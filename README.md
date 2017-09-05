@@ -1,4 +1,4 @@
-# SW9Ecdar
+# H-UPPAAL
 **A NEW INTEGRATED DEVELOPMENT ENVIRONMENT FOR MODEL CHECKING**
 
 By Niklas Kirk Mouritzsen and Rasmus Holm Jensen
