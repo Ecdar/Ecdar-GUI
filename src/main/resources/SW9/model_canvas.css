@@ -1,0 +1,131 @@
+.component-frame {
+    -fx-stroke-width: 2;
+}
+
+.component-frame.selected {
+    -fx-fill: -accent-color-lightest;
+    -fx-stroke: -accent-color-darkest;
+}
+
+.component-label-container {
+
+}
+
+.component-label-container.selected {
+    -fx-fill: -accent-color;
+}
+
+.component-label-container {
+
+}
+
+.component-label-container.selected {
+    -fx-fill: -accent-color;
+}
+
+.location {
+    -fx-stroke-width: 1;
+    -fx-stroke-type: inside;
+}
+
+.location.selected {
+    -fx-fill: -accent-color;
+    -fx-stroke: -accent-color-darkest;
+}
+
+.initial-location-inner-circle {
+    -fx-fill: rgba(0,0,0,0);
+    -fx-stroke-width: 2;
+}
+
+.location-label {
+    -fx-alignment: center;
+    -fx-smooth: true;
+}
+
+.location-label.selected {
+    -fx-text-fill: -white;
+}
+
+.link {
+    -fx-stroke: -primary-color-darkest;
+    -fx-stroke-width: 1;
+}
+
+.link.selected {
+    -fx-stroke: -accent-color-darker;
+}
+
+.nail {
+    -fx-stroke-width: 1;
+}
+
+.nail.selected {
+    -fx-fill: -accent-color;
+    -fx-stroke: -accent-color-darkest;
+}
+
+.grid-line {
+    -fx-stroke: -grey-300;
+}
+
+.component-label-container {
+    -fx-stroke-width: 1;
+}
+
+.component-stroke {
+    -fx-stroke-width: 1;
+}
+
+.channel-box {
+    -fx-fill: -primary-color;
+    -fx-stroke: -primary-color-darker;
+    -fx-stroke-width: 1;
+}
+
+.edge-properties .icon-container .icon-background {
+    -fx-fill: -primary-color;
+    -fx-stroke: -primary-color-darker;
+    -fx-stroke-type: centered;
+    -fx-stroke-width: 1;
+}
+
+.edge-properties .icon-container .icon-label {
+    -fx-text-alignment: center;
+    -fx-alignment: center;
+    -fx-text-fill: -white;
+}
+
+.edge-properties .value-container .value-background {
+    -fx-fill: -white;
+    -fx-stroke: -primary-color-darker;
+    -fx-stroke-type: centered;
+    -fx-stroke-width: 1;
+}
+
+.edge-properties .value-container .value-text-field{
+    -fx-text-alignment: left;
+    -fx-alignment: center-left;
+    -fx-text-fill: -primary-text-color;
+    -fx-padding: 3 5 3 5;
+    -fx-background-color: white;
+    -fx-stroke-width: 0;
+    -fx-border-radius: 0 0 0 0;
+    -fx-background-radius: 0 0 0 0;
+    -fx-focus-color: -primary-color;
+    -fx-unfocus-color: transparent;
+}
+
+.channel-receiver {
+    -fx-stroke-width: 1;
+    -fx-stroke: -primary-color-darker;
+    -fx-fill: -white;
+    -fx-stroke-type: inside;
+}
+
+.dashed {
+    -fx-stroke-width: 2;
+    -fx-stroke-dash-array: 5 5;
+    -fx-stroke-dash-offset: -10;
+    -fx-stroke-line-cap: butt;
+}
