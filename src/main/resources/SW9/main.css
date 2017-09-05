@@ -1,0 +1,219 @@
+.display4{
+	-fx-font-family: "Roboto Light";
+	-fx-font-size: 112.0;
+}
+.display3{
+	-fx-font-family: "Roboto";
+	-fx-font-size: 56.0;
+}
+.display2{
+	-fx-font-family: "Roboto";
+	-fx-font-size: 45.0;
+}
+.display1{
+	-fx-font-family: "Roboto";
+	-fx-font-size: 34.0;
+}
+.headline{
+	-fx-font-family: "Roboto";
+	-fx-font-size: 24.0;
+}
+.title{
+	-fx-font-family: "Roboto Medium";
+	-fx-font-size: 20.0;
+}
+.subhead{
+	-fx-font-family: "Roboto";
+	-fx-font-size: 15.0;
+}
+.body2{
+	-fx-font-family: "Roboto Medium";
+	-fx-font-size: 13.0;
+}
+.body1{
+	-fx-font-family: "Roboto";
+	-fx-font-size: 13.0;
+}
+.caption{
+	-fx-font-family: "Roboto";
+	-fx-font-size: 12.0;
+}
+.sub-caption{
+	-fx-font-family: "Roboto";
+	-fx-font-size: 11.0;
+}
+.jork-label{
+	-fx-font-family: "Roboto";
+	-fx-font-size: 9.0;
+}
+
+.sub-caption-mono{
+	-fx-font-family: "Roboto Mono";
+	-fx-font-size: 10.0;
+}
+
+.edge-property{
+	-fx-font-family: "Roboto Mono Medium";
+	-fx-font-size: 12.0;
+}
+
+.button{
+	-fx-font-family: "Roboto Medium";
+	-fx-font-size: 14.0;
+}
+
+.display4-mono{
+	-fx-font-family: "Roboto Mono Light";
+	-fx-font-size: 112.0;
+}
+.display3-mono{
+	-fx-font-family: "Roboto Mono";
+	-fx-font-size: 56.0;
+}
+.display2-mono{
+	-fx-font-family: "Roboto Mono";
+	-fx-font-size: 45.0;
+}
+.display1-mono{
+	-fx-font-family: "Roboto Mono";
+	-fx-font-size: 34.0;
+}
+.headline-mono{
+	-fx-font-family: "Roboto Mono";
+	-fx-font-size: 24.0;
+}
+.title-mono{
+	-fx-font-family: "Roboto Mono Medium";
+	-fx-font-size: 20.0;
+}
+.subhead-mono{
+	-fx-font-family: "Roboto Mono";
+	-fx-font-size: 15.0;
+}
+.body2-mono{
+	-fx-font-family: "Roboto Mono Medium";
+	-fx-font-size: 13.0;
+}
+.body1-mono{
+	-fx-font-family: "Roboto Mono";
+	-fx-font-size: 13.0;
+}
+.caption-mono{
+	-fx-font-family: "Roboto Mono";
+	-fx-font-size: 12.0;
+}
+.button-mono{
+	-fx-font-family: "Roboto Mono Medium";
+	-fx-font-size: 14.0;
+}
+
+.white-text {
+    -fx-text-fill: #ffffff;
+}
+
+.status-bar {
+    -fx-background-color: -primary-color-darkest;
+}
+
+.window-title {
+ -fx-label-padding: 0 0 0 10px;
+}
+
+.floating-action-button {
+	-fx-pref-width: 56;
+	-fx-pref-height: 56;
+	-fx-text-fill: white;
+}
+
+.titled-pane > .content {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+}
+
+.titled-pane > .title {
+    -fx-pref-height: 20;
+}
+
+.text-area {
+    -fx-background-insets: 0;
+    -fx-background-color: white white white white;
+    -fx-background-radius: 0;
+}
+
+.text-area .content {
+    -fx-background-color: white white white white;
+    -fx-background-radius: 0;
+}
+
+.text-area:focused .content {
+    -fx-background-color: white white white white;
+    -fx-background-radius: 0;
+}
+
+.text-area:focused {
+    -fx-highlight-fill: -deep-orange-500;
+    -fx-highlight-text-fill: -white;
+}
+
+.text-area .content {
+    -fx-highlight-fill: -deep-orange-500;
+    -fx-highlight-text-fill: -white;
+}
+
+.menu .label {
+    -fx-text-fill: -white;
+
+    -fx-font-family: "Roboto";
+    -fx-font-size: 13.0;
+}
+
+.menu-item .label {
+    -fx-text-fill: -black;
+}
+
+.tab-header-background {
+    -fx-background-color: -blue-grey-700;
+}
+
+.tab-selected-line {
+    -fx-stroke: #ffffff;
+}
+
+.jfx-tab-pane .jfx-rippler {
+    -fx-rippler-fill: #ffffff;
+}
+
+.jfx-tab-pane .scroll-pane {
+   -fx-background: #ffffff00; /** Transparent **/
+}
+
+.comment {
+	-fx-fill: -grey-500;
+}
+
+.uppaal-keyword {
+	-fx-fill: -blue-700;
+}
+
+.c-keyword {
+	-fx-fill: -green-700;
+	-fx-font-weight: bold;
+}
+
+.jfx-snackbar-content {
+	-fx-background-color: #323232;
+	-fx-font-family: "Roboto Medium";
+	-fx-font-size: 13.0;
+}
+
+.jfx-snackbar-toast {
+	-fx-text-fill: WHITE;
+
+	-fx-padding-left: 24;
+	-fx-padding-right: 24;
+}
+
+.jfx-snackbar-action {
+	-fx-text-fill: WHITE;
+}
