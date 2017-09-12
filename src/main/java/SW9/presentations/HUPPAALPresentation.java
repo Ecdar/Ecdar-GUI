@@ -77,7 +77,7 @@ public class HUPPAALPresentation extends StackPane {
             Tooltip.install(controller.colorSelected, new Tooltip("Colour"));
 
             initializeSelectDependentToolbarButton(controller.deleteSelected);
-            Tooltip.install(controller.deleteSelected, new Tooltip("delete"));
+            Tooltip.install(controller.deleteSelected, new Tooltip("Delete"));
 
             initializeToolbarButton(controller.undo);
             initializeToolbarButton(controller.redo);
@@ -245,8 +245,8 @@ public class HUPPAALPresentation extends StackPane {
         controller.redo.setOpacity(0.3);
 
         // Set tooltips
-        Tooltip.install(controller.undo, new Tooltip("undo"));
-        Tooltip.install(controller.redo, new Tooltip("redo"));
+        Tooltip.install(controller.undo, new Tooltip("Undo"));
+        Tooltip.install(controller.redo, new Tooltip("Redo"));
     }
 
     private void initializeColorSelector() {
