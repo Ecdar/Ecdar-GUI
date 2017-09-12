@@ -13,6 +13,6 @@ public class LocationTest {
     public void getNickname() throws Exception {
         final Location location = new Location();
         location.setNickname("test");
-        Assert.assertEquals("test", location.getNickname());
+        Assert.assertEquals("testsdfsf", location.getNickname());
     }
 }
