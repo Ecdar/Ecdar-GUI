@@ -28,10 +28,7 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
@@ -374,6 +371,8 @@ public class HUPPAALController implements Initializable {
     }
 
     private void initializeMenuBar() {
+        menuBar.setUseSystemMenuBar(true);
+
         menuBarFileSave.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN));
         menuBarFileSave.setOnAction(event -> {
             HUPPAAL.save();
@@ -407,14 +406,14 @@ public class HUPPAALController implements Initializable {
 
 
         menuBarViewFilePanel.getGraphic().setOpacity(1);
-        menuBarViewFilePanel.setAccelerator(new KeyCodeCombination(KeyCode.F));
+        menuBarViewFilePanel.setAccelerator(new KeyCodeCombination(KeyCode.P, KeyCodeCombination.SHORTCUT_DOWN));
         menuBarViewFilePanel.setOnAction(event -> {
             final BooleanProperty isOpen = HUPPAAL.toggleFilePane();
             menuBarViewFilePanel.getGraphic().opacityProperty().bind(new When(isOpen).then(1).otherwise(0));
         });
 
         menuBarViewQueryPanel.getGraphic().setOpacity(0);
-        menuBarViewQueryPanel.setAccelerator(new KeyCodeCombination(KeyCode.Q));
+        menuBarViewQueryPanel.setAccelerator(new KeyCodeCombination(KeyCode.G, KeyCodeCombination.SHORTCUT_DOWN));
         menuBarViewQueryPanel.setOnAction(event -> {
             final BooleanProperty isOpen = HUPPAAL.toggleQueryPane();
             menuBarViewQueryPanel.getGraphic().opacityProperty().bind(new When(isOpen).then(1).otherwise(0));
