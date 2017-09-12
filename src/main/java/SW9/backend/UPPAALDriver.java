@@ -1,6 +1,6 @@
 package SW9.backend;
 
-import SW9.HUPPAAL;
+import SW9.Ecdar;
 import SW9.abstractions.Component;
 import SW9.abstractions.Location;
 import SW9.abstractions.SubComponent;
@@ -13,7 +13,6 @@ import com.uppaal.engine.QueryVerificationResult;
 import com.uppaal.model.core2.Document;
 import com.uppaal.model.system.UppaalSystem;
 import javafx.application.Platform;
-import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,11 +32,11 @@ public class UPPAALDriver {
     public static void generateDebugUPPAALModel() throws Exception, BackendException {
         // Generate and store the debug document
         buildHUPPAALDocument();
-        storeUppaalFile(huppaalDocument.toUPPAALDocument(), HUPPAAL.debugDirectory + File.separator + "debug.xml");
+        storeUppaalFile(huppaalDocument.toUPPAALDocument(), Ecdar.debugDirectory + File.separator + "debug.xml");
     }
 
     public static void buildHUPPAALDocument() throws BackendException, Exception {
-        final Component mainComponent = HUPPAAL.getProject().getMainComponent();
+        final Component mainComponent = Ecdar.getProject().getMainComponent();
         if (mainComponent == null) {
             throw new Exception("Main component is null");
         }
@@ -183,11 +182,11 @@ public class UPPAALDriver {
         final File file;
 
         if (os.contains("Mac")) {
-            file = new File(HUPPAAL.serverDirectory + File.separator + "bin-MacOS" + File.separator + serverName);
+            file = new File(Ecdar.serverDirectory + File.separator + "bin-MacOS" + File.separator + serverName);
         } else if (os.contains("Linux")) {
-            file = new File(HUPPAAL.serverDirectory + File.separator + "bin-Linux" + File.separator + serverName);
+            file = new File(Ecdar.serverDirectory + File.separator + "bin-Linux" + File.separator + serverName);
         } else {
-            file = new File(HUPPAAL.serverDirectory + File.separator + "bin-Win32" + File.separator + serverName + ".exe");
+            file = new File(Ecdar.serverDirectory + File.separator + "bin-Win32" + File.separator + serverName + ".exe");
         }
 
         return file;
@@ -295,7 +294,7 @@ public class UPPAALDriver {
         }
 
         // Run through all sub components in main
-        for (final SubComponent subComp : HUPPAAL.getProject().getMainComponent().getSubComponents()) {
+        for (final SubComponent subComp : Ecdar.getProject().getMainComponent().getSubComponents()) {
             subComponentInstanceNames.addAll(getTemplateNames("", subComp, component));
         }
         return subComponentInstanceNames;

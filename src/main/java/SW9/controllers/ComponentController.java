@@ -1,6 +1,6 @@
 package SW9.controllers;
 
-import SW9.HUPPAAL;
+import SW9.Ecdar;
 import SW9.abstractions.*;
 import SW9.backend.UPPAALDriver;
 import SW9.code_analysis.CodeAnalysis;
@@ -365,7 +365,7 @@ public class ComponentController implements Initializable {
         }
 
         // Cancel timers when the component is removed
-        HUPPAAL.getProject().getComponents().addListener(new ListChangeListener<Component>() {
+        Ecdar.getProject().getComponents().addListener(new ListChangeListener<Component>() {
             @Override
             public void onChanged(Change<? extends Component> c) {
                 while (c.next()) {
@@ -460,7 +460,7 @@ public class ComponentController implements Initializable {
             });
 
             final DropDownMenu subMenu = new DropDownMenu(root, dropDownMenuHelperCircle, 150, false);
-            HUPPAAL.getProject().getComponents().forEach(c -> {
+            Ecdar.getProject().getComponents().forEach(c -> {
                 if (!c.equals(component)) {
                     subMenu.addClickableListElement(c.getName(), event -> {
                         contextMenu.close();
@@ -500,7 +500,7 @@ public class ComponentController implements Initializable {
 
                 // Add new query for this component
                 final Query query = new Query(deadlockQuery, deadlockComment, QueryState.UNKNOWN);
-                HUPPAAL.getProject().getQueries().add(query);
+                Ecdar.getProject().getQueries().add(query);
                 query.run();
 
                 contextMenu.close();
@@ -519,7 +519,7 @@ public class ComponentController implements Initializable {
             initializeDropDownMenu.accept(newComponent);
         });
 
-        HUPPAAL.getProject().getComponents().addListener(new ListChangeListener<Component>() {
+        Ecdar.getProject().getComponents().addListener(new ListChangeListener<Component>() {
             @Override
             public void onChanged(final Change<? extends Component> c) {
                 initializeDropDownMenu.accept(getComponent());
@@ -612,7 +612,7 @@ public class ComponentController implements Initializable {
             });
 
             final DropDownMenu subMenu = new DropDownMenu(root, dropDownMenuHelperCircle, 150, false);
-            HUPPAAL.getProject().getComponents().forEach(c -> {
+            Ecdar.getProject().getComponents().forEach(c -> {
                 if (!c.equals(component)) {
                     subMenu.addClickableListElement(c.getName(), event -> {
                         contextMenu.close();

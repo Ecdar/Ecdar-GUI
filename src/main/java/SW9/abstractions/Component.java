@@ -1,6 +1,6 @@
 package SW9.abstractions;
 
-import SW9.HUPPAAL;
+import SW9.Ecdar;
 import SW9.controllers.HUPPAALController;
 import SW9.presentations.DropDownMenu;
 import SW9.utility.UndoRedoStack;
@@ -81,7 +81,7 @@ public class Component implements Serializable, DropDownMenu.HasColor {
             // Color the new component in such a way that we avoid clashing with other components if possible
             final List<EnabledColor> availableColors = new ArrayList<>();
             EnabledColor.enabledColors.forEach(availableColors::add);
-            HUPPAAL.getProject().getComponents().forEach(component -> {
+            Ecdar.getProject().getComponents().forEach(component -> {
                 availableColors.removeIf(enabledColor -> enabledColor.color.equals(component.getColor()));
             });
             if (availableColors.size() == 0) {

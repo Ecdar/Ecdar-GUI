@@ -1,6 +1,5 @@
 package SW9.presentations;
 
-import SW9.HUPPAAL;
 import SW9.abstractions.Component;
 import SW9.abstractions.Location;
 import SW9.controllers.CanvasController;
@@ -18,7 +17,6 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.collections.ListChangeListener;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.geometry.Insets;
@@ -30,7 +28,6 @@ import javafx.scene.layout.*;
 import javafx.scene.shape.*;
 import org.fxmisc.richtext.StyleSpans;
 import org.fxmisc.richtext.StyleSpansBuilder;
-import org.reactfx.util.TriConsumer;
 
 import java.io.IOException;
 import java.net.URL;

@@ -42,7 +42,7 @@ import java.nio.charset.Charset;
 import java.security.CodeSource;
 import java.util.*;
 
-public class HUPPAAL extends Application {
+public class Ecdar extends Application {
 
     public static String serverDirectory;
     public static String debugDirectory;
@@ -54,7 +54,7 @@ public class HUPPAAL extends Application {
 
     {
         try {
-            final CodeSource codeSource = HUPPAAL.class.getProtectionDomain().getCodeSource();
+            final CodeSource codeSource = Ecdar.class.getProtectionDomain().getCodeSource();
             final File jarFile = new File(codeSource.getLocation().toURI().getPath());
             final String rootDirectory = jarFile.getParentFile().getPath() + File.separator;
             projectDirectory.set(rootDirectory + "projects" + File.separator + "project");
@@ -73,7 +73,7 @@ public class HUPPAAL extends Application {
     }
 
     public static void main(final String[] args) {
-        launch(HUPPAAL.class, args);
+        launch(Ecdar.class, args);
     }
 
     public static Project getProject() {
@@ -91,7 +91,7 @@ public class HUPPAAL extends Application {
             e.printStackTrace();
         }
 
-        HUPPAAL.getProject().getComponents().forEach(component -> {
+        Ecdar.getProject().getComponents().forEach(component -> {
             try {
                 final Writer writer = new FileWriter(String.format(projectDirectory.getValue() + File.separator + "%s.json", component.getName()));
                 final Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -106,7 +106,7 @@ public class HUPPAAL extends Application {
         });
 
         final JsonArray queries = new JsonArray();
-        HUPPAAL.getProject().getQueries().forEach(query -> {
+        Ecdar.getProject().getQueries().forEach(query -> {
             queries.add(query.serialize());
         });
 
@@ -151,9 +151,8 @@ public class HUPPAAL extends Application {
         // Load or create new project
         project = new Project();
 
-        // Set the title and icon for the application
-        stage.setTitle("H-UPPAAL");
-        stage.getIcons().add(new Image("SW9/uppaal.ico"));
+        // Set the title for the application
+        stage.setTitle("Ecdar");
 
         // Load the fonts required for the project
         IconFontFX.register(GoogleMaterialDesignIcons.getIconFont());
@@ -267,9 +266,9 @@ public class HUPPAAL extends Application {
         CodeAnalysis.getErrors().removeIf(message -> true);
         CodeAnalysis.getWarnings().removeIf(message -> true);
         CodeAnalysis.disable();
-        HUPPAAL.getProject().getQueries().removeIf(query -> true);
-        HUPPAAL.getProject().getComponents().removeIf(component -> true);
-        HUPPAAL.getProject().setMainComponent(null);
+        Ecdar.getProject().getQueries().removeIf(query -> true);
+        Ecdar.getProject().getComponents().removeIf(component -> true);
+        Ecdar.getProject().setMainComponent(null);
 
         // Deserialize the project
         deserializeProject(directory);
@@ -277,7 +276,7 @@ public class HUPPAAL extends Application {
 
         // Generate all component presentations by making them the active component in the view one by one
         Component initialShownComponent = null;
-        for (final Component component : HUPPAAL.getProject().getComponents()) {
+        for (final Component component : Ecdar.getProject().getComponents()) {
             // The first component should be shown if there is no main
             if (initialShownComponent == null) {
                 initialShownComponent = component;

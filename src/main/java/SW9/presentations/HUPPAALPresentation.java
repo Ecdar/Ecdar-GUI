@@ -1,6 +1,6 @@
 package SW9.presentations;
 
-import SW9.HUPPAAL;
+import SW9.Ecdar;
 import SW9.abstractions.Query;
 import SW9.code_analysis.CodeAnalysis;
 import SW9.controllers.HUPPAALController;
@@ -78,8 +78,6 @@ public class HUPPAALPresentation extends StackPane {
             initializeToolbarButton(controller.undo);
             initializeToolbarButton(controller.redo);
             initializeUndoRedoButtons();
-
-            initializeLogo();
 
             initializeMessageContainer();
 
@@ -207,10 +205,6 @@ public class HUPPAALPresentation extends StackPane {
                 collapseIfNoErrorsOrWarnings.run();
             }
         });
-    }
-
-    private void initializeLogo() {
-        controller.logo.setImage(new Image(HUPPAAL.class.getResource("ic_launcher/mipmap-mdpi/ic_launcher.png").toExternalForm()));
     }
 
     private void initializeUndoRedoButtons() {
@@ -411,7 +405,7 @@ public class HUPPAALPresentation extends StackPane {
         });
 
         // When new queries are added, make sure that the query pane is open
-        HUPPAAL.getProject().getQueries().addListener(new ListChangeListener<Query>() {
+        Ecdar.getProject().getQueries().addListener(new ListChangeListener<Query>() {
             @Override
             public void onChanged(final Change<? extends Query> c) {
                 if (queryPaneOpen == null || openQueryPaneAnimation == null)

@@ -1,6 +1,6 @@
 package SW9.presentations;
 
-import SW9.HUPPAAL;
+import SW9.Ecdar;
 import SW9.abstractions.Query;
 import SW9.abstractions.QueryState;
 import SW9.controllers.CanvasController;
@@ -10,7 +10,6 @@ import com.jfoenix.controls.JFXRippler;
 import com.jfoenix.controls.JFXSpinner;
 import com.jfoenix.controls.JFXTextField;
 import javafx.beans.binding.When;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.geometry.Insets;
@@ -104,7 +103,7 @@ public class QueryPresentation extends AnchorPane {
 
         dropDownMenu.addClickableListElement("Delete", event -> {
             // Remove the query
-            HUPPAAL.getProject().getQueries().remove(query);
+            Ecdar.getProject().getQueries().remove(query);
 
             // Close the menu
             dropDownMenu.close();

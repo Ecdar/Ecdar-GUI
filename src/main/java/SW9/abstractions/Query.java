@@ -1,6 +1,6 @@
 package SW9.abstractions;
 
-import SW9.HUPPAAL;
+import SW9.Ecdar;
 import SW9.backend.QueryListener;
 import SW9.backend.UPPAALDriver;
 import SW9.controllers.HUPPAALController;
@@ -93,7 +93,7 @@ public class Query implements Serializable {
         runQuery = (buildHUPPAALDocument) -> {
             setQueryState(QueryState.RUNNING);
 
-            final Component mainComponent = HUPPAAL.getProject().getMainComponent();
+            final Component mainComponent = Ecdar.getProject().getMainComponent();
 
             if (mainComponent == null) {
                 return; // We cannot generate a UPPAAL file without a main component
