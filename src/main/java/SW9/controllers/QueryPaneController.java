@@ -1,6 +1,6 @@
 package SW9.controllers;
 
-import SW9.HUPPAAL;
+import SW9.Ecdar;
 import SW9.abstractions.Query;
 import SW9.abstractions.QueryState;
 import SW9.backend.UPPAALDriver;
@@ -43,7 +43,7 @@ public class QueryPaneController implements Initializable {
         addQueryButton.addEventHandler(MouseEvent.MOUSE_PRESSED, event -> addQueryButtonPressed());
         addQueryButton.addEventHandler(MouseEvent.MOUSE_RELEASED, event -> addQueryButtonReleased());
 
-        HUPPAAL.getProject().getQueries().addListener(new ListChangeListener<Query>() {
+        Ecdar.getProject().getQueries().addListener(new ListChangeListener<Query>() {
             @Override
             public void onChanged(final Change<? extends Query> c) {
                 while (c.next()) {
@@ -61,14 +61,14 @@ public class QueryPaneController implements Initializable {
             }
         });
 
-        for (final Query newQuery : HUPPAAL.getProject().getQueries()) {
+        for (final Query newQuery : Ecdar.getProject().getQueries()) {
             queriesList.getChildren().add(new QueryPresentation(newQuery));
         }
     }
 
     @FXML
     private void addQueryButtonClicked() {
-        HUPPAAL.getProject().getQueries().add(new Query("", "", QueryState.UNKNOWN));
+        Ecdar.getProject().getQueries().add(new Query("", "", QueryState.UNKNOWN));
     }
 
     @FXML
@@ -85,7 +85,7 @@ public class QueryPaneController implements Initializable {
     private void runAllQueriesButtonClicked() {
         try {
             UPPAALDriver.buildHUPPAALDocument();
-            HUPPAAL.getProject().getQueries().forEach(query -> {
+            Ecdar.getProject().getQueries().forEach(query -> {
                 query.cancel();
                 query.run(false);
             });
@@ -96,6 +96,6 @@ public class QueryPaneController implements Initializable {
 
     @FXML
     private void clearAllQueriesButtonClicked() {
-        HUPPAAL.getProject().getQueries().forEach(query -> query.setQueryState(QueryState.UNKNOWN));
+        Ecdar.getProject().getQueries().forEach(query -> query.setQueryState(QueryState.UNKNOWN));
     }
 }
