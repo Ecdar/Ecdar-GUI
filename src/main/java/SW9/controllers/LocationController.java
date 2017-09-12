@@ -169,16 +169,6 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
             }
         });
 
-        final BooleanProperty isCommitted = new SimpleBooleanProperty(false);
-        isCommitted.bind(getLocation().urgencyProperty().isEqualTo(Location.Urgency.COMMITTED));
-        dropDownMenu.addTogglableListElement("Committed", isCommitted, event -> {
-            if (isCommitted.get()) {
-                getLocation().setUrgency(Location.Urgency.NORMAL);
-            } else {
-                getLocation().setUrgency(Location.Urgency.COMMITTED);
-            }
-        });
-
         dropDownMenu.addSpacerElement();
 
         dropDownMenu.addClickableListElement("Is " + getLocation().getId() + " reachable?", event -> {
@@ -325,26 +315,6 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                 }, "Made location " + getLocation().getNickname() + " normal (back form urgent)", "hourglass-empty");
             }
         }));
-
-        // Keybind for making location committed
-        KeyboardTracker.registerKeybind(KeyboardTracker.MAKE_LOCATION_COMMITTED, new Keybind(new KeyCodeCombination(KeyCode.C), () -> {
-            final Location.Urgency previousUrgency = location.get().getUrgency();
-
-            if (previousUrgency.equals(Location.Urgency.COMMITTED)) {
-                UndoRedoStack.push(() -> { // Perform
-                    getLocation().setUrgency(Location.Urgency.NORMAL);
-                }, () -> { // Undo
-                    getLocation().setUrgency(previousUrgency);
-                }, "Made location " + getLocation().getNickname() + " committed", "hourglass-full");
-            } else {
-                UndoRedoStack.push(() -> { // Perform
-                    getLocation().setUrgency(Location.Urgency.COMMITTED);
-                }, () -> { // Undo
-                    getLocation().setUrgency(previousUrgency);
-                }, "Made location " + getLocation().getNickname() + " normal (back from committed)", "hourglass-empty");
-            }
-
-        }));
     }
 
     @FXML
@@ -357,7 +327,6 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
         locationPresentation.animateHoverExited();
 
         KeyboardTracker.unregisterKeybind(KeyboardTracker.MAKE_LOCATION_URGENT);
-        KeyboardTracker.unregisterKeybind(KeyboardTracker.MAKE_LOCATION_COMMITTED);
     }
 
     private void initializeMouseControls() {
