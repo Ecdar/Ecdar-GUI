@@ -30,6 +30,7 @@ public class Link extends Group implements SelectHelper.Selectable {
 
         // Create the two lines
         shownLine = new Line();
+        shownLine.getStrokeDashArray().addAll(6d);
         final Line hiddenHoverLine = new Line();
 
         // Add them
