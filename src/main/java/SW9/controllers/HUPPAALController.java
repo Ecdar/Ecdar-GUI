@@ -407,7 +407,7 @@ public class HUPPAALController implements Initializable {
 
 
         menuBarViewFilePanel.getGraphic().setOpacity(1);
-        menuBarViewFilePanel.setAccelerator(new KeyCodeCombination(KeyCode.F));
+        menuBarViewFilePanel.setAccelerator(new KeyCodeCombination(KeyCode.P));
         menuBarViewFilePanel.setOnAction(event -> {
             final BooleanProperty isOpen = Ecdar.toggleFilePane();
             menuBarViewFilePanel.getGraphic().opacityProperty().bind(new When(isOpen).then(1).otherwise(0));
