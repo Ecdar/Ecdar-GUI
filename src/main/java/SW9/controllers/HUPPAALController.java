@@ -152,6 +152,21 @@ public class HUPPAALController implements Initializable {
             queryDialogContainer.setMouseTransparent(false);
         });
 
+
+        //Press ctrl+N or cmd+N to create a new component. The canvas changes to this new component
+        KeyCodeCombination combination = new KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN);
+        Keybind binding = new Keybind(combination, (event) -> {
+            final Component newComponent = new Component(true);
+            UndoRedoStack.push(() -> { // Perform
+                Ecdar.getProject().getComponents().add(newComponent);
+            }, () -> { // Undo
+                Ecdar.getProject().getComponents().remove(newComponent);
+            }, "Created new component: " + newComponent.getName(), "add-circle");
+
+            CanvasController.setActiveComponent(newComponent);
+        });
+        KeyboardTracker.registerKeybind(KeyboardTracker.CREATE_COMPONENT, binding);
+
         // Keybind for nudging the selected elements
         KeyboardTracker.registerKeybind(KeyboardTracker.NUDGE_UP, new Keybind(new KeyCodeCombination(KeyCode.UP), (event) -> {
             event.consume();
