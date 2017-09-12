@@ -130,7 +130,7 @@
                 </Menu>
 
                 <Menu text="View">
-                    <MenuItem fx:id="menuBarViewFilePanel" text="File Panel">
+                    <MenuItem fx:id="menuBarViewFilePanel" text="Project Panel">
                         <graphic>
                             <FontIcon iconLiteral="gmi-check" iconSize="24" fill="black"/>
                         </graphic>
