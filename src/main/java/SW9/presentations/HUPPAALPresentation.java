@@ -24,6 +24,7 @@ import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Circle;
@@ -73,7 +74,10 @@ public class HUPPAALPresentation extends StackPane {
             initializeToggleFilePaneFunctionality();
 
             initializeSelectDependentToolbarButton(controller.colorSelected);
+            Tooltip.install(controller.colorSelected, new Tooltip("Colour"));
+
             initializeSelectDependentToolbarButton(controller.deleteSelected);
+            Tooltip.install(controller.deleteSelected, new Tooltip("delete"));
 
             initializeToolbarButton(controller.undo);
             initializeToolbarButton(controller.redo);
@@ -239,6 +243,10 @@ public class HUPPAALPresentation extends StackPane {
         // Disable the redo button
         controller.redo.setEnabled(false);
         controller.redo.setOpacity(0.3);
+
+        // Set tooltips
+        Tooltip.install(controller.undo, new Tooltip("undo"));
+        Tooltip.install(controller.redo, new Tooltip("redo"));
     }
 
     private void initializeColorSelector() {
@@ -334,6 +342,8 @@ public class HUPPAALPresentation extends StackPane {
 
         controller.generateUppaalModel.setMaskType(JFXRippler.RipplerMask.CIRCLE);
         controller.generateUppaalModel.setRipplerFill(color.getTextColor(colorIntensity));
+
+        Tooltip.install(controller.generateUppaalModel, new Tooltip("Generate UPPAAL model"));
     }
 
     private void initializeSelectDependentToolbarButton(final JFXRippler button) {

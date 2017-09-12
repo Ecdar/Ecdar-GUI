@@ -7,6 +7,7 @@ import com.jfoenix.controls.JFXRippler;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.geometry.Insets;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.*;
 import org.kordamp.ikonli.javafx.FontIcon;
 
@@ -84,9 +85,11 @@ public class QueryPanePresentation extends StackPane {
 
         controller.runAllQueriesButton.setMaskType(JFXRippler.RipplerMask.CIRCLE);
         controller.runAllQueriesButton.setRipplerFill(color.getTextColor(colorIntensity));
+        Tooltip.install(controller.runAllQueriesButton, new Tooltip("Run all queries"));
 
         controller.clearAllQueriesButton.setMaskType(JFXRippler.RipplerMask.CIRCLE);
         controller.clearAllQueriesButton.setRipplerFill(color.getTextColor(colorIntensity));
+        Tooltip.install(controller.clearAllQueriesButton, new Tooltip("Clear all queries"));
 
         // Set the elevation of the toolbar
         controller.toolbar.setEffect(DropShadowHelper.generateElevationShadow(8));
