@@ -258,7 +258,6 @@ public class Edge implements Serializable, Nearable {
             return targetCircular.get();
         }
         return null;
-
     }
 
     private void updateSourceCircular() {
