@@ -689,7 +689,7 @@ public class HUPPAALController implements Initializable {
 
         try {
             UPPAALDriver.generateDebugUPPAALModel();
-            Ecdar.showToast("UPPAAL debug file stored");
+            Ecdar.showToast("UPPAAL model stored");
         } catch (final Exception e) {
             Ecdar.showToast("Could not store UPPAAL debug model due to an error");
             e.printStackTrace();
