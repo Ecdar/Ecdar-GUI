@@ -321,15 +321,6 @@
                             </Label>
                         </HBox>
 
-                        <HBox>
-                            <LocationPresentation>
-                                <initial>COMMITTED</initial>
-                            </LocationPresentation>
-                            <Label styleClass="body1" style="-fx-padding: 9 0 0 5">
-                                This is a committed location
-                            </Label>
-                        </HBox>
-
                         <Region minHeight="16"/>
                         <HBox minHeight="1" style="-fx-background-color: #eee;"/>
                         <Region minHeight="16"/>
