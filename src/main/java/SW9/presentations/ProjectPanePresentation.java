@@ -35,7 +35,7 @@ public class ProjectPanePresentation extends StackPane {
             initializeToolbar();
 
             initializeToolbarButton(controller.createComponent);
-            Tooltip.install(controller.createComponent, new Tooltip("Create component"));
+            Tooltip.install(controller.createComponent, new Tooltip("Add component"));
 
         } catch (final IOException ioe) {
             throw new IllegalStateException(ioe);
