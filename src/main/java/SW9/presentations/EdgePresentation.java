@@ -47,5 +47,4 @@ public class EdgePresentation extends Group {
             throw new IllegalStateException(ioe);
         }
     }
-
 }
