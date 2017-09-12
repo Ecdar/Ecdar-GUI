@@ -1,6 +1,6 @@
 package SW9.controllers;
 
-import SW9.HUPPAAL;
+import SW9.Ecdar;
 import SW9.abstractions.Component;
 import SW9.presentations.DropDownMenu;
 import SW9.presentations.FilePresentation;
@@ -8,7 +8,6 @@ import SW9.utility.UndoRedoStack;
 import com.jfoenix.controls.JFXPopup;
 import com.jfoenix.controls.JFXRippler;
 import com.jfoenix.controls.JFXTextArea;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -37,7 +36,7 @@ public class ProjectPaneController implements Initializable {
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
 
-        HUPPAAL.getProject().getComponents().addListener(new ListChangeListener<Component>() {
+        Ecdar.getProject().getComponents().addListener(new ListChangeListener<Component>() {
             @Override
             public void onChanged(final Change<? extends Component> c) {
                 while (c.next()) {
@@ -46,9 +45,9 @@ public class ProjectPaneController implements Initializable {
 
                     // We should make a new component active
                     if (c.getRemoved().size() > 0) {
-                        if (HUPPAAL.getProject().getComponents().size() > 0) {
+                        if (Ecdar.getProject().getComponents().size() > 0) {
                             // Find the first available component and show it instead of the removed one
-                            final Component component = HUPPAAL.getProject().getComponents().get(0);
+                            final Component component = Ecdar.getProject().getComponents().get(0);
                             CanvasController.setActiveComponent(component);
                         } else {
                             // Show no components (since there are none in the project)
@@ -62,7 +61,7 @@ public class ProjectPaneController implements Initializable {
             }
         });
 
-        HUPPAAL.getProject().getComponents().forEach(this::handleAddedComponent);
+        Ecdar.getProject().getComponents().forEach(this::handleAddedComponent);
     }
 
     private void sortPresentations() {
@@ -144,9 +143,9 @@ public class ProjectPaneController implements Initializable {
          */
         moreInformationDropDown.addClickableListElement("Delete", event -> {
             UndoRedoStack.push(() -> { // Perform
-                HUPPAAL.getProject().getComponents().remove(component);
+                Ecdar.getProject().getComponents().remove(component);
             }, () -> { // Undo
-                HUPPAAL.getProject().getComponents().add(component);
+                Ecdar.getProject().getComponents().add(component);
             }, "Deleted component " + component.getName(), "delete");
 
             moreInformationDropDown.close();
@@ -173,10 +172,10 @@ public class ProjectPaneController implements Initializable {
         component.nameProperty().addListener(obs -> sortPresentations());
 
         component.isMainProperty().addListener((obs, oldIsMain, newIsMain) -> {
-            final Component mainComponent = HUPPAAL.getProject().getMainComponent();
+            final Component mainComponent = Ecdar.getProject().getMainComponent();
 
             if (component.equals(mainComponent) && !newIsMain) {
-                HUPPAAL.getProject().setMainComponent(null);
+                Ecdar.getProject().setMainComponent(null);
                 return;
             }
 
@@ -184,7 +183,7 @@ public class ProjectPaneController implements Initializable {
                 mainComponent.setIsMain(false);
             }
 
-            HUPPAAL.getProject().setMainComponent(component);
+            Ecdar.getProject().setMainComponent(component);
         });
     }
 
@@ -198,9 +197,9 @@ public class ProjectPaneController implements Initializable {
         final Component newComponent = new Component(true);
 
         UndoRedoStack.push(() -> { // Perform
-            HUPPAAL.getProject().getComponents().add(newComponent);
+            Ecdar.getProject().getComponents().add(newComponent);
         }, () -> { // Undo
-            HUPPAAL.getProject().getComponents().remove(newComponent);
+            Ecdar.getProject().getComponents().remove(newComponent);
         }, "Created new component: " + newComponent.getName(), "add-circle");
 
         CanvasController.setActiveComponent(newComponent);

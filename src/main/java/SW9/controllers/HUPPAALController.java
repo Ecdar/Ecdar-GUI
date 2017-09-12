@@ -1,7 +1,7 @@
 package SW9.controllers;
 
 import SW9.Debug;
-import SW9.HUPPAAL;
+import SW9.Ecdar;
 import SW9.abstractions.*;
 import SW9.backend.BackendException;
 import SW9.backend.UPPAALDriver;
@@ -215,15 +215,15 @@ public class HUPPAALController implements Initializable {
 
 
 
-        HUPPAAL.getProject().getComponents().addListener(new ListChangeListener<Component>() {
+        Ecdar.getProject().getComponents().addListener(new ListChangeListener<Component>() {
             @Override
             public void onChanged(final Change<? extends Component> c) {
                 if (!hasChanged.get()) {
-                    CanvasController.setActiveComponent(HUPPAAL.getProject().getComponents().get(0));
+                    CanvasController.setActiveComponent(Ecdar.getProject().getComponents().get(0));
                     hasChanged.set(true);
                 }
 
-                if(HUPPAAL.serializationDone && HUPPAAL.getProject().getComponents().size() - 1 == 0 && HUPPAAL.getProject().getMainComponent() == null) {
+                if(Ecdar.serializationDone && Ecdar.getProject().getComponents().size() - 1 == 0 && Ecdar.getProject().getMainComponent() == null) {
                     c.next();
                     c.getAddedSubList().get(0).setIsMain(true);
                 }
@@ -276,7 +276,7 @@ public class HUPPAALController implements Initializable {
                     // Make sure that the model is generated
                     UPPAALDriver.buildHUPPAALDocument();
 
-                    HUPPAAL.getProject().getQueries().forEach(query -> {
+                    Ecdar.getProject().getQueries().forEach(query -> {
                         if (query.isPeriodic()) query.run();
                     });
 
@@ -284,7 +284,7 @@ public class HUPPAALController implements Initializable {
                     List<Thread> threads = new ArrayList<>();
 
                     // Submit all background reachability queries
-                    HUPPAAL.getProject().getComponents().forEach(component -> {
+                    Ecdar.getProject().getComponents().forEach(component -> {
                         // Check if we should consider this component
                         if (!component.isIncludeInPeriodicCheck()) {
                             component.getLocationsWithInitialAndFinal().forEach(location -> location.setReachability(Location.Reachability.EXCLUDED));
@@ -335,7 +335,7 @@ public class HUPPAALController implements Initializable {
         )));
 
         statusLabel.setTextFill(Color.GREY_BLUE.getColor(Color.Intensity.I50));
-        statusLabel.textProperty().bind(HUPPAAL.projectDirectory);
+        statusLabel.textProperty().bind(Ecdar.projectDirectory);
         statusLabel.setOpacity(0.5);
 
         queryLabel.setTextFill(Color.GREY_BLUE.getColor(Color.Intensity.I50));
@@ -361,7 +361,7 @@ public class HUPPAALController implements Initializable {
     private void initializeNoMainComponentError() {
         final CodeAnalysis.Message noMainComponentErrorMessage = new CodeAnalysis.Message("No main component specified", CodeAnalysis.MessageType.ERROR);
 
-        HUPPAAL.getProject().mainComponentProperty().addListener((obs, oldMain, newMain) -> {
+        Ecdar.getProject().mainComponentProperty().addListener((obs, oldMain, newMain) -> {
             if(newMain == null) {
                 CodeAnalysis.addMessage(null, noMainComponentErrorMessage);
             } else {
@@ -376,7 +376,7 @@ public class HUPPAALController implements Initializable {
     private void initializeMenuBar() {
         menuBarFileSave.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN));
         menuBarFileSave.setOnAction(event -> {
-            HUPPAAL.save();
+            Ecdar.save();
         });
 
         menuBarFileOpenProject.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.SHORTCUT_DOWN));
@@ -397,8 +397,8 @@ public class HUPPAALController implements Initializable {
             final File file = projectPicker.showDialog(root.getScene().getWindow());
             if(file != null) {
                 try {
-                    HUPPAAL.projectDirectory.set(file.getAbsolutePath());
-                    HUPPAAL.initializeProjectFolder();
+                    Ecdar.projectDirectory.set(file.getAbsolutePath());
+                    Ecdar.initializeProjectFolder();
                 } catch (final IOException e) {
                     e.printStackTrace();
                 }
@@ -409,18 +409,18 @@ public class HUPPAALController implements Initializable {
         menuBarViewFilePanel.getGraphic().setOpacity(1);
         menuBarViewFilePanel.setAccelerator(new KeyCodeCombination(KeyCode.F));
         menuBarViewFilePanel.setOnAction(event -> {
-            final BooleanProperty isOpen = HUPPAAL.toggleFilePane();
+            final BooleanProperty isOpen = Ecdar.toggleFilePane();
             menuBarViewFilePanel.getGraphic().opacityProperty().bind(new When(isOpen).then(1).otherwise(0));
         });
 
         menuBarViewQueryPanel.getGraphic().setOpacity(0);
         menuBarViewQueryPanel.setAccelerator(new KeyCodeCombination(KeyCode.Q));
         menuBarViewQueryPanel.setOnAction(event -> {
-            final BooleanProperty isOpen = HUPPAAL.toggleQueryPane();
+            final BooleanProperty isOpen = Ecdar.toggleQueryPane();
             menuBarViewQueryPanel.getGraphic().opacityProperty().bind(new When(isOpen).then(1).otherwise(0));
         });
 
-        menuBarHelpHelp.setOnAction(event -> HUPPAAL.showHelp());
+        menuBarHelpHelp.setOnAction(event -> Ecdar.showHelp());
 
         menuBarEditBalance.setAccelerator(new KeyCodeCombination(KeyCode.B, KeyCombination.SHORTCUT_DOWN));
         menuBarEditBalance.setOnAction(event -> {
@@ -433,7 +433,7 @@ public class HUPPAALController implements Initializable {
 
                 // A list of components we have not ordered yet
                 final List<Component> missingComponents = new ArrayList<>();
-                HUPPAAL.getProject().getComponents().forEach(missingComponents::add);
+                Ecdar.getProject().getComponents().forEach(missingComponents::add);
 
                 // List to iterate through the components
                 final List<SubComponent> subComponentsToCheck = new ArrayList<>();
@@ -464,7 +464,7 @@ public class HUPPAALController implements Initializable {
                 };
 
                 // Balance the identifiers in the main component
-                resetLocationsInComponent.accept(HUPPAAL.getProject().getMainComponent());
+                resetLocationsInComponent.accept(Ecdar.getProject().getMainComponent());
 
                 // While we are missing subcomponents, balance them!
                 while(!subComponentsToCheck.isEmpty()) {
@@ -541,8 +541,8 @@ public class HUPPAALController implements Initializable {
         // Add error that is project wide but not a backend error
         addComponent.accept(null);
 
-        HUPPAAL.getProject().getComponents().forEach(addComponent);
-        HUPPAAL.getProject().getComponents().addListener(new ListChangeListener<Component>() {
+        Ecdar.getProject().getComponents().forEach(addComponent);
+        Ecdar.getProject().getComponents().addListener(new ListChangeListener<Component>() {
             @Override
             public void onChanged(final Change<? extends Component> c) {
                 while (c.next()) {
@@ -666,7 +666,7 @@ public class HUPPAALController implements Initializable {
 
     @FXML
     private void generateUppaalModelClicked() {
-        final Component mainComponent = HUPPAAL.getProject().getMainComponent();
+        final Component mainComponent = Ecdar.getProject().getMainComponent();
 
         if (mainComponent == null) {
             System.out.println("No main component");
@@ -675,9 +675,9 @@ public class HUPPAALController implements Initializable {
 
         try {
             UPPAALDriver.generateDebugUPPAALModel();
-            HUPPAAL.showToast("UPPAAL debug file stored");
+            Ecdar.showToast("UPPAAL debug file stored");
         } catch (final Exception e) {
-            HUPPAAL.showToast("Could not store UPPAAL debug model due to an error");
+            Ecdar.showToast("Could not store UPPAAL debug model due to an error");
             e.printStackTrace();
         }
     }

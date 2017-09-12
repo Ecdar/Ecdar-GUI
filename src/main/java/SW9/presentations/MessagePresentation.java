@@ -1,6 +1,6 @@
 package SW9.presentations;
 
-import SW9.HUPPAAL;
+import SW9.Ecdar;
 import SW9.abstractions.Component;
 import SW9.abstractions.Edge;
 import SW9.abstractions.Location;
@@ -86,19 +86,19 @@ public class MessagePresentation extends HBox {
 
                             // We are pressing a location, find the location and open the corresponding component
                             if (nearable instanceof Location) {
-                                HUPPAAL.getProject().getComponents().forEach(component -> {
+                                Ecdar.getProject().getComponents().forEach(component -> {
                                     if (component.getLocations().contains(nearable)) {
                                         openComponent[0] = component;
                                     }
                                 });
                             } else if (nearable instanceof Edge) { // We are pressing an edge, find the edge and open the corresponding component
-                                HUPPAAL.getProject().getComponents().forEach(component -> {
+                                Ecdar.getProject().getComponents().forEach(component -> {
                                     if (component.getEdges().contains(nearable)) {
                                         openComponent[0] = component;
                                     }
                                 });
                             } else if (nearable instanceof SubComponent) { // We are pressing a subcomponent, find the subcomponent and open the corresponding component
-                                HUPPAAL.getProject().getComponents().forEach(component -> {
+                                Ecdar.getProject().getComponents().forEach(component -> {
                                     if (component.getSubComponents().contains(nearable)) {
                                         openComponent[0] = component;
                                     }

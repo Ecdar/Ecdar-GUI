@@ -1,6 +1,6 @@
 package SW9.controllers;
 
-import SW9.HUPPAAL;
+import SW9.Ecdar;
 import SW9.abstractions.*;
 import SW9.backend.UPPAALDriver;
 import SW9.code_analysis.CodeAnalysis;
@@ -180,7 +180,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
             // Add new query for this location
             final Query query = new Query(reachabilityQuery, reachabilityComment, QueryState.UNKNOWN);
-            HUPPAAL.getProject().getQueries().add(query);
+            Ecdar.getProject().getQueries().add(query);
             query.run();
 
             dropDownMenu.close();

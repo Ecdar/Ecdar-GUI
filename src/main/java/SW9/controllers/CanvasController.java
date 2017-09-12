@@ -1,6 +1,5 @@
 package SW9.controllers;
 
-import SW9.HUPPAAL;
 import SW9.abstractions.Component;
 import SW9.presentations.CanvasPresentation;
 import SW9.presentations.ComponentPresentation;

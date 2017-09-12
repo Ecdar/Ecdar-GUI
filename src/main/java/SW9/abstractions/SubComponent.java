@@ -1,6 +1,6 @@
 package SW9.abstractions;
 
-import SW9.HUPPAAL;
+import SW9.Ecdar;
 import SW9.code_analysis.Nearable;
 import SW9.utility.helpers.Circular;
 import SW9.utility.serialize.Serializable;
@@ -127,7 +127,7 @@ public class SubComponent implements Serializable, Circular, Nearable {
 
     @Override
     public void deserialize(final JsonObject json) {
-        HUPPAAL.getProject().getComponents().forEach(c -> {
+        Ecdar.getProject().getComponents().forEach(c -> {
             if(json.getAsJsonPrimitive(COMPONENT).getAsString().equals(c.getName())) {
                 this.component.set(c);
             }
