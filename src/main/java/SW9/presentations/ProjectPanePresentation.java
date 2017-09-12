@@ -7,6 +7,7 @@ import com.jfoenix.controls.JFXRippler;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.geometry.Insets;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.*;
 
 import java.io.IOException;
@@ -34,6 +35,8 @@ public class ProjectPanePresentation extends StackPane {
             initializeToolbar();
 
             initializeToolbarButton(controller.createComponent);
+            final Tooltip tooltip = new Tooltip("Create component");
+            Tooltip.install(controller.createComponent, tooltip);
 
         } catch (final IOException ioe) {
             throw new IllegalStateException(ioe);
