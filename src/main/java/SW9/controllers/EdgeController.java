@@ -517,6 +517,25 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
 
                         final DropDownMenu dropDownMenu = new DropDownMenu(((Pane) edgeRoot.getParent().getParent().getParent().getParent()), dropDownMenuHelperCircle, 230, true);
 
+                        // Switch between input and output edge
+                        final String status;
+                        if (getEdge().getStatus() == EdgeStatus.INPUT) {
+                            status = "Change to output edge";
+                        } else {
+                            status = "Change to input edge";
+                        }
+
+                        dropDownMenu.addClickableListElement(status, mouseEvent -> {
+                            UndoRedoStack.push(
+                                    () -> switchEdgeStatus(),
+                                    () -> switchEdgeStatus(),
+                                    "Switch edge status",
+                                    "switch"
+                            );
+                            dropDownMenu.close();
+                        });
+                        dropDownMenu.addSpacerElement();
+
                         addEdgePropertyRow(dropDownMenu, "Add Select", Edge.PropertyType.SELECTION, link);
                         addEdgePropertyRow(dropDownMenu, "Add Guard", Edge.PropertyType.GUARD, link);
                         addEdgePropertyRow(dropDownMenu, "Add Synchronization", Edge.PropertyType.SYNCHRONIZATION, link);
@@ -572,6 +591,22 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
             }
         });
     }
+
+    private void switchEdgeStatus() {
+        getEdge().switchStatus();
+
+        final boolean isLinkDashed;
+        if (getEdge().getStatus() == EdgeStatus.INPUT) {
+            isLinkDashed = false;
+        } else {
+            isLinkDashed = true;
+        }
+
+        for (final Link link : links) {
+            link.updateStatus(isLinkDashed);
+        }
+    }
+
 
     private void addEdgePropertyRow(final DropDownMenu dropDownMenu, final String rowTitle, final Edge.PropertyType type, final Link link) {
         final SimpleBooleanProperty isDisabled = new SimpleBooleanProperty(false);
