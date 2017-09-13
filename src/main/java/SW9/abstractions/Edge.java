@@ -52,6 +52,9 @@ public class Edge implements Serializable, Nearable {
     private ObjectProperty<Circular> sourceCircular = new SimpleObjectProperty<>();
     private ObjectProperty<Circular> targetCircular = new SimpleObjectProperty<>();
 
+    // Defines if this is an input or an output edge
+    private EdgeStatus status = EdgeStatus.INPUT; // TODO remove = EdgeStatus.INPUT;
+
     public Edge(final Location sourceLocation) {
         setSourceLocation(sourceLocation);
         bindReachabilityAnalysis();
@@ -574,6 +577,25 @@ public class Edge implements Serializable, Nearable {
         }
 
         return result;
+    }
+
+    /**
+     * Gets if this is an input or output edge.
+     * @return the status
+     */
+    public EdgeStatus getStatus() {
+        return status;
+    }
+
+    /**
+     * Switches if the status of this is input of output
+     */
+    public void switchStatus() {
+        if (status == EdgeStatus.INPUT) {
+            status = EdgeStatus.OUTPUT;
+        } else {
+            status = EdgeStatus.INPUT;
+        }
     }
 
     public enum PropertyType {

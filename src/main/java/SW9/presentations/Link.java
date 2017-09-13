@@ -15,7 +15,7 @@ public class Link extends Group implements SelectHelper.Selectable {
     private final DoubleProperty endX;
     private final DoubleProperty startY;
     private final DoubleProperty endY;
-    private final Line shownLine;
+    private Line shownLine;
 
     public Link() {
         this(0,0,0,0);
@@ -28,19 +28,12 @@ public class Link extends Group implements SelectHelper.Selectable {
         this.startY = new SimpleDoubleProperty(startY);
         this.endY = new SimpleDoubleProperty(endY);
 
-        // Create the two lines
-        shownLine = new Line();
-        shownLine.getStrokeDashArray().addAll(6d);
+        setUpLine(false); // TODO something
+
         final Line hiddenHoverLine = new Line();
 
         // Add them
-        getChildren().addAll(shownLine, hiddenHoverLine);
-
-        // Bind the shown line
-        shownLine.startXProperty().bind(this.startX);
-        shownLine.endXProperty().bind(this.endX);
-        shownLine.startYProperty().bind(this.startY);
-        shownLine.endYProperty().bind(this.endY);
+        getChildren().add(hiddenHoverLine);
 
         // Bind the hidden line
         hiddenHoverLine.startXProperty().bind(shownLine.startXProperty());
@@ -54,6 +47,36 @@ public class Link extends Group implements SelectHelper.Selectable {
         // Debug visuals
         hiddenHoverLine.setStroke(Debug.hoverableAreaColor.getColor(Debug.hoverableAreaColorIntensity));
         hiddenHoverLine.opacityProperty().bind(Debug.hoverableAreaOpacity);
+    }
+
+    public void updateStatus(final boolean isDashed) {
+        getChildren().remove(shownLine);
+        setUpLine(isDashed);
+    }
+
+    /**
+     * Creates the line to show.
+     */
+    private void setUpLine(final boolean isDashed) {
+        // Create the two lines
+        shownLine = new Line();
+
+        if (isDashed) {
+            shownLine.getStrokeDashArray().addAll(6d);
+        }
+
+        // Add them
+        getChildren().add(shownLine);
+
+        // Bind the shown line
+        shownLine.startXProperty().bind(this.startX);
+        shownLine.endXProperty().bind(this.endX);
+        shownLine.startYProperty().bind(this.startY);
+        shownLine.endYProperty().bind(this.endY);
+    }
+
+    private void remove() {
+
     }
 
     public double getStartX() {
