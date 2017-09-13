@@ -21,6 +21,14 @@ public class UndoRedoStack {
         UndoRedoStack.debugRunnable = debugRunnable;
     }
 
+    /**
+     * Pushes to the stack and performs the redo action once.
+     * @param perform the redo action
+     * @param undo the undo action
+     * @param description a description of the actions
+     * @param icon not used?
+     * @return the command created
+     */
     public static Command push(final Runnable perform, final Runnable undo, final String description, final String icon) {
         final Command item = new Command(perform, undo, description, icon);
 
