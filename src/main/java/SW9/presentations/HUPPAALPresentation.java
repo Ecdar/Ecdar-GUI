@@ -202,7 +202,6 @@ public class HUPPAALPresentation extends StackPane {
                     controller.warningsTab.setText("Warnings");
                 } else {
                     controller.warningsTab.setText("Warnings (" + warnings + ")");
-                    controller.expandMessagesIfNotExpanded();
                     controller.tabPane.getSelectionModel().select(controller.warningsTab);
                 }
 

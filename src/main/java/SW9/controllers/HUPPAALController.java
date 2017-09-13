@@ -600,11 +600,12 @@ public class HUPPAALController implements Initializable {
         tabPane.getSelectionModel().selectedIndexProperty().addListener((obs, oldSelected, newSelected) -> {
             if (newSelected.intValue() < 0 || tabPaneContainer.getMaxHeight() > 35) return;
 
+            // TODO: Is the shouldISkip flag needed if we no longer need the expandMessages method call
             if (shouldISkipOpeningTheMessagesContainer) {
                 tabPane.getSelectionModel().clearSelection();
                 shouldISkipOpeningTheMessagesContainer = false;
             } else {
-                expandMessagesContainer.play();
+                //expandMessagesIfNotExpanded();
             }
         });
 
