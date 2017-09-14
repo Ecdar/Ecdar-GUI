@@ -202,7 +202,8 @@ public class HUPPAALPresentation extends StackPane {
                     controller.warningsTab.setText("Warnings");
                 } else {
                     controller.warningsTab.setText("Warnings (" + warnings + ")");
-                    controller.expandMessagesIfNotExpanded();
+                    //We must select the warnings tab but we don't want the messages areas to open
+                    controller.shouldISkipOpeningTheMessagesContainer = true;
                     controller.tabPane.getSelectionModel().select(controller.warningsTab);
                 }
 
