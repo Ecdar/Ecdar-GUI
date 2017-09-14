@@ -76,6 +76,7 @@ public class HUPPAALController implements Initializable {
     public Tab warningsTab;
     public Rectangle tabPaneResizeElement;
     public StackPane tabPaneContainer;
+    private double expandHeight = 300;
     public final Transition expandMessagesContainer = new Transition() {
         {
             setInterpolator(Interpolator.SPLINE(0.645, 0.045, 0.355, 1));
@@ -84,7 +85,7 @@ public class HUPPAALController implements Initializable {
 
         @Override
         protected void interpolate(final double frac) {
-            tabPaneContainer.setMaxHeight(35 + frac * (300 - 35));
+            tabPaneContainer.setMaxHeight(35 + frac * (expandHeight - 35));
         }
     };
     public Rectangle bottomFillerElement;
@@ -651,6 +652,7 @@ public class HUPPAALController implements Initializable {
         };
 
         if (tabPaneContainer.getMaxHeight() > 35) {
+            expandHeight = tabPaneContainer.getHeight();
             collapse.play();
         }
     }
@@ -672,6 +674,7 @@ public class HUPPAALController implements Initializable {
         };
 
         if (tabPaneContainer.getMaxHeight() > 35) {
+            expandHeight = tabPaneContainer.getHeight();
             collapse.play();
         } else {
             expandMessagesContainer.play();
