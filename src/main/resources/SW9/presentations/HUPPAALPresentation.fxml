@@ -43,6 +43,20 @@
                             </StackPane>
                         </JFXRippler>
 
+                        <Region minWidth="8"/>
+
+                        <!-- Switch between input and output edges -->
+                        <JFXRippler fx:id="switchToInput" managed="false" visible="false">
+                            <StackPane minWidth="40" minHeight="40" onMouseClicked="#switchToInputClicked">
+                                <FontIcon iconLiteral="gmi-flight-land" iconSize="24" fill="white"/>
+                            </StackPane>
+                        </JFXRippler>
+                        <JFXRippler fx:id="switchToOutput">
+                            <StackPane minWidth="40" minHeight="40" onMouseClicked="#switchToOutputClicked">
+                                <FontIcon iconLiteral="gmi-flight-takeoff" iconSize="24" fill="white"/>
+                            </StackPane>
+                        </JFXRippler>
+
                         <Region HBox.hgrow="ALWAYS" />
 
                         <!-- DELETE SELECTED -->
