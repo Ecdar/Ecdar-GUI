@@ -1,6 +1,7 @@
 package SW9.presentations;
 
 import SW9.Debug;
+import SW9.abstractions.EdgeStatus;
 import SW9.utility.colors.Color;
 import SW9.utility.helpers.SelectHelper;
 import javafx.beans.property.DoubleProperty;
@@ -17,18 +18,18 @@ public class Link extends Group implements SelectHelper.Selectable {
     private final DoubleProperty endY;
     private Line shownLine;
 
-    public Link() {
-        this(0,0,0,0);
+    public Link(final EdgeStatus status) {
+        this(0,0,0,0, status);
     }
 
-    public Link(final double startX, final double endX, final double startY, final double endY) {
+    public Link(final double startX, final double endX, final double startY, final double endY, final EdgeStatus status) {
         // Set the initial values
         this.startX = new SimpleDoubleProperty(startX);
         this.endX = new SimpleDoubleProperty(endX);
         this.startY = new SimpleDoubleProperty(startY);
         this.endY = new SimpleDoubleProperty(endY);
 
-        setUpLine(false); // TODO something
+        setUpLine(status);
 
         final Line hiddenHoverLine = new Line();
 
@@ -49,19 +50,20 @@ public class Link extends Group implements SelectHelper.Selectable {
         hiddenHoverLine.opacityProperty().bind(Debug.hoverableAreaOpacity);
     }
 
-    public void updateStatus(final boolean isDashed) {
+    public void updateStatus(final EdgeStatus status) {
         getChildren().remove(shownLine);
-        setUpLine(isDashed);
+        setUpLine(status);
     }
 
     /**
      * Creates the line to show.
      */
-    private void setUpLine(final boolean isDashed) {
+    private void setUpLine(final EdgeStatus status) {
         // Create the two lines
         shownLine = new Line();
 
-        if (isDashed) {
+        // Make dashed line, if output edge
+        if (status == EdgeStatus.OUTPUT) {
             shownLine.getStrokeDashArray().addAll(6d);
         }
 

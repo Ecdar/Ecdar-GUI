@@ -53,16 +53,18 @@ public class Edge implements Serializable, Nearable {
     private ObjectProperty<Circular> targetCircular = new SimpleObjectProperty<>();
 
     // Defines if this is an input or an output edge
-    private EdgeStatus status = EdgeStatus.INPUT; // TODO remove = EdgeStatus.INPUT;
+    private EdgeStatus status;
 
-    public Edge(final Location sourceLocation) {
+    public Edge(final Location sourceLocation, final EdgeStatus status) {
         setSourceLocation(sourceLocation);
         bindReachabilityAnalysis();
+        this.status = status;
     }
 
-    public Edge(final SubComponent sourceComponent) {
+    public Edge(final SubComponent sourceComponent, final EdgeStatus status) {
         setSourceSubComponent(sourceComponent);
         bindReachabilityAnalysis();
+        this.status = status;
     }
 
     public Edge(final Jork sourceJork) {
@@ -70,6 +72,7 @@ public class Edge implements Serializable, Nearable {
         bindReachabilityAnalysis();
     }
 
+    // TODO take status
     public Edge(final JsonObject jsonObject, final Component component) {
         deserialize(jsonObject, component);
         bindReachabilityAnalysis();
