@@ -29,6 +29,7 @@ public class Edge implements Serializable, Nearable {
     private static final String UPDATE = "update";
     private static final String SYNC = "sync";
     private static final String NAILS = "nails";
+    private static final String STATUS = "status";
 
     // Verification properties
     private final ObjectProperty<Location> sourceLocation = new SimpleObjectProperty<>();
@@ -72,7 +73,6 @@ public class Edge implements Serializable, Nearable {
         bindReachabilityAnalysis();
     }
 
-    // TODO take status
     public Edge(final JsonObject jsonObject, final Component component) {
         deserialize(jsonObject, component);
         bindReachabilityAnalysis();
@@ -488,6 +488,7 @@ public class Edge implements Serializable, Nearable {
         if (getTargetJork() != null) {
             result.addProperty(TARGET_JORK, getTargetJork().getId());
         }
+        result.addProperty(STATUS, status.toString());
         result.addProperty(SELECT, getSelect());
         result.addProperty(GUARD, getGuard());
         result.addProperty(UPDATE, getUpdate());
@@ -501,8 +502,9 @@ public class Edge implements Serializable, Nearable {
     }
 
     @Override
+    @Deprecated
     public void deserialize(final JsonObject json) {
-        // todo: We can't deserialize this object without knowledge about locations. Use the method below
+        throw new UnsupportedOperationException("Use deserialize(JsonObject, Component) instead");
     }
 
     public void deserialize(final JsonObject json, final Component component) {
@@ -547,6 +549,8 @@ public class Edge implements Serializable, Nearable {
         };
 
         component.getJorks().forEach(setFromAndToJorkIfMatches);
+
+        status = EdgeStatus.valueOf(json.getAsJsonPrimitive(STATUS).getAsString());
 
         setSelect(json.getAsJsonPrimitive(SELECT).getAsString());
         setGuard(json.getAsJsonPrimitive(GUARD).getAsString());
