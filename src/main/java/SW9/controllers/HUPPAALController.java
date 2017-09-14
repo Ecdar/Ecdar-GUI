@@ -123,7 +123,7 @@ public class HUPPAALController implements Initializable {
     private static Text _queryTextQuery;
 
     private double tabPanePreviousY = 0;
-    private boolean shouldISkipOpeningTheMessagesContainer = true;
+    public boolean shouldISkipOpeningTheMessagesContainer = true;
 
     public static void runReachabilityAnalysis() {
         if (!reachabilityServiceEnabled) return;
@@ -604,7 +604,7 @@ public class HUPPAALController implements Initializable {
                 tabPane.getSelectionModel().clearSelection();
                 shouldISkipOpeningTheMessagesContainer = false;
             } else {
-                expandMessagesContainer.play();
+                expandMessagesIfNotExpanded();
             }
         });
 
