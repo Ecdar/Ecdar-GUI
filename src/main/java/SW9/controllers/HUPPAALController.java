@@ -76,7 +76,7 @@ public class HUPPAALController implements Initializable {
     public Tab warningsTab;
     public Rectangle tabPaneResizeElement;
     public StackPane tabPaneContainer;
-    public double expandHeight = 300;
+    private double expandHeight = 300;
     public final Transition expandMessagesContainer = new Transition() {
         {
             setInterpolator(Interpolator.SPLINE(0.645, 0.045, 0.355, 1));
