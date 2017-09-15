@@ -162,7 +162,7 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
             initialLocationGuideContainer.setOpacity(1);
             finalLocationGuideContainer.setOpacity(1);
             playIndicatorAnimations(Location.Type.INITIAL, initialLocationGuideContainer);
-            playIndicatorAnimations(Location.Type.FINAl, finalLocationGuideContainer);
+            playIndicatorAnimations(Location.Type.FINAL, finalLocationGuideContainer);
             controller.getComponent().setFirsTimeShown(true);
         }
 

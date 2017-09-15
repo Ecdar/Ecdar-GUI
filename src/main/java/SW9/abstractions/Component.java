@@ -102,7 +102,7 @@ public class Component implements Serializable, DropDownMenu.HasColor {
 
         // A component must have at least one final location
         final Location finalLocation = new Location();
-        finalLocation.setType(Location.Type.FINAl);
+        finalLocation.setType(Location.Type.FINAL);
         finalLocation.setColorIntensity(getColorIntensity());
         finalLocation.setColor(getColor());
         this.finalLocation.set(finalLocation);

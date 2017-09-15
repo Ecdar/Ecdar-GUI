@@ -112,7 +112,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
 
         final Consumer<Location> checkIfErrorIsPresent = (sourceLocation) -> {
             if (sourceLocation != null
-                    && sourceLocation.getType().equals(Location.Type.FINAl)
+                    && sourceLocation.getType().equals(Location.Type.FINAL)
                     && getComponent().getEdges().contains(getEdge())
                     && getEdge().getTargetCircular() != null) {
 

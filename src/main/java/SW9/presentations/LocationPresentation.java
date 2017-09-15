@@ -105,8 +105,8 @@ public class LocationPresentation extends Group implements MouseTrackable, Selec
 
         if (initial.equals("INITIAL")) {
             location.setType(Location.Type.INITIAL);
-        } else if (initial.equals("FINAl")) {
-            location.setType(Location.Type.FINAl);
+        } else if (initial.equals("FINAL")) {
+            location.setType(Location.Type.FINAL);
         } else if (initial.equals("URGENT")) {
             location.setUrgency(Location.Urgency.URGENT);
         } else if (initial.equals("COMMITTED")) {
@@ -476,7 +476,7 @@ public class LocationPresentation extends Group implements MouseTrackable, Selec
 
 
         final StackPane finalIndicator = controller.finalIndicator;
-        finalIndicator.visibleProperty().bind(location.typeProperty().isEqualTo(Location.Type.FINAl));
+        finalIndicator.visibleProperty().bind(location.typeProperty().isEqualTo(Location.Type.FINAL));
     }
 
     public void setLocation(final Location location) {
