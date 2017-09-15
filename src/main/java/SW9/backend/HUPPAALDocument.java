@@ -576,6 +576,12 @@ public class HUPPAALDocument {
         final List<Nail> reversedNails = new ArrayList<>();
         hEdge.getNails().forEach(nail -> reversedNails.add(0, nail));
 
+        //Decides of the
+        if (hEdge.getStatus() == EdgeStatus.OUTPUT){
+            uEdge.setProperty("controllable", false);
+        }
+
+
         for (final Nail hNail : reversedNails) {
 
             // Create a Uppaal nail
