@@ -29,6 +29,7 @@ public class Edge implements Serializable, Nearable {
     private static final String UPDATE = "update";
     private static final String SYNC = "sync";
     private static final String NAILS = "nails";
+    private static final String STATUS = "status";
 
     // Verification properties
     private final ObjectProperty<Location> sourceLocation = new SimpleObjectProperty<>();
@@ -52,14 +53,19 @@ public class Edge implements Serializable, Nearable {
     private ObjectProperty<Circular> sourceCircular = new SimpleObjectProperty<>();
     private ObjectProperty<Circular> targetCircular = new SimpleObjectProperty<>();
 
-    public Edge(final Location sourceLocation) {
+    // Defines if this is an input or an output edge
+    private EdgeStatus status;
+
+    public Edge(final Location sourceLocation, final EdgeStatus status) {
         setSourceLocation(sourceLocation);
         bindReachabilityAnalysis();
+        this.status = status;
     }
 
-    public Edge(final SubComponent sourceComponent) {
+    public Edge(final SubComponent sourceComponent, final EdgeStatus status) {
         setSourceSubComponent(sourceComponent);
         bindReachabilityAnalysis();
+        this.status = status;
     }
 
     public Edge(final Jork sourceJork) {
@@ -258,7 +264,6 @@ public class Edge implements Serializable, Nearable {
             return targetCircular.get();
         }
         return null;
-
     }
 
     private void updateSourceCircular() {
@@ -483,6 +488,7 @@ public class Edge implements Serializable, Nearable {
         if (getTargetJork() != null) {
             result.addProperty(TARGET_JORK, getTargetJork().getId());
         }
+        result.addProperty(STATUS, status.toString());
         result.addProperty(SELECT, getSelect());
         result.addProperty(GUARD, getGuard());
         result.addProperty(UPDATE, getUpdate());
@@ -496,8 +502,9 @@ public class Edge implements Serializable, Nearable {
     }
 
     @Override
+    @Deprecated
     public void deserialize(final JsonObject json) {
-        // todo: We can't deserialize this object without knowledge about locations. Use the method below
+        throw new UnsupportedOperationException("Use deserialize(JsonObject, Component) instead");
     }
 
     public void deserialize(final JsonObject json, final Component component) {
@@ -543,6 +550,8 @@ public class Edge implements Serializable, Nearable {
 
         component.getJorks().forEach(setFromAndToJorkIfMatches);
 
+        status = EdgeStatus.valueOf(json.getAsJsonPrimitive(STATUS).getAsString());
+
         setSelect(json.getAsJsonPrimitive(SELECT).getAsString());
         setGuard(json.getAsJsonPrimitive(GUARD).getAsString());
         setUpdate(json.getAsJsonPrimitive(UPDATE).getAsString());
@@ -575,6 +584,25 @@ public class Edge implements Serializable, Nearable {
         }
 
         return result;
+    }
+
+    /**
+     * Gets if this is an input or output edge.
+     * @return the status
+     */
+    public EdgeStatus getStatus() {
+        return status;
+    }
+
+    /**
+     * Switches if the status of this is input of output
+     */
+    public void switchStatus() {
+        if (status == EdgeStatus.INPUT) {
+            status = EdgeStatus.OUTPUT;
+        } else {
+            status = EdgeStatus.INPUT;
+        }
     }
 
     public enum PropertyType {

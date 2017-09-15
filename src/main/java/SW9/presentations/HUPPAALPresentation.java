@@ -70,6 +70,8 @@ public class HUPPAALPresentation extends StackPane {
             initializeGenerateUppaalModelButton();
             initializeColorSelector();
 
+            initializeEdgeStatusIcons();
+
             initializeToggleQueryPaneFunctionality();
             initializeToggleFilePaneFunctionality();
 
@@ -335,6 +337,20 @@ public class HUPPAALPresentation extends StackPane {
 
             popup.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, fromLeft, boundsInScreenButton.getMinY() - boundsInScreenRoot.getMinY());
         });
+    }
+
+    private void initializeEdgeStatusIcons() {
+        controller.inputModeImage.setImage(new Image(Ecdar.class.getResource("ic_input_mode.png").toExternalForm()));
+        controller.inputModePane.widthProperty().addListener((observable, oldValue, newValue) ->
+                controller.inputModeImage.setFitWidth(controller.inputModePane.getWidth()));
+        controller.inputModePane.heightProperty().addListener((observable, oldValue, newValue) ->
+                controller.inputModeImage.setFitHeight(controller.inputModePane.getHeight()));
+
+        controller.outputModeImage.setImage(new Image(Ecdar.class.getResource("ic_output_mode.png").toExternalForm()));
+        controller.outputModePane.widthProperty().addListener((observable, oldValue, newValue) ->
+                controller.outputModeImage.setFitWidth(controller.outputModePane.getWidth()));
+        controller.outputModePane.heightProperty().addListener((observable, oldValue, newValue) ->
+                controller.outputModeImage.setFitHeight(controller.outputModePane.getHeight()));
     }
 
     private void initializeGenerateUppaalModelButton() {

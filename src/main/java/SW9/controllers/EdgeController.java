@@ -260,8 +260,9 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
 
     private ChangeListener<Component> getComponentChangeListener(final Edge newEdge) {
         return (obsComponent, oldComponent, newComponent) -> {
+            // Draw new edge from a location
             if (newEdge.getNails().isEmpty() && newEdge.getTargetCircular() == null) {
-                final Link link = new Link();
+                final Link link = new Link(newEdge.getStatus());
                 links.add(link);
 
                 // Add the link and its arrowhead to the view
@@ -276,7 +277,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                 final Circular[] previous = {newEdge.getSourceCircular()};
 
                 newEdge.getNails().forEach(nail -> {
-                    final Link link = new Link();
+                    final Link link = new Link(newEdge.getStatus());
                     links.add(link);
 
                     final NailPresentation nailPresentation = new NailPresentation(nail, newEdge, getComponent());
@@ -288,7 +289,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                     previous[0] = nail;
                 });
 
-                final Link link = new Link();
+                final Link link = new Link(newEdge.getStatus());
                 links.add(link);
 
                 edgeRoot.getChildren().add(link);
@@ -315,7 +316,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                     if (newEdge.getTargetCircular() != null) {
                         final int indexOfNewNail = edge.get().getNails().indexOf(newNail);
 
-                        final Link newLink = new Link();
+                        final Link newLink = new Link(edge.get().getStatus());
                         final Link pressedLink = links.get(indexOfNewNail);
                         links.add(indexOfNewNail, newLink);
 
@@ -359,7 +360,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                         }
 
                         // Create a new link that will bind from the new nail to the mouse
-                        final Link newLink = new Link();
+                        final Link newLink = new Link(edge.get().getStatus());
                         links.add(newLink);
                         BindingHelper.bind(newLink, simpleArrowHead, newNail, newComponent.xProperty(), newComponent.yProperty());
                         edgeRoot.getChildren().add(newLink);
@@ -517,6 +518,25 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
 
                         final DropDownMenu dropDownMenu = new DropDownMenu(((Pane) edgeRoot.getParent().getParent().getParent().getParent()), dropDownMenuHelperCircle, 230, true);
 
+                        // Switch between input and output edge
+                        final String status;
+                        if (getEdge().getStatus() == EdgeStatus.INPUT) {
+                            status = "Change to output edge";
+                        } else {
+                            status = "Change to input edge";
+                        }
+
+                        dropDownMenu.addClickableListElement(status, mouseEvent -> {
+                            UndoRedoStack.push(
+                                    () -> switchEdgeStatus(),
+                                    () -> switchEdgeStatus(),
+                                    "Switch edge status",
+                                    "switch"
+                            );
+                            dropDownMenu.close();
+                        });
+                        dropDownMenu.addSpacerElement();
+
                         addEdgePropertyRow(dropDownMenu, "Add Select", Edge.PropertyType.SELECTION, link);
                         addEdgePropertyRow(dropDownMenu, "Add Guard", Edge.PropertyType.GUARD, link);
                         addEdgePropertyRow(dropDownMenu, "Add Synchronization", Edge.PropertyType.SYNCHRONIZATION, link);
@@ -572,6 +592,15 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
             }
         });
     }
+
+    private void switchEdgeStatus() {
+        getEdge().switchStatus();
+
+        for (final Link link : links) {
+            link.updateStatus(getEdge().getStatus());
+        }
+    }
+
 
     private void addEdgePropertyRow(final DropDownMenu dropDownMenu, final String rowTitle, final Edge.PropertyType type, final Link link) {
         final SimpleBooleanProperty isDisabled = new SimpleBooleanProperty(false);

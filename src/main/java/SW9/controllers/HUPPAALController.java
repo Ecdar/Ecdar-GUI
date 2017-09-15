@@ -52,6 +52,8 @@ public class HUPPAALController implements Initializable {
     private static long reachabilityTime = Long.MAX_VALUE;
     private static ExecutorService reachabilityService;
 
+    private static EdgeStatus globalEdgeStatus;
+
     // View stuff
     public StackPane root;
     public QueryPanePresentation queryPane;
@@ -70,13 +72,19 @@ public class HUPPAALController implements Initializable {
     public JFXRippler deleteSelected;
     public JFXRippler undo;
     public JFXRippler redo;
-    public ImageView logo;
     public JFXTabPane tabPane;
     public Tab errorsTab;
     public Tab warningsTab;
     public Rectangle tabPaneResizeElement;
     public StackPane tabPaneContainer;
+
+    public StackPane inputModePane;
+    public StackPane outputModePane;
+    public ImageView inputModeImage;
+    public ImageView outputModeImage;
+
     private double expandHeight = 300;
+
     public final Transition expandMessagesContainer = new Transition() {
         {
             setInterpolator(Interpolator.SPLINE(0.645, 0.045, 0.355, 1));
@@ -123,6 +131,9 @@ public class HUPPAALController implements Initializable {
     private static Text _queryTextResult;
     private static Text _queryTextQuery;
 
+    public JFXRippler switchToInput;
+    public JFXRippler switchToOutput;
+
     private double tabPanePreviousY = 0;
     public boolean shouldISkipOpeningTheMessagesContainer = true;
 
@@ -130,6 +141,10 @@ public class HUPPAALController implements Initializable {
         if (!reachabilityServiceEnabled) return;
 
         reachabilityTime = System.currentTimeMillis() + 500;
+    }
+
+    public static EdgeStatus getGlobalEdgeStatus() {
+        return globalEdgeStatus;
     }
 
     @Override
@@ -153,6 +168,10 @@ public class HUPPAALController implements Initializable {
             queryDialogContainer.setMouseTransparent(false);
         });
 
+        globalEdgeStatus = EdgeStatus.INPUT;
+
+        Tooltip.install(switchToInput, new Tooltip("Switch to input mode"));
+        Tooltip.install(switchToOutput, new Tooltip("Switch to output mode"));
 
         //Press ctrl+N or cmd+N to create a new component. The canvas changes to this new component
         KeyCodeCombination combination = new KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN);
@@ -853,6 +872,40 @@ public class HUPPAALController implements Initializable {
     @FXML
     private void redoClicked() {
         UndoRedoStack.redo();
+    }
+
+    /**
+     * Switch to input edge mode
+     */
+    @FXML
+    private void switchToInputClicked() {
+        setGlobalEdgeStatus(EdgeStatus.INPUT);
+
+        switchToInput.setManaged(false);
+        switchToInput.setVisible(false);
+        switchToOutput.setManaged(true);
+        switchToOutput.setVisible(true);
+    }
+
+    /**
+     * Switch to output edge mode
+     */
+    @FXML
+    private void switchToOutputClicked() {
+        setGlobalEdgeStatus(EdgeStatus.OUTPUT);
+
+        switchToInput.setManaged(true);
+        switchToInput.setVisible(true);
+        switchToOutput.setManaged(false);
+        switchToOutput.setVisible(false);
+    }
+
+    /**
+     * Sets the global edge status.
+     * @param status the status
+     */
+    private void setGlobalEdgeStatus(EdgeStatus status) {
+        globalEdgeStatus = status;
     }
 
     @FXML
