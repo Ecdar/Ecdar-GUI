@@ -295,7 +295,7 @@
                         <Region minHeight="20"/>
 
                         <HBox>
-                            <LocationPresentation>
+                            <LocationPresentation mouseTransparent="true">
                                 <initial>INITIAL</initial>
                             </LocationPresentation>
                             <Label styleClass="body1" style="-fx-padding: 9 0 0 5">
@@ -304,7 +304,7 @@
                         </HBox>
 
                         <HBox>
-                            <LocationPresentation>
+                            <LocationPresentation mouseTransparent="true">
                                 <initial>FINAL</initial>
                             </LocationPresentation>
                             <Label styleClass="body1" style="-fx-padding: 9 0 0 5">
@@ -313,7 +313,7 @@
                         </HBox>
 
                         <HBox>
-                            <LocationPresentation>
+                            <LocationPresentation mouseTransparent="true">
                                 <initial>URGENT</initial>
                             </LocationPresentation>
                             <Label styleClass="body1" style="-fx-padding: 9 0 0 5">
@@ -353,7 +353,7 @@
 
                         <HBox>
                             <VBox>
-                                <JorkPresentation>
+                                <JorkPresentation mouseTransparent="true">
                                     <type>FORK</type>
                                 </JorkPresentation>
                                 <Label alignment="BASELINE_CENTER" style="-fx-padding: 6 20 0 20;" styleClass="caption">
@@ -361,7 +361,7 @@
                                 </Label>
                             </VBox>
                             <VBox>
-                                <JorkPresentation>
+                                <JorkPresentation mouseTransparent="true">
                                     <type>JOIN</type>
                                 </JorkPresentation>
                                 <Label alignment="BASELINE_CENTER" style="-fx-padding: 6 20 0 20;" styleClass="caption">
