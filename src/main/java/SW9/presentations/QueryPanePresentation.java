@@ -51,7 +51,7 @@ public class QueryPanePresentation extends StackPane {
                 Color.GREY.getColor(Color.Intensity.I400),
                 BorderStrokeStyle.SOLID,
                 CornerRadii.EMPTY,
-                new BorderWidths(0, 0, 0, 1)
+                new BorderWidths(0, 0, 20, 1)
         )));
     }
 
@@ -95,5 +95,19 @@ public class QueryPanePresentation extends StackPane {
 
         // Set the elevation of the toolbar
         controller.toolbar.setEffect(DropShadowHelper.generateElevationShadow(8));
+    }
+
+    public void showBottomInset(final Boolean shouldShow) {
+        double bottomInsetWidth = 0;
+        if(shouldShow) {
+            bottomInsetWidth = 20;
+        }
+
+        controller.scrollPane.setBorder(new Border(new BorderStroke(
+                Color.GREY.getColor(Color.Intensity.I400),
+                BorderStrokeStyle.SOLID,
+                CornerRadii.EMPTY,
+                new BorderWidths(0, 1, bottomInsetWidth, 0)
+        )));
     }
 }

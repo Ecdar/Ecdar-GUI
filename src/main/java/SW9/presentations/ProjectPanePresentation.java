@@ -9,6 +9,7 @@ import javafx.fxml.JavaFXBuilderFactory;
 import javafx.geometry.Insets;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.*;
+import org.apache.xpath.operations.Bool;
 
 import java.io.IOException;
 import java.net.URL;
@@ -50,12 +51,14 @@ public class ProjectPanePresentation extends StackPane {
                 new BorderWidths(0, 1, 0, 0)
         )));
 
-        controller.scrollPane.setBorder(new Border(new BorderStroke(
+        /*controller.scrollPane.setBorder(new Border(new BorderStroke(
                 Color.GREY.getColor(Color.Intensity.I400),
                 BorderStrokeStyle.SOLID,
                 CornerRadii.EMPTY,
                 new BorderWidths(0, 1, 0, 0)
-        )));
+        )));*/
+
+        showBottomInset(true);
     }
 
     private void initializeBackground() {
@@ -90,6 +93,20 @@ public class ProjectPanePresentation extends StackPane {
         button.setMaskType(JFXRippler.RipplerMask.CIRCLE);
         button.setRipplerFill(color.getTextColor(colorIntensity));
         button.setPosition(JFXRippler.RipplerPos.BACK);
+    }
+
+    public void showBottomInset(final Boolean shouldShow) {
+        double bottomInsetWidth = 0;
+        if(shouldShow) {
+            bottomInsetWidth = 20;
+        }
+
+        controller.scrollPane.setBorder(new Border(new BorderStroke(
+                Color.GREY.getColor(Color.Intensity.I400),
+                BorderStrokeStyle.SOLID,
+                CornerRadii.EMPTY,
+                new BorderWidths(0, 1, bottomInsetWidth, 0)
+        )));
     }
 
 }
