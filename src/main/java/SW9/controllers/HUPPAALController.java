@@ -77,6 +77,8 @@ public class HUPPAALController implements Initializable {
     public Tab warningsTab;
     public Rectangle tabPaneResizeElement;
     public StackPane tabPaneContainer;
+    public JFXRippler switchToInput;
+    public JFXRippler switchToOutput;
 
     public StackPane inputModePane;
     public StackPane outputModePane;
@@ -130,9 +132,6 @@ public class HUPPAALController implements Initializable {
     private static JFXDialog _queryDialog;
     private static Text _queryTextResult;
     private static Text _queryTextQuery;
-
-    public JFXRippler switchToInput;
-    public JFXRippler switchToOutput;
 
     private double tabPanePreviousY = 0;
     public boolean shouldISkipOpeningTheMessagesContainer = true;
