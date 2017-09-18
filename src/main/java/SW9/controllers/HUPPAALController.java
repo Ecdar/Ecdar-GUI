@@ -486,8 +486,7 @@ public class HUPPAALController implements Initializable {
             filePicker.setTitle("Export png");
             filePicker.setInitialFileName(name);
             filePicker.setInitialDirectory(new File(Ecdar.projectDirectory.get()));
-            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("PNG File", "*.png");
-            filePicker.getExtensionFilters().add(extFilter);
+            filePicker.getExtensionFilters().add(new FileChooser.ExtensionFilter("PNG File", "*.png"));
 
             File file = filePicker.showSaveDialog(root.getScene().getWindow());
             if (file != null){
