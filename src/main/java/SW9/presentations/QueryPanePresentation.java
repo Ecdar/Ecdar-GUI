@@ -92,6 +92,12 @@ public class QueryPanePresentation extends StackPane {
         controller.toolbar.setEffect(DropShadowHelper.generateElevationShadow(8));
     }
 
+
+    /**
+     * Inserts an edge/inset at the bottom of the scrollView
+     * which is used to push up the elements of the scrollview
+     * @param shouldShow boolean indicating whether to push up the items
+     */
     public void showBottomInset(final Boolean shouldShow) {
         double bottomInsetWidth = 0;
         if(shouldShow) {

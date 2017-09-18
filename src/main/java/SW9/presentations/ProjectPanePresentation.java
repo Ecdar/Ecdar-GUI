@@ -88,6 +88,11 @@ public class ProjectPanePresentation extends StackPane {
         button.setPosition(JFXRippler.RipplerPos.BACK);
     }
 
+    /**
+     * Inserts an edge/inset at the bottom of the scrollView
+     * which is used to push up the elements of the scrollview
+     * @param shouldShow boolean indicating whether to push up the items
+     */
     public void showBottomInset(final Boolean shouldShow) {
         double bottomInsetWidth = 0;
         if(shouldShow) {
