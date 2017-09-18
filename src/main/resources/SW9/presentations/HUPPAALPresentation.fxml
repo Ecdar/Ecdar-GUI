@@ -128,6 +128,7 @@
                             <FontIcon iconLiteral="gmi-folder-open" iconSize="24" fill="black"/>
                         </graphic>
                     </MenuItem>
+                    <SeparatorMenuItem/>
                     <MenuItem fx:id="menuBarFileSave" text="Save Project">
                         <graphic>
                             <FontIcon iconLiteral="gmi-save" iconSize="24" fill="black"/>
