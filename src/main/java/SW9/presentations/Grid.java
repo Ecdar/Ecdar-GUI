@@ -6,15 +6,13 @@ import javafx.scene.shape.Line;
 
 import java.util.ArrayList;
 
-/**
- * The grid on the canvas.
- */
-class Grid extends Parent {
+public class Grid extends Parent {
 
     private final ArrayList<Line> horizontalLines = new ArrayList<>();
     private final ArrayList<Line> verticalLines = new ArrayList<>();
 
-    Grid(final int gridSize) {
+    public Grid(final int gridSize) {
+
         // When the scene changes (goes from null to something)
         sceneProperty().addListener((observable, oldScene, newScene) -> {
             // When the width of this scene is being updated
@@ -91,5 +89,6 @@ class Grid extends Parent {
                 horizontalLines.forEach(line -> getChildren().add(line));
             });
         });
+
     }
 }

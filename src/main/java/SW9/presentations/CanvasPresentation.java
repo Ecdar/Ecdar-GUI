@@ -8,7 +8,9 @@ import SW9.utility.keyboard.Keybind;
 import SW9.utility.keyboard.KeyboardTracker;
 import SW9.utility.mouse.MouseTracker;
 import javafx.beans.binding.DoubleBinding;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
@@ -31,7 +33,8 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
 
     private final DoubleProperty x = new SimpleDoubleProperty(0);
     private final DoubleProperty y = new SimpleDoubleProperty(0);
-
+    private final BooleanProperty gridOn = new SimpleBooleanProperty(false);
+    private final Grid grid = new Grid(GRID_SIZE);
     private final CanvasController controller;
 
     public CanvasPresentation() {
@@ -60,9 +63,20 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
     }
 
     private void initializeGrid() {
-        final Grid grid = new Grid(GRID_SIZE);
         getChildren().add(grid);
         grid.toBack();
+        gridOn.setValue(true);
+    }
+
+    public BooleanProperty toggleGrid() {
+        if (gridOn.get()) {
+            grid.setOpacity(0);
+            gridOn.setValue(false);
+        } else {
+            grid.setOpacity(1);
+            gridOn.setValue(true);
+        }
+        return gridOn;
     }
 
     @Override
@@ -89,6 +103,4 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
     public MouseTracker getMouseTracker() {
         return mouseTracker;
     }
-
-
 }

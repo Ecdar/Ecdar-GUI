@@ -157,6 +157,10 @@ public class Ecdar extends Application {
         return presentation.toggleQueryPane();
     }
 
+    public static BooleanProperty toggleGrid() {
+        return presentation.toggleGrid();
+    }
+
     private void forceCreateFolder(final String directoryPath) throws IOException {
         final File directory = new File(directoryPath);
         FileUtils.forceMkdir(directory);

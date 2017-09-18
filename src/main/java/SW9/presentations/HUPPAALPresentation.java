@@ -585,6 +585,10 @@ public class HUPPAALPresentation extends StackPane {
         return filePaneOpen;
     }
 
+    public BooleanProperty toggleGrid(){
+        return controller.canvas.toggleGrid();
+    }
+
     public void showSnackbarMessage(final String message) {
         controller.snackbar.enqueue(new JFXSnackbar.SnackbarEvent(message, "", 3000, event -> {
 

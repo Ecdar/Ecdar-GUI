@@ -116,6 +116,7 @@ public class HUPPAALController implements Initializable {
     public MenuBar menuBar;
     public MenuItem menuBarViewFilePanel;
     public MenuItem menuBarViewQueryPanel;
+    public MenuItem menuBarViewGrid;
     public MenuItem menuBarFileSave;
     public MenuItem menuBarFileSaveAs;
     public MenuItem menuBarFileOpenProject;
@@ -471,6 +472,13 @@ public class HUPPAALController implements Initializable {
         menuBarViewQueryPanel.setOnAction(event -> {
             final BooleanProperty isOpen = Ecdar.toggleQueryPane();
             menuBarViewQueryPanel.getGraphic().opacityProperty().bind(new When(isOpen).then(1).otherwise(0));
+        });
+
+        menuBarViewGrid.getGraphic().setOpacity(1);
+        menuBarViewGrid.setAccelerator(new KeyCodeCombination(KeyCode.K, KeyCodeCombination.SHORTCUT_DOWN));
+        menuBarViewGrid.setOnAction(event -> {
+            final BooleanProperty isOn = Ecdar.toggleGrid();
+            menuBarViewGrid.getGraphic().opacityProperty().bind(new When(isOn).then(1).otherwise(0));
         });
 
         menuBarHelpHelp.setOnAction(event -> Ecdar.showHelp());
