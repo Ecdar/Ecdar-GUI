@@ -47,12 +47,7 @@ public class QueryPanePresentation extends StackPane {
                 new BorderWidths(0, 0, 0, 1)
         )));
 
-        controller.scrollPane.setBorder(new Border(new BorderStroke(
-                Color.GREY.getColor(Color.Intensity.I400),
-                BorderStrokeStyle.SOLID,
-                CornerRadii.EMPTY,
-                new BorderWidths(0, 0, 0, 1)
-        )));
+        showBottomInset(true);
     }
 
     private void initializeBackground() {
@@ -95,5 +90,25 @@ public class QueryPanePresentation extends StackPane {
 
         // Set the elevation of the toolbar
         controller.toolbar.setEffect(DropShadowHelper.generateElevationShadow(8));
+    }
+
+
+    /**
+     * Inserts an edge/inset at the bottom of the scrollView
+     * which is used to push up the elements of the scrollview
+     * @param shouldShow boolean indicating whether to push up the items
+     */
+    public void showBottomInset(final Boolean shouldShow) {
+        double bottomInsetWidth = 0;
+        if(shouldShow) {
+            bottomInsetWidth = 20;
+        }
+
+        controller.scrollPane.setBorder(new Border(new BorderStroke(
+                Color.GREY.getColor(Color.Intensity.I400),
+                BorderStrokeStyle.SOLID,
+                CornerRadii.EMPTY,
+                new BorderWidths(0, 1, bottomInsetWidth, 0)
+        )));
     }
 }

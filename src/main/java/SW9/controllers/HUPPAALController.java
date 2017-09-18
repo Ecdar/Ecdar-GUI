@@ -93,7 +93,7 @@ public class HUPPAALController implements Initializable {
 
         @Override
         protected void interpolate(final double frac) {
-            tabPaneContainer.setMaxHeight(35 + frac * (expandHeight - 35));
+            setMaxHeight(35 + frac * (expandHeight - 35));
         }
     };
     public Rectangle bottomFillerElement;
@@ -645,8 +645,9 @@ public class HUPPAALController implements Initializable {
         double newHeight = tabPaneContainer.getMaxHeight() - (mouseY - tabPanePreviousY);
         newHeight = Math.max(35, newHeight);
 
-        tabPaneContainer.setMaxHeight(newHeight);
+        setMaxHeight(newHeight);
         tabPanePreviousY = mouseY;
+
     }
 
     public void expandMessagesIfNotExpanded() {
@@ -666,7 +667,7 @@ public class HUPPAALController implements Initializable {
 
             @Override
             protected void interpolate(final double frac) {
-                tabPaneContainer.setMaxHeight(((height - 35) * (1 - frac)) + 35);
+                setMaxHeight(((height - 35) * (1 - frac)) + 35);
             }
         };
 
@@ -688,7 +689,7 @@ public class HUPPAALController implements Initializable {
 
             @Override
             protected void interpolate(final double frac) {
-                tabPaneContainer.setMaxHeight(((height - 35) * (1 - frac)) + 35);
+                setMaxHeight(((height - 35) * (1 - frac)) + 35);
             }
         };
 
@@ -697,6 +698,24 @@ public class HUPPAALController implements Initializable {
             collapse.play();
         } else {
             expandMessagesContainer.play();
+        }
+    }
+
+    /**
+     * This method is used as a central place to decide whether the tabPane is opened or closed
+     * @param height the value used to set the height of the tabPane
+     */
+    public void setMaxHeight(double height)
+    {
+        tabPaneContainer.setMaxHeight(height);
+        if(height > 35) { //The tabpane is opened
+            filePane.showBottomInset(false);
+            queryPane.showBottomInset(false);
+        } else {
+            // When closed we push up the scrollviews in the filePane and queryPane as the tabPane
+            // would otherwise cover some items in these views
+            filePane.showBottomInset(true);
+            queryPane.showBottomInset(true);
         }
     }
 

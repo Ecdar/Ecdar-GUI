@@ -41,7 +41,7 @@
                     AnchorPane.bottomAnchor="0"
                     AnchorPane.leftAnchor="0"
                     AnchorPane.rightAnchor="0"
-                    styleClass="edge-to-edge">
+                    styleClass="edge-to-edge" >
 
             <VBox fx:id="filesList">
                 <VBox fx:id="mainComponentContainer" style="-fx-background-color: brown;"/>
