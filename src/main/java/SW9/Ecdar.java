@@ -80,6 +80,11 @@ public class Ecdar extends Application {
         return project;
     }
 
+    /***
+     * Saves the project to the {@see Ecdar#projectDirectory} path.
+     * This include making directories, converting project files (components and queries)
+     * into Json formatted files.
+     */
     public static void save() {
         // Clear the project folder
         try {
