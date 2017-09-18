@@ -51,13 +51,6 @@ public class ProjectPanePresentation extends StackPane {
                 new BorderWidths(0, 1, 0, 0)
         )));
 
-        /*controller.scrollPane.setBorder(new Border(new BorderStroke(
-                Color.GREY.getColor(Color.Intensity.I400),
-                BorderStrokeStyle.SOLID,
-                CornerRadii.EMPTY,
-                new BorderWidths(0, 1, 0, 0)
-        )));*/
-
         showBottomInset(true);
     }
 
