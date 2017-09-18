@@ -481,14 +481,24 @@ public class HUPPAALController implements Initializable {
             } else {
                 image = canvas.snapshot(new SnapshotParameters(), null);
             }
-            // Right now exports file to a defualt directory with the name image.png, should be changed
-            File file = new File(Ecdar.projectDirectory.getValue() + name +".png");
 
-            try {
-                ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
-                Ecdar.showToast("Export succeeded");
-            } catch (IOException e){
-                Ecdar.showToast("Export failed "+ e.getMessage());
+            FileChooser filePicker = new FileChooser();
+            filePicker.setTitle("Export png");
+            filePicker.setInitialFileName(name);
+            filePicker.setInitialDirectory(new File(Ecdar.projectDirectory.get()));
+            FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("PNG File", "*.png");
+            filePicker.getExtensionFilters().add(extFilter);
+
+            File file = filePicker.showSaveDialog(root.getScene().getWindow());
+            if (file != null){
+                try {
+                    ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
+                    Ecdar.showToast("Export succeeded");
+                } catch (IOException e){
+                    Ecdar.showToast("Export failed "+ e.getMessage());
+                }
+            } else {
+                Ecdar.showToast("Export was cancelled");
             }
         });
 
