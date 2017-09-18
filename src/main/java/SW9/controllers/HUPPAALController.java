@@ -25,11 +25,14 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ListChangeListener;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
@@ -40,6 +43,7 @@ import javafx.util.Duration;
 import javafx.util.Pair;
 import org.kordamp.ikonli.javafx.FontIcon;
 
+import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -120,6 +124,7 @@ public class HUPPAALController implements Initializable {
     public MenuItem menuBarFileSave;
     public MenuItem menuBarFileSaveAs;
     public MenuItem menuBarFileOpenProject;
+    public MenuItem menuBarFileExportAsPng;
     public MenuItem menuBarHelpHelp;
     public MenuItem menuBarEditBalance;
 
@@ -456,6 +461,34 @@ public class HUPPAALController implements Initializable {
                 } catch (final IOException e) {
                     e.printStackTrace();
                 }
+            }
+        });
+
+        menuBarFileExportAsPng.setAccelerator(new KeyCodeCombination(KeyCode.L, KeyCombination.SHORTCUT_DOWN));
+        menuBarFileExportAsPng.setOnAction(event -> {
+            //If there is no active component
+            if(CanvasController.getActiveComponent() == null){
+                Ecdar.showToast("No component to export");
+                return;
+            }
+            //Save as png in picked directory
+            final WritableImage image;
+            String name = CanvasController.getActiveComponent().getName();
+            if(canvas.isGridOn()){
+                canvas.toggleGrid();
+                image = canvas.snapshot(new SnapshotParameters(), null);
+                canvas.toggleGrid();
+            } else {
+                image = canvas.snapshot(new SnapshotParameters(), null);
+            }
+            // Right now exports file to a defualt directory with the name image.png, should be changed
+            File file = new File(Ecdar.projectDirectory.getValue() + name +".png");
+
+            try {
+                ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
+                Ecdar.showToast("Export succeeded");
+            } catch (IOException e){
+                Ecdar.showToast("Export failed "+ e.getMessage());
             }
         });
 
@@ -971,5 +1004,4 @@ public class HUPPAALController implements Initializable {
 
         _queryDialog.show();
     }
-
 }

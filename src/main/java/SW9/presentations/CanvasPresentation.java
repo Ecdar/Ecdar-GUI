@@ -103,4 +103,8 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
     public MouseTracker getMouseTracker() {
         return mouseTracker;
     }
+
+    public boolean isGridOn() {
+        return gridOn.get();
+    }
 }
