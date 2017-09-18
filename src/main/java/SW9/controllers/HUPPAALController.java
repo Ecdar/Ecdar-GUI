@@ -701,7 +701,10 @@ public class HUPPAALController implements Initializable {
         }
     }
 
-    // This method is used as a central place to decide whether the tabPane is opened or closed
+    /**
+     * This method is used as a central place to decide whether the tabPane is opened or closed
+     * @param height the value used to set the height of the tabPane
+     */
     public void setMaxHeight(double height)
     {
         tabPaneContainer.setMaxHeight(height);
