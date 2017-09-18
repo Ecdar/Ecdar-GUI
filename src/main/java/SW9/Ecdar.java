@@ -80,6 +80,22 @@ public class Ecdar extends Application {
         return project;
     }
 
+    /**
+     * Saves the current project to the given path.
+     * This changes the {@see Ecdar#projectDirectory}
+     * to the path, and then calls {@see Ecdar#save()}
+     * @param path The path to where the project should be saved
+     */
+    public static void saveAs(String path){
+        projectDirectory.setValue(path);
+        save();
+    }
+
+    /***
+     * Saves the project to the {@see Ecdar#projectDirectory} path.
+     * This include making directories, converting project files (components and queries)
+     * into Json formatted files.
+     */
     public static void save() {
         // Clear the project folder
         try {

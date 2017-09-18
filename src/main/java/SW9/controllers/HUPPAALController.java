@@ -21,7 +21,9 @@ import javafx.animation.Transition;
 import javafx.application.Platform;
 import javafx.beans.binding.When;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -33,6 +35,7 @@ import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import javafx.util.Pair;
 import org.kordamp.ikonli.javafx.FontIcon;
@@ -77,6 +80,8 @@ public class HUPPAALController implements Initializable {
     public Tab warningsTab;
     public Rectangle tabPaneResizeElement;
     public StackPane tabPaneContainer;
+    public JFXRippler switchToInput;
+    public JFXRippler switchToOutput;
 
     public StackPane inputModePane;
     public StackPane outputModePane;
@@ -112,6 +117,7 @@ public class HUPPAALController implements Initializable {
     public MenuItem menuBarViewFilePanel;
     public MenuItem menuBarViewQueryPanel;
     public MenuItem menuBarFileSave;
+    public MenuItem menuBarFileSaveAs;
     public MenuItem menuBarFileOpenProject;
     public MenuItem menuBarHelpHelp;
     public MenuItem menuBarEditBalance;
@@ -130,9 +136,6 @@ public class HUPPAALController implements Initializable {
     private static JFXDialog _queryDialog;
     private static Text _queryTextResult;
     private static Text _queryTextQuery;
-
-    public JFXRippler switchToInput;
-    public JFXRippler switchToOutput;
 
     private double tabPanePreviousY = 0;
     public boolean shouldISkipOpeningTheMessagesContainer = true;
@@ -411,6 +414,22 @@ public class HUPPAALController implements Initializable {
         menuBarFileSave.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN));
         menuBarFileSave.setOnAction(event -> {
             Ecdar.save();
+        });
+
+        menuBarFileSaveAs.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN));
+        menuBarFileSaveAs.setOnAction(event -> {
+            FileChooser filePicker = new FileChooser();
+            filePicker.setTitle("Save project");
+            filePicker.setInitialFileName("New Ecdar Project");
+            filePicker.setInitialDirectory(new File(Ecdar.projectDirectory.get()));
+
+            File file = filePicker.showSaveDialog(root.getScene().getWindow());
+            if (file != null){
+                Ecdar.saveAs(file.getPath());
+            } else {
+                Ecdar.showToast("The project was not saved");
+            }
+
         });
 
         menuBarFileOpenProject.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.SHORTCUT_DOWN));
