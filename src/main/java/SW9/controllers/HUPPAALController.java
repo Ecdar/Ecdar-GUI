@@ -21,9 +21,7 @@ import javafx.animation.Transition;
 import javafx.application.Platform;
 import javafx.beans.binding.When;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.StringProperty;
 import javafx.collections.ListChangeListener;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
@@ -44,6 +42,7 @@ import javafx.util.Pair;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -464,43 +463,7 @@ public class HUPPAALController implements Initializable {
             }
         });
 
-        menuBarFileExportAsPng.setAccelerator(new KeyCodeCombination(KeyCode.L, KeyCombination.SHORTCUT_DOWN));
-        menuBarFileExportAsPng.setOnAction(event -> {
-            //If there is no active component
-            if(CanvasController.getActiveComponent() == null){
-                Ecdar.showToast("No component to export");
-                return;
-            }
-            //Save as png in picked directory
-            final WritableImage image;
-            String name = CanvasController.getActiveComponent().getName();
-            if(canvas.isGridOn()){
-                canvas.toggleGrid();
-                image = canvas.snapshot(new SnapshotParameters(), null);
-                canvas.toggleGrid();
-            } else {
-                image = canvas.snapshot(new SnapshotParameters(), null);
-            }
-
-            FileChooser filePicker = new FileChooser();
-            filePicker.setTitle("Export png");
-            filePicker.setInitialFileName(name);
-            filePicker.setInitialDirectory(new File(Ecdar.projectDirectory.get()));
-            filePicker.getExtensionFilters().add(new FileChooser.ExtensionFilter("PNG File", "*.png"));
-
-            File file = filePicker.showSaveDialog(root.getScene().getWindow());
-            if (file != null){
-                try {
-                    ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
-                    Ecdar.showToast("Export succeeded");
-                } catch (IOException e){
-                    Ecdar.showToast("Export failed "+ e.getMessage());
-                }
-            } else {
-                Ecdar.showToast("Export was cancelled");
-            }
-        });
-
+        initializeFileExportAsPng();
 
         menuBarViewFilePanel.getGraphic().setOpacity(1);
         menuBarViewFilePanel.setAccelerator(new KeyCodeCombination(KeyCode.P, KeyCodeCombination.SHORTCUT_DOWN));
@@ -589,6 +552,141 @@ public class HUPPAALController implements Initializable {
                 previousIdentifiers.forEach(Location::setId);
             }, "Balanced location identifiers", "shuffle");
         });
+    }
+
+    /**
+     * Initializes button for exporting as png.
+     */
+    private void initializeFileExportAsPng() {
+        menuBarFileExportAsPng.setAccelerator(new KeyCodeCombination(KeyCode.L, KeyCombination.SHORTCUT_DOWN));
+        menuBarFileExportAsPng.setOnAction(event -> {
+            //If there is no active component
+            if(CanvasController.getActiveComponent() == null){
+                Ecdar.showToast("No component to export");
+                return;
+            }
+
+            //Save as png in picked directory
+            final WritableImage image;
+            final String name = CanvasController.getActiveComponent().getName();
+            if (canvas.isGridOn()) {
+                canvas.toggleGrid();
+                image = canvas.snapshot(new SnapshotParameters(), null);
+                canvas.toggleGrid();
+            } else {
+                image = canvas.snapshot(new SnapshotParameters(), null);
+            }
+
+            final FileChooser filePicker = new FileChooser();
+            filePicker.setTitle("Export png");
+            filePicker.setInitialFileName(name);
+            filePicker.setInitialDirectory(new File(Ecdar.projectDirectory.get()));
+            filePicker.getExtensionFilters().add(new FileChooser.ExtensionFilter("PNG File", "*.png"));
+
+            final BufferedImage finalImage
+            try {
+                finalImage = autoCropImage(SwingFXUtils.fromFXImage(image, null));
+            } catch (IllegalArgumentException e) {
+                Ecdar.showToast("Export failed. " + e.getMessage());
+                return;
+            }
+
+
+            final File file = filePicker.showSaveDialog(root.getScene().getWindow());
+            if (file != null){
+                try {
+                    ImageIO.write(finalImage, "png", file);
+                    Ecdar.showToast("Export succeeded");
+                } catch (final IOException e) {
+                    Ecdar.showToast("Export failed "+ e.getMessage());
+                }
+            } else {
+                Ecdar.showToast("Export was cancelled");
+            }
+        });
+    }
+
+    /**
+     * Crops an image so that the all-white borders are removed.
+     * @param image the original image
+     * @return the cropped image
+     */
+    private static BufferedImage autoCropImage(final BufferedImage image) {
+        final int topY = getAutoCropTopY(image);
+        final int leftX = getAutoCropLeftX(image);
+        final int rightX = getAutoCropRightX(image);
+        final int bottomY = getAutoCropBottomY(image);
+
+
+        return image.getSubimage(leftX, topY, rightX - leftX, bottomY - topY);
+    }
+
+    /**
+     * Gets the top y coordinate of an auto cropped image.
+     * @param image the original image
+     * @return the y coordinate
+     */
+    private static int getAutoCropTopY(final BufferedImage image) {
+        for (int y = 0; y < image.getHeight(); y++) {
+            for (int x = 0; x < image.getWidth(); x++) {
+                if (image.getRGB(x, y) != java.awt.Color.WHITE.getRGB()) {
+                    return y;
+                }
+            }
+        }
+
+        throw new IllegalArgumentException("Image is all white");
+    }
+
+    /**
+     * Gets the left x coordinate of an auto cropped image.
+     * @param image the original image
+     * @return the x coordinate
+     */
+    private static int getAutoCropLeftX(final BufferedImage image) {
+        for (int x = 0; x < image.getWidth(); x++) {
+            for (int y = 0; y < image.getHeight(); y++) {
+                if (image.getRGB(x, y) != java.awt.Color.WHITE.getRGB()) {
+                    return x;
+                }
+            }
+        }
+
+        throw new IllegalArgumentException("Image is all white");
+    }
+
+    /**
+     * Gets the bottom y coordinate of an auto cropped image.
+     * @param image the original image
+     * @return the y coordinate
+     */
+    private static int getAutoCropBottomY(final BufferedImage image) {
+        for (int y = image.getHeight() - 1; y >= 0; y--) {
+            for (int x = 0; x < image.getWidth(); x++) {
+                if (image.getRGB(x, y) != java.awt.Color.WHITE.getRGB()) {
+                    return y;
+                }
+            }
+        }
+
+        throw new IllegalArgumentException("Image is all white");
+    }
+
+    /**
+     * Gets the right x coordinate of an auto cropped image.
+     * @param image the original image
+     * @return the x coordinate
+     */
+    private static int getAutoCropRightX(final BufferedImage image) {
+        for (int x = image.getWidth() - 1; x >= 0; x--) {
+            for (int y = 0; y < image.getHeight(); y++) {
+                if (image.getRGB(x, y) != java.awt.Color.WHITE.getRGB()) {
+                    return x;
+                }
+            }
+        }
+
+        throw new IllegalArgumentException("Image is all white");
     }
 
     private void initializeMessages() {
