@@ -157,6 +157,15 @@ public class Ecdar extends Application {
         return presentation.toggleQueryPane();
     }
 
+    /**
+     * Calls
+     * {@see CanvasPresentation#toggleGrid()}
+     * @return A Boolean Property that is true if the grid has been turned on and false if it is off
+     */
+    public static BooleanProperty toggleGrid() {
+        return presentation.toggleGrid();
+    }
+
     private void forceCreateFolder(final String directoryPath) throws IOException {
         final File directory = new File(directoryPath);
         FileUtils.forceMkdir(directory);

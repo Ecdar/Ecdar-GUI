@@ -585,6 +585,15 @@ public class HUPPAALPresentation extends StackPane {
         return filePaneOpen;
     }
 
+    /**
+     * Calls
+     * {@see CanvasPresentation#toggleGrid()}
+     * @return A Boolean Property that is true if the grid has been turned on and false if it is off
+     */
+    public BooleanProperty toggleGrid(){
+        return controller.canvas.toggleGrid();
+    }
+
     public void showSnackbarMessage(final String message) {
         controller.snackbar.enqueue(new JFXSnackbar.SnackbarEvent(message, "", 3000, event -> {
 

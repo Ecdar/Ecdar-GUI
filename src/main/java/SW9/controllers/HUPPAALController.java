@@ -25,11 +25,14 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ListChangeListener;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
@@ -40,6 +43,7 @@ import javafx.util.Duration;
 import javafx.util.Pair;
 import org.kordamp.ikonli.javafx.FontIcon;
 
+import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -116,9 +120,11 @@ public class HUPPAALController implements Initializable {
     public MenuBar menuBar;
     public MenuItem menuBarViewFilePanel;
     public MenuItem menuBarViewQueryPanel;
+    public MenuItem menuBarViewGrid;
     public MenuItem menuBarFileSave;
     public MenuItem menuBarFileSaveAs;
     public MenuItem menuBarFileOpenProject;
+    public MenuItem menuBarFileExportAsPng;
     public MenuItem menuBarHelpHelp;
     public MenuItem menuBarEditBalance;
 
@@ -458,6 +464,43 @@ public class HUPPAALController implements Initializable {
             }
         });
 
+        menuBarFileExportAsPng.setAccelerator(new KeyCodeCombination(KeyCode.L, KeyCombination.SHORTCUT_DOWN));
+        menuBarFileExportAsPng.setOnAction(event -> {
+            //If there is no active component
+            if(CanvasController.getActiveComponent() == null){
+                Ecdar.showToast("No component to export");
+                return;
+            }
+            //Save as png in picked directory
+            final WritableImage image;
+            String name = CanvasController.getActiveComponent().getName();
+            if(canvas.isGridOn()){
+                canvas.toggleGrid();
+                image = canvas.snapshot(new SnapshotParameters(), null);
+                canvas.toggleGrid();
+            } else {
+                image = canvas.snapshot(new SnapshotParameters(), null);
+            }
+
+            FileChooser filePicker = new FileChooser();
+            filePicker.setTitle("Export png");
+            filePicker.setInitialFileName(name);
+            filePicker.setInitialDirectory(new File(Ecdar.projectDirectory.get()));
+            filePicker.getExtensionFilters().add(new FileChooser.ExtensionFilter("PNG File", "*.png"));
+
+            File file = filePicker.showSaveDialog(root.getScene().getWindow());
+            if (file != null){
+                try {
+                    ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
+                    Ecdar.showToast("Export succeeded");
+                } catch (IOException e){
+                    Ecdar.showToast("Export failed "+ e.getMessage());
+                }
+            } else {
+                Ecdar.showToast("Export was cancelled");
+            }
+        });
+
 
         menuBarViewFilePanel.getGraphic().setOpacity(1);
         menuBarViewFilePanel.setAccelerator(new KeyCodeCombination(KeyCode.P, KeyCodeCombination.SHORTCUT_DOWN));
@@ -471,6 +514,13 @@ public class HUPPAALController implements Initializable {
         menuBarViewQueryPanel.setOnAction(event -> {
             final BooleanProperty isOpen = Ecdar.toggleQueryPane();
             menuBarViewQueryPanel.getGraphic().opacityProperty().bind(new When(isOpen).then(1).otherwise(0));
+        });
+
+        menuBarViewGrid.getGraphic().setOpacity(1);
+        menuBarViewGrid.setAccelerator(new KeyCodeCombination(KeyCode.K, KeyCodeCombination.SHORTCUT_DOWN));
+        menuBarViewGrid.setOnAction(event -> {
+            final BooleanProperty isOn = Ecdar.toggleGrid();
+            menuBarViewGrid.getGraphic().opacityProperty().bind(new When(isOn).then(1).otherwise(0));
         });
 
         menuBarHelpHelp.setOnAction(event -> Ecdar.showHelp());
@@ -963,5 +1013,4 @@ public class HUPPAALController implements Initializable {
 
         _queryDialog.show();
     }
-
 }

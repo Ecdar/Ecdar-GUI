@@ -139,6 +139,12 @@
                             <FontIcon iconLiteral="gmi-save" iconSize="24" fill="black"/>
                         </graphic>
                     </MenuItem>
+                    <SeparatorMenuItem/>
+                    <MenuItem fx:id="menuBarFileExportAsPng" text="Export as Png">
+                        <graphic>
+                            <FontIcon iconLiteral="gmi-image" iconSize="24" fill="black"/>
+                        </graphic>
+                    </MenuItem>
                 </Menu>
 
                 <Menu text="Edit">
@@ -156,6 +162,11 @@
                         </graphic>
                     </MenuItem>
                     <MenuItem fx:id="menuBarViewQueryPanel" text="Query Panel">
+                        <graphic>
+                            <FontIcon iconLiteral="gmi-check" iconSize="24" fill="black"/>
+                        </graphic>
+                    </MenuItem>
+                    <MenuItem fx:id="menuBarViewGrid" text="Grid">
                         <graphic>
                             <FontIcon iconLiteral="gmi-check" iconSize="24" fill="black"/>
                         </graphic>
