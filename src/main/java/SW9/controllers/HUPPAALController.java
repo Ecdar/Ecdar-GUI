@@ -583,10 +583,10 @@ public class HUPPAALController implements Initializable {
             filePicker.setInitialDirectory(new File(Ecdar.projectDirectory.get()));
             filePicker.getExtensionFilters().add(new FileChooser.ExtensionFilter("PNG File", "*.png"));
 
-            final BufferedImage finalImage
+            final BufferedImage finalImage;
             try {
                 finalImage = autoCropImage(SwingFXUtils.fromFXImage(image, null));
-            } catch (IllegalArgumentException e) {
+            } catch (final IllegalArgumentException e) {
                 Ecdar.showToast("Export failed. " + e.getMessage());
                 return;
             }
