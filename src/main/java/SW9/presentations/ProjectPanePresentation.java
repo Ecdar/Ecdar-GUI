@@ -99,6 +99,7 @@ public class ProjectPanePresentation extends StackPane {
             bottomInsetWidth = 20;
         }
 
+        // We set the border instead of the padding, as the border also pushes up the scrollbar
         controller.scrollPane.setBorder(new Border(new BorderStroke(
                 Color.GREY.getColor(Color.Intensity.I400),
                 BorderStrokeStyle.SOLID,
