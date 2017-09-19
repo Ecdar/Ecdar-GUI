@@ -68,6 +68,10 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
         gridOn.setValue(true);
     }
 
+    /**
+     * Toggles the grid on if the grid is off and vice versa
+     * @return a Boolean property that is true if the grid has been turned on and false if the grid has been turned off
+     */
     public BooleanProperty toggleGrid() {
         if (gridOn.get()) {
             grid.setOpacity(0);

@@ -585,6 +585,11 @@ public class HUPPAALPresentation extends StackPane {
         return filePaneOpen;
     }
 
+    /**
+     * Calls
+     * {@see CanvasPresentation#toggleGrid()}
+     * @return A Boolean Property that is true if the grid has been turned on and false if it is off
+     */
     public BooleanProperty toggleGrid(){
         return controller.canvas.toggleGrid();
     }
