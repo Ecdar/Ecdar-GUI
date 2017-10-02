@@ -122,6 +122,7 @@ public class HUPPAALController implements Initializable {
     public MenuItem menuBarViewGrid;
     public MenuItem menuBarFileSave;
     public MenuItem menuBarFileSaveAs;
+    public MenuItem menuBarFileCreateNewProject;
     public MenuItem menuBarFileOpenProject;
     public MenuItem menuBarFileExportAsPng;
     public MenuItem menuBarHelpHelp;
@@ -413,13 +414,12 @@ public class HUPPAALController implements Initializable {
 
     }
 
+    // TODO refactor: place in different methods
     private void initializeMenuBar() {
         menuBar.setUseSystemMenuBar(true);
 
         menuBarFileSave.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN));
-        menuBarFileSave.setOnAction(event -> {
-            Ecdar.save();
-        });
+        menuBarFileSave.setOnAction(event -> Ecdar.save());
 
         menuBarFileSaveAs.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN));
         menuBarFileSaveAs.setOnAction(event -> {
@@ -436,6 +436,8 @@ public class HUPPAALController implements Initializable {
             }
 
         });
+
+        initializeCreateNewProjectMenuItem();
 
         menuBarFileOpenProject.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.SHORTCUT_DOWN));
         menuBarFileOpenProject.setOnAction(event -> {
@@ -552,6 +554,47 @@ public class HUPPAALController implements Initializable {
                 previousIdentifiers.forEach(Location::setId);
             }, "Balanced location identifiers", "shuffle");
         });
+    }
+    private void initializeCreateNewProjectMenuItem() {
+        menuBarFileCreateNewProject.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN));
+        menuBarFileCreateNewProject.setOnAction(event -> {
+
+            ButtonType yesButton = new ButtonType("save", ButtonBar.ButtonData.OK_DONE);
+            ButtonType noButton = new ButtonType("don't save", ButtonBar.ButtonData.NO);
+            ButtonType cancelButton = new ButtonType("cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+            Alert alert = new Alert(Alert.AlertType.WARNING,
+                    "Do you want to save the existing project?",
+                    yesButton,
+                    noButton,
+                    cancelButton);
+
+            alert.setTitle("Create new project");
+            Optional<ButtonType> result = alert.showAndWait();
+
+            if (result.isPresent()) {
+                if (result.get() == yesButton) {
+                    Ecdar.save();
+                    createNewProject();
+                } else if (result.get() == noButton) {
+                    createNewProject();
+                }
+            }
+        });
+    }
+
+    private void createNewProject() {
+        CodeAnalysis.disable();
+
+        CodeAnalysis.clearErrorsAndWarnings();
+        Ecdar.cleanProject();
+
+        // Close project
+        // remove project path
+        // Create system dec, global dec, a component
+
+
+
+        CodeAnalysis.enable();
     }
 
     /**

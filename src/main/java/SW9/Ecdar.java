@@ -286,14 +286,9 @@ public class Ecdar extends Application {
                 });
             }
         });
-
-        CodeAnalysis.getBackendErrors().removeIf(message -> true);
-        CodeAnalysis.getErrors().removeIf(message -> true);
-        CodeAnalysis.getWarnings().removeIf(message -> true);
+        CodeAnalysis.clearErrorsAndWarnings();
         CodeAnalysis.disable();
-        Ecdar.getProject().getQueries().removeIf(query -> true);
-        Ecdar.getProject().getComponents().removeIf(component -> true);
-        Ecdar.getProject().setMainComponent(null);
+        cleanProject();
 
         // Deserialize the project
         deserializeProject(directory);
@@ -321,6 +316,16 @@ public class Ecdar extends Application {
         }
 
         serializationDone = true;
+    }
+
+    /**
+     * Cleans the project.
+     * Be sure to disable code analysis before call and enable after call.
+     */
+    public static void cleanProject() {
+        Ecdar.getProject().getQueries().removeIf(query -> true);
+        Ecdar.getProject().getComponents().removeIf(component -> true);
+        Ecdar.getProject().setMainComponent(null);
     }
 
     private static void deserializeProject(final File projectFolder) throws IOException {
