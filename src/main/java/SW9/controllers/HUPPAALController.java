@@ -198,7 +198,7 @@ public class HUPPAALController implements Initializable {
                 Ecdar.getProject().getComponents().remove(newComponent);
             }, "Created new component: " + newComponent.getName(), "add-circle");
 
-            CanvasController.setActiveComponent(newComponent);
+            CanvasController.setActiveVerificationObject(newComponent);
         });
         KeyboardTracker.registerKeybind(KeyboardTracker.CREATE_COMPONENT, binding);
 
@@ -265,8 +265,12 @@ public class HUPPAALController implements Initializable {
         Ecdar.getProject().getComponents().addListener(new ListChangeListener<Component>() {
             @Override
             public void onChanged(final Change<? extends Component> c) {
+                if (Ecdar.getProject().getComponents().isEmpty()) {
+                    return;
+                }
+
                 if (!hasChanged.get()) {
-                    CanvasController.setActiveComponent(Ecdar.getProject().getComponents().get(0));
+                    CanvasController.setActiveVerificationObject(Ecdar.getProject().getComponents().get(0));
                     hasChanged.set(true);
                 }
 
@@ -629,10 +633,10 @@ public class HUPPAALController implements Initializable {
         menuBarFileCreateNewProject.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN));
         menuBarFileCreateNewProject.setOnAction(event -> {
 
-            final ButtonType yesButton = new ButtonType("save", ButtonBar.ButtonData.OK_DONE);
-            final ButtonType noButton = new ButtonType("don't save", ButtonBar.ButtonData.NO);
-            final ButtonType cancelButton = new ButtonType("cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
-            final Alert alert = new Alert(Alert.AlertType.WARNING,
+            final ButtonType yesButton = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
+            final ButtonType noButton = new ButtonType("Don't save", ButtonBar.ButtonData.NO);
+            final ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+            final Alert alert = new Alert(Alert.AlertType.NONE,
                     "Do you want to save the existing project?",
                     yesButton,
                     noButton,
@@ -659,19 +663,13 @@ public class HUPPAALController implements Initializable {
         CodeAnalysis.disable();
 
         CodeAnalysis.clearErrorsAndWarnings();
-        Ecdar.cleanProject();
-
 
         Ecdar.projectDirectory.set(null);
 
+        Ecdar.createNewProject();
+        CanvasController.setActiveVerificationObject(Ecdar.getProject().getComponents().get(0));
 
-        Ecdar.getProject().getComponents().add(new Component(true));
-        Ecdar.getProject().getComponents().add(new Component(true));
-        Ecdar.getProject().getComponents().add(new Component(true));
-
-        // Create system dec, global dec, a component
-
-
+        // TODO clear UndoRedoStack
 
         CodeAnalysis.enable();
     }
@@ -683,14 +681,14 @@ public class HUPPAALController implements Initializable {
         menuBarFileExportAsPng.setAccelerator(new KeyCodeCombination(KeyCode.L, KeyCombination.SHORTCUT_DOWN));
         menuBarFileExportAsPng.setOnAction(event -> {
             //If there is no active component
-            if(CanvasController.getActiveComponent() == null){
+            if(CanvasController.getActiveVerificationObject() == null){
                 Ecdar.showToast("No component to export");
                 return;
             }
 
             //Save as png in picked directory
             final WritableImage image;
-            final String name = CanvasController.getActiveComponent().getName();
+            final String name = ((Component) CanvasController.getActiveVerificationObject()).getName();
             if (canvas.isGridOn()) {
                 canvas.toggleGrid();
                 image = canvas.snapshot(new SnapshotParameters(), null);
@@ -1100,7 +1098,7 @@ public class HUPPAALController implements Initializable {
                     component.addEdge(edge);
                 }, String.format("Deleted %s", selectable.toString()), "delete");
             } else if (selectable instanceof JorkController) {
-                final Component component = CanvasController.getActiveComponent();
+                final Component component = (Component) CanvasController.getActiveVerificationObject();
                 final Jork jork = ((JorkController) selectable).getJork();
 
                 final List<Edge> relatedEdges = component.getRelatedEdges(jork);
@@ -1115,7 +1113,7 @@ public class HUPPAALController implements Initializable {
                     relatedEdges.forEach(component::addEdge);
                 }, String.format("Deleted %s", selectable.toString()), "delete");
             } else if (selectable instanceof SubComponentController) {
-                final Component component = CanvasController.getActiveComponent();
+                final Component component = (Component) CanvasController.getActiveVerificationObject();
                 final SubComponent subComponent = ((SubComponentController) selectable).getSubComponent();
 
 

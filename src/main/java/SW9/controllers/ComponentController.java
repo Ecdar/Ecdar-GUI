@@ -511,7 +511,7 @@ public class ComponentController implements Initializable {
 
             contextMenu.addListElement("Color");
 
-            contextMenu.addColorPicker(component, component::color);
+            contextMenu.addColorPicker(component, component::dye);
         };
 
 

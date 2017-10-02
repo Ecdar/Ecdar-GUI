@@ -81,7 +81,7 @@ public class SubComponentController implements Initializable, SelectHelper.ItemS
         dropDownMenu = new DropDownMenu(((Pane) root.getParent().getParent().getParent()), root, 230, true);
 
         dropDownMenu.addClickableListElement("Open in canvas", event -> {
-            CanvasController.setActiveComponent(getSubComponent().getComponent());
+            CanvasController.setActiveVerificationObject(getSubComponent().getComponent());
         });
 
 
@@ -300,7 +300,7 @@ public class SubComponentController implements Initializable, SelectHelper.ItemS
             } else if(event.isPrimaryButtonDown()) {
                 // If the sub component is pressed twice open its corresponding component in the canvas
                 if(event.getClickCount() > 1) {
-                    CanvasController.setActiveComponent(getSubComponent().getComponent());
+                    CanvasController.setActiveVerificationObject(getSubComponent().getComponent());
                 } else {
                     if (event.isShortcutDown()) {
                         SelectHelper.addToSelection(this);

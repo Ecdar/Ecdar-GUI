@@ -1,5 +1,6 @@
 package SW9.utility.helpers;
 
+import SW9.abstractions.Component;
 import SW9.controllers.CanvasController;
 import SW9.presentations.CanvasPresentation;
 import SW9.presentations.ComponentPresentation;
@@ -113,8 +114,8 @@ public class ItemDragHelper {
 
             final DragBounds dragBounds = getDragBounds.get();
 
-            final double newX = CanvasPresentation.mouseTracker.getGridX() - CanvasController.getActiveComponent().getX();
-            final double newY = CanvasPresentation.mouseTracker.getGridY() - CanvasController.getActiveComponent().getY();
+            final double newX = CanvasPresentation.mouseTracker.getGridX() - ((Component) CanvasController.getActiveVerificationObject()).getX();
+            final double newY = CanvasPresentation.mouseTracker.getGridY() - ((Component) CanvasController.getActiveVerificationObject()).getY();
 
             final double unRoundedX = dragBounds.trimX(newX - xDiff.get());
             final double unRoundedY = dragBounds.trimY(newY - yDiff.get());

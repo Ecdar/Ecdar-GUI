@@ -34,9 +34,7 @@ import jiconfont.javafx.IconFontFX;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Writer;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.security.CodeSource;
@@ -74,8 +72,19 @@ public class Ecdar extends Application {
         launch(Ecdar.class, args);
     }
 
+    /**
+     * Gets the project.
+     * @return the project
+     */
     public static Project getProject() {
         return project;
+    }
+
+    /**
+     * Creates a new instance of Project.
+     */
+    public static void createNewProject() {
+        project.reset();
     }
 
     public static void showToast(final String message) {
@@ -155,7 +164,8 @@ public class Ecdar extends Application {
                 new Image(getClass().getResource("ic_launcher/mipmap-xxxhdpi/ic_launcher.png").toExternalForm())
         );
 
-        //initializeProjectFolder();
+        project.reset();
+        CanvasController.setActiveVerificationObject(Ecdar.getProject().getComponents().get(0));
 
         // We're now ready! Let the curtains fall!
         stage.show();
@@ -244,12 +254,12 @@ public class Ecdar extends Application {
                 initialShownComponent = component;
             }
 
-            CanvasController.setActiveComponent(component);
+            CanvasController.setActiveVerificationObject(component);
         }
 
         // If we found a component (preferably main) set that as active
         if (initialShownComponent != null) {
-            CanvasController.setActiveComponent(initialShownComponent);
+            CanvasController.setActiveVerificationObject(initialShownComponent);
         }
 
         serializationDone = true;

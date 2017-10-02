@@ -2,12 +2,16 @@ package SW9.controllers;
 
 import SW9.Ecdar;
 import SW9.abstractions.Component;
+import SW9.abstractions.Declarations;
+import SW9.abstractions.VerificationObject;
 import SW9.presentations.DropDownMenu;
 import SW9.presentations.FilePresentation;
 import SW9.utility.UndoRedoStack;
 import com.jfoenix.controls.JFXPopup;
 import com.jfoenix.controls.JFXRippler;
 import com.jfoenix.controls.JFXTextArea;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -31,7 +35,6 @@ public class ProjectPaneController implements Initializable {
     public ScrollPane scrollPane;
     public VBox filesList;
     public JFXRippler createComponent;
-    public VBox mainComponentContainer;
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
@@ -48,16 +51,30 @@ public class ProjectPaneController implements Initializable {
                         if (Ecdar.getProject().getComponents().size() > 0) {
                             // Find the first available component and show it instead of the removed one
                             final Component component = Ecdar.getProject().getComponents().get(0);
-                            CanvasController.setActiveComponent(component);
+                            CanvasController.setActiveVerificationObject(component);
                         } else {
                             // Show no components (since there are none in the project)
-                            CanvasController.setActiveComponent(null);
+                            CanvasController.setActiveVerificationObject(null);
                         }
                     }
 
                     // Sort the children alphabetically
                     sortPresentations();
                 }
+            }
+        });
+
+        Ecdar.getProject().globalDeclarationsProperty().addListener(new ChangeListener<Declarations>() {
+            @Override
+            public void changed(ObservableValue<? extends Declarations> observable, Declarations oldValue, Declarations newValue) {
+                filesList.getChildren().add(new FilePresentation(newValue));
+            }
+        });
+
+        Ecdar.getProject().systemDeclarationsProperty().addListener(new ChangeListener<Declarations>() {
+            @Override
+            public void changed(ObservableValue<? extends Declarations> observable, Declarations oldValue, Declarations newValue) {
+                filesList.getChildren().add(new FilePresentation(newValue));
             }
         });
 
@@ -75,35 +92,11 @@ public class ProjectPaneController implements Initializable {
         final JFXRippler moreInformation = (JFXRippler) filePresentation.lookup("#moreInformation");
         final int listWidth = 230;
         final DropDownMenu moreInformationDropDown = new DropDownMenu(root, moreInformation, listWidth, true);
-        final Component component = filePresentation.getComponent();
+        final VerificationObject verificationObject = filePresentation.getVerificationObject();
 
         moreInformationDropDown.addListElement("Configuration");
 
-        /*
-         * IS MAIN
-         */
-        moreInformationDropDown.addTogglableListElement("Main", filePresentation.getComponent().isMainProperty(), event -> {
-            final boolean wasMain = component.isIsMain();
-
-            UndoRedoStack.push(() -> { // Perform
-                component.setIsMain(!wasMain);
-            }, () -> { // Undo
-                component.setIsMain(wasMain);
-            }, "Component " + component.getName() + " isMain: " + !wasMain, "star");
-        });
-
-        /*
-         * INCLUDE IN PERIODIC CHECK
-         */
-        moreInformationDropDown.addTogglableListElement("Include in periodic check", component.includeInPeriodicCheckProperty(), event -> {
-            final boolean didIncludeInPeriodicCheck = component.includeInPeriodicCheckProperty().get();
-
-            UndoRedoStack.push(() -> { // Perform
-                component.includeInPeriodicCheckProperty().set(!didIncludeInPeriodicCheck);
-            }, () -> { // Undo
-                component.includeInPeriodicCheckProperty().set(didIncludeInPeriodicCheck);
-            }, "Component " + component.getName() + " is included in periodic check: " + !didIncludeInPeriodicCheck, "search");
-        });
+        initializeTogglePeriodicCheck(moreInformationDropDown, (Component) verificationObject);
 
         moreInformationDropDown.addSpacerElement();
 
@@ -112,7 +105,7 @@ public class ProjectPaneController implements Initializable {
         final JFXTextArea textArea = new JFXTextArea();
         textArea.setMinHeight(30);
 
-        filePresentation.getComponent().descriptionProperty().bindBidirectional(textArea.textProperty());
+        filePresentation.getVerificationObject().descriptionProperty().bindBidirectional(textArea.textProperty());
 
         textArea.textProperty().addListener((obs, oldText, newText) -> {
             int i = 0;
@@ -129,31 +122,41 @@ public class ProjectPaneController implements Initializable {
 
         moreInformationDropDown.addSpacerElement();
 
-        moreInformationDropDown.addListElement("Color");
+        // Color picker button
+        if (verificationObject instanceof Component) {
+            moreInformationDropDown.addListElement("Color");
+            moreInformationDropDown.addColorPicker((Component) filePresentation.getVerificationObject(),
+                    ((Component) filePresentation.getVerificationObject())::dye);
 
-        /*
-         * COLOR SELECTOR
-         */
-        moreInformationDropDown.addColorPicker(filePresentation.getComponent(), filePresentation.getComponent()::color);
+            moreInformationDropDown.addSpacerElement();
 
-        moreInformationDropDown.addSpacerElement();
+            // Delete button
+            moreInformationDropDown.addClickableListElement("Delete", event -> {
+                UndoRedoStack.push(() -> { // Perform
+                    Ecdar.getProject().getComponents().remove(verificationObject);
+                }, () -> { // Undo
+                    Ecdar.getProject().getComponents().add((Component) verificationObject);
+                }, "Deleted component " + verificationObject.getName(), "delete");
 
-        /*
-         * THE DELETE BUTTON
-         */
-        moreInformationDropDown.addClickableListElement("Delete", event -> {
-            UndoRedoStack.push(() -> { // Perform
-                Ecdar.getProject().getComponents().remove(component);
-            }, () -> { // Undo
-                Ecdar.getProject().getComponents().add(component);
-            }, "Deleted component " + component.getName(), "delete");
-
-            moreInformationDropDown.close();
-        });
+                moreInformationDropDown.close();
+            });
+        }
 
         moreInformation.setOnMousePressed((e) -> {
             e.consume();
             moreInformationDropDown.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, 10, 10);
+        });
+    }
+
+    private void initializeTogglePeriodicCheck(DropDownMenu moreInformationDropDown, final Component component) {
+        moreInformationDropDown.addTogglableListElement("Include in periodic check", component.includeInPeriodicCheckProperty(), event -> {
+            final boolean didIncludeInPeriodicCheck = component.includeInPeriodicCheckProperty().get();
+
+            UndoRedoStack.push(() -> { // Perform
+                component.includeInPeriodicCheckProperty().set(!didIncludeInPeriodicCheck);
+            }, () -> { // Undo
+                component.includeInPeriodicCheckProperty().set(didIncludeInPeriodicCheck);
+            }, "Component " + component.getName() + " is included in periodic check: " + !didIncludeInPeriodicCheck, "search");
         });
     }
 
@@ -166,7 +169,7 @@ public class ProjectPaneController implements Initializable {
         // Open the component if the presentation is pressed
         filePresentation.setOnMousePressed(event -> {
             event.consume();
-            CanvasController.setActiveComponent(component);
+            CanvasController.setActiveVerificationObject(component);
         });
 
         component.nameProperty().addListener(obs -> sortPresentations());
@@ -202,7 +205,7 @@ public class ProjectPaneController implements Initializable {
             Ecdar.getProject().getComponents().remove(newComponent);
         }, "Created new component: " + newComponent.getName(), "add-circle");
 
-        CanvasController.setActiveComponent(newComponent);
+        CanvasController.setActiveVerificationObject(newComponent);
     }
 
 }
