@@ -57,10 +57,8 @@ public class Ecdar extends Application {
             final CodeSource codeSource = Ecdar.class.getProtectionDomain().getCodeSource();
             final File jarFile = new File(codeSource.getLocation().toURI().getPath());
             final String rootDirectory = jarFile.getParentFile().getPath() + File.separator;
-            projectDirectory.set(rootDirectory + "projects" + File.separator + "project");
             serverDirectory = rootDirectory + "servers";
             debugDirectory = rootDirectory + "uppaal-debug";
-            forceCreateFolder(projectDirectory.getValue());
             forceCreateFolder(serverDirectory);
             forceCreateFolder(debugDirectory);
         } catch (final URISyntaxException e) {
@@ -78,67 +76,6 @@ public class Ecdar extends Application {
 
     public static Project getProject() {
         return project;
-    }
-
-    /**
-     * Saves the current project to the given path.
-     * This changes the {@see Ecdar#projectDirectory}
-     * to the path, and then calls {@see Ecdar#save()}
-     * @param path The path to where the project should be saved
-     */
-    public static void saveAs(String path){
-        projectDirectory.setValue(path);
-        save();
-    }
-
-    /***
-     * Saves the project to the {@see Ecdar#projectDirectory} path.
-     * This include making directories, converting project files (components and queries)
-     * into Json formatted files.
-     */
-    public static void save() {
-        // Clear the project folder
-        try {
-            final File directory = new File(projectDirectory.getValue());
-
-            FileUtils.forceMkdir(directory);
-            FileUtils.cleanDirectory(directory);
-        } catch (final IOException e) {
-            e.printStackTrace();
-        }
-
-        Ecdar.getProject().getComponents().forEach(component -> {
-            try {
-                final Writer writer = new FileWriter(String.format(projectDirectory.getValue() + File.separator + "%s.json", component.getName()));
-                final Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
-                gson.toJson(component.serialize(), writer);
-
-                writer.close();
-            } catch (final IOException e) {
-                showToast("Could not save project: " + e.getMessage());
-                e.printStackTrace();
-            }
-        });
-
-        final JsonArray queries = new JsonArray();
-        Ecdar.getProject().getQueries().forEach(query -> {
-            queries.add(query.serialize());
-        });
-
-        final Writer writer;
-        try {
-            writer = new FileWriter(projectDirectory.getValue() + File.separator + "Queries.json");
-            final Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
-            gson.toJson(queries, writer);
-            writer.close();
-
-            showToast("Project saved!");
-        } catch (final IOException e) {
-            showToast("Could not save project: " + e.getMessage());
-            e.printStackTrace();
-        }
     }
 
     public static void showToast(final String message) {
@@ -218,7 +155,7 @@ public class Ecdar extends Application {
                 new Image(getClass().getResource("ic_launcher/mipmap-xxxhdpi/ic_launcher.png").toExternalForm())
         );
 
-        initializeProjectFolder();
+        //initializeProjectFolder();
 
         // We're now ready! Let the curtains fall!
         stage.show();

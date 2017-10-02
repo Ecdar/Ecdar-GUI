@@ -15,6 +15,9 @@ import SW9.utility.keyboard.Keybind;
 import SW9.utility.keyboard.KeyboardTracker;
 import SW9.utility.keyboard.NudgeDirection;
 import SW9.utility.keyboard.Nudgeable;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.jfoenix.controls.*;
 import javafx.animation.Interpolator;
 import javafx.animation.Transition;
@@ -39,12 +42,15 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import javafx.util.Pair;
+import org.apache.commons.io.FileUtils;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -419,23 +425,10 @@ public class HUPPAALController implements Initializable {
         menuBar.setUseSystemMenuBar(true);
 
         menuBarFileSave.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN));
-        menuBarFileSave.setOnAction(event -> Ecdar.save());
+        menuBarFileSave.setOnAction(event -> save());
 
         menuBarFileSaveAs.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN));
-        menuBarFileSaveAs.setOnAction(event -> {
-            FileChooser filePicker = new FileChooser();
-            filePicker.setTitle("Save project");
-            filePicker.setInitialFileName("New Ecdar Project");
-            filePicker.setInitialDirectory(new File(Ecdar.projectDirectory.get()));
-
-            File file = filePicker.showSaveDialog(root.getScene().getWindow());
-            if (file != null){
-                Ecdar.saveAs(file.getPath());
-            } else {
-                Ecdar.showToast("The project was not saved");
-            }
-
-        });
+        menuBarFileSaveAs.setOnAction(event -> saveAs());
 
         initializeCreateNewProjectMenuItem();
 
@@ -555,25 +548,102 @@ public class HUPPAALController implements Initializable {
             }, "Balanced location identifiers", "shuffle");
         });
     }
+
+    /**
+     * Save project as.
+     */
+    private void saveAs() {
+        final FileChooser filePicker = new FileChooser();
+        filePicker.setTitle("Save project");
+        filePicker.setInitialFileName("New Ecdar Project");
+        filePicker.setInitialDirectory(new File(System.getProperty("user.home")));
+
+        final File file = filePicker.showSaveDialog(root.getScene().getWindow());
+        if (file != null){
+            Ecdar.projectDirectory.setValue(file.getPath());
+            save();
+        } else {
+            Ecdar.showToast("The project was not saved");
+        }
+    }
+
+    /***
+     * Saves the project to the {@see Ecdar#projectDirectory} path.
+     * This include making directories, converting project files (components and queries)
+     * into Json formatted files.
+     */
+    public void save() {
+        if (Ecdar.projectDirectory.isNull().get()) {
+            saveAs();
+            return;
+        }
+
+        // Clear the project folder
+        try {
+            final File directory = new File(Ecdar.projectDirectory.getValue());
+
+            FileUtils.forceMkdir(directory);
+            FileUtils.cleanDirectory(directory);
+        } catch (final IOException e) {
+            e.printStackTrace();
+        }
+
+        Ecdar.getProject().getComponents().forEach(component -> {
+            try {
+                final Writer writer = new FileWriter(String.format(Ecdar.projectDirectory.getValue() + File.separator + "%s.json", component.getName()));
+                final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+                gson.toJson(component.serialize(), writer);
+
+                writer.close();
+            } catch (final IOException e) {
+                Ecdar.showToast("Could not save project: " + e.getMessage());
+                e.printStackTrace();
+            }
+        });
+
+        final JsonArray queries = new JsonArray();
+        Ecdar.getProject().getQueries().forEach(query -> {
+            queries.add(query.serialize());
+        });
+
+        final Writer writer;
+        try {
+            writer = new FileWriter(Ecdar.projectDirectory.getValue() + File.separator + "Queries.json");
+            final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+            gson.toJson(queries, writer);
+            writer.close();
+
+            Ecdar.showToast("Project saved!");
+        } catch (final IOException e) {
+            Ecdar.showToast("Could not save project: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Initializes menu item for creating a new project.
+     */
     private void initializeCreateNewProjectMenuItem() {
-        menuBarFileCreateNewProject.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN));
+        menuBarFileCreateNewProject.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN));
         menuBarFileCreateNewProject.setOnAction(event -> {
 
-            ButtonType yesButton = new ButtonType("save", ButtonBar.ButtonData.OK_DONE);
-            ButtonType noButton = new ButtonType("don't save", ButtonBar.ButtonData.NO);
-            ButtonType cancelButton = new ButtonType("cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
-            Alert alert = new Alert(Alert.AlertType.WARNING,
+            final ButtonType yesButton = new ButtonType("save", ButtonBar.ButtonData.OK_DONE);
+            final ButtonType noButton = new ButtonType("don't save", ButtonBar.ButtonData.NO);
+            final ButtonType cancelButton = new ButtonType("cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+            final Alert alert = new Alert(Alert.AlertType.WARNING,
                     "Do you want to save the existing project?",
                     yesButton,
                     noButton,
                     cancelButton);
 
             alert.setTitle("Create new project");
-            Optional<ButtonType> result = alert.showAndWait();
+            final Optional<ButtonType> result = alert.showAndWait();
 
             if (result.isPresent()) {
                 if (result.get() == yesButton) {
-                    Ecdar.save();
+                    save();
                     createNewProject();
                 } else if (result.get() == noButton) {
                     createNewProject();
@@ -582,14 +652,23 @@ public class HUPPAALController implements Initializable {
         });
     }
 
-    private void createNewProject() {
+    /**
+     * Creates a new project.
+     */
+    private static void createNewProject() {
         CodeAnalysis.disable();
 
         CodeAnalysis.clearErrorsAndWarnings();
         Ecdar.cleanProject();
 
-        // Close project
-        // remove project path
+
+        Ecdar.projectDirectory.set(null);
+
+
+        Ecdar.getProject().getComponents().add(new Component(true));
+        Ecdar.getProject().getComponents().add(new Component(true));
+        Ecdar.getProject().getComponents().add(new Component(true));
+
         // Create system dec, global dec, a component
 
 
