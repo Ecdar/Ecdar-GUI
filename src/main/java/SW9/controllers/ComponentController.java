@@ -410,7 +410,7 @@ public class ComponentController implements Initializable {
                 newLocation.setColor(component.getColor());
 
                 // Add a new location
-                UndoRedoStack.push(() -> { // Perform
+                UndoRedoStack.pushAndPerform(() -> { // Perform
                     component.addLocation(newLocation);
                 }, () -> { // Undo
                     component.removeLocation(newLocation);
@@ -431,7 +431,7 @@ public class ComponentController implements Initializable {
                 newJork.setY(y);
 
                 // Add a new location
-                UndoRedoStack.push(() -> { // Perform
+                UndoRedoStack.pushAndPerform(() -> { // Perform
                     component.addJork(newJork);
                 }, () -> { // Undo
                     component.removeJork(newJork);
@@ -452,7 +452,7 @@ public class ComponentController implements Initializable {
                 newJork.setY(y);
 
                 // Add a new location
-                UndoRedoStack.push(() -> { // Perform
+                UndoRedoStack.pushAndPerform(() -> { // Perform
                     component.addJork(newJork);
                 }, () -> { // Undo
                     component.removeJork(newJork);
@@ -476,7 +476,7 @@ public class ComponentController implements Initializable {
                         newSubComponent.setY(y);
 
                         // Add a new sub-component
-                        UndoRedoStack.push(() -> { // Perform
+                        UndoRedoStack.pushAndPerform(() -> { // Perform
                             component.addSubComponent(newSubComponent);
                         }, () -> { // Undo
                             component.removeSubComponent(newSubComponent);
@@ -564,7 +564,7 @@ public class ComponentController implements Initializable {
                 setCoordinates.accept(location);
 
                 // Add a new location
-                UndoRedoStack.push(() -> { // Perform
+                UndoRedoStack.pushAndPerform(() -> { // Perform
                     getComponent().addLocation(location);
                     UndoRedoStack.redo();
                 }, () -> { // Undo
@@ -583,7 +583,7 @@ public class ComponentController implements Initializable {
                 setCoordinates.accept(jork);
 
                 // Add a new jork
-                UndoRedoStack.push(() -> { // Perform
+                UndoRedoStack.pushAndPerform(() -> { // Perform
                     getComponent().addJork(jork);
                     UndoRedoStack.redo();
                 }, () -> { // Undo
@@ -602,7 +602,7 @@ public class ComponentController implements Initializable {
                 setCoordinates.accept(jork);
 
                 // Add a new jork
-                UndoRedoStack.push(() -> { // Perform
+                UndoRedoStack.pushAndPerform(() -> { // Perform
                     getComponent().addJork(jork);
                     UndoRedoStack.redo();
                 }, () -> { // Undo
@@ -626,7 +626,7 @@ public class ComponentController implements Initializable {
                         newSubComponent.setY(newSubComponent.getY() - GRID_SIZE * 2);
 
                         // Add a new sub-component
-                        UndoRedoStack.push(() -> { // Perform
+                        UndoRedoStack.pushAndPerform(() -> { // Perform
                             component.addSubComponent(newSubComponent);
                             UndoRedoStack.redo();
                         }, () -> { // Undo
@@ -839,7 +839,7 @@ public class ComponentController implements Initializable {
             }
 
             // Add a new location
-            UndoRedoStack.push(() -> { // Perform
+            UndoRedoStack.pushAndPerform(() -> { // Perform
                 getComponent().addLocation(location);
                 if (unfinishedEdge != null) {
                     UndoRedoStack.redo();

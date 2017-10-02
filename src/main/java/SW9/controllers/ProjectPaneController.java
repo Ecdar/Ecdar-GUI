@@ -85,7 +85,7 @@ public class ProjectPaneController implements Initializable {
         moreInformationDropDown.addTogglableListElement("Main", filePresentation.getComponent().isMainProperty(), event -> {
             final boolean wasMain = component.isIsMain();
 
-            UndoRedoStack.push(() -> { // Perform
+            UndoRedoStack.pushAndPerform(() -> { // Perform
                 component.setIsMain(!wasMain);
             }, () -> { // Undo
                 component.setIsMain(wasMain);
@@ -98,7 +98,7 @@ public class ProjectPaneController implements Initializable {
         moreInformationDropDown.addTogglableListElement("Include in periodic check", component.includeInPeriodicCheckProperty(), event -> {
             final boolean didIncludeInPeriodicCheck = component.includeInPeriodicCheckProperty().get();
 
-            UndoRedoStack.push(() -> { // Perform
+            UndoRedoStack.pushAndPerform(() -> { // Perform
                 component.includeInPeriodicCheckProperty().set(!didIncludeInPeriodicCheck);
             }, () -> { // Undo
                 component.includeInPeriodicCheckProperty().set(didIncludeInPeriodicCheck);
@@ -142,7 +142,7 @@ public class ProjectPaneController implements Initializable {
          * THE DELETE BUTTON
          */
         moreInformationDropDown.addClickableListElement("Delete", event -> {
-            UndoRedoStack.push(() -> { // Perform
+            UndoRedoStack.pushAndPerform(() -> { // Perform
                 Ecdar.getProject().getComponents().remove(component);
             }, () -> { // Undo
                 Ecdar.getProject().getComponents().add(component);
@@ -196,7 +196,7 @@ public class ProjectPaneController implements Initializable {
     private void createComponentClicked() {
         final Component newComponent = new Component(true);
 
-        UndoRedoStack.push(() -> { // Perform
+        UndoRedoStack.pushAndPerform(() -> { // Perform
             Ecdar.getProject().getComponents().add(newComponent);
         }, () -> { // Undo
             Ecdar.getProject().getComponents().remove(newComponent);

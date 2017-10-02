@@ -94,7 +94,7 @@ public class SubComponentController implements Initializable, SelectHelper.ItemS
                         UndoRedoStack.forgetLast();
                     }));
 
-                    UndoRedoStack.push(() -> { // Perform
+                    UndoRedoStack.pushAndPerform(() -> { // Perform
                         getParentComponent().addEdge(newEdge);
                     }, () -> { // Undo
                         getParentComponent().removeEdge(newEdge);
@@ -115,7 +115,7 @@ public class SubComponentController implements Initializable, SelectHelper.ItemS
                     final Component oldComponent = getSubComponent().getComponent();
 
                     // Add a new sub-component
-                    UndoRedoStack.push(() -> { // Perform
+                    UndoRedoStack.pushAndPerform(() -> { // Perform
                         getSubComponent().setComponent(c);
                         HUPPAALController.runReachabilityAnalysis();
                     }, () -> { // Undo
@@ -138,7 +138,7 @@ public class SubComponentController implements Initializable, SelectHelper.ItemS
 
             final List<Edge> relatedEdges = parentComponent.getRelatedEdges(subcomponent);
 
-            UndoRedoStack.push(() -> { // Perform
+            UndoRedoStack.pushAndPerform(() -> { // Perform
                 parentComponent.removeSubComponent(subcomponent);
                 relatedEdges.forEach(parentComponent::removeEdge);
             }, () -> { // Undo
@@ -289,7 +289,7 @@ public class SubComponentController implements Initializable, SelectHelper.ItemS
                     UndoRedoStack.forgetLast();
                 }));
 
-                UndoRedoStack.push(() -> { // Perform
+                UndoRedoStack.pushAndPerform(() -> { // Perform
                     getParentComponent().addEdge(newEdge);
                 }, () -> { // Undo
                     getParentComponent().removeEdge(newEdge);
