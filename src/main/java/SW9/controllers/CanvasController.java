@@ -8,8 +8,9 @@ import SW9.presentations.ComponentPresentation;
 import SW9.presentations.DeclarationPresentation;
 import SW9.utility.helpers.SelectHelper;
 import javafx.application.Platform;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.fxml.Initializable;
 import javafx.scene.input.KeyCode;
@@ -25,19 +26,34 @@ import java.util.function.Consumer;
 import static SW9.presentations.CanvasPresentation.GRID_SIZE;
 
 public class CanvasController implements Initializable {
-
-    private final static ObjectProperty<VerificationObject> activeVerificationObject = new SimpleObjectProperty<>(null);
-
-    private final static HashMap<Component, Pair<Double, Double>> componentTranslateMap = new HashMap<>();
+    public final static double DECLARATION_X_MARGIN = GRID_SIZE * 5.5;
 
     public Pane root;
+
+    private final static ObjectProperty<VerificationObject> activeVerificationObject = new SimpleObjectProperty<>(null);
+    private final static HashMap<Component, Pair<Double, Double>> componentTranslateMap = new HashMap<>();
+
+    private static DoubleProperty width, height;
+    private static BooleanProperty insetShouldShow;
+
+    public static DoubleProperty getWidthProperty() {
+        return width;
+    }
+
+    public static DoubleProperty getHeightProperty() {
+        return height;
+    }
+
+    public static BooleanProperty getInsetShouldShow() {
+        return insetShouldShow;
+    }
 
     public static VerificationObject getActiveVerificationObject() {
         return activeVerificationObject.get();
     }
 
-    public static void setActiveVerificationObject(final Component component) {
-        CanvasController.activeVerificationObject.set(component);
+    public static void setActiveVerificationObject(final VerificationObject object) {
+        CanvasController.activeVerificationObject.set(object);
         Platform.runLater(CanvasController::leaveTextAreas);
     }
 
@@ -63,8 +79,24 @@ public class CanvasController implements Initializable {
     private static Consumer<KeyEvent> leaveOnEnterPressed;
     private static Runnable leaveTextAreas;
 
+    public static boolean isInsetShouldShow() {
+        return insetShouldShow.get();
+    }
+
+    public static BooleanProperty insetShouldShowProperty() {
+        return insetShouldShow;
+    }
+
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
+        width = new SimpleDoubleProperty();
+        height = new SimpleDoubleProperty();
+        insetShouldShow = new SimpleBooleanProperty();
+        insetShouldShow.set(true);
+
+        root.widthProperty().addListener((observable, oldValue, newValue) -> width.setValue(newValue));
+        root.heightProperty().addListener((observable, oldValue, newValue) -> height.setValue(newValue));
+
         CanvasPresentation.mouseTracker.registerOnMousePressedEventHandler(event -> {
             // Deselect all elements
             SelectHelper.clearSelectedElements();
@@ -113,10 +145,17 @@ public class CanvasController implements Initializable {
             final ComponentPresentation newComponentPresentation = new ComponentPresentation((Component) newVeriObj);
             root.getChildren().add(newComponentPresentation);
         } else if (newVeriObj instanceof Declarations) {
-            root.getChildren().add(new DeclarationPresentation((Declarations) newVeriObj));
+            root.setTranslateX(GRID_SIZE * 0);
+            root.setTranslateY(DECLARATION_X_MARGIN);
+
+            DeclarationPresentation presentation = new DeclarationPresentation((Declarations) newVeriObj);
+            root.getChildren().add(presentation);
         }
 
         root.requestFocus();
     }
 
+    public void showButtomInsert(Boolean shouldShow) {
+        insetShouldShow.set(shouldShow);
+    }
 }

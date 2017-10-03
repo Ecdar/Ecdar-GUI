@@ -992,17 +992,18 @@ public class HUPPAALController implements Initializable {
      * This method is used as a central place to decide whether the tabPane is opened or closed
      * @param height the value used to set the height of the tabPane
      */
-    public void setMaxHeight(double height)
-    {
+    public void setMaxHeight(double height) {
         tabPaneContainer.setMaxHeight(height);
         if(height > 35) { //The tabpane is opened
             filePane.showBottomInset(false);
             queryPane.showBottomInset(false);
+            canvas.showBottomInset(false);
         } else {
             // When closed we push up the scrollviews in the filePane and queryPane as the tabPane
             // would otherwise cover some items in these views
             filePane.showBottomInset(true);
             queryPane.showBottomInset(true);
+            canvas.showBottomInset(true);
         }
     }
 

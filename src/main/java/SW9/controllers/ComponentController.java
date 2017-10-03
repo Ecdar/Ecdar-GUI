@@ -758,7 +758,7 @@ public class ComponentController implements Initializable {
         declaration.setStyleSpans(0, ComponentPresentation.computeHighlighting(getComponent().getDeclarations()));
 
         final Circle circle = new Circle(0);
-        if(getComponent().isDeclarationOpen()) {
+        if (getComponent().isDeclarationOpen()) {
             circle.setRadius(1000);
         }
         final ObjectProperty<Node> clip = new SimpleObjectProperty<>(circle);

@@ -27,8 +27,6 @@ import java.util.HashMap;
 import java.util.ResourceBundle;
 
 public class ProjectPaneController implements Initializable {
-
-    private final HashMap<Component, FilePresentation> componentPresentationMap = new HashMap<>();
     public StackPane root;
     public AnchorPane toolbar;
     public Label toolbarTitle;
@@ -36,8 +34,27 @@ public class ProjectPaneController implements Initializable {
     public VBox filesList;
     public JFXRippler createComponent;
 
+    private final HashMap<Component, FilePresentation> componentPresentationMap = new HashMap<>();
+
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
+        // Bind global declarations and add mouse event
+        final Declarations globalDcl = Ecdar.getProject().getGlobalDeclarations();
+        final FilePresentation globalDclPresentation = new FilePresentation(globalDcl);
+        globalDclPresentation.setOnMousePressed(event -> {
+            event.consume();
+            CanvasController.setActiveVerificationObject(globalDcl);
+        });
+        filesList.getChildren().add(globalDclPresentation);
+
+        // Bind system declarations and add mouse event
+        final Declarations systemDcl = Ecdar.getProject().getSystemDeclarations();
+        final FilePresentation systemDclPresentation = new FilePresentation(systemDcl);
+        systemDclPresentation.setOnMousePressed(event -> {
+            event.consume();
+            CanvasController.setActiveVerificationObject(systemDcl);
+        });
+        filesList.getChildren().add(systemDclPresentation);
 
         Ecdar.getProject().getComponents().addListener(new ListChangeListener<Component>() {
             @Override
@@ -61,20 +78,6 @@ public class ProjectPaneController implements Initializable {
                     // Sort the children alphabetically
                     sortPresentations();
                 }
-            }
-        });
-
-        Ecdar.getProject().globalDeclarationsProperty().addListener(new ChangeListener<Declarations>() {
-            @Override
-            public void changed(ObservableValue<? extends Declarations> observable, Declarations oldValue, Declarations newValue) {
-                filesList.getChildren().add(new FilePresentation(newValue));
-            }
-        });
-
-        Ecdar.getProject().systemDeclarationsProperty().addListener(new ChangeListener<Declarations>() {
-            @Override
-            public void changed(ObservableValue<? extends Declarations> observable, Declarations oldValue, Declarations newValue) {
-                filesList.getChildren().add(new FilePresentation(newValue));
             }
         });
 

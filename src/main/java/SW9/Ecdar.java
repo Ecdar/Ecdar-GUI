@@ -164,11 +164,11 @@ public class Ecdar extends Application {
                 new Image(getClass().getResource("ic_launcher/mipmap-xxxhdpi/ic_launcher.png").toExternalForm())
         );
 
-        project.reset();
-        CanvasController.setActiveVerificationObject(Ecdar.getProject().getComponents().get(0));
-
         // We're now ready! Let the curtains fall!
         stage.show();
+
+        project.reset();
+        CanvasController.setActiveVerificationObject(Ecdar.getProject().getComponents().get(0));
 
         HUPPAALController.reachabilityServiceEnabled = true;
 

@@ -2,6 +2,7 @@ package SW9.presentations;
 
 import SW9.controllers.CanvasController;
 import SW9.utility.UndoRedoStack;
+import SW9.utility.colors.Color;
 import SW9.utility.helpers.CanvasDragHelper;
 import SW9.utility.helpers.MouseTrackable;
 import SW9.utility.keyboard.Keybind;
@@ -19,7 +20,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.*;
 import javafx.scene.shape.Line;
 
 import java.io.IOException;
@@ -81,6 +82,16 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
             gridOn.setValue(true);
         }
         return gridOn;
+    }
+
+
+    /**
+     *
+     * TODO
+     * @param shouldShow boolean indicating whether to push up the items
+     */
+    public void showBottomInset(final Boolean shouldShow) {
+        controller.showButtomInsert(shouldShow);
     }
 
     @Override
