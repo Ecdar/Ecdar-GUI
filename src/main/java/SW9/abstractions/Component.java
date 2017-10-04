@@ -6,7 +6,6 @@ import SW9.presentations.DropDownMenu;
 import SW9.utility.UndoRedoStack;
 import SW9.utility.colors.Color;
 import SW9.utility.colors.EnabledColor;
-import SW9.utility.serialize.Serializable;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import javafx.beans.property.*;

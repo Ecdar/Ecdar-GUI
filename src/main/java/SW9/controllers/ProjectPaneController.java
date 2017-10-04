@@ -2,7 +2,6 @@ package SW9.controllers;
 
 import SW9.Ecdar;
 import SW9.abstractions.Component;
-import SW9.abstractions.Declarations;
 import SW9.abstractions.VerificationObject;
 import SW9.presentations.DropDownMenu;
 import SW9.presentations.FilePresentation;
@@ -10,8 +9,6 @@ import SW9.utility.UndoRedoStack;
 import com.jfoenix.controls.JFXPopup;
 import com.jfoenix.controls.JFXRippler;
 import com.jfoenix.controls.JFXTextArea;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -99,26 +96,6 @@ public class ProjectPaneController implements Initializable {
 
         initializeTogglePeriodicCheck(moreInformationDropDown, (Component) verificationObject);
 
-            UndoRedoStack.pushAndPerform(() -> { // Perform
-                component.setIsMain(!wasMain);
-            }, () -> { // Undo
-                component.setIsMain(wasMain);
-            }, "Component " + component.getName() + " isMain: " + !wasMain, "star");
-        });
-
-        /*
-         * INCLUDE IN PERIODIC CHECK
-         */
-        moreInformationDropDown.addTogglableListElement("Include in periodic check", component.includeInPeriodicCheckProperty(), event -> {
-            final boolean didIncludeInPeriodicCheck = component.includeInPeriodicCheckProperty().get();
-
-            UndoRedoStack.pushAndPerform(() -> { // Perform
-                component.includeInPeriodicCheckProperty().set(!didIncludeInPeriodicCheck);
-            }, () -> { // Undo
-                component.includeInPeriodicCheckProperty().set(didIncludeInPeriodicCheck);
-            }, "Component " + component.getName() + " is included in periodic check: " + !didIncludeInPeriodicCheck, "search");
-        });
-
         moreInformationDropDown.addSpacerElement();
 
         moreInformationDropDown.addListElement("Description");
@@ -176,7 +153,7 @@ public class ProjectPaneController implements Initializable {
         moreInformationDropDown.addTogglableListElement("Include in periodic check", component.includeInPeriodicCheckProperty(), event -> {
             final boolean didIncludeInPeriodicCheck = component.includeInPeriodicCheckProperty().get();
 
-            UndoRedoStack.push(() -> { // Perform
+            UndoRedoStack.pushAndPerform(() -> { // Perform
                 component.includeInPeriodicCheckProperty().set(!didIncludeInPeriodicCheck);
             }, () -> { // Undo
                 component.includeInPeriodicCheckProperty().set(didIncludeInPeriodicCheck);
