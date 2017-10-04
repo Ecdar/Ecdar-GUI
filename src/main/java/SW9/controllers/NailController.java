@@ -22,7 +22,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableDoubleValue;
 import javafx.fxml.Initializable;
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
@@ -93,7 +92,7 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
                 message += String.format("(Was last Nail on self loop edge --> %s also deleted)", toString());
             }
 
-            UndoRedoStack.push(
+            UndoRedoStack.pushAndPerform(
                     () -> {
                         edge.removeNail(nail);
                         edge.setProperty(nail.getPropertyType(), "");

@@ -139,7 +139,7 @@ public class ItemDragHelper {
             final double storePreviousY = previousY.get();
 
             if(currentX != storePreviousX || currentY != storePreviousY) {
-                UndoRedoStack.push(
+                UndoRedoStack.pushAndPerform(
                         () -> {
                             mouseSubject.setLayoutX(currentX);
                             mouseSubject.setLayoutY(currentY);

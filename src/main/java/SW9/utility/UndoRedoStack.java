@@ -29,7 +29,7 @@ public class UndoRedoStack {
      * @param icon not used?
      * @return the command created
      */
-    public static Command push(final Runnable perform, final Runnable undo, final String description, final String icon) {
+    public static Command pushAndPerform(final Runnable perform, final Runnable undo, final String description, final String icon) {
         final Command item = new Command(perform, undo, description, icon);
 
         // Empty the redo stack (new changes may be conflicting with redoing)
