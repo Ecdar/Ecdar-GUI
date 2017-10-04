@@ -125,7 +125,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                             UndoRedoStack.forgetLast();
                         }));
 
-                        UndoRedoStack.push(() -> { // Perform
+                        UndoRedoStack.pushAndPerform(() -> { // Perform
                             getComponent().addEdge(newEdge);
                         }, () -> { // Undo
                             getComponent().removeEdge(newEdge);
@@ -202,7 +202,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
                 final List<Edge> relatedEdges = component.getRelatedEdges(location);
 
-                UndoRedoStack.push(() -> { // Perform
+                UndoRedoStack.pushAndPerform(() -> { // Perform
                     // Remove the location
                     component.getLocations().remove(location);
                     relatedEdges.forEach(component::removeEdge);
@@ -302,13 +302,13 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
             final Location.Urgency previousUrgency = location.get().getUrgency();
 
             if (previousUrgency.equals(Location.Urgency.URGENT)) {
-                UndoRedoStack.push(() -> { // Perform
+                UndoRedoStack.pushAndPerform(() -> { // Perform
                     getLocation().setUrgency(Location.Urgency.NORMAL);
                 }, () -> { // Undo
                     getLocation().setUrgency(previousUrgency);
                 }, "Made location " + getLocation().getNickname() + " urgent", "hourglass-full");
             } else {
-                UndoRedoStack.push(() -> { // Perform
+                UndoRedoStack.pushAndPerform(() -> { // Perform
                     getLocation().setUrgency(Location.Urgency.URGENT);
                 }, () -> { // Undo
                     getLocation().setUrgency(previousUrgency);
@@ -356,7 +356,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                             UndoRedoStack.forgetLast();
                         }));
 
-                        UndoRedoStack.push(() -> { // Perform
+                        UndoRedoStack.pushAndPerform(() -> { // Perform
                             component.addEdge(newEdge);
                         }, () -> { // Undo
                             component.removeEdge(newEdge);

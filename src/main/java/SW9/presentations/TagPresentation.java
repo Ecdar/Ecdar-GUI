@@ -6,10 +6,8 @@ import SW9.utility.UndoRedoStack;
 import SW9.utility.colors.Color;
 import SW9.utility.helpers.LocationAware;
 import com.jfoenix.controls.JFXTextField;
-import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.beans.binding.When;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.StringProperty;
@@ -19,13 +17,10 @@ import javafx.fxml.JavaFXBuilderFactory;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
-import javafx.util.Duration;
 
 import java.io.IOException;
 import java.net.URL;
@@ -196,7 +191,7 @@ public class TagPresentation extends StackPane {
                 final double currentY = getTranslateY();
                 final double storePreviousX = previousX;
                 final double storePreviousY = previousY;
-                UndoRedoStack.push(
+                UndoRedoStack.pushAndPerform(
                         () -> {
                             setTranslateX(currentX);
                             setTranslateY(currentY);

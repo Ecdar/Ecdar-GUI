@@ -544,7 +544,7 @@ public class Component implements Serializable, DropDownMenu.HasColor {
             previousLocationColors.put(location, new Pair<>(location.getColor(), location.getColorIntensity()));
         }
 
-        UndoRedoStack.push(() -> { // Perform
+        UndoRedoStack.pushAndPerform(() -> { // Perform
             // Color the component
             setColorIntensity(intensity);
             setColor(color);

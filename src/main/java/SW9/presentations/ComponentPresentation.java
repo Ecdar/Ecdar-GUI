@@ -326,7 +326,7 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
             // If no difference do not save change
             if (previousHeight == currentHeight) return;
 
-            UndoRedoStack.push(() -> { // Perform
+            UndoRedoStack.pushAndPerform(() -> { // Perform
                         component.setHeight(currentHeight);
                     }, () -> { // Undo
                         component.setHeight(previousHeight);
@@ -396,7 +396,7 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
             // If no difference do not save change
             if (previousWidth == currentWidth) return;
 
-            UndoRedoStack.push(() -> { // Perform
+            UndoRedoStack.pushAndPerform(() -> { // Perform
                         component.setWidth(currentWidth);
                     }, () -> { // Undo
                         component.setWidth(previousWidth);

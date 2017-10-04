@@ -296,7 +296,7 @@ public class HUPPAALPresentation extends StackPane {
                     previousColor.add(new Pair<>(selectable, new EnabledColor(selectable.getColor(), selectable.getColorIntensity())));
                 });
 
-                UndoRedoStack.push(() -> { // Perform
+                UndoRedoStack.pushAndPerform(() -> { // Perform
                     SelectHelper.getSelectedElements().forEach(selectable -> {
                         selectable.color(color.color, color.intensity);
                     });

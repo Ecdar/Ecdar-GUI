@@ -527,7 +527,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                         }
 
                         dropDownMenu.addClickableListElement(status, mouseEvent -> {
-                            UndoRedoStack.push(
+                            UndoRedoStack.pushAndPerform(
                                     () -> switchEdgeStatus(),
                                     () -> switchEdgeStatus(),
                                     "Switch edge status",
@@ -549,7 +549,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                             final double nailY = Math.round((DropDownMenu.y - getComponent().getY()) / GRID_SIZE) * GRID_SIZE;
                             final Nail newNail = new Nail(nailX, nailY);
 
-                            UndoRedoStack.push(
+                            UndoRedoStack.pushAndPerform(
                                     () -> getEdge().insertNailAt(newNail, links.indexOf(link)),
                                     () -> getEdge().removeNail(newNail),
                                     "Nail added",
@@ -561,7 +561,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
 
                         dropDownMenu.addClickableListElement("Delete", mouseEvent -> {
                             dropDownMenu.close();
-                            UndoRedoStack.push(() -> { // Perform
+                            UndoRedoStack.pushAndPerform(() -> { // Perform
                                 getComponent().removeEdge(getEdge());
                             }, () -> { // Undo
                                 getComponent().addEdge(getEdge());
@@ -580,7 +580,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
 
                         final Nail newNail = new Nail(nailX, nailY);
 
-                        UndoRedoStack.push(
+                        UndoRedoStack.pushAndPerform(
                                 () -> getEdge().insertNailAt(newNail, links.indexOf(link)),
                                 () -> getEdge().removeNail(newNail),
                                 "Nail added",
@@ -648,7 +648,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
             final Nail newNail = new Nail(nailX, nailY);
             newNail.setPropertyType(type);
 
-            UndoRedoStack.push(
+            UndoRedoStack.pushAndPerform(
                     () -> getEdge().insertNailAt(newNail, insertAt.get()),
                     () -> getEdge().removeNail(newNail),
                     "Nail property added (" + type + ")",
