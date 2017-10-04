@@ -137,17 +137,20 @@ public class CanvasController implements Initializable {
             final ComponentPresentation newComponentPresentation = new ComponentPresentation((Component) newVeriObj);
             root.getChildren().add(newComponentPresentation);
         } else if (newVeriObj instanceof Declarations) {
-            root.setTranslateX(GRID_SIZE * 0);
+            root.setTranslateX(0);
             root.setTranslateY(DECLARATION_X_MARGIN);
 
-            DeclarationPresentation presentation = new DeclarationPresentation((Declarations) newVeriObj);
-            root.getChildren().add(presentation);
+            root.getChildren().add(new DeclarationPresentation((Declarations) newVeriObj));
         }
 
         root.requestFocus();
     }
 
-    public void showButtomInsert(Boolean shouldShow) {
+    /**
+     * Updates if views should show an inset behind the error view.
+     * @param shouldShow true iff views should show an inset
+     */
+    public static void showBottomInset(final Boolean shouldShow) {
         insetShouldShow.set(shouldShow);
     }
 }

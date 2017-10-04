@@ -7,13 +7,21 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 /**
- *
+ * An object used for verifications.
+ * This could be a component or a declarations object.
  */
 public abstract class VerificationObject {
-    protected final StringProperty declarationsText = new SimpleStringProperty("");
-    private final StringProperty name = new SimpleStringProperty("");
-    private final ObjectProperty<Color> color = new SimpleObjectProperty<>(Color.GREY_BLUE);
-    private final ObjectProperty<Color.Intensity> colorIntensity = new SimpleObjectProperty<>(Color.Intensity.I700);
+    private final StringProperty declarationsText;
+    private final StringProperty name;
+    private final ObjectProperty<Color> color;
+    private final ObjectProperty<Color.Intensity> colorIntensity;
+
+    VerificationObject() {
+        declarationsText = new SimpleStringProperty("");
+        name = new SimpleStringProperty("");
+        color = new SimpleObjectProperty<>(Color.GREY_BLUE);
+        colorIntensity = new SimpleObjectProperty<>(Color.Intensity.I700);
+    }
 
     public String getDeclarationsText() {
         return declarationsText.get();
@@ -26,7 +34,6 @@ public abstract class VerificationObject {
     public StringProperty declarationsTextProperty() {
         return declarationsText;
     }
-
 
     public String getName() {
         return name.get();

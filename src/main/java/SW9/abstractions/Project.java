@@ -6,13 +6,15 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+/**
+ * A project of models.
+ */
 public class Project {
-
     private final ObservableList<Query> queries;
     private final ObservableList<Component> components;
     private final ObjectProperty<Component> mainComponent;
-    private ObjectProperty<Declarations> globalDeclarations;
-    private ObjectProperty<Declarations> systemDeclarations;
+    private final ObjectProperty<Declarations> globalDeclarations;
+    private final ObjectProperty<Declarations> systemDeclarations;
 
     public Project() {
         queries = FXCollections.observableArrayList();
@@ -23,7 +25,8 @@ public class Project {
     }
 
     /**
-     * Resets declarations and components.
+     * Resets components.
+     * After this, there is only one component.
      */
     public void reset() {
         components.clear();
@@ -54,23 +57,7 @@ public class Project {
         return globalDeclarations.get();
     }
 
-    public ObjectProperty<Declarations> globalDeclarationsProperty() {
-        return globalDeclarations;
-    }
-
-    public void setGlobalDeclarations(Declarations globalDeclarations) {
-        this.globalDeclarations.set(globalDeclarations);
-    }
-
     public Declarations getSystemDeclarations() {
         return systemDeclarations.get();
-    }
-
-    public ObjectProperty<Declarations> systemDeclarationsProperty() {
-        return systemDeclarations;
-    }
-
-    public void setSystemDeclarations(Declarations systemDeclarations) {
-        this.systemDeclarations.set(systemDeclarations);
     }
 }

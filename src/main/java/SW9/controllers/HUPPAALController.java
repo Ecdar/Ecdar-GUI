@@ -997,13 +997,13 @@ public class HUPPAALController implements Initializable {
         if(height > 35) { //The tabpane is opened
             filePane.showBottomInset(false);
             queryPane.showBottomInset(false);
-            canvas.showBottomInset(false);
+            CanvasPresentation.showBottomInset(false);
         } else {
             // When closed we push up the scrollviews in the filePane and queryPane as the tabPane
             // would otherwise cover some items in these views
             filePane.showBottomInset(true);
             queryPane.showBottomInset(true);
-            canvas.showBottomInset(true);
+            CanvasPresentation.showBottomInset(true);
         }
     }
 

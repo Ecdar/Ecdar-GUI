@@ -15,21 +15,30 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 /**
- *
+ * Controller for overall declarations.
  */
 public class DeclarationsController implements Initializable {
     public StyleClassedTextArea textArea;
     public StackPane root;
 
     private double offSet, canvasHeight;
-    private ObjectProperty<Declarations> declarations  = new SimpleObjectProperty<>(null);
+    private final ObjectProperty<Declarations> declarations;
 
-    public void setDeclarations(Declarations declarations) {
+    public DeclarationsController() {
+        declarations = new SimpleObjectProperty<>(null);
+    }
+
+    public void setDeclarations(final Declarations declarations) {
         this.declarations.set(declarations);
     }
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
+        initializeWidthAndHeight();
+        initializeText();
+    }
+
+    private void initializeWidthAndHeight() {
         // Fetch width and height of canvas and update
         root.setMinWidth(CanvasController.getWidthProperty().doubleValue());
         canvasHeight = CanvasController.getHeightProperty().doubleValue();
@@ -48,8 +57,6 @@ public class DeclarationsController implements Initializable {
             updateOffset(newValue);
             updateHeight();
         });
-
-        initializeText();
     }
 
     private void initializeText() {
@@ -67,10 +74,17 @@ public class DeclarationsController implements Initializable {
                 declarations.get().setDeclarationsText(newDeclaration));
     }
 
+    /**
+     * Updates highlighting of the text in the text area.
+     */
     public void updateHighlighting() {
         textArea.setStyleSpans(0, ComponentPresentation.computeHighlighting(declarations.get().getDeclarationsText()));
     }
 
+    /**
+     * Updates the offset of the height of the view based on whether an inset should show.
+     * @param insetShouldShow true iff an inset should show
+     */
     private void updateOffset(final boolean insetShouldShow) {
         if (insetShouldShow) {
             offSet = 20;
@@ -79,6 +93,9 @@ public class DeclarationsController implements Initializable {
         }
     }
 
+    /**
+     * Updates the height of the view.
+     */
     private void updateHeight() {
         final double value = canvasHeight - CanvasController.DECLARATION_X_MARGIN - offSet;
 

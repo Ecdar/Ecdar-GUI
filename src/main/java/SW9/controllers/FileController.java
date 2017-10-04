@@ -7,7 +7,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 /**
- *
+ * Controller for a file in the project pane.
  */
 public class FileController implements Initializable {
     public JFXRippler moreInformation;
