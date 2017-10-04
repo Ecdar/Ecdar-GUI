@@ -192,7 +192,7 @@ public class HUPPAALController implements Initializable {
         KeyCodeCombination combination = new KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN);
         Keybind binding = new Keybind(combination, (event) -> {
             final Component newComponent = new Component(true);
-            UndoRedoStack.push(() -> { // Perform
+            UndoRedoStack.pushAndPerform(() -> { // Perform
                 Ecdar.getProject().getComponents().add(newComponent);
             }, () -> { // Undo
                 Ecdar.getProject().getComponents().remove(newComponent);
@@ -244,7 +244,7 @@ public class HUPPAALController implements Initializable {
                     previousColor.add(new Pair<>(selectable, new EnabledColor(selectable.getColor(), selectable.getColorIntensity())));
                 });
 
-                UndoRedoStack.push(() -> { // Perform
+                UndoRedoStack.pushAndPerform(() -> { // Perform
                     SelectHelper.getSelectedElements().forEach(selectable -> {
                         selectable.color(enabledColor.color, enabledColor.intensity);
                     });
@@ -492,7 +492,7 @@ public class HUPPAALController implements Initializable {
             // Map to store the previous identifiers (to undo/redo)
             final Map<Location, String> previousIdentifiers = new HashMap<>();
 
-            UndoRedoStack.push(() -> { // Perform
+            UndoRedoStack.pushAndPerform(() -> { // Perform
                 // Set the counter used to generate the identifiers
                 Location.resetHiddenID();
 
@@ -1065,7 +1065,7 @@ public class HUPPAALController implements Initializable {
 
         final List<Nudgeable> nudgedElements = new ArrayList<>();
 
-        UndoRedoStack.push(() -> { // Perform
+        UndoRedoStack.pushAndPerform(() -> { // Perform
 
                     final boolean[] foundUnNudgableElement = {false};
                     selectedElements.forEach(selectable -> {
@@ -1112,7 +1112,7 @@ public class HUPPAALController implements Initializable {
 
                 final List<Edge> relatedEdges = component.getRelatedEdges(location);
 
-                UndoRedoStack.push(() -> { // Perform
+                UndoRedoStack.pushAndPerform(() -> { // Perform
                     // Remove the location
                     component.getLocations().remove(location);
                     relatedEdges.forEach(component::removeEdge);
@@ -1126,7 +1126,7 @@ public class HUPPAALController implements Initializable {
                 final Component component = ((EdgeController) selectable).getComponent();
                 final Edge edge = ((EdgeController) selectable).getEdge();
 
-                UndoRedoStack.push(() -> { // Perform
+                UndoRedoStack.pushAndPerform(() -> { // Perform
                     // Remove the edge
                     component.removeEdge(edge);
                 }, () -> { // Undo
@@ -1139,7 +1139,7 @@ public class HUPPAALController implements Initializable {
 
                 final List<Edge> relatedEdges = component.getRelatedEdges(jork);
 
-                UndoRedoStack.push(() -> { // Perform
+                UndoRedoStack.pushAndPerform(() -> { // Perform
                     // Remove the jork
                     component.getJorks().remove(jork);
                     relatedEdges.forEach(component::removeEdge);
@@ -1155,7 +1155,7 @@ public class HUPPAALController implements Initializable {
 
                 final List<Edge> relatedEdges = component.getRelatedEdges(subComponent);
 
-                UndoRedoStack.push(() -> { // Perform
+                UndoRedoStack.pushAndPerform(() -> { // Perform
                     // Remove the subComponent
                     component.getSubComponents().remove(subComponent);
                     relatedEdges.forEach(component::removeEdge);
@@ -1182,7 +1182,7 @@ public class HUPPAALController implements Initializable {
                     message += String.format("(Was last Nail on self loop edge --> %s also deleted)", edge.toString());
                 }
 
-                UndoRedoStack.push(
+                UndoRedoStack.pushAndPerform(
                         () -> {
                             edge.removeNail(nail);
                             edge.setProperty(nail.getPropertyType(), "");

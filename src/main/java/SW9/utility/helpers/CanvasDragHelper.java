@@ -144,7 +144,7 @@ public class CanvasDragHelper {
 
             final LocationAware parent = findAncestor(subject);
 
-            UndoRedoStack.push(() -> { // Perform
+            UndoRedoStack.pushAndPerform(() -> { // Perform
                 // If the x stringBinder is bound bind the x stringBinder correctly, else update the value
                 if (subject.xProperty().isBound()) {
                     subject.xProperty().bind(newXBinding[0]);

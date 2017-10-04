@@ -99,6 +99,26 @@ public class ProjectPaneController implements Initializable {
 
         initializeTogglePeriodicCheck(moreInformationDropDown, (Component) verificationObject);
 
+            UndoRedoStack.pushAndPerform(() -> { // Perform
+                component.setIsMain(!wasMain);
+            }, () -> { // Undo
+                component.setIsMain(wasMain);
+            }, "Component " + component.getName() + " isMain: " + !wasMain, "star");
+        });
+
+        /*
+         * INCLUDE IN PERIODIC CHECK
+         */
+        moreInformationDropDown.addTogglableListElement("Include in periodic check", component.includeInPeriodicCheckProperty(), event -> {
+            final boolean didIncludeInPeriodicCheck = component.includeInPeriodicCheckProperty().get();
+
+            UndoRedoStack.pushAndPerform(() -> { // Perform
+                component.includeInPeriodicCheckProperty().set(!didIncludeInPeriodicCheck);
+            }, () -> { // Undo
+                component.includeInPeriodicCheckProperty().set(didIncludeInPeriodicCheck);
+            }, "Component " + component.getName() + " is included in periodic check: " + !didIncludeInPeriodicCheck, "search");
+        });
+
         moreInformationDropDown.addSpacerElement();
 
         moreInformationDropDown.addListElement("Description");
@@ -136,7 +156,7 @@ public class ProjectPaneController implements Initializable {
 
             // Delete button
             moreInformationDropDown.addClickableListElement("Delete", event -> {
-                UndoRedoStack.push(() -> { // Perform
+                UndoRedoStack.pushAndPerform(() -> { // Perform
                     Ecdar.getProject().getComponents().remove(verificationObject);
                 }, () -> { // Undo
                     Ecdar.getProject().getComponents().add((Component) verificationObject);
@@ -203,7 +223,7 @@ public class ProjectPaneController implements Initializable {
     private void createComponentClicked() {
         final Component newComponent = new Component(true);
 
-        UndoRedoStack.push(() -> { // Perform
+        UndoRedoStack.pushAndPerform(() -> { // Perform
             Ecdar.getProject().getComponents().add(newComponent);
         }, () -> { // Undo
             Ecdar.getProject().getComponents().remove(newComponent);

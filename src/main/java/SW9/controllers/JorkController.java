@@ -108,7 +108,7 @@ public class JorkController implements Initializable, SelectHelper.ItemSelectabl
                     UndoRedoStack.forgetLast();
                 }));
 
-                UndoRedoStack.push(() -> { // Perform
+                UndoRedoStack.pushAndPerform(() -> { // Perform
                     component.addEdge(newEdge);
                 }, () -> { // Undo
                     component.removeEdge(newEdge);
@@ -132,7 +132,7 @@ public class JorkController implements Initializable, SelectHelper.ItemSelectabl
                         UndoRedoStack.forgetLast();
                     }));
 
-                    UndoRedoStack.push(() -> { // Perform
+                    UndoRedoStack.pushAndPerform(() -> { // Perform
                         getComponent().addEdge(newEdge);
                     }, () -> { // Undo
                         getComponent().removeEdge(newEdge);
@@ -150,7 +150,7 @@ public class JorkController implements Initializable, SelectHelper.ItemSelectabl
 
             final List<Edge> relatedEdges = component.getRelatedEdges(jork);
 
-            UndoRedoStack.push(() -> { // Perform
+            UndoRedoStack.pushAndPerform(() -> { // Perform
                 // Remove the jork
                 component.getJorks().remove(jork);
                 relatedEdges.forEach(component::removeEdge);
