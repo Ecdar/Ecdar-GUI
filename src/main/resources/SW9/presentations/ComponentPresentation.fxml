@@ -55,7 +55,7 @@
         </top>
 
         <center>
-            <StyleClassedTextArea fx:id="declaration"
+            <StyleClassedTextArea fx:id="declarationTextArea"
                                   StackPane.alignment="TOP_CENTER"
                                   styleClass="body2-mono"
                                   style="-fx-faint-focus-color: transparent; -fx-focus-color: transparent;"/>

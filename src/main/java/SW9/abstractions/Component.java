@@ -382,7 +382,7 @@ public class Component extends VerificationObject implements Serializable, DropD
         final JsonObject result = new JsonObject();
 
         result.addProperty(NAME, getName());
-        result.addProperty(DECLARATIONS, getDeclarations());
+        result.addProperty(DECLARATIONS, getDeclarationsText());
 
         final JsonArray locations = new JsonArray();
         getLocations().forEach(location -> locations.add(location.serialize()));
@@ -421,7 +421,7 @@ public class Component extends VerificationObject implements Serializable, DropD
     @Override
     public void deserialize(final JsonObject json) {
         setName(json.getAsJsonPrimitive(NAME).getAsString());
-        setDeclarations(json.getAsJsonPrimitive(DECLARATIONS).getAsString());
+        setDeclarationsText(json.getAsJsonPrimitive(DECLARATIONS).getAsString());
 
         json.getAsJsonArray(LOCATIONS).forEach(jsonElement -> {
             final Location newLocation = new Location((JsonObject) jsonElement);
@@ -509,7 +509,7 @@ public class Component extends VerificationObject implements Serializable, DropD
     private void bindReachabilityAnalysis() {
         locations.addListener((ListChangeListener<? super Location>) c -> HUPPAALController.runReachabilityAnalysis());
         edges.addListener((ListChangeListener<? super Edge>) c -> HUPPAALController.runReachabilityAnalysis());
-        declarationsProperty().addListener((observable, oldValue, newValue) -> HUPPAALController.runReachabilityAnalysis());
+        declarationsTextProperty().addListener((observable, oldValue, newValue) -> HUPPAALController.runReachabilityAnalysis());
         includeInPeriodicCheckProperty().addListener((observable, oldValue, newValue) -> HUPPAALController.runReachabilityAnalysis());
     }
 }

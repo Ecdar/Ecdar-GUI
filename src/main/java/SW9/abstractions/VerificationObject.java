@@ -10,22 +10,22 @@ import javafx.beans.property.StringProperty;
  *
  */
 public abstract class VerificationObject {
-    private final StringProperty declarations = new SimpleStringProperty("");
+    protected final StringProperty declarationsText = new SimpleStringProperty("");
     private final StringProperty name = new SimpleStringProperty("");
     private final ObjectProperty<Color> color = new SimpleObjectProperty<>(Color.GREY_BLUE);
     private final ObjectProperty<Color.Intensity> colorIntensity = new SimpleObjectProperty<>(Color.Intensity.I700);
     private final StringProperty description = new SimpleStringProperty("");
 
-    public String getDeclarations() {
-        return declarations.get();
+    public String getDeclarationsText() {
+        return declarationsText.get();
     }
 
-    public void setDeclarations(final String declarations) {
-        this.declarations.set(declarations);
+    public void setDeclarationsText(final String declarationsText) {
+        this.declarationsText.set(declarationsText);
     }
 
-    public StringProperty declarationsProperty() {
-        return declarations;
+    public StringProperty declarationsTextProperty() {
+        return declarationsText;
     }
 
 

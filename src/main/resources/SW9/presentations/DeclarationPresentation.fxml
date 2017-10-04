@@ -10,7 +10,7 @@
          fx:controller="SW9.controllers.DeclarationsController">
     <BorderPane fx:id="frame" pickOnBounds="false" >
         <center>
-            <StyleClassedTextArea fx:id="declaration"
+            <StyleClassedTextArea fx:id="textArea"
                                   styleClass="body2-mono"
                                   style="-fx-faint-focus-color: transparent; -fx-focus-color: transparent;"/>
         </center>

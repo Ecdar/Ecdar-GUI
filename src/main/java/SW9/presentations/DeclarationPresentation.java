@@ -10,12 +10,13 @@ import org.fxmisc.richtext.StyleClassedTextArea;
 import java.io.IOException;
 import java.net.URL;
 
+import static SW9.presentations.ComponentPresentation.computeHighlighting;
+
 /**
  *
  */
 public class DeclarationPresentation extends StackPane {
     private final DeclarationsController controller;
-    public StyleClassedTextArea declaration;
 
     public DeclarationPresentation(final Declarations declarations) {
         final URL location = this.getClass().getResource("DeclarationPresentation.fxml");
@@ -30,6 +31,10 @@ public class DeclarationPresentation extends StackPane {
 
             controller = fxmlLoader.getController();
             controller.setDeclarations(declarations);
+
+            // Listen to changes and
+            controller.textArea.textProperty().addListener((obs, oldText, newText) ->
+                    controller.updateHighlighting());
         } catch (final IOException ioe) {
             throw new IllegalStateException(ioe);
         }

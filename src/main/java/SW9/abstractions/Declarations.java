@@ -8,11 +8,9 @@ import javafx.beans.property.StringProperty;
  *
  */
 public class Declarations extends VerificationObject {
-    private StringProperty declarations;
 
     public Declarations(final String name) {
         setName(name);
         setColor(Color.AMBER);
-        declarations = new SimpleStringProperty("");
     }
 }
