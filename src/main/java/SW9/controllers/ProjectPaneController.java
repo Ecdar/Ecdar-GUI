@@ -108,7 +108,10 @@ public class ProjectPaneController implements Initializable {
         final JFXTextArea textArea = new JFXTextArea();
         textArea.setMinHeight(30);
 
-        filePresentation.getVerificationObject().descriptionProperty().bindBidirectional(textArea.textProperty());
+        final VerificationObject object = filePresentation.getVerificationObject();
+        if (object instanceof Component) {
+            ((Component) object).descriptionProperty().bindBidirectional(textArea.textProperty());
+        }
 
         textArea.textProperty().addListener((obs, oldText, newText) -> {
             int i = 0;

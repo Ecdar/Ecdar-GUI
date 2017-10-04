@@ -14,7 +14,6 @@ public abstract class VerificationObject {
     private final StringProperty name = new SimpleStringProperty("");
     private final ObjectProperty<Color> color = new SimpleObjectProperty<>(Color.GREY_BLUE);
     private final ObjectProperty<Color.Intensity> colorIntensity = new SimpleObjectProperty<>(Color.Intensity.I700);
-    private final StringProperty description = new SimpleStringProperty("");
 
     public String getDeclarationsText() {
         return declarationsText.get();
@@ -64,17 +63,5 @@ public abstract class VerificationObject {
 
     public ObjectProperty<Color.Intensity> colorIntensityProperty() {
         return colorIntensity;
-    }
-
-    public String getDescription() {
-        return description.get();
-    }
-
-    public void setDescription(final String description) {
-        this.description.set(description);
-    }
-
-    public StringProperty descriptionProperty() {
-        return description;
     }
 }

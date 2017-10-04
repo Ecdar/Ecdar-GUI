@@ -3,6 +3,7 @@ package SW9.presentations;
 import SW9.abstractions.Component;
 import SW9.abstractions.VerificationObject;
 import SW9.controllers.CanvasController;
+import SW9.controllers.FileController;
 import SW9.utility.colors.Color;
 import com.jfoenix.controls.JFXRippler;
 import javafx.beans.property.SimpleObjectProperty;
@@ -20,8 +21,9 @@ import java.net.URL;
 import java.util.function.BiConsumer;
 
 public class FilePresentation extends AnchorPane {
-
     private final SimpleObjectProperty<VerificationObject> verificationObject = new SimpleObjectProperty<>(null);
+
+    private FileController controller;
 
     public FilePresentation(final VerificationObject verificationObject) {
         final URL location = this.getClass().getResource("FilePresentation.fxml");
@@ -33,6 +35,8 @@ public class FilePresentation extends AnchorPane {
         try {
             fxmlLoader.setRoot(this);
             fxmlLoader.load(location.openStream());
+
+            controller = fxmlLoader.getController();
 
             this.verificationObject.set(verificationObject);
 
@@ -48,11 +52,12 @@ public class FilePresentation extends AnchorPane {
     }
 
     private void initializeMoreInformationButton() {
-        final JFXRippler moreInformation = (JFXRippler) lookup("#moreInformation");
-
-        moreInformation.setMaskType(JFXRippler.RipplerMask.CIRCLE);
-        moreInformation.setPosition(JFXRippler.RipplerPos.BACK);
-        moreInformation.setRipplerFill(Color.GREY_BLUE.getColor(Color.Intensity.I500));
+        if (getVerificationObject() instanceof Component) {
+            controller.moreInformation.setVisible(true);
+            controller.moreInformation.setMaskType(JFXRippler.RipplerMask.CIRCLE);
+            controller.moreInformation.setPosition(JFXRippler.RipplerPos.BACK);
+            controller.moreInformation.setRipplerFill(Color.GREY_BLUE.getColor(Color.Intensity.I500));
+        }
     }
 
     private void initializeRippler() {

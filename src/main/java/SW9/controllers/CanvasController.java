@@ -79,14 +79,6 @@ public class CanvasController implements Initializable {
     private static Consumer<KeyEvent> leaveOnEnterPressed;
     private static Runnable leaveTextAreas;
 
-    public static boolean isInsetShouldShow() {
-        return insetShouldShow.get();
-    }
-
-    public static BooleanProperty insetShouldShowProperty() {
-        return insetShouldShow;
-    }
-
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
         width = new SimpleDoubleProperty();
@@ -130,7 +122,7 @@ public class CanvasController implements Initializable {
         if (newVeriObj == null) return; // We should not add the new component since it is null (clear the view)
 
         // Remove verification object from view
-        root.getChildren().removeIf(node -> node instanceof ComponentPresentation);
+        root.getChildren().removeIf(node -> node instanceof ComponentPresentation || node instanceof DeclarationPresentation);
 
         if (newVeriObj instanceof Component) {
             if (componentTranslateMap.containsKey(newVeriObj)) {

@@ -48,6 +48,7 @@ public class Component extends VerificationObject implements Serializable, DropD
     private final ObjectProperty<Location> finalLocation = new SimpleObjectProperty<>();
     private final ObservableList<SubComponent> subComponents = FXCollections.observableArrayList();
     private final BooleanProperty isMain = new SimpleBooleanProperty(false);
+    private final StringProperty description = new SimpleStringProperty("");
 
     // Background check
     private final BooleanProperty includeInPeriodicCheck = new SimpleBooleanProperty(true);
@@ -511,5 +512,17 @@ public class Component extends VerificationObject implements Serializable, DropD
         edges.addListener((ListChangeListener<? super Edge>) c -> HUPPAALController.runReachabilityAnalysis());
         declarationsTextProperty().addListener((observable, oldValue, newValue) -> HUPPAALController.runReachabilityAnalysis());
         includeInPeriodicCheckProperty().addListener((observable, oldValue, newValue) -> HUPPAALController.runReachabilityAnalysis());
+    }
+
+    public String getDescription() {
+        return description.get();
+    }
+
+    public void setDescription(final String description) {
+        this.description.set(description);
+    }
+
+    public StringProperty descriptionProperty() {
+        return description;
     }
 }
