@@ -576,6 +576,7 @@ public class HUPPAALController implements Initializable {
      * This include making directories, converting project files (components and queries)
      * into Json formatted files.
      */
+    // TODO Serialize in Project
     public void save() {
         if (Ecdar.projectDirectory.isNull().get()) {
             saveAs();
@@ -592,9 +593,34 @@ public class HUPPAALController implements Initializable {
             e.printStackTrace();
         }
 
+        // Save global and system declarations
+        try {
+            final Writer writer = getSaveFileWriter(Project.GLOBAL_DCL_FILENAME);
+            final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+            gson.toJson(Ecdar.getProject().getGlobalDeclarations().serialize(), writer);
+
+            writer.close();
+        } catch (final IOException e) {
+            Ecdar.showToast("Could not save project: " + e.getMessage());
+            e.printStackTrace();
+        }
+        try {
+            final Writer writer = getSaveFileWriter(Project.SYSTEM_DCL_FILENAME);
+            final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+            gson.toJson(Ecdar.getProject().getSystemDeclarations().serialize(), writer);
+
+            writer.close();
+        } catch (final IOException e) {
+            Ecdar.showToast("Could not save project: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        // Save components
         Ecdar.getProject().getComponents().forEach(component -> {
             try {
-                final Writer writer = new FileWriter(String.format(Ecdar.projectDirectory.getValue() + File.separator + "%s.json", component.getName()));
+                final Writer writer = getSaveFileWriter(component.getName());
                 final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
                 gson.toJson(component.serialize(), writer);
@@ -613,7 +639,7 @@ public class HUPPAALController implements Initializable {
 
         final Writer writer;
         try {
-            writer = new FileWriter(Ecdar.projectDirectory.getValue() + File.separator + "Queries.json");
+            writer = getSaveFileWriter("Queries");
             final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
             gson.toJson(queries, writer);
@@ -624,6 +650,15 @@ public class HUPPAALController implements Initializable {
             Ecdar.showToast("Could not save project: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Gets a new file writer for saving a file.
+     * @param filename name of file without extension.
+     * @return the file writer
+     */
+    private static FileWriter getSaveFileWriter(final String filename) throws IOException {
+        return new FileWriter(Ecdar.projectDirectory.getValue() + File.separator + filename + ".json");
     }
 
     /**

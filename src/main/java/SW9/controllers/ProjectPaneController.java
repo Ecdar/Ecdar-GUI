@@ -39,20 +39,18 @@ public class ProjectPaneController implements Initializable {
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
         // Bind global declarations and add mouse event
-        final Declarations globalDcl = Ecdar.getProject().getGlobalDeclarations();
-        final FilePresentation globalDclPresentation = new FilePresentation(globalDcl);
+        final FilePresentation globalDclPresentation = new FilePresentation(Ecdar.getProject().getGlobalDeclarations());
         globalDclPresentation.setOnMousePressed(event -> {
             event.consume();
-            CanvasController.setActiveVerificationObject(globalDcl);
+            CanvasController.setActiveVerificationObject(Ecdar.getProject().getGlobalDeclarations());
         });
         filesList.getChildren().add(globalDclPresentation);
 
         // Bind system declarations and add mouse event
-        final Declarations systemDcl = Ecdar.getProject().getSystemDeclarations();
-        final FilePresentation systemDclPresentation = new FilePresentation(systemDcl);
+        final FilePresentation systemDclPresentation = new FilePresentation(Ecdar.getProject().getSystemDeclarations());
         systemDclPresentation.setOnMousePressed(event -> {
             event.consume();
-            CanvasController.setActiveVerificationObject(systemDcl);
+            CanvasController.setActiveVerificationObject(Ecdar.getProject().getSystemDeclarations());
         });
         filesList.getChildren().add(systemDclPresentation);
 

@@ -18,12 +18,10 @@ import javafx.util.Pair;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class Component extends VerificationObject implements Serializable, DropDownMenu.HasColor {
+public class Component extends VerificationObject implements DropDownMenu.HasColor {
 
     private static final AtomicInteger hiddenID = new AtomicInteger(0); // Used to generate unique IDs
 
-    private static final String NAME = "name";
-    private static final String DECLARATIONS = "declarations";
     private static final String LOCATIONS = "locations";
     private static final String JORKS = "jorks";
     private static final String INITIAL_LOCATION = "initial_location";
@@ -36,9 +34,8 @@ public class Component extends VerificationObject implements Serializable, DropD
     private static final String Y = "y";
     private static final String WIDTH = "width";
     private static final String HEIGHT = "height";
-    private static final String COLOR = "color";
     private static final String INCLUDE_IN_PERIODIC_CHECK = "include_in_periodic_check";
-    private static final String COLOR_INTENSITY = "color_intensity";
+    private static final String COLOR = "color";
 
     // Verification properties
     private final ObservableList<Location> locations = FXCollections.observableArrayList();
@@ -380,10 +377,7 @@ public class Component extends VerificationObject implements Serializable, DropD
 
     @Override
     public JsonObject serialize() {
-        final JsonObject result = new JsonObject();
-
-        result.addProperty(NAME, getName());
-        result.addProperty(DECLARATIONS, getDeclarationsText());
+        final JsonObject result = super.serialize();
 
         final JsonArray locations = new JsonArray();
         getLocations().forEach(location -> locations.add(location.serialize()));
@@ -412,6 +406,7 @@ public class Component extends VerificationObject implements Serializable, DropD
         result.addProperty(Y, getY());
         result.addProperty(WIDTH, getWidth());
         result.addProperty(HEIGHT, getHeight());
+
         result.addProperty(COLOR, EnabledColor.getIdentifier(getColor()));
 
         result.addProperty(INCLUDE_IN_PERIODIC_CHECK, isIncludeInPeriodicCheck());
@@ -421,8 +416,7 @@ public class Component extends VerificationObject implements Serializable, DropD
 
     @Override
     public void deserialize(final JsonObject json) {
-        setName(json.getAsJsonPrimitive(NAME).getAsString());
-        setDeclarationsText(json.getAsJsonPrimitive(DECLARATIONS).getAsString());
+        super.deserialize(json);
 
         json.getAsJsonArray(LOCATIONS).forEach(jsonElement -> {
             final Location newLocation = new Location((JsonObject) jsonElement);

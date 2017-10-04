@@ -1,6 +1,9 @@
 package SW9.abstractions;
 
 import SW9.utility.colors.Color;
+import SW9.utility.colors.EnabledColor;
+import SW9.utility.serialize.Serializable;
+import com.google.gson.JsonObject;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -10,7 +13,10 @@ import javafx.beans.property.StringProperty;
  * An object used for verifications.
  * This could be a component or a declarations object.
  */
-public abstract class VerificationObject {
+public abstract class VerificationObject implements Serializable {
+    private static final String NAME = "name";
+    private static final String DECLARATIONS = "declarations";
+
     private final StringProperty declarationsText;
     private final StringProperty name;
     private final ObjectProperty<Color> color;
@@ -70,5 +76,21 @@ public abstract class VerificationObject {
 
     public ObjectProperty<Color.Intensity> colorIntensityProperty() {
         return colorIntensity;
+    }
+
+    @Override
+    public JsonObject serialize() {
+        final JsonObject result = new JsonObject();
+
+        result.addProperty(NAME, getName());
+        result.addProperty(DECLARATIONS, getDeclarationsText());
+
+        return result;
+    }
+
+    @Override
+    public void deserialize(final JsonObject json) {
+        setName(json.getAsJsonPrimitive(NAME).getAsString());
+        setDeclarationsText(json.getAsJsonPrimitive(DECLARATIONS).getAsString());
     }
 }

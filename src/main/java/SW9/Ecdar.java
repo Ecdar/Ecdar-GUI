@@ -1,6 +1,7 @@
 package SW9;
 
 import SW9.abstractions.Component;
+import SW9.abstractions.Declarations;
 import SW9.abstractions.Project;
 import SW9.abstractions.Query;
 import SW9.backend.UPPAALDriver;
@@ -41,6 +42,7 @@ import java.security.CodeSource;
 import java.util.*;
 
 public class Ecdar extends Application {
+
 
     public static String serverDirectory;
     public static String debugDirectory;
@@ -275,8 +277,8 @@ public class Ecdar extends Application {
         Ecdar.getProject().setMainComponent(null);
     }
 
+    // TODO Deserialize in Project
     private static void deserializeProject(final File projectFolder) throws IOException {
-
         // If there are no files do not try to deserialize
         final File[] projectFiles = projectFolder.listFiles();
         if (projectFiles == null || projectFiles.length == 0) return;
@@ -287,8 +289,19 @@ public class Ecdar extends Application {
         JsonObject mainJsonComponent = null;
 
         for (final File file : projectFiles) {
-
             final String fileContent = Files.toString(file, Charset.defaultCharset());
+
+            if (file.getName().equals(Project.GLOBAL_DCL_FILENAME + Project.JSON_FILENAME_EXTENSION)) {
+                final JsonObject jsonObject = new JsonParser().parse(fileContent).getAsJsonObject();
+                getProject().setGlobalDeclarations(new Declarations(jsonObject));
+                continue;
+            }
+
+            if (file.getName().equals(Project.SYSTEM_DCL_FILENAME+ Project.JSON_FILENAME_EXTENSION)) {
+                final JsonObject jsonObject = new JsonParser().parse(fileContent).getAsJsonObject();
+                getProject().setSystemDeclarations(new Declarations(jsonObject));
+                continue;
+            }
 
             // If the file represents the queries
             if (file.getName().equals("Queries.json")) {

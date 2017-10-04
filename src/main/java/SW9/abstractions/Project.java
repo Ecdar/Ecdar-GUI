@@ -10,6 +10,10 @@ import javafx.collections.ObservableList;
  * A project of models.
  */
 public class Project {
+    public final static String GLOBAL_DCL_FILENAME = "GlobalDeclarations";
+    public final static String SYSTEM_DCL_FILENAME = "SystemDeclarations";
+    public final static String JSON_FILENAME_EXTENSION = ".json";
+
     private final ObservableList<Query> queries;
     private final ObservableList<Component> components;
     private final ObjectProperty<Component> mainComponent;
@@ -57,7 +61,15 @@ public class Project {
         return globalDeclarations.get();
     }
 
+    public void setGlobalDeclarations(final Declarations declarations) {
+        globalDeclarations.set(declarations);
+    }
+
     public Declarations getSystemDeclarations() {
         return systemDeclarations.get();
+    }
+
+    public void setSystemDeclarations(final Declarations declarations) {
+        systemDeclarations.set(declarations);
     }
 }
