@@ -38,6 +38,9 @@ public class DeclarationsController implements Initializable {
         initializeText();
     }
 
+    /**
+     * Initializes width and height of the text editor field, such that it fills up the whole canvas
+     */
     private void initializeWidthAndHeight() {
         // Fetch width and height of canvas and update
         root.setMinWidth(CanvasController.getWidthProperty().doubleValue());
@@ -59,6 +62,9 @@ public class DeclarationsController implements Initializable {
         });
     }
 
+    /**
+     * Sets up the linenumbers and binds the text in the text area to the declaration object
+     */
     private void initializeText() {
         textArea.setParagraphGraphicFactory(LineNumberFactory.get(textArea));
 

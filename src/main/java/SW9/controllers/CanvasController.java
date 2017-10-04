@@ -52,6 +52,10 @@ public class CanvasController implements Initializable {
         return activeVerificationObject.get();
     }
 
+    /**
+     * Sets the given VerificationObject as the one to be active / to be shown on the screen
+     * @param object
+     */
     public static void setActiveVerificationObject(final VerificationObject object) {
         CanvasController.activeVerificationObject.set(object);
         Platform.runLater(CanvasController::leaveTextAreas);
