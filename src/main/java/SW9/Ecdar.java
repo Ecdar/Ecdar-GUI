@@ -43,7 +43,6 @@ import java.util.*;
 
 public class Ecdar extends Application {
 
-
     public static String serverDirectory;
     public static String debugDirectory;
     public static boolean serializationDone = false;
