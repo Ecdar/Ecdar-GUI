@@ -27,13 +27,13 @@ public class EcdarDocument {
 
     private final Document uppaalDocument = new Document(new PrototypeDocument());
 
-    // Map to convert H-UPPAAL locations to UPPAAL locations
+    // Map to convert Ecdar locations to UPPAAL locations
     private final Map<Location, com.uppaal.model.core2.Location> hToULocations = new HashMap<>();
 
-    // Map to convert back from UPPAAL to H-UPPAAL items
+    // Map to convert back from UPPAAL to Ecdar items
     private final Map<com.uppaal.model.core2.Location, Location> uToHLocations = new HashMap<>();
 
-    // Map to convert back from UPPAAL edges to H-UPPAAL edges
+    // Map to convert back from UPPAAL edges to Ecdar edges
     private final Map<com.uppaal.model.core2.Edge, Edge> uToHEdges = new HashMap<>();
 
     // Map from location to all of its uppaal names
