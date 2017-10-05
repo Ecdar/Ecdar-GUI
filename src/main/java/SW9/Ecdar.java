@@ -1,9 +1,7 @@
 package SW9;
 
 import SW9.abstractions.Component;
-import SW9.abstractions.Declarations;
 import SW9.abstractions.Project;
-import SW9.abstractions.Query;
 import SW9.backend.UPPAALDriver;
 import SW9.code_analysis.CodeAnalysis;
 import SW9.controllers.CanvasController;
@@ -13,8 +11,6 @@ import SW9.presentations.HUPPAALPresentation;
 import SW9.presentations.UndoRedoHistoryPresentation;
 import SW9.utility.keyboard.Keybind;
 import SW9.utility.keyboard.KeyboardTracker;
-import com.google.common.io.Files;
-import com.google.gson.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -37,9 +33,7 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
 import java.security.CodeSource;
-import java.util.*;
 
 public class Ecdar extends Application {
 
@@ -239,7 +233,7 @@ public class Ecdar extends Application {
         cleanProject();
 
         // Deserialize the project
-        deserializeProject(directory);
+        Ecdar.getProject().deserialize(directory);
         CodeAnalysis.enable();
 
         // Generate all component presentations by making them the active component in the view one by one
@@ -274,105 +268,6 @@ public class Ecdar extends Application {
         Ecdar.getProject().getQueries().removeIf(query -> true);
         Ecdar.getProject().getComponents().removeIf(component -> true);
         Ecdar.getProject().setMainComponent(null);
-    }
-
-    // TODO Deserialize in Project
-    private static void deserializeProject(final File projectFolder) throws IOException {
-        // If there are no files do not try to deserialize
-        final File[] projectFiles = projectFolder.listFiles();
-        if (projectFiles == null || projectFiles.length == 0) return;
-
-        // Create maps for deserialization
-        final Map<String, JsonObject> componentJsonMap = new HashMap<>();
-        final Map<JsonObject, Integer> componentMaxDepthMap = new HashMap<>();
-        JsonObject mainJsonComponent = null;
-
-        for (final File file : projectFiles) {
-            final String fileContent = Files.toString(file, Charset.defaultCharset());
-
-            if (file.getName().equals(Project.GLOBAL_DCL_FILENAME + Project.JSON_FILENAME_EXTENSION)) {
-                final JsonObject jsonObject = new JsonParser().parse(fileContent).getAsJsonObject();
-                getProject().setGlobalDeclarations(new Declarations(jsonObject));
-                continue;
-            }
-
-            if (file.getName().equals(Project.SYSTEM_DCL_FILENAME+ Project.JSON_FILENAME_EXTENSION)) {
-                final JsonObject jsonObject = new JsonParser().parse(fileContent).getAsJsonObject();
-                getProject().setSystemDeclarations(new Declarations(jsonObject));
-                continue;
-            }
-
-            // If the file represents the queries
-            if (file.getName().equals("Queries.json")) {
-                new JsonParser().parse(fileContent).getAsJsonArray().forEach(jsonElement -> {
-                    final Query newQuery = new Query((JsonObject) jsonElement);
-                    getProject().getQueries().add(newQuery);
-                });
-                // Do not parse Queries.json as a component
-                continue;
-            }
-
-            // Parse the file to an json object
-            final JsonObject jsonObject = new JsonParser().parse(fileContent).getAsJsonObject();
-
-            // Fetch the name of the component
-            final String componentName = jsonObject.get("name").getAsString();
-
-            // Add the name and the json object to the map
-            componentJsonMap.put(componentName, jsonObject);
-
-            // Initialize the max depth map
-            componentMaxDepthMap.put(jsonObject, 0);
-
-            // Find the main name of the main component
-            if (jsonObject.get("main").getAsBoolean()) {
-                mainJsonComponent = jsonObject;
-            }
-
-        }
-
-        if (mainJsonComponent != null) {
-            updateDepthMap(mainJsonComponent, 0, componentJsonMap, componentMaxDepthMap);
-        }
-
-        final List<Map.Entry<JsonObject, Integer>> list = new LinkedList<>(componentMaxDepthMap.entrySet());
-        // Defined Custom Comparator here
-        Collections.sort(list, (o1, o2) -> o1.getValue().compareTo(o2.getValue()));
-
-        final List<JsonObject> orderedJsonComponents = new ArrayList<>();
-
-
-        for (final Map.Entry<JsonObject, Integer> mapEntry : list) {
-            orderedJsonComponents.add(mapEntry.getKey());
-        }
-
-        // Reverse the list such that the greatest depth is first in the list
-        Collections.reverse(orderedJsonComponents);
-
-        // Add the components to the list
-        orderedJsonComponents.forEach(jsonObject -> {
-
-            // It is important that the components are added the list prior to deserialiation
-            final Component newComponent = new Component();
-            getProject().getComponents().add(newComponent);
-            newComponent.deserialize(jsonObject);
-        });
-    }
-
-    private static void updateDepthMap(final JsonObject jsonObject, final int depth, final Map<String, JsonObject> nameToJson, final Map<JsonObject, Integer> jsonToDpeth) {
-        if (jsonToDpeth.get(jsonObject) < depth) {
-            jsonToDpeth.put(jsonObject, depth);
-        }
-
-        final List<String> subComponentNames = new ArrayList<>();
-
-        jsonObject.get("sub_components").getAsJsonArray().forEach(jsonElement -> {
-            subComponentNames.add(jsonElement.getAsJsonObject().get("component").getAsString());
-        });
-
-        for (final String subComponentName : subComponentNames) {
-            updateDepthMap(nameToJson.get(subComponentName), depth + 1, nameToJson, jsonToDpeth);
-        }
     }
 
     private void loadFonts() {

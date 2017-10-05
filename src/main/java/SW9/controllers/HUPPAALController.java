@@ -15,9 +15,6 @@ import SW9.utility.keyboard.Keybind;
 import SW9.utility.keyboard.KeyboardTracker;
 import SW9.utility.keyboard.NudgeDirection;
 import SW9.utility.keyboard.Nudgeable;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
 import com.jfoenix.controls.*;
 import javafx.animation.Interpolator;
 import javafx.animation.Transition;
@@ -42,15 +39,12 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import javafx.util.Pair;
-import org.apache.commons.io.FileUtils;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Writer;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -583,82 +577,12 @@ public class HUPPAALController implements Initializable {
             return;
         }
 
-        // Clear the project folder
         try {
-            final File directory = new File(Ecdar.projectDirectory.getValue());
-
-            FileUtils.forceMkdir(directory);
-            FileUtils.cleanDirectory(directory);
-        } catch (final IOException e) {
-            e.printStackTrace();
-        }
-
-        // Save global and system declarations
-        try {
-            final Writer writer = getSaveFileWriter(Project.GLOBAL_DCL_FILENAME);
-            final Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
-            gson.toJson(Ecdar.getProject().getGlobalDeclarations().serialize(), writer);
-
-            writer.close();
-        } catch (final IOException e) {
+            Ecdar.getProject().serialize();
+        } catch (IOException e) {
             Ecdar.showToast("Could not save project: " + e.getMessage());
             e.printStackTrace();
         }
-        try {
-            final Writer writer = getSaveFileWriter(Project.SYSTEM_DCL_FILENAME);
-            final Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
-            gson.toJson(Ecdar.getProject().getSystemDeclarations().serialize(), writer);
-
-            writer.close();
-        } catch (final IOException e) {
-            Ecdar.showToast("Could not save project: " + e.getMessage());
-            e.printStackTrace();
-        }
-
-        // Save components
-        Ecdar.getProject().getComponents().forEach(component -> {
-            try {
-                final Writer writer = getSaveFileWriter(component.getName());
-                final Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
-                gson.toJson(component.serialize(), writer);
-
-                writer.close();
-            } catch (final IOException e) {
-                Ecdar.showToast("Could not save project: " + e.getMessage());
-                e.printStackTrace();
-            }
-        });
-
-        final JsonArray queries = new JsonArray();
-        Ecdar.getProject().getQueries().forEach(query -> {
-            queries.add(query.serialize());
-        });
-
-        final Writer writer;
-        try {
-            writer = getSaveFileWriter("Queries");
-            final Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
-            gson.toJson(queries, writer);
-            writer.close();
-
-            Ecdar.showToast("Project saved!");
-        } catch (final IOException e) {
-            Ecdar.showToast("Could not save project: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Gets a new file writer for saving a file.
-     * @param filename name of file without extension.
-     * @return the file writer
-     */
-    private static FileWriter getSaveFileWriter(final String filename) throws IOException {
-        return new FileWriter(Ecdar.projectDirectory.getValue() + File.separator + filename + ".json");
     }
 
     /**
