@@ -6,7 +6,8 @@
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
-         type="AnchorPane">
+         type="AnchorPane"
+         fx:controller="SW9.controllers.FileController">
 
     <JFXRippler id="rippler" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
         <HBox style="-fx-padding: 0 8 0 8;"
@@ -27,7 +28,7 @@
             <Region minWidth="16"/>
 
             <!-- MORE INFORMATION (REFACTOR ?) -->
-            <JFXRippler id="moreInformation">
+            <JFXRippler fx:id="moreInformation" visible="false">
                 <StackPane minWidth="40" minHeight="40">
                     <FontIcon id="moreInformationIcon" iconLiteral="gmi-more-vert" iconSize="24" fill="white"/>
                 </StackPane>

@@ -15,6 +15,9 @@ import SW9.utility.keyboard.Keybind;
 import SW9.utility.keyboard.KeyboardTracker;
 import SW9.utility.keyboard.NudgeDirection;
 import SW9.utility.keyboard.Nudgeable;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.jfoenix.controls.*;
 import javafx.animation.Interpolator;
 import javafx.animation.Transition;
@@ -39,12 +42,15 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import javafx.util.Pair;
+import org.apache.commons.io.FileUtils;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -122,6 +128,7 @@ public class HUPPAALController implements Initializable {
     public MenuItem menuBarViewGrid;
     public MenuItem menuBarFileSave;
     public MenuItem menuBarFileSaveAs;
+    public MenuItem menuBarFileCreateNewProject;
     public MenuItem menuBarFileOpenProject;
     public MenuItem menuBarFileExportAsPng;
     public MenuItem menuBarHelpHelp;
@@ -191,7 +198,7 @@ public class HUPPAALController implements Initializable {
                 Ecdar.getProject().getComponents().remove(newComponent);
             }, "Created new component: " + newComponent.getName(), "add-circle");
 
-            CanvasController.setActiveComponent(newComponent);
+            CanvasController.setActiveVerificationObject(newComponent);
         });
         KeyboardTracker.registerKeybind(KeyboardTracker.CREATE_COMPONENT, binding);
 
@@ -258,8 +265,12 @@ public class HUPPAALController implements Initializable {
         Ecdar.getProject().getComponents().addListener(new ListChangeListener<Component>() {
             @Override
             public void onChanged(final Change<? extends Component> c) {
+                if (Ecdar.getProject().getComponents().isEmpty()) {
+                    return;
+                }
+
                 if (!hasChanged.get()) {
-                    CanvasController.setActiveComponent(Ecdar.getProject().getComponents().get(0));
+                    CanvasController.setActiveVerificationObject(Ecdar.getProject().getComponents().get(0));
                     hasChanged.set(true);
                 }
 
@@ -413,29 +424,17 @@ public class HUPPAALController implements Initializable {
 
     }
 
+    // TODO refactor: place in different methods
     private void initializeMenuBar() {
         menuBar.setUseSystemMenuBar(true);
 
         menuBarFileSave.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN));
-        menuBarFileSave.setOnAction(event -> {
-            Ecdar.save();
-        });
+        menuBarFileSave.setOnAction(event -> save());
 
         menuBarFileSaveAs.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN));
-        menuBarFileSaveAs.setOnAction(event -> {
-            FileChooser filePicker = new FileChooser();
-            filePicker.setTitle("Save project");
-            filePicker.setInitialFileName("New Ecdar Project");
-            filePicker.setInitialDirectory(new File(Ecdar.projectDirectory.get()));
+        menuBarFileSaveAs.setOnAction(event -> saveAs());
 
-            File file = filePicker.showSaveDialog(root.getScene().getWindow());
-            if (file != null){
-                Ecdar.saveAs(file.getPath());
-            } else {
-                Ecdar.showToast("The project was not saved");
-            }
-
-        });
+        initializeCreateNewProjectMenuItem();
 
         menuBarFileOpenProject.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.SHORTCUT_DOWN));
         menuBarFileOpenProject.setOnAction(event -> {
@@ -555,20 +554,176 @@ public class HUPPAALController implements Initializable {
     }
 
     /**
+     * Save project as.
+     */
+    private void saveAs() {
+        final FileChooser filePicker = new FileChooser();
+        filePicker.setTitle("Save project");
+        filePicker.setInitialFileName("New Ecdar Project");
+        filePicker.setInitialDirectory(new File(System.getProperty("user.home")));
+
+        final File file = filePicker.showSaveDialog(root.getScene().getWindow());
+        if (file != null){
+            Ecdar.projectDirectory.setValue(file.getPath());
+            save();
+        } else {
+            Ecdar.showToast("The project was not saved");
+        }
+    }
+
+    /***
+     * Saves the project to the {@see Ecdar#projectDirectory} path.
+     * This include making directories, converting project files (components and queries)
+     * into Json formatted files.
+     */
+    // TODO Serialize in Project
+    public void save() {
+        if (Ecdar.projectDirectory.isNull().get()) {
+            saveAs();
+            return;
+        }
+
+        // Clear the project folder
+        try {
+            final File directory = new File(Ecdar.projectDirectory.getValue());
+
+            FileUtils.forceMkdir(directory);
+            FileUtils.cleanDirectory(directory);
+        } catch (final IOException e) {
+            e.printStackTrace();
+        }
+
+        // Save global and system declarations
+        try {
+            final Writer writer = getSaveFileWriter(Project.GLOBAL_DCL_FILENAME);
+            final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+            gson.toJson(Ecdar.getProject().getGlobalDeclarations().serialize(), writer);
+
+            writer.close();
+        } catch (final IOException e) {
+            Ecdar.showToast("Could not save project: " + e.getMessage());
+            e.printStackTrace();
+        }
+        try {
+            final Writer writer = getSaveFileWriter(Project.SYSTEM_DCL_FILENAME);
+            final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+            gson.toJson(Ecdar.getProject().getSystemDeclarations().serialize(), writer);
+
+            writer.close();
+        } catch (final IOException e) {
+            Ecdar.showToast("Could not save project: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        // Save components
+        Ecdar.getProject().getComponents().forEach(component -> {
+            try {
+                final Writer writer = getSaveFileWriter(component.getName());
+                final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+                gson.toJson(component.serialize(), writer);
+
+                writer.close();
+            } catch (final IOException e) {
+                Ecdar.showToast("Could not save project: " + e.getMessage());
+                e.printStackTrace();
+            }
+        });
+
+        final JsonArray queries = new JsonArray();
+        Ecdar.getProject().getQueries().forEach(query -> {
+            queries.add(query.serialize());
+        });
+
+        final Writer writer;
+        try {
+            writer = getSaveFileWriter("Queries");
+            final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+            gson.toJson(queries, writer);
+            writer.close();
+
+            Ecdar.showToast("Project saved!");
+        } catch (final IOException e) {
+            Ecdar.showToast("Could not save project: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Gets a new file writer for saving a file.
+     * @param filename name of file without extension.
+     * @return the file writer
+     */
+    private static FileWriter getSaveFileWriter(final String filename) throws IOException {
+        return new FileWriter(Ecdar.projectDirectory.getValue() + File.separator + filename + ".json");
+    }
+
+    /**
+     * Initializes menu item for creating a new project.
+     */
+    private void initializeCreateNewProjectMenuItem() {
+        menuBarFileCreateNewProject.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN));
+        menuBarFileCreateNewProject.setOnAction(event -> {
+
+            final ButtonType yesButton = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
+            final ButtonType noButton = new ButtonType("Don't save", ButtonBar.ButtonData.NO);
+            final ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+            final Alert alert = new Alert(Alert.AlertType.NONE,
+                    "Do you want to save the existing project?",
+                    yesButton,
+                    noButton,
+                    cancelButton);
+
+            alert.setTitle("Create new project");
+            final Optional<ButtonType> result = alert.showAndWait();
+
+            if (result.isPresent()) {
+                if (result.get() == yesButton) {
+                    save();
+                    createNewProject();
+                } else if (result.get() == noButton) {
+                    createNewProject();
+                }
+            }
+        });
+    }
+
+    /**
+     * Creates a new project.
+     */
+    private static void createNewProject() {
+        CodeAnalysis.disable();
+
+        CodeAnalysis.clearErrorsAndWarnings();
+
+        Ecdar.projectDirectory.set(null);
+
+        Ecdar.createNewProject();
+        CanvasController.setActiveVerificationObject(Ecdar.getProject().getComponents().get(0));
+
+        // TODO clear UndoRedoStack
+
+        CodeAnalysis.enable();
+    }
+
+    /**
      * Initializes button for exporting as png.
      */
     private void initializeFileExportAsPng() {
         menuBarFileExportAsPng.setAccelerator(new KeyCodeCombination(KeyCode.L, KeyCombination.SHORTCUT_DOWN));
         menuBarFileExportAsPng.setOnAction(event -> {
             //If there is no active component
-            if(CanvasController.getActiveComponent() == null){
+            if(CanvasController.getActiveVerificationObject() == null){
                 Ecdar.showToast("No component to export");
                 return;
             }
 
             //Save as png in picked directory
             final WritableImage image;
-            final String name = CanvasController.getActiveComponent().getName();
+            final String name = ((Component) CanvasController.getActiveVerificationObject()).getName();
             if (canvas.isGridOn()) {
                 canvas.toggleGrid();
                 image = canvas.snapshot(new SnapshotParameters(), null);
@@ -872,17 +1027,18 @@ public class HUPPAALController implements Initializable {
      * This method is used as a central place to decide whether the tabPane is opened or closed
      * @param height the value used to set the height of the tabPane
      */
-    public void setMaxHeight(double height)
-    {
+    public void setMaxHeight(double height) {
         tabPaneContainer.setMaxHeight(height);
         if(height > 35) { //The tabpane is opened
             filePane.showBottomInset(false);
             queryPane.showBottomInset(false);
+            CanvasPresentation.showBottomInset(false);
         } else {
             // When closed we push up the scrollviews in the filePane and queryPane as the tabPane
             // would otherwise cover some items in these views
             filePane.showBottomInset(true);
             queryPane.showBottomInset(true);
+            CanvasPresentation.showBottomInset(true);
         }
     }
 
@@ -978,7 +1134,7 @@ public class HUPPAALController implements Initializable {
                     component.addEdge(edge);
                 }, String.format("Deleted %s", selectable.toString()), "delete");
             } else if (selectable instanceof JorkController) {
-                final Component component = CanvasController.getActiveComponent();
+                final Component component = (Component) CanvasController.getActiveVerificationObject();
                 final Jork jork = ((JorkController) selectable).getJork();
 
                 final List<Edge> relatedEdges = component.getRelatedEdges(jork);
@@ -993,7 +1149,7 @@ public class HUPPAALController implements Initializable {
                     relatedEdges.forEach(component::addEdge);
                 }, String.format("Deleted %s", selectable.toString()), "delete");
             } else if (selectable instanceof SubComponentController) {
-                final Component component = CanvasController.getActiveComponent();
+                final Component component = (Component) CanvasController.getActiveVerificationObject();
                 final SubComponent subComponent = ((SubComponentController) selectable).getSubComponent();
 
 

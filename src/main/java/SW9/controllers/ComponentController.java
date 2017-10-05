@@ -62,7 +62,7 @@ public class ComponentController implements Initializable {
     private final Map<Jork, JorkPresentation> jorkPresentationMap = new HashMap<>();
     public BorderPane toolbar;
     public Rectangle background;
-    public StyleClassedTextArea declaration;
+    public StyleClassedTextArea declarationTextArea;
     public JFXRippler toggleDeclarationButton;
     public BorderPane frame;
     public JFXTextField name;
@@ -104,8 +104,7 @@ public class ComponentController implements Initializable {
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
-
-        declaration.setParagraphGraphicFactory(LineNumberFactory.get(declaration));
+        declarationTextArea.setParagraphGraphicFactory(LineNumberFactory.get(declarationTextArea));
 
         component.addListener((obs, oldComponent, newComponent) -> {
             // Bind the width and the height of the abstraction to the values in the view todo: reflect the height and width from the presentation into the abstraction
@@ -123,12 +122,12 @@ public class ComponentController implements Initializable {
             newComponent.yProperty().bindBidirectional(root.layoutYProperty());
 
             // Bind the declarations of the abstraction the the view
-            declaration.replaceText(0, declaration.getLength(), newComponent.getDeclarations());
-            declaration.textProperty().addListener((observable, oldDeclaration, newDeclaration) -> newComponent.setDeclarations(newDeclaration));
+            declarationTextArea.replaceText(0, declarationTextArea.getLength(), newComponent.getDeclarationsText());
+            declarationTextArea.textProperty().addListener((observable, oldDeclaration, newDeclaration) -> newComponent.setDeclarationsText(newDeclaration));
 
 
             // Find the clocks in the decls
-            newComponent.declarationsProperty().addListener((observable, oldValue, newValue) -> {
+            newComponent.declarationsTextProperty().addListener((observable, oldValue, newValue) -> {
 
                 final List<String> clocks = new ArrayList<String>();
 
@@ -511,7 +510,7 @@ public class ComponentController implements Initializable {
 
             contextMenu.addListElement("Color");
 
-            contextMenu.addColorPicker(component, component::color);
+            contextMenu.addColorPicker(component, component::dye);
         };
 
 
@@ -755,14 +754,14 @@ public class ComponentController implements Initializable {
 
     private void initializeDeclarations() {
         // Initially style the declarations
-        declaration.setStyleSpans(0, ComponentPresentation.computeHighlighting(getComponent().getDeclarations()));
+        declarationTextArea.setStyleSpans(0, ComponentPresentation.computeHighlighting(getComponent().getDeclarationsText()));
 
         final Circle circle = new Circle(0);
-        if(getComponent().isDeclarationOpen()) {
+        if (getComponent().isDeclarationOpen()) {
             circle.setRadius(1000);
         }
         final ObjectProperty<Node> clip = new SimpleObjectProperty<>(circle);
-        declaration.clipProperty().bind(clip);
+        declarationTextArea.clipProperty().bind(clip);
         clip.set(circle);
     }
 
@@ -772,7 +771,7 @@ public class ComponentController implements Initializable {
         circle.setCenterY(-1 * mouseEvent.getY());
 
         final ObjectProperty<Node> clip = new SimpleObjectProperty<>(circle);
-        declaration.clipProperty().bind(clip);
+        declarationTextArea.clipProperty().bind(clip);
 
         final Transition rippleEffect = new Transition() {
             private final double maxRadius = Math.sqrt(Math.pow(getComponent().getWidth(), 2) + Math.pow(getComponent().getHeight(), 2));

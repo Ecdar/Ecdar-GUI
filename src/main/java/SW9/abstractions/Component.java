@@ -6,7 +6,6 @@ import SW9.presentations.DropDownMenu;
 import SW9.utility.UndoRedoStack;
 import SW9.utility.colors.Color;
 import SW9.utility.colors.EnabledColor;
-import SW9.utility.serialize.Serializable;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import javafx.beans.property.*;
@@ -18,12 +17,10 @@ import javafx.util.Pair;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class Component implements Serializable, DropDownMenu.HasColor {
+public class Component extends VerificationObject implements DropDownMenu.HasColor {
 
     private static final AtomicInteger hiddenID = new AtomicInteger(0); // Used to generate unique IDs
 
-    private static final String NAME = "name";
-    private static final String DECLARATIONS = "declarations";
     private static final String LOCATIONS = "locations";
     private static final String JORKS = "jorks";
     private static final String INITIAL_LOCATION = "initial_location";
@@ -36,13 +33,10 @@ public class Component implements Serializable, DropDownMenu.HasColor {
     private static final String Y = "y";
     private static final String WIDTH = "width";
     private static final String HEIGHT = "height";
-    private static final String COLOR = "color";
     private static final String INCLUDE_IN_PERIODIC_CHECK = "include_in_periodic_check";
-    private static final String COLOR_INTENSITY = "color_intensity";
+    private static final String COLOR = "color";
 
     // Verification properties
-    private final StringProperty name = new SimpleStringProperty("");
-    private final StringProperty declarations = new SimpleStringProperty("");
     private final ObservableList<Location> locations = FXCollections.observableArrayList();
     private final ObservableList<Jork> jorks = FXCollections.observableArrayList();
     private final ObservableList<Edge> edges = FXCollections.observableArrayList();
@@ -61,8 +55,6 @@ public class Component implements Serializable, DropDownMenu.HasColor {
     private final DoubleProperty width = new SimpleDoubleProperty(450d);
     private final DoubleProperty height = new SimpleDoubleProperty(600d);
     private final BooleanProperty declarationOpen = new SimpleBooleanProperty(false);
-    private final ObjectProperty<Color> color = new SimpleObjectProperty<>(Color.GREY_BLUE);
-    private final ObjectProperty<Color.Intensity> colorIntensity = new SimpleObjectProperty<>(Color.Intensity.I700);
 
     private final BooleanProperty firsTimeShown = new SimpleBooleanProperty(false);
 
@@ -115,31 +107,6 @@ public class Component implements Serializable, DropDownMenu.HasColor {
         setFirsTimeShown(true);
         deserialize(object);
         bindReachabilityAnalysis();
-    }
-
-    public String getName() {
-        return name.get();
-    }
-
-    public void setName(final String name) {
-        this.name.unbind();
-        this.name.set(name);
-    }
-
-    public StringProperty nameProperty() {
-        return name;
-    }
-
-    public String getDeclarations() {
-        return declarations.get();
-    }
-
-    public void setDeclarations(final String declarations) {
-        this.declarations.set(declarations);
-    }
-
-    public StringProperty declarationsProperty() {
-        return declarations;
     }
 
     public ObservableList<Location> getLocations() {
@@ -318,30 +285,6 @@ public class Component implements Serializable, DropDownMenu.HasColor {
         return height;
     }
 
-    public Color getColor() {
-        return color.get();
-    }
-
-    public void setColor(final Color color) {
-        this.color.set(color);
-    }
-
-    public ObjectProperty<Color> colorProperty() {
-        return color;
-    }
-
-    public Color.Intensity getColorIntensity() {
-        return colorIntensity.get();
-    }
-
-    public void setColorIntensity(final Color.Intensity colorIntensity) {
-        this.colorIntensity.set(colorIntensity);
-    }
-
-    public ObjectProperty<Color.Intensity> colorIntensityProperty() {
-        return colorIntensity;
-    }
-
     public boolean isDeclarationOpen() {
         return declarationOpen.get();
     }
@@ -407,18 +350,6 @@ public class Component implements Serializable, DropDownMenu.HasColor {
         return isMain;
     }
 
-    public String getDescription() {
-        return description.get();
-    }
-
-    public void setDescription(final String description) {
-        this.description.set(description);
-    }
-
-    public StringProperty descriptionProperty() {
-        return description;
-    }
-
     public boolean isFirsTimeShown() {
         return firsTimeShown.get();
     }
@@ -445,10 +376,7 @@ public class Component implements Serializable, DropDownMenu.HasColor {
 
     @Override
     public JsonObject serialize() {
-        final JsonObject result = new JsonObject();
-
-        result.addProperty(NAME, getName());
-        result.addProperty(DECLARATIONS, getDeclarations());
+        final JsonObject result = super.serialize();
 
         final JsonArray locations = new JsonArray();
         getLocations().forEach(location -> locations.add(location.serialize()));
@@ -477,6 +405,7 @@ public class Component implements Serializable, DropDownMenu.HasColor {
         result.addProperty(Y, getY());
         result.addProperty(WIDTH, getWidth());
         result.addProperty(HEIGHT, getHeight());
+
         result.addProperty(COLOR, EnabledColor.getIdentifier(getColor()));
 
         result.addProperty(INCLUDE_IN_PERIODIC_CHECK, isIncludeInPeriodicCheck());
@@ -486,8 +415,7 @@ public class Component implements Serializable, DropDownMenu.HasColor {
 
     @Override
     public void deserialize(final JsonObject json) {
-        setName(json.getAsJsonPrimitive(NAME).getAsString());
-        setDeclarations(json.getAsJsonPrimitive(DECLARATIONS).getAsString());
+        super.deserialize(json);
 
         json.getAsJsonArray(LOCATIONS).forEach(jsonElement -> {
             final Location newLocation = new Location((JsonObject) jsonElement);
@@ -533,7 +461,12 @@ public class Component implements Serializable, DropDownMenu.HasColor {
         setIncludeInPeriodicCheck(json.getAsJsonPrimitive(INCLUDE_IN_PERIODIC_CHECK).getAsBoolean());
     }
 
-    public void color(final Color color, final Color.Intensity intensity) {
+    /**
+     * Dyes the component and its locations.
+     * @param color the color to dye with
+     * @param intensity the intensity of the color
+     */
+    public void dye(final Color color, final Color.Intensity intensity) {
         final Color previousColor = colorProperty().get();
         final Color.Intensity previousColorIntensity = colorIntensityProperty().get();
 
@@ -570,7 +503,19 @@ public class Component implements Serializable, DropDownMenu.HasColor {
     private void bindReachabilityAnalysis() {
         locations.addListener((ListChangeListener<? super Location>) c -> HUPPAALController.runReachabilityAnalysis());
         edges.addListener((ListChangeListener<? super Edge>) c -> HUPPAALController.runReachabilityAnalysis());
-        declarationsProperty().addListener((observable, oldValue, newValue) -> HUPPAALController.runReachabilityAnalysis());
+        declarationsTextProperty().addListener((observable, oldValue, newValue) -> HUPPAALController.runReachabilityAnalysis());
         includeInPeriodicCheckProperty().addListener((observable, oldValue, newValue) -> HUPPAALController.runReachabilityAnalysis());
+    }
+
+    public String getDescription() {
+        return description.get();
+    }
+
+    public void setDescription(final String description) {
+        this.description.set(description);
+    }
+
+    public StringProperty descriptionProperty() {
+        return description;
     }
 }

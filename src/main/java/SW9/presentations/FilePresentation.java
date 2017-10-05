@@ -1,7 +1,9 @@
 package SW9.presentations;
 
 import SW9.abstractions.Component;
+import SW9.abstractions.VerificationObject;
 import SW9.controllers.CanvasController;
+import SW9.controllers.FileController;
 import SW9.utility.colors.Color;
 import com.jfoenix.controls.JFXRippler;
 import javafx.beans.property.SimpleObjectProperty;
@@ -19,10 +21,11 @@ import java.net.URL;
 import java.util.function.BiConsumer;
 
 public class FilePresentation extends AnchorPane {
+    private final SimpleObjectProperty<VerificationObject> verificationObject = new SimpleObjectProperty<>(null);
 
-    private final SimpleObjectProperty<Component> component = new SimpleObjectProperty<>(null);
+    private FileController controller;
 
-    public FilePresentation(final Component component) {
+    public FilePresentation(final VerificationObject verificationObject) {
         final URL location = this.getClass().getResource("FilePresentation.fxml");
 
         final FXMLLoader fxmlLoader = new FXMLLoader();
@@ -33,7 +36,9 @@ public class FilePresentation extends AnchorPane {
             fxmlLoader.setRoot(this);
             fxmlLoader.load(location.openStream());
 
-            this.component.set(component);
+            controller = fxmlLoader.getController();
+
+            this.verificationObject.set(verificationObject);
 
             initializeIcon();
             initializeFileName();
@@ -47,16 +52,12 @@ public class FilePresentation extends AnchorPane {
     }
 
     private void initializeMoreInformationButton() {
-        final JFXRippler moreInformation = (JFXRippler) lookup("#moreInformation");
-
-        moreInformation.setMaskType(JFXRippler.RipplerMask.CIRCLE);
-        moreInformation.setPosition(JFXRippler.RipplerPos.BACK);
-        moreInformation.setRipplerFill(Color.GREY_BLUE.getColor(Color.Intensity.I500));
-
-        /*moreInformation.setOnMousePressed((mouseEvent) -> {
-            mouseEvent.consume();
-            component.get().setIsMain(true);
-        });*/
+        if (getVerificationObject() instanceof Component) {
+            controller.moreInformation.setVisible(true);
+            controller.moreInformation.setMaskType(JFXRippler.RipplerMask.CIRCLE);
+            controller.moreInformation.setPosition(JFXRippler.RipplerPos.BACK);
+            controller.moreInformation.setRipplerFill(Color.GREY_BLUE.getColor(Color.Intensity.I500));
+        }
     }
 
     private void initializeRippler() {
@@ -74,31 +75,21 @@ public class FilePresentation extends AnchorPane {
     private void initializeFileName() {
         final Label label = (Label) lookup("#fileName");
 
-        component.get().nameProperty().addListener((obs, oldName, newName) -> label.setText(newName));
-        label.setText(component.get().getName());
+        verificationObject.get().nameProperty().addListener((obs, oldName, newName) -> label.setText(newName));
+        label.setText(verificationObject.get().getName());
     }
 
     private void initializeIcon() {
         final Circle circle = (Circle) lookup("#iconBackground");
         final FontIcon icon = (FontIcon) lookup("#icon");
 
-        component.get().colorProperty().addListener((obs, oldColor, newColor) -> {
-            circle.setFill(newColor.getColor(component.get().getColorIntensity()));
-            icon.setFill(newColor.getTextColor(component.get().getColorIntensity()));
+        verificationObject.get().colorProperty().addListener((obs, oldColor, newColor) -> {
+            circle.setFill(newColor.getColor(verificationObject.get().getColorIntensity()));
+            icon.setFill(newColor.getTextColor(verificationObject.get().getColorIntensity()));
         });
 
-        circle.setFill(component.get().getColor().getColor(component.get().getColorIntensity()));
-        icon.setFill(component.get().getColor().getTextColor(component.get().getColorIntensity()));
-
-        component.get().isMainProperty().addListener((obs, oldIsMain, newIsMain) -> {
-            if (newIsMain) {
-                icon.setIconLiteral("gmi-star");
-                icon.setIconSize(22);
-            } else {
-                icon.setIconLiteral("gmi-description");
-                icon.setIconSize(22);
-            }
-        });
+        circle.setFill(verificationObject.get().getColor().getColor(verificationObject.get().getColorIntensity()));
+        icon.setFill(verificationObject.get().getColor().getTextColor(verificationObject.get().getColorIntensity()));
     }
 
     private void initializeColors() {
@@ -126,7 +117,7 @@ public class FilePresentation extends AnchorPane {
 
         // Update the background when hovered
         setOnMouseEntered(event -> {
-            if(CanvasController.getActiveComponent().equals(component.get())) {
+            if(CanvasController.getActiveVerificationObject().equals(verificationObject.get())) {
                 setBackground.accept(color, colorIntensity.next(2));
             } else {
                 setBackground.accept(color, colorIntensity.next());
@@ -134,7 +125,7 @@ public class FilePresentation extends AnchorPane {
             setCursor(Cursor.HAND);
         });
         setOnMouseExited(event -> {
-            if(CanvasController.getActiveComponent().equals(component.get())) {
+            if(CanvasController.getActiveVerificationObject().equals(verificationObject.get())) {
                 setBackground.accept(color, colorIntensity.next(1));
             } else {
                 setBackground.accept(color, colorIntensity);
@@ -146,7 +137,7 @@ public class FilePresentation extends AnchorPane {
             if (newActiveComponent == null) return;
 
 
-            if (newActiveComponent.equals(component.get())) {
+            if (newActiveComponent.equals(verificationObject.get())) {
                 setBackground.accept(color, colorIntensity.next(2));
             } else {
                 setBackground.accept(color, colorIntensity);
@@ -157,12 +148,7 @@ public class FilePresentation extends AnchorPane {
         setBackground.accept(color, colorIntensity);
     }
 
-    public Component getComponent() {
-        return component.get();
+    public VerificationObject getVerificationObject() {
+        return verificationObject.get();
     }
-
-    public SimpleObjectProperty<Component> componentProperty() {
-        return component;
-    }
-
 }

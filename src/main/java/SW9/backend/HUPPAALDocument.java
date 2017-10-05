@@ -168,9 +168,9 @@ public class HUPPAALDocument {
         uppaalDocument.insert(template, null);
 
         if(subComponent != null) {
-            template.setProperty(DECLARATION_PROPERTY_TAG, component.getDeclarations());
+            template.setProperty(DECLARATION_PROPERTY_TAG, component.getDeclarationsText());
         } else {
-            addToGlobalDeclarations(component.getDeclarations());
+            addToGlobalDeclarations(component.getDeclarationsText());
         }
 
         // Add all locations from the model to our conversion map and to the template

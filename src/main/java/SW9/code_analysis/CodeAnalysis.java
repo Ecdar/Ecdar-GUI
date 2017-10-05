@@ -99,14 +99,6 @@ public class CodeAnalysis {
         }
     }
 
-    public static void clearWarnings(final Component component) {
-        getWarnings(component).clear();
-    }
-
-    public static void clearErrors(final Component component) {
-        getErrors(component).clear();
-    }
-
     public static ObservableList<Message> getWarnings() {
         return warnings;
     }
@@ -125,6 +117,15 @@ public class CodeAnalysis {
 
     public static ObservableList<Message> getBackendErrors() {
         return backendErrors;
+    }
+
+    /**
+     * Clears errors and warnings.
+     */
+    public static void clearErrorsAndWarnings() {
+        getBackendErrors().removeIf(message -> true);
+        getErrors().removeIf(message -> true);
+        getWarnings().removeIf(message -> true);
     }
 
     public enum MessageType {WARNING, ERROR}

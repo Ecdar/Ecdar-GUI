@@ -120,9 +120,8 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
                 onUpdateSize.run();
             });
 
-            controller.declaration.textProperty().addListener((obs, oldText, newText) -> {
-                controller.declaration.setStyleSpans(0, computeHighlighting(newText));
-            });
+            controller.declarationTextArea.textProperty().addListener((obs, oldText, newText) ->
+                    controller.declarationTextArea.setStyleSpans(0, computeHighlighting(newText)));
 
         } catch (final IOException ioe) {
             throw new IllegalStateException(ioe);

@@ -1,6 +1,7 @@
 package SW9;
 
 import SW9.abstractions.Component;
+import SW9.abstractions.Declarations;
 import SW9.abstractions.Project;
 import SW9.abstractions.Query;
 import SW9.backend.UPPAALDriver;
@@ -34,9 +35,7 @@ import jiconfont.javafx.IconFontFX;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Writer;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.security.CodeSource;
@@ -57,10 +56,8 @@ public class Ecdar extends Application {
             final CodeSource codeSource = Ecdar.class.getProtectionDomain().getCodeSource();
             final File jarFile = new File(codeSource.getLocation().toURI().getPath());
             final String rootDirectory = jarFile.getParentFile().getPath() + File.separator;
-            projectDirectory.set(rootDirectory + "projects" + File.separator + "project");
             serverDirectory = rootDirectory + "servers";
             debugDirectory = rootDirectory + "uppaal-debug";
-            forceCreateFolder(projectDirectory.getValue());
             forceCreateFolder(serverDirectory);
             forceCreateFolder(debugDirectory);
         } catch (final URISyntaxException e) {
@@ -76,69 +73,19 @@ public class Ecdar extends Application {
         launch(Ecdar.class, args);
     }
 
+    /**
+     * Gets the project.
+     * @return the project
+     */
     public static Project getProject() {
         return project;
     }
 
     /**
-     * Saves the current project to the given path.
-     * This changes the {@see Ecdar#projectDirectory}
-     * to the path, and then calls {@see Ecdar#save()}
-     * @param path The path to where the project should be saved
+     * Creates a new instance of Project.
      */
-    public static void saveAs(String path){
-        projectDirectory.setValue(path);
-        save();
-    }
-
-    /***
-     * Saves the project to the {@see Ecdar#projectDirectory} path.
-     * This include making directories, converting project files (components and queries)
-     * into Json formatted files.
-     */
-    public static void save() {
-        // Clear the project folder
-        try {
-            final File directory = new File(projectDirectory.getValue());
-
-            FileUtils.forceMkdir(directory);
-            FileUtils.cleanDirectory(directory);
-        } catch (final IOException e) {
-            e.printStackTrace();
-        }
-
-        Ecdar.getProject().getComponents().forEach(component -> {
-            try {
-                final Writer writer = new FileWriter(String.format(projectDirectory.getValue() + File.separator + "%s.json", component.getName()));
-                final Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
-                gson.toJson(component.serialize(), writer);
-
-                writer.close();
-            } catch (final IOException e) {
-                showToast("Could not save project: " + e.getMessage());
-                e.printStackTrace();
-            }
-        });
-
-        final JsonArray queries = new JsonArray();
-        Ecdar.getProject().getQueries().forEach(query -> {
-            queries.add(query.serialize());
-        });
-
-        final Writer writer;
-        try {
-            writer = new FileWriter(projectDirectory.getValue() + File.separator + "Queries.json");
-            final Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
-            gson.toJson(queries, writer);
-            writer.close();
-
-            showToast("Project saved!");
-        } catch (final IOException e) {
-            showToast("Could not save project: " + e.getMessage());
-            e.printStackTrace();
-        }
+    public static void createNewProject() {
+        project.reset();
     }
 
     public static void showToast(final String message) {
@@ -218,10 +165,11 @@ public class Ecdar extends Application {
                 new Image(getClass().getResource("ic_launcher/mipmap-xxxhdpi/ic_launcher.png").toExternalForm())
         );
 
-        initializeProjectFolder();
-
         // We're now ready! Let the curtains fall!
         stage.show();
+
+        project.reset();
+        CanvasController.setActiveVerificationObject(Ecdar.getProject().getComponents().get(0));
 
         HUPPAALController.reachabilityServiceEnabled = true;
 
@@ -286,14 +234,9 @@ public class Ecdar extends Application {
                 });
             }
         });
-
-        CodeAnalysis.getBackendErrors().removeIf(message -> true);
-        CodeAnalysis.getErrors().removeIf(message -> true);
-        CodeAnalysis.getWarnings().removeIf(message -> true);
+        CodeAnalysis.clearErrorsAndWarnings();
         CodeAnalysis.disable();
-        Ecdar.getProject().getQueries().removeIf(query -> true);
-        Ecdar.getProject().getComponents().removeIf(component -> true);
-        Ecdar.getProject().setMainComponent(null);
+        cleanProject();
 
         // Deserialize the project
         deserializeProject(directory);
@@ -312,19 +255,29 @@ public class Ecdar extends Application {
                 initialShownComponent = component;
             }
 
-            CanvasController.setActiveComponent(component);
+            CanvasController.setActiveVerificationObject(component);
         }
 
         // If we found a component (preferably main) set that as active
         if (initialShownComponent != null) {
-            CanvasController.setActiveComponent(initialShownComponent);
+            CanvasController.setActiveVerificationObject(initialShownComponent);
         }
 
         serializationDone = true;
     }
 
-    private static void deserializeProject(final File projectFolder) throws IOException {
+    /**
+     * Cleans the project.
+     * Be sure to disable code analysis before call and enable after call.
+     */
+    public static void cleanProject() {
+        Ecdar.getProject().getQueries().removeIf(query -> true);
+        Ecdar.getProject().getComponents().removeIf(component -> true);
+        Ecdar.getProject().setMainComponent(null);
+    }
 
+    // TODO Deserialize in Project
+    private static void deserializeProject(final File projectFolder) throws IOException {
         // If there are no files do not try to deserialize
         final File[] projectFiles = projectFolder.listFiles();
         if (projectFiles == null || projectFiles.length == 0) return;
@@ -335,8 +288,19 @@ public class Ecdar extends Application {
         JsonObject mainJsonComponent = null;
 
         for (final File file : projectFiles) {
-
             final String fileContent = Files.toString(file, Charset.defaultCharset());
+
+            if (file.getName().equals(Project.GLOBAL_DCL_FILENAME + Project.JSON_FILENAME_EXTENSION)) {
+                final JsonObject jsonObject = new JsonParser().parse(fileContent).getAsJsonObject();
+                getProject().setGlobalDeclarations(new Declarations(jsonObject));
+                continue;
+            }
+
+            if (file.getName().equals(Project.SYSTEM_DCL_FILENAME+ Project.JSON_FILENAME_EXTENSION)) {
+                final JsonObject jsonObject = new JsonParser().parse(fileContent).getAsJsonObject();
+                getProject().setSystemDeclarations(new Declarations(jsonObject));
+                continue;
+            }
 
             // If the file represents the queries
             if (file.getName().equals("Queries.json")) {

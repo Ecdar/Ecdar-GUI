@@ -145,7 +145,7 @@ public class JorkController implements Initializable, SelectHelper.ItemSelectabl
         contextMenu.addSpacerElement();
 
         contextMenu.addClickableListElement("Delete", (mouseEvent -> {
-            final Component component = CanvasController.getActiveComponent();
+            final Component component = (Component) CanvasController.getActiveVerificationObject();
             final Jork jork = getJork();
 
             final List<Edge> relatedEdges = component.getRelatedEdges(jork);
