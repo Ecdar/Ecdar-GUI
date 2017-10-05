@@ -88,11 +88,12 @@ public class DeclarationsController implements Initializable {
     }
 
     /**
-     * Updates the offset of the height of the view based on whether the offset should be show.
-     * @param offsetShouldShow true iff an offset should be shown
+     * Updates if height of the view should have an offset at the bottom.
+     * Whether the view should have an offset is based on the configuration of the error view.
+     * @param shouldHave true iff views should have an offset
      */
-    private void updateOffset(final boolean offsetShouldShow) {
-        if (offsetShouldShow) {
+    private void updateOffset(final boolean shouldHave) {
+        if (shouldHave) {
             offSet = 20;
         } else {
             offSet = 0;

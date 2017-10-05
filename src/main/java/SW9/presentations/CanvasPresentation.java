@@ -85,7 +85,7 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
      * @param shouldShow true iff views should show an inset
      */
     public static void showBottomInset(final Boolean shouldShow) {
-        CanvasController.showBottomInset(shouldShow);
+        CanvasController.updateOffset(shouldShow);
     }
 
     @Override

@@ -151,10 +151,11 @@ public class CanvasController implements Initializable {
     }
 
     /**
-     * Updates if views should show an inset behind the error view.
-     * @param shouldShow true iff views should show an inset
+     * Updates if height of views should have offsets at the bottom.
+     * Whether views should have an offset is based on the configuration of the error view.
+     * @param shouldHave true iff views should have an offset
      */
-    public static void showBottomInset(final Boolean shouldShow) {
-        insetShouldShow.set(shouldShow);
+    public static void updateOffset(final Boolean shouldHave) {
+        insetShouldShow.set(shouldHave);
     }
 }
