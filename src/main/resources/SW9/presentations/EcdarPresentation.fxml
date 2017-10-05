@@ -12,7 +12,7 @@
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="StackPane"
          fx:id="root"
-         fx:controller="SW9.controllers.HUPPAALController">
+         fx:controller="SW9.controllers.EcdarController">
 
     <!-- Actual content of the view -->
     <BorderPane>

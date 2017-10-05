@@ -51,7 +51,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
-public class HUPPAALController implements Initializable {
+public class EcdarController implements Initializable {
 
     // Reachability analysis
     public static boolean reachabilityServiceEnabled = false;
@@ -319,7 +319,7 @@ public class HUPPAALController implements Initializable {
 
                 try {
                     // Make sure that the model is generated
-                    UPPAALDriver.buildHUPPAALDocument();
+                    UPPAALDriver.buildEcdarDocument();
 
                     Ecdar.getProject().getQueries().forEach(query -> {
                         if (query.isPeriodic()) query.run();
@@ -410,7 +410,7 @@ public class HUPPAALController implements Initializable {
             if(newMain == null) {
                 CodeAnalysis.addMessage(null, noMainComponentErrorMessage);
             } else {
-                HUPPAALController.runReachabilityAnalysis();
+                EcdarController.runReachabilityAnalysis();
                 CodeAnalysis.removeMessage(null, noMainComponentErrorMessage);
             }
         });

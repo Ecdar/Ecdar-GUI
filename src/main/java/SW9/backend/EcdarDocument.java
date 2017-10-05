@@ -14,7 +14,7 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class HUPPAALDocument {
+public class EcdarDocument {
 
     private static final String SUBS_DONE_BROADCAST = "subDone";
     private static final String DECLARATION_PROPERTY_TAG = "declaration";
@@ -61,7 +61,7 @@ public class HUPPAALDocument {
 
     private ArrayList<String> subComponentTemplates = new ArrayList<>();
 
-    public HUPPAALDocument(final Component mainComponent) throws BackendException {
+    public EcdarDocument(final Component mainComponent) throws BackendException {
         this.mainComponent = mainComponent;
         generateUPPAALDocument();
     }

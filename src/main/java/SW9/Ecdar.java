@@ -5,9 +5,9 @@ import SW9.abstractions.Project;
 import SW9.backend.UPPAALDriver;
 import SW9.code_analysis.CodeAnalysis;
 import SW9.controllers.CanvasController;
-import SW9.controllers.HUPPAALController;
+import SW9.controllers.EcdarController;
 import SW9.presentations.BackgroundThreadPresentation;
-import SW9.presentations.HUPPAALPresentation;
+import SW9.presentations.EcdarPresentation;
 import SW9.presentations.UndoRedoHistoryPresentation;
 import SW9.utility.keyboard.Keybind;
 import SW9.utility.keyboard.KeyboardTracker;
@@ -41,7 +41,7 @@ public class Ecdar extends Application {
     public static String debugDirectory;
     public static boolean serializationDone = false;
     private static Project project;
-    private static HUPPAALPresentation presentation;
+    private static EcdarPresentation presentation;
     public static SimpleStringProperty projectDirectory = new SimpleStringProperty();
     private Stage debugStage;
 
@@ -128,12 +128,11 @@ public class Ecdar extends Application {
         stage.initStyle(StageStyle.UNIFIED);
 
         // Make the view used for the application
-        final HUPPAALPresentation huppaal = new HUPPAALPresentation();
-        presentation = huppaal;
+        presentation = new EcdarPresentation();
 
         // Make the scene that we will use, and set its size to 80% of the primary screen
         final Screen screen = Screen.getPrimary();
-        final Scene scene = new Scene(huppaal, screen.getVisualBounds().getWidth() * 0.8, screen.getVisualBounds().getHeight() * 0.8);
+        final Scene scene = new Scene(presentation, screen.getVisualBounds().getWidth() * 0.8, screen.getVisualBounds().getHeight() * 0.8);
         stage.setScene(scene);
 
         // Load all .css files used todo: these should be loaded in the view classes (?)
@@ -165,7 +164,7 @@ public class Ecdar extends Application {
         project.reset();
         CanvasController.setActiveVerificationObject(Ecdar.getProject().getComponents().get(0));
 
-        HUPPAALController.reachabilityServiceEnabled = true;
+        EcdarController.reachabilityServiceEnabled = true;
 
         // Register a key-bind for showing debug-information
         KeyboardTracker.registerKeybind("DEBUG", new Keybind(new KeyCodeCombination(KeyCode.F12), () -> {

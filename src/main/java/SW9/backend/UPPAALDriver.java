@@ -27,22 +27,22 @@ public class UPPAALDriver {
     public static final int MAX_ENGINES = 10;
     public static final Object engineLock = false; // Used to lock concurrent engine reference access
 
-    private static HUPPAALDocument huppaalDocument;
+    private static EcdarDocument ecdarDocument;
 
     public static void generateDebugUPPAALModel() throws Exception, BackendException {
         // Generate and store the debug document
-        buildHUPPAALDocument();
-        storeUppaalFile(huppaalDocument.toUPPAALDocument(), Ecdar.debugDirectory + File.separator + "debug.xml");
+        buildEcdarDocument();
+        storeUppaalFile(ecdarDocument.toUPPAALDocument(), Ecdar.debugDirectory + File.separator + "debug.xml");
     }
 
-    public static void buildHUPPAALDocument() throws BackendException, Exception {
+    public static void buildEcdarDocument() throws BackendException, Exception {
         final Component mainComponent = Ecdar.getProject().getMainComponent();
         if (mainComponent == null) {
             throw new Exception("Main component is null");
         }
 
-        // Generate HUPPAAL document based on the main component
-        huppaalDocument = new HUPPAALDocument(mainComponent);
+        // Generate Ecdar document based on the main component
+        ecdarDocument = new EcdarDocument(mainComponent);
     }
 
     public static Thread runQuery(final String query,
@@ -109,7 +109,7 @@ public class UPPAALDriver {
                     final ArrayList<Problem> problems = new ArrayList<>();
 
                     // Get the system, and fill the problems list if any
-                    final UppaalSystem system = engine.getSystem(huppaalDocument.toUPPAALDocument(), problems);
+                    final UppaalSystem system = engine.getSystem(ecdarDocument.toUPPAALDocument(), problems);
 
                     // Run on UI thread
                     Platform.runLater(() -> {

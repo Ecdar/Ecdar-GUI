@@ -118,7 +118,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
         dropDownMenu.addClickableListElement("Draw edge",
                 (event) -> {
-                        final Edge newEdge = new Edge(getLocation(), HUPPAALController.getGlobalEdgeStatus());
+                        final Edge newEdge = new Edge(getLocation(), EcdarController.getGlobalEdgeStatus());
 
                         KeyboardTracker.registerKeybind(KeyboardTracker.ABANDON_EDGE, new Keybind(new KeyCodeCombination(KeyCode.ESCAPE), () -> {
                             getComponent().removeEdge(newEdge);
@@ -349,7 +349,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                 } else {
                     // If shift is being held down, start drawing a new edge
                     if ((event.isShiftDown() && event.isPrimaryButtonDown()) || event.isMiddleButtonDown()) {
-                        final Edge newEdge = new Edge(getLocation(), HUPPAALController.getGlobalEdgeStatus());
+                        final Edge newEdge = new Edge(getLocation(), EcdarController.getGlobalEdgeStatus());
 
                         KeyboardTracker.registerKeybind(KeyboardTracker.ABANDON_EDGE, new Keybind(new KeyCodeCombination(KeyCode.ESCAPE), () -> {
                             component.removeEdge(newEdge);

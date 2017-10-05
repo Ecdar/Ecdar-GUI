@@ -2,7 +2,7 @@ package SW9.backend;
 
 import SW9.abstractions.Query;
 import SW9.abstractions.QueryState;
-import SW9.controllers.HUPPAALController;
+import SW9.controllers.EcdarController;
 import com.uppaal.engine.QueryFeedback;
 import com.uppaal.engine.QueryVerificationResult;
 import com.uppaal.model.system.symbolic.SymbolicTransition;
@@ -55,7 +55,7 @@ public class QueryListener implements QueryFeedback {
     public void setFeedback(final String s) {
         if (s.contains("inf") || s.contains("sup")) {
             Platform.runLater(() -> {
-                HUPPAALController.openQueryDialog(query, s.split("\n")[1]);
+                EcdarController.openQueryDialog(query, s.split("\n")[1]);
             });
         }
     }

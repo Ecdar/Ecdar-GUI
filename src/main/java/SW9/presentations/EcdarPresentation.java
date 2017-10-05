@@ -3,7 +3,7 @@ package SW9.presentations;
 import SW9.Ecdar;
 import SW9.abstractions.Query;
 import SW9.code_analysis.CodeAnalysis;
-import SW9.controllers.HUPPAALController;
+import SW9.controllers.EcdarController;
 import SW9.utility.UndoRedoStack;
 import SW9.utility.colors.Color;
 import SW9.utility.colors.EnabledColor;
@@ -38,9 +38,9 @@ import java.util.List;
 
 import static SW9.utility.colors.EnabledColor.enabledColors;
 
-public class HUPPAALPresentation extends StackPane {
+public class EcdarPresentation extends StackPane {
 
-    private final HUPPAALController controller;
+    private final EcdarController controller;
 
     private final BooleanProperty queryPaneOpen = new SimpleBooleanProperty(false);
     private final SimpleDoubleProperty queryPaneAnimationProperty = new SimpleDoubleProperty(0);
@@ -51,8 +51,8 @@ public class HUPPAALPresentation extends StackPane {
     private Timeline closeFilePaneAnimation;
     private Timeline openFilePaneAnimation;
 
-    public HUPPAALPresentation() {
-        final URL location = this.getClass().getResource("HUPPAALPresentation.fxml");
+    public EcdarPresentation() {
+        final URL location = this.getClass().getResource("EcdarPresentation.fxml");
 
         final FXMLLoader fxmlLoader = new FXMLLoader();
         fxmlLoader.setLocation(location);
