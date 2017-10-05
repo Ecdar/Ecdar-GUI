@@ -1,7 +1,7 @@
 package SW9.abstractions;
 
 import SW9.code_analysis.Nearable;
-import SW9.controllers.HUPPAALController;
+import SW9.controllers.EcdarController;
 import SW9.presentations.DropDownMenu;
 import SW9.utility.colors.Color;
 import SW9.utility.colors.EnabledColor;
@@ -129,7 +129,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     }
 
     public void setUrgency(final Urgency urgency) {
-        HUPPAALController.runReachabilityAnalysis();
+        EcdarController.runReachabilityAnalysis();
         this.urgency.set(urgency);
     }
 
@@ -252,7 +252,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     }
 
     public void setInvariantY(final double invariantY) {
-        HUPPAALController.runReachabilityAnalysis();
+        EcdarController.runReachabilityAnalysis();
         this.invariantY.set(invariantY);
     }
 
@@ -344,8 +344,8 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
 
     private void bindReachabilityAnalysis() {
 
-        invariantProperty().addListener((observable, oldValue, newValue) -> HUPPAALController.runReachabilityAnalysis());
-        urgencyProperty().addListener((observable, oldValue, newValue) -> HUPPAALController.runReachabilityAnalysis());
+        invariantProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
+        urgencyProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
     }
 
 

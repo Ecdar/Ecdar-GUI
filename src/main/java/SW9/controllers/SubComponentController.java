@@ -87,7 +87,7 @@ public class SubComponentController implements Initializable, SelectHelper.ItemS
 
         dropDownMenu.addClickableListElement("Draw edge",
                 (event) -> {
-                    final Edge newEdge = new Edge(getSubComponent(), HUPPAALController.getGlobalEdgeStatus());
+                    final Edge newEdge = new Edge(getSubComponent(), EcdarController.getGlobalEdgeStatus());
 
                     KeyboardTracker.registerKeybind(KeyboardTracker.ABANDON_EDGE, new Keybind(new KeyCodeCombination(KeyCode.ESCAPE), () -> {
                         getParentComponent().removeEdge(newEdge);
@@ -117,10 +117,10 @@ public class SubComponentController implements Initializable, SelectHelper.ItemS
                     // Add a new sub-component
                     UndoRedoStack.pushAndPerform(() -> { // Perform
                         getSubComponent().setComponent(c);
-                        HUPPAALController.runReachabilityAnalysis();
+                        EcdarController.runReachabilityAnalysis();
                     }, () -> { // Undo
                         getSubComponent().setComponent(oldComponent);
-                        HUPPAALController.runReachabilityAnalysis();
+                        EcdarController.runReachabilityAnalysis();
                     }, "Updated component for  subcomponent '" + getSubComponent().toString() + "' to component '" + c.getName() + "'", "edit");
                 });
             }
@@ -282,7 +282,7 @@ public class SubComponentController implements Initializable, SelectHelper.ItemS
 
             } else if ((event.isShiftDown() && event.isPrimaryButtonDown()) || event.isMiddleButtonDown()) {
 
-                final Edge newEdge = new Edge(getSubComponent(), HUPPAALController.getGlobalEdgeStatus());
+                final Edge newEdge = new Edge(getSubComponent(), EcdarController.getGlobalEdgeStatus());
 
                 KeyboardTracker.registerKeybind(KeyboardTracker.ABANDON_EDGE, new Keybind(new KeyCodeCombination(KeyCode.ESCAPE), () -> {
                     getParentComponent().removeEdge(newEdge);

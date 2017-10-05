@@ -17,7 +17,7 @@ public class Trace {
         private final List<Location> targetLocations = new ArrayList<>();
         private final List<Edge> edges = new ArrayList<>();
 
-        private Transition(final SymbolicTransition symbolicTransition, final HUPPAALDocument huppaalDocument) {
+        private Transition(final SymbolicTransition symbolicTransition, final EcdarDocument ecdarDocument) {
 
             final SymbolicState sourceState = symbolicTransition.getSource();
             final SymbolicState targetState = symbolicTransition.getTarget();
@@ -26,19 +26,19 @@ public class Trace {
 
             if (sourceState != null) {
                 for (final SystemLocation sourceSystemLocation : sourceState.getLocations()) {
-                    sourceLocations.add(huppaalDocument.getLocation(sourceSystemLocation.getLocation()));
+                    sourceLocations.add(ecdarDocument.getLocation(sourceSystemLocation.getLocation()));
                 }
             }
 
             if (targetState != null) {
                 for (final SystemLocation targetSystemLocation : targetState.getLocations()) {
-                    targetLocations.add(huppaalDocument.getLocation(targetSystemLocation.getLocation()));
+                    targetLocations.add(ecdarDocument.getLocation(targetSystemLocation.getLocation()));
                 }
             }
 
             if (chosenEdges != null) {
                 for (final SystemEdgeSelect chosenEdge : chosenEdges) {
-                    edges.add(huppaalDocument.getEdge(chosenEdge.getEdge()));
+                    edges.add(ecdarDocument.getEdge(chosenEdge.getEdge()));
                 }
             }
         }
@@ -62,7 +62,7 @@ public class Trace {
 
     private List<Transition> transitions = new ArrayList<>();
 
-    public Trace(final List<SymbolicTransition> symbolicTransitions, final HUPPAALDocument huppaalDocument) {
-        symbolicTransitions.forEach(symbolicTransition -> transitions.add(new Transition(symbolicTransition, huppaalDocument)));
+    public Trace(final List<SymbolicTransition> symbolicTransitions, final EcdarDocument ecdarDocument) {
+        symbolicTransitions.forEach(symbolicTransition -> transitions.add(new Transition(symbolicTransition, ecdarDocument)));
     }
 }

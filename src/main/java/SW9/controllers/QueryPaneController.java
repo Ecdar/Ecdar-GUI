@@ -5,15 +5,12 @@ import SW9.abstractions.Query;
 import SW9.abstractions.QueryState;
 import SW9.backend.UPPAALDriver;
 import SW9.presentations.QueryPresentation;
-import SW9.utility.helpers.DropShadowHelper;
-import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXRippler;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -67,7 +64,7 @@ public class QueryPaneController implements Initializable {
     @FXML
     private void runAllQueriesButtonClicked() {
         try {
-            UPPAALDriver.buildHUPPAALDocument();
+            UPPAALDriver.buildEcdarDocument();
             Ecdar.getProject().getQueries().forEach(query -> {
                 query.cancel();
                 query.run(false);

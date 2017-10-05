@@ -3,7 +3,7 @@ package SW9.abstractions;
 import SW9.Ecdar;
 import SW9.backend.QueryListener;
 import SW9.backend.UPPAALDriver;
-import SW9.controllers.HUPPAALController;
+import SW9.controllers.EcdarController;
 import SW9.utility.serialize.Serializable;
 import com.google.gson.JsonObject;
 import com.uppaal.engine.Engine;
@@ -90,7 +90,7 @@ public class Query implements Serializable {
     private Boolean forcedCancel = false;
 
     private void initializeRunQuery() {
-        runQuery = (buildHUPPAALDocument) -> {
+        runQuery = (buildEcdarDocument) -> {
             setQueryState(QueryState.RUNNING);
 
             final Component mainComponent = Ecdar.getProject().getMainComponent();
@@ -100,8 +100,8 @@ public class Query implements Serializable {
             }
 
             try {
-                if (buildHUPPAALDocument) {
-                    UPPAALDriver.buildHUPPAALDocument();
+                if (buildEcdarDocument) {
+                    UPPAALDriver.buildEcdarDocument();
                 }
                 UPPAALDriver.runQuery(getQuery(),
                         aBoolean -> {
@@ -122,7 +122,7 @@ public class Query implements Serializable {
                                     if(cause instanceof NullPointerException) {
                                         setQueryState(QueryState.UNKNOWN);
                                     } else {
-                                        Platform.runLater(() -> HUPPAALController.openQueryDialog(this, cause.toString()));
+                                        Platform.runLater(() -> EcdarController.openQueryDialog(this, cause.toString()));
                                     }
                                 }
                             }
@@ -163,8 +163,8 @@ public class Query implements Serializable {
         run(true);
     }
 
-    public void run(final boolean buildHUPPAALDocument) {
-        runQuery.accept(buildHUPPAALDocument);
+    public void run(final boolean buildEcdarDocument) {
+        runQuery.accept(buildEcdarDocument);
     }
 
     public void cancel() {

@@ -1,7 +1,7 @@
 package SW9.abstractions;
 
 import SW9.Ecdar;
-import SW9.controllers.HUPPAALController;
+import SW9.controllers.EcdarController;
 import SW9.presentations.DropDownMenu;
 import SW9.utility.UndoRedoStack;
 import SW9.utility.colors.Color;
@@ -501,10 +501,10 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
     }
 
     private void bindReachabilityAnalysis() {
-        locations.addListener((ListChangeListener<? super Location>) c -> HUPPAALController.runReachabilityAnalysis());
-        edges.addListener((ListChangeListener<? super Edge>) c -> HUPPAALController.runReachabilityAnalysis());
-        declarationsTextProperty().addListener((observable, oldValue, newValue) -> HUPPAALController.runReachabilityAnalysis());
-        includeInPeriodicCheckProperty().addListener((observable, oldValue, newValue) -> HUPPAALController.runReachabilityAnalysis());
+        locations.addListener((ListChangeListener<? super Location>) c -> EcdarController.runReachabilityAnalysis());
+        edges.addListener((ListChangeListener<? super Edge>) c -> EcdarController.runReachabilityAnalysis());
+        declarationsTextProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
+        includeInPeriodicCheckProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
     }
 
     public String getDescription() {

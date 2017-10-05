@@ -1,7 +1,7 @@
 package SW9.abstractions;
 
 import SW9.code_analysis.Nearable;
-import SW9.controllers.HUPPAALController;
+import SW9.controllers.EcdarController;
 import SW9.presentations.JorkPresentation;
 import SW9.utility.colors.Color;
 import SW9.utility.helpers.Circular;
@@ -633,10 +633,10 @@ public class Edge implements Serializable, Nearable {
 
     private void bindReachabilityAnalysis() {
 
-        selectProperty().addListener((observable, oldValue, newValue) -> HUPPAALController.runReachabilityAnalysis());
-        guardProperty().addListener((observable, oldValue, newValue) -> HUPPAALController.runReachabilityAnalysis());
-        syncProperty().addListener((observable, oldValue, newValue) -> HUPPAALController.runReachabilityAnalysis());
-        updateProperty().addListener((observable, oldValue, newValue) -> HUPPAALController.runReachabilityAnalysis());
+        selectProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
+        guardProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
+        syncProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
+        updateProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
     }
 
 }
