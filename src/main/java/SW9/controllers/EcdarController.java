@@ -364,8 +364,9 @@ public class EcdarController implements Initializable {
 
                 } catch (final BackendException e) {
                     // Something went wrong with creating the document
+                    Ecdar.showToast("An Error occurred during setup of a query. I got the error: " + e.getMessage());
                     e.printStackTrace();
-                } catch (final Exception ignored) {
+                } catch (final NullPointerException ignored) {
                     // The main component is null. Ignore.
                 }
             }

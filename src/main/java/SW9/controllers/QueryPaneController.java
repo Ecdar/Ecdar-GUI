@@ -3,6 +3,7 @@ package SW9.controllers;
 import SW9.Ecdar;
 import SW9.abstractions.Query;
 import SW9.abstractions.QueryState;
+import SW9.backend.BackendException;
 import SW9.backend.UPPAALDriver;
 import SW9.presentations.QueryPresentation;
 import com.jfoenix.controls.JFXRippler;
@@ -69,8 +70,8 @@ public class QueryPaneController implements Initializable {
                 query.cancel();
                 query.run(false);
             });
-        } catch (final Exception e) {
-            e.printStackTrace();
+        } catch (final BackendException e) {
+            Ecdar.showToast("An Error occurred during setup of a query. I got the error: " + e.getMessage());
         }
     }
 

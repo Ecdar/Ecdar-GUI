@@ -1,6 +1,7 @@
 package SW9.abstractions;
 
 import SW9.Ecdar;
+import SW9.backend.BackendException;
 import SW9.backend.QueryListener;
 import SW9.backend.UPPAALDriver;
 import SW9.controllers.EcdarController;
@@ -132,8 +133,8 @@ public class Query implements Serializable {
                         },
                         new QueryListener(this)
                 ).start();
-            } catch (final Exception e) {
-                e.printStackTrace();
+            } catch (final BackendException e) {
+                Ecdar.showToast("An Error occurred during setup of a query. I got the error: " + e.getMessage());
             }
         };
     }
