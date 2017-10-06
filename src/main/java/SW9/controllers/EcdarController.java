@@ -1067,22 +1067,6 @@ public class EcdarController implements Initializable {
                     component.getJorks().add(jork);
                     relatedEdges.forEach(component::addEdge);
                 }, String.format("Deleted %s", selectable.toString()), "delete");
-            } else if (selectable instanceof SubComponentController) {
-                final Component component = (Component) CanvasController.getActiveVerificationObject();
-                final SubComponent subComponent = ((SubComponentController) selectable).getSubComponent();
-
-
-                final List<Edge> relatedEdges = component.getRelatedEdges(subComponent);
-
-                UndoRedoStack.pushAndPerform(() -> { // Perform
-                    // Remove the subComponent
-                    component.getSubComponents().remove(subComponent);
-                    relatedEdges.forEach(component::removeEdge);
-                }, () -> { // Undo
-                    // Re-all the subComponent
-                    component.getSubComponents().add(subComponent);
-                    relatedEdges.forEach(component::addEdge);
-                }, String.format("Deleted %s", selectable.toString()), "delete");
             } else if (selectable instanceof NailController) {
                 final NailController nailController = (NailController) selectable;
                 final Edge edge = nailController.getEdge();

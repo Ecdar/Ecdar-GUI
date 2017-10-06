@@ -526,17 +526,6 @@ public class Edge implements Serializable, Nearable {
         setFromAndToLocationIfMatches.accept(initialLocation);
         setFromAndToLocationIfMatches.accept(finalLocation);
 
-        // Sets a sub component to be either source or target sub component if the sub component matches the json content
-        final Consumer<SubComponent> setFromAndToSubComponentIfMatches = (subComponent) -> {
-            if (json.get(SOURCE_SUB_COMPONENT) != null && subComponent.getIdentifier().equals(json.getAsJsonPrimitive(SOURCE_SUB_COMPONENT).getAsString())) {
-                setSourceSubComponent(subComponent);
-            }
-            if (json.get(TARGET_SUB_COMPONENT) != null && subComponent.getIdentifier().equals(json.getAsJsonPrimitive(TARGET_SUB_COMPONENT).getAsString())) {
-                setTargetSubComponent(subComponent);
-            }
-        };
-
-        component.getSubComponents().forEach(setFromAndToSubComponentIfMatches);
 
         // Sets a jork to be either source or target jork if the jork matches the json content
         final Consumer<Jork> setFromAndToJorkIfMatches = (jork) -> {

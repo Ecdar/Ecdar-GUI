@@ -277,30 +277,8 @@ public class UPPAALDriver {
     private static List<String> getTemplateNames(final Component component) {
         final List<String> subComponentInstanceNames = new ArrayList<>();
 
-        if (component.isIsMain()) {
+        if (component != null) {
             subComponentInstanceNames.add(component.getName());
-        }
-
-        // Run through all sub components in main
-        for (final SubComponent subComp : Ecdar.getProject().getMainComponent().getSubComponents()) {
-            subComponentInstanceNames.addAll(getTemplateNames("", subComp, component));
-        }
-        return subComponentInstanceNames;
-    }
-
-    private static List<String> getTemplateNames(String str, final SubComponent subject, final Component needle) {
-        final List<String> subComponentInstanceNames = new ArrayList<>();
-
-        // Run all their sub components
-        for (final SubComponent sc : subject.getComponent().getSubComponents()) {
-            subComponentInstanceNames.addAll(getTemplateNames(subject.getIdentifier(), sc, needle));
-        }
-
-        if (subject.getComponent().equals(needle)) {
-            if (!Strings.isNullOrEmpty(str)) {
-                str += "_";
-            }
-            subComponentInstanceNames.add(str + subject.getIdentifier());
         }
 
         return subComponentInstanceNames;

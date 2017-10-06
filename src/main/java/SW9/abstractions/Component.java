@@ -25,7 +25,6 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
     private static final String JORKS = "jorks";
     private static final String INITIAL_LOCATION = "initial_location";
     private static final String FINAL_LOCATION = "final_location";
-    private static final String SUBCOMPONENTS = "sub_components";
     private static final String EDGES = "edges";
     private static final String IS_MAIN = "main";
     private static final String DESCRIPTION = "description";
@@ -389,9 +388,6 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         getJorks().forEach(jork -> jorks.add(jork.serialize()));
         result.add(JORKS, jorks);
 
-        final JsonArray subComponents = new JsonArray();
-        getSubComponents().forEach(subComponent -> subComponents.add(subComponent.serialize()));
-        result.add(SUBCOMPONENTS, subComponents);
 
         final JsonArray edges = new JsonArray();
         getEdges().forEach(edge -> edges.add(edge.serialize()));
@@ -433,10 +429,6 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
             jorks.add(newJork);
         });
 
-        json.getAsJsonArray(SUBCOMPONENTS).forEach(jsonElement -> {
-            final SubComponent newSubComponent = new SubComponent((JsonObject) jsonElement);
-            subComponents.add(newSubComponent);
-        });
 
         json.getAsJsonArray(EDGES).forEach(jsonElement -> {
             final Edge newEdge = new Edge((JsonObject) jsonElement, this);
