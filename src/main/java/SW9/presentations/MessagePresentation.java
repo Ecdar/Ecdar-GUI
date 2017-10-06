@@ -4,7 +4,6 @@ import SW9.Ecdar;
 import SW9.abstractions.Component;
 import SW9.abstractions.Edge;
 import SW9.abstractions.Location;
-import SW9.abstractions.SubComponent;
 import SW9.code_analysis.CodeAnalysis;
 import SW9.code_analysis.Nearable;
 import SW9.controllers.CanvasController;
@@ -68,7 +67,6 @@ public class MessagePresentation extends HBox {
 
                     final boolean isClickable = nearable instanceof Location
                             || nearable instanceof Edge
-                            || nearable instanceof SubComponent
                             || nearable instanceof Component;
 
                     if (isClickable) {
@@ -94,12 +92,6 @@ public class MessagePresentation extends HBox {
                             } else if (nearable instanceof Edge) { // We are pressing an edge, find the edge and open the corresponding component
                                 Ecdar.getProject().getComponents().forEach(component -> {
                                     if (component.getEdges().contains(nearable)) {
-                                        openComponent[0] = component;
-                                    }
-                                });
-                            } else if (nearable instanceof SubComponent) { // We are pressing a subcomponent, find the subcomponent and open the corresponding component
-                                Ecdar.getProject().getComponents().forEach(component -> {
-                                    if (component.getSubComponents().contains(nearable)) {
                                         openComponent[0] = component;
                                     }
                                 });

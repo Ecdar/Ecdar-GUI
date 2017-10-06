@@ -72,7 +72,6 @@ public class ComponentController implements Initializable {
     public Pane defaultLocationsContainer;
     public Rectangle rightAnchor;
     public Rectangle bottomAnchor;
-    public Pane modelContainerSubComponent;
     public Pane modelContainerLocation;
     public Pane modelContainerEdge;
     public Pane modelContainerJork;
@@ -471,7 +470,7 @@ public class ComponentController implements Initializable {
                 }, "Finished edge '" + unfinishedEdge + "' by adding '" + jork + "' to component '" + component.getName() + "'", "add-circle");
             });
 
-            finishEdgeContextMenu.addClickableAndDisableableListElement("Join", new SimpleBooleanProperty(unfinishedEdge.getSourceSubComponent() == null), event -> {
+            finishEdgeContextMenu.addClickableAndDisableableListElement("Join", new SimpleBooleanProperty(false), event  -> {
                 finishEdgeContextMenu.close();
 
                 final Jork jork = new Jork(Jork.Type.JOIN);

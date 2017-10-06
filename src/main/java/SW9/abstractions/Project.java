@@ -188,7 +188,7 @@ public class Project {
         }
 
         if (mainJsonComponent != null) {
-            updateDepthMap(mainJsonComponent, 0, componentJsonMap, componentMaxDepthMap);
+            updateDepthMap(mainJsonComponent, componentMaxDepthMap);
         }
 
         final List<Map.Entry<JsonObject, Integer>> list = new LinkedList<>(componentMaxDepthMap.entrySet());
@@ -215,18 +215,9 @@ public class Project {
         });
     }
 
-    private static void updateDepthMap(final JsonObject jsonObject, final int depth, final Map<String, JsonObject> nameToJson, final Map<JsonObject, Integer> jsonToDpeth) {
-        if (jsonToDpeth.get(jsonObject) < depth) {
-            jsonToDpeth.put(jsonObject, depth);
-        }
-
-        final List<String> subComponentNames = new ArrayList<>();
-
-        jsonObject.get("sub_components").getAsJsonArray().forEach(jsonElement ->
-                subComponentNames.add(jsonElement.getAsJsonObject().get("component").getAsString()));
-
-        for (final String subComponentName : subComponentNames) {
-            updateDepthMap(nameToJson.get(subComponentName), depth + 1, nameToJson, jsonToDpeth);
+    private static void updateDepthMap(final JsonObject jsonObject, final Map<JsonObject, Integer> jsonToDepth) {
+        if (jsonToDepth.get(jsonObject) < 0) {
+            jsonToDepth.put(jsonObject, 0);
         }
     }
 
