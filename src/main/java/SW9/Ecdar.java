@@ -113,7 +113,7 @@ public class Ecdar extends Application {
     }
 
     @Override
-    public void start(final Stage stage) throws Exception {
+    public void start(final Stage stage) {
         // Load or create new project
         project = new Project();
 
@@ -177,33 +177,29 @@ public class Ecdar extends Application {
                 return;
             }
 
-            try {
-                final UndoRedoHistoryPresentation undoRedoHistoryPresentation = new UndoRedoHistoryPresentation();
-                undoRedoHistoryPresentation.setMinWidth(100);
+            final UndoRedoHistoryPresentation undoRedoHistoryPresentation = new UndoRedoHistoryPresentation();
+            undoRedoHistoryPresentation.setMinWidth(100);
 
-                final BackgroundThreadPresentation backgroundThreadPresentation = new BackgroundThreadPresentation();
-                backgroundThreadPresentation.setMinWidth(100);
+            final BackgroundThreadPresentation backgroundThreadPresentation = new BackgroundThreadPresentation();
+            backgroundThreadPresentation.setMinWidth(100);
 
-                final HBox root = new HBox(undoRedoHistoryPresentation, backgroundThreadPresentation);
-                root.setStyle("-fx-background-color: brown;");
-                HBox.setHgrow(undoRedoHistoryPresentation, Priority.ALWAYS);
-                HBox.setHgrow(backgroundThreadPresentation, Priority.ALWAYS);
+            final HBox root = new HBox(undoRedoHistoryPresentation, backgroundThreadPresentation);
+            root.setStyle("-fx-background-color: brown;");
+            HBox.setHgrow(undoRedoHistoryPresentation, Priority.ALWAYS);
+            HBox.setHgrow(backgroundThreadPresentation, Priority.ALWAYS);
 
 
-                debugStage = new Stage();
-                debugStage.setScene(new Scene(root));
+            debugStage = new Stage();
+            debugStage.setScene(new Scene(root));
 
-                debugStage.getScene().getStylesheets().add("SW9/main.css");
-                debugStage.getScene().getStylesheets().add("SW9/colors.css");
+            debugStage.getScene().getStylesheets().add("SW9/main.css");
+            debugStage.getScene().getStylesheets().add("SW9/colors.css");
 
-                debugStage.setWidth(screen.getVisualBounds().getWidth() * 0.2);
-                debugStage.setHeight(screen.getVisualBounds().getWidth() * 0.3);
+            debugStage.setWidth(screen.getVisualBounds().getWidth() * 0.2);
+            debugStage.setHeight(screen.getVisualBounds().getWidth() * 0.3);
 
-                debugStage.show();
-                //stage.requestFocus();
-            } catch (final Exception e) {
-                e.printStackTrace();
-            }
+            debugStage.show();
+            //stage.requestFocus();
         }));
 
         stage.setOnCloseRequest(event -> {

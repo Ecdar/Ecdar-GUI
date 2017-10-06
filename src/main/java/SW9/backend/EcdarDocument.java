@@ -33,9 +33,6 @@ class EcdarDocument {
     // Map to convert back from UPPAAL edges to Ecdar edges
     private final Map<com.uppaal.model.core2.Edge, Edge> xmlToEcdarEdges = new HashMap<>();
 
-    // Map from location to all of its uppaal names
-    private final Map<Location, List<String>> hLocationToFlattenedNames = new HashMap<>();
-
     EcdarDocument() throws BackendException {
         generateXmlDocument();
     }
@@ -116,18 +113,8 @@ class EcdarDocument {
      * @param xmlLocation xml location to add
      */
     private void addLocationsToMaps(final Location ecdarLocation, final com.uppaal.model.core2.Location xmlLocation) {
-        final String serializedHLocationName = generateName(ecdarLocation);
         ecdarToXmlLocations.put(ecdarLocation, xmlLocation);
         xmlToEcdarLocations.put(xmlLocation, ecdarLocation);
-
-        // TODO overvej, om skal slettes
-        List<String> nameList;
-        nameList = hLocationToFlattenedNames.get(ecdarLocation);
-        if (nameList == null) {
-            nameList = new ArrayList<>();
-            hLocationToFlattenedNames.put(ecdarLocation, nameList);
-        }
-        nameList.add(serializedHLocationName);
     }
 
     /**
@@ -197,14 +184,14 @@ class EcdarDocument {
         if (ecdarEdge.getSourceLocation() != null) {
             sourceULocation = ecdarToXmlLocations.get(ecdarEdge.getSourceLocation());
         } else {
-            throw new BackendException("No source found");
+            throw new BackendException("An edge has no source location");
         }
 
         // Find the target locations
         if (ecdarEdge.getTargetLocation() != null) {
             targetULocation = ecdarToXmlLocations.get(ecdarEdge.getTargetLocation());
         } else {
-            throw new BackendException("No target found");
+            throw new BackendException("An edge has no target location");
         }
 
         // Add the to the edge
