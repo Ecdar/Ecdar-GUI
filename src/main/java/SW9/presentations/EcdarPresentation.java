@@ -360,7 +360,7 @@ public class EcdarPresentation extends StackPane {
         controller.generateUppaalModel.setMaskType(JFXRippler.RipplerMask.CIRCLE);
         controller.generateUppaalModel.setRipplerFill(color.getTextColor(colorIntensity));
 
-        Tooltip.install(controller.generateUppaalModel, new Tooltip("Generate UPPAAL model"));
+        Tooltip.install(controller.generateUppaalModel, new Tooltip("Generate XML model"));
     }
 
     private void initializeSelectDependentToolbarButton(final JFXRippler button) {

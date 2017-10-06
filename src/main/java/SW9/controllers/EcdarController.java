@@ -966,20 +966,16 @@ public class EcdarController implements Initializable {
         }
     }
 
+    /**
+     * Generates an XML document based on all components in this project.
+     */
     @FXML
-    private void generateUppaalModelClicked() {
-        final Component mainComponent = Ecdar.getProject().getMainComponent();
-
-        if (mainComponent == null) {
-            System.out.println("No main component");
-            return; // We cannot generate a UPPAAL file without a main component
-        }
-
+    private void generateXmlModelClicked() {
         try {
             UPPAALDriver.generateDebugUPPAALModel();
-            Ecdar.showToast("UPPAAL model stored");
+            Ecdar.showToast("XML model stored");
         } catch (final Exception e) {
-            Ecdar.showToast("Could not store UPPAAL debug model due to an error");
+            Ecdar.showToast("Could not store XML debug model due to an error");
             e.printStackTrace();
         }
     }

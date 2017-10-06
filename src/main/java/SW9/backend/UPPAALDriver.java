@@ -32,17 +32,11 @@ public class UPPAALDriver {
     public static void generateDebugUPPAALModel() throws Exception, BackendException {
         // Generate and store the debug document
         buildEcdarDocument();
-        storeUppaalFile(ecdarDocument.toUPPAALDocument(), Ecdar.debugDirectory + File.separator + "debug.xml");
+        storeUppaalFile(ecdarDocument.toXmlDocument(), Ecdar.debugDirectory + File.separator + "debug.xml");
     }
 
     public static void buildEcdarDocument() throws BackendException, Exception {
-        final Component mainComponent = Ecdar.getProject().getMainComponent();
-        if (mainComponent == null) {
-            throw new Exception("Main component is null");
-        }
-
-        // Generate Ecdar document based on the main component
-        ecdarDocument = new EcdarDocument(mainComponent);
+        ecdarDocument = new EcdarDocument();
     }
 
     public static Thread runQuery(final String query,
@@ -109,7 +103,7 @@ public class UPPAALDriver {
                     final ArrayList<Problem> problems = new ArrayList<>();
 
                     // Get the system, and fill the problems list if any
-                    final UppaalSystem system = engine.getSystem(ecdarDocument.toUPPAALDocument(), problems);
+                    final UppaalSystem system = engine.getSystem(ecdarDocument.toXmlDocument(), problems);
 
                     // Run on UI thread
                     Platform.runLater(() -> {

@@ -83,7 +83,7 @@
 
                         <!-- GENERATE UPPAAL MODEL FOR PROJECT -->
                         <JFXRippler fx:id="generateUppaalModel">
-                            <StackPane minWidth="40" minHeight="40" onMouseClicked="#generateUppaalModelClicked">
+                            <StackPane minWidth="40" minHeight="40" onMouseClicked="#generateXmlModelClicked">
                                 <FontIcon iconLiteral="gmi-archive" iconSize="24" fill="white"/>
                             </StackPane>
                         </JFXRippler>
