@@ -66,13 +66,15 @@ public class QueryPaneController implements Initializable {
     private void runAllQueriesButtonClicked() {
         try {
             UPPAALDriver.buildEcdarDocument();
-            Ecdar.getProject().getQueries().forEach(query -> {
-                query.cancel();
-                query.run(false);
-            });
         } catch (final BackendException e) {
-            Ecdar.showToast("An Error occurred during setup of a query. I got the error: " + e.getMessage());
+            Ecdar.showToast("Could not build XML model. I got the error: " + e.getMessage());
+            return;
         }
+
+        Ecdar.getProject().getQueries().forEach(query -> {
+            query.cancel();
+            query.run(false);
+        });
     }
 
     @FXML
