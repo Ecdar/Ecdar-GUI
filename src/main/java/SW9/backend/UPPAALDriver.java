@@ -36,13 +36,7 @@ public class UPPAALDriver {
     }
 
     public static void buildEcdarDocument() throws BackendException, Exception {
-        final Component mainComponent = Ecdar.getProject().getMainComponent();
-        if (mainComponent == null) {
-            throw new Exception("Main component is null");
-        }
-
-        // Generate Ecdar document based on the main component
-        ecdarDocument = new EcdarDocument(mainComponent);
+        ecdarDocument = new EcdarDocument();
     }
 
     public static Thread runQuery(final String query,

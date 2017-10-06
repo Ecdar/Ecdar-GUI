@@ -968,13 +968,6 @@ public class EcdarController implements Initializable {
 
     @FXML
     private void generateUppaalModelClicked() {
-        final Component mainComponent = Ecdar.getProject().getMainComponent();
-
-        if (mainComponent == null) {
-            System.out.println("No main component");
-            return; // We cannot generate a UPPAAL file without a main component
-        }
-
         try {
             UPPAALDriver.generateDebugUPPAALModel();
             Ecdar.showToast("UPPAAL model stored");
