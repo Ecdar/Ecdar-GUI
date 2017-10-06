@@ -974,7 +974,7 @@ public class EcdarController implements Initializable {
     private void generateXmlModelClicked() {
         try {
             UPPAALDriver.generateDebugUPPAALModel();
-            Ecdar.showToast("UPPAAL model stored");
+            Ecdar.showToast("XML model stored");
         } catch (final BackendException | IOException e) {
             Ecdar.showToast("Could not store XML debug model due to an error");
             e.printStackTrace();
