@@ -29,13 +29,13 @@ public class UPPAALDriver {
 
     private static EcdarDocument ecdarDocument;
 
-    public static void generateDebugUPPAALModel() throws Exception, BackendException {
+    public static void generateDebugUPPAALModel() throws BackendException, IOException {
         // Generate and store the debug document
         buildEcdarDocument();
         storeUppaalFile(ecdarDocument.toXmlDocument(), Ecdar.debugDirectory + File.separator + "debug.xml");
     }
 
-    public static void buildEcdarDocument() throws BackendException, Exception {
+    public static void buildEcdarDocument() throws BackendException {
         ecdarDocument = new EcdarDocument();
     }
 
@@ -239,14 +239,8 @@ public class UPPAALDriver {
         }
     }
 
-    private static void storeUppaalFile(final Document uppaalDocument, final String fileName) {
-        final File file = new File(fileName);
-        try {
-            uppaalDocument.save(file);
-        } catch (final IOException e) {
-            // TODO Handle exception
-            e.printStackTrace();
-        }
+    private static void storeUppaalFile(final Document uppaalDocument, final String fileName) throws IOException {
+        uppaalDocument.save(new File(fileName));
     }
 
     public static String getLocationReachableQuery(final Location location, final Component component) {
