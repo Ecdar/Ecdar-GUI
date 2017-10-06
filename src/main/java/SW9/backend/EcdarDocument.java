@@ -14,7 +14,6 @@ import java.util.*;
 import java.util.List;
 
 class EcdarDocument {
-
     private static final String DECLARATION_PROPERTY_TAG = "declaration"; // Global and local declarations
     private static final String NAME_PROPERTY_TAG = "name";
     private static final String INVARIANT_PROPERTY_TAG = "invariant";
@@ -38,10 +37,14 @@ class EcdarDocument {
     private final Map<Location, List<String>> hLocationToFlattenedNames = new HashMap<>();
 
     EcdarDocument() throws BackendException {
-        generateUPPAALDocument();
+        generateXmlDocument();
     }
 
-    private void generateUPPAALDocument() throws BackendException {
+    /**
+     * Generate a xml document based on the models.
+     * @throws BackendException if an error occurs during
+     */
+    private void generateXmlDocument() throws BackendException {
         // Create a template for each model
         for (final Component component : Ecdar.getProject().getComponents()) {
             generateAndAddTemplate(component);
@@ -55,6 +58,11 @@ class EcdarDocument {
 
     }
 
+    /**
+     * Generate XML name of a location.
+     * @param location the location to be used
+     * @return the XML name
+     */
     private static String generateName(final Location location) {
         String result = "L";
 
@@ -65,6 +73,11 @@ class EcdarDocument {
         return result;
     }
 
+    /**
+     * Generates a template for a component and adds it to the xml document.
+     * @param component the component to use
+     * @throws BackendException if an error occurs during generation
+     */
     private void generateAndAddTemplate(final Component component) throws BackendException {
         // Create empty template and insert it into the uppaal document
         final Template template = xmlDocument.createTemplate();
@@ -97,21 +110,32 @@ class EcdarDocument {
 
     }
 
-    private void addLocationsToMaps(final Location hLocation, final com.uppaal.model.core2.Location uLocation) {
-        final String serializedHLocationName = generateName(hLocation);
-        ecdarToXmlLocations.put(hLocation, uLocation);
-        xmlToEcdarLocations.put(uLocation, hLocation);
+    /**
+     * Adds a pair of locations to maps.
+     * @param ecdarLocation ecdar location to add
+     * @param xmlLocation xml location to add
+     */
+    private void addLocationsToMaps(final Location ecdarLocation, final com.uppaal.model.core2.Location xmlLocation) {
+        final String serializedHLocationName = generateName(ecdarLocation);
+        ecdarToXmlLocations.put(ecdarLocation, xmlLocation);
+        xmlToEcdarLocations.put(xmlLocation, ecdarLocation);
 
         // TODO overvej, om skal slettes
         List<String> nameList;
-        nameList = hLocationToFlattenedNames.get(hLocation);
+        nameList = hLocationToFlattenedNames.get(ecdarLocation);
         if (nameList == null) {
             nameList = new ArrayList<>();
-            hLocationToFlattenedNames.put(hLocation, nameList);
+            hLocationToFlattenedNames.put(ecdarLocation, nameList);
         }
         nameList.add(serializedHLocationName);
     }
 
+    /**
+     * Generates an xml location from an Ecdar location and adds it to a template.
+     * @param template the template
+     * @param ecdarLocation the Ecdar location
+     * @return the xml location added
+     */
     private static com.uppaal.model.core2.Location addLocation(final Template template, final Location ecdarLocation) {
         final int x = (int) ecdarLocation.xProperty().get();
         final int y = (int) ecdarLocation.yProperty().get();
@@ -154,6 +178,13 @@ class EcdarDocument {
         return xmlLocation;
     }
 
+    /**
+     * Generates an xml edge from an Ecdar edge and adds it to a template.
+     * @param template the template
+     * @param ecdarEdge the Ecdar edge
+     * @return the XML edge generated
+     * @throws BackendException iff an edge has no source or target location
+     */
     private com.uppaal.model.core2.Edge addEdge(final Template template, final Edge ecdarEdge) throws BackendException {
         // Create new UPPAAL edge and insert it into the template
         final com.uppaal.model.core2.Edge xmlEdge = template.createEdge();
@@ -185,6 +216,11 @@ class EcdarDocument {
         return xmlEdge;
     }
 
+    /**
+     * Annotates an XML edge based on the corresponding Ecdar edge.
+     * @param xmlEdge the XML edge
+     * @param ecdarEdge the corresponding Ecdar edge
+     */
     private static void annotateEdge(final com.uppaal.model.core2.Edge xmlEdge, final Edge ecdarEdge) {
         final List<Nail> reversedNails = new ArrayList<>();
         ecdarEdge.getNails().forEach(nail -> reversedNails.add(0, nail));
@@ -238,16 +274,30 @@ class EcdarDocument {
         }
     }
 
-    Document toUPPAALDocument() {
+    /**
+     * Gets the XML document generated.
+     * @return the XML document
+     */
+    Document toXmlDocument() {
         return xmlDocument;
     }
 
-    Location getLocation(final com.uppaal.model.core2.Location uLocation) {
-        return xmlToEcdarLocations.get(uLocation);
+    /**
+     * Gets a corresponding Ecdar location from an XML location.
+     * @param xmlLocation the XML location
+     * @return the Ecdar location
+     */
+    Location getLocation(final com.uppaal.model.core2.Location xmlLocation) {
+        return xmlToEcdarLocations.get(xmlLocation);
     }
 
-    Edge getEdge(final com.uppaal.model.core2.Edge uEdge) {
-        return xmlToEcdarEdges.get(uEdge);
+    /**
+     * Gets the corresponding Ecdar edge from an XML edge.
+     * @param xmlEdge the XML edge
+     * @return the Ecdar edge
+     */
+    Edge getEdge(final com.uppaal.model.core2.Edge xmlEdge) {
+        return xmlToEcdarEdges.get(xmlEdge);
     }
 
 }
