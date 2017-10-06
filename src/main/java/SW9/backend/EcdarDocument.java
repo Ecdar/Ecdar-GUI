@@ -42,7 +42,7 @@ class EcdarDocument {
 
     /**
      * Generate a xml document based on the models.
-     * @throws BackendException if an error occurs during
+     * @throws BackendException if an error occurs during generation
      */
     private void generateXmlDocument() throws BackendException {
         // Create a template for each model
