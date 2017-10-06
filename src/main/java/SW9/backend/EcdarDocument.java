@@ -197,14 +197,14 @@ class EcdarDocument {
         if (ecdarEdge.getSourceLocation() != null) {
             sourceULocation = ecdarToXmlLocations.get(ecdarEdge.getSourceLocation());
         } else {
-            throw new BackendException("No source found");
+            throw new BackendException("An edge has no source found");
         }
 
         // Find the target locations
         if (ecdarEdge.getTargetLocation() != null) {
             targetULocation = ecdarToXmlLocations.get(ecdarEdge.getTargetLocation());
         } else {
-            throw new BackendException("No target found");
+            throw new BackendException("An edge has no target found");
         }
 
         // Add the to the edge
