@@ -100,42 +100,44 @@ public class Query implements Serializable {
                 return; // We cannot generate a UPPAAL file without a main component
             }
 
-            try {
-                if (buildEcdarDocument) {
+            if (buildEcdarDocument) {
+                try {
                     UPPAALDriver.buildEcdarDocument();
+                } catch (final BackendException e) {
+                    Ecdar.showToast("Could not build XML document. I got the error: " + e.getMessage());
+                    return;
                 }
-                UPPAALDriver.runQuery(getQuery(),
-                        aBoolean -> {
-                            if (aBoolean) {
-                                setQueryState(QueryState.SUCCESSFUL);
-                            } else {
-                                setQueryState(QueryState.ERROR);
-                            }
-                        },
-                        e -> {
-                            if (forcedCancel) {
-                                setQueryState(QueryState.UNKNOWN);
-                            } else {
-                                setQueryState(QueryState.SYNTAX_ERROR);
-                                final Throwable cause = e.getCause();
-                                if (cause != null) {
-                                    // We had trouble generating the model if we get a NullPointerException
-                                    if(cause instanceof NullPointerException) {
-                                        setQueryState(QueryState.UNKNOWN);
-                                    } else {
-                                        Platform.runLater(() -> EcdarController.openQueryDialog(this, cause.toString()));
-                                    }
+            }
+
+            UPPAALDriver.runQuery(getQuery(),
+                    aBoolean -> {
+                        if (aBoolean) {
+                            setQueryState(QueryState.SUCCESSFUL);
+                        } else {
+                            setQueryState(QueryState.ERROR);
+                        }
+                    },
+                    e -> {
+                        if (forcedCancel) {
+                            setQueryState(QueryState.UNKNOWN);
+                        } else {
+                            setQueryState(QueryState.SYNTAX_ERROR);
+                            final Throwable cause = e.getCause();
+                            if (cause != null) {
+                                // We had trouble generating the model if we get a NullPointerException
+                                if(cause instanceof NullPointerException) {
+                                    setQueryState(QueryState.UNKNOWN);
+                                } else {
+                                    Platform.runLater(() -> EcdarController.openQueryDialog(this, cause.toString()));
                                 }
                             }
-                        },
-                        eng -> {
-                            engine = eng;
-                        },
-                        new QueryListener(this)
-                ).start();
-            } catch (final BackendException e) {
-                Ecdar.showToast("An Error occurred during setup of a query. I got the error: " + e.getMessage());
-            }
+                        }
+                    },
+                    eng -> {
+                        engine = eng;
+                    },
+                    new QueryListener(this)
+            ).start();
         };
     }
 

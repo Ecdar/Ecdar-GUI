@@ -320,55 +320,52 @@ public class EcdarController implements Initializable {
                 try {
                     // Make sure that the model is generated
                     UPPAALDriver.buildEcdarDocument();
-
-                    Ecdar.getProject().getQueries().forEach(query -> {
-                        if (query.isPeriodic()) query.run();
-                    });
-
-                    // List of threads to start
-                    List<Thread> threads = new ArrayList<>();
-
-                    // Submit all background reachability queries
-                    Ecdar.getProject().getComponents().forEach(component -> {
-                        // Check if we should consider this component
-                        if (!component.isIncludeInPeriodicCheck()) {
-                            component.getLocationsWithInitialAndFinal().forEach(location -> location.setReachability(Location.Reachability.EXCLUDED));
-                        } else {
-                            component.getLocationsWithInitialAndFinal().forEach(location -> {
-                                final String locationReachableQuery = UPPAALDriver.getLocationReachableQuery(location, component);
-                                final Thread verifyThread = UPPAALDriver.runQuery(
-                                        locationReachableQuery,
-                                        (result -> {
-                                            if (result) {
-                                                location.setReachability(Location.Reachability.REACHABLE);
-                                            } else {
-                                                location.setReachability(Location.Reachability.UNREACHABLE);
-                                            }
-                                            Debug.removeThread(Thread.currentThread());
-                                        }),
-                                        (e) -> {
-                                            location.setReachability(Location.Reachability.UNKNOWN);
-                                            Debug.removeThread(Thread.currentThread());
-                                        },
-                                        2000
-                                );
-
-                                verifyThread.setName(locationReachableQuery + " (" + verifyThread.getName() + ")");
-                                Debug.addThread(verifyThread);
-                                threads.add(verifyThread);
-                            });
-                        }
-                    });
-
-                    threads.forEach((verifyThread) -> reachabilityService.submit(verifyThread::start));
-
                 } catch (final BackendException e) {
                     // Something went wrong with creating the document
-                    Ecdar.showToast("An Error occurred during setup of a query. I got the error: " + e.getMessage());
+                    Ecdar.showToast("Could not build XML model. I got the error: " + e.getMessage());
                     e.printStackTrace();
-                } catch (final NullPointerException ignored) {
-                    // The main component is null. Ignore.
                 }
+
+                Ecdar.getProject().getQueries().forEach(query -> {
+                    if (query.isPeriodic()) query.run();
+                });
+
+                // List of threads to start
+                List<Thread> threads = new ArrayList<>();
+
+                // Submit all background reachability queries
+                Ecdar.getProject().getComponents().forEach(component -> {
+                    // Check if we should consider this component
+                    if (!component.isIncludeInPeriodicCheck()) {
+                        component.getLocationsWithInitialAndFinal().forEach(location -> location.setReachability(Location.Reachability.EXCLUDED));
+                    } else {
+                        component.getLocationsWithInitialAndFinal().forEach(location -> {
+                            final String locationReachableQuery = UPPAALDriver.getLocationReachableQuery(location, component);
+                            final Thread verifyThread = UPPAALDriver.runQuery(
+                                    locationReachableQuery,
+                                    (result -> {
+                                        if (result) {
+                                            location.setReachability(Location.Reachability.REACHABLE);
+                                        } else {
+                                            location.setReachability(Location.Reachability.UNREACHABLE);
+                                        }
+                                        Debug.removeThread(Thread.currentThread());
+                                    }),
+                                    (e) -> {
+                                        location.setReachability(Location.Reachability.UNKNOWN);
+                                        Debug.removeThread(Thread.currentThread());
+                                    },
+                                    2000
+                            );
+
+                            verifyThread.setName(locationReachableQuery + " (" + verifyThread.getName() + ")");
+                            Debug.addThread(verifyThread);
+                            threads.add(verifyThread);
+                        });
+                    }
+                });
+
+                threads.forEach((verifyThread) -> reachabilityService.submit(verifyThread::start));
             }
         }).start();
     }
