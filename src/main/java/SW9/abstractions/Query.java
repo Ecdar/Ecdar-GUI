@@ -105,6 +105,7 @@ public class Query implements Serializable {
                     UPPAALDriver.buildEcdarDocument();
                 } catch (final BackendException e) {
                     Ecdar.showToast("Could not build XML document. I got the error: " + e.getMessage());
+                    e.printStackTrace();
                     return;
                 }
             }
