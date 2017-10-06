@@ -51,14 +51,12 @@ import static SW9.presentations.CanvasPresentation.GRID_SIZE;
 
 public class ComponentController implements Initializable {
 
-    private static final Map<Component, Timer> COMPONENT_SUBCOMPONENT_NAME_CHECK_TIMER_MAP = new HashMap<>();
     private static final Map<Component, ListChangeListener<Location>> locationListChangeListenerMap = new HashMap<>();
     private static final Map<Component, Boolean> errorsAndWarningsInitialized = new HashMap<>();
     private static Location placingLocation = null;
     private final ObjectProperty<Component> component = new SimpleObjectProperty<>(null);
     private final Map<Edge, EdgePresentation> edgePresentationMap = new HashMap<>();
     private final Map<Location, LocationPresentation> locationPresentationMap = new HashMap<>();
-    private final Map<SubComponent, SubComponentPresentation> subComponentPresentationMap = new HashMap<>();
     private final Map<Jork, JorkPresentation> jorkPresentationMap = new HashMap<>();
     public BorderPane toolbar;
     public Rectangle background;
@@ -148,7 +146,6 @@ public class ComponentController implements Initializable {
 
             initializeEdgeHandling(newComponent);
             initializeLocationHandling(newComponent);
-            initializeSubComponentHandling(newComponent);
             initializeJorkHandling(newComponent);
             initializeDeclarations();
 
@@ -177,7 +174,6 @@ public class ComponentController implements Initializable {
             if (component == null) return;
 
             if (!errorsAndWarningsInitialized.containsKey(component) || !errorsAndWarningsInitialized.get(component)) {
-                initializeSubComponentUniqueNameError();
                 initializeNoIncomingEdgesWarning();
                 errorsAndWarningsInitialized.put(component, true);
             }
@@ -289,94 +285,6 @@ public class ComponentController implements Initializable {
         newComponent.getJorks().forEach(handleAddedJork);
     }
 
-    private void initializeSubComponentUniqueNameError() {
-        final HashMap<String, ArrayList<CodeAnalysis.Message>> errorsMap = new HashMap<>();
-
-        final Runnable checkNames = () -> {
-            final HashMap<String, Integer> occurrences = new HashMap<>();
-
-            subComponentPresentationMap.keySet().forEach(subComponent -> {
-
-                // Check if we have seen the identifier of the sub component before
-                final String identifier = subComponent.getIdentifier();
-                if (occurrences.containsKey(identifier)) {
-                    occurrences.put(identifier, occurrences.get(identifier) + 1);
-                } else {
-                    occurrences.put(identifier, 0);
-                }
-            });
-
-            // Check if we have previously added an error for each of the found duplicates
-            occurrences.keySet().forEach(id -> {
-                if (!errorsMap.containsKey(id)) {
-                    errorsMap.put(id, new ArrayList<>());
-                }
-
-                final ArrayList<CodeAnalysis.Message> messages = errorsMap.get(id);
-                final int addedErrors = messages.size();
-                final int foundErrors = occurrences.get(id);
-
-                if (addedErrors > foundErrors) { // There are too many errors in the view
-                    final CodeAnalysis.Message messageToRemove = messages.get(0);
-                    messages.remove(messageToRemove);
-                    Platform.runLater(() -> CodeAnalysis.removeMessage(getComponent(), messageToRemove));
-                } else if (addedErrors < foundErrors) { // There are too few errors in the view
-                    // Find all subcomponents with that name
-                    final List<Nearable> clashingSubcomponents = new ArrayList<>();
-
-                    getComponent().getSubComponents().forEach(subComponent -> {
-                        if (subComponent.getIdentifier().equals(id)) {
-                            clashingSubcomponents.add(subComponent);
-                        }
-                    });
-
-                    final CodeAnalysis.Message identifierIsNotUnique = new CodeAnalysis.Message("Identifier '" + id + "' is multiply defined", CodeAnalysis.MessageType.ERROR, clashingSubcomponents);
-                    messages.add(identifierIsNotUnique);
-                    Platform.runLater(() -> CodeAnalysis.addMessage(getComponent(), identifierIsNotUnique));
-                }
-            });
-
-            // Remove any messages that are no longer found
-            errorsMap.keySet().forEach(id -> {
-                if (!occurrences.containsKey(id)) {
-                    errorsMap.get(id).forEach(message -> Platform.runLater(() -> CodeAnalysis.removeMessage(getComponent(), message)));
-                    errorsMap.put(id, new ArrayList<>());
-                }
-            });
-
-        };
-
-        // Wait until component is not null
-        if (!COMPONENT_SUBCOMPONENT_NAME_CHECK_TIMER_MAP.containsKey(getComponent())) {
-            final TimerTask reachabilityCheckTask = new TimerTask() {
-                @Override
-                public void run() {
-                    if (getComponent() == null) return;
-                    checkNames.run();
-                }
-            };
-
-            final int interval = 2000; // ms
-            final Timer timer = new Timer();
-            timer.schedule(reachabilityCheckTask, 0, interval);
-
-            COMPONENT_SUBCOMPONENT_NAME_CHECK_TIMER_MAP.put(getComponent(), timer);
-        }
-
-        // Cancel timers when the component is removed
-        Ecdar.getProject().getComponents().addListener(new ListChangeListener<Component>() {
-            @Override
-            public void onChanged(Change<? extends Component> c) {
-                while (c.next()) {
-                    c.getRemoved().forEach(removedComponent -> {
-                        if (COMPONENT_SUBCOMPONENT_NAME_CHECK_TIMER_MAP.containsKey(removedComponent)) {
-                            COMPONENT_SUBCOMPONENT_NAME_CHECK_TIMER_MAP.get(removedComponent).cancel();
-                        }
-                    });
-                }
-            }
-        });
-    }
 
     private void initializeComponentContextMenu() {
         dropDownMenuHelperCircle = new Circle(5);
@@ -457,34 +365,6 @@ public class ComponentController implements Initializable {
                     component.removeJork(newJork);
                 }, "Added join '" + newJork.toString() + "' to component '" + component.getName() + "'", "add-circle");
             });
-
-            final DropDownMenu subMenu = new DropDownMenu(root, dropDownMenuHelperCircle, 150, false);
-            Ecdar.getProject().getComponents().forEach(c -> {
-                if (!c.equals(component)) {
-                    subMenu.addClickableListElement(c.getName(), event -> {
-                        contextMenu.close();
-
-                        final SubComponent newSubComponent = new SubComponent(c);
-
-                        double x = DropDownMenu.x - GRID_SIZE * 2;
-                        x -= x % GRID_SIZE;
-                        newSubComponent.setX(x);
-
-                        double y = DropDownMenu.y - GRID_SIZE * 2;
-                        y -= y % GRID_SIZE;
-                        newSubComponent.setY(y);
-
-                        // Add a new sub-component
-                        UndoRedoStack.pushAndPerform(() -> { // Perform
-                            component.addSubComponent(newSubComponent);
-                        }, () -> { // Undo
-                            component.removeSubComponent(newSubComponent);
-                        }, "Added sub-component '" + newSubComponent.toString() + "' to component '" + component.getName() + "'", "add-circle");
-                    });
-                }
-            });
-
-            contextMenu.addSubMenu("Add Subcomponent", subMenu, 3 * 35);
 
             contextMenu.addSpacerElement();
 
@@ -609,35 +489,6 @@ public class ComponentController implements Initializable {
                     UndoRedoStack.undo();
                 }, "Finished edge '" + unfinishedEdge + "' by adding '" + jork + "' to component '" + component.getName() + "'", "add-circle");
             });
-
-            final DropDownMenu subMenu = new DropDownMenu(root, dropDownMenuHelperCircle, 150, false);
-            Ecdar.getProject().getComponents().forEach(c -> {
-                if (!c.equals(component)) {
-                    subMenu.addClickableListElement(c.getName(), event -> {
-                        contextMenu.close();
-
-                        final SubComponent newSubComponent = new SubComponent(c);
-
-                        unfinishedEdge.setTargetSubComponent(newSubComponent);
-
-                        setCoordinates.accept(newSubComponent);
-                        newSubComponent.setX(newSubComponent.getX() - GRID_SIZE * 2);
-                        newSubComponent.setY(newSubComponent.getY() - GRID_SIZE * 2);
-
-                        // Add a new sub-component
-                        UndoRedoStack.pushAndPerform(() -> { // Perform
-                            component.addSubComponent(newSubComponent);
-                            UndoRedoStack.redo();
-                        }, () -> { // Undo
-                            component.removeSubComponent(newSubComponent);
-                            UndoRedoStack.undo();
-                        }, "Finished edge '" + unfinishedEdge + "' by adding '" + newSubComponent + "' to component '" + component.getName() + "'", "add-circle");
-                    });
-                }
-            });
-
-            finishEdgeContextMenu.addSubMenu("Subcomponent", subMenu, 4 * 35);
-
         };
 
         component.addListener((obs, oldComponent, newComponent) -> {
@@ -723,33 +574,6 @@ public class ComponentController implements Initializable {
         });
 
         newComponent.getEdges().forEach(handleAddedEdge);
-    }
-
-    private void initializeSubComponentHandling(final Component newSubComponent) {
-        final Consumer<SubComponent> handleAddedSubComponent = subComponent -> {
-            final SubComponentPresentation subComponentPresentation = new SubComponentPresentation(subComponent, getComponent());
-            subComponentPresentationMap.put(subComponent, subComponentPresentation);
-            modelContainerSubComponent.getChildren().add(subComponentPresentation);
-        };
-
-        // React on addition of sub components to the component
-        newSubComponent.getSubComponents().addListener(new ListChangeListener<SubComponent>() {
-            @Override
-            public void onChanged(final Change<? extends SubComponent> c) {
-                if (c.next()) {
-                    // SubComponents are added to the component
-                    c.getAddedSubList().forEach(handleAddedSubComponent::accept);
-
-                    // SubComponents are removed from the component
-                    c.getRemoved().forEach(subComponent -> {
-                        final SubComponentPresentation subComponentPresentation = subComponentPresentationMap.get(subComponent);
-                        modelContainerSubComponent.getChildren().remove(subComponentPresentation);
-                    });
-                }
-            }
-        });
-
-        newSubComponent.getSubComponents().forEach(handleAddedSubComponent);
     }
 
     private void initializeDeclarations() {
