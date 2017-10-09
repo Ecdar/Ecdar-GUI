@@ -252,7 +252,7 @@ public class UPPAALDriver {
      * @return A reachability query string
      */
     public static String getLocationReachableQuery(final Location location, final Component component) {
-        return "E<> " + " || " + component.getName() + "." + location.getId();
+        return "E<> " + component.getName() + "." + location.getId();
     }
 
     /**
