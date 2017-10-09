@@ -514,7 +514,7 @@ public class EcdarController implements Initializable {
                     // Set the identifier for the final location
                     resetLocation.accept(component.getFinalLocation());
 
-                    // We are now finished with this component, remove it from the list and add subcomponents to the checking list
+                    // We are now finished with this component, remove it from the list
                     missingComponents.remove(component);
                 };
 
