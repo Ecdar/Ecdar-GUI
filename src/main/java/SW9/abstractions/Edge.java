@@ -46,8 +46,8 @@ public class Edge implements Serializable, Nearable {
     private final ObservableList<Nail> nails = FXCollections.observableArrayList();
 
     // Circulars
-    private ObjectProperty<Circular> sourceCircular = new SimpleObjectProperty<>();
-    private ObjectProperty<Circular> targetCircular = new SimpleObjectProperty<>();
+    private final ObjectProperty<Circular> sourceCircular = new SimpleObjectProperty<>();
+    private final ObjectProperty<Circular> targetCircular = new SimpleObjectProperty<>();
 
     // Defines if this is an input or an output edge
     private EdgeStatus status;
@@ -80,6 +80,10 @@ public class Edge implements Serializable, Nearable {
     private void setSourceLocation(final Location sourceLocation) {
         this.sourceLocation.set(sourceLocation);
         updateSourceCircular();
+    }
+
+    public ObjectProperty<Circular> sourceCircularProperty() {
+        return sourceCircular;
     }
 
     public ObjectProperty<Location> sourceLocationProperty() {
@@ -474,7 +478,7 @@ public class Edge implements Serializable, Nearable {
         SYNCHRONIZATION(2),
         UPDATE(3);
 
-        private int i;
+        private final int i;
 
         PropertyType(final int i) {
             this.i = i;
