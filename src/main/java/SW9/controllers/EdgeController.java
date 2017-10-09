@@ -181,8 +181,6 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                     && edge.getSourceJork() != null
                     // The source jork is a fork
                     && edge.getSourceJork().getType().equals(Jork.Type.FORK)
-                    // The jork does not have a sub component as its target
-                    && edge.getTargetSubComponent() == null
                     // The edge is in the component (not deleted)
                     && getComponent().getEdges().contains(edge)) {
                 // Add the message to the UI
@@ -218,8 +216,6 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                     && edge.getTargetJork() != null
                     // The target jork is a join
                     && edge.getTargetJork().getType().equals(Jork.Type.JOIN)
-                    // The jork does not have a sub component as its source
-                    && edge.getSourceSubComponent() == null
                     // The edge is in the component (not deleted)
                     && getComponent().getEdges().contains(edge)) {
                 // Add the message to the UI
