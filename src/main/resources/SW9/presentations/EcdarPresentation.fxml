@@ -404,9 +404,6 @@
                                     Join
                                 </Label>
                             </VBox>
-                            <Label styleClass="body1" style="-fx-padding: 2 0 0 5">
-                                Models parallelization of subcomponents
-                            </Label>
                         </HBox>
 
                     </VBox>

@@ -25,7 +25,6 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
     private static final String JORKS = "jorks";
     private static final String INITIAL_LOCATION = "initial_location";
     private static final String FINAL_LOCATION = "final_location";
-    private static final String SUBCOMPONENTS = "sub_components";
     private static final String EDGES = "edges";
     private static final String IS_MAIN = "main";
     private static final String DESCRIPTION = "description";
@@ -42,7 +41,6 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
     private final ObservableList<Edge> edges = FXCollections.observableArrayList();
     private final ObjectProperty<Location> initialLocation = new SimpleObjectProperty<>();
     private final ObjectProperty<Location> finalLocation = new SimpleObjectProperty<>();
-    private final ObservableList<SubComponent> subComponents = FXCollections.observableArrayList();
     private final BooleanProperty isMain = new SimpleBooleanProperty(false);
     private final StringProperty description = new SimpleStringProperty("");
 
@@ -153,42 +151,6 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         return relatedEdges;
     }
 
-    public List<Edge> getRelatedEdges(final SubComponent subComponent) {
-        final ArrayList<Edge> relatedEdges = new ArrayList<>();
-
-        edges.forEach(edge -> {
-            if(subComponent.equals(edge.getSourceSubComponent()) ||subComponent.equals(edge.getTargetSubComponent())) {
-                relatedEdges.add(edge);
-            }
-        });
-
-        return relatedEdges;
-    }
-
-    public List<Edge> getIncomingEdges(final SubComponent subComponent) {
-        final ArrayList<Edge> relatedEdges = new ArrayList<>();
-
-        edges.forEach(edge -> {
-            if (subComponent.equals(edge.getTargetSubComponent())) {
-                relatedEdges.add(edge);
-            }
-        });
-
-        return relatedEdges;
-    }
-
-    public List<Edge> getOutGoingEdges(final SubComponent subComponent) {
-        final ArrayList<Edge> relatedEdges = new ArrayList<>();
-
-        edges.forEach(edge -> {
-            if (subComponent.equals(edge.getSourceSubComponent())) {
-                relatedEdges.add(edge);
-            }
-        });
-
-        return relatedEdges;
-    }
-
     public List<Edge> getRelatedEdges(final Jork jork) {
         final ArrayList<Edge> relatedEdges = new ArrayList<>();
 
@@ -201,29 +163,6 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         return relatedEdges;
     }
 
-    public List<Edge> getIncomingEdges(final Jork jork) {
-        final ArrayList<Edge> relatedEdges = new ArrayList<>();
-
-        edges.forEach(edge -> {
-            if(jork.equals(edge.getTargetJork())) {
-                relatedEdges.add(edge);
-            }
-        });
-
-        return relatedEdges;
-    }
-
-    public List<Edge> getOutGoingEdges(final Jork jork) {
-        final ArrayList<Edge> relatedEdges = new ArrayList<>();
-
-        edges.forEach(edge -> {
-            if(jork.equals(edge.getSourceJork())) {
-                relatedEdges.add(edge);
-            }
-        });
-
-        return relatedEdges;
-    }
 
     public ObservableList<Jork> getJorks() {
         return jorks;
@@ -317,21 +256,10 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         return finalLocation;
     }
 
-    public ObservableList<SubComponent> getSubComponents() {
-        return subComponents;
-    }
-
-    public boolean addSubComponent(final SubComponent component) {
-        return subComponents.add(component);
-    }
-
-    public boolean removeSubComponent(final SubComponent component) {
-        return subComponents.remove(component);
-    }
 
     public Edge getUnfinishedEdge() {
         for (final Edge edge : edges) {
-            if (edge.getTargetLocation() == null && edge.getTargetSubComponent() == null && edge.getTargetJork() == null)
+            if (edge.getTargetLocation() == null && edge.getTargetJork() == null)
                 return edge;
         }
 
@@ -389,9 +317,6 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         getJorks().forEach(jork -> jorks.add(jork.serialize()));
         result.add(JORKS, jorks);
 
-        final JsonArray subComponents = new JsonArray();
-        getSubComponents().forEach(subComponent -> subComponents.add(subComponent.serialize()));
-        result.add(SUBCOMPONENTS, subComponents);
 
         final JsonArray edges = new JsonArray();
         getEdges().forEach(edge -> edges.add(edge.serialize()));
@@ -433,10 +358,6 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
             jorks.add(newJork);
         });
 
-        json.getAsJsonArray(SUBCOMPONENTS).forEach(jsonElement -> {
-            final SubComponent newSubComponent = new SubComponent((JsonObject) jsonElement);
-            subComponents.add(newSubComponent);
-        });
 
         json.getAsJsonArray(EDGES).forEach(jsonElement -> {
             final Edge newEdge = new Edge((JsonObject) jsonElement, this);

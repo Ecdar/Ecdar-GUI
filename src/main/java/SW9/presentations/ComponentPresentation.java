@@ -280,10 +280,6 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
 
             final DoubleProperty minHeight = new SimpleDoubleProperty(10 * GRID_SIZE);
 
-            component.getSubComponents().forEach(subComponent -> {
-                minHeight.set(Math.max(minHeight.doubleValue(), subComponent.getHeight() + subComponent.getY() + GRID_SIZE));
-            });
-
             component.getLocations().forEach(location -> {
                 minHeight.set(Math.max(minHeight.doubleValue(), location.getY() + GRID_SIZE * 2));
             });
@@ -350,10 +346,6 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
         final Supplier<Double> componentMinWidth = () -> {
 
             final DoubleProperty minWidth = new SimpleDoubleProperty(10 * GRID_SIZE);
-
-            component.getSubComponents().forEach(subComponent -> {
-                minWidth.set(Math.max(minWidth.doubleValue(), subComponent.getWidth() + subComponent.getX() + GRID_SIZE));
-            });
 
             component.getLocations().forEach(location -> {
                 minWidth.set(Math.max(minWidth.doubleValue(), location.getX() + GRID_SIZE * 2));

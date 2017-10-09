@@ -3,9 +3,7 @@ package SW9.backend;
 import SW9.Ecdar;
 import SW9.abstractions.Component;
 import SW9.abstractions.Location;
-import SW9.abstractions.SubComponent;
 import SW9.code_analysis.CodeAnalysis;
-import com.google.common.base.Strings;
 import com.uppaal.engine.Engine;
 import com.uppaal.engine.EngineException;
 import com.uppaal.engine.Problem;
@@ -26,6 +24,7 @@ public class UPPAALDriver {
 
     public static final int MAX_ENGINES = 10;
     public static final Object engineLock = false; // Used to lock concurrent engine reference access
+    private static final String SERVER_NAME = "server";
 
     private static EcdarDocument ecdarDocument;
 
@@ -171,16 +170,20 @@ public class UPPAALDriver {
     private static final ArrayList<Engine> createdEngines = new ArrayList<>();
     private static final ArrayList<Engine> availableEngines = new ArrayList<>();
 
-    private static File findServerFile(final String serverName) {
+    /**
+     * Finds the right server files, based on the system os
+     * @return The server file
+     */
+    private static File findServerFile() {
         final String os = System.getProperty("os.name");
         final File file;
 
         if (os.contains("Mac")) {
-            file = new File(Ecdar.serverDirectory + File.separator + "bin-MacOS" + File.separator + serverName);
+            file = new File(Ecdar.serverDirectory + File.separator + "bin-MacOS" + File.separator + SERVER_NAME);
         } else if (os.contains("Linux")) {
-            file = new File(Ecdar.serverDirectory + File.separator + "bin-Linux" + File.separator + serverName);
+            file = new File(Ecdar.serverDirectory + File.separator + "bin-Linux" + File.separator + SERVER_NAME);
         } else {
-            file = new File(Ecdar.serverDirectory + File.separator + "bin-Win32" + File.separator + serverName + ".exe");
+            file = new File(Ecdar.serverDirectory + File.separator + "bin-Win32" + File.separator + SERVER_NAME + ".exe");
         }
 
         return file;
@@ -188,8 +191,7 @@ public class UPPAALDriver {
 
     private static Engine getAvailableEngineOrCreateNew() {
         if (availableEngines.size() == 0) {
-            final String serverName = "server";
-            final File serverFile = findServerFile(serverName);
+            final File serverFile = findServerFile();
             serverFile.setExecutable(true); // Allows us to use the server file
 
             // Check if the user copied the file correctly
@@ -243,67 +245,33 @@ public class UPPAALDriver {
         uppaalDocument.save(new File(fileName));
     }
 
+    /**
+     * Generates a reachability query based on the given location and component
+     * @param location The location which should be checked for reachability
+     * @param component The component where the location belong to / are placed
+     * @return A reachability query string
+     */
     public static String getLocationReachableQuery(final Location location, final Component component) {
+        return "E<> " + component.getName() + "." + location.getId();
+    }
 
-        // Get the various flattened names of a location to produce a reachability query
-        final List<String> templateNames = getTemplateNames(component);
+    /**
+     * Generates a string for a deadlock query based on the component
+     * @param component The component which should be checked for deadlocks
+     * @return A deadlock query string
+     */
+    public static String getExistDeadlockQuery(final Component component) {
+        // Get the names of the locations of this component. Used to produce the deadlock query
+        final String templateName = component.getName();
         final List<String> locationNames = new ArrayList<>();
 
-        for (final String templateName : templateNames) {
+        for (final Location location : component.getLocations()) {
             locationNames.add(templateName + "." + location.getId());
         }
 
-        return "E<> " + String.join(" || ", locationNames);
-    }
-
-    public static String getExistDeadlockQuery(final Component component) {
-        // Get the various flattened names of a location to produce a reachability query
-        final List<String> template = getTemplateNames(component);
-        final List<String> locationNames = new ArrayList<>();
-
-
-        for (final String templateName : template) {
-            for (final Location location : component.getLocations()) {
-                locationNames.add(templateName + "." + location.getId());
-            }
-
-            locationNames.add(templateName + "." + component.getInitialLocation().getId());
-            locationNames.add(templateName + "." + component.getFinalLocation().getId());
-        }
+        locationNames.add(templateName + "." + component.getInitialLocation().getId());
 
         return "E<> (" + String.join(" || ", locationNames) + ") && deadlock";
-    }
-
-    private static List<String> getTemplateNames(final Component component) {
-        final List<String> subComponentInstanceNames = new ArrayList<>();
-
-        if (component.isIsMain()) {
-            subComponentInstanceNames.add(component.getName());
-        }
-
-        // Run through all sub components in main
-        for (final SubComponent subComp : Ecdar.getProject().getMainComponent().getSubComponents()) {
-            subComponentInstanceNames.addAll(getTemplateNames("", subComp, component));
-        }
-        return subComponentInstanceNames;
-    }
-
-    private static List<String> getTemplateNames(String str, final SubComponent subject, final Component needle) {
-        final List<String> subComponentInstanceNames = new ArrayList<>();
-
-        // Run all their sub components
-        for (final SubComponent sc : subject.getComponent().getSubComponents()) {
-            subComponentInstanceNames.addAll(getTemplateNames(subject.getIdentifier(), sc, needle));
-        }
-
-        if (subject.getComponent().equals(needle)) {
-            if (!Strings.isNullOrEmpty(str)) {
-                str += "_";
-            }
-            subComponentInstanceNames.add(str + subject.getIdentifier());
-        }
-
-        return subComponentInstanceNames;
     }
 
     public enum TraceType {

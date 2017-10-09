@@ -138,10 +138,8 @@ public class Project {
         final File[] projectFiles = projectFolder.listFiles();
         if (projectFiles == null || projectFiles.length == 0) return;
 
-        // Create maps for deserialization
+        // Create map for deserialization
         final Map<String, JsonObject> componentJsonMap = new HashMap<>();
-        final Map<JsonObject, Integer> componentMaxDepthMap = new HashMap<>();
-        JsonObject mainJsonComponent = null;
 
         for (final File file : projectFiles) {
             final String fileContent = Files.toString(file, Charset.defaultCharset());
@@ -177,29 +175,16 @@ public class Project {
             // Add the name and the json object to the map
             componentJsonMap.put(componentName, jsonObject);
 
-            // Initialize the max depth map
-            componentMaxDepthMap.put(jsonObject, 0);
-
-            // Find the main name of the main component
-            if (jsonObject.get("main").getAsBoolean()) {
-                mainJsonComponent = jsonObject;
-            }
-
         }
 
-        if (mainJsonComponent != null) {
-            updateDepthMap(mainJsonComponent, 0, componentJsonMap, componentMaxDepthMap);
-        }
-
-        final List<Map.Entry<JsonObject, Integer>> list = new LinkedList<>(componentMaxDepthMap.entrySet());
+        final List<Map.Entry<String, JsonObject>> list = new LinkedList<>(componentJsonMap.entrySet());
         // Defined Custom Comparator here
-        list.sort(Comparator.comparing(Map.Entry::getValue));
+        list.sort(Comparator.comparing(Map.Entry::getKey));
 
         final List<JsonObject> orderedJsonComponents = new ArrayList<>();
 
-
-        for (final Map.Entry<JsonObject, Integer> mapEntry : list) {
-            orderedJsonComponents.add(mapEntry.getKey());
+        for (final Map.Entry<String, JsonObject> mapEntry : list) {
+            orderedJsonComponents.add(mapEntry.getValue());
         }
 
         // Reverse the list such that the greatest depth is first in the list
@@ -213,22 +198,7 @@ public class Project {
             getComponents().add(newComponent);
             newComponent.deserialize(jsonObject);
         });
-    }
-
-    private static void updateDepthMap(final JsonObject jsonObject, final int depth, final Map<String, JsonObject> nameToJson, final Map<JsonObject, Integer> jsonToDpeth) {
-        if (jsonToDpeth.get(jsonObject) < depth) {
-            jsonToDpeth.put(jsonObject, depth);
         }
-
-        final List<String> subComponentNames = new ArrayList<>();
-
-        jsonObject.get("sub_components").getAsJsonArray().forEach(jsonElement ->
-                subComponentNames.add(jsonElement.getAsJsonObject().get("component").getAsString()));
-
-        for (final String subComponentName : subComponentNames) {
-            updateDepthMap(nameToJson.get(subComponentName), depth + 1, nameToJson, jsonToDpeth);
-        }
-    }
 
     /**
      * Resets components.

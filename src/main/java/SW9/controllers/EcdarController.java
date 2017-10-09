@@ -494,8 +494,6 @@ public class EcdarController implements Initializable {
                 final List<Component> missingComponents = new ArrayList<>();
                 Ecdar.getProject().getComponents().forEach(missingComponents::add);
 
-                // List to iterate through the components
-                final List<SubComponent> subComponentsToCheck = new ArrayList<>();
 
                 // Consumer to reset the location identifier
                 final Consumer<Location> resetLocation = (location -> {
@@ -517,25 +515,12 @@ public class EcdarController implements Initializable {
                     // Set the identifier for the final location
                     resetLocation.accept(component.getFinalLocation());
 
-                    // We are now finished with this component, remove it from the list and add subcomponents to the checking list
+                    // We are now finished with this component, remove it from the list
                     missingComponents.remove(component);
-                    component.getSubComponents().forEach(subComponentsToCheck::add);
                 };
 
                 // Balance the identifiers in the main component
                 resetLocationsInComponent.accept(Ecdar.getProject().getMainComponent());
-
-                // While we are missing subcomponents, balance them!
-                while(!subComponentsToCheck.isEmpty()) {
-                    // Pick the 0th element which we will now check
-                    final SubComponent subComponent = subComponentsToCheck.get(0);
-
-                    // Reset the location identifiers in the given subcomponent's component
-                    resetLocationsInComponent.accept(subComponent.getComponent());
-
-                    // Remove the subcomponent from the list
-                    subComponentsToCheck.remove(0);
-                }
 
                 // If we still need to balance some component (they might not be used) then do it now
                 while(!missingComponents.isEmpty()) {
@@ -1068,22 +1053,6 @@ public class EcdarController implements Initializable {
                     component.getJorks().add(jork);
                     relatedEdges.forEach(component::addEdge);
                 }, String.format("Deleted %s", selectable.toString()), "delete");
-            } else if (selectable instanceof SubComponentController) {
-                final Component component = (Component) CanvasController.getActiveVerificationObject();
-                final SubComponent subComponent = ((SubComponentController) selectable).getSubComponent();
-
-
-                final List<Edge> relatedEdges = component.getRelatedEdges(subComponent);
-
-                UndoRedoStack.pushAndPerform(() -> { // Perform
-                    // Remove the subComponent
-                    component.getSubComponents().remove(subComponent);
-                    relatedEdges.forEach(component::removeEdge);
-                }, () -> { // Undo
-                    // Re-all the subComponent
-                    component.getSubComponents().add(subComponent);
-                    relatedEdges.forEach(component::addEdge);
-                }, String.format("Deleted %s", selectable.toString()), "delete");
             } else if (selectable instanceof NailController) {
                 final NailController nailController = (NailController) selectable;
                 final Edge edge = nailController.getEdge();
@@ -1094,7 +1063,7 @@ public class EcdarController implements Initializable {
                 final String restoreProperty = edge.getProperty(nail.getPropertyType());
 
                 // If the last nail on a self loop for a location or join/fork delete the edge also
-                final boolean shouldDeleteEdgeAlso = edge.isSelfLoop() && edge.getNails().size() == 1 && edge.getSourceSubComponent() == null;
+                final boolean shouldDeleteEdgeAlso = edge.isSelfLoop() && edge.getNails().size() == 1;
 
                 // Create an undo redo description based, add extra comment if edge is also deleted
                 String message =  String.format("Deleted %s", selectable.toString());

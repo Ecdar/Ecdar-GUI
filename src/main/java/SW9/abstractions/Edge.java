@@ -20,8 +20,6 @@ public class Edge implements Serializable, Nearable {
 
     private static final String SOURCE_LOCATION = "source_location";
     private static final String TARGET_LOCATION = "target_location";
-    private static final String SOURCE_SUB_COMPONENT = "source_sub_component";
-    private static final String TARGET_SUB_COMPONENT = "target_sub_component";
     private static final String SOURCE_JORK = "source_jork";
     private static final String TARGET_JORK = "target_jork";
     private static final String SELECT = "select";
@@ -34,8 +32,6 @@ public class Edge implements Serializable, Nearable {
     // Verification properties
     private final ObjectProperty<Location> sourceLocation = new SimpleObjectProperty<>();
     private final ObjectProperty<Location> targetLocation = new SimpleObjectProperty<>();
-    private final ObjectProperty<SubComponent> sourceSubComponent = new SimpleObjectProperty<>();
-    private final ObjectProperty<SubComponent> targetSubComponent = new SimpleObjectProperty<>();
     private final ObjectProperty<Jork> sourceJork = new SimpleObjectProperty<>();
 
     private final ObjectProperty<Jork> targetJork = new SimpleObjectProperty<>();
@@ -50,8 +46,8 @@ public class Edge implements Serializable, Nearable {
     private final ObservableList<Nail> nails = FXCollections.observableArrayList();
 
     // Circulars
-    private ObjectProperty<Circular> sourceCircular = new SimpleObjectProperty<>();
-    private ObjectProperty<Circular> targetCircular = new SimpleObjectProperty<>();
+    private final ObjectProperty<Circular> sourceCircular = new SimpleObjectProperty<>();
+    private final ObjectProperty<Circular> targetCircular = new SimpleObjectProperty<>();
 
     // Defines if this is an input or an output edge
     private EdgeStatus status;
@@ -62,8 +58,7 @@ public class Edge implements Serializable, Nearable {
         this.status = status;
     }
 
-    public Edge(final SubComponent sourceComponent, final EdgeStatus status) {
-        setSourceSubComponent(sourceComponent);
+    public Edge(final EdgeStatus status) {
         bindReachabilityAnalysis();
         this.status = status;
     }
@@ -85,6 +80,10 @@ public class Edge implements Serializable, Nearable {
     private void setSourceLocation(final Location sourceLocation) {
         this.sourceLocation.set(sourceLocation);
         updateSourceCircular();
+    }
+
+    public ObjectProperty<Circular> sourceCircularProperty() {
+        return sourceCircular;
     }
 
     public ObjectProperty<Location> sourceLocationProperty() {
@@ -192,32 +191,6 @@ public class Edge implements Serializable, Nearable {
         return nails.remove(nail);
     }
 
-    public SubComponent getSourceSubComponent() {
-        return sourceSubComponent.get();
-    }
-
-    public void setSourceSubComponent(final SubComponent sourceSubComponent) {
-        this.sourceSubComponent.set(sourceSubComponent);
-        updateSourceCircular();
-    }
-
-    public ObjectProperty<SubComponent> sourceSubComponentProperty() {
-        return sourceSubComponent;
-    }
-
-    public SubComponent getTargetSubComponent() {
-        return targetSubComponent.get();
-    }
-
-    public void setTargetSubComponent(final SubComponent targetSubComponent) {
-        this.targetSubComponent.set(targetSubComponent);
-        updateTargetCircular();
-    }
-
-    public ObjectProperty<SubComponent> targetSubComponentProperty() {
-        return targetSubComponent;
-    }
-
     public Jork getSourceJork() {
         return sourceJork.get();
     }
@@ -227,10 +200,6 @@ public class Edge implements Serializable, Nearable {
         updateSourceCircular();
     }
 
-    public ObjectProperty<Jork> sourceJorkProperty() {
-        return sourceJork;
-    }
-
     public Jork getTargetJork() {
         return targetJork.get();
     }
@@ -238,14 +207,6 @@ public class Edge implements Serializable, Nearable {
     public void setTargetJork(final Jork targetJork) {
         this.targetJork.set(targetJork);
         updateTargetCircular();
-    }
-
-    public ObjectProperty<Jork> targetJorkProperty() {
-        return targetJork;
-    }
-
-    public ObjectProperty<Circular> sourceCircularProperty() {
-        return sourceCircular;
     }
 
     public ObjectProperty<Circular> targetCircularProperty() {
@@ -269,45 +230,6 @@ public class Edge implements Serializable, Nearable {
     private void updateSourceCircular() {
         if(getSourceLocation() != null) {
             sourceCircular.set(getSourceLocation());
-        } else if(getSourceSubComponent() != null) {
-            sourceCircular.set(new Circular() {
-                DoubleProperty x = new SimpleDoubleProperty();
-                DoubleProperty y = new SimpleDoubleProperty();
-                {
-                    x.bind(getSourceSubComponent().xProperty().add(getSourceSubComponent().widthProperty()).subtract(GRID_SIZE * 2));
-                    y.bind(getSourceSubComponent().yProperty().add(getSourceSubComponent().heightProperty()).subtract(GRID_SIZE * 2));
-                }
-
-                @Override
-                public DoubleProperty radiusProperty() {
-                    return getSourceSubComponent().getComponent().getFinalLocation().radiusProperty();
-                }
-
-                @Override
-                public DoubleProperty scaleProperty() {
-                    return getSourceSubComponent().getComponent().getFinalLocation().scaleProperty();
-                }
-
-                @Override
-                public DoubleProperty xProperty() {
-                    return x;
-                }
-
-                @Override
-                public DoubleProperty yProperty() {
-                    return y;
-                }
-
-                @Override
-                public double getX() {
-                    return xProperty().get();
-                }
-
-                @Override
-                public double getY() {
-                    return yProperty().get();
-                }
-            });
         } else if (getSourceJork() != null) {
             sourceCircular.set(new Circular() {
                 DoubleProperty x = new SimpleDoubleProperty();
@@ -354,45 +276,6 @@ public class Edge implements Serializable, Nearable {
     private void updateTargetCircular() {
         if(getTargetLocation() != null) {
             targetCircular.set(getTargetLocation());
-        } else if(getTargetSubComponent() != null) {
-            targetCircular.set(new Circular() {
-                DoubleProperty x = new SimpleDoubleProperty();
-                DoubleProperty y = new SimpleDoubleProperty();
-                {
-                    x.bind(getTargetSubComponent().xProperty().add(GRID_SIZE * 2));
-                    y.bind(getTargetSubComponent().yProperty().add(GRID_SIZE * 2));
-                }
-
-                @Override
-                public DoubleProperty radiusProperty() {
-                    return getTargetSubComponent().getComponent().getInitialLocation().radiusProperty();
-                }
-
-                @Override
-                public DoubleProperty scaleProperty() {
-                    return getTargetSubComponent().getComponent().getInitialLocation().scaleProperty();
-                }
-
-                @Override
-                public DoubleProperty xProperty() {
-                    return x;
-                }
-
-                @Override
-                public DoubleProperty yProperty() {
-                    return y;
-                }
-
-                @Override
-                public double getX() {
-                    return xProperty().get();
-                }
-
-                @Override
-                public double getY() {
-                    return yProperty().get();
-                }
-            });
         } else if (getTargetJork() != null) {
             targetCircular.set(new Circular() {
                 DoubleProperty x = new SimpleDoubleProperty();
@@ -476,12 +359,6 @@ public class Edge implements Serializable, Nearable {
         if (getTargetLocation() != null) {
             result.addProperty(TARGET_LOCATION, getTargetLocation().getId());
         }
-        if (getSourceSubComponent() != null) {
-            result.addProperty(SOURCE_SUB_COMPONENT, getSourceSubComponent().getIdentifier());
-        }
-        if (getTargetSubComponent() != null) {
-            result.addProperty(TARGET_SUB_COMPONENT, getTargetSubComponent().getIdentifier());
-        }
         if (getSourceJork() != null) {
             result.addProperty(SOURCE_JORK, getSourceJork().getId());
         }
@@ -526,17 +403,6 @@ public class Edge implements Serializable, Nearable {
         setFromAndToLocationIfMatches.accept(initialLocation);
         setFromAndToLocationIfMatches.accept(finalLocation);
 
-        // Sets a sub component to be either source or target sub component if the sub component matches the json content
-        final Consumer<SubComponent> setFromAndToSubComponentIfMatches = (subComponent) -> {
-            if (json.get(SOURCE_SUB_COMPONENT) != null && subComponent.getIdentifier().equals(json.getAsJsonPrimitive(SOURCE_SUB_COMPONENT).getAsString())) {
-                setSourceSubComponent(subComponent);
-            }
-            if (json.get(TARGET_SUB_COMPONENT) != null && subComponent.getIdentifier().equals(json.getAsJsonPrimitive(TARGET_SUB_COMPONENT).getAsString())) {
-                setTargetSubComponent(subComponent);
-            }
-        };
-
-        component.getSubComponents().forEach(setFromAndToSubComponentIfMatches);
 
         // Sets a jork to be either source or target jork if the jork matches the json content
         final Consumer<Jork> setFromAndToJorkIfMatches = (jork) -> {
@@ -612,7 +478,7 @@ public class Edge implements Serializable, Nearable {
         SYNCHRONIZATION(2),
         UPDATE(3);
 
-        private int i;
+        private final int i;
 
         PropertyType(final int i) {
             this.i = i;
@@ -626,7 +492,6 @@ public class Edge implements Serializable, Nearable {
     public boolean isSelfLoop() {
 
         return (getSourceLocation() != null && getSourceLocation().equals(getTargetLocation())) ||
-                (getSourceSubComponent() != null && getSourceSubComponent().equals(getTargetSubComponent())) ||
                 (getSourceJork() != null && getSourceJork().equals(getTargetJork()));
 
     }
