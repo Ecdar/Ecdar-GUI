@@ -242,44 +242,21 @@ public class UPPAALDriver {
     }
 
     public static String getLocationReachableQuery(final Location location, final Component component) {
-
-        // Get the various flattened names of a location to produce a reachability query
-        final List<String> templateNames = getTemplateNames(component);
-        final List<String> locationNames = new ArrayList<>();
-
-        for (final String templateName : templateNames) {
-            locationNames.add(templateName + "." + location.getId());
-        }
-
-        return "E<> " + String.join(" || ", locationNames);
+        return "E<> " + " || " + component.getName() + "." + location.getId();
     }
 
     public static String getExistDeadlockQuery(final Component component) {
-        // Get the various flattened names of a location to produce a reachability query
-        final List<String> template = getTemplateNames(component);
+        // Get the names of the locations of this component. Used to produce the deadlock query
+        final String templateName = component.getName();
         final List<String> locationNames = new ArrayList<>();
 
-
-        for (final String templateName : template) {
-            for (final Location location : component.getLocations()) {
-                locationNames.add(templateName + "." + location.getId());
-            }
-
-            locationNames.add(templateName + "." + component.getInitialLocation().getId());
-            locationNames.add(templateName + "." + component.getFinalLocation().getId());
+        for (final Location location : component.getLocations()) {
+            locationNames.add(templateName + "." + location.getId());
         }
+
+        locationNames.add(templateName + "." + component.getInitialLocation().getId());
 
         return "E<> (" + String.join(" || ", locationNames) + ") && deadlock";
-    }
-
-    private static List<String> getTemplateNames(final Component component) {
-        final List<String> subComponentInstanceNames = new ArrayList<>();
-
-        if (component != null) {
-            subComponentInstanceNames.add(component.getName());
-        }
-
-        return subComponentInstanceNames;
     }
 
     public enum TraceType {
