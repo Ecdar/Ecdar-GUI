@@ -75,13 +75,6 @@ public class Ecdar extends Application {
         return project;
     }
 
-    /**
-     * Creates a new instance of Project.
-     */
-    public static void createNewProject() {
-        project.reset();
-    }
-
     public static void showToast(final String message) {
         presentation.showSnackbarMessage(message);
     }
@@ -225,7 +218,7 @@ public class Ecdar extends Application {
         });
         CodeAnalysis.clearErrorsAndWarnings();
         CodeAnalysis.disable();
-        cleanProject();
+        getProject().clean();
 
         // Deserialize the project
         Ecdar.getProject().deserialize(directory);
@@ -253,16 +246,6 @@ public class Ecdar extends Application {
         }
 
         serializationDone = true;
-    }
-
-    /**
-     * Cleans the project.
-     * Be sure to disable code analysis before call and enable after call.
-     */
-    public static void cleanProject() {
-        Ecdar.getProject().getQueries().removeIf(query -> true);
-        Ecdar.getProject().getComponents().removeIf(component -> true);
-        Ecdar.getProject().setMainComponent(null);
     }
 
     private void loadFonts() {
