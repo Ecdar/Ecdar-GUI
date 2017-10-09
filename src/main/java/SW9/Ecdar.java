@@ -62,7 +62,7 @@ public class Ecdar extends Application {
             System.exit(2);
         }
     }
-    // Test2
+    // Test3
     public static void main(final String[] args) {
         launch(Ecdar.class, args);
     }
