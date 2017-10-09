@@ -93,4 +93,8 @@ public abstract class VerificationObject implements Serializable {
         setName(json.getAsJsonPrimitive(NAME).getAsString());
         setDeclarationsText(json.getAsJsonPrimitive(DECLARATIONS).getAsString());
     }
+
+    public void clearDeclarationsText() {
+        setDeclarationsText("");
+    }
 }

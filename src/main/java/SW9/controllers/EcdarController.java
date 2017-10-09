@@ -449,6 +449,7 @@ public class EcdarController implements Initializable {
                 try {
                     Ecdar.projectDirectory.set(file.getAbsolutePath());
                     Ecdar.initializeProjectFolder();
+                    UndoRedoStack.clear();
                 } catch (final IOException e) {
                     e.printStackTrace();
                 }
@@ -609,10 +610,10 @@ public class EcdarController implements Initializable {
 
         Ecdar.projectDirectory.set(null);
 
-        Ecdar.createNewProject();
+        Ecdar.getProject().reset();
         CanvasController.setActiveVerificationObject(Ecdar.getProject().getComponents().get(0));
 
-        // TODO clear UndoRedoStack
+        UndoRedoStack.clear();
 
         CodeAnalysis.enable();
     }

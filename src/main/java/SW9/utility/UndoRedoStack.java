@@ -45,6 +45,15 @@ public class UndoRedoStack {
         return command;
     }
 
+    /**
+     * Clears the stacks.
+     */
+    public static void clear() {
+        undoStack.clear();
+        redoStack.clear();
+        updateState();
+    }
+
     public static void undo() {
         try {
             final Command command = undoStack.pop();

@@ -203,9 +203,23 @@ public class Project {
     /**
      * Resets components.
      * After this, there is only one component.
+     * Be sure to disable code analysis before call and enable after call.
      */
     public void reset() {
-        components.clear();
+        clean();
         components.add(new Component(true));
+    }
+
+    /**
+     * Cleans the project.
+     * Be sure to disable code analysis before call and enable after call.
+     */
+    public void clean() {
+        getGlobalDeclarations().clearDeclarationsText();
+        getSystemDeclarations().clearDeclarationsText();
+
+        queries.clear();
+
+        components.clear();
     }
 }
