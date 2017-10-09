@@ -24,6 +24,7 @@ public class UPPAALDriver {
 
     public static final int MAX_ENGINES = 10;
     public static final Object engineLock = false; // Used to lock concurrent engine reference access
+    private static final String SERVER_NAME = "server";
 
     private static EcdarDocument ecdarDocument;
 
@@ -169,16 +170,16 @@ public class UPPAALDriver {
     private static final ArrayList<Engine> createdEngines = new ArrayList<>();
     private static final ArrayList<Engine> availableEngines = new ArrayList<>();
 
-    private static File findServerFile(final String serverName) {
+    private static File findServerFile() {
         final String os = System.getProperty("os.name");
         final File file;
 
         if (os.contains("Mac")) {
-            file = new File(Ecdar.serverDirectory + File.separator + "bin-MacOS" + File.separator + serverName);
+            file = new File(Ecdar.serverDirectory + File.separator + "bin-MacOS" + File.separator + SERVER_NAME);
         } else if (os.contains("Linux")) {
-            file = new File(Ecdar.serverDirectory + File.separator + "bin-Linux" + File.separator + serverName);
+            file = new File(Ecdar.serverDirectory + File.separator + "bin-Linux" + File.separator + SERVER_NAME);
         } else {
-            file = new File(Ecdar.serverDirectory + File.separator + "bin-Win32" + File.separator + serverName + ".exe");
+            file = new File(Ecdar.serverDirectory + File.separator + "bin-Win32" + File.separator + SERVER_NAME + ".exe");
         }
 
         return file;
@@ -186,8 +187,7 @@ public class UPPAALDriver {
 
     private static Engine getAvailableEngineOrCreateNew() {
         if (availableEngines.size() == 0) {
-            final String serverName = "server";
-            final File serverFile = findServerFile(serverName);
+            final File serverFile = findServerFile();
             serverFile.setExecutable(true); // Allows us to use the server file
 
             // Check if the user copied the file correctly
