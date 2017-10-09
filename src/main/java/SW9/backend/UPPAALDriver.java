@@ -170,6 +170,10 @@ public class UPPAALDriver {
     private static final ArrayList<Engine> createdEngines = new ArrayList<>();
     private static final ArrayList<Engine> availableEngines = new ArrayList<>();
 
+    /**
+     * Finds the right server files, based on the system os
+     * @return The server file
+     */
     private static File findServerFile() {
         final String os = System.getProperty("os.name");
         final File file;
@@ -241,10 +245,21 @@ public class UPPAALDriver {
         uppaalDocument.save(new File(fileName));
     }
 
+    /**
+     * Generates a reachability query based on the given location and component
+     * @param location The location which should be checked for reachability
+     * @param component The component where the location belong to / are placed
+     * @return A reachability query string
+     */
     public static String getLocationReachableQuery(final Location location, final Component component) {
         return "E<> " + " || " + component.getName() + "." + location.getId();
     }
 
+    /**
+     * Generates a string for a deadlock query based on the component
+     * @param component The component which should be checked for deadlocks
+     * @return A deadlock query string
+     */
     public static String getExistDeadlockQuery(final Component component) {
         // Get the names of the locations of this component. Used to produce the deadlock query
         final String templateName = component.getName();
