@@ -57,7 +57,6 @@ public class ComponentController implements Initializable {
     private final ObjectProperty<Component> component = new SimpleObjectProperty<>(null);
     private final Map<Edge, EdgePresentation> edgePresentationMap = new HashMap<>();
     private final Map<Location, LocationPresentation> locationPresentationMap = new HashMap<>();
-    private final Map<Jork, JorkPresentation> jorkPresentationMap = new HashMap<>();
     public BorderPane toolbar;
     public Rectangle background;
     public StyleClassedTextArea declarationTextArea;
@@ -74,7 +73,6 @@ public class ComponentController implements Initializable {
     public Rectangle bottomAnchor;
     public Pane modelContainerLocation;
     public Pane modelContainerEdge;
-    public Pane modelContainerJork;
 
     private MouseTracker mouseTracker;
     private DropDownMenu contextMenu;
@@ -145,7 +143,6 @@ public class ComponentController implements Initializable {
 
             initializeEdgeHandling(newComponent);
             initializeLocationHandling(newComponent);
-            initializeJorkHandling(newComponent);
             initializeDeclarations();
 
             // When we update the color of the component, also update the color of the initial and final locations if the colors are the same
@@ -255,35 +252,6 @@ public class ComponentController implements Initializable {
         });
     }
 
-    private void initializeJorkHandling(final Component newComponent) {
-        final Consumer<Jork> handleAddedJork = newJork -> {
-            final JorkPresentation jorkPresentation = new JorkPresentation(newJork, newComponent);
-            jorkPresentationMap.put(newJork, jorkPresentation);
-            modelContainerJork.getChildren().add(jorkPresentation);
-        };
-
-
-        // React on addition of jorks to the component
-        newComponent.getJorks().addListener(new ListChangeListener<Jork>() {
-            @Override
-            public void onChanged(final Change<? extends Jork> c) {
-                if (c.next()) {
-                    // Edges are added to the component
-                    c.getAddedSubList().forEach(handleAddedJork::accept);
-
-                    // Edges are removed from the component
-                    c.getRemoved().forEach(edge -> {
-                        final JorkPresentation jorkPresentation = jorkPresentationMap.get(edge);
-                        modelContainerJork.getChildren().remove(jorkPresentation);
-                        jorkPresentationMap.remove(edge);
-                    });
-                }
-            }
-        });
-
-        newComponent.getJorks().forEach(handleAddedJork);
-    }
-
 
     private void initializeComponentContextMenu() {
         dropDownMenuHelperCircle = new Circle(5);
@@ -321,48 +289,6 @@ public class ComponentController implements Initializable {
                 }, () -> { // Undo
                     component.removeLocation(newLocation);
                 }, "Added location '" + newLocation.toString() + "' to component '" + component.getName() + "'", "add-circle");
-            });
-
-            contextMenu.addClickableListElement("Add Fork", event -> {
-                contextMenu.close();
-
-                final Jork newJork = new Jork(Jork.Type.FORK);
-
-                double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
-                x = Math.round(x / GRID_SIZE) * GRID_SIZE;
-                newJork.setX(x);
-
-                double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
-                y = Math.round(y / GRID_SIZE) * GRID_SIZE;
-                newJork.setY(y);
-
-                // Add a new location
-                UndoRedoStack.pushAndPerform(() -> { // Perform
-                    component.addJork(newJork);
-                }, () -> { // Undo
-                    component.removeJork(newJork);
-                }, "Added fork '" + newJork.toString() + "' to component '" + component.getName() + "'", "add-circle");
-            });
-
-            contextMenu.addClickableListElement("Add Join", event -> {
-                contextMenu.close();
-
-                final Jork newJork = new Jork(Jork.Type.JOIN);
-
-                double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
-                x = Math.round(x / GRID_SIZE) * GRID_SIZE;
-                newJork.setX(x);
-
-                double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
-                y = Math.round(y / GRID_SIZE) * GRID_SIZE;
-                newJork.setY(y);
-
-                // Add a new location
-                UndoRedoStack.pushAndPerform(() -> { // Perform
-                    component.addJork(newJork);
-                }, () -> { // Undo
-                    component.removeJork(newJork);
-                }, "Added join '" + newJork.toString() + "' to component '" + component.getName() + "'", "add-circle");
             });
 
             contextMenu.addSpacerElement();
@@ -449,44 +375,6 @@ public class ComponentController implements Initializable {
                     getComponent().removeLocation(location);
                     UndoRedoStack.undo();
                 }, "Finished edge '" + unfinishedEdge + "' by adding '" + location + "' to component '" + component.getName() + "'", "add-circle");
-            });
-
-            finishEdgeContextMenu.addClickableAndDisableableListElement("Fork", new SimpleBooleanProperty(unfinishedEdge.getSourceLocation() == null), event -> {
-                finishEdgeContextMenu.close();
-
-                final Jork jork = new Jork(Jork.Type.FORK);
-
-                unfinishedEdge.setTargetJork(jork);
-
-                setCoordinates.accept(jork);
-
-                // Add a new jork
-                UndoRedoStack.pushAndPerform(() -> { // Perform
-                    getComponent().addJork(jork);
-                    UndoRedoStack.redo();
-                }, () -> { // Undo
-                    getComponent().removeJork(jork);
-                    UndoRedoStack.undo();
-                }, "Finished edge '" + unfinishedEdge + "' by adding '" + jork + "' to component '" + component.getName() + "'", "add-circle");
-            });
-
-            finishEdgeContextMenu.addClickableAndDisableableListElement("Join", new SimpleBooleanProperty(false), event  -> {
-                finishEdgeContextMenu.close();
-
-                final Jork jork = new Jork(Jork.Type.JOIN);
-
-                unfinishedEdge.setTargetJork(jork);
-
-                setCoordinates.accept(jork);
-
-                // Add a new jork
-                UndoRedoStack.pushAndPerform(() -> { // Perform
-                    getComponent().addJork(jork);
-                    UndoRedoStack.redo();
-                }, () -> { // Undo
-                    getComponent().removeJork(jork);
-                    UndoRedoStack.undo();
-                }, "Finished edge '" + unfinishedEdge + "' by adding '" + jork + "' to component '" + component.getName() + "'", "add-circle");
             });
         };
 
