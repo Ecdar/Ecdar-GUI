@@ -94,12 +94,6 @@ public class Query implements Serializable {
         runQuery = (buildEcdarDocument) -> {
             setQueryState(QueryState.RUNNING);
 
-            final Component mainComponent = Ecdar.getProject().getMainComponent();
-
-            if (mainComponent == null) {
-                return; // We cannot generate a UPPAAL file without a main component
-            }
-
             if (buildEcdarDocument) {
                 try {
                     UPPAALDriver.buildEcdarDocument();
