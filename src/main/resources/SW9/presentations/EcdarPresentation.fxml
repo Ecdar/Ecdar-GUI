@@ -382,11 +382,6 @@
                                 Opens context menus
                             </Label>
                         </HBox>
-
-                        <Region minHeight="16"/>
-                        <HBox minHeight="1" style="-fx-background-color: #eee;"/>
-                        <Region minHeight="16"/>
-
                     </VBox>
 
                     <HBox style="-fx-padding: 8px;">
