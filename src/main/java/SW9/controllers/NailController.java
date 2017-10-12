@@ -83,7 +83,7 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
 
             final String restoreProperty = edge.getProperty(nail.getPropertyType());
 
-            // If the last nail on a self loop for a location or join/fork delete the edge also
+            // If the last nail on a self loop for a location, delete the edge too
             final boolean shouldDeleteEdgeAlso = edge.isSelfLoop() && edge.getNails().size() == 1;
 
             // Create an undo redo description based, add extra comment if edge is also deleted

@@ -382,30 +382,6 @@
                                 Opens context menus
                             </Label>
                         </HBox>
-
-                        <Region minHeight="16"/>
-                        <HBox minHeight="1" style="-fx-background-color: #eee;"/>
-                        <Region minHeight="16"/>
-
-                        <HBox>
-                            <VBox>
-                                <JorkPresentation mouseTransparent="true">
-                                    <type>FORK</type>
-                                </JorkPresentation>
-                                <Label alignment="BASELINE_CENTER" style="-fx-padding: 6 20 0 20;" styleClass="caption">
-                                    Fork
-                                </Label>
-                            </VBox>
-                            <VBox>
-                                <JorkPresentation mouseTransparent="true">
-                                    <type>JOIN</type>
-                                </JorkPresentation>
-                                <Label alignment="BASELINE_CENTER" style="-fx-padding: 6 20 0 20;" styleClass="caption">
-                                    Join
-                                </Label>
-                            </VBox>
-                        </HBox>
-
                     </VBox>
 
                     <HBox style="-fx-padding: 8px;">

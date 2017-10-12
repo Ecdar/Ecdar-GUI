@@ -2,7 +2,6 @@ package SW9.abstractions;
 
 import SW9.code_analysis.Nearable;
 import SW9.controllers.EcdarController;
-import SW9.presentations.JorkPresentation;
 import SW9.utility.colors.Color;
 import SW9.utility.helpers.Circular;
 import SW9.utility.serialize.Serializable;
@@ -20,8 +19,6 @@ public class Edge implements Serializable, Nearable {
 
     private static final String SOURCE_LOCATION = "source_location";
     private static final String TARGET_LOCATION = "target_location";
-    private static final String SOURCE_JORK = "source_jork";
-    private static final String TARGET_JORK = "target_jork";
     private static final String SELECT = "select";
     private static final String GUARD = "guard";
     private static final String UPDATE = "update";
@@ -32,9 +29,7 @@ public class Edge implements Serializable, Nearable {
     // Verification properties
     private final ObjectProperty<Location> sourceLocation = new SimpleObjectProperty<>();
     private final ObjectProperty<Location> targetLocation = new SimpleObjectProperty<>();
-    private final ObjectProperty<Jork> sourceJork = new SimpleObjectProperty<>();
 
-    private final ObjectProperty<Jork> targetJork = new SimpleObjectProperty<>();
     private final StringProperty select = new SimpleStringProperty("");
     private final StringProperty guard = new SimpleStringProperty("");
     private final StringProperty update = new SimpleStringProperty("");
@@ -61,11 +56,6 @@ public class Edge implements Serializable, Nearable {
     public Edge(final EdgeStatus status) {
         bindReachabilityAnalysis();
         this.status = status;
-    }
-
-    public Edge(final Jork sourceJork) {
-        setSourceJork(sourceJork);
-        bindReachabilityAnalysis();
     }
 
     public Edge(final JsonObject jsonObject, final Component component) {
@@ -191,24 +181,6 @@ public class Edge implements Serializable, Nearable {
         return nails.remove(nail);
     }
 
-    public Jork getSourceJork() {
-        return sourceJork.get();
-    }
-
-    public void setSourceJork(final Jork sourceJork) {
-        this.sourceJork.set(sourceJork);
-        updateSourceCircular();
-    }
-
-    public Jork getTargetJork() {
-        return targetJork.get();
-    }
-
-    public void setTargetJork(final Jork targetJork) {
-        this.targetJork.set(targetJork);
-        updateTargetCircular();
-    }
-
     public ObjectProperty<Circular> targetCircularProperty() {
         return targetCircular;
     }
@@ -230,92 +202,12 @@ public class Edge implements Serializable, Nearable {
     private void updateSourceCircular() {
         if(getSourceLocation() != null) {
             sourceCircular.set(getSourceLocation());
-        } else if (getSourceJork() != null) {
-            sourceCircular.set(new Circular() {
-                DoubleProperty x = new SimpleDoubleProperty();
-                DoubleProperty y = new SimpleDoubleProperty();
-
-                {
-                    x.bind(getSourceJork().xProperty().add(JorkPresentation.JORK_WIDTH / 2));
-                    y.bind(getSourceJork().yProperty().add(JorkPresentation.JORK_HEIGHT + JorkPresentation.JORK_Y_TRANSLATE));
-                }
-
-                @Override
-                public DoubleProperty radiusProperty() {
-                    return new SimpleDoubleProperty(0);
-                }
-
-                @Override
-                public DoubleProperty scaleProperty() {
-                    return new SimpleDoubleProperty(0);
-                }
-
-                @Override
-                public DoubleProperty xProperty() {
-                    return x;
-                }
-
-                @Override
-                public DoubleProperty yProperty() {
-                    return y;
-                }
-
-                @Override
-                public double getX() {
-                    return xProperty().get();
-                }
-
-                @Override
-                public double getY() {
-                    return yProperty().get();
-                }
-            });
         }
     }
 
     private void updateTargetCircular() {
         if(getTargetLocation() != null) {
             targetCircular.set(getTargetLocation());
-        } else if (getTargetJork() != null) {
-            targetCircular.set(new Circular() {
-                DoubleProperty x = new SimpleDoubleProperty();
-                DoubleProperty y = new SimpleDoubleProperty();
-
-                {
-                    x.bind(getTargetJork().xProperty().add(JorkPresentation.JORK_WIDTH / 2));
-                    y.bind(getTargetJork().yProperty().add(JorkPresentation.JORK_Y_TRANSLATE));
-                }
-
-                @Override
-                public DoubleProperty radiusProperty() {
-                    return new SimpleDoubleProperty(0);
-                }
-
-                @Override
-                public DoubleProperty scaleProperty() {
-                    return new SimpleDoubleProperty(0);
-                }
-
-                @Override
-                public DoubleProperty xProperty() {
-                    return x;
-                }
-
-                @Override
-                public DoubleProperty yProperty() {
-                    return y;
-                }
-
-                @Override
-                public double getX() {
-                    return xProperty().get();
-                }
-
-                @Override
-                public double getY() {
-                    return yProperty().get();
-                }
-            });
         }
     }
 
@@ -359,12 +251,7 @@ public class Edge implements Serializable, Nearable {
         if (getTargetLocation() != null) {
             result.addProperty(TARGET_LOCATION, getTargetLocation().getId());
         }
-        if (getSourceJork() != null) {
-            result.addProperty(SOURCE_JORK, getSourceJork().getId());
-        }
-        if (getTargetJork() != null) {
-            result.addProperty(TARGET_JORK, getTargetJork().getId());
-        }
+
         result.addProperty(STATUS, status.toString());
         result.addProperty(SELECT, getSelect());
         result.addProperty(GUARD, getGuard());
@@ -404,18 +291,6 @@ public class Edge implements Serializable, Nearable {
         setFromAndToLocationIfMatches.accept(finalLocation);
 
 
-        // Sets a jork to be either source or target jork if the jork matches the json content
-        final Consumer<Jork> setFromAndToJorkIfMatches = (jork) -> {
-            if (json.get(SOURCE_JORK) != null && jork.getId().equals(json.getAsJsonPrimitive(SOURCE_JORK).getAsString())) {
-                setSourceJork(jork);
-            }
-            if (json.get(TARGET_JORK) != null && jork.getId().equals(json.getAsJsonPrimitive(TARGET_JORK).getAsString())) {
-                setTargetJork(jork);
-            }
-        };
-
-        component.getJorks().forEach(setFromAndToJorkIfMatches);
-
         status = EdgeStatus.valueOf(json.getAsJsonPrimitive(STATUS).getAsString());
 
         setSelect(json.getAsJsonPrimitive(SELECT).getAsString());
@@ -435,16 +310,12 @@ public class Edge implements Serializable, Nearable {
 
         if (getSourceLocation() != null) {
             result += " from " + getSourceLocation().generateNearString();
-        } else if (getSourceJork() != null) {
-            result += " from " + getSourceJork().generateNearString();
         } else {
             result += " from " + getSourceCircular();
         }
 
         if (getTargetLocation() != null) {
             result += " to " + getTargetLocation().generateNearString();
-        } else if (getTargetJork() != null) {
-            result += " to " + getTargetJork().generateNearString();
         } else {
             result += " to " + getTargetCircular();
         }
@@ -490,14 +361,10 @@ public class Edge implements Serializable, Nearable {
     }
 
     public boolean isSelfLoop() {
-
-        return (getSourceLocation() != null && getSourceLocation().equals(getTargetLocation())) ||
-                (getSourceJork() != null && getSourceJork().equals(getTargetJork()));
-
+        return (getSourceLocation() != null && getSourceLocation().equals(getTargetLocation()));
     }
 
     private void bindReachabilityAnalysis() {
-
         selectProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
         guardProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
         syncProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());

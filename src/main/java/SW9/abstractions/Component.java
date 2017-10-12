@@ -22,7 +22,6 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
     private static final AtomicInteger hiddenID = new AtomicInteger(0); // Used to generate unique IDs
 
     private static final String LOCATIONS = "locations";
-    private static final String JORKS = "jorks";
     private static final String INITIAL_LOCATION = "initial_location";
     private static final String FINAL_LOCATION = "final_location";
     private static final String EDGES = "edges";
@@ -37,7 +36,6 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
 
     // Verification properties
     private final ObservableList<Location> locations = FXCollections.observableArrayList();
-    private final ObservableList<Jork> jorks = FXCollections.observableArrayList();
     private final ObservableList<Edge> edges = FXCollections.observableArrayList();
     private final ObjectProperty<Location> initialLocation = new SimpleObjectProperty<>();
     private final ObjectProperty<Location> finalLocation = new SimpleObjectProperty<>();
@@ -151,31 +149,6 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         return relatedEdges;
     }
 
-    public List<Edge> getRelatedEdges(final Jork jork) {
-        final ArrayList<Edge> relatedEdges = new ArrayList<>();
-
-        edges.forEach(edge -> {
-            if(jork.equals(edge.getSourceJork()) ||jork.equals(edge.getTargetJork())) {
-                relatedEdges.add(edge);
-            }
-        });
-
-        return relatedEdges;
-    }
-
-
-    public ObservableList<Jork> getJorks() {
-        return jorks;
-    }
-
-    public boolean addJork(final Jork jork) {
-        return jorks.add(jork);
-    }
-
-    public boolean removeJork(final Jork jork) {
-        return jorks.remove(jork);
-    }
-
     public double getX() {
         return x.get();
     }
@@ -259,10 +232,9 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
 
     public Edge getUnfinishedEdge() {
         for (final Edge edge : edges) {
-            if (edge.getTargetLocation() == null && edge.getTargetJork() == null)
+            if (edge.getTargetLocation() == null)
                 return edge;
         }
-
         return null;
     }
 
@@ -313,11 +285,6 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         result.add(INITIAL_LOCATION, getInitialLocation().serialize());
         result.add(FINAL_LOCATION, getFinalLocation().serialize());
 
-        final JsonArray jorks = new JsonArray();
-        getJorks().forEach(jork -> jorks.add(jork.serialize()));
-        result.add(JORKS, jorks);
-
-
         final JsonArray edges = new JsonArray();
         getEdges().forEach(edge -> edges.add(edge.serialize()));
         result.add(EDGES, edges);
@@ -352,11 +319,6 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
 
         final Location newFinalLocation = new Location(json.getAsJsonObject(FINAL_LOCATION));
         setFinalLocation(newFinalLocation);
-
-        json.getAsJsonArray(JORKS).forEach(jsonElement -> {
-            final Jork newJork = new Jork((JsonObject) jsonElement);
-            jorks.add(newJork);
-        });
 
 
         json.getAsJsonArray(EDGES).forEach(jsonElement -> {

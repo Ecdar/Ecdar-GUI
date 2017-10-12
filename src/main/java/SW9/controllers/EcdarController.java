@@ -1038,21 +1038,6 @@ public class EcdarController implements Initializable {
                     // Re-all the edge
                     component.addEdge(edge);
                 }, String.format("Deleted %s", selectable.toString()), "delete");
-            } else if (selectable instanceof JorkController) {
-                final Component component = (Component) CanvasController.getActiveVerificationObject();
-                final Jork jork = ((JorkController) selectable).getJork();
-
-                final List<Edge> relatedEdges = component.getRelatedEdges(jork);
-
-                UndoRedoStack.pushAndPerform(() -> { // Perform
-                    // Remove the jork
-                    component.getJorks().remove(jork);
-                    relatedEdges.forEach(component::removeEdge);
-                }, () -> { // Undo
-                    // Re-all the jork
-                    component.getJorks().add(jork);
-                    relatedEdges.forEach(component::addEdge);
-                }, String.format("Deleted %s", selectable.toString()), "delete");
             } else if (selectable instanceof NailController) {
                 final NailController nailController = (NailController) selectable;
                 final Edge edge = nailController.getEdge();
@@ -1062,7 +1047,7 @@ public class EcdarController implements Initializable {
 
                 final String restoreProperty = edge.getProperty(nail.getPropertyType());
 
-                // If the last nail on a self loop for a location or join/fork delete the edge also
+                // If the last nail on a self loop for a location delete the edge too
                 final boolean shouldDeleteEdgeAlso = edge.isSelfLoop() && edge.getNails().size() == 1;
 
                 // Create an undo redo description based, add extra comment if edge is also deleted
