@@ -512,8 +512,6 @@ public class EcdarController implements Initializable {
                     // Set the identifiers for the rest of the locations
                     component.getLocations().forEach(resetLocation);
 
-                    // Set the identifier for the final location
-                    resetLocation.accept(component.getFinalLocation());
 
                     // We are now finished with this component, remove it from the list
                     missingComponents.remove(component);
@@ -1008,11 +1006,10 @@ public class EcdarController implements Initializable {
                 final Location location = ((LocationController) selectable).getLocation();
 
                 final Location initialLocation = component.getInitialLocation();
-                final Location finalLocation = component.getFinalLocation();
 
-                if (location.getId().equals(initialLocation.getId()) || location.getId().equals(finalLocation.getId())) {
+                if (location.getId().equals(initialLocation.getId())) {
                     ((LocationPresentation) ((LocationController) selectable).root).shake();
-                    return; // Do not delete initial or final locations
+                    return; // Do not delete initial location
                 }
 
                 final List<Edge> relatedEdges = component.getRelatedEdges(location);

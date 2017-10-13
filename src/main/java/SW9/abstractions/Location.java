@@ -331,7 +331,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
         return "Location " + (!Strings.isNullOrEmpty(getNickname()) ? (getNickname() + " (" + getId() + ")") : getId());
     }
     public enum Type {
-        NORMAL, INITIAL, FINAL;
+        NORMAL, INITIAL;
     }
 
     public enum Urgency {

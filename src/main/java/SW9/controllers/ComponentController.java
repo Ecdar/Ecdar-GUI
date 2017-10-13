@@ -84,9 +84,6 @@ public class ComponentController implements Initializable {
     public Path initialLocationGuideArrow;
     public Label initialLocationGuideLabel;
 
-    public Group finalLocationGuideContainer;
-    public Path finalLocationGuideArrow;
-    public Label finalLocationGuideLabel;
 
 
     public static boolean isPlacingLocation() {
@@ -153,11 +150,6 @@ public class ComponentController implements Initializable {
                     initialLocation.setColor(newColor);
                 }
 
-                final Location finalLocation = newComponent.getFinalLocation();
-                if (finalLocation.getColor().equals(oldColor)) {
-                    finalLocation.setColorIntensity(newComponent.getColorIntensity());
-                    finalLocation.setColor(newColor);
-                }
             });
         });
 

@@ -65,7 +65,6 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
     private final ComponentController controller;
     private final List<BiConsumer<Color, Color.Intensity>> updateColorDelegates = new ArrayList<>();
     private LocationPresentation initialLocationPresentation = null;
-    private LocationPresentation finalLocationPresentation = null;
 
     public ComponentPresentation() {
         this(new Component());
@@ -102,7 +101,6 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
                 initializeToolbar();
                 initializeFrame();
                 initializeInitialLocation();
-                initializeFinalLocation();
                 initializeBackground();
             };
 
@@ -144,24 +142,11 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
         initialLocationGuideContainer.toFront();
         initialLocationGuideContainer.setOpacity(0);
 
-        // Final indicator
-        final Group finalLocationGuideContainer = controller.finalLocationGuideContainer;
-        final Path finalLocationGuideArrow = controller.finalLocationGuideArrow;
-        final Label finalLocationGuideLabel = controller.finalLocationGuideLabel;
 
-        drawIndicatorArrow(finalLocationGuideArrow);
-        finalLocationGuideContainer.setRotate(45);
-        finalLocationGuideContainer.setTranslateX(-2.3 * GRID_SIZE);
-        finalLocationGuideContainer.setTranslateY(-3.8 * GRID_SIZE);
-        finalLocationGuideLabel.setTranslateY(10.5);
-        finalLocationGuideContainer.toFront();
-        finalLocationGuideContainer.setOpacity(0);
 
         if (!controller.getComponent().isFirsTimeShown()) {
             initialLocationGuideContainer.setOpacity(1);
-            finalLocationGuideContainer.setOpacity(1);
             playIndicatorAnimations(Location.Type.INITIAL, initialLocationGuideContainer);
-            playIndicatorAnimations(Location.Type.FINAL, finalLocationGuideContainer);
             controller.getComponent().setFirsTimeShown(true);
         }
 
@@ -397,17 +382,13 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
             controller.defaultLocationsContainer.getChildren().remove(initialLocationPresentation);
         }
 
-        if (finalLocationPresentation != null) {
-            controller.defaultLocationsContainer.getChildren().remove(finalLocationPresentation);
-        }
 
         // Instantiate views for the initial and final location
         final Component component = controller.getComponent();
         initialLocationPresentation = new LocationPresentation(component.getInitialLocation(), component);
-        finalLocationPresentation = new LocationPresentation(component.getFinalLocation(), component);
 
         // Add the locations to the view
-        controller.defaultLocationsContainer.getChildren().addAll(initialLocationPresentation, finalLocationPresentation);
+        controller.defaultLocationsContainer.getChildren().add(initialLocationPresentation);
     }
 
     private void initializeName() {
@@ -456,17 +437,8 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
         StackPane.setAlignment(initialLocationPresentation, Pos.TOP_LEFT);
     }
 
-    private void initializeFinalLocation() {
-        final Component component = controller.getComponent();
 
-        finalLocationPresentation.setLocation(component.getFinalLocation());
-        finalLocationPresentation.layoutXProperty().unbind();
-        finalLocationPresentation.layoutYProperty().unbind();
-        finalLocationPresentation.setLayoutX(component.getWidth() - CORNER_SIZE / 2);
-        finalLocationPresentation.setLayoutY(component.getHeight() - CORNER_SIZE / 2);
 
-        StackPane.setAlignment(finalLocationPresentation, Pos.BOTTOM_RIGHT);
-    }
 
     private void initializeToolbar() {
         final Component component = controller.getComponent();
