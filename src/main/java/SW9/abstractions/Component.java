@@ -109,7 +109,7 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         return locations;
     }
 
-    public List<Location> getLocationsWithInitialAndFinal() {
+    public List<Location> getLocationsWithInitial() {
         final List<Location> locations = new ArrayList<>();
         locations.addAll(getLocations());
         locations.add(initialLocation.get());

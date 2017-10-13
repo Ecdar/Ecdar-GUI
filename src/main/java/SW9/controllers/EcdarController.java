@@ -338,9 +338,9 @@ public class EcdarController implements Initializable {
                 Ecdar.getProject().getComponents().forEach(component -> {
                     // Check if we should consider this component
                     if (!component.isIncludeInPeriodicCheck()) {
-                        component.getLocationsWithInitialAndFinal().forEach(location -> location.setReachability(Location.Reachability.EXCLUDED));
+                        component.getLocationsWithInitial().forEach(location -> location.setReachability(Location.Reachability.EXCLUDED));
                     } else {
-                        component.getLocationsWithInitialAndFinal().forEach(location -> {
+                        component.getLocationsWithInitial().forEach(location -> {
                             final String locationReachableQuery = UPPAALDriver.getLocationReachableQuery(location, component);
                             final Thread verifyThread = UPPAALDriver.runQuery(
                                     locationReachableQuery,
