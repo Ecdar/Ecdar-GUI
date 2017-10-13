@@ -512,7 +512,6 @@ public class EcdarController implements Initializable {
                     // Set the identifiers for the rest of the locations
                     component.getLocations().forEach(resetLocation);
 
-
                     // We are now finished with this component, remove it from the list
                     missingComponents.remove(component);
                 };

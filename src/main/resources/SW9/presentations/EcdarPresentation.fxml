@@ -341,7 +341,6 @@
 
                         <HBox>
                             <LocationPresentation mouseTransparent="true">
-
                                 <initial>URGENT</initial>
                             </LocationPresentation>
                             <Label styleClass="body1" style="-fx-padding: 9 0 0 5">

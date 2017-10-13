@@ -471,8 +471,6 @@ public class LocationPresentation extends Group implements MouseTrackable, Selec
         committedInitialIndicator.setLayoutY(-INITIAL_RADIUS);
 
         committedInitialIndicator.visibleProperty().bind(location.typeProperty().isEqualTo(Location.Type.INITIAL).and(location.urgencyProperty().isEqualTo(Location.Urgency.COMMITTED)));
-
-
     }
 
     public void setLocation(final Location location) {

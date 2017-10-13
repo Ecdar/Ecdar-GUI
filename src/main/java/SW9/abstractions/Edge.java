@@ -288,7 +288,6 @@ public class Edge implements Serializable, Nearable {
         component.getLocations().forEach(setFromAndToLocationIfMatches);
         setFromAndToLocationIfMatches.accept(initialLocation);
 
-
         status = EdgeStatus.valueOf(json.getAsJsonPrimitive(STATUS).getAsString());
 
         setSelect(json.getAsJsonPrimitive(SELECT).getAsString());

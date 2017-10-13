@@ -113,7 +113,6 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                     && getComponent().getEdges().contains(getEdge())
                     && getEdge().getTargetCircular() != null) {
 
-
                 // Add the message to the UI
                 CodeAnalysis.addMessage(getComponent(), message);
             } else {

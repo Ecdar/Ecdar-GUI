@@ -84,8 +84,6 @@ public class ComponentController implements Initializable {
     public Path initialLocationGuideArrow;
     public Label initialLocationGuideLabel;
 
-
-
     public static boolean isPlacingLocation() {
         return placingLocation != null;
     }
@@ -116,7 +114,6 @@ public class ComponentController implements Initializable {
             // Bind the declarations of the abstraction the the view
             declarationTextArea.replaceText(0, declarationTextArea.getLength(), newComponent.getDeclarationsText());
             declarationTextArea.textProperty().addListener((observable, oldDeclaration, newDeclaration) -> newComponent.setDeclarationsText(newDeclaration));
-
 
             // Find the clocks in the decls
             newComponent.declarationsTextProperty().addListener((observable, oldValue, newValue) -> {
@@ -149,7 +146,6 @@ public class ComponentController implements Initializable {
                     initialLocation.setColorIntensity(newComponent.getColorIntensity());
                     initialLocation.setColor(newColor);
                 }
-
             });
         });
 
@@ -244,7 +240,6 @@ public class ComponentController implements Initializable {
         });
     }
 
-
     private void initializeComponentContextMenu() {
         dropDownMenuHelperCircle = new Circle(5);
         dropDownMenuHelperCircle.setOpacity(0);
@@ -300,16 +295,12 @@ public class ComponentController implements Initializable {
                 query.run();
 
                 contextMenu.close();
-
             });
 
             contextMenu.addSpacerElement();
-
             contextMenu.addListElement("Color");
-
             contextMenu.addColorPicker(component, component::dye);
         };
-
 
         component.addListener((obs, oldComponent, newComponent) -> {
             initializeDropDownMenu.accept(newComponent);
@@ -321,7 +312,6 @@ public class ComponentController implements Initializable {
                 initializeDropDownMenu.accept(getComponent());
             }
         });
-
         initializeDropDownMenu.accept(getComponent());
     }
 
@@ -344,7 +334,6 @@ public class ComponentController implements Initializable {
             };
 
             finishEdgeContextMenu = new DropDownMenu(root, dropDownMenuHelperCircle, 230, true);
-
             finishEdgeContextMenu.addListElement("Finish edge in a:");
 
             finishEdgeContextMenu.addClickableListElement("Location", event -> {
@@ -433,7 +422,6 @@ public class ComponentController implements Initializable {
             updateMouseTransparency.accept(edge.getTargetCircular());
         };
 
-
         // React on addition of edges to the component
         newComponent.getEdges().addListener(new ListChangeListener<Edge>() {
             @Override
@@ -451,7 +439,6 @@ public class ComponentController implements Initializable {
                 }
             }
         });
-
         newComponent.getEdges().forEach(handleAddedEdge);
     }
 
@@ -478,7 +465,6 @@ public class ComponentController implements Initializable {
 
         final Transition rippleEffect = new Transition() {
             private final double maxRadius = Math.sqrt(Math.pow(getComponent().getWidth(), 2) + Math.pow(getComponent().getHeight(), 2));
-
             {
                 setCycleDuration(Duration.millis(500));
             }
@@ -515,11 +501,9 @@ public class ComponentController implements Initializable {
     @FXML
     private void modelContainerPressed(final MouseEvent event) {
         event.consume();
-
         CanvasController.leaveTextAreas();
 
         final Edge unfinishedEdge = getComponent().getUnfinishedEdge();
-
 
         if ((event.isShiftDown() && event.isPrimaryButtonDown()) || event.isMiddleButtonDown()) {
 
@@ -580,11 +564,8 @@ public class ComponentController implements Initializable {
                 SelectHelper.clearSelectedElements();
             }
         }
-
     }
-
     public MouseTracker getMouseTracker() {
         return mouseTracker;
     }
-
 }

@@ -208,10 +208,6 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         return initialLocation;
     }
 
-
-
-
-
     public Edge getUnfinishedEdge() {
         for (final Edge edge : edges) {
             if (edge.getTargetLocation() == null)
@@ -297,8 +293,6 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
 
         final Location newInitialLocation = new Location(json.getAsJsonObject(INITIAL_LOCATION));
         setInitialLocation(newInitialLocation);
-
-
 
         json.getAsJsonArray(EDGES).forEach(jsonElement -> {
             final Edge newEdge = new Edge((JsonObject) jsonElement, this);
