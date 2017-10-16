@@ -11,3 +11,7 @@ Gundersen, Tobias Rosenkrantz
 Lauritsen, Rene Mejer
 
 Ovesen, Christian
+
+H-UPPAAL
+----------
+This project is a hard fork of https://github.com/ulriknyman/H-Uppaal
