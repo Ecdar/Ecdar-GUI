@@ -56,7 +56,6 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
     public Path notCommittedInitialIndicator;
     public Rectangle committedInitialIndicator;
-    public StackPane finalIndicator;
 
     public Group shakeContent;
     public Circle reachabilityStatus;
@@ -456,7 +455,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
     @Override
     public boolean nudge(final NudgeDirection direction) {
 
-        // Do not nudge initial and final location
+        // Do not nudge initial location
         if(!getLocation().getType().equals(Location.Type.NORMAL)) return false;
 
         final double oldX = root.getLayoutX();

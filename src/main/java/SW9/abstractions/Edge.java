@@ -272,9 +272,8 @@ public class Edge implements Serializable, Nearable {
     }
 
     public void deserialize(final JsonObject json, final Component component) {
-        // Find the initial and final location of the component of the edge
+        // Find the initial location of the component of the edge
         final Location initialLocation = component.getInitialLocation();
-        final Location finalLocation = component.getFinalLocation();
 
         // Sets a location to be either source or target location if the location matches the json content
         final Consumer<Location> setFromAndToLocationIfMatches = (location) -> {
@@ -288,8 +287,6 @@ public class Edge implements Serializable, Nearable {
 
         component.getLocations().forEach(setFromAndToLocationIfMatches);
         setFromAndToLocationIfMatches.accept(initialLocation);
-        setFromAndToLocationIfMatches.accept(finalLocation);
-
 
         status = EdgeStatus.valueOf(json.getAsJsonPrimitive(STATUS).getAsString());
 

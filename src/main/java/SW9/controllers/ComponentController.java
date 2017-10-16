@@ -84,11 +84,6 @@ public class ComponentController implements Initializable {
     public Path initialLocationGuideArrow;
     public Label initialLocationGuideLabel;
 
-    public Group finalLocationGuideContainer;
-    public Path finalLocationGuideArrow;
-    public Label finalLocationGuideLabel;
-
-
     public static boolean isPlacingLocation() {
         return placingLocation != null;
     }
@@ -120,7 +115,6 @@ public class ComponentController implements Initializable {
             declarationTextArea.replaceText(0, declarationTextArea.getLength(), newComponent.getDeclarationsText());
             declarationTextArea.textProperty().addListener((observable, oldDeclaration, newDeclaration) -> newComponent.setDeclarationsText(newDeclaration));
 
-
             // Find the clocks in the decls
             newComponent.declarationsTextProperty().addListener((observable, oldValue, newValue) -> {
 
@@ -145,18 +139,12 @@ public class ComponentController implements Initializable {
             initializeLocationHandling(newComponent);
             initializeDeclarations();
 
-            // When we update the color of the component, also update the color of the initial and final locations if the colors are the same
+            // When we update the color of the component, also update the color of the initial location if the colors are the same
             newComponent.colorProperty().addListener((obs1, oldColor, newColor) -> {
                 final Location initialLocation = newComponent.getInitialLocation();
                 if (initialLocation.getColor().equals(oldColor)) {
                     initialLocation.setColorIntensity(newComponent.getColorIntensity());
                     initialLocation.setColor(newColor);
-                }
-
-                final Location finalLocation = newComponent.getFinalLocation();
-                if (finalLocation.getColor().equals(oldColor)) {
-                    finalLocation.setColorIntensity(newComponent.getColorIntensity());
-                    finalLocation.setColor(newColor);
                 }
             });
         });
@@ -252,7 +240,6 @@ public class ComponentController implements Initializable {
         });
     }
 
-
     private void initializeComponentContextMenu() {
         dropDownMenuHelperCircle = new Circle(5);
         dropDownMenuHelperCircle.setOpacity(0);
@@ -308,16 +295,12 @@ public class ComponentController implements Initializable {
                 query.run();
 
                 contextMenu.close();
-
             });
 
             contextMenu.addSpacerElement();
-
             contextMenu.addListElement("Color");
-
             contextMenu.addColorPicker(component, component::dye);
         };
-
 
         component.addListener((obs, oldComponent, newComponent) -> {
             initializeDropDownMenu.accept(newComponent);
@@ -329,7 +312,6 @@ public class ComponentController implements Initializable {
                 initializeDropDownMenu.accept(getComponent());
             }
         });
-
         initializeDropDownMenu.accept(getComponent());
     }
 
@@ -352,7 +334,6 @@ public class ComponentController implements Initializable {
             };
 
             finishEdgeContextMenu = new DropDownMenu(root, dropDownMenuHelperCircle, 230, true);
-
             finishEdgeContextMenu.addListElement("Finish edge in a:");
 
             finishEdgeContextMenu.addClickableListElement("Location", event -> {
@@ -441,7 +422,6 @@ public class ComponentController implements Initializable {
             updateMouseTransparency.accept(edge.getTargetCircular());
         };
 
-
         // React on addition of edges to the component
         newComponent.getEdges().addListener(new ListChangeListener<Edge>() {
             @Override
@@ -459,7 +439,6 @@ public class ComponentController implements Initializable {
                 }
             }
         });
-
         newComponent.getEdges().forEach(handleAddedEdge);
     }
 
@@ -486,7 +465,6 @@ public class ComponentController implements Initializable {
 
         final Transition rippleEffect = new Transition() {
             private final double maxRadius = Math.sqrt(Math.pow(getComponent().getWidth(), 2) + Math.pow(getComponent().getHeight(), 2));
-
             {
                 setCycleDuration(Duration.millis(500));
             }
@@ -523,11 +501,9 @@ public class ComponentController implements Initializable {
     @FXML
     private void modelContainerPressed(final MouseEvent event) {
         event.consume();
-
         CanvasController.leaveTextAreas();
 
         final Edge unfinishedEdge = getComponent().getUnfinishedEdge();
-
 
         if ((event.isShiftDown() && event.isPrimaryButtonDown()) || event.isMiddleButtonDown()) {
 
@@ -588,11 +564,8 @@ public class ComponentController implements Initializable {
                 SelectHelper.clearSelectedElements();
             }
         }
-
     }
-
     public MouseTracker getMouseTracker() {
         return mouseTracker;
     }
-
 }

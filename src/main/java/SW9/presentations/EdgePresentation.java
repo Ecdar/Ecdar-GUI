@@ -38,7 +38,6 @@ public class EdgePresentation extends Group {
             controller.setComponent(component);
             this.component.bind(controller.componentProperty());
 
-            controller.initializeEdgeErrorFromTargetLocation();
             controller.initializeEdgeErrorToInitialLocation();
 
         } catch (final IOException ioe) {

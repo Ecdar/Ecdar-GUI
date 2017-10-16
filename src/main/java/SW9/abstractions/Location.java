@@ -324,14 +324,12 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
         setInvariantY(json.getAsJsonPrimitive(INVARIANT_Y).getAsDouble());
     }
 
-
-
     @Override
     public String generateNearString() {
         return "Location " + (!Strings.isNullOrEmpty(getNickname()) ? (getNickname() + " (" + getId() + ")") : getId());
     }
     public enum Type {
-        NORMAL, INITIAL, FINAL;
+        NORMAL, INITIAL
     }
 
     public enum Urgency {
@@ -343,10 +341,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     }
 
     private void bindReachabilityAnalysis() {
-
         invariantProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
         urgencyProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
     }
-
-
 }

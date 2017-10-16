@@ -23,7 +23,6 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
 
     private static final String LOCATIONS = "locations";
     private static final String INITIAL_LOCATION = "initial_location";
-    private static final String FINAL_LOCATION = "final_location";
     private static final String EDGES = "edges";
     private static final String IS_MAIN = "main";
     private static final String DESCRIPTION = "description";
@@ -38,7 +37,6 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
     private final ObservableList<Location> locations = FXCollections.observableArrayList();
     private final ObservableList<Edge> edges = FXCollections.observableArrayList();
     private final ObjectProperty<Location> initialLocation = new SimpleObjectProperty<>();
-    private final ObjectProperty<Location> finalLocation = new SimpleObjectProperty<>();
     private final BooleanProperty isMain = new SimpleBooleanProperty(false);
     private final StringProperty description = new SimpleStringProperty("");
 
@@ -88,12 +86,6 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         initialLocation.setColor(getColor());
         this.initialLocation.set(initialLocation);
 
-        // A component must have at least one final location
-        final Location finalLocation = new Location();
-        finalLocation.setType(Location.Type.FINAL);
-        finalLocation.setColorIntensity(getColorIntensity());
-        finalLocation.setColor(getColor());
-        this.finalLocation.set(finalLocation);
 
         bindReachabilityAnalysis();
     }
@@ -109,11 +101,10 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         return locations;
     }
 
-    public List<Location> getLocationsWithInitialAndFinal() {
+    public List<Location> getLocationsWithInitial() {
         final List<Location> locations = new ArrayList<>();
         locations.addAll(getLocations());
         locations.add(initialLocation.get());
-        locations.add(finalLocation.get());
         return locations;
     }
 
@@ -217,19 +208,6 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         return initialLocation;
     }
 
-    public Location getFinalLocation() {
-        return finalLocation.get();
-    }
-
-    public void setFinalLocation(final Location finalLocation) {
-        this.finalLocation.set(finalLocation);
-    }
-
-    public ObjectProperty<Location> finalLocationProperty() {
-        return finalLocation;
-    }
-
-
     public Edge getUnfinishedEdge() {
         for (final Edge edge : edges) {
             if (edge.getTargetLocation() == null)
@@ -283,7 +261,6 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         result.add(LOCATIONS, locations);
 
         result.add(INITIAL_LOCATION, getInitialLocation().serialize());
-        result.add(FINAL_LOCATION, getFinalLocation().serialize());
 
         final JsonArray edges = new JsonArray();
         getEdges().forEach(edge -> edges.add(edge.serialize()));
@@ -316,10 +293,6 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
 
         final Location newInitialLocation = new Location(json.getAsJsonObject(INITIAL_LOCATION));
         setInitialLocation(newInitialLocation);
-
-        final Location newFinalLocation = new Location(json.getAsJsonObject(FINAL_LOCATION));
-        setFinalLocation(newFinalLocation);
-
 
         json.getAsJsonArray(EDGES).forEach(jsonElement -> {
             final Edge newEdge = new Edge((JsonObject) jsonElement, this);

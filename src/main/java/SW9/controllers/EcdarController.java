@@ -338,9 +338,9 @@ public class EcdarController implements Initializable {
                 Ecdar.getProject().getComponents().forEach(component -> {
                     // Check if we should consider this component
                     if (!component.isIncludeInPeriodicCheck()) {
-                        component.getLocationsWithInitialAndFinal().forEach(location -> location.setReachability(Location.Reachability.EXCLUDED));
+                        component.getLocationsWithInitial().forEach(location -> location.setReachability(Location.Reachability.EXCLUDED));
                     } else {
-                        component.getLocationsWithInitialAndFinal().forEach(location -> {
+                        component.getLocationsWithInitial().forEach(location -> {
                             final String locationReachableQuery = UPPAALDriver.getLocationReachableQuery(location, component);
                             final Thread verifyThread = UPPAALDriver.runQuery(
                                     locationReachableQuery,
@@ -511,9 +511,6 @@ public class EcdarController implements Initializable {
 
                     // Set the identifiers for the rest of the locations
                     component.getLocations().forEach(resetLocation);
-
-                    // Set the identifier for the final location
-                    resetLocation.accept(component.getFinalLocation());
 
                     // We are now finished with this component, remove it from the list
                     missingComponents.remove(component);
@@ -1008,11 +1005,10 @@ public class EcdarController implements Initializable {
                 final Location location = ((LocationController) selectable).getLocation();
 
                 final Location initialLocation = component.getInitialLocation();
-                final Location finalLocation = component.getFinalLocation();
 
-                if (location.getId().equals(initialLocation.getId()) || location.getId().equals(finalLocation.getId())) {
+                if (location.getId().equals(initialLocation.getId())) {
                     ((LocationPresentation) ((LocationController) selectable).root).shake();
-                    return; // Do not delete initial or final locations
+                    return; // Do not delete initial location
                 }
 
                 final List<Edge> relatedEdges = component.getRelatedEdges(location);
