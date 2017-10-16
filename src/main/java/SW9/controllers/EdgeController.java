@@ -430,7 +430,11 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                     if (event.isSecondaryButtonDown() && getComponent().getUnfinishedEdge() == null) {
                         event.consume();
 
-                        final DropDownMenu dropDownMenu = new DropDownMenu(((Pane) edgeRoot.getParent().getParent().getParent().getParent()), dropDownMenuHelperCircle, 230, true);
+                        final DropDownMenu dropDownMenu = new DropDownMenu(
+                                ((Pane) edgeRoot.getParent().getParent().getParent().getParent()),
+                                dropDownMenuHelperCircle,
+                                230,
+                                true);
 
                         // Switch between input and output edge
                         final String status;
