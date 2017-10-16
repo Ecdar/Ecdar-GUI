@@ -139,7 +139,7 @@ public class ComponentController implements Initializable {
             initializeLocationHandling(newComponent);
             initializeDeclarations();
 
-            // When we update the color of the component, also update the color of the initial and final locations if the colors are the same
+            // When we update the color of the component, also update the color of the initial location if the colors are the same
             newComponent.colorProperty().addListener((obs1, oldColor, newColor) -> {
                 final Location initialLocation = newComponent.getInitialLocation();
                 if (initialLocation.getColor().equals(oldColor)) {
