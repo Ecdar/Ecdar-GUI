@@ -131,7 +131,6 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
         // Check if the error is present right now
         checkIfErrorIsPresent.accept(getEdge().getSourceLocation());
     }
-
     public void initializeEdgeErrorToInitialLocation() {
         if (initializedEdgeToInitialError.containsKey(getEdge())) return; // Already initialized
         initializedEdgeToInitialError.put(getEdge(), true); // Set initialized
@@ -312,8 +311,6 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                     } else {
                         BindingHelper.bind(danglingLink, newFrom, newTo);
                     }
-
-
                     links.remove(removedIndex);
                 });
             }
@@ -368,7 +365,6 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
             final KeyFrame kf3 = new KeyFrame(Duration.millis(100), radius1);
 
             animation.getKeyFrames().addAll(kf1, kf2, kf3);
-
             animation.play();
         };
         shrinkNail = nail -> {
@@ -382,13 +378,11 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
             final KeyFrame kf2 = new KeyFrame(Duration.millis(100), radius0);
 
             animation.getKeyFrames().addAll(kf1, kf2);
-
             animation.play();
         };
 
         collapseNail = () -> {
             final int interval = 50;
-
             int previousValue = 1;
 
             try {
@@ -410,10 +404,8 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                             // Collapse all nails
                             getEdge().getNails().forEach(shrinkNail);
                         });
-
                         break;
                     }
-
                     previousValue = timeHoveringEdge.get();
                 }
 
@@ -495,7 +487,6 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                         DropDownMenu.x = CanvasPresentation.mouseTracker.getGridX();
                         DropDownMenu.y = CanvasPresentation.mouseTracker.getGridY();
 
-
                     } else if ((event.isShiftDown() && event.isPrimaryButtonDown()) || event.isMiddleButtonDown()) {
                         final double nailX = CanvasPresentation.mouseTracker.gridXProperty().subtract(getComponent().xProperty()).doubleValue();
                         final double nailY = CanvasPresentation.mouseTracker.gridYProperty().subtract(getComponent().yProperty()).doubleValue();
@@ -508,7 +499,6 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                                 "Nail added",
                                 "add-circle"
                         );
-
                     }
                 }));
             }
@@ -517,12 +507,10 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
 
     private void switchEdgeStatus() {
         getEdge().switchStatus();
-
         for (final Link link : links) {
             link.updateStatus(getEdge().getStatus());
         }
     }
-
 
     private void addEdgePropertyRow(final DropDownMenu dropDownMenu, final String rowTitle, final Edge.PropertyType type, final Link link) {
         final SimpleBooleanProperty isDisabled = new SimpleBooleanProperty(false);
@@ -545,7 +533,6 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
 
         final SimpleIntegerProperty insertAt = new SimpleIntegerProperty(links.indexOf(link));
         final int clickedLinkedIndex = links.indexOf(link);
-
 
         // Check the elements before me, and ensure that I am placed after these
         for (int i1 = type.getI() - 1; i1 >= 0; i1--) {
@@ -576,7 +563,6 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                     "Nail property added (" + type + ")",
                     "add-circle"
             );
-
             dropDownMenu.close();
         });
     }

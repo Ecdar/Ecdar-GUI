@@ -44,7 +44,6 @@
                 <Line style="-fx-stroke: white;" startX="8" startY="-8" endX="-8" endY="8"/>
                 <Line style="-fx-stroke: white;" startX="-8" startY="-8" endX="8" endY="8"/>
             </StackPane>
-
             <!-- The initial indicator -->
             <Path fx:id="notCommittedInitialIndicator" strokeType="INSIDE" style="-fx-stroke: -white; -fx-fill: transparent;" mouseTransparent="true"/>
             <Rectangle fx:id="committedInitialIndicator" strokeType="INSIDE" style="-fx-stroke: -white; -fx-fill: transparent;" mouseTransparent="true"/>
