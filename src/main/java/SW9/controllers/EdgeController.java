@@ -102,35 +102,6 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
         });
     }
 
-    public void initializeEdgeErrorFromTargetLocation() {
-        if (initializedEdgeFromTargetError.containsKey(getEdge())) return; // Already initialized
-        initializedEdgeFromTargetError.put(getEdge(), true); // Set initialized
-
-        final CodeAnalysis.Message message = new CodeAnalysis.Message("Outgoing edges from a target location are not allowed", CodeAnalysis.MessageType.ERROR, getEdge());
-
-        final Consumer<Location> checkIfErrorIsPresent = (sourceLocation) -> {
-            if (sourceLocation != null
-                    && getComponent().getEdges().contains(getEdge())
-                    && getEdge().getTargetCircular() != null) {
-
-                // Add the message to the UI
-                CodeAnalysis.addMessage(getComponent(), message);
-            } else {
-                // Remove the message from the UI
-                CodeAnalysis.removeMessage(getComponent(), message);
-            }
-        };
-
-        // When the source location is updated
-        getEdge().sourceLocationProperty().addListener((obs, oldSource, newSource) -> checkIfErrorIsPresent.accept(newSource));
-
-        // When the list of edges are updated
-        final InvalidationListener listener = observable -> checkIfErrorIsPresent.accept(getEdge().getSourceLocation());
-        getComponent().getEdges().addListener(listener);
-
-        // Check if the error is present right now
-        checkIfErrorIsPresent.accept(getEdge().getSourceLocation());
-    }
     public void initializeEdgeErrorToInitialLocation() {
         if (initializedEdgeToInitialError.containsKey(getEdge())) return; // Already initialized
         initializedEdgeToInitialError.put(getEdge(), true); // Set initialized
