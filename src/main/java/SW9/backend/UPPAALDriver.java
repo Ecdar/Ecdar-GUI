@@ -139,6 +139,41 @@ public class UPPAALDriver {
                     // Update some internal state for the engine by getting the initial state
                     engine.getInitialState(system);
 
+                    //System.out.println(engine.getOptionsInfo());
+
+                    final String ecdarDefaultOptions = "order 0\n" +
+                            "order2 1\n" +
+                            "tigaOrder 0\n" +
+                            "reduction 1\n" +
+                            "representation 0\n" +
+                            "trace 0\n" +
+                            "extrapolation 0\n" +
+                            "hashsize 27\n" +
+                            "reuse 0\n" +
+                            "tigaWarnIO 0";
+
+                    final String apiExampleToEcdar = "order 0\n" +
+                            "order2 1\n" +
+                            "tigaOrder 0\n" +
+                            "reduction 1\n" +
+                            "representation 0\n" +
+                            "trace 0\n" +
+                            "extrapolation 0\n" +
+                            "hashsize 27\n" +
+                            "reuse 1\n" +
+                            "tigaWarnIO 0";
+
+                    final String tigaDefultOptions = "order 0\n" +
+                            "order2 1\n" +
+                            "tigaOrder 0\n" +
+                            "reduction 1\n" +
+                            "representation 0\n" +
+                            "trace 0\n" +
+                            "extrapolation 0\n" +
+                            "hashsize 27\n" +
+                            "reuse 0\n" +
+                            "tigaPrune 0";
+
                     final QueryVerificationResult qvr = engine.query(system, "", query, queryListener);
                     final char result = qvr.result;
 
