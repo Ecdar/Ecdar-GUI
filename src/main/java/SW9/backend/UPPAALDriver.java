@@ -174,8 +174,7 @@ public class UPPAALDriver {
                             "reuse 0\n" +
                             "tigaPrune 0";
 
-                    final QueryVerificationResult qvr = engine.query(system, "", query, queryListener);
-                    final char result = qvr.result;
+                    final char result = engine.query(system, ecdarDefaultOptions, query, queryListener);
 
                     // Process the query result
                     if (result == 'T') {
