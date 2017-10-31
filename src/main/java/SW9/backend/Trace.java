@@ -2,7 +2,6 @@ package SW9.backend;
 
 import SW9.abstractions.Edge;
 import SW9.abstractions.Location;
-import com.uppaal.model.system.SystemEdgeSelect;
 import com.uppaal.model.system.SystemLocation;
 import com.uppaal.model.system.symbolic.SymbolicState;
 import com.uppaal.model.system.symbolic.SymbolicTransition;
@@ -22,7 +21,8 @@ public class Trace {
             final SymbolicState sourceState = symbolicTransition.getSource();
             final SymbolicState targetState = symbolicTransition.getTarget();
 
-            final SystemEdgeSelect[] chosenEdges = symbolicTransition.getEdges();
+            // TODO Fix
+            //final SystemEdgeSelect[] chosenEdges = symbolicTransition.getEdges();
 
             if (sourceState != null) {
                 for (final SystemLocation sourceSystemLocation : sourceState.getLocations()) {
@@ -36,11 +36,12 @@ public class Trace {
                 }
             }
 
-            if (chosenEdges != null) {
+            // TODO fix
+            /*if (chosenEdges != null) {
                 for (final SystemEdgeSelect chosenEdge : chosenEdges) {
                     edges.add(ecdarDocument.getEdge(chosenEdge.getEdge()));
                 }
-            }
+            }*/
         }
 
         public List<Location> getTargetLocations() {
