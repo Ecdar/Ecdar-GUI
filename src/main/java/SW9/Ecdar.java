@@ -238,7 +238,6 @@ public class Ecdar extends Application {
         if (initialShownComponent != null) {
             CanvasController.setActiveVerificationObject(initialShownComponent);
         }
-
         serializationDone = true;
     }
 

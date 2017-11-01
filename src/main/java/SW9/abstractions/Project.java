@@ -45,9 +45,6 @@ public class Project {
         return components;
     }
 
-
-
-
     public Declarations getGlobalDeclarations() {
         return globalDeclarations.get();
     }

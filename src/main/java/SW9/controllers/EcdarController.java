@@ -271,7 +271,6 @@ public class EcdarController implements Initializable {
                 if(Ecdar.serializationDone && Ecdar.getProject().getComponents().size() - 1 == 0) {
                     c.next();
                 }
-
             }
         });
 
@@ -399,10 +398,6 @@ public class EcdarController implements Initializable {
             }
         });
     }
-
-
-
-
     // TODO refactor: place in different methods
     private void initializeMenuBar() {
         menuBar.setUseSystemMenuBar(true);
@@ -501,7 +496,6 @@ public class EcdarController implements Initializable {
                     // We are now finished with this component, remove it from the list
                     missingComponents.remove(component);
                 };
-
 
                 // If we still need to balance some component (they might not be used) then do it now
                 while(!missingComponents.isEmpty()) {
@@ -1114,11 +1108,9 @@ public class EcdarController implements Initializable {
         if (text != null) {
             _queryTextResult.setText(text);
         }
-
         if (query != null) {
             _queryTextQuery.setText(query.getQuery());
         }
-
         _queryDialog.show();
     }
 }
