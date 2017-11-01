@@ -252,36 +252,10 @@ public class EcdarController implements Initializable {
             }));
         });
 
-        final BooleanProperty hasChanged = new SimpleBooleanProperty(false);
-
-
-
-        Ecdar.getProject().getComponents().addListener(new ListChangeListener<Component>() {
-            @Override
-            public void onChanged(final Change<? extends Component> c) {
-                if (Ecdar.getProject().getComponents().isEmpty()) {
-                    return;
-                }
-
-                if (!hasChanged.get()) {
-                    CanvasController.setActiveVerificationObject(Ecdar.getProject().getComponents().get(0));
-                    hasChanged.set(true);
-                }
-
-                if(Ecdar.serializationDone && Ecdar.getProject().getComponents().size() - 1 == 0 && Ecdar.getProject().getMainComponent() == null) {
-                    c.next();
-                    c.getAddedSubList().get(0).setIsMain(true);
-                }
-
-            }
-        });
-
         initializeTabPane();
         initializeStatusBar();
         initializeMessages();
         initializeMenuBar();
-        initializeNoMainComponentError();
-
         initializeReachabilityAnalysisThread();
 
     }
@@ -401,22 +375,6 @@ public class EcdarController implements Initializable {
             }
         });
     }
-
-    private void initializeNoMainComponentError() {
-        final CodeAnalysis.Message noMainComponentErrorMessage = new CodeAnalysis.Message("No main component specified", CodeAnalysis.MessageType.ERROR);
-
-        Ecdar.getProject().mainComponentProperty().addListener((obs, oldMain, newMain) -> {
-            if(newMain == null) {
-                CodeAnalysis.addMessage(null, noMainComponentErrorMessage);
-            } else {
-                EcdarController.runReachabilityAnalysis();
-                CodeAnalysis.removeMessage(null, noMainComponentErrorMessage);
-            }
-        });
-
-
-    }
-
     // TODO refactor: place in different methods
     private void initializeMenuBar() {
         menuBar.setUseSystemMenuBar(true);
@@ -515,9 +473,6 @@ public class EcdarController implements Initializable {
                     // We are now finished with this component, remove it from the list
                     missingComponents.remove(component);
                 };
-
-                // Balance the identifiers in the main component
-                resetLocationsInComponent.accept(Ecdar.getProject().getMainComponent());
 
                 // If we still need to balance some component (they might not be used) then do it now
                 while(!missingComponents.isEmpty()) {
@@ -1130,11 +1085,9 @@ public class EcdarController implements Initializable {
         if (text != null) {
             _queryTextResult.setText(text);
         }
-
         if (query != null) {
             _queryTextQuery.setText(query.getQuery());
         }
-
         _queryDialog.show();
     }
 }

@@ -24,7 +24,6 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
     private static final String LOCATIONS = "locations";
     private static final String INITIAL_LOCATION = "initial_location";
     private static final String EDGES = "edges";
-    private static final String IS_MAIN = "main";
     private static final String DESCRIPTION = "description";
     private static final String X = "x";
     private static final String Y = "y";
@@ -37,7 +36,6 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
     private final ObservableList<Location> locations = FXCollections.observableArrayList();
     private final ObservableList<Edge> edges = FXCollections.observableArrayList();
     private final ObjectProperty<Location> initialLocation = new SimpleObjectProperty<>();
-    private final BooleanProperty isMain = new SimpleBooleanProperty(false);
     private final StringProperty description = new SimpleStringProperty("");
 
     // Background check
@@ -216,18 +214,6 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         return null;
     }
 
-    public boolean isIsMain() {
-        return isMain.get();
-    }
-
-    public void setIsMain(boolean isMain) {
-        this.isMain.set(isMain);
-    }
-
-    public BooleanProperty isMainProperty() {
-        return isMain;
-    }
-
     public boolean isFirsTimeShown() {
         return firsTimeShown.get();
     }
@@ -266,8 +252,6 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         getEdges().forEach(edge -> edges.add(edge.serialize()));
         result.add(EDGES, edges);
 
-        result.addProperty(IS_MAIN, isIsMain());
-
         result.addProperty(DESCRIPTION, getDescription());
 
         result.addProperty(X, getX());
@@ -298,8 +282,6 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
             final Edge newEdge = new Edge((JsonObject) jsonElement, this);
             edges.add(newEdge);
         });
-
-        setIsMain(json.getAsJsonPrimitive(IS_MAIN).getAsBoolean());
 
         setDescription(json.getAsJsonPrimitive(DESCRIPTION).getAsString());
 
