@@ -268,9 +268,8 @@ public class EcdarController implements Initializable {
                     hasChanged.set(true);
                 }
 
-                if(Ecdar.serializationDone && Ecdar.getProject().getComponents().size() - 1 == 0 && Ecdar.getProject().getMainComponent() == null) {
+                if(Ecdar.serializationDone && Ecdar.getProject().getComponents().size() - 1 == 0) {
                     c.next();
-                    c.getAddedSubList().get(0).setIsMain(true);
                 }
 
             }
@@ -280,7 +279,6 @@ public class EcdarController implements Initializable {
         initializeStatusBar();
         initializeMessages();
         initializeMenuBar();
-        initializeNoMainComponentError();
 
         initializeReachabilityAnalysisThread();
 
@@ -402,20 +400,8 @@ public class EcdarController implements Initializable {
         });
     }
 
-    private void initializeNoMainComponentError() {
-        final CodeAnalysis.Message noMainComponentErrorMessage = new CodeAnalysis.Message("No main component specified", CodeAnalysis.MessageType.ERROR);
-
-        Ecdar.getProject().mainComponentProperty().addListener((obs, oldMain, newMain) -> {
-            if(newMain == null) {
-                CodeAnalysis.addMessage(null, noMainComponentErrorMessage);
-            } else {
-                EcdarController.runReachabilityAnalysis();
-                CodeAnalysis.removeMessage(null, noMainComponentErrorMessage);
-            }
-        });
 
 
-    }
 
     // TODO refactor: place in different methods
     private void initializeMenuBar() {
@@ -516,8 +502,6 @@ public class EcdarController implements Initializable {
                     missingComponents.remove(component);
                 };
 
-                // Balance the identifiers in the main component
-                resetLocationsInComponent.accept(Ecdar.getProject().getMainComponent());
 
                 // If we still need to balance some component (they might not be used) then do it now
                 while(!missingComponents.isEmpty()) {
