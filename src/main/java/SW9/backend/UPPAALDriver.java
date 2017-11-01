@@ -182,8 +182,7 @@ public class UPPAALDriver {
                     } else if (result == 'M') {
                         failure.accept(new BackendException.QueryErrorException("UPPAAL Engine was uncertain on the result"));
                     } else {
-                        // TODO FIX
-                        //failure.accept(new BackendException.BadUPPAALQueryException("Unable to run query", qvr.exception));
+                        failure.accept(new BackendException.BadUPPAALQueryException("Unable to run query"));
                     }
 
                 } catch (EngineException | IOException | NullPointerException e) {
