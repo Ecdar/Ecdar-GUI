@@ -192,7 +192,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
             getLocation().setColor(color);
         });
 
-        if(getLocation().getType().equals(Location.Type.NORMAL)) {
+        if(!getLocation().getType().equals(Location.Type.INITIAL)) {
             dropDownMenu.addSpacerElement();
 
             dropDownMenu.addClickableListElement("Delete", event -> {
@@ -456,7 +456,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
     public boolean nudge(final NudgeDirection direction) {
 
         // Do not nudge initial location
-        if(!getLocation().getType().equals(Location.Type.NORMAL)) return false;
+        if(getLocation().getType().equals(Location.Type.INITIAL)) return false;
 
         final double oldX = root.getLayoutX();
         final double newX = getDragBounds().trimX(root.getLayoutX() + direction.getXOffset());

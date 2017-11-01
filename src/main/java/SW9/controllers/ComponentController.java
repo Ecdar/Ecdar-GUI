@@ -278,6 +278,32 @@ public class ComponentController implements Initializable {
                 }, "Added location '" + newLocation.toString() + "' to component '" + component.getName() + "'", "add-circle");
             });
 
+            contextMenu.addClickableListElement("Add Universal Location", event -> {
+                contextMenu.close();
+
+                final Location newLocation = new Location();
+
+                newLocation.setType(Location.Type.UNIVERSAL);
+
+                double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
+                x = Math.round(x / GRID_SIZE) * GRID_SIZE;
+                newLocation.setX(x);
+
+                double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
+                y = Math.round(y / GRID_SIZE) * GRID_SIZE;
+                newLocation.setY(y);
+
+                newLocation.setColorIntensity(component.getColorIntensity());
+                newLocation.setColor(component.getColor());
+
+                // Add a new location
+                UndoRedoStack.pushAndPerform(() -> { // Perform
+                    component.addLocation(newLocation);
+                }, () -> { // Undo
+                    component.removeLocation(newLocation);
+                }, "Added universal location '" + newLocation.toString() + "' to component '" + component.getName() + "'", "add-circle");
+            });
+
             contextMenu.addSpacerElement();
 
             contextMenu.addClickableListElement("Contains deadlock?", event -> {
