@@ -252,33 +252,10 @@ public class EcdarController implements Initializable {
             }));
         });
 
-        final BooleanProperty hasChanged = new SimpleBooleanProperty(false);
-
-
-
-        Ecdar.getProject().getComponents().addListener(new ListChangeListener<Component>() {
-            @Override
-            public void onChanged(final Change<? extends Component> c) {
-                if (Ecdar.getProject().getComponents().isEmpty()) {
-                    return;
-                }
-
-                if (!hasChanged.get()) {
-                    CanvasController.setActiveVerificationObject(Ecdar.getProject().getComponents().get(0));
-                    hasChanged.set(true);
-                }
-
-                if(Ecdar.serializationDone && Ecdar.getProject().getComponents().size() - 1 == 0) {
-                    c.next();
-                }
-            }
-        });
-
         initializeTabPane();
         initializeStatusBar();
         initializeMessages();
         initializeMenuBar();
-
         initializeReachabilityAnalysisThread();
 
     }
