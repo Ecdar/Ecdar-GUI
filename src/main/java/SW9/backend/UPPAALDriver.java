@@ -22,6 +22,17 @@ public class UPPAALDriver {
     public static final Object engineLock = false; // Used to lock concurrent engine reference access
     private static final String SERVER_NAME = "server";
 
+    private static final String ECDAR_DEFAULT_OPTIONS = "order 0\n" +
+            "order2 1\n" +
+            "tigaOrder 0\n" +
+            "reduction 1\n" +
+            "representation 0\n" +
+            "trace 0\n" +
+            "extrapolation 0\n" +
+            "hashsize 27\n" +
+            "reuse 0\n" +
+            "tigaWarnIO 0";
+
     private static EcdarDocument ecdarDocument;
 
     public static void generateDebugUPPAALModel() throws BackendException, IOException {
@@ -106,73 +117,15 @@ public class UPPAALDriver {
                         CodeAnalysis.clearBackendErrors();
 
                         // Check if there is any problems
-                        // TODO fix
                         if (!problems.isEmpty()) {
                             problems.forEach(problem -> {
                                 System.out.println("problem: " + problem);
-
-                                // Generate the message
-                                CodeAnalysis.Message message = null;
-                                if (problem.getPath().contains("declaration")) {
-                                    //final String[] lines = problem.getLocation().split("\\n");
-                                    //final String errorLine = lines[problem.getFirstLine() - 1];
-
-                                    /*message = new CodeAnalysis.Message(
-                                            problem.getMessage() + " on line " + problem.getFirstLine() + " (" + errorLine + ")",
-                                            CodeAnalysis.MessageType.ERROR
-                                    );*/
-                                } else {
-                                    /*message = new CodeAnalysis.Message(
-                                            problem.getMessage() + " (" + problem.getLocation() + ")",
-                                            CodeAnalysis.MessageType.ERROR
-                                    );*/
-                                }
-
-                                //CodeAnalysis.addBackendError(message);
+                                CodeAnalysis.addBackendError(new CodeAnalysis.Message(problem.getMessage(), CodeAnalysis.MessageType.ERROR));
                             });
                         }
                     });
 
-                    // Update some internal state for the engine by getting the initial state
-                    // TODO Should be used?
-                    //engine.getInitialState(system);
-
-                    //System.out.println(engine.getOptionsInfo());
-
-                    final String ecdarDefaultOptions = "order 0\n" +
-                            "order2 1\n" +
-                            "tigaOrder 0\n" +
-                            "reduction 1\n" +
-                            "representation 0\n" +
-                            "trace 0\n" +
-                            "extrapolation 0\n" +
-                            "hashsize 27\n" +
-                            "reuse 0\n" +
-                            "tigaWarnIO 0";
-
-                    final String apiExampleToEcdar = "order 0\n" +
-                            "order2 1\n" +
-                            "tigaOrder 0\n" +
-                            "reduction 1\n" +
-                            "representation 0\n" +
-                            "trace 0\n" +
-                            "extrapolation 0\n" +
-                            "hashsize 27\n" +
-                            "reuse 1\n" +
-                            "tigaWarnIO 0";
-
-                    final String tigaDefultOptions = "order 0\n" +
-                            "order2 1\n" +
-                            "tigaOrder 0\n" +
-                            "reduction 1\n" +
-                            "representation 0\n" +
-                            "trace 0\n" +
-                            "extrapolation 0\n" +
-                            "hashsize 27\n" +
-                            "reuse 0\n" +
-                            "tigaPrune 0";
-
-                    final char result = engine.query(system, ecdarDefaultOptions, query, queryListener);
+                    final char result = engine.query(system, ECDAR_DEFAULT_OPTIONS, query, queryListener);
 
                     // Process the query result
                     if (result == 'T') {
@@ -274,7 +227,6 @@ public class UPPAALDriver {
     }
 
     private static void storeUppaalFile(final Document uppaalDocument, final String fileName) throws IOException {
-        // TODO this has been changed, test
         uppaalDocument.save(fileName);
     }
 
