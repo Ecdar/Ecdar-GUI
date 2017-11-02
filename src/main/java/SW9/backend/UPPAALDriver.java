@@ -7,17 +7,13 @@ import SW9.code_analysis.CodeAnalysis;
 import com.uppaal.engine.Engine;
 import com.uppaal.engine.EngineException;
 import com.uppaal.engine.Problem;
-import com.uppaal.engine.QueryVerificationResult;
 import com.uppaal.model.core2.Document;
 import com.uppaal.model.system.UppaalSystem;
 import javafx.application.Platform;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class UPPAALDriver {
@@ -25,6 +21,17 @@ public class UPPAALDriver {
     public static final int MAX_ENGINES = 10;
     public static final Object engineLock = false; // Used to lock concurrent engine reference access
     private static final String SERVER_NAME = "server";
+
+    private static final String ECDAR_DEFAULT_OPTIONS = "order 0\n" +
+            "order2 1\n" +
+            "tigaOrder 0\n" +
+            "reduction 1\n" +
+            "representation 0\n" +
+            "trace 0\n" +
+            "extrapolation 0\n" +
+            "hashsize 27\n" +
+            "reuse 0\n" +
+            "tigaWarnIO 0";
 
     private static EcdarDocument ecdarDocument;
 
@@ -99,7 +106,7 @@ public class UPPAALDriver {
                     engineConsumer.accept(engine);
 
                     // Create a list to store the problems of the query
-                    final ArrayList<Problem> problems = new ArrayList<>();
+                    final Vector<Problem> problems = new Vector<>();
 
                     // Get the system, and fill the problems list if any
                     final UppaalSystem system = engine.getSystem(ecdarDocument.toXmlDocument(), problems);
@@ -113,34 +120,12 @@ public class UPPAALDriver {
                         if (!problems.isEmpty()) {
                             problems.forEach(problem -> {
                                 System.out.println("problem: " + problem);
-
-                                // Generate the message
-                                CodeAnalysis.Message message = null;
-                                if (problem.getPath().contains("declaration")) {
-                                    final String[] lines = problem.getLocation().split("\\n");
-                                    final String errorLine = lines[problem.getFirstLine() - 1];
-
-                                    message = new CodeAnalysis.Message(
-                                            problem.getMessage() + " on line " + problem.getFirstLine() + " (" + errorLine + ")",
-                                            CodeAnalysis.MessageType.ERROR
-                                    );
-                                } else {
-                                    message = new CodeAnalysis.Message(
-                                            problem.getMessage() + " (" + problem.getLocation() + ")",
-                                            CodeAnalysis.MessageType.ERROR
-                                    );
-                                }
-
-                                CodeAnalysis.addBackendError(message);
+                                CodeAnalysis.addBackendError(new CodeAnalysis.Message(problem.getMessage(), CodeAnalysis.MessageType.ERROR));
                             });
                         }
                     });
 
-                    // Update some internal state for the engine by getting the initial state
-                    engine.getInitialState(system);
-
-                    final QueryVerificationResult qvr = engine.query(system, "", query, queryListener);
-                    final char result = qvr.result;
+                    final char result = engine.query(system, ECDAR_DEFAULT_OPTIONS, query, queryListener);
 
                     // Process the query result
                     if (result == 'T') {
@@ -150,7 +135,7 @@ public class UPPAALDriver {
                     } else if (result == 'M') {
                         failure.accept(new BackendException.QueryErrorException("UPPAAL Engine was uncertain on the result"));
                     } else {
-                        failure.accept(new BackendException.BadUPPAALQueryException("Unable to run query", qvr.exception));
+                        failure.accept(new BackendException.BadUPPAALQueryException("Unable to run query"));
                     }
 
                 } catch (EngineException | IOException | NullPointerException e) {
@@ -242,7 +227,7 @@ public class UPPAALDriver {
     }
 
     private static void storeUppaalFile(final Document uppaalDocument, final String fileName) throws IOException {
-        uppaalDocument.save(new File(fileName));
+        uppaalDocument.save(fileName);
     }
 
     /**

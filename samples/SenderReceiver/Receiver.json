@@ -1,0 +1,94 @@
+{
+  "name": "Receiver",
+  "declarations": "",
+  "locations": [
+    {
+      "id": "L4",
+      "nickname": "",
+      "invariant": "",
+      "type": "NORMAL",
+      "urgency": "NORMAL",
+      "x": 190.0,
+      "y": 160.0,
+      "color": "2",
+      "nickname_x": 30.0,
+      "nickname_y": -10.0,
+      "invariant_x": 30.0,
+      "invariant_y": 10.0
+    }
+  ],
+  "initial_location": {
+    "id": "L3",
+    "nickname": "",
+    "invariant": "",
+    "type": "INITIAL",
+    "urgency": "NORMAL",
+    "x": 20.0,
+    "y": 20.0,
+    "color": "2",
+    "nickname_x": 30.0,
+    "nickname_y": -10.0,
+    "invariant_x": 30.0,
+    "invariant_y": 10.0
+  },
+  "edges": [
+    {
+      "source_location": "L3",
+      "target_location": "L4",
+      "status": "INPUT",
+      "select": "",
+      "guard": "",
+      "update": "",
+      "sync": "c?",
+      "nails": [
+        {
+          "x": 100.0,
+          "y": 90.0,
+          "property_type": "SYNCHRONIZATION",
+          "property_x": 10.0,
+          "property_y": -10.0
+        }
+      ]
+    },
+    {
+      "source_location": "L4",
+      "target_location": "L4",
+      "status": "INPUT",
+      "select": "",
+      "guard": "",
+      "update": "",
+      "sync": "c?",
+      "nails": [
+        {
+          "x": 240.0,
+          "y": 130.0,
+          "property_type": "NONE",
+          "property_x": 0.0,
+          "property_y": 0.0
+        },
+        {
+          "x": 240.0,
+          "y": 160.0,
+          "property_type": "SYNCHRONIZATION",
+          "property_x": 10.0,
+          "property_y": -10.0
+        },
+        {
+          "x": 240.0,
+          "y": 190.0,
+          "property_type": "NONE",
+          "property_x": 0.0,
+          "property_y": 0.0
+        }
+      ]
+    }
+  ],
+  "main": false,
+  "description": "",
+  "x": 5.0,
+  "y": 5.0,
+  "width": 450.0,
+  "height": 600.0,
+  "color": "2",
+  "include_in_periodic_check": false
+}
