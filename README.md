@@ -1,5 +1,5 @@
 
-[![Build Status](https://travis-ci.com/tgunde13/SW9ecdar.svg?token=FznbqXU3Q5KCswHurpPf&branch=first-test)](https://travis-ci.com/tgunde13/SW9ecdar)
+[![Build Status](https://travis-ci.com/tgunde13/SW9ecdar.svg?token=FznbqXU3Q5KCswHurpPf&branch=master)](https://travis-ci.com/tgunde13/SW9ecdar)
 # Ecdar
 
 Ecdar Demonstration
