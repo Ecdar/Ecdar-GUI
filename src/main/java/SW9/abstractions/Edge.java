@@ -243,13 +243,8 @@ public class Edge implements Serializable, Nearable {
     public JsonObject serialize() {
         final JsonObject result = new JsonObject();
 
-        // TODO test
-        if (getSourceLocation() != null) {
-            result.addProperty(SOURCE_LOCATION, getSourceLocation().getId());
-        }
-        if (getTargetLocation() != null) {
-            result.addProperty(TARGET_LOCATION, getTargetLocation().getId());
-        }
+        result.addProperty(SOURCE_LOCATION, getSourceLocation().getId());
+        result.addProperty(TARGET_LOCATION, getTargetLocation().getId());
 
         result.addProperty(STATUS, status.toString());
         result.addProperty(SELECT, getSelect());

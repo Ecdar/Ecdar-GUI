@@ -75,11 +75,6 @@ public class ComponentController implements Initializable {
     private DropDownMenu finishEdgeContextMenu;
     private Circle dropDownMenuHelperCircle;
 
-    // Guiding indicator for initial and final location
-    public Group initialLocationGuideContainer;
-    public Path initialLocationGuideArrow;
-    public Label initialLocationGuideLabel;
-
     public static boolean isPlacingLocation() {
         return placingLocation != null;
     }
@@ -247,11 +242,11 @@ public class ComponentController implements Initializable {
                 final Location newLocation = new Location();
 
                 double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
-                x = Math.round(x / GRID_SIZE) * GRID_SIZE;
+                x = Grid.snap(x);
                 newLocation.setX(x);
 
                 double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
-                y = Math.round(y / GRID_SIZE) * GRID_SIZE;
+                y = Grid.snap(y);
                 newLocation.setY(y);
 
                 newLocation.setColorIntensity(component.getColorIntensity());

@@ -3,6 +3,7 @@ package SW9.abstractions;
 import SW9.Ecdar;
 import SW9.controllers.EcdarController;
 import SW9.presentations.DropDownMenu;
+import SW9.presentations.Grid;
 import SW9.utility.UndoRedoStack;
 import SW9.utility.colors.Color;
 import SW9.utility.colors.EnabledColor;
@@ -19,7 +20,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Component extends VerificationObject implements DropDownMenu.HasColor {
-
     private static final AtomicInteger hiddenID = new AtomicInteger(0); // Used to generate unique IDs
 
     private static final String LOCATIONS = "locations";
@@ -81,6 +81,11 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         initialLocation.setType(Location.Type.INITIAL);
         initialLocation.setColorIntensity(getColorIntensity());
         initialLocation.setColor(getColor());
+
+        // Place in center
+        initialLocation.setX(Grid.snap(getX() + getWidth() / 2));
+        initialLocation.setY(Grid.snap(getY() + getHeight() / 2));
+
         locations.add(initialLocation);
 
         bindReachabilityAnalysis();

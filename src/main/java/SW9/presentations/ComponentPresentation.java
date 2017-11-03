@@ -103,8 +103,6 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
             initializeName();
             initializeDragAnchors();
             onUpdateSize.run();
-            initializeLocationTypeIndicatorArrows();
-
 
             // Re run initialisation on update of width and height property
             component.widthProperty().addListener(observable -> {
@@ -119,29 +117,6 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
 
         } catch (final IOException ioe) {
             throw new IllegalStateException(ioe);
-        }
-    }
-
-    private void initializeLocationTypeIndicatorArrows() {
-
-        // Initial indicator
-        final Group initialLocationGuideContainer = controller.initialLocationGuideContainer;
-        final Path initialLocationGuideArrow = controller.initialLocationGuideArrow;
-        final Label initialLocationGuideLabel = controller.initialLocationGuideLabel;
-
-        drawIndicatorArrow(initialLocationGuideArrow);
-        initialLocationGuideContainer.setRotate(-45-90);
-        initialLocationGuideContainer.setTranslateX(2.3 * GRID_SIZE);
-        initialLocationGuideContainer.setTranslateY(3.8 * GRID_SIZE);
-        initialLocationGuideLabel.setRotate(180);
-        initialLocationGuideLabel.setTranslateY(10.5);
-        initialLocationGuideContainer.toFront();
-        initialLocationGuideContainer.setOpacity(0);
-
-        if (!controller.getComponent().isFirsTimeShown()) {
-            initialLocationGuideContainer.setOpacity(1);
-            playIndicatorAnimations(Location.Type.INITIAL, initialLocationGuideContainer);
-            controller.getComponent().setFirsTimeShown(true);
         }
     }
 
