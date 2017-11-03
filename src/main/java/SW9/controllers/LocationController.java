@@ -31,7 +31,6 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Path;
@@ -203,11 +202,11 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
                 UndoRedoStack.pushAndPerform(() -> { // Perform
                     // Remove the location
-                    component.getLocations().remove(location);
+                    component.getAllButInitialLocations().remove(location);
                     relatedEdges.forEach(component::removeEdge);
                 }, () -> { // Undo
                     // Re-all the location
-                    component.getLocations().add(location);
+                    component.getAllButInitialLocations().add(location);
                     relatedEdges.forEach(component::addEdge);
 
                 }, String.format("Deleted %s", location), "delete");

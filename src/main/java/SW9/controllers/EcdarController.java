@@ -21,7 +21,6 @@ import javafx.animation.Transition;
 import javafx.application.Platform;
 import javafx.beans.binding.When;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ListChangeListener;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
@@ -468,7 +467,7 @@ public class EcdarController implements Initializable {
                     resetLocation.accept(component.getInitialLocation());
 
                     // Set the identifiers for the rest of the locations
-                    component.getLocations().forEach(resetLocation);
+                    component.getAllButInitialLocations().forEach(resetLocation);
 
                     // We are now finished with this component, remove it from the list
                     missingComponents.remove(component);
@@ -970,11 +969,11 @@ public class EcdarController implements Initializable {
 
                 UndoRedoStack.pushAndPerform(() -> { // Perform
                     // Remove the location
-                    component.getLocations().remove(location);
+                    component.getAllButInitialLocations().remove(location);
                     relatedEdges.forEach(component::removeEdge);
                 }, () -> { // Undo
                     // Re-all the location
-                    component.getLocations().add(location);
+                    component.getAllButInitialLocations().add(location);
                     relatedEdges.forEach(component::addEdge);
 
                 }, String.format("Deleted %s", selectable.toString()), "delete");

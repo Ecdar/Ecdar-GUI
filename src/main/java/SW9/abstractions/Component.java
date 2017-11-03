@@ -22,7 +22,6 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
     private static final AtomicInteger hiddenID = new AtomicInteger(0); // Used to generate unique IDs
 
     private static final String LOCATIONS = "locations";
-    private static final String INITIAL_LOCATION = "initial_location";
     private static final String EDGES = "edges";
     private static final String DESCRIPTION = "description";
     private static final String X = "x";
@@ -35,7 +34,6 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
     // Verification properties
     private final ObservableList<Location> locations = FXCollections.observableArrayList();
     private final ObservableList<Edge> edges = FXCollections.observableArrayList();
-    private final ObjectProperty<Location> initialLocation = new SimpleObjectProperty<>();
     private final StringProperty description = new SimpleStringProperty("");
 
     // Background check
@@ -77,13 +75,12 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
             setColor(selectedColor.color);
         }
 
-        // A component must have at least one initial location
+        // Make initial location
         final Location initialLocation = new Location();
         initialLocation.setType(Location.Type.INITIAL);
         initialLocation.setColorIntensity(getColorIntensity());
         initialLocation.setColor(getColor());
-        this.initialLocation.set(initialLocation);
-
+        locations.add(initialLocation);
 
         bindReachabilityAnalysis();
     }
@@ -95,14 +92,15 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         bindReachabilityAnalysis();
     }
 
-    public ObservableList<Location> getLocations() {
+    public ObservableList<Location> getAllButInitialLocations() {
         return locations;
+
+        /*final List<Location> locations = new ArrayList<>();
+        locations.addAll(getLocations());
+        locations.add(initialLocation.get()); */
     }
 
-    public List<Location> getLocationsWithInitial() {
-        final List<Location> locations = new ArrayList<>();
-        locations.addAll(getLocations());
-        locations.add(initialLocation.get());
+    public ObservableList<Location> getLocations() {
         return locations;
     }
 
@@ -194,16 +192,36 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         return declarationOpen;
     }
 
+    /**
+     * Gets the initial location.
+     * Done with linear search.
+     * O(n), where n is number of locations in this.
+     * @return the initial location, or null if there is none
+     */
     public Location getInitialLocation() {
-        return initialLocation.get();
+        for (final Location loc : getAllButInitialLocations()) {
+            if (loc.getType() == Location.Type.INITIAL) {
+                return  loc;
+            }
+        }
+
+        return null;
     }
 
+    /**
+     * Sets current initial location (if one exists) to no longer initial.
+     * Then sets a new initial location.
+     * O(n), where n is number of locations in this.
+     * @param initialLocation new initial location.
+     */
     public void setInitialLocation(final Location initialLocation) {
-        this.initialLocation.set(initialLocation);
-    }
+        // Make current initial location no longer initial
+        final Location currentInitLoc = getInitialLocation();
+        if (currentInitLoc != null) {
+            currentInitLoc.setType(Location.Type.NORMAL);
+        }
 
-    public ObjectProperty<Location> initialLocationProperty() {
-        return initialLocation;
+        initialLocation.setType(Location.Type.INITIAL);
     }
 
     public Edge getUnfinishedEdge() {
@@ -243,10 +261,8 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         final JsonObject result = super.serialize();
 
         final JsonArray locations = new JsonArray();
-        getLocations().forEach(location -> locations.add(location.serialize()));
+        getAllButInitialLocations().forEach(location -> locations.add(location.serialize()));
         result.add(LOCATIONS, locations);
-
-        result.add(INITIAL_LOCATION, getInitialLocation().serialize());
 
         final JsonArray edges = new JsonArray();
         getEdges().forEach(edge -> edges.add(edge.serialize()));
@@ -274,9 +290,6 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
             final Location newLocation = new Location((JsonObject) jsonElement);
             locations.add(newLocation);
         });
-
-        final Location newInitialLocation = new Location(json.getAsJsonObject(INITIAL_LOCATION));
-        setInitialLocation(newInitialLocation);
 
         json.getAsJsonArray(EDGES).forEach(jsonElement -> {
             final Edge newEdge = new Edge((JsonObject) jsonElement, this);
@@ -310,7 +323,7 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
 
         final Map<Location, Pair<Color, Color.Intensity>> previousLocationColors = new HashMap<>();
 
-        for (final Location location : getLocations()) {
+        for (final Location location : getAllButInitialLocations()) {
             if (!location.getColor().equals(previousColor)) continue;
             previousLocationColors.put(location, new Pair<>(location.getColor(), location.getColorIntensity()));
         }

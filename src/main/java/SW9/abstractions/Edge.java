@@ -13,8 +13,6 @@ import javafx.collections.ObservableList;
 
 import java.util.function.Consumer;
 
-import static SW9.presentations.CanvasPresentation.GRID_SIZE;
-
 public class Edge implements Serializable, Nearable {
 
     private static final String SOURCE_LOCATION = "source_location";
@@ -285,7 +283,7 @@ public class Edge implements Serializable, Nearable {
             }
         };
 
-        component.getLocations().forEach(setFromAndToLocationIfMatches);
+        component.getAllButInitialLocations().forEach(setFromAndToLocationIfMatches);
         setFromAndToLocationIfMatches.accept(initialLocation);
 
         status = EdgeStatus.valueOf(json.getAsJsonPrimitive(STATUS).getAsString());

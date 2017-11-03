@@ -4,7 +4,6 @@ import SW9.Ecdar;
 import SW9.abstractions.*;
 import SW9.backend.UPPAALDriver;
 import SW9.code_analysis.CodeAnalysis;
-import SW9.code_analysis.Nearable;
 import SW9.presentations.*;
 import SW9.utility.UndoRedoStack;
 import SW9.utility.helpers.BindingHelper;
@@ -17,10 +16,8 @@ import com.jfoenix.controls.JFXRippler;
 import com.jfoenix.controls.JFXTextField;
 import javafx.animation.Interpolator;
 import javafx.animation.Transition;
-import javafx.application.Platform;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
@@ -168,7 +165,7 @@ public class ComponentController implements Initializable {
         final Map<Location, CodeAnalysis.Message> messages = new HashMap<>();
 
         final Function<Location, Boolean> hasIncomingEdges = location -> {
-            if (!getComponent().getLocations().contains(location))
+            if (!getComponent().getAllButInitialLocations().contains(location))
                 return true; // Do now show messages for locations not in the set of locations
 
             for (final Edge edge : getComponent().getEdges()) {
@@ -200,7 +197,7 @@ public class ComponentController implements Initializable {
             removeMessages.forEach(messages::remove);
 
             // Run through all non-ignored locations
-            for (final Location location : component.getLocations()) {
+            for (final Location location : component.getAllButInitialLocations()) {
                 if (ignored.contains(location)) continue; // Skip ignored
                 if (messages.containsKey(location)) continue; // Skip locations that already have warnings associated
 
@@ -230,7 +227,7 @@ public class ComponentController implements Initializable {
         });
 
         // Check location whenever we get new locations
-        component.getLocations().addListener(new ListChangeListener<Location>() {
+        component.getAllButInitialLocations().addListener(new ListChangeListener<Location>() {
             @Override
             public void onChanged(final Change<? extends Location> c) {
                 while (c.next()) {
@@ -383,7 +380,7 @@ public class ComponentController implements Initializable {
         };
 
         if(locationListChangeListenerMap.containsKey(newComponent)) {
-            newComponent.getLocations().removeListener(locationListChangeListenerMap.get(newComponent));
+            newComponent.getAllButInitialLocations().removeListener(locationListChangeListenerMap.get(newComponent));
         }
         final ListChangeListener<Location> locationListChangeListener = c -> {
             if (c.next()) {
@@ -398,10 +395,10 @@ public class ComponentController implements Initializable {
                 });
             }
         };
-        newComponent.getLocations().addListener(locationListChangeListener);
+        newComponent.getAllButInitialLocations().addListener(locationListChangeListener);
         locationListChangeListenerMap.put(newComponent, locationListChangeListener);
 
-        newComponent.getLocations().forEach(handleAddedLocation);
+        newComponent.getAllButInitialLocations().forEach(handleAddedLocation);
     }
 
     private void initializeEdgeHandling(final Component newComponent) {
