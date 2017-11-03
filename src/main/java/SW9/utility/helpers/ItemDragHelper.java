@@ -158,8 +158,4 @@ public class ItemDragHelper {
         });
 
     }
-
-    ;
-
-
 }
