@@ -52,7 +52,7 @@ public class CanvasController implements Initializable {
 
     /**
      * Sets the given VerificationObject as the one to be active / to be shown on the screen
-     * @param object
+     * @param object the given VerificationObject
      */
     public static void setActiveVerificationObject(final VerificationObject object) {
         CanvasController.activeVerificationObject.set(object);
