@@ -1,10 +1,7 @@
 package SW9.abstractions;
 
 import SW9.utility.colors.Color;
-import SW9.utility.serialize.Serializable;
 import com.google.gson.JsonObject;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 
 /**
  * Overall declarations of a model.
