@@ -3,34 +3,34 @@
   "declarations": "",
   "locations": [
     {
+      "id": "L0",
+      "nickname": "",
+      "invariant": "",
+      "type": "INITIAL",
+      "urgency": "NORMAL",
+      "x": 230.0,
+      "y": 300.0,
+      "color": "9",
+      "nickname_x": 30.0,
+      "nickname_y": -10.0,
+      "invariant_x": 30.0,
+      "invariant_y": 10.0
+    },
+    {
       "id": "L1",
       "nickname": "",
       "invariant": "",
       "type": "NORMAL",
       "urgency": "NORMAL",
-      "x": 130.0,
-      "y": 130.0,
-      "color": "5",
+      "x": 260.0,
+      "y": 160.0,
+      "color": "9",
       "nickname_x": 30.0,
       "nickname_y": -10.0,
       "invariant_x": 30.0,
       "invariant_y": 10.0
     }
   ],
-  "initial_location": {
-    "id": "L0",
-    "nickname": "",
-    "invariant": "",
-    "type": "INITIAL",
-    "urgency": "NORMAL",
-    "x": 20.0,
-    "y": 20.0,
-    "color": "5",
-    "nickname_x": 30.0,
-    "nickname_y": -10.0,
-    "invariant_x": 30.0,
-    "invariant_y": 10.0
-  },
   "edges": [
     {
       "source_location": "L0",
@@ -42,8 +42,8 @@
       "sync": "c!",
       "nails": [
         {
-          "x": 70.0,
-          "y": 70.0,
+          "x": 270.0,
+          "y": 230.0,
           "property_type": "SYNCHRONIZATION",
           "property_x": 10.0,
           "property_y": -10.0
@@ -60,22 +60,22 @@
       "sync": "c!",
       "nails": [
         {
-          "x": 190.0,
-          "y": 100.0,
+          "x": 370.0,
+          "y": 120.0,
           "property_type": "NONE",
           "property_x": 0.0,
           "property_y": 0.0
         },
         {
-          "x": 190.0,
-          "y": 130.0,
+          "x": 310.0,
+          "y": 100.0,
           "property_type": "SYNCHRONIZATION",
           "property_x": 10.0,
           "property_y": -10.0
         },
         {
-          "x": 190.0,
-          "y": 160.0,
+          "x": 270.0,
+          "y": 80.0,
           "property_type": "NONE",
           "property_x": 0.0,
           "property_y": 0.0
@@ -83,12 +83,11 @@
       ]
     }
   ],
-  "main": true,
   "description": "",
   "x": 5.0,
   "y": 5.0,
   "width": 450.0,
   "height": 600.0,
-  "color": "5",
-  "include_in_periodic_check": false
+  "color": "9",
+  "include_in_periodic_check": true
 }

@@ -1,11 +1,11 @@
 [
   {
-    "query": "specification: Sender",
+    "query": "E\u003c\u003e Receiver.L3",
     "comment": "",
     "is_periodic": false
   },
   {
-    "query": "E\u003c\u003e Receiver.L4",
+    "query": "specification: Sender",
     "comment": "",
     "is_periodic": false
   },
