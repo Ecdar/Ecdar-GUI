@@ -9,7 +9,6 @@ import SW9.utility.colors.Color;
 import SW9.utility.colors.EnabledColor;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.sun.istack.internal.Nullable;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -214,7 +213,6 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
      * O(n), where n is number of locations in this.
      * @return the initial location, or null if there is none
      */
-    @Nullable
     public Location getInitialLocation() {
         for (final Location loc : getLocations()) {
             if (loc.getType() == Location.Type.INITIAL) {
