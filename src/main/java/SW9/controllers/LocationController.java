@@ -153,6 +153,24 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                 }
         );
 
+        // For when non-initial
+        dropDownMenu.addClickableAndDisableableListElement("Make initial",
+                getLocation().typeProperty().isEqualTo(Location.Type.INITIAL),
+                event -> {
+                    getComponent().setInitialLocation(getLocation());
+                    dropDownMenu.close();
+                }
+        );
+
+        // For when initial
+        dropDownMenu.addClickableAndDisableableListElement("Make non-initial",
+                getLocation().typeProperty().isNotEqualTo(Location.Type.INITIAL),
+                event -> {
+                    getLocation().setType(Location.Type.NORMAL);
+                    dropDownMenu.close();
+                }
+        );
+
         dropDownMenu.addSpacerElement();
 
         dropDownMenu.addListElement("Set Urgency");
