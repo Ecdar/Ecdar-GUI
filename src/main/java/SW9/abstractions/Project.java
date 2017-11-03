@@ -64,9 +64,8 @@ public class Project {
     /**
      * Serializes and stores this at the Ecdar project directory as JSON files.
      */
-    public void serialize() throws IOException {
+    public void serialize(final File directory) throws IOException {
         // Clear the project folder
-        final File directory = new File(Ecdar.projectDirectory.getValue());
         FileUtils.forceMkdir(directory);
         FileUtils.cleanDirectory(directory);
 

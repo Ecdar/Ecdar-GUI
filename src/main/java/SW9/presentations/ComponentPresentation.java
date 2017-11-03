@@ -23,7 +23,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
-import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.scene.shape.*;
 import org.fxmisc.richtext.StyleSpans;
@@ -40,7 +39,7 @@ import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static SW9.presentations.CanvasPresentation.GRID_SIZE;
+import static SW9.presentations.Grid.GRID_SIZE;
 import static javafx.util.Duration.millis;
 
 public class ComponentPresentation extends StackPane implements MouseTrackable, SelectHelper.Selectable {

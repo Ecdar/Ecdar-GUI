@@ -374,9 +374,12 @@ public class EcdarController implements Initializable {
             }
         });
     }
-    // TODO refactor: place in different methods
+
     private void initializeMenuBar() {
         menuBar.setUseSystemMenuBar(true);
+
+        initializeCreateNewProjectMenuItem();
+        initializeOpenProjectMenuItem();
 
         menuBarFileSave.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN));
         menuBarFileSave.setOnAction(event -> save());
@@ -384,37 +387,19 @@ public class EcdarController implements Initializable {
         menuBarFileSaveAs.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN));
         menuBarFileSaveAs.setOnAction(event -> saveAs());
 
-        initializeCreateNewProjectMenuItem();
-
-        menuBarFileOpenProject.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.SHORTCUT_DOWN));
-        menuBarFileOpenProject.setOnAction(event -> {
-            // Dialog title
-            final DirectoryChooser projectPicker = new DirectoryChooser();
-            projectPicker.setTitle("Open project");
-
-            // The initial location for the file choosing dialog
-            final File jarDir = new File(System.getProperty("java.class.path")).getAbsoluteFile().getParentFile();
-
-            // If the file does not exist, we must be running it from a development environment, use an default location
-            if(jarDir.exists()) {
-                projectPicker.setInitialDirectory(jarDir);
-            }
-
-            // Prompt the user to find a file (will halt the UI thread)
-            final File file = projectPicker.showDialog(root.getScene().getWindow());
-            if(file != null) {
-                try {
-                    Ecdar.projectDirectory.set(file.getAbsolutePath());
-                    Ecdar.initializeProjectFolder();
-                    UndoRedoStack.clear();
-                } catch (final IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-
         initializeFileExportAsPng();
 
+        initializeEditBalanceMenuItem();
+
+        initializeViewMenu();
+
+        menuBarHelpHelp.setOnAction(event -> Ecdar.showHelp());
+    }
+
+    /**
+     * Initialize. the View menu.
+     */
+    private void initializeViewMenu() {
         menuBarViewFilePanel.getGraphic().setOpacity(1);
         menuBarViewFilePanel.setAccelerator(new KeyCodeCombination(KeyCode.P, KeyCodeCombination.SHORTCUT_DOWN));
         menuBarViewFilePanel.setOnAction(event -> {
@@ -435,9 +420,12 @@ public class EcdarController implements Initializable {
             final BooleanProperty isOn = Ecdar.toggleGrid();
             menuBarViewGrid.getGraphic().opacityProperty().bind(new When(isOn).then(1).otherwise(0));
         });
+    }
 
-        menuBarHelpHelp.setOnAction(event -> Ecdar.showHelp());
-
+    /**
+     * Initializes the Edit Balance menu item.
+     */
+    private void initializeEditBalanceMenuItem() {
         menuBarEditBalance.setAccelerator(new KeyCodeCombination(KeyCode.B, KeyCombination.SHORTCUT_DOWN));
         menuBarEditBalance.setOnAction(event -> {
             // Map to store the previous identifiers (to undo/redo)
@@ -481,6 +469,51 @@ public class EcdarController implements Initializable {
     }
 
     /**
+     * Initializes the open project menu item.
+     */
+    private void initializeOpenProjectMenuItem() {
+        menuBarFileOpenProject.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.SHORTCUT_DOWN));
+        menuBarFileOpenProject.setOnAction(event -> {
+            // Dialog title
+            final DirectoryChooser projectPicker = new DirectoryChooser();
+            projectPicker.setTitle("Open project");
+
+            // The initial location for the file choosing dialog
+            final File jarDir = new File(System.getProperty("java.class.path")).getAbsoluteFile().getParentFile();
+
+            // If the file does not exist, we must be running it from a development environment, use an default location
+            if(jarDir.exists()) {
+                projectPicker.setInitialDirectory(jarDir);
+            }
+
+            // Prompt the user to find a file (will halt the UI thread)
+            final File file = projectPicker.showDialog(root.getScene().getWindow());
+            if(file != null) {
+                try {
+                    Ecdar.projectDirectory.set(file.getAbsolutePath());
+                    Ecdar.initializeProjectFolder();
+                    UndoRedoStack.clear();
+                } catch (final IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    /**
+     * Saves the project to the {@see Ecdar#projectDirectory} path.
+     * This include making directories, converting project files (components and queries)
+     * into Json formatted files.
+     */
+    public void save() {
+        if (Ecdar.projectDirectory.isNull().get()) {
+            saveAs();
+        } else {
+            save(new File(Ecdar.projectDirectory.get()));
+        }
+    }
+
+    /**
      * Save project as.
      */
     private void saveAs() {
@@ -490,29 +523,22 @@ public class EcdarController implements Initializable {
         filePicker.setInitialDirectory(new File(System.getProperty("user.home")));
 
         final File file = filePicker.showSaveDialog(root.getScene().getWindow());
-        if (file != null){
+        if (file != null) {
             Ecdar.projectDirectory.setValue(file.getPath());
-            save();
+            save(file);
         } else {
             Ecdar.showToast("The project was not saved");
         }
     }
 
-    /***
-     * Saves the project to the {@see Ecdar#projectDirectory} path.
-     * This include making directories, converting project files (components and queries)
-     * into Json formatted files.
+    /**
+     * Save project at a given directory.
+     * @param directory directory to save at
      */
-    // TODO Serialize in Project
-    public void save() {
-        if (Ecdar.projectDirectory.isNull().get()) {
-            saveAs();
-            return;
-        }
-
+    private static void save(final File directory) {
         try {
-            Ecdar.getProject().serialize();
-        } catch (IOException e) {
+            Ecdar.getProject().serialize(directory);
+        } catch (final IOException e) {
             Ecdar.showToast("Could not save project: " + e.getMessage());
             e.printStackTrace();
         }

@@ -16,7 +16,7 @@ import javafx.scene.input.MouseEvent;
 import java.util.List;
 import java.util.function.Supplier;
 
-import static SW9.presentations.CanvasPresentation.GRID_SIZE;
+import static SW9.presentations.Grid.GRID_SIZE;
 
 public class ItemDragHelper {
 

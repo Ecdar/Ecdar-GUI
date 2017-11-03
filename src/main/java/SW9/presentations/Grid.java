@@ -6,10 +6,8 @@ import javafx.scene.shape.Line;
 
 import java.util.ArrayList;
 
-import static SW9.presentations.CanvasPresentation.GRID_SIZE;
-
 public class Grid extends Parent {
-
+    public static final int GRID_SIZE = 10;
     private final ArrayList<Line> horizontalLines = new ArrayList<>();
     private final ArrayList<Line> verticalLines = new ArrayList<>();
 

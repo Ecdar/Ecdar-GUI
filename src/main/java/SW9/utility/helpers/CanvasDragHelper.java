@@ -1,6 +1,7 @@
 package SW9.utility.helpers;
 
 import SW9.presentations.CanvasPresentation;
+import SW9.presentations.Grid;
 import SW9.utility.UndoRedoStack;
 import SW9.utility.mouse.MouseTracker;
 import javafx.beans.binding.NumberBinding;
@@ -65,8 +66,8 @@ public class CanvasDragHelper {
             double y = event.getY() + dragYOffset[0];
 
             // Make coordinates snap to the grip on the canvas
-            x -= x % CanvasPresentation.GRID_SIZE - (CanvasPresentation.GRID_SIZE / 2);
-            y -= y % CanvasPresentation.GRID_SIZE - (CanvasPresentation.GRID_SIZE / 2);
+            x -= x % Grid.GRID_SIZE - (Grid.GRID_SIZE / 2);
+            y -= y % Grid.GRID_SIZE - (Grid.GRID_SIZE / 2);
 
             // If the subject has its x stringBinder bound have a parent where we can get the xProperty as well
             if (subject.xProperty().isBound()) {
@@ -232,8 +233,8 @@ public class CanvasDragHelper {
                 subject.setTranslateX(newX);
                 subject.setTranslateY(newY);
             } else {
-                subject.xProperty().set(newX - (newX % CanvasPresentation.GRID_SIZE) + CanvasPresentation.GRID_SIZE * 0.5);
-                subject.yProperty().set(newY - (newY % CanvasPresentation.GRID_SIZE) + CanvasPresentation.GRID_SIZE * 0.5);
+                subject.xProperty().set(newX - (newX % Grid.GRID_SIZE) + Grid.GRID_SIZE * 0.5);
+                subject.yProperty().set(newY - (newY % Grid.GRID_SIZE) + Grid.GRID_SIZE * 0.5);
             }
 
             subject.setCursor(Cursor.MOVE);
