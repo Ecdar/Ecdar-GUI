@@ -57,7 +57,6 @@
 
     <Line fx:id="line1"/>
     <Line fx:id="line2"/>
-    <Pane fx:id="defaultLocationsContainer" pickOnBounds="false"/>
 
     <Rectangle opacity="0" fx:id="bottomAnchor" StackPane.alignment="BOTTOM_LEFT"/>
     <Rectangle opacity="0" fx:id="rightAnchor" StackPane.alignment="TOP_RIGHT"/>

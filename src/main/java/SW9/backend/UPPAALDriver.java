@@ -250,11 +250,9 @@ public class UPPAALDriver {
         final String templateName = component.getName();
         final List<String> locationNames = new ArrayList<>();
 
-        for (final Location location : component.getAllButInitialLocations()) {
+        for (final Location location : component.getLocations()) {
             locationNames.add(templateName + "." + location.getId());
         }
-
-        locationNames.add(templateName + "." + component.getInitialLocation().getId());
 
         return "E<> (" + String.join(" || ", locationNames) + ") && deadlock";
     }

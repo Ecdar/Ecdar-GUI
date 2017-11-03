@@ -8,6 +8,7 @@ import SW9.utility.colors.Color;
 import SW9.utility.colors.EnabledColor;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.sun.istack.internal.Nullable;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -92,12 +93,22 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         bindReachabilityAnalysis();
     }
 
-    public ObservableList<Location> getAllButInitialLocations() {
-        return locations;
-
-        /*final List<Location> locations = new ArrayList<>();
+    /**
+     * Get all locations in this, but the initial location (if one exists).
+     * O(n), n is # of locations in component.
+     * @return all but the initial location
+     */
+    public List<Location> getAllButInitialLocations() {
+        final List<Location> locations = new ArrayList<>();
         locations.addAll(getLocations());
-        locations.add(initialLocation.get()); */
+
+        // Remove initial location
+        final Location initLoc = getInitialLocation();
+        if (initLoc != null) {
+            locations.remove(getInitialLocation());
+        }
+
+        return locations;
     }
 
     public ObservableList<Location> getLocations() {
@@ -198,8 +209,9 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
      * O(n), where n is number of locations in this.
      * @return the initial location, or null if there is none
      */
+    @Nullable
     public Location getInitialLocation() {
-        for (final Location loc : getAllButInitialLocations()) {
+        for (final Location loc : getLocations()) {
             if (loc.getType() == Location.Type.INITIAL) {
                 return  loc;
             }
@@ -261,7 +273,7 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         final JsonObject result = super.serialize();
 
         final JsonArray locations = new JsonArray();
-        getAllButInitialLocations().forEach(location -> locations.add(location.serialize()));
+        getLocations().forEach(location -> locations.add(location.serialize()));
         result.add(LOCATIONS, locations);
 
         final JsonArray edges = new JsonArray();
@@ -323,7 +335,7 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
 
         final Map<Location, Pair<Color, Color.Intensity>> previousLocationColors = new HashMap<>();
 
-        for (final Location location : getAllButInitialLocations()) {
+        for (final Location location : getLocations()) {
             if (!location.getColor().equals(previousColor)) continue;
             previousLocationColors.put(location, new Pair<>(location.getColor(), location.getColorIntensity()));
         }

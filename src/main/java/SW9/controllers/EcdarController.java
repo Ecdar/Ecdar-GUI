@@ -311,9 +311,9 @@ public class EcdarController implements Initializable {
                 Ecdar.getProject().getComponents().forEach(component -> {
                     // Check if we should consider this component
                     if (!component.isIncludeInPeriodicCheck()) {
-                        component.getLocationsWithInitial().forEach(location -> location.setReachability(Location.Reachability.EXCLUDED));
+                        component.getLocations().forEach(location -> location.setReachability(Location.Reachability.EXCLUDED));
                     } else {
-                        component.getLocationsWithInitial().forEach(location -> {
+                        component.getLocations().forEach(location -> {
                             final String locationReachableQuery = UPPAALDriver.getLocationReachableQuery(location, component);
                             final Thread verifyThread = UPPAALDriver.runQuery(
                                     locationReachableQuery,
@@ -463,11 +463,8 @@ public class EcdarController implements Initializable {
                     // Check if we already balanced this component
                     if(!missingComponents.contains(component)) return;
 
-                    // Set the identifier for the initial location
-                    resetLocation.accept(component.getInitialLocation());
-
-                    // Set the identifiers for the rest of the locations
-                    component.getAllButInitialLocations().forEach(resetLocation);
+                    // Set the identifiers for the locations
+                    component.getLocations().forEach(resetLocation);
 
                     // We are now finished with this component, remove it from the list
                     missingComponents.remove(component);
@@ -958,22 +955,15 @@ public class EcdarController implements Initializable {
                 final Component component = ((LocationController) selectable).getComponent();
                 final Location location = ((LocationController) selectable).getLocation();
 
-                final Location initialLocation = component.getInitialLocation();
-
-                if (location.getId().equals(initialLocation.getId())) {
-                    ((LocationPresentation) ((LocationController) selectable).root).shake();
-                    return; // Do not delete initial location
-                }
-
                 final List<Edge> relatedEdges = component.getRelatedEdges(location);
 
                 UndoRedoStack.pushAndPerform(() -> { // Perform
                     // Remove the location
-                    component.getAllButInitialLocations().remove(location);
+                    component.getLocations().remove(location);
                     relatedEdges.forEach(component::removeEdge);
                 }, () -> { // Undo
                     // Re-all the location
-                    component.getAllButInitialLocations().add(location);
+                    component.getLocations().add(location);
                     relatedEdges.forEach(component::addEdge);
 
                 }, String.format("Deleted %s", selectable.toString()), "delete");

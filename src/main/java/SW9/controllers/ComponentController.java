@@ -65,7 +65,6 @@ public class ComponentController implements Initializable {
     public Line line2;
     public Label x;
     public Label y;
-    public Pane defaultLocationsContainer;
     public Rectangle rightAnchor;
     public Rectangle bottomAnchor;
     public Pane modelContainerLocation;
@@ -135,15 +134,6 @@ public class ComponentController implements Initializable {
             initializeEdgeHandling(newComponent);
             initializeLocationHandling(newComponent);
             initializeDeclarations();
-
-            // When we update the color of the component, also update the color of the initial location if the colors are the same
-            newComponent.colorProperty().addListener((obs1, oldColor, newColor) -> {
-                final Location initialLocation = newComponent.getInitialLocation();
-                if (initialLocation.getColor().equals(oldColor)) {
-                    initialLocation.setColorIntensity(newComponent.getColorIntensity());
-                    initialLocation.setColor(newColor);
-                }
-            });
         });
 
         // The root view have been inflated, initialize the mouse tracker on it
@@ -227,7 +217,7 @@ public class ComponentController implements Initializable {
         });
 
         // Check location whenever we get new locations
-        component.getAllButInitialLocations().addListener(new ListChangeListener<Location>() {
+        component.getLocations().addListener(new ListChangeListener<Location>() {
             @Override
             public void onChanged(final Change<? extends Location> c) {
                 while (c.next()) {
@@ -380,7 +370,7 @@ public class ComponentController implements Initializable {
         };
 
         if(locationListChangeListenerMap.containsKey(newComponent)) {
-            newComponent.getAllButInitialLocations().removeListener(locationListChangeListenerMap.get(newComponent));
+            newComponent.getLocations().removeListener(locationListChangeListenerMap.get(newComponent));
         }
         final ListChangeListener<Location> locationListChangeListener = c -> {
             if (c.next()) {
@@ -395,10 +385,10 @@ public class ComponentController implements Initializable {
                 });
             }
         };
-        newComponent.getAllButInitialLocations().addListener(locationListChangeListener);
+        newComponent.getLocations().addListener(locationListChangeListener);
         locationListChangeListenerMap.put(newComponent, locationListChangeListener);
 
-        newComponent.getAllButInitialLocations().forEach(handleAddedLocation);
+        newComponent.getLocations().forEach(handleAddedLocation);
     }
 
     private void initializeEdgeHandling(final Component newComponent) {

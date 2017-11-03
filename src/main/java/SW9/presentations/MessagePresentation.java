@@ -85,7 +85,7 @@ public class MessagePresentation extends HBox {
                             // We are pressing a location, find the location and open the corresponding component
                             if (nearable instanceof Location) {
                                 Ecdar.getProject().getComponents().forEach(component -> {
-                                    if (component.getAllButInitialLocations().contains(nearable)) {
+                                    if (component.getLocations().contains(nearable)) {
                                         openComponent[0] = component;
                                     }
                                 });

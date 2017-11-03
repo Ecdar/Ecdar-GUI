@@ -64,7 +64,6 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
             + "|(//.*|(\"(?:\\\\[^\"]|\\\\\"|.)*?\")|(?s)/\\*.*?\\*/)");
     private final ComponentController controller;
     private final List<BiConsumer<Color, Color.Intensity>> updateColorDelegates = new ArrayList<>();
-    private LocationPresentation initialLocationPresentation = null;
 
     public ComponentPresentation() {
         this(new Component());
@@ -94,13 +93,10 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
             controller = fxmlLoader.getController();
             controller.setComponent(component);
 
-            initializeDefaultLocationsContainer();
-
             // Initializer methods that is sensitive to width and height
             final Runnable onUpdateSize = () -> {
                 initializeToolbar();
                 initializeFrame();
-                initializeInitialLocation();
                 initializeBackground();
             };
 
@@ -261,7 +257,7 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
 
             final DoubleProperty minHeight = new SimpleDoubleProperty(10 * GRID_SIZE);
 
-            component.getAllButInitialLocations().forEach(location -> {
+            component.getLocations().forEach(location -> {
                 minHeight.set(Math.max(minHeight.doubleValue(), location.getY() + GRID_SIZE * 2));
             });
 
@@ -321,10 +317,9 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
         final DoubleProperty prevWidth = new SimpleDoubleProperty();
 
         final Supplier<Double> componentMinWidth = () -> {
-
             final DoubleProperty minWidth = new SimpleDoubleProperty(10 * GRID_SIZE);
 
-            component.getAllButInitialLocations().forEach(location -> {
+            component.getLocations().forEach(location -> {
                 minWidth.set(Math.max(minWidth.doubleValue(), location.getX() + GRID_SIZE * 2));
             });
 
@@ -373,19 +368,6 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
 
     }
 
-    private void initializeDefaultLocationsContainer() {
-        if (initialLocationPresentation != null) {
-            controller.defaultLocationsContainer.getChildren().remove(initialLocationPresentation);
-        }
-
-        // Instantiate views for the initial and final location
-        final Component component = controller.getComponent();
-        initialLocationPresentation = new LocationPresentation(component.getInitialLocation(), component);
-
-        // Add the locations to the view
-        controller.defaultLocationsContainer.getChildren().add(initialLocationPresentation);
-    }
-
     private void initializeName() {
         final Component component = controller.getComponent();
         final BooleanProperty initialized = new SimpleBooleanProperty(false);
@@ -420,16 +402,6 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
         // Center the text vertically and aff a left padding of CORNER_SIZE
         controller.name.setPadding(new Insets(2, 0, 0, CORNER_SIZE));
         controller.name.setOnKeyPressed(CanvasController.getLeaveTextAreaKeyHandler());
-    }
-
-    private void initializeInitialLocation() {
-        initialLocationPresentation.setLocation(controller.getComponent().getInitialLocation());
-        initialLocationPresentation.layoutXProperty().unbind();
-        initialLocationPresentation.layoutYProperty().unbind();
-        initialLocationPresentation.setLayoutX(CORNER_SIZE / 2);
-        initialLocationPresentation.setLayoutY(CORNER_SIZE / 2);
-
-        StackPane.setAlignment(initialLocationPresentation, Pos.TOP_LEFT);
     }
 
     private void initializeToolbar() {

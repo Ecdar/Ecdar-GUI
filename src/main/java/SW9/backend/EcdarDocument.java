@@ -85,18 +85,13 @@ class EcdarDocument {
         xmlDocument.insert(template, null);
 
         // Add all locations from the model to our conversion map and to the template
-        for (final Location ecdarLocation : component.getAllButInitialLocations()) {
+        for (final Location ecdarLocation : component.getLocations()) {
             // Add the location to the template
             final com.uppaal.model.core2.Location xmlLocation = addLocation(template, ecdarLocation);
 
             // Populate the map
             addLocationsToMaps(ecdarLocation, xmlLocation);
         }
-
-        // Add the initial location to the template
-        final Location ecdarInitialLocation = component.getInitialLocation();
-        final com.uppaal.model.core2.Location xmlInitialLocation = addLocation(template, ecdarInitialLocation);
-        addLocationsToMaps(ecdarInitialLocation, xmlInitialLocation);
 
         for (final Edge ecdarEdge : component.getEdges()) {
             // Draw edges that are purely location to location edges

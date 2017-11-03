@@ -191,29 +191,27 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
             getLocation().setColor(color);
         });
 
-        if(getLocation().getType().equals(Location.Type.NORMAL)) {
-            dropDownMenu.addSpacerElement();
+        dropDownMenu.addSpacerElement();
 
-            dropDownMenu.addClickableListElement("Delete", event -> {
-                final Component component = getComponent();
-                final Location location = getLocation();
+        dropDownMenu.addClickableListElement("Delete", event -> {
+            final Component component = getComponent();
+            final Location location = getLocation();
 
-                final List<Edge> relatedEdges = component.getRelatedEdges(location);
+            final List<Edge> relatedEdges = component.getRelatedEdges(location);
 
-                UndoRedoStack.pushAndPerform(() -> { // Perform
-                    // Remove the location
-                    component.getAllButInitialLocations().remove(location);
-                    relatedEdges.forEach(component::removeEdge);
-                }, () -> { // Undo
-                    // Re-all the location
-                    component.getAllButInitialLocations().add(location);
-                    relatedEdges.forEach(component::addEdge);
+            UndoRedoStack.pushAndPerform(() -> { // Perform
+                // Remove the location
+                component.getLocations().remove(location);
+                relatedEdges.forEach(component::removeEdge);
+            }, () -> { // Undo
+                // Re-all the location
+                component.getLocations().add(location);
+                relatedEdges.forEach(component::addEdge);
 
-                }, String.format("Deleted %s", location), "delete");
+            }, String.format("Deleted %s", location), "delete");
 
-                dropDownMenu.close();
-            });
-        }
+            dropDownMenu.close();
+        });
     }
 
     public void initializeInvalidNameError() {
