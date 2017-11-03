@@ -421,9 +421,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
             root.addEventHandler(MouseEvent.MOUSE_PRESSED, mousePressed::accept);
 
-            if(newLocation.getType() == Location.Type.NORMAL) {
-                ItemDragHelper.makeDraggable(root, this::getDragBounds);
-            }
+            ItemDragHelper.makeDraggable(root, this::getDragBounds);
         });
 
 
@@ -469,10 +467,6 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
     @Override
     public boolean nudge(final NudgeDirection direction) {
-
-        // Do not nudge initial location
-        if(!getLocation().getType().equals(Location.Type.NORMAL)) return false;
-
         final double oldX = root.getLayoutX();
         final double newX = getDragBounds().trimX(root.getLayoutX() + direction.getXOffset());
         root.layoutXProperty().set(newX);
