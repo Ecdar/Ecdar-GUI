@@ -6,10 +6,10 @@
       "id": "L0",
       "nickname": "",
       "invariant": "",
-      "type": "INITIAL",
+      "type": "NORMAL",
       "urgency": "NORMAL",
-      "x": 230.0,
-      "y": 300.0,
+      "x": 260.0,
+      "y": 160.0,
       "color": "9",
       "nickname_x": 30.0,
       "nickname_y": -10.0,
@@ -20,10 +20,10 @@
       "id": "L1",
       "nickname": "",
       "invariant": "",
-      "type": "NORMAL",
+      "type": "INITIAL",
       "urgency": "NORMAL",
-      "x": 260.0,
-      "y": 160.0,
+      "x": 200.0,
+      "y": 250.0,
       "color": "9",
       "nickname_x": 30.0,
       "nickname_y": -10.0,
@@ -34,25 +34,7 @@
   "edges": [
     {
       "source_location": "L0",
-      "target_location": "L1",
-      "status": "OUTPUT",
-      "select": "",
-      "guard": "",
-      "update": "",
-      "sync": "c!",
-      "nails": [
-        {
-          "x": 270.0,
-          "y": 230.0,
-          "property_type": "SYNCHRONIZATION",
-          "property_x": 10.0,
-          "property_y": -10.0
-        }
-      ]
-    },
-    {
-      "source_location": "L1",
-      "target_location": "L1",
+      "target_location": "L0",
       "status": "OUTPUT",
       "select": "",
       "guard": "",
@@ -79,6 +61,24 @@
           "property_type": "NONE",
           "property_x": 0.0,
           "property_y": 0.0
+        }
+      ]
+    },
+    {
+      "source_location": "L1",
+      "target_location": "L0",
+      "status": "OUTPUT",
+      "select": "",
+      "guard": "",
+      "update": "",
+      "sync": "c!",
+      "nails": [
+        {
+          "x": 230.0,
+          "y": 210.0,
+          "property_type": "SYNCHRONIZATION",
+          "property_x": 10.0,
+          "property_y": -10.0
         }
       ]
     }

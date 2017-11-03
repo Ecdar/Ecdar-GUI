@@ -10,7 +10,7 @@
       "urgency": "NORMAL",
       "x": 230.0,
       "y": 300.0,
-      "color": "5",
+      "color": "0",
       "nickname_x": 30.0,
       "nickname_y": -10.0,
       "invariant_x": 30.0,
@@ -18,6 +18,20 @@
     },
     {
       "id": "L3",
+      "nickname": "",
+      "invariant": "",
+      "type": "INITIAL",
+      "urgency": "NORMAL",
+      "x": 230.0,
+      "y": 300.0,
+      "color": "5",
+      "nickname_x": 30.0,
+      "nickname_y": -10.0,
+      "invariant_x": 30.0,
+      "invariant_y": 10.0
+    },
+    {
+      "id": "L4",
       "nickname": "",
       "invariant": "",
       "type": "NORMAL",
@@ -33,8 +47,8 @@
   ],
   "edges": [
     {
-      "source_location": "L2",
-      "target_location": "L3",
+      "source_location": "L3",
+      "target_location": "L4",
       "status": "INPUT",
       "select": "",
       "guard": "",
@@ -58,8 +72,8 @@
       ]
     },
     {
-      "source_location": "L3",
-      "target_location": "L3",
+      "source_location": "L4",
+      "target_location": "L4",
       "status": "INPUT",
       "select": "",
       "guard": "",
