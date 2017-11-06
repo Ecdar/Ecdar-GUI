@@ -62,7 +62,9 @@ public class Project {
     }
 
     /**
-     * Serializes and stores this at the Ecdar project directory as JSON files.
+     * Serializes and stores this as JSON files at a given directory.
+     * @param directory object containing path to the desired directory to store at
+     * @throws IOException if an IO error happens
      */
     public void serialize(final File directory) throws IOException {
         // Clear the project folder
