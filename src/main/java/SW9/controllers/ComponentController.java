@@ -296,6 +296,8 @@ public class ComponentController implements Initializable {
                 newLocation.setColorIntensity(component.getColorIntensity());
                 newLocation.setColor(component.getColor());
 
+                newLocation.setNickname("Universal");
+
                 // Add a new location
                 UndoRedoStack.pushAndPerform(() -> { // Perform
                     component.addLocation(newLocation);
