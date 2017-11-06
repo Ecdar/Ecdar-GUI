@@ -11,8 +11,6 @@ import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import java.util.function.Consumer;
-
 public class Edge implements Serializable, Nearable {
 
     private static final String SOURCE_LOCATION = "source_location";

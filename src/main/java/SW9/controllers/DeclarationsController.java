@@ -4,8 +4,6 @@ import SW9.abstractions.Declarations;
 import SW9.presentations.ComponentPresentation;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.Initializable;
 import javafx.scene.layout.StackPane;
 import org.fxmisc.richtext.LineNumberFactory;

@@ -2,7 +2,6 @@
 
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.*?>
-<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.shape.*?>
 <?import SW9.presentations.TagPresentation?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"

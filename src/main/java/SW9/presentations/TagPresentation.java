@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.function.BiConsumer;
 
-import static SW9.presentations.CanvasPresentation.GRID_SIZE;
+import static SW9.presentations.Grid.GRID_SIZE;
 import static javafx.scene.paint.Color.TRANSPARENT;
 
 public class TagPresentation extends StackPane {

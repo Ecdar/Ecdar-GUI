@@ -41,7 +41,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
-import static SW9.presentations.CanvasPresentation.GRID_SIZE;
+import static SW9.presentations.Grid.GRID_SIZE;
 
 public class EdgeController implements Initializable, SelectHelper.ItemSelectable {
     private final ObservableList<Link> links = FXCollections.observableArrayList();

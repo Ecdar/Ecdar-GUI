@@ -40,7 +40,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.function.Consumer;
 
-import static SW9.presentations.CanvasPresentation.GRID_SIZE;
+import static SW9.presentations.Grid.GRID_SIZE;
 
 public class LocationController implements Initializable, SelectHelper.ItemSelectable, Nudgeable {
 

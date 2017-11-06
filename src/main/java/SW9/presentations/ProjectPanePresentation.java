@@ -9,7 +9,6 @@ import javafx.fxml.JavaFXBuilderFactory;
 import javafx.geometry.Insets;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.*;
-import org.apache.xpath.operations.Bool;
 
 import java.io.IOException;
 import java.net.URL;

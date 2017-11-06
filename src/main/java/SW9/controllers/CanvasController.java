@@ -9,8 +9,6 @@ import SW9.presentations.DeclarationPresentation;
 import SW9.utility.helpers.SelectHelper;
 import javafx.application.Platform;
 import javafx.beans.property.*;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.fxml.Initializable;
 import javafx.scene.input.KeyCode;
@@ -23,7 +21,7 @@ import java.util.HashMap;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
-import static SW9.presentations.CanvasPresentation.GRID_SIZE;
+import static SW9.presentations.Grid.GRID_SIZE;
 
 public class CanvasController implements Initializable {
     public final static double DECLARATION_X_MARGIN = GRID_SIZE * 5.5;
@@ -54,7 +52,7 @@ public class CanvasController implements Initializable {
 
     /**
      * Sets the given VerificationObject as the one to be active / to be shown on the screen
-     * @param object
+     * @param object the given VerificationObject
      */
     public static void setActiveVerificationObject(final VerificationObject object) {
         CanvasController.activeVerificationObject.set(object);
