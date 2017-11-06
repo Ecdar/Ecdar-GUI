@@ -21,7 +21,6 @@ import javafx.animation.Transition;
 import javafx.application.Platform;
 import javafx.beans.binding.When;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ListChangeListener;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
@@ -312,9 +311,9 @@ public class EcdarController implements Initializable {
                 Ecdar.getProject().getComponents().forEach(component -> {
                     // Check if we should consider this component
                     if (!component.isIncludeInPeriodicCheck()) {
-                        component.getLocationsWithInitial().forEach(location -> location.setReachability(Location.Reachability.EXCLUDED));
+                        component.getLocations().forEach(location -> location.setReachability(Location.Reachability.EXCLUDED));
                     } else {
-                        component.getLocationsWithInitial().forEach(location -> {
+                        component.getLocations().forEach(location -> {
                             final String locationReachableQuery = UPPAALDriver.getLocationReachableQuery(location, component);
                             final Thread verifyThread = UPPAALDriver.runQuery(
                                     locationReachableQuery,
@@ -464,10 +463,7 @@ public class EcdarController implements Initializable {
                     // Check if we already balanced this component
                     if(!missingComponents.contains(component)) return;
 
-                    // Set the identifier for the initial location
-                    resetLocation.accept(component.getInitialLocation());
-
-                    // Set the identifiers for the rest of the locations
+                    // Set the identifiers for the locations
                     component.getLocations().forEach(resetLocation);
 
                     // We are now finished with this component, remove it from the list
@@ -956,28 +952,7 @@ public class EcdarController implements Initializable {
         // Run through the selected elements and look for something that we can delete
         SelectHelper.getSelectedElements().forEach(selectable -> {
             if (selectable instanceof LocationController) {
-                final Component component = ((LocationController) selectable).getComponent();
-                final Location location = ((LocationController) selectable).getLocation();
-
-                final Location initialLocation = component.getInitialLocation();
-
-                if (location.getId().equals(initialLocation.getId())) {
-                    ((LocationPresentation) ((LocationController) selectable).root).shake();
-                    return; // Do not delete initial location
-                }
-
-                final List<Edge> relatedEdges = component.getRelatedEdges(location);
-
-                UndoRedoStack.pushAndPerform(() -> { // Perform
-                    // Remove the location
-                    component.getLocations().remove(location);
-                    relatedEdges.forEach(component::removeEdge);
-                }, () -> { // Undo
-                    // Re-all the location
-                    component.getLocations().add(location);
-                    relatedEdges.forEach(component::addEdge);
-
-                }, String.format("Deleted %s", selectable.toString()), "delete");
+                ((LocationController) selectable).tryDelete();
             } else if (selectable instanceof EdgeController) {
                 final Component component = ((EdgeController) selectable).getComponent();
                 final Edge edge = ((EdgeController) selectable).getEdge();

@@ -5,18 +5,11 @@
 <?import javafx.scene.shape.*?>
 <?import org.fxmisc.richtext.StyleClassedTextArea?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.Group?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="StackPane"
          fx:id="root"
          fx:controller="SW9.controllers.ComponentController">
-
-    <Group fx:id="initialLocationGuideContainer" StackPane.alignment="TOP_LEFT">
-        <Path fx:id="initialLocationGuideArrow" fill="black"/>
-        <Label fx:id="initialLocationGuideLabel" styleClass="body1" text="Initial" textFill="white"/>
-    </Group>
 
     <Rectangle fx:id="background" StackPane.alignment="TOP_LEFT"/>
 
@@ -57,7 +50,6 @@
 
     <Line fx:id="line1"/>
     <Line fx:id="line2"/>
-    <Pane fx:id="defaultLocationsContainer" pickOnBounds="false"/>
 
     <Rectangle opacity="0" fx:id="bottomAnchor" StackPane.alignment="BOTTOM_LEFT"/>
     <Rectangle opacity="0" fx:id="rightAnchor" StackPane.alignment="TOP_RIGHT"/>

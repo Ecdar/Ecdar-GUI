@@ -3,34 +3,34 @@
   "declarations": "",
   "locations": [
     {
+      "id": "L3",
+      "nickname": "",
+      "invariant": "",
+      "type": "INITIAL",
+      "urgency": "NORMAL",
+      "x": 160.0,
+      "y": 200.0,
+      "color": "5",
+      "nickname_x": 30.0,
+      "nickname_y": -10.0,
+      "invariant_x": 30.0,
+      "invariant_y": 10.0
+    },
+    {
       "id": "L4",
       "nickname": "",
       "invariant": "",
       "type": "NORMAL",
       "urgency": "NORMAL",
-      "x": 190.0,
+      "x": 250.0,
       "y": 160.0,
-      "color": "2",
+      "color": "5",
       "nickname_x": 30.0,
       "nickname_y": -10.0,
       "invariant_x": 30.0,
       "invariant_y": 10.0
     }
   ],
-  "initial_location": {
-    "id": "L3",
-    "nickname": "",
-    "invariant": "",
-    "type": "INITIAL",
-    "urgency": "NORMAL",
-    "x": 20.0,
-    "y": 20.0,
-    "color": "2",
-    "nickname_x": 30.0,
-    "nickname_y": -10.0,
-    "invariant_x": 30.0,
-    "invariant_y": 10.0
-  },
   "edges": [
     {
       "source_location": "L3",
@@ -42,8 +42,15 @@
       "sync": "c?",
       "nails": [
         {
-          "x": 100.0,
-          "y": 90.0,
+          "x": 310.0,
+          "y": 230.0,
+          "property_type": "NONE",
+          "property_x": 0.0,
+          "property_y": 0.0
+        },
+        {
+          "x": 290.0,
+          "y": 210.0,
           "property_type": "SYNCHRONIZATION",
           "property_x": 10.0,
           "property_y": -10.0
@@ -60,22 +67,22 @@
       "sync": "c?",
       "nails": [
         {
-          "x": 240.0,
-          "y": 130.0,
+          "x": 320.0,
+          "y": 110.0,
           "property_type": "NONE",
           "property_x": 0.0,
           "property_y": 0.0
         },
         {
-          "x": 240.0,
-          "y": 160.0,
+          "x": 280.0,
+          "y": 100.0,
           "property_type": "SYNCHRONIZATION",
           "property_x": 10.0,
           "property_y": -10.0
         },
         {
           "x": 240.0,
-          "y": 190.0,
+          "y": 90.0,
           "property_type": "NONE",
           "property_x": 0.0,
           "property_y": 0.0
@@ -83,12 +90,11 @@
       ]
     }
   ],
-  "main": false,
   "description": "",
   "x": 5.0,
   "y": 5.0,
   "width": 450.0,
   "height": 600.0,
-  "color": "2",
-  "include_in_periodic_check": false
+  "color": "5",
+  "include_in_periodic_check": true
 }

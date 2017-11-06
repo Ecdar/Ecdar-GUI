@@ -64,7 +64,6 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
             + "|(//.*|(\"(?:\\\\[^\"]|\\\\\"|.)*?\")|(?s)/\\*.*?\\*/)");
     private final ComponentController controller;
     private final List<BiConsumer<Color, Color.Intensity>> updateColorDelegates = new ArrayList<>();
-    private LocationPresentation initialLocationPresentation = null;
 
     public ComponentPresentation() {
         this(new Component());
@@ -94,21 +93,16 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
             controller = fxmlLoader.getController();
             controller.setComponent(component);
 
-            initializeDefaultLocationsContainer();
-
             // Initializer methods that is sensitive to width and height
             final Runnable onUpdateSize = () -> {
                 initializeToolbar();
                 initializeFrame();
-                initializeInitialLocation();
                 initializeBackground();
             };
 
             initializeName();
             initializeDragAnchors();
             onUpdateSize.run();
-            initializeLocationTypeIndicatorArrows();
-
 
             // Re run initialisation on update of width and height property
             component.widthProperty().addListener(observable -> {
@@ -123,29 +117,6 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
 
         } catch (final IOException ioe) {
             throw new IllegalStateException(ioe);
-        }
-    }
-
-    private void initializeLocationTypeIndicatorArrows() {
-
-        // Initial indicator
-        final Group initialLocationGuideContainer = controller.initialLocationGuideContainer;
-        final Path initialLocationGuideArrow = controller.initialLocationGuideArrow;
-        final Label initialLocationGuideLabel = controller.initialLocationGuideLabel;
-
-        drawIndicatorArrow(initialLocationGuideArrow);
-        initialLocationGuideContainer.setRotate(-45-90);
-        initialLocationGuideContainer.setTranslateX(2.3 * GRID_SIZE);
-        initialLocationGuideContainer.setTranslateY(3.8 * GRID_SIZE);
-        initialLocationGuideLabel.setRotate(180);
-        initialLocationGuideLabel.setTranslateY(10.5);
-        initialLocationGuideContainer.toFront();
-        initialLocationGuideContainer.setOpacity(0);
-
-        if (!controller.getComponent().isFirsTimeShown()) {
-            initialLocationGuideContainer.setOpacity(1);
-            playIndicatorAnimations(Location.Type.INITIAL, initialLocationGuideContainer);
-            controller.getComponent().setFirsTimeShown(true);
         }
     }
 
@@ -321,7 +292,6 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
         final DoubleProperty prevWidth = new SimpleDoubleProperty();
 
         final Supplier<Double> componentMinWidth = () -> {
-
             final DoubleProperty minWidth = new SimpleDoubleProperty(10 * GRID_SIZE);
 
             component.getLocations().forEach(location -> {
@@ -373,19 +343,6 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
 
     }
 
-    private void initializeDefaultLocationsContainer() {
-        if (initialLocationPresentation != null) {
-            controller.defaultLocationsContainer.getChildren().remove(initialLocationPresentation);
-        }
-
-        // Instantiate views for the initial and final location
-        final Component component = controller.getComponent();
-        initialLocationPresentation = new LocationPresentation(component.getInitialLocation(), component);
-
-        // Add the locations to the view
-        controller.defaultLocationsContainer.getChildren().add(initialLocationPresentation);
-    }
-
     private void initializeName() {
         final Component component = controller.getComponent();
         final BooleanProperty initialized = new SimpleBooleanProperty(false);
@@ -420,16 +377,6 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
         // Center the text vertically and aff a left padding of CORNER_SIZE
         controller.name.setPadding(new Insets(2, 0, 0, CORNER_SIZE));
         controller.name.setOnKeyPressed(CanvasController.getLeaveTextAreaKeyHandler());
-    }
-
-    private void initializeInitialLocation() {
-        initialLocationPresentation.setLocation(controller.getComponent().getInitialLocation());
-        initialLocationPresentation.layoutXProperty().unbind();
-        initialLocationPresentation.layoutYProperty().unbind();
-        initialLocationPresentation.setLayoutX(CORNER_SIZE / 2);
-        initialLocationPresentation.setLayoutY(CORNER_SIZE / 2);
-
-        StackPane.setAlignment(initialLocationPresentation, Pos.TOP_LEFT);
     }
 
     private void initializeToolbar() {

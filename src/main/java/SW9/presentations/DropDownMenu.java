@@ -353,6 +353,7 @@ public class DropDownMenu {
         list.getChildren().add(child);
     }
 
+    // TODO Fix name
     public void addClickableAndDisableableListElement(final String s, final ObservableBooleanValue isDisabled, final Consumer<MouseEvent> mouseEventConsumer) {
         final Label label = new Label(s);
 

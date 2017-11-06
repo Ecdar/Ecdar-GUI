@@ -254,8 +254,6 @@ public class UPPAALDriver {
             locationNames.add(templateName + "." + location.getId());
         }
 
-        locationNames.add(templateName + "." + component.getInitialLocation().getId());
-
         return "E<> (" + String.join(" || ", locationNames) + ") && deadlock";
     }
 

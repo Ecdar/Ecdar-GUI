@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.net.URL;
 
 public class CanvasPresentation extends Pane implements MouseTrackable {
-
+    // TODO move to Grid
     public static final int GRID_SIZE = 10;
     public static MouseTracker mouseTracker;
 

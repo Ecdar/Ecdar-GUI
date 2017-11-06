@@ -4,7 +4,6 @@ import SW9.Ecdar;
 import SW9.abstractions.*;
 import SW9.backend.UPPAALDriver;
 import SW9.code_analysis.CodeAnalysis;
-import SW9.code_analysis.Nearable;
 import SW9.presentations.*;
 import SW9.utility.UndoRedoStack;
 import SW9.utility.helpers.BindingHelper;
@@ -17,10 +16,8 @@ import com.jfoenix.controls.JFXRippler;
 import com.jfoenix.controls.JFXTextField;
 import javafx.animation.Interpolator;
 import javafx.animation.Transition;
-import javafx.application.Platform;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
@@ -68,7 +65,6 @@ public class ComponentController implements Initializable {
     public Line line2;
     public Label x;
     public Label y;
-    public Pane defaultLocationsContainer;
     public Rectangle rightAnchor;
     public Rectangle bottomAnchor;
     public Pane modelContainerLocation;
@@ -78,11 +74,6 @@ public class ComponentController implements Initializable {
     private DropDownMenu contextMenu;
     private DropDownMenu finishEdgeContextMenu;
     private Circle dropDownMenuHelperCircle;
-
-    // Guiding indicator for initial and final location
-    public Group initialLocationGuideContainer;
-    public Path initialLocationGuideArrow;
-    public Label initialLocationGuideLabel;
 
     public static boolean isPlacingLocation() {
         return placingLocation != null;
@@ -138,15 +129,6 @@ public class ComponentController implements Initializable {
             initializeEdgeHandling(newComponent);
             initializeLocationHandling(newComponent);
             initializeDeclarations();
-
-            // When we update the color of the component, also update the color of the initial location if the colors are the same
-            newComponent.colorProperty().addListener((obs1, oldColor, newColor) -> {
-                final Location initialLocation = newComponent.getInitialLocation();
-                if (initialLocation.getColor().equals(oldColor)) {
-                    initialLocation.setColorIntensity(newComponent.getColorIntensity());
-                    initialLocation.setColor(newColor);
-                }
-            });
         });
 
         // The root view have been inflated, initialize the mouse tracker on it
@@ -168,7 +150,7 @@ public class ComponentController implements Initializable {
         final Map<Location, CodeAnalysis.Message> messages = new HashMap<>();
 
         final Function<Location, Boolean> hasIncomingEdges = location -> {
-            if (!getComponent().getLocations().contains(location))
+            if (!getComponent().getAllButInitialLocations().contains(location))
                 return true; // Do now show messages for locations not in the set of locations
 
             for (final Edge edge : getComponent().getEdges()) {
@@ -200,7 +182,7 @@ public class ComponentController implements Initializable {
             removeMessages.forEach(messages::remove);
 
             // Run through all non-ignored locations
-            for (final Location location : component.getLocations()) {
+            for (final Location location : component.getAllButInitialLocations()) {
                 if (ignored.contains(location)) continue; // Skip ignored
                 if (messages.containsKey(location)) continue; // Skip locations that already have warnings associated
 
@@ -260,11 +242,11 @@ public class ComponentController implements Initializable {
                 final Location newLocation = new Location();
 
                 double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
-                x = Math.round(x / GRID_SIZE) * GRID_SIZE;
+                x = Grid.snap(x);
                 newLocation.setX(x);
 
                 double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
-                y = Math.round(y / GRID_SIZE) * GRID_SIZE;
+                y = Grid.snap(y);
                 newLocation.setY(y);
 
                 newLocation.setColorIntensity(component.getColorIntensity());

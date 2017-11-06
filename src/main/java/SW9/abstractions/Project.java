@@ -177,14 +177,8 @@ public class Project {
         Collections.reverse(orderedJsonComponents);
 
         // Add the components to the list
-        orderedJsonComponents.forEach(jsonObject -> {
-
-            // It is important that the components are added the list prior to deserialization
-            final Component newComponent = new Component();
-            getComponents().add(newComponent);
-            newComponent.deserialize(jsonObject);
-        });
-        }
+        orderedJsonComponents.forEach(jsonObject -> getComponents().add(new Component(jsonObject)));
+    }
 
     /**
      * Resets components.

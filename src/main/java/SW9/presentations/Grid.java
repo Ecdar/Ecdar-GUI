@@ -6,6 +6,8 @@ import javafx.scene.shape.Line;
 
 import java.util.ArrayList;
 
+import static SW9.presentations.CanvasPresentation.GRID_SIZE;
+
 public class Grid extends Parent {
 
     private final ArrayList<Line> horizontalLines = new ArrayList<>();
@@ -90,5 +92,14 @@ public class Grid extends Parent {
             });
         });
 
+    }
+
+    /**
+     * Snap to the grid.
+     * @param raw the raw value
+     * @return the value after being snapped
+     */
+    public static double snap(final double raw) {
+        return Math.round(raw / GRID_SIZE) * GRID_SIZE;
     }
 }
