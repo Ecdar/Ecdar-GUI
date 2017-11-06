@@ -952,21 +952,7 @@ public class EcdarController implements Initializable {
         // Run through the selected elements and look for something that we can delete
         SelectHelper.getSelectedElements().forEach(selectable -> {
             if (selectable instanceof LocationController) {
-                final Component component = ((LocationController) selectable).getComponent();
-                final Location location = ((LocationController) selectable).getLocation();
-
-                final List<Edge> relatedEdges = component.getRelatedEdges(location);
-
-                UndoRedoStack.pushAndPerform(() -> { // Perform
-                    // Remove the location
-                    component.getLocations().remove(location);
-                    relatedEdges.forEach(component::removeEdge);
-                }, () -> { // Undo
-                    // Re-all the location
-                    component.getLocations().add(location);
-                    relatedEdges.forEach(component::addEdge);
-
-                }, String.format("Deleted %s", selectable.toString()), "delete");
+                ((LocationController) selectable).tryDelete();
             } else if (selectable instanceof EdgeController) {
                 final Component component = ((EdgeController) selectable).getComponent();
                 final Edge edge = ((EdgeController) selectable).getEdge();

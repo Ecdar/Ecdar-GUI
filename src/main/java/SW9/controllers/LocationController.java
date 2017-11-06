@@ -48,7 +48,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
     private final ObjectProperty<Location> location = new SimpleObjectProperty<>();
     private final ObjectProperty<Component> component = new SimpleObjectProperty<>();
-    public Group root;
+    public LocationPresentation root;
 
     public Path notCommittedShape;
     public Rectangle committedShape;
@@ -155,18 +155,16 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
         // For when non-initial
         dropDownMenu.addClickableAndDisableableListElement("Make initial",
-                getLocation().typeProperty().isEqualTo(Location.Type.INITIAL),
+                getLocation().typeProperty().isEqualTo(Location.Type.INITIAL), // disable if already initial
                 event -> {
-                    getComponent().setInitialLocation(getLocation());
-                    dropDownMenu.close();
-                }
-        );
+                    final Location previousInitLoc = getComponent().getInitialLocation();
 
-        // For when initial
-        dropDownMenu.addClickableAndDisableableListElement("Make non-initial",
-                getLocation().typeProperty().isNotEqualTo(Location.Type.INITIAL),
-                event -> {
-                    getLocation().setType(Location.Type.NORMAL);
+                    UndoRedoStack.pushAndPerform(() -> { // Perform
+                        getComponent().setInitialLocation(getLocation());
+                    }, () -> { // Undo
+                        getComponent().setInitialLocation(previousInitLoc);
+                    }, String.format("Made %s initial", location), "initial");
+
                     dropDownMenu.close();
                 }
         );
@@ -212,6 +210,22 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
         dropDownMenu.addSpacerElement();
 
         dropDownMenu.addClickableListElement("Delete", event -> {
+            tryDelete();
+            dropDownMenu.close();
+        });
+    }
+
+    /**
+     * Deletes this location.
+     * You are not allowed to delete the initial location.
+     * If this is an initial location, shake and give an error message instead.
+     */
+    public void tryDelete() {
+        if (getLocation().getType() == Location.Type.INITIAL) {
+            // You are not allowed to delete an initial location
+            root.shake();
+            Ecdar.showToast("You cannot delete the initial location");
+        } else {
             final Component component = getComponent();
             final Location location = getLocation();
 
@@ -225,11 +239,8 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                 // Re-all the location
                 component.getLocations().add(location);
                 relatedEdges.forEach(component::addEdge);
-
             }, String.format("Deleted %s", location), "delete");
-
-            dropDownMenu.close();
-        });
+        }
     }
 
     public void initializeInvalidNameError() {
@@ -271,7 +282,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
             root.setLayoutY(location.getY());
             location.xProperty().bind(root.layoutXProperty());
             location.yProperty().bind(root.layoutYProperty());
-            ((LocationPresentation) root).setPlaced(true);
+            root.setPlaced(true);
         }
     }
 
@@ -293,23 +304,21 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
     @FXML
     private void locationEntered() {
-        ((LocationPresentation) root).animateLocationEntered();
+        root.animateLocationEntered();
     }
 
     @FXML
     private void locationExited() {
-        ((LocationPresentation) root).animateLocationExited();
+        root.animateLocationExited();
     }
 
     @FXML
     private void mouseEntered() {
-        final LocationPresentation locationPresentation = (LocationPresentation) this.root;
-
-        if(!locationPresentation.isInteractable()) return;
+        if(!this.root.isInteractable()) return;
 
         circle.setCursor(Cursor.HAND);
 
-        locationPresentation.animateHoverEntered();
+        this.root.animateHoverEntered();
 
         // Keybind for making location urgent
         KeyboardTracker.registerKeybind(KeyboardTracker.MAKE_LOCATION_URGENT, new Keybind(new KeyCodeCombination(KeyCode.U), () -> {
@@ -333,7 +342,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
     @FXML
     private void mouseExited() {
-        final LocationPresentation locationPresentation = (LocationPresentation) this.root;
+        final LocationPresentation locationPresentation = this.root;
         if(!locationPresentation.isInteractable()) return;
 
         circle.setCursor(Cursor.DEFAULT);
@@ -350,7 +359,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
             final Component component = getComponent();
 
-            if (((LocationPresentation) root).isPlaced()) {
+            if (root.isPlaced()) {
 
                 final Edge unfinishedEdge = component.getUnfinishedEdge();
 
@@ -378,7 +387,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                     }
                     // Otherwise, select the location
                     else {
-                        if(((LocationPresentation) root).isInteractable()) {
+                        if(root.isInteractable()) {
                             if (event.isShortcutDown()) {
                                 SelectHelper.addToSelection(this);
                             } else {
@@ -405,11 +414,11 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                     getLocation().yProperty().bind(root.layoutYProperty());
 
                     // Notify that the location was placed
-                    ((LocationPresentation) root).setPlaced(true);
+                    root.setPlaced(true);
                     ComponentController.setPlacingLocation(null);
                     KeyboardTracker.unregisterKeybind(KeyboardTracker.ABANDON_LOCATION);
                 } else {
-                    ((LocationPresentation) root).shake();
+                    root.shake();
                 }
 
             }
@@ -457,12 +466,12 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
     @Override
     public void select() {
-        ((SelectHelper.Selectable) root).select();
+        root.select();
     }
 
     @Override
     public void deselect() {
-        ((SelectHelper.Selectable) root).deselect();
+        root.deselect();
     }
 
     @Override
