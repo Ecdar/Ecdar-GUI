@@ -397,7 +397,7 @@ public class EcdarController implements Initializable {
     }
 
     /**
-     * Initialize. the View menu.
+     * Initialize the View menu.
      */
     private void initializeViewMenu() {
         menuBarViewFilePanel.getGraphic().setOpacity(1);
