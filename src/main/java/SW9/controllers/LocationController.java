@@ -115,7 +115,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
         dropDownMenu = new DropDownMenu(((Pane) root.getParent().getParent().getParent()), root, 230, true);
 
-        dropDownMenu.addClickableListElement("Draw edge",
+        dropDownMenu.addClickableAndDisableableListElement("Draw edge", getLocation().getIsLocked(),
                 (event) -> {
                         final Edge newEdge = new Edge(getLocation(), EcdarController.getGlobalEdgeStatus());
 
@@ -145,7 +145,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
         );
 
         dropDownMenu.addClickableAndDisableableListElement("Add Invariant",
-                getLocation().invariantProperty().isNotEmpty().or(invariantTag.textFieldFocusProperty()),
+                getLocation().invariantProperty().isNotEmpty().or(invariantTag.textFieldFocusProperty()).or(getLocation().getIsLocked()),
                 event -> {
                     invariantTag.setOpacity(1);
                     invariantTag.requestTextFieldFocus();
@@ -156,7 +156,8 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
         dropDownMenu.addSpacerElement();
 
-        dropDownMenu.addListElement("Set Urgency");
+
+        //dropDownMenu.addListElement("Set Urgency");
 
         final BooleanProperty isUrgent = new SimpleBooleanProperty(false);
         isUrgent.bind(getLocation().urgencyProperty().isEqualTo(Location.Urgency.URGENT));

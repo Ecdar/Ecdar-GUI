@@ -52,6 +52,8 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
 
     private final ObjectProperty<Reachability> reachability = new SimpleObjectProperty<>();
 
+    private final SimpleBooleanProperty isLocked = new SimpleBooleanProperty(false);
+
     public Location() {
         resetId();
         bindReachabilityAnalysis();
@@ -279,6 +281,10 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     public void setReachability(final Reachability reachability) {
         this.reachability.set(reachability);
     }
+
+    public SimpleBooleanProperty getIsLocked() {return isLocked;}
+
+    public void setIsLocked(final boolean bool) {isLocked.setValue(bool); }
 
     @Override
     public JsonObject serialize() {
