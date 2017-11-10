@@ -30,7 +30,8 @@ public class MenuElement {
 
     public MenuElement(final String s, final int width){
         createLabel(s, width);
-        item = label;
+        container.getChildren().addAll(spacer, label);
+        item = container;
     }
 
     public MenuElement(final String s, final Consumer<MouseEvent> mouseEventConsumer, final int width) {
