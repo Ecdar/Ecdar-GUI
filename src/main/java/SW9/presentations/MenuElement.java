@@ -18,7 +18,7 @@ import java.util.function.Consumer;
 import static javafx.scene.paint.Color.TRANSPARENT;
 import static javafx.scene.paint.Color.WHITE;
 
-public class MenuItem {
+public class MenuElement {
 
     private final SimpleBooleanProperty canIShowSubMenu = new SimpleBooleanProperty(false);
     StackPane clickListenerFix;
@@ -26,19 +26,33 @@ public class MenuItem {
     private Node item;
     private Label label;
     private JFXRippler rippler;
-    FontIcon icon;
-    ObservableBooleanValue isDisabled = new SimpleBooleanProperty(true);
+    private Region spacer;
+    private HBox container;
+    private FontIcon icon;
+    private ObservableBooleanValue isDisabled = new SimpleBooleanProperty(false);
 
-    public MenuItem(final String s, final Consumer<MouseEvent> mouseEventConsumer, final int width) {
+    public MenuElement(final String s, final Consumer<MouseEvent> mouseEventConsumer, final int width) {
         createLabel(s, width);
+
+        container.getChildren().addAll(spacer, label);
+
+        clickListenerFix = new StackPane(container);
+
         createRippler(mouseEventConsumer);
+
         item = rippler;
     }
 
-    public MenuItem(final String s, final String iconString, final Consumer<MouseEvent> mouseEventConsumer, final int width){
+    public MenuElement(final String s, final String iconString, final Consumer<MouseEvent> mouseEventConsumer, final int width){
         createLabel(s, width);
         addIcon(iconString);
+
+        container.getChildren().addAll(spacer, icon, label);
+
+        clickListenerFix = new StackPane(container);
+
         createRippler(mouseEventConsumer);
+
         item = rippler;
     }
 
@@ -81,35 +95,17 @@ public class MenuItem {
 
             mouseEventConsumer.accept(event);
         });
-
-        final Consumer<Boolean> updateTransparency = (disabled) -> {
-            if (disabled) {
-                rippler.setRipplerFill(WHITE);
-                clickListenerFix.setOpacity(0.5);
-            } else {
-                rippler.setOpacity(1);
-                rippler.setRipplerFill(Color.GREY_BLUE.getColor(Color.Intensity.I300));
-                clickListenerFix.setOpacity(1);
-            }
-        };
-
-        isDisabled.addListener((obs, oldDisabled, newDisabled) -> updateTransparency.accept(newDisabled));
-        updateTransparency.accept(isDisabled.get());
     }
 
     private void createLabel(String s, int width){
-        final Label label = new Label(s);
+        label = new Label(s);
         label.getStyleClass().add("body2");
 
-        final HBox container = new HBox();
+        container = new HBox();
         container.setStyle("-fx-padding: 8 16 8 16;");
 
-        final Region spacer = new Region();
+        spacer = new Region();
         spacer.setMinWidth(8);
-
-        container.getChildren().addAll(spacer, label);
-
-        clickListenerFix = new StackPane(container);
     }
 
     private void addIcon(String icon_string){
@@ -124,7 +120,21 @@ public class MenuItem {
     }
 
     public void setDisableable(BooleanProperty bool) {
+
         isDisabled = bool;
+        final Consumer<Boolean> updateTransparency = (disabled) -> {
+            if (disabled) {
+                rippler.setRipplerFill(WHITE);
+                clickListenerFix.setOpacity(0.5);
+            } else {
+                rippler.setOpacity(1);
+                rippler.setRipplerFill(Color.GREY_BLUE.getColor(Color.Intensity.I300));
+                clickListenerFix.setOpacity(1);
+            }
+        };
+
+        isDisabled.addListener((obs, oldDisabled, newDisabled) -> updateTransparency.accept(newDisabled));
+        updateTransparency.accept(isDisabled.get());
     }
 
     public void setToogleable(BooleanProperty isToggled){

@@ -3,14 +3,12 @@ package SW9.presentations;
 import SW9.utility.colors.Color;
 import SW9.utility.colors.EnabledColor;
 import com.jfoenix.controls.JFXPopup;
-import com.jfoenix.controls.JFXRippler;
 import javafx.animation.ScaleTransition;
 import javafx.beans.binding.When;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableBooleanValue;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -26,8 +24,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import static SW9.utility.colors.EnabledColor.enabledColors;
-import static javafx.scene.paint.Color.TRANSPARENT;
-import static javafx.scene.paint.Color.WHITE;
 
 public class DropDownMenu {
 
@@ -103,15 +99,16 @@ public class DropDownMenu {
     }
 
     public void addClickableListElement(final String s, final Consumer<MouseEvent> mouseEventConsumer) {
-        MenuItem element = new MenuItem(s, mouseEventConsumer, width);
+        MenuElement element = new MenuElement(s, mouseEventConsumer, width);
         list.getChildren().add(element.getItem());
     }
 
     public void addTogglableListElement(final String s, final ObservableBooleanValue isToggled, final Consumer<MouseEvent> mouseEventConsumer) {
-        MenuItem element = new MenuItem(s, "gmi-done", mouseEventConsumer, width);
+        MenuElement element = new MenuElement(s, "gmi-done", mouseEventConsumer, width);
         BooleanProperty bool = new SimpleBooleanProperty();
         bool.bind(isToggled);
         element.setToogleable(bool);
+        list.getChildren().add(element.getItem());
     }
 
         /*final JFXRippler rippler = new JFXRippler(clickListenerFix);
@@ -147,7 +144,7 @@ public class DropDownMenu {
     }*/
 
     public void addClickableAndDisableableListElement(final String s, final ObservableBooleanValue isDisabled, final Consumer<MouseEvent> mouseEventConsumer) {
-        MenuItem element = new MenuItem(s, mouseEventConsumer, width);
+        MenuElement element = new MenuElement(s, mouseEventConsumer, width);
         BooleanProperty bool = new SimpleBooleanProperty();
         bool.bind(isDisabled);
         element.setDisableable(bool);
