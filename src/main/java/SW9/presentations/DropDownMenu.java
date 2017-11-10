@@ -5,13 +5,11 @@ import SW9.utility.colors.EnabledColor;
 import com.jfoenix.controls.JFXPopup;
 import javafx.animation.ScaleTransition;
 import javafx.beans.binding.When;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableBooleanValue;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Circle;
@@ -35,9 +33,7 @@ public class DropDownMenu {
     private final JFXPopup popup;
     private final SimpleBooleanProperty isHoveringSubMenu = new SimpleBooleanProperty(false);
     private final SimpleBooleanProperty isHoveringMenu = new SimpleBooleanProperty(false);
-    private final SimpleBooleanProperty showSubMenu = new SimpleBooleanProperty(false);
     private final SimpleBooleanProperty canIShowSubMenu = new SimpleBooleanProperty(false);
-    private StackPane subMenuContent;
 
     public DropDownMenu(final Pane container, final Node source, final int width, final boolean closeOnMouseExit) {
         this.width = width;
@@ -87,15 +83,8 @@ public class DropDownMenu {
     }
 
     public void addListElement(final String s) {
-        final Label label = new Label(s);
-
-        label.setStyle("-fx-padding: 8 16 8 16;");
-        label.getStyleClass().add("body2");
-        label.setMinWidth(width);
-
-        list.getChildren().add(label);
-
-        label.setOnMouseEntered(event -> canIShowSubMenu.set(false));
+        MenuElement element = new MenuElement(s, width);
+        list.getChildren().add(element.getItem());
     }
 
     public void addClickableListElement(final String s, final Consumer<MouseEvent> mouseEventConsumer) {
@@ -105,49 +94,20 @@ public class DropDownMenu {
 
     public void addTogglableListElement(final String s, final ObservableBooleanValue isToggled, final Consumer<MouseEvent> mouseEventConsumer) {
         MenuElement element = new MenuElement(s, "gmi-done", mouseEventConsumer, width);
-        BooleanProperty bool = new SimpleBooleanProperty();
-        bool.bind(isToggled);
-        element.setToogleable(bool);
+        element.setToggleable(isToggled);
         list.getChildren().add(element.getItem());
     }
 
-        /*final JFXRippler rippler = new JFXRippler(clickListenerFix);
-        rippler.setRipplerFill(Color.GREY_BLUE.getColor(Color.Intensity.I300));
-
-        rippler.setOnMouseEntered(event -> {
-            // Set the background to a light grey
-            container.setBackground(new Background(new BackgroundFill(
-                    Color.GREY.getColor(Color.Intensity.I200),
-                    CornerRadii.EMPTY,
-                    Insets.EMPTY
-            )));
-
-            canIShowSubMenu.set(false);
-        });
-
-        rippler.setOnMouseExited(event -> {
-            // Set the background to be transparent
-            container.setBackground(new Background(new BackgroundFill(
-                    TRANSPARENT,
-                    CornerRadii.EMPTY,
-                    Insets.EMPTY
-            )));
-        });
-
-        // When the rippler is pressed, run the provided consumer.
-        clickListenerFix.setOnMousePressed(event -> {
-            mouseEventConsumer.accept(event);
-            event.consume();
-        });
-
-        list.getChildren().add(rippler);
-    }*/
+    public void addTogglableAndDisableableListElement(final String s, final ObservableBooleanValue isToggled, final ObservableBooleanValue isDisableable, final Consumer<MouseEvent> mouseEventConsumer) {
+        MenuElement element = new MenuElement(s, "gmi-done", mouseEventConsumer, width);
+        element.setToggleable(isToggled);
+        element.setDisableable(isDisableable);
+        list.getChildren().add(element.getItem());
+    }
 
     public void addClickableAndDisableableListElement(final String s, final ObservableBooleanValue isDisabled, final Consumer<MouseEvent> mouseEventConsumer) {
         MenuElement element = new MenuElement(s, mouseEventConsumer, width);
-        BooleanProperty bool = new SimpleBooleanProperty();
-        bool.bind(isDisabled);
-        element.setDisableable(bool);
+        element.setDisableable(isDisabled);
         list.getChildren().add(element.getItem());
     }
 

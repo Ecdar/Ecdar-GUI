@@ -175,7 +175,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
         final BooleanProperty isUrgent = new SimpleBooleanProperty(false);
         isUrgent.bind(getLocation().urgencyProperty().isEqualTo(Location.Urgency.URGENT));
-        dropDownMenu.addTogglableListElement("Urgent", isUrgent, event -> {
+        dropDownMenu.addTogglableAndDisableableListElement("Urgent", isUrgent, getLocation().getIsLocked(), event -> {
             if (isUrgent.get()) {
                 getLocation().setUrgency(Location.Urgency.NORMAL);
             } else {
