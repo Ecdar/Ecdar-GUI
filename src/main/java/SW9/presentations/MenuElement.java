@@ -19,10 +19,7 @@ import static javafx.scene.paint.Color.TRANSPARENT;
 import static javafx.scene.paint.Color.WHITE;
 
 public class MenuElement {
-
-    private final SimpleBooleanProperty canIShowSubMenu = new SimpleBooleanProperty(false);
-    StackPane clickListenerFix;
-
+    private StackPane clickListenerFix;
     private Node item;
     private Label label;
     private JFXRippler rippler;
@@ -31,9 +28,15 @@ public class MenuElement {
     private FontIcon icon;
     private ObservableBooleanValue isDisabled = new SimpleBooleanProperty(false);
 
+    public MenuElement(final String s, final int width){
+        createLabel(s, width);
+        item = label;
+    }
+
     public MenuElement(final String s, final Consumer<MouseEvent> mouseEventConsumer, final int width) {
         createLabel(s, width);
 
+        spacer.setMinWidth(28);
         container.getChildren().addAll(spacer, label);
 
         clickListenerFix = new StackPane(container);
@@ -47,7 +50,7 @@ public class MenuElement {
         createLabel(s, width);
         addIcon(iconString);
 
-        container.getChildren().addAll(spacer, icon, label);
+        container.getChildren().addAll(icon ,spacer, label);
 
         clickListenerFix = new StackPane(container);
 
@@ -68,8 +71,6 @@ public class MenuElement {
                     CornerRadii.EMPTY,
                     Insets.EMPTY
             )));
-
-            canIShowSubMenu.set(false);
         });
 
         rippler.setOnMouseExited(event -> {
@@ -89,9 +90,9 @@ public class MenuElement {
                 event.consume();
                 return;
             }
-
             // If we do not do this, the method below will be called twice
             if (!(event.getTarget() instanceof StackPane)) return;
+            if (!(((StackPane)(event.getTarget())).getChildren().get(0) instanceof HBox)) return;
 
             mouseEventConsumer.accept(event);
         });
@@ -119,7 +120,7 @@ public class MenuElement {
         return item;
     }
 
-    public void setDisableable(BooleanProperty bool) {
+    public void setDisableable(ObservableBooleanValue bool) {
 
         isDisabled = bool;
         final Consumer<Boolean> updateTransparency = (disabled) -> {
@@ -137,7 +138,7 @@ public class MenuElement {
         updateTransparency.accept(isDisabled.get());
     }
 
-    public void setToogleable(BooleanProperty isToggled){
+    public void setToggleable(ObservableBooleanValue isToggled){
         icon.visibleProperty().bind(isToggled);
     }
 }
