@@ -407,9 +407,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
             root.addEventHandler(MouseEvent.MOUSE_PRESSED, mousePressed::accept);
 
-            if(newLocation.getType() == Location.Type.NORMAL) {
-                ItemDragHelper.makeDraggable(root, this::getDragBounds);
-            }
+            ItemDragHelper.makeDraggable(root, this::getDragBounds);
         });
 
 

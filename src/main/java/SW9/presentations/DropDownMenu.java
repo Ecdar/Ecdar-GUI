@@ -129,6 +129,8 @@ public class DropDownMenu {
     }
 
     public void addColorPicker(final HasColor hasColor, final BiConsumer<Color, Color.Intensity> consumer) {
+        addListElement("Color");
+
         final FlowPane flowPane = new FlowPane();
         flowPane.setStyle("-fx-padding: 0 8 0 8");
 

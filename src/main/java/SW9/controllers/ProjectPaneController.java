@@ -125,7 +125,6 @@ public class ProjectPaneController implements Initializable {
 
         // Color picker button
         if (verificationObject instanceof Component) {
-            moreInformationDropDown.addListElement("Color");
             moreInformationDropDown.addColorPicker((Component) filePresentation.getVerificationObject(),
                     ((Component) filePresentation.getVerificationObject())::dye);
 

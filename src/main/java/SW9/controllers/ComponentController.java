@@ -299,6 +299,7 @@ public class ComponentController implements Initializable {
                 newLocation.setId("U1");
 
                 final Edge inputEdge = new Edge(newLocation, EdgeStatus.INPUT);
+                inputEdge.setIsLocked(true);
                 inputEdge.setProperty(Edge.PropertyType.SYNCHRONIZATION, "*");
                 Nail inputNail1 = new Nail(newLocation.getX() - 40, newLocation.getY() - 10);
                 Nail inputNailSync = new Nail(newLocation.getX() - 60, newLocation.getY());
@@ -310,6 +311,7 @@ public class ComponentController implements Initializable {
                 inputEdge.setTargetLocation(newLocation);
 
                 final Edge outputEdge = new Edge(newLocation, EdgeStatus.OUTPUT);
+                outputEdge.setIsLocked(true);
                 outputEdge.setProperty(Edge.PropertyType.SYNCHRONIZATION, "*");
                 Nail outputNail1 = new Nail(newLocation.getX() + 40, newLocation.getY() - 10);
                 Nail outputNailSync = new Nail(newLocation.getX() + 60, newLocation.getY());
@@ -332,6 +334,34 @@ public class ComponentController implements Initializable {
                 }, "Added universal location '" + newLocation.toString() + "' to component '" + component.getName() + "'", "add-circle");
             });
 
+            contextMenu.addClickableListElement("Add Inconsistent Location", event -> {
+                contextMenu.close();
+
+                final Location newLocation = new Location();
+                newLocation.setIsLocked(true);
+                newLocation.setType(Location.Type.INCONSISTENT);
+
+                double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
+                x = Math.round(x / GRID_SIZE) * GRID_SIZE;
+                newLocation.setX(x);
+
+                double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
+                y = Math.round(y / GRID_SIZE) * GRID_SIZE;
+                newLocation.setY(y);
+
+                newLocation.setColorIntensity(component.getColorIntensity());
+                newLocation.setColor(component.getColor());
+
+                newLocation.setId("I1");
+
+                // Add a new location
+                UndoRedoStack.pushAndPerform(() -> { // Perform
+                    component.addLocation(newLocation);
+                }, () -> { // Undo
+                    component.removeLocation(newLocation);
+                }, "Added inconsistent location '" + newLocation.toString() + "' to component '" + component.getName() + "'", "add-circle");
+            });
+
             contextMenu.addSpacerElement();
 
             contextMenu.addClickableListElement("Contains deadlock?", event -> {
@@ -352,7 +382,6 @@ public class ComponentController implements Initializable {
             });
 
             contextMenu.addSpacerElement();
-            contextMenu.addListElement("Color");
             contextMenu.addColorPicker(component, component::dye);
         };
 

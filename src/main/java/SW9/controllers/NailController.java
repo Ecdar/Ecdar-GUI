@@ -75,7 +75,7 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
 
         final DropDownMenu contextMenu = new DropDownMenu(((Pane) root.getParent().getParent().getParent().getParent()), root, 230, true);
 
-        contextMenu.addClickableListElement("Delete", (mouseEvent -> {
+        contextMenu.addClickableAndDisableableListElement("Delete", getEdge().getIsLocked(), (mouseEvent -> {
             final Nail nail = getNail();
             final Edge edge = getEdge();
             final Component component = getComponent();

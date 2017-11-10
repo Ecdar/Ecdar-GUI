@@ -1,6 +1,7 @@
 package SW9.presentations;
 
 import SW9.abstractions.Component;
+import SW9.abstractions.Nail;
 import SW9.controllers.CanvasController;
 import SW9.utility.UndoRedoStack;
 import SW9.utility.colors.Color;
@@ -142,6 +143,7 @@ public class TagPresentation extends StackPane {
         });
 
         label.textProperty().bind(new When(textField.textProperty().isNotEmpty()).then(textField.textProperty()).otherwise(textField.promptTextProperty()));
+
 
     }
 
@@ -306,5 +308,10 @@ public class TagPresentation extends StackPane {
 
     public void setLocationAware(LocationAware locationAware) {
         this.locationAware.set(locationAware);
+    }
+
+    public void setDisabledText(boolean bool){
+        final JFXTextField textField = (JFXTextField) lookup("#textField");
+        textField.setDisable(true);
     }
 }

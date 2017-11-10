@@ -415,7 +415,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                             status = "Change to input edge";
                         }
 
-                        dropDownMenu.addClickableListElement(status, mouseEvent -> {
+                        dropDownMenu.addClickableAndDisableableListElement(status, getEdge().getIsLocked(), mouseEvent -> {
                             UndoRedoStack.pushAndPerform(
                                     () -> switchEdgeStatus(),
                                     () -> switchEdgeStatus(),
@@ -433,7 +433,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
 
                         dropDownMenu.addSpacerElement();
 
-                        dropDownMenu.addClickableListElement("Add Nail", mouseEvent -> {
+                        dropDownMenu.addClickableAndDisableableListElement("Add Nail", getEdge().getIsLocked(), mouseEvent -> {
                             final double nailX = Math.round((DropDownMenu.x - getComponent().getX()) / GRID_SIZE) * GRID_SIZE;
                             final double nailY = Math.round((DropDownMenu.y - getComponent().getY()) / GRID_SIZE) * GRID_SIZE;
                             final Nail newNail = new Nail(nailX, nailY);
@@ -448,7 +448,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                         });
                         dropDownMenu.addSpacerElement();
 
-                        dropDownMenu.addClickableListElement("Delete", mouseEvent -> {
+                        dropDownMenu.addClickableAndDisableableListElement("Delete",getEdge().getIsLocked(), mouseEvent -> {
                             dropDownMenu.close();
                             UndoRedoStack.pushAndPerform(() -> { // Perform
                                 getComponent().removeEdge(getEdge());
@@ -499,7 +499,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
             if (nail.getPropertyType().equals(Edge.PropertyType.SYNCHRONIZATION)) data[Edge.PropertyType.SYNCHRONIZATION.getI()] = i;
             if (nail.getPropertyType().equals(Edge.PropertyType.UPDATE)) data[Edge.PropertyType.UPDATE.getI()] = i;
 
-            if (nail.getPropertyType().equals(type)) {
+            if ((getEdge().getIsLocked().getValue()) || nail.getPropertyType().equals(type)) {
                 isDisabled.set(true);
             }
 
