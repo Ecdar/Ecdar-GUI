@@ -15,7 +15,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.scene.Group;
 import javafx.scene.control.Label;
-import javafx.scene.effect.ColorInput;
 import javafx.scene.shape.Line;
 
 import java.io.IOException;

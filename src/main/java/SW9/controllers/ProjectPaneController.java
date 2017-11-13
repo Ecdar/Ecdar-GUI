@@ -69,7 +69,6 @@ public class ProjectPaneController implements Initializable {
                             CanvasController.setActiveVerificationObject(null);
                         }
                     }
-
                     // Sort the children alphabetically
                     sortPresentations();
                 }
@@ -171,23 +170,7 @@ public class ProjectPaneController implements Initializable {
             event.consume();
             CanvasController.setActiveVerificationObject(component);
         });
-
         component.nameProperty().addListener(obs -> sortPresentations());
-
-        component.isMainProperty().addListener((obs, oldIsMain, newIsMain) -> {
-            final Component mainComponent = Ecdar.getProject().getMainComponent();
-
-            if (component.equals(mainComponent) && !newIsMain) {
-                Ecdar.getProject().setMainComponent(null);
-                return;
-            }
-
-            if (mainComponent != null && newIsMain) {
-                mainComponent.setIsMain(false);
-            }
-
-            Ecdar.getProject().setMainComponent(component);
-        });
     }
 
     private void handleRemovedComponent(final Component component) {

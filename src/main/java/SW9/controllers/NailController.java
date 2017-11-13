@@ -4,10 +4,7 @@ import SW9.Debug;
 import SW9.abstractions.Component;
 import SW9.abstractions.Edge;
 import SW9.abstractions.Nail;
-import SW9.presentations.CanvasPresentation;
-import SW9.presentations.ComponentPresentation;
-import SW9.presentations.DropDownMenu;
-import SW9.presentations.TagPresentation;
+import SW9.presentations.*;
 import SW9.utility.UndoRedoStack;
 import SW9.utility.colors.Color;
 import SW9.utility.helpers.ItemDragHelper;
@@ -188,10 +185,10 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
 
     @Override
     public ItemDragHelper.DragBounds getDragBounds() {
-        final ObservableDoubleValue minX = new SimpleDoubleProperty(CanvasPresentation.GRID_SIZE);
-        final ObservableDoubleValue maxX = getComponent().widthProperty().subtract(CanvasPresentation.GRID_SIZE);
-        final ObservableDoubleValue minY = new SimpleDoubleProperty(ComponentPresentation.TOOL_BAR_HEIGHT + CanvasPresentation.GRID_SIZE);
-        final ObservableDoubleValue maxY = getComponent().heightProperty().subtract(CanvasPresentation.GRID_SIZE);
+        final ObservableDoubleValue minX = new SimpleDoubleProperty(Grid.GRID_SIZE);
+        final ObservableDoubleValue maxX = getComponent().widthProperty().subtract(Grid.GRID_SIZE);
+        final ObservableDoubleValue minY = new SimpleDoubleProperty(ComponentPresentation.TOOL_BAR_HEIGHT + Grid.GRID_SIZE);
+        final ObservableDoubleValue maxY = getComponent().heightProperty().subtract(Grid.GRID_SIZE);
 
         return new ItemDragHelper.DragBounds(minX, maxX, minY, maxY);
     }

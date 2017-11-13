@@ -23,14 +23,12 @@ import java.io.IOException;
 import java.net.URL;
 
 public class CanvasPresentation extends Pane implements MouseTrackable {
-
-    public static final int GRID_SIZE = 10;
     public static MouseTracker mouseTracker;
 
     private final DoubleProperty x = new SimpleDoubleProperty(0);
     private final DoubleProperty y = new SimpleDoubleProperty(0);
     private final BooleanProperty gridOn = new SimpleBooleanProperty(false);
-    private final Grid grid = new Grid(GRID_SIZE);
+    private final Grid grid = new Grid(Grid.GRID_SIZE);
     private final CanvasController controller;
 
     public CanvasPresentation() {

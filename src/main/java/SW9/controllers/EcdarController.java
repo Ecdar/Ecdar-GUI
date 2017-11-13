@@ -21,7 +21,6 @@ import javafx.animation.Transition;
 import javafx.application.Platform;
 import javafx.beans.binding.When;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ListChangeListener;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
@@ -252,36 +251,10 @@ public class EcdarController implements Initializable {
             }));
         });
 
-        final BooleanProperty hasChanged = new SimpleBooleanProperty(false);
-
-
-
-        Ecdar.getProject().getComponents().addListener(new ListChangeListener<Component>() {
-            @Override
-            public void onChanged(final Change<? extends Component> c) {
-                if (Ecdar.getProject().getComponents().isEmpty()) {
-                    return;
-                }
-
-                if (!hasChanged.get()) {
-                    CanvasController.setActiveVerificationObject(Ecdar.getProject().getComponents().get(0));
-                    hasChanged.set(true);
-                }
-
-                if(Ecdar.serializationDone && Ecdar.getProject().getComponents().size() - 1 == 0 && Ecdar.getProject().getMainComponent() == null) {
-                    c.next();
-                    c.getAddedSubList().get(0).setIsMain(true);
-                }
-
-            }
-        });
-
         initializeTabPane();
         initializeStatusBar();
         initializeMessages();
         initializeMenuBar();
-        initializeNoMainComponentError();
-
         initializeReachabilityAnalysisThread();
 
     }
@@ -338,9 +311,9 @@ public class EcdarController implements Initializable {
                 Ecdar.getProject().getComponents().forEach(component -> {
                     // Check if we should consider this component
                     if (!component.isIncludeInPeriodicCheck()) {
-                        component.getLocationsWithInitial().forEach(location -> location.setReachability(Location.Reachability.EXCLUDED));
+                        component.getLocations().forEach(location -> location.setReachability(Location.Reachability.EXCLUDED));
                     } else {
-                        component.getLocationsWithInitial().forEach(location -> {
+                        component.getLocations().forEach(location -> {
                             final String locationReachableQuery = UPPAALDriver.getLocationReachableQuery(location, component);
                             final Thread verifyThread = UPPAALDriver.runQuery(
                                     locationReachableQuery,
@@ -402,24 +375,11 @@ public class EcdarController implements Initializable {
         });
     }
 
-    private void initializeNoMainComponentError() {
-        final CodeAnalysis.Message noMainComponentErrorMessage = new CodeAnalysis.Message("No main component specified", CodeAnalysis.MessageType.ERROR);
-
-        Ecdar.getProject().mainComponentProperty().addListener((obs, oldMain, newMain) -> {
-            if(newMain == null) {
-                CodeAnalysis.addMessage(null, noMainComponentErrorMessage);
-            } else {
-                EcdarController.runReachabilityAnalysis();
-                CodeAnalysis.removeMessage(null, noMainComponentErrorMessage);
-            }
-        });
-
-
-    }
-
-    // TODO refactor: place in different methods
     private void initializeMenuBar() {
         menuBar.setUseSystemMenuBar(true);
+
+        initializeCreateNewProjectMenuItem();
+        initializeOpenProjectMenuItem();
 
         menuBarFileSave.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN));
         menuBarFileSave.setOnAction(event -> save());
@@ -427,8 +387,91 @@ public class EcdarController implements Initializable {
         menuBarFileSaveAs.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN));
         menuBarFileSaveAs.setOnAction(event -> saveAs());
 
-        initializeCreateNewProjectMenuItem();
+        initializeFileExportAsPng();
 
+        initializeEditBalanceMenuItem();
+
+        initializeViewMenu();
+
+        menuBarHelpHelp.setOnAction(event -> Ecdar.showHelp());
+    }
+
+    /**
+     * Initialize the View menu.
+     */
+    private void initializeViewMenu() {
+        menuBarViewFilePanel.getGraphic().setOpacity(1);
+        menuBarViewFilePanel.setAccelerator(new KeyCodeCombination(KeyCode.P, KeyCodeCombination.SHORTCUT_DOWN));
+        menuBarViewFilePanel.setOnAction(event -> {
+            final BooleanProperty isOpen = Ecdar.toggleFilePane();
+            menuBarViewFilePanel.getGraphic().opacityProperty().bind(new When(isOpen).then(1).otherwise(0));
+        });
+
+        menuBarViewQueryPanel.getGraphic().setOpacity(0);
+        menuBarViewQueryPanel.setAccelerator(new KeyCodeCombination(KeyCode.G, KeyCodeCombination.SHORTCUT_DOWN));
+        menuBarViewQueryPanel.setOnAction(event -> {
+            final BooleanProperty isOpen = Ecdar.toggleQueryPane();
+            menuBarViewQueryPanel.getGraphic().opacityProperty().bind(new When(isOpen).then(1).otherwise(0));
+        });
+
+        menuBarViewGrid.getGraphic().setOpacity(1);
+        menuBarViewGrid.setAccelerator(new KeyCodeCombination(KeyCode.K, KeyCodeCombination.SHORTCUT_DOWN));
+        menuBarViewGrid.setOnAction(event -> {
+            final BooleanProperty isOn = Ecdar.toggleGrid();
+            menuBarViewGrid.getGraphic().opacityProperty().bind(new When(isOn).then(1).otherwise(0));
+        });
+    }
+
+    /**
+     * Initializes the Edit Balance menu item.
+     */
+    private void initializeEditBalanceMenuItem() {
+        menuBarEditBalance.setAccelerator(new KeyCodeCombination(KeyCode.B, KeyCombination.SHORTCUT_DOWN));
+        menuBarEditBalance.setOnAction(event -> {
+            // Map to store the previous identifiers (to undo/redo)
+            final Map<Location, String> previousIdentifiers = new HashMap<>();
+
+            UndoRedoStack.pushAndPerform(() -> { // Perform
+                // Set the counter used to generate the identifiers
+                Location.resetHiddenID();
+
+                // A list of components we have not ordered yet
+                final List<Component> missingComponents = new ArrayList<>();
+                Ecdar.getProject().getComponents().forEach(missingComponents::add);
+
+
+                // Consumer to reset the location identifier
+                final Consumer<Location> resetLocation = (location -> {
+                    previousIdentifiers.put(location, location.getId());
+                    location.resetId();
+                });
+
+                // Consumer to reset the location identifiers in a given component
+                final Consumer<Component> resetLocationsInComponent = (component) -> {
+                    // Check if we already balanced this component
+                    if(!missingComponents.contains(component)) return;
+
+                    // Set the identifiers for the locations
+                    component.getLocations().forEach(resetLocation);
+
+                    // We are now finished with this component, remove it from the list
+                    missingComponents.remove(component);
+                };
+
+                // If we still need to balance some component (they might not be used) then do it now
+                while(!missingComponents.isEmpty()) {
+                    resetLocationsInComponent.accept(missingComponents.get(0));
+                }
+            }, () -> { // Undo
+                previousIdentifiers.forEach(Location::setId);
+            }, "Balanced location identifiers", "shuffle");
+        });
+    }
+
+    /**
+     * Initializes the open project menu item.
+     */
+    private void initializeOpenProjectMenuItem() {
         menuBarFileOpenProject.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.SHORTCUT_DOWN));
         menuBarFileOpenProject.setOnAction(event -> {
             // Dialog title
@@ -455,78 +498,19 @@ public class EcdarController implements Initializable {
                 }
             }
         });
+    }
 
-        initializeFileExportAsPng();
-
-        menuBarViewFilePanel.getGraphic().setOpacity(1);
-        menuBarViewFilePanel.setAccelerator(new KeyCodeCombination(KeyCode.P, KeyCodeCombination.SHORTCUT_DOWN));
-        menuBarViewFilePanel.setOnAction(event -> {
-            final BooleanProperty isOpen = Ecdar.toggleFilePane();
-            menuBarViewFilePanel.getGraphic().opacityProperty().bind(new When(isOpen).then(1).otherwise(0));
-        });
-
-        menuBarViewQueryPanel.getGraphic().setOpacity(0);
-        menuBarViewQueryPanel.setAccelerator(new KeyCodeCombination(KeyCode.G, KeyCodeCombination.SHORTCUT_DOWN));
-        menuBarViewQueryPanel.setOnAction(event -> {
-            final BooleanProperty isOpen = Ecdar.toggleQueryPane();
-            menuBarViewQueryPanel.getGraphic().opacityProperty().bind(new When(isOpen).then(1).otherwise(0));
-        });
-
-        menuBarViewGrid.getGraphic().setOpacity(1);
-        menuBarViewGrid.setAccelerator(new KeyCodeCombination(KeyCode.K, KeyCodeCombination.SHORTCUT_DOWN));
-        menuBarViewGrid.setOnAction(event -> {
-            final BooleanProperty isOn = Ecdar.toggleGrid();
-            menuBarViewGrid.getGraphic().opacityProperty().bind(new When(isOn).then(1).otherwise(0));
-        });
-
-        menuBarHelpHelp.setOnAction(event -> Ecdar.showHelp());
-
-        menuBarEditBalance.setAccelerator(new KeyCodeCombination(KeyCode.B, KeyCombination.SHORTCUT_DOWN));
-        menuBarEditBalance.setOnAction(event -> {
-            // Map to store the previous identifiers (to undo/redo)
-            final Map<Location, String> previousIdentifiers = new HashMap<>();
-
-            UndoRedoStack.pushAndPerform(() -> { // Perform
-                // Set the counter used to generate the identifiers
-                Location.resetHiddenID();
-
-                // A list of components we have not ordered yet
-                final List<Component> missingComponents = new ArrayList<>();
-                Ecdar.getProject().getComponents().forEach(missingComponents::add);
-
-
-                // Consumer to reset the location identifier
-                final Consumer<Location> resetLocation = (location -> {
-                    previousIdentifiers.put(location, location.getId());
-                    location.resetId();
-                });
-
-                // Consumer to reset the location identifiers in a given component
-                final Consumer<Component> resetLocationsInComponent = (component) -> {
-                    // Check if we already balanced this component
-                    if(!missingComponents.contains(component)) return;
-
-                    // Set the identifier for the initial location
-                    resetLocation.accept(component.getInitialLocation());
-
-                    // Set the identifiers for the rest of the locations
-                    component.getLocations().forEach(resetLocation);
-
-                    // We are now finished with this component, remove it from the list
-                    missingComponents.remove(component);
-                };
-
-                // Balance the identifiers in the main component
-                resetLocationsInComponent.accept(Ecdar.getProject().getMainComponent());
-
-                // If we still need to balance some component (they might not be used) then do it now
-                while(!missingComponents.isEmpty()) {
-                    resetLocationsInComponent.accept(missingComponents.get(0));
-                }
-            }, () -> { // Undo
-                previousIdentifiers.forEach(Location::setId);
-            }, "Balanced location identifiers", "shuffle");
-        });
+    /**
+     * Saves the project to the {@see Ecdar#projectDirectory} path.
+     * This include making directories, converting project files (components and queries)
+     * into Json formatted files.
+     */
+    public void save() {
+        if (Ecdar.projectDirectory.isNull().get()) {
+            saveAs();
+        } else {
+            save(new File(Ecdar.projectDirectory.get()));
+        }
     }
 
     /**
@@ -539,29 +523,22 @@ public class EcdarController implements Initializable {
         filePicker.setInitialDirectory(new File(System.getProperty("user.home")));
 
         final File file = filePicker.showSaveDialog(root.getScene().getWindow());
-        if (file != null){
+        if (file != null) {
             Ecdar.projectDirectory.setValue(file.getPath());
-            save();
+            save(file);
         } else {
             Ecdar.showToast("The project was not saved");
         }
     }
 
-    /***
-     * Saves the project to the {@see Ecdar#projectDirectory} path.
-     * This include making directories, converting project files (components and queries)
-     * into Json formatted files.
+    /**
+     * Save project at a given directory.
+     * @param directory directory to save at
      */
-    // TODO Serialize in Project
-    public void save() {
-        if (Ecdar.projectDirectory.isNull().get()) {
-            saveAs();
-            return;
-        }
-
+    private static void save(final File directory) {
         try {
-            Ecdar.getProject().serialize();
-        } catch (IOException e) {
+            Ecdar.getProject().serialize(directory);
+        } catch (final IOException e) {
             Ecdar.showToast("Could not save project: " + e.getMessage());
             e.printStackTrace();
         }
@@ -1001,28 +978,7 @@ public class EcdarController implements Initializable {
         // Run through the selected elements and look for something that we can delete
         SelectHelper.getSelectedElements().forEach(selectable -> {
             if (selectable instanceof LocationController) {
-                final Component component = ((LocationController) selectable).getComponent();
-                final Location location = ((LocationController) selectable).getLocation();
-
-                final Location initialLocation = component.getInitialLocation();
-
-                if (location.getId().equals(initialLocation.getId())) {
-                    ((LocationPresentation) ((LocationController) selectable).root).shake();
-                    return; // Do not delete initial location
-                }
-
-                final List<Edge> relatedEdges = component.getRelatedEdges(location);
-
-                UndoRedoStack.pushAndPerform(() -> { // Perform
-                    // Remove the location
-                    component.getLocations().remove(location);
-                    relatedEdges.forEach(component::removeEdge);
-                }, () -> { // Undo
-                    // Re-all the location
-                    component.getLocations().add(location);
-                    relatedEdges.forEach(component::addEdge);
-
-                }, String.format("Deleted %s", selectable.toString()), "delete");
+                ((LocationController) selectable).tryDelete();
             } else if (selectable instanceof EdgeController) {
                 final Component component = ((EdgeController) selectable).getComponent();
                 final Edge edge = ((EdgeController) selectable).getEdge();
@@ -1137,11 +1093,9 @@ public class EcdarController implements Initializable {
         if (text != null) {
             _queryTextResult.setText(text);
         }
-
         if (query != null) {
             _queryTextQuery.setText(query.getQuery());
         }
-
         _queryDialog.show();
     }
 }

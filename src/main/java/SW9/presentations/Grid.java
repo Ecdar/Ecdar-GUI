@@ -7,7 +7,7 @@ import javafx.scene.shape.Line;
 import java.util.ArrayList;
 
 public class Grid extends Parent {
-
+    public static final int GRID_SIZE = 10;
     private final ArrayList<Line> horizontalLines = new ArrayList<>();
     private final ArrayList<Line> verticalLines = new ArrayList<>();
 
@@ -90,5 +90,14 @@ public class Grid extends Parent {
             });
         });
 
+    }
+
+    /**
+     * Snap to the grid.
+     * @param raw the raw value
+     * @return the value after being snapped
+     */
+    public static double snap(final double raw) {
+        return Math.round(raw / GRID_SIZE) * GRID_SIZE;
     }
 }

@@ -1,0 +1,93 @@
+{
+  "name": "Sender",
+  "declarations": "",
+  "locations": [
+    {
+      "id": "L0",
+      "nickname": "",
+      "invariant": "",
+      "type": "NORMAL",
+      "urgency": "NORMAL",
+      "x": 260.0,
+      "y": 160.0,
+      "color": "9",
+      "nickname_x": 30.0,
+      "nickname_y": -10.0,
+      "invariant_x": 30.0,
+      "invariant_y": 10.0
+    },
+    {
+      "id": "L1",
+      "nickname": "",
+      "invariant": "",
+      "type": "INITIAL",
+      "urgency": "NORMAL",
+      "x": 160.0,
+      "y": 250.0,
+      "color": "9",
+      "nickname_x": 30.0,
+      "nickname_y": -10.0,
+      "invariant_x": 30.0,
+      "invariant_y": 10.0
+    }
+  ],
+  "edges": [
+    {
+      "source_location": "L0",
+      "target_location": "L0",
+      "status": "OUTPUT",
+      "select": "",
+      "guard": "",
+      "update": "",
+      "sync": "c!",
+      "nails": [
+        {
+          "x": 370.0,
+          "y": 120.0,
+          "property_type": "NONE",
+          "property_x": 0.0,
+          "property_y": 0.0
+        },
+        {
+          "x": 310.0,
+          "y": 100.0,
+          "property_type": "SYNCHRONIZATION",
+          "property_x": 10.0,
+          "property_y": -10.0
+        },
+        {
+          "x": 270.0,
+          "y": 80.0,
+          "property_type": "NONE",
+          "property_x": 0.0,
+          "property_y": 0.0
+        }
+      ]
+    },
+    {
+      "source_location": "L1",
+      "target_location": "L0",
+      "status": "OUTPUT",
+      "select": "",
+      "guard": "",
+      "update": "",
+      "sync": "c!",
+      "nails": [
+        {
+          "x": 230.0,
+          "y": 210.0,
+          "property_type": "SYNCHRONIZATION",
+          "property_x": 10.0,
+          "property_y": -10.0
+        }
+      ]
+    }
+  ],
+  "description": "",
+  "x": 5.0,
+  "y": 5.0,
+  "width": 450.0,
+  "height": 600.0,
+  "color": "9",
+  "include_in_periodic_check": true
+}

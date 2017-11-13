@@ -1,0 +1,100 @@
+{
+  "name": "Receiver",
+  "declarations": "",
+  "locations": [
+    {
+      "id": "L3",
+      "nickname": "",
+      "invariant": "",
+      "type": "INITIAL",
+      "urgency": "NORMAL",
+      "x": 160.0,
+      "y": 200.0,
+      "color": "5",
+      "nickname_x": 30.0,
+      "nickname_y": -10.0,
+      "invariant_x": 30.0,
+      "invariant_y": 10.0
+    },
+    {
+      "id": "L4",
+      "nickname": "",
+      "invariant": "",
+      "type": "NORMAL",
+      "urgency": "NORMAL",
+      "x": 250.0,
+      "y": 160.0,
+      "color": "5",
+      "nickname_x": 30.0,
+      "nickname_y": -10.0,
+      "invariant_x": 30.0,
+      "invariant_y": 10.0
+    }
+  ],
+  "edges": [
+    {
+      "source_location": "L3",
+      "target_location": "L4",
+      "status": "INPUT",
+      "select": "",
+      "guard": "",
+      "update": "",
+      "sync": "c?",
+      "nails": [
+        {
+          "x": 310.0,
+          "y": 230.0,
+          "property_type": "NONE",
+          "property_x": 0.0,
+          "property_y": 0.0
+        },
+        {
+          "x": 290.0,
+          "y": 210.0,
+          "property_type": "SYNCHRONIZATION",
+          "property_x": 10.0,
+          "property_y": -10.0
+        }
+      ]
+    },
+    {
+      "source_location": "L4",
+      "target_location": "L4",
+      "status": "INPUT",
+      "select": "",
+      "guard": "",
+      "update": "",
+      "sync": "c?",
+      "nails": [
+        {
+          "x": 320.0,
+          "y": 110.0,
+          "property_type": "NONE",
+          "property_x": 0.0,
+          "property_y": 0.0
+        },
+        {
+          "x": 280.0,
+          "y": 100.0,
+          "property_type": "SYNCHRONIZATION",
+          "property_x": 10.0,
+          "property_y": -10.0
+        },
+        {
+          "x": 240.0,
+          "y": 90.0,
+          "property_type": "NONE",
+          "property_x": 0.0,
+          "property_y": 0.0
+        }
+      ]
+    }
+  ],
+  "description": "",
+  "x": 5.0,
+  "y": 5.0,
+  "width": 450.0,
+  "height": 600.0,
+  "color": "5",
+  "include_in_periodic_check": true
+}

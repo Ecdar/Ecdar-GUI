@@ -11,10 +11,6 @@ import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import java.util.function.Consumer;
-
-import static SW9.presentations.CanvasPresentation.GRID_SIZE;
-
 public class Edge implements Serializable, Nearable {
 
     private static final String SOURCE_LOCATION = "source_location";
@@ -248,12 +244,8 @@ public class Edge implements Serializable, Nearable {
     public JsonObject serialize() {
         final JsonObject result = new JsonObject();
 
-        if (getSourceLocation() != null) {
-            result.addProperty(SOURCE_LOCATION, getSourceLocation().getId());
-        }
-        if (getTargetLocation() != null) {
-            result.addProperty(TARGET_LOCATION, getTargetLocation().getId());
-        }
+        result.addProperty(SOURCE_LOCATION, getSourceLocation().getId());
+        result.addProperty(TARGET_LOCATION, getTargetLocation().getId());
 
         result.addProperty(STATUS, status.toString());
         result.addProperty(SELECT, getSelect());
@@ -275,21 +267,15 @@ public class Edge implements Serializable, Nearable {
     }
 
     public void deserialize(final JsonObject json, final Component component) {
-        // Find the initial location of the component of the edge
-        final Location initialLocation = component.getInitialLocation();
-
-        // Sets a location to be either source or target location if the location matches the json content
-        final Consumer<Location> setFromAndToLocationIfMatches = (location) -> {
-            if (json.get(SOURCE_LOCATION) != null && location.getId().equals(json.getAsJsonPrimitive(SOURCE_LOCATION).getAsString())) {
-                setSourceLocation(location);
+        for (final Location loc : component.getLocations()) {
+            // Sets a location to be either source or target location if the location matches the json content
+            if (loc.getId().equals(json.getAsJsonPrimitive(SOURCE_LOCATION).getAsString())) {
+                setSourceLocation(loc);
             }
-            if (json.get(TARGET_LOCATION) != null && location.getId().equals(json.getAsJsonPrimitive(TARGET_LOCATION).getAsString())) {
-                setTargetLocation(location);
+            if (loc.getId().equals(json.getAsJsonPrimitive(TARGET_LOCATION).getAsString())) {
+                setTargetLocation(loc);
             }
-        };
-
-        component.getLocations().forEach(setFromAndToLocationIfMatches);
-        setFromAndToLocationIfMatches.accept(initialLocation);
+        }
 
         status = EdgeStatus.valueOf(json.getAsJsonPrimitive(STATUS).getAsString());
 

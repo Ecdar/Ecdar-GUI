@@ -227,24 +227,17 @@ public class Ecdar extends Application {
         // Generate all component presentations by making them the active component in the view one by one
         Component initialShownComponent = null;
         for (final Component component : Ecdar.getProject().getComponents()) {
-            // The first component should be shown if there is no main
+            // The first component should be shown
             if (initialShownComponent == null) {
                 initialShownComponent = component;
             }
-
-            // If the component is the main show that one
-            if (component.isIsMain()) {
-                initialShownComponent = component;
-            }
-
             CanvasController.setActiveVerificationObject(component);
         }
 
-        // If we found a component (preferably main) set that as active
+        // If we found a component set that as active
         if (initialShownComponent != null) {
             CanvasController.setActiveVerificationObject(initialShownComponent);
         }
-
         serializationDone = true;
     }
 

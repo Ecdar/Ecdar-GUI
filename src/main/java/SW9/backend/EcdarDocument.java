@@ -93,11 +93,6 @@ class EcdarDocument {
             addLocationsToMaps(ecdarLocation, xmlLocation);
         }
 
-        // Add the initial location to the template
-        final Location ecdarInitialLocation = component.getInitialLocation();
-        final com.uppaal.model.core2.Location xmlInitialLocation = addLocation(template, ecdarInitialLocation);
-        addLocationsToMaps(ecdarInitialLocation, xmlInitialLocation);
-
         for (final Edge ecdarEdge : component.getEdges()) {
             // Draw edges that are purely location to location edges
             if (ecdarEdge.getSourceLocation() != null && ecdarEdge.getTargetLocation() != null) {

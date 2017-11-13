@@ -1,6 +1,6 @@
 package SW9.utility.mouse;
 
-import SW9.presentations.CanvasPresentation;
+import SW9.presentations.Grid;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -30,7 +30,7 @@ public class MouseTracker {
 
         @Override
         protected double computeValue() {
-            return xProperty().get() - (xProperty().get() % CanvasPresentation.GRID_SIZE) + CanvasPresentation.GRID_SIZE * 0.5;
+            return xProperty().get() - (xProperty().get() % Grid.GRID_SIZE) + Grid.GRID_SIZE * 0.5;
         }
     };
     private final DoubleBinding gridY = new DoubleBinding() {
@@ -40,7 +40,7 @@ public class MouseTracker {
 
         @Override
         protected double computeValue() {
-            return yProperty().get() - (yProperty().get() % CanvasPresentation.GRID_SIZE) + CanvasPresentation.GRID_SIZE * 0.5;
+            return yProperty().get() - (yProperty().get() % Grid.GRID_SIZE) + Grid.GRID_SIZE * 0.5;
         }
     };
 

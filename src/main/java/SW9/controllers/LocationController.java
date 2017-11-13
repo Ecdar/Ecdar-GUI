@@ -31,7 +31,6 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Path;
@@ -41,7 +40,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.function.Consumer;
 
-import static SW9.presentations.CanvasPresentation.GRID_SIZE;
+import static SW9.presentations.Grid.GRID_SIZE;
 
 public class LocationController implements Initializable, SelectHelper.ItemSelectable, Nudgeable {
 
@@ -49,7 +48,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
     private final ObjectProperty<Location> location = new SimpleObjectProperty<>();
     private final ObjectProperty<Component> component = new SimpleObjectProperty<>();
-    public Group root;
+    public LocationPresentation root;
 
     public Path notCommittedShape;
     public Rectangle committedShape;
@@ -154,6 +153,22 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                 }
         );
 
+        // For when non-initial
+        dropDownMenu.addClickableAndDisableableListElement("Make initial",
+                getLocation().typeProperty().isEqualTo(Location.Type.INITIAL), // disable if already initial
+                event -> {
+                    final Location previousInitLoc = getComponent().getInitialLocation();
+
+                    UndoRedoStack.pushAndPerform(() -> { // Perform
+                        getComponent().setInitialLocation(getLocation());
+                    }, () -> { // Undo
+                        getComponent().setInitialLocation(previousInitLoc);
+                    }, String.format("Made %s initial", location), "initial");
+
+                    dropDownMenu.close();
+                }
+        );
+
         dropDownMenu.addSpacerElement();
 
 
@@ -193,28 +208,39 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
             getLocation().setColor(color);
         });
 
-        if(!getLocation().getType().equals(Location.Type.INITIAL)) {
-            dropDownMenu.addSpacerElement();
+        dropDownMenu.addSpacerElement();
 
-            dropDownMenu.addClickableListElement("Delete", event -> {
-                final Component component = getComponent();
-                final Location location = getLocation();
+        dropDownMenu.addClickableListElement("Delete", event -> {
+            tryDelete();
+            dropDownMenu.close();
+        });
+    }
 
-                final List<Edge> relatedEdges = component.getRelatedEdges(location);
+    /**
+     * Deletes this location.
+     * You are not allowed to delete the initial location.
+     * If this is an initial location, shake and give an error message instead.
+     */
+    public void tryDelete() {
+        if (getLocation().getType() == Location.Type.INITIAL) {
+            // You are not allowed to delete an initial location
+            root.shake();
+            Ecdar.showToast("You cannot delete the initial location");
+        } else {
+            final Component component = getComponent();
+            final Location location = getLocation();
 
-                UndoRedoStack.pushAndPerform(() -> { // Perform
-                    // Remove the location
-                    component.getLocations().remove(location);
-                    relatedEdges.forEach(component::removeEdge);
-                }, () -> { // Undo
-                    // Re-all the location
-                    component.getLocations().add(location);
-                    relatedEdges.forEach(component::addEdge);
+            final List<Edge> relatedEdges = component.getRelatedEdges(location);
 
-                }, String.format("Deleted %s", location), "delete");
-
-                dropDownMenu.close();
-            });
+            UndoRedoStack.pushAndPerform(() -> { // Perform
+                // Remove the location
+                component.getLocations().remove(location);
+                relatedEdges.forEach(component::removeEdge);
+            }, () -> { // Undo
+                // Re-all the location
+                component.getLocations().add(location);
+                relatedEdges.forEach(component::addEdge);
+            }, String.format("Deleted %s", location), "delete");
         }
     }
 
@@ -257,7 +283,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
             root.setLayoutY(location.getY());
             location.xProperty().bind(root.layoutXProperty());
             location.yProperty().bind(root.layoutYProperty());
-            ((LocationPresentation) root).setPlaced(true);
+            root.setPlaced(true);
         }
     }
 
@@ -279,23 +305,21 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
     @FXML
     private void locationEntered() {
-        ((LocationPresentation) root).animateLocationEntered();
+        root.animateLocationEntered();
     }
 
     @FXML
     private void locationExited() {
-        ((LocationPresentation) root).animateLocationExited();
+        root.animateLocationExited();
     }
 
     @FXML
     private void mouseEntered() {
-        final LocationPresentation locationPresentation = (LocationPresentation) this.root;
-
-        if(!locationPresentation.isInteractable()) return;
+        if(!this.root.isInteractable()) return;
 
         circle.setCursor(Cursor.HAND);
 
-        locationPresentation.animateHoverEntered();
+        this.root.animateHoverEntered();
 
         // Keybind for making location urgent
         KeyboardTracker.registerKeybind(KeyboardTracker.MAKE_LOCATION_URGENT, new Keybind(new KeyCodeCombination(KeyCode.U), () -> {
@@ -319,7 +343,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
     @FXML
     private void mouseExited() {
-        final LocationPresentation locationPresentation = (LocationPresentation) this.root;
+        final LocationPresentation locationPresentation = this.root;
         if(!locationPresentation.isInteractable()) return;
 
         circle.setCursor(Cursor.DEFAULT);
@@ -336,7 +360,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
             final Component component = getComponent();
 
-            if (((LocationPresentation) root).isPlaced()) {
+            if (root.isPlaced()) {
 
                 final Edge unfinishedEdge = component.getUnfinishedEdge();
 
@@ -364,7 +388,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                     }
                     // Otherwise, select the location
                     else {
-                        if(((LocationPresentation) root).isInteractable()) {
+                        if(root.isInteractable()) {
                             if (event.isShortcutDown()) {
                                 SelectHelper.addToSelection(this);
                             } else {
@@ -391,11 +415,11 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                     getLocation().yProperty().bind(root.layoutYProperty());
 
                     // Notify that the location was placed
-                    ((LocationPresentation) root).setPlaced(true);
+                    root.setPlaced(true);
                     ComponentController.setPlacingLocation(null);
                     KeyboardTracker.unregisterKeybind(KeyboardTracker.ABANDON_LOCATION);
                 } else {
-                    ((LocationPresentation) root).shake();
+                    root.shake();
                 }
 
             }
@@ -443,20 +467,16 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
     @Override
     public void select() {
-        ((SelectHelper.Selectable) root).select();
+        root.select();
     }
 
     @Override
     public void deselect() {
-        ((SelectHelper.Selectable) root).deselect();
+        root.deselect();
     }
 
     @Override
     public boolean nudge(final NudgeDirection direction) {
-
-        // Do not nudge initial location
-        if(getLocation().getType().equals(Location.Type.INITIAL)) return false;
-
         final double oldX = root.getLayoutX();
         final double newX = getDragBounds().trimX(root.getLayoutX() + direction.getXOffset());
         root.layoutXProperty().set(newX);

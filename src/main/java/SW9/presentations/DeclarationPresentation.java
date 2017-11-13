@@ -5,12 +5,9 @@ import SW9.controllers.DeclarationsController;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.scene.layout.StackPane;
-import org.fxmisc.richtext.StyleClassedTextArea;
 
 import java.io.IOException;
 import java.net.URL;
-
-import static SW9.presentations.ComponentPresentation.computeHighlighting;
 
 /**
  * Presentation for overall declarations.

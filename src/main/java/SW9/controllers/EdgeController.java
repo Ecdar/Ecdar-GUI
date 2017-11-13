@@ -41,11 +41,9 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
-import static SW9.presentations.CanvasPresentation.GRID_SIZE;
+import static SW9.presentations.Grid.GRID_SIZE;
 
 public class EdgeController implements Initializable, SelectHelper.ItemSelectable {
-    private static final Map<Edge, Boolean> initializedEdgeFromTargetError = new HashMap<>();
-    private static final Map<Edge, Boolean> initializedEdgeToInitialError = new HashMap<>();
     private final ObservableList<Link> links = FXCollections.observableArrayList();
     private final ObjectProperty<Edge> edge = new SimpleObjectProperty<>();
     private final ObjectProperty<Component> component = new SimpleObjectProperty<>();
@@ -100,37 +98,6 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                 }
             }
         });
-    }
-
-    public void initializeEdgeErrorToInitialLocation() {
-        if (initializedEdgeToInitialError.containsKey(getEdge())) return; // Already initialized
-        initializedEdgeToInitialError.put(getEdge(), true); // Set initialized
-
-        final CodeAnalysis.Message message = new CodeAnalysis.Message("Incoming edges to an initial location are not allowed", CodeAnalysis.MessageType.ERROR, getEdge());
-
-        final Consumer<Location> checkIfErrorIsPresent = (targetLocation) -> {
-
-            if (targetLocation != null
-                    && targetLocation.getType().equals(Location.Type.INITIAL)
-                    && getComponent().getEdges().contains(getEdge())) {
-
-                // Add the message to the UI
-                CodeAnalysis.addMessage(getComponent(), message);
-            } else {
-                // Remove the message from the UI
-                CodeAnalysis.removeMessage(getComponent(), message);
-            }
-        };
-
-        // When the source location is updated
-        getEdge().targetLocationProperty().addListener((obs, oldTarget, newTarget) -> checkIfErrorIsPresent.accept(newTarget));
-
-        // When the list of edges are updated
-        final InvalidationListener listener = observable -> checkIfErrorIsPresent.accept(getEdge().getTargetLocation());
-        getComponent().getEdges().addListener(listener);
-
-        // Check if the error is present right now
-        checkIfErrorIsPresent.accept(getEdge().getTargetLocation());
     }
 
     private void ensureNailsInFront() {

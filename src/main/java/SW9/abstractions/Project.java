@@ -27,14 +27,12 @@ public class Project {
 
     private final ObservableList<Query> queries;
     private final ObservableList<Component> components;
-    private final ObjectProperty<Component> mainComponent;
     private final ObjectProperty<Declarations> globalDeclarations;
     private final ObjectProperty<Declarations> systemDeclarations;
 
     public Project() {
         queries = FXCollections.observableArrayList();
         components = FXCollections.observableArrayList();
-        mainComponent = new SimpleObjectProperty<>();
         globalDeclarations = new SimpleObjectProperty<>(new Declarations("Global Declarations"));
         systemDeclarations = new SimpleObjectProperty<>(new Declarations("System Declarations"));
     }
@@ -45,18 +43,6 @@ public class Project {
 
     public ObservableList<Component> getComponents() {
         return components;
-    }
-
-    public Component getMainComponent() {
-        return mainComponent.get();
-    }
-
-    public ObjectProperty<Component> mainComponentProperty() {
-        return mainComponent;
-    }
-
-    public void setMainComponent(final Component mainComponent) {
-        this.mainComponent.set(mainComponent);
     }
 
     public Declarations getGlobalDeclarations() {
@@ -76,11 +62,12 @@ public class Project {
     }
 
     /**
-     * Serializes and stores this at the Ecdar project directory as JSON files.
+     * Serializes and stores this as JSON files at a given directory.
+     * @param directory object containing path to the desired directory to store at
+     * @throws IOException if an IO error happens
      */
-    public void serialize() throws IOException {
+    public void serialize(final File directory) throws IOException {
         // Clear the project folder
-        final File directory = new File(Ecdar.projectDirectory.getValue());
         FileUtils.forceMkdir(directory);
         FileUtils.cleanDirectory(directory);
 
@@ -191,14 +178,8 @@ public class Project {
         Collections.reverse(orderedJsonComponents);
 
         // Add the components to the list
-        orderedJsonComponents.forEach(jsonObject -> {
-
-            // It is important that the components are added the list prior to deserialization
-            final Component newComponent = new Component();
-            getComponents().add(newComponent);
-            newComponent.deserialize(jsonObject);
-        });
-        }
+        orderedJsonComponents.forEach(jsonObject -> getComponents().add(new Component(jsonObject)));
+    }
 
     /**
      * Resets components.

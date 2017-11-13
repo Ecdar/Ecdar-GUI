@@ -1,14 +1,14 @@
 package SW9.model_canvas.arrow_heads;
 
-import SW9.presentations.CanvasPresentation;
+import SW9.presentations.Grid;
 import SW9.utility.colors.Color;
 import SW9.utility.helpers.SelectHelper;
 import javafx.scene.shape.Line;
 
 public class SimpleArrowHead extends ArrowHead implements SelectHelper.Selectable {
 
-    private static final double TRIANGLE_LENGTH = CanvasPresentation.GRID_SIZE * 1.5;
-    private static final double TRIANGLE_WIDTH = CanvasPresentation.GRID_SIZE;
+    private static final double TRIANGLE_LENGTH = Grid.GRID_SIZE * 1.5;
+    private static final double TRIANGLE_WIDTH = Grid.GRID_SIZE;
 
     private Line leftArrow;
     private Line rightArrow;

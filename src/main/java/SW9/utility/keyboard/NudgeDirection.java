@@ -1,6 +1,6 @@
 package SW9.utility.keyboard;
 
-import static SW9.presentations.CanvasPresentation.GRID_SIZE;
+import static SW9.presentations.Grid.GRID_SIZE;
 
 public enum NudgeDirection {
     UP(0, -GRID_SIZE),
