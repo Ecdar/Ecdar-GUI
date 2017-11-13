@@ -10,11 +10,13 @@ import SW9.utility.colors.EnabledColor;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import javafx.beans.property.*;
+import javafx.beans.value.ObservableStringValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.util.Pair;
 
+import javax.swing.event.ChangeListener;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -34,6 +36,8 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
     // Verification properties
     private final ObservableList<Location> locations = FXCollections.observableArrayList();
     private final ObservableList<Edge> edges = FXCollections.observableArrayList();
+    private final ObservableList<String> inputStrings = FXCollections.observableArrayList();
+    private final ObservableList<String> outputStrings = FXCollections.observableArrayList();
     private final StringProperty description = new SimpleStringProperty("");
 
     // Background check
