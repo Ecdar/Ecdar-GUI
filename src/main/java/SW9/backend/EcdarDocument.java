@@ -87,8 +87,13 @@ class EcdarDocument {
         // Add all locations from the model to our conversion map and to the template
         for (final Location ecdarLocation : component.getLocations()) {
             // Add the location to the template
-            final com.uppaal.model.core2.Location xmlLocation = addLocation(template, ecdarLocation);
+            final com.uppaal.model.core2.Location xmlLocation;
 
+            if(ecdarLocation.getType() == Location.Type.UNIVERSAL){
+                xmlLocation = addUniversalLocation(template, ecdarLocation);
+            } else {
+                xmlLocation = addLocation(template, ecdarLocation);
+            }
             // Populate the map
             addLocationsToMaps(ecdarLocation, xmlLocation);
         }
@@ -160,6 +165,33 @@ class EcdarDocument {
         return xmlLocation;
     }
 
+    private static com.uppaal.model.core2.Location addUniversalLocation(final Template template, final Location ecdarLocation) {
+        final int x = (int) ecdarLocation.xProperty().get();
+        final int y = (int) ecdarLocation.yProperty().get();
+        final Color color = ecdarLocation.getColor().toAwtColor(ecdarLocation.getColorIntensity());
+
+        // Create new UPPAAL location and insert it into the template
+        final com.uppaal.model.core2.Location xmlLocation = template.createLocation();
+        template.insert(xmlLocation, null);
+
+        // Set name of the location
+        xmlLocation.setProperty(NAME_PROPERTY_TAG, ecdarLocation.getId());
+
+        // Update the placement of the name label
+        final Property p = xmlLocation.getProperty(NAME_PROPERTY_TAG);
+        p.setProperty("x", x);
+        p.setProperty("y", y - 30);
+
+        // Set the color of the location
+        xmlLocation.setProperty("color", color);
+
+        // Set the x and y properties
+        xmlLocation.setProperty("x", x);
+        xmlLocation.setProperty("y", y);
+
+        return xmlLocation;
+    }
+
     /**
      * Generates an xml edge from an Ecdar edge and adds it to a template.
      * @param template the template
@@ -196,6 +228,19 @@ class EcdarDocument {
         annotateEdge(xmlEdge, ecdarEdge);
 
         return xmlEdge;
+    }
+
+
+    /**
+     * Method takes a universal location and adds loops of all input and output edges
+     * @param template the template the universal location is located in
+     * @param universalLocation the universal location
+     * @return a set of edges
+     * @throws BackendException
+     */
+    private void addUniversalEdges(final Template template, final Location universalLocation) throws BackendException {
+
+        Edge edge = new Edge(universalLocation, EdgeStatus.INPUT);
     }
 
     /**

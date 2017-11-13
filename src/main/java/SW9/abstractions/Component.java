@@ -151,6 +151,30 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         return relatedEdges;
     }
 
+    public List<String> getInputChannels(){
+        final List<String> inputStrings = new ArrayList<String>();
+
+        edges.forEach(edge -> {
+            if(edge.getStatus() == EdgeStatus.INPUT && edge.getSync().equalsIgnoreCase("")){
+                inputStrings.add(edge.getSync());
+            }
+        });
+
+        return inputStrings;
+    }
+
+    public List<String> getOutputChannels(){
+        final List<String> outputStrings = new ArrayList<String>();
+
+        edges.forEach(edge -> {
+            if(edge.getStatus() == EdgeStatus.OUTPUT && edge.getSync().equalsIgnoreCase("")){
+                outputStrings.add(edge.getSync());
+            }
+        });
+
+        return outputStrings;
+    }
+
     public double getX() {
         return x.get();
     }
