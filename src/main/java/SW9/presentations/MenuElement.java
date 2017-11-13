@@ -121,7 +121,7 @@ public class MenuElement {
         return item;
     }
 
-    public void setDisableable(ObservableBooleanValue bool) {
+    public MenuElement setDisableable(ObservableBooleanValue bool) {
 
         isDisabled = bool;
         final Consumer<Boolean> updateTransparency = (disabled) -> {
@@ -137,9 +137,12 @@ public class MenuElement {
 
         isDisabled.addListener((obs, oldDisabled, newDisabled) -> updateTransparency.accept(newDisabled));
         updateTransparency.accept(isDisabled.get());
+
+        return this;
     }
 
-    public void setToggleable(ObservableBooleanValue isToggled){
+    public MenuElement setToggleable(ObservableBooleanValue isToggled){
         icon.visibleProperty().bind(isToggled);
+        return this;
     }
 }
