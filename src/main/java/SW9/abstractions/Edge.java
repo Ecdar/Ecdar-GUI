@@ -43,6 +43,9 @@ public class Edge implements Serializable, Nearable {
     // Defines if this is an input or an output edge
     private EdgeStatus status;
 
+    // Boolean for if this edge is locked or can be edited
+    private final BooleanProperty isLocked = new SimpleBooleanProperty(false);
+
     public Edge(final Location sourceLocation, final EdgeStatus status) {
         setSourceLocation(sourceLocation);
         bindReachabilityAnalysis();
@@ -346,6 +349,10 @@ public class Edge implements Serializable, Nearable {
     public boolean isSelfLoop() {
         return (getSourceLocation() != null && getSourceLocation().equals(getTargetLocation()));
     }
+
+    public BooleanProperty getIsLocked(){return isLocked; }
+
+    public void setIsLocked(boolean bool){isLocked.setValue(bool); }
 
     private void bindReachabilityAnalysis() {
         selectProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
