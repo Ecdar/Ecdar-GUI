@@ -4,6 +4,7 @@ import SW9.Debug;
 import SW9.Ecdar;
 import SW9.abstractions.Component;
 import SW9.abstractions.Edge;
+import SW9.abstractions.EdgeStatus;
 import SW9.abstractions.Nail;
 import SW9.presentations.*;
 import SW9.utility.UndoRedoStack;
@@ -37,6 +38,8 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
     private final ObjectProperty<Edge> edge = new SimpleObjectProperty<>();
     private final ObjectProperty<Nail> nail = new SimpleObjectProperty<>();
 
+    private EdgeController edgeController;
+
     public NailPresentation root;
     public Circle nailCircle;
     public Circle dragCircle;
@@ -69,11 +72,22 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
         initializeMouseControls();
     }
 
+    /**
+     * Sets an edge controller.
+     * This should be called when adding a nail.
+     * @param controller the edge controller
+     */
+    public void setEdgeController(final EdgeController controller) {
+        this.edgeController = controller;
+    }
+
     private void showContextMenu() {
         final DropDownMenu contextMenu = new DropDownMenu(((Pane) root.getParent().getParent().getParent().getParent()), root, 230, true);
 
-        // Only delete option if not sync nail
-        if (!getNail().getPropertyType().equals(Edge.PropertyType.SYNCHRONIZATION)) {
+        if (getNail().getPropertyType().equals(Edge.PropertyType.SYNCHRONIZATION)) {
+            contextMenu.addMenuElement(edgeController.getChangeStatusMenuElement(contextMenu));
+        } else {
+            // Only delete option if not sync nail
             contextMenu.addClickableAndDisableableListElement("Delete", getEdge().getIsLocked(), (mouseEvent -> {
                 final Nail nail = getNail();
                 final Edge edge = getEdge();
