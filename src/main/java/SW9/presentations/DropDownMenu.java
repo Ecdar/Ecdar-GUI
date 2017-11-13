@@ -111,6 +111,10 @@ public class DropDownMenu {
         list.getChildren().add(element.getItem());
     }
 
+    /**
+     * Add a custom menu element
+     * @param element the constructed menu element to be added
+     */
     public void addMenuElement(MenuElement element) {
         list.getChildren().add(element.getItem());
     }
