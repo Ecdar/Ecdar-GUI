@@ -994,45 +994,7 @@ public class EcdarController implements Initializable {
                     component.addEdge(edge);
                 }, String.format("Deleted %s", selectable.toString()), "delete");
             } else if (selectable instanceof NailController) {
-                final NailController nailController = (NailController) selectable;
-                final Edge edge = nailController.getEdge();
-
-                // Dont delete nail if its edge is locked
-                if(edge.getIsLocked().getValue()){return;}
-
-                final Component component = nailController.getComponent();
-                final Nail nail = nailController.getNail();
-                final int index = edge.getNails().indexOf(nail);
-
-                final String restoreProperty = edge.getProperty(nail.getPropertyType());
-
-                // If the last nail on a self loop for a location delete the edge too
-                final boolean shouldDeleteEdgeAlso = edge.isSelfLoop() && edge.getNails().size() == 1;
-
-                // Create an undo redo description based, add extra comment if edge is also deleted
-                String message =  String.format("Deleted %s", selectable.toString());
-                if(shouldDeleteEdgeAlso) {
-                    message += String.format("(Was last Nail on self loop edge --> %s also deleted)", edge.toString());
-                }
-
-                UndoRedoStack.pushAndPerform(
-                        () -> {
-                            edge.removeNail(nail);
-                            edge.setProperty(nail.getPropertyType(), "");
-                            if(shouldDeleteEdgeAlso) {
-                                component.removeEdge(edge);
-                            }
-                        },
-                        () -> {
-                            if(shouldDeleteEdgeAlso) {
-                                component.addEdge(edge);
-                            }
-                            edge.setProperty(nail.getPropertyType(), restoreProperty);
-                            edge.insertNailAt(nail, index);
-                        },
-                        message,
-                        "delete"
-                );
+                ((NailController) selectable).tryDelete();
             }
         });
 
