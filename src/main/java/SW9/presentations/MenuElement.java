@@ -2,7 +2,6 @@ package SW9.presentations;
 
 import SW9.utility.colors.Color;
 import com.jfoenix.controls.JFXRippler;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableBooleanValue;
 import javafx.geometry.Insets;
@@ -28,14 +27,14 @@ public class MenuElement {
     private FontIcon icon;
     private ObservableBooleanValue isDisabled = new SimpleBooleanProperty(false);
 
-    public MenuElement(final String s, final int width){
-        createLabel(s, width);
+    public MenuElement(final String s){
+        createLabel(s);
         container.getChildren().addAll(spacer, label);
         item = container;
     }
 
-    public MenuElement(final String s, final Consumer<MouseEvent> mouseEventConsumer, final int width) {
-        createLabel(s, width);
+    public MenuElement(final String s, final Consumer<MouseEvent> mouseEventConsumer) {
+        createLabel(s);
 
         spacer.setMinWidth(28);
         container.getChildren().addAll(spacer, label);
@@ -47,8 +46,8 @@ public class MenuElement {
         item = rippler;
     }
 
-    public MenuElement(final String s, final String iconString, final Consumer<MouseEvent> mouseEventConsumer, final int width){
-        createLabel(s, width);
+    public MenuElement(final String s, final String iconString, final Consumer<MouseEvent> mouseEventConsumer){
+        createLabel(s);
         addIcon(iconString);
 
         container.getChildren().addAll(icon ,spacer, label);
@@ -99,7 +98,7 @@ public class MenuElement {
         });
     }
 
-    private void createLabel(String s, int width){
+    private void createLabel(String s){
         label = new Label(s);
         label.getStyleClass().add("body2");
 
