@@ -111,6 +111,10 @@ public class DropDownMenu {
         list.getChildren().add(element.getItem());
     }
 
+    public void addMenuElement(MenuElement element) {
+        list.getChildren().add(element.getItem());
+    }
+
     public void addSpacerElement() {
         final Region space1 = new Region();
         space1.setMinHeight(8);
