@@ -138,6 +138,11 @@ public class NailPresentation extends Group implements SelectHelper.Selectable {
                     propertyTag.setAndBindString(controller.getEdge().updateProperty());
                 }
 
+                //Disable the ability to edit the tag if the nails edge is locked
+                if(controller.getEdge().getIsLocked().getValue()){
+                    propertyTag.setDisabledText(true);
+                }
+
                 propertyTag.requestTextFieldFocus();
                 propertyTag.requestTextFieldFocus(); // Requesting it twice is needed for some reason
             }

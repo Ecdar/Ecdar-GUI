@@ -278,7 +278,6 @@ public class ComponentController implements Initializable {
             });
 
             contextMenu.addSpacerElement();
-            contextMenu.addListElement("Color");
             contextMenu.addColorPicker(component, component::dye);
         };
 

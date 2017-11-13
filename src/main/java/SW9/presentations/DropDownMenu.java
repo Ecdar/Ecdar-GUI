@@ -3,16 +3,13 @@ package SW9.presentations;
 import SW9.utility.colors.Color;
 import SW9.utility.colors.EnabledColor;
 import com.jfoenix.controls.JFXPopup;
-import com.jfoenix.controls.JFXRippler;
 import javafx.animation.ScaleTransition;
 import javafx.beans.binding.When;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableBooleanValue;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Circle;
@@ -25,8 +22,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import static SW9.utility.colors.EnabledColor.enabledColors;
-import static javafx.scene.paint.Color.TRANSPARENT;
-import static javafx.scene.paint.Color.WHITE;
 
 public class DropDownMenu {
 
@@ -38,9 +33,7 @@ public class DropDownMenu {
     private final JFXPopup popup;
     private final SimpleBooleanProperty isHoveringSubMenu = new SimpleBooleanProperty(false);
     private final SimpleBooleanProperty isHoveringMenu = new SimpleBooleanProperty(false);
-    private final SimpleBooleanProperty showSubMenu = new SimpleBooleanProperty(false);
     private final SimpleBooleanProperty canIShowSubMenu = new SimpleBooleanProperty(false);
-    private StackPane subMenuContent;
 
     public DropDownMenu(final Pane container, final Node source, final int width, final boolean closeOnMouseExit) {
         this.width = width;
@@ -90,192 +83,40 @@ public class DropDownMenu {
     }
 
     public void addListElement(final String s) {
-        final Label label = new Label(s);
-
-        label.setStyle("-fx-padding: 8 16 8 16;");
-        label.getStyleClass().add("body2");
-        label.setMinWidth(width);
-
-        list.getChildren().add(label);
-
-        label.setOnMouseEntered(event -> canIShowSubMenu.set(false));
+        MenuElement element = new MenuElement(s);
+        list.getChildren().add(element.getItem());
     }
 
     public void addClickableListElement(final String s, final Consumer<MouseEvent> mouseEventConsumer) {
-        final Label label = new Label(s);
-
-        label.setStyle("-fx-padding: 8 16 8 16;");
-        label.getStyleClass().add("body2");
-        label.setMinWidth(width);
-
-        final JFXRippler rippler = new JFXRippler(label);
-        rippler.setRipplerFill(Color.GREY_BLUE.getColor(Color.Intensity.I300));
-
-        rippler.setOnMouseEntered(event -> {
-            // Set the background to a light grey
-            label.setBackground(new Background(new BackgroundFill(
-                    Color.GREY.getColor(Color.Intensity.I200),
-                    CornerRadii.EMPTY,
-                    Insets.EMPTY
-            )));
-
-            canIShowSubMenu.set(false);
-        });
-
-        rippler.setOnMouseExited(event -> {
-            // Set the background to be transparent
-            label.setBackground(new Background(new BackgroundFill(
-                    TRANSPARENT,
-                    CornerRadii.EMPTY,
-                    Insets.EMPTY
-            )));
-        });
-
-        // When the rippler is pressed, run the provided consumer.
-        rippler.setOnMousePressed(event -> {
-            // If we do not do this, the method below will be called twice
-            if (!(event.getTarget() instanceof StackPane)) return;
-
-            mouseEventConsumer.accept(event);
-        });
-
-        list.getChildren().add(rippler);
-    }
-
-    public void addSubMenu(final String s, final DropDownMenu subMenu, final int offset) {
-        final Label label = new Label(s);
-
-        label.setStyle("-fx-padding: 8 16 8 16;");
-        label.getStyleClass().add("body2");
-        label.setMinWidth(width);
-
-        subMenuContent = subMenu.content;
-        if (!this.content.getChildren().contains(subMenuContent)) {
-            subMenuContent.setStyle("-fx-padding: 0 0 0 5;");
-            subMenuContent.setMinWidth(subMenuContent.getMinWidth() + 1);
-            subMenuContent.setMaxWidth(subMenuContent.getMinWidth() + 1);
-            subMenuContent.setTranslateX(width - 40);
-            this.content.getChildren().add(subMenuContent);
-        }
-
-        subMenuContent.setTranslateY(offset);
-
-        subMenuContent.setOpacity(0);
-        final Runnable showHideSubMenu = () -> {
-            if (showSubMenu.get() || isHoveringSubMenu.get()) {
-                subMenuContent.setOpacity(1);
-            } else {
-                subMenuContent.setOpacity(0);
-            }
-        };
-
-        showSubMenu.addListener((obs, oldShow, newShow) -> showHideSubMenu.run());
-        isHoveringSubMenu.addListener((obs, oldHovering, newHovering) -> showHideSubMenu.run());
-
-        subMenuContent.setOnMouseEntered(event -> {
-            if (canIShowSubMenu.get()) {
-                isHoveringSubMenu.set(true);
-            }
-        });
-        subMenuContent.setOnMouseExited(event -> {
-            isHoveringSubMenu.set(false);
-        });
-
-        final JFXRippler rippler = new JFXRippler(label);
-        rippler.setRipplerFill(Color.GREY_BLUE.getColor(Color.Intensity.I300));
-
-        rippler.setOnMouseEntered(event -> {
-            // Set the background to a light grey
-            label.setBackground(new Background(new BackgroundFill(
-                    Color.GREY.getColor(Color.Intensity.I200),
-                    CornerRadii.EMPTY,
-                    Insets.EMPTY
-            )));
-
-            canIShowSubMenu.set(true);
-            showSubMenu.set(true);
-        });
-
-        rippler.setOnMouseExited(event -> {
-            // Set the background to be transparent
-            label.setBackground(new Background(new BackgroundFill(
-                    TRANSPARENT,
-                    CornerRadii.EMPTY,
-                    Insets.EMPTY
-            )));
-
-            if (!isHoveringSubMenu.get()) {
-                showSubMenu.set(false);
-            }
-        });
-
-        final FontIcon icon = new FontIcon();
-        icon.setIconLiteral("gmi-chevron-right");
-        icon.setFill(Color.GREY.getColor(Color.Intensity.I600));
-        icon.setIconSize(20);
-
-        final StackPane iconContainer = new StackPane(icon);
-        iconContainer.setMaxWidth(20);
-        iconContainer.setMaxHeight(20);
-        iconContainer.setStyle("-fx-padding: 8;");
-        iconContainer.setMouseTransparent(true);
-
-        rippler.getChildren().add(iconContainer);
-        StackPane.setAlignment(iconContainer, Pos.CENTER_RIGHT);
-
-        list.getChildren().add(rippler);
+        MenuElement element = new MenuElement(s, mouseEventConsumer);
+        list.getChildren().add(element.getItem());
     }
 
     public void addTogglableListElement(final String s, final ObservableBooleanValue isToggled, final Consumer<MouseEvent> mouseEventConsumer) {
-        final Label label = new Label(s);
-        label.getStyleClass().add("body2");
+        MenuElement element = new MenuElement(s, "gmi-done", mouseEventConsumer);
+        element.setToggleable(isToggled);
+        list.getChildren().add(element.getItem());
+    }
 
-        final HBox container = new HBox();
-        container.setStyle("-fx-padding: 8 16 8 16;");
+    public void addTogglableAndDisableableListElement(final String s, final ObservableBooleanValue isToggled, final ObservableBooleanValue isDisableable, final Consumer<MouseEvent> mouseEventConsumer) {
+        MenuElement element = new MenuElement(s, "gmi-done", mouseEventConsumer);
+        element.setToggleable(isToggled);
+        element.setDisableable(isDisableable);
+        list.getChildren().add(element.getItem());
+    }
 
-        final FontIcon icon = new FontIcon();
-        icon.setIconLiteral("gmi-done");
-        icon.setFill(Color.GREY.getColor(Color.Intensity.I600));
-        icon.setIconSize(20);
-        icon.visibleProperty().bind(isToggled);
+    public void addClickableAndDisableableListElement(final String s, final ObservableBooleanValue isDisabled, final Consumer<MouseEvent> mouseEventConsumer) {
+        MenuElement element = new MenuElement(s, mouseEventConsumer);
+        element.setDisableable(isDisabled);
+        list.getChildren().add(element.getItem());
+    }
 
-        final Region spacer = new Region();
-        spacer.setMinWidth(8);
-
-        container.getChildren().addAll(icon, spacer, label);
-
-        final StackPane clickListenerFix = new StackPane(container);
-
-        final JFXRippler rippler = new JFXRippler(clickListenerFix);
-        rippler.setRipplerFill(Color.GREY_BLUE.getColor(Color.Intensity.I300));
-
-        rippler.setOnMouseEntered(event -> {
-            // Set the background to a light grey
-            container.setBackground(new Background(new BackgroundFill(
-                    Color.GREY.getColor(Color.Intensity.I200),
-                    CornerRadii.EMPTY,
-                    Insets.EMPTY
-            )));
-
-            canIShowSubMenu.set(false);
-        });
-
-        rippler.setOnMouseExited(event -> {
-            // Set the background to be transparent
-            container.setBackground(new Background(new BackgroundFill(
-                    TRANSPARENT,
-                    CornerRadii.EMPTY,
-                    Insets.EMPTY
-            )));
-        });
-
-        // When the rippler is pressed, run the provided consumer.
-        clickListenerFix.setOnMousePressed(event -> {
-            mouseEventConsumer.accept(event);
-            event.consume();
-        });
-
-        list.getChildren().add(rippler);
+    /**
+     * Add a custom menu element
+     * @param element the constructed menu element to be added
+     */
+    public void addMenuElement(MenuElement element) {
+        list.getChildren().add(element.getItem());
     }
 
     public void addSpacerElement() {
@@ -296,6 +137,8 @@ public class DropDownMenu {
     }
 
     public void addColorPicker(final HasColor hasColor, final BiConsumer<Color, Color.Intensity> consumer) {
+        addListElement("Color");
+
         final FlowPane flowPane = new FlowPane();
         flowPane.setStyle("-fx-padding: 0 8 0 8");
 
@@ -351,69 +194,6 @@ public class DropDownMenu {
 
     public void addCustomChild(final Node child) {
         list.getChildren().add(child);
-    }
-
-    public void addClickableAndDisableableListElement(final String s, final ObservableBooleanValue isDisabled, final Consumer<MouseEvent> mouseEventConsumer) {
-        final Label label = new Label(s);
-
-        label.setStyle("-fx-padding: 8 16 8 16;");
-        label.getStyleClass().add("body2");
-        label.setMinWidth(width);
-
-        final JFXRippler rippler = new JFXRippler(label);
-
-        rippler.setOnMouseEntered(event -> {
-            if (isDisabled.get()) return;
-
-            // Set the background to a light grey
-            label.setBackground(new Background(new BackgroundFill(
-                    Color.GREY.getColor(Color.Intensity.I200),
-                    CornerRadii.EMPTY,
-                    Insets.EMPTY
-            )));
-
-            canIShowSubMenu.set(false);
-        });
-
-        rippler.setOnMouseExited(event -> {
-            if (isDisabled.get()) return;
-
-            // Set the background to be transparent
-            label.setBackground(new Background(new BackgroundFill(
-                    TRANSPARENT,
-                    CornerRadii.EMPTY,
-                    Insets.EMPTY
-            )));
-        });
-
-        // When the rippler is pressed, run the provided consumer.
-        rippler.setOnMousePressed(event -> {
-            if (isDisabled.get()) {
-                event.consume();
-                return;
-            }
-
-            // If we do not do this, the method below will be called twice
-            if (!(event.getTarget() instanceof StackPane)) return;
-
-            mouseEventConsumer.accept(event);
-        });
-
-        final Consumer<Boolean> updateTransparency = (disabled) -> {
-            if (disabled) {
-                rippler.setRipplerFill(WHITE);
-                label.setOpacity(0.5);
-            } else {
-                rippler.setOpacity(1);
-                rippler.setRipplerFill(Color.GREY_BLUE.getColor(Color.Intensity.I300));
-                label.setOpacity(1);
-            }
-        };
-
-        isDisabled.addListener((obs, oldDisabled, newDisabled) -> updateTransparency.accept(newDisabled));
-        updateTransparency.accept(isDisabled.get());
-
-        list.getChildren().add(rippler);
     }
 
     public interface HasColor {

@@ -983,6 +983,9 @@ public class EcdarController implements Initializable {
                 final Component component = ((EdgeController) selectable).getComponent();
                 final Edge edge = ((EdgeController) selectable).getEdge();
 
+                // Dont delete edge if it is locked
+                if(edge.getIsLocked().getValue()){return;}
+
                 UndoRedoStack.pushAndPerform(() -> { // Perform
                     // Remove the edge
                     component.removeEdge(edge);
@@ -993,6 +996,10 @@ public class EcdarController implements Initializable {
             } else if (selectable instanceof NailController) {
                 final NailController nailController = (NailController) selectable;
                 final Edge edge = nailController.getEdge();
+
+                // Dont delete nail if its edge is locked
+                if(edge.getIsLocked().getValue()){return;}
+
                 final Component component = nailController.getComponent();
                 final Nail nail = nailController.getNail();
                 final int index = edge.getNails().indexOf(nail);
