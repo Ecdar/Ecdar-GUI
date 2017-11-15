@@ -326,6 +326,8 @@ public class Edge implements Serializable, Nearable {
         } else {
             status = EdgeStatus.INPUT;
         }
+
+
     }
 
     public enum PropertyType {
