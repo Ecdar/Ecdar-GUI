@@ -132,7 +132,7 @@ public class CanvasController implements Initializable {
                 root.setTranslateX(restoreCoordinates.getKey());
                 root.setTranslateY(restoreCoordinates.getValue());
             } else {
-                root.setTranslateX(GRID_SIZE * 3);
+                root.setTranslateX(GRID_SIZE * 8);
                 root.setTranslateY(GRID_SIZE * 8);
             }
 

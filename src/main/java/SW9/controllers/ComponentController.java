@@ -22,6 +22,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.layout.VBox;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
@@ -67,6 +68,9 @@ public class ComponentController implements Initializable {
     public Rectangle bottomAnchor;
     public Pane modelContainerLocation;
     public Pane modelContainerEdge;
+
+    public VBox outputSignatureContainer;
+    public VBox inputSignatureContainer;
 
     private MouseTracker mouseTracker;
     private DropDownMenu contextMenu;
@@ -127,7 +131,9 @@ public class ComponentController implements Initializable {
             initializeEdgeHandling(newComponent);
             initializeLocationHandling(newComponent);
             initializeDeclarations();
+            initializeSignature(newComponent);
         });
+
 
         // The root view have been inflated, initialize the mouse tracker on it
         mouseTracker = new MouseTracker(root);
@@ -140,6 +146,40 @@ public class ComponentController implements Initializable {
             if (!errorsAndWarningsInitialized.containsKey(component) || !errorsAndWarningsInitialized.get(component)) {
                 initializeNoIncomingEdgesWarning();
                 errorsAndWarningsInitialized.put(component, true);
+            }
+        });
+    }
+
+    private void initializeSignature(final Component newComponent) {
+        HashMap<String, ArrayList<Edge>> edgeDictionary = new HashMap<>();
+
+        // This is work-in-progress and should instead use methods on the component to getOutputChannels and getInput...
+        newComponent.edges.addListener(new ListChangeListener<Edge>() {
+            @Override
+            public void onChanged(Change<? extends Edge> c) {
+
+                edgeDictionary.clear();
+                outputSignatureContainer.getChildren().clear();
+                inputSignatureContainer.getChildren().clear();
+
+                for (Edge edge : c.getList()) {
+                    String edgeKey = edge.getSync();
+                    final ArrayList<Edge> edgeList = edgeDictionary.get(edgeKey);
+
+                    if(edgeList == null) {
+                        ArrayList<Edge> newList = new ArrayList<>();
+                        newList.add(edge);
+                        edgeDictionary.put(edgeKey, newList);
+                    } else {
+                        edgeList.add(edge);
+                    }
+                }
+
+                edgeDictionary.forEach((key, value) -> {
+                    final SignatureArrow newSignatureArrow = new SignatureArrow(value);
+
+                    inputSignatureContainer.getChildren().add(newSignatureArrow);
+                });
             }
         });
     }

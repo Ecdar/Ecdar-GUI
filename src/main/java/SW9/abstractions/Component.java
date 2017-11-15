@@ -33,7 +33,7 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
 
     // Verification properties
     private final ObservableList<Location> locations = FXCollections.observableArrayList();
-    private final ObservableList<Edge> edges = FXCollections.observableArrayList();
+    public final ObservableList<Edge> edges = FXCollections.observableArrayList();
     private final StringProperty description = new SimpleStringProperty("");
 
     // Background check
