@@ -137,6 +137,14 @@ public class Edge implements Serializable, Nearable {
         return sync;
     }
 
+    /**
+     * Gets the synchronization string concatenated with the synchronization symbol (? or !).
+     * @return the synchronization string concatenated with the synchronization symbol.
+     */
+    public String getSyncWithSymbol() {
+        return sync.get() + (ioStatus.get().equals(EdgeStatus.INPUT) ? "?" : "!");
+    }
+
     public Color getColor() {
         return color.get();
     }
