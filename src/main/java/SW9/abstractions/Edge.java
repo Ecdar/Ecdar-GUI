@@ -2,6 +2,7 @@ package SW9.abstractions;
 
 import SW9.code_analysis.Nearable;
 import SW9.controllers.EcdarController;
+import SW9.presentations.Grid;
 import SW9.utility.colors.Color;
 import SW9.utility.helpers.Circular;
 import SW9.utility.serialize.Serializable;
@@ -43,15 +44,14 @@ public class Edge implements Serializable, Nearable {
     // Defines if this is an input or an output edge
     private EdgeStatus status;
 
+    // Boolean for if this edge is locked or can be edited
+    private final BooleanProperty isLocked = new SimpleBooleanProperty(false);
+
     public Edge(final Location sourceLocation, final EdgeStatus status) {
         setSourceLocation(sourceLocation);
-        bindReachabilityAnalysis();
         this.status = status;
-    }
 
-    public Edge(final EdgeStatus status) {
         bindReachabilityAnalysis();
-        this.status = status;
     }
 
     public Edge(final JsonObject jsonObject, final Component component) {
@@ -179,6 +179,30 @@ public class Edge implements Serializable, Nearable {
 
     public ObjectProperty<Circular> targetCircularProperty() {
         return targetCircular;
+    }
+
+    /**
+     * Gets whether this has a synchronization nail.
+     * @return true iff this has a synchronization nail
+     */
+    public boolean hasSyncNail() {
+        for (final Nail nail : getNails()) {
+            if (nail.getPropertyType().equals(PropertyType.SYNCHRONIZATION)) return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Makes a synchronization nail between the source and target locations.
+     */
+    public void makeSyncNailBetweenLocations() {
+        final double x = Grid.snap((getSourceLocation().getX() + getTargetLocation().getX()) / 2.0);
+        final double y = Grid.snap((getSourceLocation().getY() + getTargetLocation().getY()) / 2.0);
+
+        final Nail nail = new Nail(x, y);
+        nail.setPropertyType(Edge.PropertyType.SYNCHRONIZATION);
+        addNail(nail);
     }
 
     public Circular getSourceCircular() {
@@ -315,7 +339,7 @@ public class Edge implements Serializable, Nearable {
     }
 
     /**
-     * Switches if the status of this is input of output
+     * Switches if the status of this is input or output
      */
     public void switchStatus() {
         if (status == EdgeStatus.INPUT) {
@@ -346,6 +370,10 @@ public class Edge implements Serializable, Nearable {
     public boolean isSelfLoop() {
         return (getSourceLocation() != null && getSourceLocation().equals(getTargetLocation()));
     }
+
+    public BooleanProperty getIsLocked(){return isLocked; }
+
+    public void setIsLocked(boolean bool){isLocked.setValue(bool); }
 
     private void bindReachabilityAnalysis() {
         selectProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());

@@ -1,8 +1,10 @@
 package SW9.controllers;
 
 import SW9.Debug;
+import SW9.Ecdar;
 import SW9.abstractions.Component;
 import SW9.abstractions.Edge;
+import SW9.abstractions.EdgeStatus;
 import SW9.abstractions.Nail;
 import SW9.presentations.*;
 import SW9.utility.UndoRedoStack;
@@ -36,7 +38,9 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
     private final ObjectProperty<Edge> edge = new SimpleObjectProperty<>();
     private final ObjectProperty<Nail> nail = new SimpleObjectProperty<>();
 
-    public Group root;
+    private EdgeController edgeController;
+
+    public NailPresentation root;
     public Circle nailCircle;
     public Circle dragCircle;
     public Line propertyTagLine;
@@ -68,49 +72,111 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
         initializeMouseControls();
     }
 
-    private void showContextMenu() {
+    /**
+     * Sets an edge controller.
+     * This should be called when adding a nail.
+     * @param controller the edge controller
+     */
+    public void setEdgeController(final EdgeController controller) {
+        this.edgeController = controller;
+    }
 
+    private void showContextMenu() {
         final DropDownMenu contextMenu = new DropDownMenu(((Pane) root.getParent().getParent().getParent().getParent()), root, 230, true);
 
-        contextMenu.addClickableListElement("Delete", (mouseEvent -> {
-            final Nail nail = getNail();
-            final Edge edge = getEdge();
-            final Component component = getComponent();
-            final int index = edge.getNails().indexOf(nail);
+        if (getNail().getPropertyType().equals(Edge.PropertyType.SYNCHRONIZATION)) {
+            contextMenu.addMenuElement(edgeController.getChangeStatusMenuElement(contextMenu));
+        } else {
+            // Only delete option if not sync nail
+            contextMenu.addClickableAndDisableableListElement("Delete", getEdge().getIsLocked(), (mouseEvent -> {
+                final Nail nail = getNail();
+                final Edge edge = getEdge();
+                final Component component = getComponent();
+                final int index = edge.getNails().indexOf(nail);
 
-            final String restoreProperty = edge.getProperty(nail.getPropertyType());
+                final String restoreProperty = edge.getProperty(nail.getPropertyType());
 
-            // If the last nail on a self loop for a location, delete the edge too
-            final boolean shouldDeleteEdgeAlso = edge.isSelfLoop() && edge.getNails().size() == 1;
+                // If the last nail on a self loop for a location, delete the edge too
+                final boolean shouldDeleteEdgeAlso = edge.isSelfLoop() && edge.getNails().size() == 1;
 
-            // Create an undo redo description based, add extra comment if edge is also deleted
-            String message =  String.format("Deleted %s", nail.toString());
-            if(shouldDeleteEdgeAlso) {
-                message += String.format("(Was last Nail on self loop edge --> %s also deleted)", toString());
-            }
+                // Create an undo redo description based, add extra comment if edge is also deleted
+                String message =  String.format("Deleted %s", nail.toString());
+                if(shouldDeleteEdgeAlso) {
+                    message += String.format("(Was last Nail on self loop edge --> %s also deleted)", toString());
+                }
 
-            UndoRedoStack.pushAndPerform(
-                    () -> {
-                        edge.removeNail(nail);
-                        edge.setProperty(nail.getPropertyType(), "");
-                        if(shouldDeleteEdgeAlso) {
-                            component.removeEdge(edge);
-                        }
-                    },
-                    () -> {
-                        if(shouldDeleteEdgeAlso) {
-                            component.addEdge(edge);
-                        }
-                        edge.setProperty(nail.getPropertyType(), restoreProperty);
-                        edge.insertNailAt(nail, index);
-                    },
-                    message,
-                    "delete"
-            );
-            contextMenu.close();
-        }));
+                UndoRedoStack.pushAndPerform(
+                        () -> {
+                            edge.removeNail(nail);
+                            edge.setProperty(nail.getPropertyType(), "");
+                            if(shouldDeleteEdgeAlso) {
+                                component.removeEdge(edge);
+                            }
+                        },
+                        () -> {
+                            if(shouldDeleteEdgeAlso) {
+                                component.addEdge(edge);
+                            }
+                            edge.setProperty(nail.getPropertyType(), restoreProperty);
+                            edge.insertNailAt(nail, index);
+                        },
+                        message,
+                        "delete"
+                );
+                contextMenu.close();
+            }));
+        }
 
         contextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, 0.5,0.5);
+    }
+
+    public void tryDelete() {
+        final Edge edge = getEdge();
+
+        // Do not delete nail if its edge is locked or nail is sync nail
+        if (edge.getIsLocked().getValue()) {
+            root.shake();
+            Ecdar.showToast("This nail is locked. You cannot delete it");
+            return;
+        } else if (getNail().getPropertyType().equals(Edge.PropertyType.SYNCHRONIZATION)) {
+            root.shake();
+            Ecdar.showToast("You cannot delete synchronization nails");
+            return;
+        }
+
+        final Component component = getComponent();
+        final Nail nail = getNail();
+        final int index = edge.getNails().indexOf(nail);
+
+        final String restoreProperty = edge.getProperty(nail.getPropertyType());
+
+        // If the last nail on a self loop for a location delete the edge too
+        final boolean shouldDeleteEdgeAlso = edge.isSelfLoop() && edge.getNails().size() == 1;
+
+        // Create an undo redo description based, add extra comment if edge is also deleted
+        String message =  String.format("Deleted %s", toString());
+        if (shouldDeleteEdgeAlso) {
+            message += String.format("(Was last Nail on self loop edge --> %s also deleted)", edge.toString());
+        }
+
+        UndoRedoStack.pushAndPerform(
+                () -> {
+                    edge.removeNail(nail);
+                    edge.setProperty(nail.getPropertyType(), "");
+                    if(shouldDeleteEdgeAlso) {
+                        component.removeEdge(edge);
+                    }
+                },
+                () -> {
+                    if(shouldDeleteEdgeAlso) {
+                        component.addEdge(edge);
+                    }
+                    edge.setProperty(nail.getPropertyType(), restoreProperty);
+                    edge.insertNailAt(nail, index);
+                },
+                message,
+                "delete"
+        );
     }
 
     private void initializeMouseControls() {

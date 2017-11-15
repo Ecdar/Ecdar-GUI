@@ -4,10 +4,7 @@ import SW9.abstractions.*;
 import SW9.code_analysis.CodeAnalysis;
 import SW9.code_analysis.Nearable;
 import SW9.model_canvas.arrow_heads.SimpleArrowHead;
-import SW9.presentations.CanvasPresentation;
-import SW9.presentations.DropDownMenu;
-import SW9.presentations.Link;
-import SW9.presentations.NailPresentation;
+import SW9.presentations.*;
 import SW9.utility.UndoRedoStack;
 import SW9.utility.colors.Color;
 import SW9.utility.helpers.BindingHelper;
@@ -139,7 +136,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                     final Link link = new Link(newEdge.getStatus());
                     links.add(link);
 
-                    final NailPresentation nailPresentation = new NailPresentation(nail, newEdge, getComponent());
+                    final NailPresentation nailPresentation = new NailPresentation(nail, newEdge, getComponent(), this);
                     nailNailPresentationMap.put(nail, nailPresentation);
 
                     edgeRoot.getChildren().addAll(link, nailPresentation);
@@ -167,7 +164,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                 // There were added some nails
                 change.getAddedSubList().forEach(newNail -> {
                     // Create a new nail presentation based on the abstraction added to the list
-                    final NailPresentation newNailPresentation = new NailPresentation(newNail, newEdge, newComponent);
+                    final NailPresentation newNailPresentation = new NailPresentation(newNail, newEdge, newComponent, this);
                     nailNailPresentationMap.put(newNail, newNailPresentation);
 
                     edgeRoot.getChildren().addAll(newNailPresentation);
@@ -372,25 +369,11 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                                 ((Pane) edgeRoot.getParent().getParent().getParent().getParent()),
                                 dropDownMenuHelperCircle,
                                 230,
-                                true);
+                                true
+                        );
 
-                        // Switch between input and output edge
-                        final String status;
-                        if (getEdge().getStatus() == EdgeStatus.INPUT) {
-                            status = "Change to output edge";
-                        } else {
-                            status = "Change to input edge";
-                        }
+                        dropDownMenu.addMenuElement(getChangeStatusMenuElement(dropDownMenu));
 
-                        dropDownMenu.addClickableListElement(status, mouseEvent -> {
-                            UndoRedoStack.pushAndPerform(
-                                    () -> switchEdgeStatus(),
-                                    () -> switchEdgeStatus(),
-                                    "Switch edge status",
-                                    "switch"
-                            );
-                            dropDownMenu.close();
-                        });
                         dropDownMenu.addSpacerElement();
 
                         addEdgePropertyRow(dropDownMenu, "Add Select", Edge.PropertyType.SELECTION, link);
@@ -400,7 +383,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
 
                         dropDownMenu.addSpacerElement();
 
-                        dropDownMenu.addClickableListElement("Add Nail", mouseEvent -> {
+                        dropDownMenu.addClickableAndDisableableListElement("Add Nail", getEdge().getIsLocked(), mouseEvent -> {
                             final double nailX = Math.round((DropDownMenu.x - getComponent().getX()) / GRID_SIZE) * GRID_SIZE;
                             final double nailY = Math.round((DropDownMenu.y - getComponent().getY()) / GRID_SIZE) * GRID_SIZE;
                             final Nail newNail = new Nail(nailX, nailY);
@@ -415,7 +398,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                         });
                         dropDownMenu.addSpacerElement();
 
-                        dropDownMenu.addClickableListElement("Delete", mouseEvent -> {
+                        dropDownMenu.addClickableAndDisableableListElement("Delete",getEdge().getIsLocked(), mouseEvent -> {
                             dropDownMenu.close();
                             UndoRedoStack.pushAndPerform(() -> { // Perform
                                 getComponent().removeEdge(getEdge());
@@ -447,6 +430,26 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
         });
     }
 
+    public MenuElement getChangeStatusMenuElement(DropDownMenu dropDownMenu) {
+        // Switch between input and output edge
+        final String status;
+        if (getEdge().getStatus() == EdgeStatus.INPUT) {
+            status = "Change to output edge";
+        } else {
+            status = "Change to input edge";
+        }
+
+        return new MenuElement(status, mouseEvent -> {
+            UndoRedoStack.pushAndPerform(
+                    () -> switchEdgeStatus(),
+                    () -> switchEdgeStatus(),
+                    "Switch edge status",
+                    "switch"
+            );
+            dropDownMenu.close();
+        }).setDisableable(getEdge().getIsLocked());
+    }
+
     private void switchEdgeStatus() {
         getEdge().switchStatus();
         for (final Link link : links) {
@@ -466,7 +469,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
             if (nail.getPropertyType().equals(Edge.PropertyType.SYNCHRONIZATION)) data[Edge.PropertyType.SYNCHRONIZATION.getI()] = i;
             if (nail.getPropertyType().equals(Edge.PropertyType.UPDATE)) data[Edge.PropertyType.UPDATE.getI()] = i;
 
-            if (nail.getPropertyType().equals(type)) {
+            if ((getEdge().getIsLocked().getValue()) || nail.getPropertyType().equals(type)) {
                 isDisabled.set(true);
             }
 

@@ -3,6 +3,7 @@ package SW9.presentations;
 import SW9.abstractions.Component;
 import SW9.abstractions.Edge;
 import SW9.abstractions.Nail;
+import SW9.controllers.EdgeController;
 import SW9.controllers.NailController;
 import SW9.utility.colors.Color;
 import SW9.utility.helpers.BindingHelper;
@@ -31,7 +32,7 @@ public class NailPresentation extends Group implements SelectHelper.Selectable {
     private final NailController controller;
     private final Timeline shakeAnimation = new Timeline();
 
-    public NailPresentation(final Nail nail, final Edge edge,final Component component) {
+    public NailPresentation(final Nail nail, final Edge edge, final Component component, final EdgeController edgeController) {
         final URL url = this.getClass().getResource("NailPresentation.fxml");
 
         final FXMLLoader fxmlLoader = new FXMLLoader();
@@ -52,6 +53,8 @@ public class NailPresentation extends Group implements SelectHelper.Selectable {
 
             // Bind the nail with the one of the controller
             controller.setNail(nail);
+
+            controller.setEdgeController(edgeController);
 
             initializeNailCircleColor();
             initializePropertyTag();
@@ -136,6 +139,11 @@ public class NailPresentation extends Group implements SelectHelper.Selectable {
                     propertyLabel.setTranslateX(-3);
                     propertyLabel.setTranslateY(-7);
                     propertyTag.setAndBindString(controller.getEdge().updateProperty());
+                }
+
+                //Disable the ability to edit the tag if the nails edge is locked
+                if(controller.getEdge().getIsLocked().getValue()){
+                    propertyTag.setDisabledText(true);
                 }
 
                 propertyTag.requestTextFieldFocus();
