@@ -369,6 +369,8 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                 } else if (unfinishedEdge != null) {
                     unfinishedEdge.setTargetLocation(getLocation());
 
+                    // If edge has no sync, add one
+                    if (!unfinishedEdge.hasSyncNail()) unfinishedEdge.makeSyncNailBetweenLocations();
                 } else {
                     // If shift is being held down, start drawing a new edge
                     if ((event.isShiftDown() && event.isPrimaryButtonDown()) || event.isMiddleButtonDown()) {
