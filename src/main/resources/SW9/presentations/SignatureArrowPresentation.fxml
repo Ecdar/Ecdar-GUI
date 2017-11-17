@@ -14,12 +14,14 @@
          fx:controller="SW9.controllers.SignatureArrowController">
 
 
-        <VBox>
+        <VBox alignment="CENTER_RIGHT">
                 <Group>
-                        <Circle fx:id="signatureArrowCircle" />
+                        <Circle fx:id="signatureArrowCircle" styleClass="nail"/>
                         <Path fx:id="signatureArrowPath" />
                 </Group>
-                <Label fx:id="signatureArrowLabel" />
+                <HBox alignment="CENTER">
+                        <Label fx:id="signatureArrowLabel" styleClass="caption-mono" />
+                </HBox>
         </VBox>
 
 </fx:root>

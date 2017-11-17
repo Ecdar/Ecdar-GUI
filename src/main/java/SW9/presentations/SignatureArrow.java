@@ -60,7 +60,7 @@ public class SignatureArrow extends Group {
             //initialPath.setStroke(componentColor.getColor(componentColorIntensity.next(2)));
             signatureArrow.setStrokeWidth(1.0);
             if(firstEdge.getStatus() == EdgeStatus.OUTPUT){
-                signatureArrow.getStrokeDashArray().addAll(5.0);
+                signatureArrow.getStyleClass().add("dashed");
 
                 final double radius = 2.0;
                 controller.signatureArrowCircle.setCenterX(xValue - radius);
