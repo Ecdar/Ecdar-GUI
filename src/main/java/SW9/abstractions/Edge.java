@@ -361,11 +361,6 @@ public class Edge implements Serializable, Nearable {
 
     }
 
-    public void addSyncListener(ChangeListener<String> listener) {
-        syncProperty().addListener(listener);
-        this.listener = listener;
-    }
-
     public enum PropertyType {
         NONE(-1),
         SELECTION(0),

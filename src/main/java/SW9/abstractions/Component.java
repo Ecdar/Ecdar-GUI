@@ -98,21 +98,8 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
             System.out.println(outputStrings.toString());
         });
 
-        final javafx.beans.value.ChangeListener<String> listener = (observable, oldValue, newValue) -> {
-            inputStrings.clear();
-            outputStrings.clear();
-
-            for (Edge edge : edges) {
-                if(edge.getStatus() == EdgeStatus.INPUT){
-                    if(!inputStrings.contains(edge.getSync())){
-                        inputStrings.add(edge.getSync());
-                    }
-                } else if (edge.getStatus() == EdgeStatus.OUTPUT) {
-                    if(!outputStrings.contains(edge.getSync())){
-                        outputStrings.add(edge.getSync());
-                    }
-                }
-            }
+        final javafx.beans.value.ChangeListener<Object> listener = (observable, oldValue, newValue) -> {
+            updateIOList();
         };
 
         edges.addListener((ListChangeListener<Edge>) c -> {
@@ -120,16 +107,39 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
             while(c.next()) {
                 for (Edge e : c.getAddedSubList()) {
                     e.syncProperty().addListener(listener);
-                    e.io
+                    e.ioStatus.addListener(listener);
                 }
 
                 for (Edge e : c.getRemoved()) {
                     e.syncProperty().removeListener(listener);
+                    e.ioStatus.removeListener(listener);
                 }
             }
         });
 
         bindReachabilityAnalysis();
+    }
+
+    private void updateIOList() {
+        List<String> localInputStrings = new ArrayList<>();
+        List<String> localOutputStrings = new ArrayList<>();
+
+        for (Edge edge : edges) {
+            
+            if(edge.getStatus() == EdgeStatus.INPUT){
+                if(!localInputStrings.contains(edge.getSync())){
+                    localInputStrings.add(edge.getSync());
+                }
+            } else if (edge.getStatus() == EdgeStatus.OUTPUT) {
+                if(!localOutputStrings.contains(edge.getSync())){
+                    localOutputStrings.add(edge.getSync());
+                }
+            }
+        }
+
+        inputStrings.setAll(localInputStrings);
+
+        outputStrings.setAll(localOutputStrings);
     }
 
     public Component(final JsonObject object) {
