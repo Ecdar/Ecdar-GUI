@@ -33,6 +33,9 @@ class EcdarDocument {
     // Map to convert back from UPPAAL edges to Ecdar edges
     private final Map<com.uppaal.model.core2.Edge, Edge> xmlToEcdarEdges = new HashMap<>();
 
+    Location universalLocation;
+    Location inconsistentLocation;
+
     EcdarDocument() throws BackendException {
         generateXmlDocument();
     }
@@ -84,18 +87,25 @@ class EcdarDocument {
 
         xmlDocument.insert(template, null);
 
+        // Add an universal location
+        universalLocation = new Location("U" + component.getName());
+        addUniversalLocation(component, template, universalLocation);
+
+
+        // Add an inconsistent location
+        inconsistentLocation = new Location("I" + component.getName());
+        addInconsistentLocation(component, template, inconsistentLocation);
+
         // Add all locations from the model to our conversion map and to the template
         for (final Location ecdarLocation : component.getLocations()) {
             // Add the location to the template
             final com.uppaal.model.core2.Location xmlLocation;
 
-            if(ecdarLocation.getType() == Location.Type.UNIVERSAL){
-                xmlLocation = addUniversalLocation(template, ecdarLocation);
-            } else {
+            if(ecdarLocation.getType() != Location.Type.UNIVERSAL && ecdarLocation.getType() != Location.Type.INCONSISTENT){
                 xmlLocation = addLocation(template, ecdarLocation);
+                // Populate the map
+                addLocationsToMaps(ecdarLocation, xmlLocation);
             }
-            // Populate the map
-            addLocationsToMaps(ecdarLocation, xmlLocation);
         }
 
         for (final Edge ecdarEdge : component.getEdges()) {
@@ -105,6 +115,26 @@ class EcdarDocument {
             }
         }
 
+    }
+
+    private void addInconsistentLocation(Component component, Template template, Location inconsistentLocation) {
+        inconsistentLocation.setUrgency(Location.Urgency.URGENT);
+        final com.uppaal.model.core2.Location xmlInconsistentLocation = addLocation(template, inconsistentLocation);
+        addLocationsToMaps(inconsistentLocation, xmlInconsistentLocation);
+    }
+
+    private void addUniversalLocation(Component component, Template template, Location universalLocation) throws BackendException {
+        final com.uppaal.model.core2.Location xmlUniversalLocation = addLocation(template, universalLocation);
+        addLocationsToMaps(universalLocation, xmlUniversalLocation);
+        for (String input : component.getInputStrings()) {
+            Edge edge = new Edge(universalLocation, universalLocation, input, EdgeStatus.INPUT);
+            xmlToEcdarEdges.put(addEdge(template, edge), edge);
+
+        }
+        for (String output : component.getOutputStrings()) {
+            Edge edge = new Edge(universalLocation, universalLocation, output, EdgeStatus.INPUT);
+            xmlToEcdarEdges.put(addEdge(template, edge), edge);
+        }
     }
 
     /**
@@ -165,33 +195,6 @@ class EcdarDocument {
         return xmlLocation;
     }
 
-    private static com.uppaal.model.core2.Location addUniversalLocation(final Template template, final Location ecdarLocation) {
-        final int x = (int) ecdarLocation.xProperty().get();
-        final int y = (int) ecdarLocation.yProperty().get();
-        final Color color = ecdarLocation.getColor().toAwtColor(ecdarLocation.getColorIntensity());
-
-        // Create new UPPAAL location and insert it into the template
-        final com.uppaal.model.core2.Location xmlLocation = template.createLocation();
-        template.insert(xmlLocation, null);
-
-        // Set name of the location
-        xmlLocation.setProperty(NAME_PROPERTY_TAG, ecdarLocation.getId());
-
-        // Update the placement of the name label
-        final Property p = xmlLocation.getProperty(NAME_PROPERTY_TAG);
-        p.setProperty("x", x);
-        p.setProperty("y", y - 30);
-
-        // Set the color of the location
-        xmlLocation.setProperty("color", color);
-
-        // Set the x and y properties
-        xmlLocation.setProperty("x", x);
-        xmlLocation.setProperty("y", y);
-
-        return xmlLocation;
-    }
-
     /**
      * Generates an xml edge from an Ecdar edge and adds it to a template.
      * @param template the template
@@ -216,7 +219,13 @@ class EcdarDocument {
 
         // Find the target locations
         if (ecdarEdge.getTargetLocation() != null) {
-            targetULocation = ecdarToXmlLocations.get(ecdarEdge.getTargetLocation());
+            if(ecdarEdge.getTargetLocation().getType() == Location.Type.UNIVERSAL){
+                targetULocation = ecdarToXmlLocations.get(universalLocation);
+            } else if(ecdarEdge.getTargetLocation().getType() == Location.Type.INCONSISTENT){
+                targetULocation = ecdarToXmlLocations.get(inconsistentLocation);
+            } else {
+                targetULocation = ecdarToXmlLocations.get(ecdarEdge.getTargetLocation());
+            }
         } else {
             throw new BackendException("An edge has no target location");
         }
@@ -228,19 +237,6 @@ class EcdarDocument {
         annotateEdge(xmlEdge, ecdarEdge);
 
         return xmlEdge;
-    }
-
-
-    /**
-     * Method takes a universal location and adds loops of all input and output edges
-     * @param template the template the universal location is located in
-     * @param universalLocation the universal location
-     * @return a set of edges
-     * @throws BackendException
-     */
-    private void addUniversalEdges(final Template template, final Location universalLocation) throws BackendException {
-
-        Edge edge = new Edge(universalLocation, EdgeStatus.INPUT);
     }
 
     /**

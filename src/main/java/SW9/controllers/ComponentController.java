@@ -322,6 +322,7 @@ public class ComponentController implements Initializable {
                 final Location newLocation = new Location();
                 newLocation.setIsLocked(true);
                 newLocation.setType(Location.Type.INCONSISTENT);
+                newLocation.setUrgency(Location.Urgency.URGENT);
 
                 double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
                 x = Math.round(x / GRID_SIZE) * GRID_SIZE;

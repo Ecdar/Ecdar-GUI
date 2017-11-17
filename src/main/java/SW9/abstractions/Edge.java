@@ -56,6 +56,12 @@ public class Edge implements Serializable, Nearable {
         bindReachabilityAnalysis();
     }
 
+    public Edge(final Location sourceLocation, final Location targetLocation, final String syncString ,final EdgeStatus status) {
+        this(sourceLocation, status);
+        setTargetLocation(targetLocation);
+        setSync(syncString);
+    }
+
     public Edge(final JsonObject jsonObject, final Component component) {
         deserialize(jsonObject, component);
         bindReachabilityAnalysis();
