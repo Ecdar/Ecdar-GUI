@@ -569,25 +569,22 @@ public class ComponentController implements Initializable {
         final Edge unfinishedEdge = getComponent().getUnfinishedEdge();
 
         if ((event.isShiftDown() && event.isPrimaryButtonDown()) || event.isMiddleButtonDown()) {
-
             final Location location = new Location();
 
-            double x = event.getX();
-            x = Math.round(x / GRID_SIZE) * GRID_SIZE;
-            location.setX(x);
-
-            double y = event.getY();
-            y = Math.round(y / GRID_SIZE) * GRID_SIZE;
-            location.setY(y);
+            location.setX(Grid.snap(event.getX()));
+            location.setY(Grid.snap(event.getY()));
 
             location.setColorIntensity(getComponent().getColorIntensity());
             location.setColor(getComponent().getColor());
 
             if (unfinishedEdge != null) {
                 unfinishedEdge.setTargetLocation(location);
+
+                // If no sync nail, add one
+                if (!unfinishedEdge.hasSyncNail()) unfinishedEdge.makeSyncNailBetweenLocations();
             }
 
-            // Add a new location
+            // Add the new location
             UndoRedoStack.pushAndPerform(() -> { // Perform
                 getComponent().addLocation(location);
                 if (unfinishedEdge != null) {
@@ -622,6 +619,12 @@ public class ComponentController implements Initializable {
 
                 // Create the abstraction for the new nail and add it to the unfinished edge
                 final Nail newNail = new Nail(x, y);
+
+                // Make sync nail if edge has none
+                if (!unfinishedEdge.hasSyncNail()) {
+                    newNail.setPropertyType(Edge.PropertyType.SYNCHRONIZATION);
+                }
+
                 unfinishedEdge.addNail(newNail);
             } else {
                 SelectHelper.clearSelectedElements();

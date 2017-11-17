@@ -17,6 +17,9 @@ import java.util.function.Consumer;
 import static javafx.scene.paint.Color.TRANSPARENT;
 import static javafx.scene.paint.Color.WHITE;
 
+/**
+ * Represents an element of the dropdown menu, excluding spacer and the colour palette element.
+ */
 public class MenuElement {
     private StackPane clickListenerFix;
     private Node item;
@@ -27,12 +30,21 @@ public class MenuElement {
     private FontIcon icon;
     private ObservableBooleanValue isDisabled = new SimpleBooleanProperty(false);
 
+    /**
+     * Constructor creates an element that has no mouse event
+     * @param s string to be shown in the menu
+     */
     public MenuElement(final String s){
         createLabel(s);
         container.getChildren().addAll(spacer, label);
         item = container;
     }
 
+    /**
+     * Creates an element that has a label and a mouse event
+     * @param s string to be shown in the menu
+     * @param mouseEventConsumer event to be triggered if clicked
+     */
     public MenuElement(final String s, final Consumer<MouseEvent> mouseEventConsumer) {
         createLabel(s);
 
@@ -46,6 +58,12 @@ public class MenuElement {
         item = rippler;
     }
 
+    /**
+     * Creates an element that has a label, icon and mouse event
+     * @param s string to be shown in the menu
+     * @param iconString string that represents the icon to be used
+     * @param mouseEventConsumer event to be triggered if clicked
+     */
     public MenuElement(final String s, final String iconString, final Consumer<MouseEvent> mouseEventConsumer){
         createLabel(s);
         addIcon(iconString);
@@ -59,6 +77,10 @@ public class MenuElement {
         item = rippler;
     }
 
+    /**
+     * Creates a rippler that triggers when the element is clicked
+     * @param mouseEventConsumer the event to be triggered along the ripple effect
+     */
     private void createRippler(final Consumer<MouseEvent> mouseEventConsumer){
         rippler = new JFXRippler(clickListenerFix);
 
@@ -98,6 +120,10 @@ public class MenuElement {
         });
     }
 
+    /**
+     * Creates a label with the text from the given string
+     * @param s string to be shown in the label
+     */
     private void createLabel(String s){
         label = new Label(s);
         label.getStyleClass().add("body2");
@@ -109,6 +135,10 @@ public class MenuElement {
         spacer.setMinWidth(8);
     }
 
+    /**
+     * Adds an icon to the element
+     * @param icon_string string to retrieve the icon
+     */
     private void addIcon(String icon_string){
         icon = new FontIcon();
         icon.setIconLiteral(icon_string);
@@ -116,13 +146,22 @@ public class MenuElement {
         icon.setIconSize(20);
     }
 
+    /**
+     * Gets the elements item
+     * @return the elements item
+     */
     public Node getItem() {
         return item;
     }
 
-    public MenuElement setDisableable(ObservableBooleanValue bool) {
+    /**
+     * allows the element to be disabled
+     * @param isDisabled boolean value that determines wheter it is currently disabled or enabled, true means disabled, false means enabled
+     * @return Returns the element itself
+     */
+    public MenuElement setDisableable(ObservableBooleanValue isDisabled) {
 
-        isDisabled = bool;
+        this.isDisabled = isDisabled;
         final Consumer<Boolean> updateTransparency = (disabled) -> {
             if (disabled) {
                 rippler.setRipplerFill(WHITE);
@@ -134,12 +173,17 @@ public class MenuElement {
             }
         };
 
-        isDisabled.addListener((obs, oldDisabled, newDisabled) -> updateTransparency.accept(newDisabled));
-        updateTransparency.accept(isDisabled.get());
+        this.isDisabled.addListener((obs, oldDisabled, newDisabled) -> updateTransparency.accept(newDisabled));
+        updateTransparency.accept(this.isDisabled.get());
 
         return this;
     }
 
+    /**
+     * allows the element to be a toggled element, the icon is visible when on and invisible when off
+     * @param isToggled boolean value that determines whether it is currently disabled or enabled, true means toggle on, false means toggled off
+     * @return Returns the element itself
+     */
     public MenuElement setToggleable(ObservableBooleanValue isToggled){
         icon.visibleProperty().bind(isToggled);
         return this;

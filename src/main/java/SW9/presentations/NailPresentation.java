@@ -2,7 +2,9 @@ package SW9.presentations;
 
 import SW9.abstractions.Component;
 import SW9.abstractions.Edge;
+import SW9.abstractions.EdgeStatus;
 import SW9.abstractions.Nail;
+import SW9.controllers.EdgeController;
 import SW9.controllers.NailController;
 import SW9.utility.colors.Color;
 import SW9.utility.helpers.BindingHelper;
@@ -11,6 +13,8 @@ import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.scene.Group;
@@ -31,7 +35,7 @@ public class NailPresentation extends Group implements SelectHelper.Selectable {
     private final NailController controller;
     private final Timeline shakeAnimation = new Timeline();
 
-    public NailPresentation(final Nail nail, final Edge edge,final Component component) {
+    public NailPresentation(final Nail nail, final Edge edge, final Component component, final EdgeController edgeController) {
         final URL url = this.getClass().getResource("NailPresentation.fxml");
 
         final FXMLLoader fxmlLoader = new FXMLLoader();
@@ -52,6 +56,8 @@ public class NailPresentation extends Group implements SelectHelper.Selectable {
 
             // Bind the nail with the one of the controller
             controller.setNail(nail);
+
+            controller.setEdgeController(edgeController);
 
             initializeNailCircleColor();
             initializePropertyTag();
@@ -126,8 +132,8 @@ public class NailPresentation extends Group implements SelectHelper.Selectable {
                     propertyTag.setAndBindString(controller.getEdge().guardProperty());
                 } else if(propertyType.equals(Edge.PropertyType.SYNCHRONIZATION)) {
                     propertyTag.setPlaceholder("Sync");
-                    propertyLabel.setText("!?");
-                    propertyLabel.setTranslateX(-6);
+                    updateSyncLabel();
+                    propertyLabel.setTranslateX(-3);
                     propertyLabel.setTranslateY(-7);
                     propertyTag.setAndBindString(controller.getEdge().syncProperty());
                 } else if(propertyType.equals(Edge.PropertyType.UPDATE)) {
@@ -153,8 +159,23 @@ public class NailPresentation extends Group implements SelectHelper.Selectable {
             updatePropertyType.accept(newPropertyType);
         });
 
+        // Whenever the edge changes I/O status
+        controller.getEdge().ioStatus.addListener((observable, oldValue, newValue) -> updateSyncLabel());
+
         // Update the tag initially
         updatePropertyType.accept(controller.getNail().getPropertyType());
+    }
+
+    /**
+     * Updates the synchronization label.
+     * The label depends on the edge I/O status.
+     */
+    private void updateSyncLabel() {
+        final Label propertyLabel = controller.propertyLabel;
+
+        // show ? or ! dependent on edge I/O status
+        if (controller.getEdge().ioStatus.get().equals(EdgeStatus.INPUT)) propertyLabel.setText("?");
+        else propertyLabel.setText("!");
     }
 
     private void initializeNailCircleColor() {
