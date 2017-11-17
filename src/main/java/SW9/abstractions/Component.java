@@ -10,6 +10,7 @@ import SW9.utility.colors.EnabledColor;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import javafx.beans.property.*;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -34,6 +35,8 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
     // Verification properties
     private final ObservableList<Location> locations = FXCollections.observableArrayList();
     private final ObservableList<Edge> edges = FXCollections.observableArrayList();
+    private final ObservableList<String> inputStrings = FXCollections.observableArrayList();
+    private final ObservableList<String> outputStrings = FXCollections.observableArrayList();
     private final StringProperty description = new SimpleStringProperty("");
 
     // Background check
@@ -48,14 +51,27 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
 
     private final BooleanProperty firsTimeShown = new SimpleBooleanProperty(false);
 
+    /**
+     * Creates a component with a random generated name but no random colouring
+     */
     public Component() {
         this(false);
     }
 
+    /**
+     * Creates a componenet with a random generated name and
+     * a given boolean value that chooses whether the colour for this component is chosen at random
+     * @param doRandomColor boolean that is true if the component should choose a colour at random and false if not
+     */
     public Component(final boolean doRandomColor) {
         this("Component" + hiddenID.getAndIncrement(), doRandomColor);
     }
 
+    /**
+     * Creates a component with a specific name and a boolean value that chooses whether the colour for this component is chosen at random
+     * @param name name of the componenet
+     * @param doRandomColor boolean that is true if the component should choose a colour at random and false if not
+     */
     public Component(final String name, final boolean doRandomColor) {
         setName(name);
 
@@ -87,6 +103,8 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
 
         locations.add(initialLocation);
 
+        initializeIOListeners();
+
         bindReachabilityAnalysis();
     }
 
@@ -94,7 +112,70 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         hiddenID.incrementAndGet();
         setFirsTimeShown(true);
         deserialize(object);
+
+        initializeIOListeners();
+
         bindReachabilityAnalysis();
+    }
+
+    /**
+     * Initialises IO listeners, adding change listener to the list of edges
+     * Also adds listeners to all current edges in edges.
+     */
+    private void initializeIOListeners() {
+        final ChangeListener<Object> listener = (observable, oldValue, newValue) -> updateIOList();
+
+        edges.addListener((ListChangeListener<Edge>) c -> {
+            while(c.next()) {
+                for (final Edge e : c.getAddedSubList()) {
+                    addListener(listener, e);
+                }
+
+                for (final Edge e : c.getRemoved()) {
+                    e.syncProperty().removeListener(listener);
+                    e.ioStatus.removeListener(listener);
+                }
+            }
+        });
+
+        // Add listener to edges initially
+        edges.forEach(edge -> addListener(listener, edge));
+    }
+
+    /**
+     * Adds a listener to the sync property and is status of an edge.
+     * @param listener the listener
+     * @param edge the edge
+     */
+    public static void addListener(final ChangeListener<Object> listener, final Edge edge) {
+        edge.syncProperty().addListener(listener);
+        edge.ioStatus.addListener(listener);
+    }
+
+    /**
+     * Method used for updating the inputstrings and outputstrings list
+     */
+    private void updateIOList() {
+        final List<String> localInputStrings = new ArrayList<>();
+        final List<String> localOutputStrings = new ArrayList<>();
+
+        for (final Edge edge : edges) {
+            // Extract channel id based on UPPAAL id definition
+            final String channel = edge.getSync().replaceAll("^([a-zA-Z_][a-zA-Z0-9_]*).*$", "$1");
+
+            if(edge.getStatus() == EdgeStatus.INPUT){
+                if(!localInputStrings.contains(channel)){
+                    localInputStrings.add(channel);
+                }
+            } else if (edge.getStatus() == EdgeStatus.OUTPUT) {
+                if(!localOutputStrings.contains(channel)){
+                    localOutputStrings.add(channel);
+                }
+            }
+        }
+
+        inputStrings.setAll(localInputStrings);
+        outputStrings.setAll(localOutputStrings);
     }
 
     /**
@@ -383,5 +464,13 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
 
     public StringProperty descriptionProperty() {
         return description;
+    }
+
+    public ObservableList<String> getInputStrings() {
+        return inputStrings;
+    }
+
+    public ObservableList<String> getOutputStrings() {
+        return outputStrings;
     }
 }
