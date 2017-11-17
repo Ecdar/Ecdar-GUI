@@ -128,7 +128,7 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         edges.addListener((ListChangeListener<Edge>) c -> {
             while(c.next()) {
                 for (final Edge e : c.getAddedSubList()) {
-                    addListener(listener, e);
+                    addSyncListener(listener, e);
                 }
 
                 for (final Edge e : c.getRemoved()) {
@@ -139,7 +139,7 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         });
 
         // Add listener to edges initially
-        edges.forEach(edge -> addListener(listener, edge));
+        edges.forEach(edge -> addSyncListener(listener, edge));
     }
 
     /**
@@ -147,7 +147,7 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
      * @param listener the listener
      * @param edge the edge
      */
-    public static void addListener(final ChangeListener<Object> listener, final Edge edge) {
+    public static void addSyncListener(final ChangeListener<Object> listener, final Edge edge) {
         edge.syncProperty().addListener(listener);
         edge.ioStatus.addListener(listener);
     }

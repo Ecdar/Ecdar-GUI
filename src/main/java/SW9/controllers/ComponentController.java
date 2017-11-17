@@ -151,35 +151,24 @@ public class ComponentController implements Initializable {
     }
 
     private void initializeSignature(final Component newComponent) {
-        HashMap<String, ArrayList<Edge>> edgeDictionary = new HashMap<>();
+        newComponent.getOutputStrings().addListener((ListChangeListener<String>) c -> {
+            // By clearing the container we don't have to fiddle with which elements are removed and added
+            outputSignatureContainer.getChildren().clear();
+            while (c.next()){
+                   for(String channel: c.getAddedSubList()) {
+                       SignatureArrow newArrow = new SignatureArrow(channel, EdgeStatus.OUTPUT);
+                       outputSignatureContainer.getChildren().add(newArrow);
+                   }
+            }
+        });
 
-        // This is work-in-progress and should instead use methods on the component to getOutputChannels and getInput...
-        newComponent.edges.addListener(new ListChangeListener<Edge>() {
-            @Override
-            public void onChanged(Change<? extends Edge> c) {
-
-                edgeDictionary.clear();
-                outputSignatureContainer.getChildren().clear();
-                inputSignatureContainer.getChildren().clear();
-
-                for (Edge edge : c.getList()) {
-                    String edgeKey = edge.getSync();
-                    final ArrayList<Edge> edgeList = edgeDictionary.get(edgeKey);
-
-                    if(edgeList == null) {
-                        ArrayList<Edge> newList = new ArrayList<>();
-                        newList.add(edge);
-                        edgeDictionary.put(edgeKey, newList);
-                    } else {
-                        edgeList.add(edge);
-                    }
+        newComponent.getInputStrings().addListener((ListChangeListener<String>) c -> {
+            inputSignatureContainer.getChildren().clear();
+            while (c.next()){
+                for(String channel: c.getAddedSubList()) {
+                    SignatureArrow newArrow = new SignatureArrow(channel, EdgeStatus.INPUT);
+                    inputSignatureContainer.getChildren().add(newArrow);
                 }
-
-                edgeDictionary.forEach((key, value) -> {
-                    final SignatureArrow newSignatureArrow = new SignatureArrow(value);
-
-                    inputSignatureContainer.getChildren().add(newSignatureArrow);
-                });
             }
         });
     }

@@ -19,7 +19,7 @@ public class SignatureArrow extends Group {
 
     private SignatureArrowController controller;
 
-    public SignatureArrow(final List<Edge> edges){
+    public SignatureArrow(final String edgeName, final EdgeStatus edgeStatus){
 
         final URL location = this.getClass().getResource("SignatureArrowPresentation.fxml");
 
@@ -34,13 +34,13 @@ public class SignatureArrow extends Group {
             controller = fxmlLoader.getController();
 
 
-            if(edges.isEmpty())
-                return;
+            //if(edgeName.isEmpty())
+             //   return;
 
             final Path signatureArrow = controller.signatureArrowPath;
-            final Edge firstEdge = edges.get(0);
-            String syncText = firstEdge.getSync();
-            controller.signatureArrowLabel.setText(syncText);
+            //final Edge firstEdge = edges.get(0);
+            //String syncText = firstEdge.getSync();
+            controller.signatureArrowLabel.setText(edgeName);
 
 
             //final Path initialPath = new Path();
@@ -59,7 +59,7 @@ public class SignatureArrow extends Group {
             //initialPath.setFill(componentColor.getColor(componentColorIntensity.next(-1)));
             //initialPath.setStroke(componentColor.getColor(componentColorIntensity.next(2)));
             signatureArrow.setStrokeWidth(1.0);
-            if(firstEdge.getStatus() == EdgeStatus.OUTPUT){
+            if(edgeStatus == EdgeStatus.OUTPUT){
                 signatureArrow.getStyleClass().add("dashed");
 
                 final double radius = 2.0;
