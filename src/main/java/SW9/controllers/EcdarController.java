@@ -606,13 +606,13 @@ public class EcdarController implements Initializable {
 
             //Save as png in picked directory
             final WritableImage image;
-            final String name = ((Component) CanvasController.getActiveVerificationObject()).getName();
+            final String name = CanvasController.getActiveVerificationObject().getName();
             if (canvas.isGridOn()) {
                 canvas.toggleGrid();
-                image = canvas.snapshot(new SnapshotParameters(), null);
+                image = scaleAndTakeSnapshot();
                 canvas.toggleGrid();
             } else {
-                image = canvas.snapshot(new SnapshotParameters(), null);
+                image = scaleAndTakeSnapshot();
             }
 
             final FileChooser filePicker = new FileChooser();
@@ -642,6 +642,21 @@ public class EcdarController implements Initializable {
                 Ecdar.showToast("Export was cancelled");
             }
         });
+    }
+
+    /**
+     * Zooms in times 2 to get a higher resolution.
+     * Then take snapshot and zoom to times 1 again.
+     * @return the snapshot
+     */
+    private WritableImage scaleAndTakeSnapshot() {
+        final WritableImage image;
+        canvas.setScaleX(2.0);
+        canvas.setScaleY(2.0);
+        image = canvas.snapshot(new SnapshotParameters(), null);
+        canvas.setScaleX(1.0);
+        canvas.setScaleY(1.0);
+        return image;
     }
 
     /**
