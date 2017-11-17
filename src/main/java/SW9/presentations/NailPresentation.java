@@ -151,13 +151,16 @@ public class NailPresentation extends Group implements SelectHelper.Selectable {
             }
         };
 
-        // Whenever the property type updates update the tag
+        // Whenever the property type updates, update the tag
         controller.getNail().propertyTypeProperty().addListener((obs, oldPropertyType, newPropertyType) -> {
             updatePropertyType.accept(newPropertyType);
         });
 
-        // Whenever the edge changes I/O status
-        controller.getEdge().ioStatus.addListener((observable, oldValue, newValue) -> updateSyncLabel(propertyTag));
+        // Whenever the edge changes I/O status, if sync nail then update its label
+        controller.getEdge().ioStatus.addListener((observable, oldValue, newValue) -> {
+            if (controller.getNail().getPropertyType().equals(Edge.PropertyType.SYNCHRONIZATION))
+                updateSyncLabel(propertyTag);
+        });
 
         // Update the tag initially
         updatePropertyType.accept(controller.getNail().getPropertyType());
