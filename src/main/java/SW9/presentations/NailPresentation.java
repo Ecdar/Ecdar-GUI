@@ -2,6 +2,7 @@ package SW9.presentations;
 
 import SW9.abstractions.Component;
 import SW9.abstractions.Edge;
+import SW9.abstractions.EdgeStatus;
 import SW9.abstractions.Nail;
 import SW9.controllers.EdgeController;
 import SW9.controllers.NailController;
@@ -128,9 +129,8 @@ public class NailPresentation extends Group implements SelectHelper.Selectable {
                     propertyLabel.setTranslateY(-7);
                     propertyTag.setAndBindString(controller.getEdge().guardProperty());
                 } else if(propertyType.equals(Edge.PropertyType.SYNCHRONIZATION)) {
-                    propertyTag.setPlaceholder("Sync");
-                    propertyLabel.setText("!?");
-                    propertyLabel.setTranslateX(-6);
+                    updateSyncLabel(propertyTag);
+                    propertyLabel.setTranslateX(-3);
                     propertyLabel.setTranslateY(-7);
                     propertyTag.setAndBindString(controller.getEdge().syncProperty());
                 } else if(propertyType.equals(Edge.PropertyType.UPDATE)) {
@@ -151,13 +151,37 @@ public class NailPresentation extends Group implements SelectHelper.Selectable {
             }
         };
 
-        // Whenever the property type updates update the tag
+        // Whenever the property type updates, update the tag
         controller.getNail().propertyTypeProperty().addListener((obs, oldPropertyType, newPropertyType) -> {
             updatePropertyType.accept(newPropertyType);
         });
 
+        // Whenever the edge changes I/O status, if sync nail then update its label
+        controller.getEdge().ioStatus.addListener((observable, oldValue, newValue) -> {
+            if (controller.getNail().getPropertyType().equals(Edge.PropertyType.SYNCHRONIZATION))
+                updateSyncLabel(propertyTag);
+        });
+
         // Update the tag initially
         updatePropertyType.accept(controller.getNail().getPropertyType());
+    }
+
+    /**
+     * Updates the synchronization label and tag.
+     * The update depends on the edge I/O status.
+     * @param propertyTag Property tag to update
+     */
+    private void updateSyncLabel(final TagPresentation propertyTag) {
+        final Label propertyLabel = controller.propertyLabel;
+
+        // show ? or ! dependent on edge I/O status
+        if (controller.getEdge().ioStatus.get().equals(EdgeStatus.INPUT)) {
+            propertyLabel.setText("?");
+            propertyTag.setPlaceholder("Input");
+        } else {
+            propertyLabel.setText("!");
+            propertyTag.setPlaceholder("Output");
+        }
     }
 
     private void initializeNailCircleColor() {

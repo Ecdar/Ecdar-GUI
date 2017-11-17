@@ -23,6 +23,9 @@ public class Edge implements Serializable, Nearable {
     private static final String NAILS = "nails";
     private static final String STATUS = "status";
 
+    // Defines if this is an input or an output edge
+    public ObjectProperty<EdgeStatus> ioStatus;
+
     // Verification properties
     private final ObjectProperty<Location> sourceLocation = new SimpleObjectProperty<>();
     private final ObjectProperty<Location> targetLocation = new SimpleObjectProperty<>();
@@ -41,15 +44,12 @@ public class Edge implements Serializable, Nearable {
     private final ObjectProperty<Circular> sourceCircular = new SimpleObjectProperty<>();
     private final ObjectProperty<Circular> targetCircular = new SimpleObjectProperty<>();
 
-    // Defines if this is an input or an output edge
-    private EdgeStatus status;
-
     // Boolean for if this edge is locked or can be edited
     private final BooleanProperty isLocked = new SimpleBooleanProperty(false);
 
     public Edge(final Location sourceLocation, final EdgeStatus status) {
         setSourceLocation(sourceLocation);
-        this.status = status;
+        ioStatus = new SimpleObjectProperty<>(status);
 
         bindReachabilityAnalysis();
     }
@@ -135,6 +135,14 @@ public class Edge implements Serializable, Nearable {
 
     public StringProperty syncProperty() {
         return sync;
+    }
+
+    /**
+     * Gets the synchronization string concatenated with the synchronization symbol (? or !).
+     * @return the synchronization string concatenated with the synchronization symbol.
+     */
+    public String getSyncWithSymbol() {
+        return sync.get() + (ioStatus.get().equals(EdgeStatus.INPUT) ? "?" : "!");
     }
 
     public Color getColor() {
@@ -268,7 +276,7 @@ public class Edge implements Serializable, Nearable {
         result.addProperty(SOURCE_LOCATION, getSourceLocation().getId());
         result.addProperty(TARGET_LOCATION, getTargetLocation().getId());
 
-        result.addProperty(STATUS, status.toString());
+        result.addProperty(STATUS, ioStatus.get().toString());
         result.addProperty(SELECT, getSelect());
         result.addProperty(GUARD, getGuard());
         result.addProperty(UPDATE, getUpdate());
@@ -298,7 +306,7 @@ public class Edge implements Serializable, Nearable {
             }
         }
 
-        status = EdgeStatus.valueOf(json.getAsJsonPrimitive(STATUS).getAsString());
+        ioStatus = new SimpleObjectProperty<>(EdgeStatus.valueOf(json.getAsJsonPrimitive(STATUS).getAsString()));
 
         setSelect(json.getAsJsonPrimitive(SELECT).getAsString());
         setGuard(json.getAsJsonPrimitive(GUARD).getAsString());
@@ -335,17 +343,17 @@ public class Edge implements Serializable, Nearable {
      * @return the status
      */
     public EdgeStatus getStatus() {
-        return status;
+        return ioStatus.get();
     }
 
     /**
      * Switches if the status of this is input or output
      */
     public void switchStatus() {
-        if (status == EdgeStatus.INPUT) {
-            status = EdgeStatus.OUTPUT;
+        if (ioStatus.get() == EdgeStatus.INPUT) {
+            ioStatus.set(EdgeStatus.OUTPUT);
         } else {
-            status = EdgeStatus.INPUT;
+            ioStatus.set(EdgeStatus.INPUT);
         }
     }
 
