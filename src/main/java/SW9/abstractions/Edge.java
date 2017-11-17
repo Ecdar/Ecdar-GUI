@@ -9,6 +9,7 @@ import SW9.utility.serialize.Serializable;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import javafx.beans.property.*;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -46,6 +47,7 @@ public class Edge implements Serializable, Nearable {
 
     // Boolean for if this edge is locked or can be edited
     private final BooleanProperty isLocked = new SimpleBooleanProperty(false);
+    private ChangeListener<String> listener;
 
     public Edge(final Location sourceLocation, final EdgeStatus status) {
         setSourceLocation(sourceLocation);
@@ -355,6 +357,8 @@ public class Edge implements Serializable, Nearable {
         } else {
             ioStatus.set(EdgeStatus.INPUT);
         }
+
+
     }
 
     public enum PropertyType {

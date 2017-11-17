@@ -10,11 +10,13 @@ import SW9.utility.colors.EnabledColor;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import javafx.beans.property.*;
+import javafx.beans.value.ObservableStringValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.util.Pair;
 
+import javax.swing.event.ChangeListener;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -34,6 +36,8 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
     // Verification properties
     private final ObservableList<Location> locations = FXCollections.observableArrayList();
     private final ObservableList<Edge> edges = FXCollections.observableArrayList();
+    private final ObservableList<String> inputStrings = FXCollections.observableArrayList();
+    private final ObservableList<String> outputStrings = FXCollections.observableArrayList();
     private final StringProperty description = new SimpleStringProperty("");
 
     // Background check
@@ -87,7 +91,55 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
 
         locations.add(initialLocation);
 
+        inputStrings.addListener((ListChangeListener<String>) c -> {
+           System.out.println(inputStrings.toString());
+        });
+        outputStrings.addListener((ListChangeListener<String>) c -> {
+            System.out.println(outputStrings.toString());
+        });
+
+        final javafx.beans.value.ChangeListener<Object> listener = (observable, oldValue, newValue) -> {
+            updateIOList();
+        };
+
+        edges.addListener((ListChangeListener<Edge>) c -> {
+
+            while(c.next()) {
+                for (Edge e : c.getAddedSubList()) {
+                    e.syncProperty().addListener(listener);
+                    e.ioStatus.addListener(listener);
+                }
+
+                for (Edge e : c.getRemoved()) {
+                    e.syncProperty().removeListener(listener);
+                    e.ioStatus.removeListener(listener);
+                }
+            }
+        });
+
         bindReachabilityAnalysis();
+    }
+
+    private void updateIOList() {
+        List<String> localInputStrings = new ArrayList<>();
+        List<String> localOutputStrings = new ArrayList<>();
+
+        for (Edge edge : edges) {
+            
+            if(edge.getStatus() == EdgeStatus.INPUT){
+                if(!localInputStrings.contains(edge.getSync())){
+                    localInputStrings.add(edge.getSync());
+                }
+            } else if (edge.getStatus() == EdgeStatus.OUTPUT) {
+                if(!localOutputStrings.contains(edge.getSync())){
+                    localOutputStrings.add(edge.getSync());
+                }
+            }
+        }
+
+        inputStrings.setAll(localInputStrings);
+
+        outputStrings.setAll(localOutputStrings);
     }
 
     public Component(final JsonObject object) {
@@ -383,5 +435,13 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
 
     public StringProperty descriptionProperty() {
         return description;
+    }
+
+    public ObservableList<String> getInputStrings() {
+        return inputStrings;
+    }
+
+    public ObservableList<String> getOutputStrings() {
+        return outputStrings;
     }
 }
