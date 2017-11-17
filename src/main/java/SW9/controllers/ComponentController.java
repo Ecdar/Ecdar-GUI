@@ -329,6 +329,9 @@ public class ComponentController implements Initializable {
 
                 setCoordinates.accept(location);
 
+                // If edge has no sync, add one
+                if (!unfinishedEdge.hasSyncNail()) unfinishedEdge.makeSyncNailBetweenLocations();
+
                 // Add a new location
                 UndoRedoStack.pushAndPerform(() -> { // Perform
                     getComponent().addLocation(location);
