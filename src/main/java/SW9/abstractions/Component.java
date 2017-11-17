@@ -10,13 +10,12 @@ import SW9.utility.colors.EnabledColor;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import javafx.beans.property.*;
-import javafx.beans.value.ObservableStringValue;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.util.Pair;
 
-import javax.swing.event.ChangeListener;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -91,62 +90,76 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
 
         locations.add(initialLocation);
 
-        inputStrings.addListener((ListChangeListener<String>) c -> {
-           System.out.println(inputStrings.toString());
-        });
-        outputStrings.addListener((ListChangeListener<String>) c -> {
-            System.out.println(outputStrings.toString());
-        });
-
-        final javafx.beans.value.ChangeListener<Object> listener = (observable, oldValue, newValue) -> {
-            updateIOList();
-        };
-
-        edges.addListener((ListChangeListener<Edge>) c -> {
-
-            while(c.next()) {
-                for (Edge e : c.getAddedSubList()) {
-                    e.syncProperty().addListener(listener);
-                    e.ioStatus.addListener(listener);
-                }
-
-                for (Edge e : c.getRemoved()) {
-                    e.syncProperty().removeListener(listener);
-                    e.ioStatus.removeListener(listener);
-                }
-            }
-        });
+        initializeIOListeners();
 
         bindReachabilityAnalysis();
-    }
-
-    private void updateIOList() {
-        List<String> localInputStrings = new ArrayList<>();
-        List<String> localOutputStrings = new ArrayList<>();
-
-        for (Edge edge : edges) {
-            
-            if(edge.getStatus() == EdgeStatus.INPUT){
-                if(!localInputStrings.contains(edge.getSync())){
-                    localInputStrings.add(edge.getSync());
-                }
-            } else if (edge.getStatus() == EdgeStatus.OUTPUT) {
-                if(!localOutputStrings.contains(edge.getSync())){
-                    localOutputStrings.add(edge.getSync());
-                }
-            }
-        }
-
-        inputStrings.setAll(localInputStrings);
-
-        outputStrings.setAll(localOutputStrings);
     }
 
     public Component(final JsonObject object) {
         hiddenID.incrementAndGet();
         setFirsTimeShown(true);
         deserialize(object);
+
+        initializeIOListeners();
+
         bindReachabilityAnalysis();
+    }
+
+    private void initializeIOListeners() {
+        // TODO Delete when done with IO signatures
+        inputStrings.addListener((ListChangeListener<String>) c -> System.out.println(inputStrings.toString()));
+        outputStrings.addListener((ListChangeListener<String>) c -> System.out.println(outputStrings.toString()));
+
+        final ChangeListener<Object> listener = (observable, oldValue, newValue) -> updateIOList();
+
+        edges.addListener((ListChangeListener<Edge>) c -> {
+            while(c.next()) {
+                for (final Edge e : c.getAddedSubList()) {
+                    addListener(listener, e);
+                }
+
+                for (final Edge e : c.getRemoved()) {
+                    e.syncProperty().removeListener(listener);
+                    e.ioStatus.removeListener(listener);
+                }
+            }
+        });
+
+        // Add listener to edges initially
+        edges.forEach(edge -> addListener(listener, edge));
+    }
+
+    /**
+     * Adds a listener to the sync property and is status of an edge.
+     * @param listener the listener
+     * @param edge the edge
+     */
+    public static void addListener(final ChangeListener<Object> listener, final Edge edge) {
+        edge.syncProperty().addListener(listener);
+        edge.ioStatus.addListener(listener);
+    }
+
+    private void updateIOList() {
+        final List<String> localInputStrings = new ArrayList<>();
+        final List<String> localOutputStrings = new ArrayList<>();
+
+        for (final Edge edge : edges) {
+            // Extract channel id based on UPPAAL id definition
+            final String channel = edge.getSync().replaceAll("^([a-zA-Z_][a-zA-Z0-9_]*).*$", "$1");
+
+            if(edge.getStatus() == EdgeStatus.INPUT){
+                if(!localInputStrings.contains(channel)){
+                    localInputStrings.add(channel);
+                }
+            } else if (edge.getStatus() == EdgeStatus.OUTPUT) {
+                if(!localOutputStrings.contains(channel)){
+                    localOutputStrings.add(channel);
+                }
+            }
+        }
+
+        inputStrings.setAll(localInputStrings);
+        outputStrings.setAll(localOutputStrings);
     }
 
     /**
