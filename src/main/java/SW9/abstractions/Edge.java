@@ -47,7 +47,6 @@ public class Edge implements Serializable, Nearable {
 
     // Boolean for if this edge is locked or can be edited
     private final BooleanProperty isLocked = new SimpleBooleanProperty(false);
-    private ChangeListener<String> listener;
 
     public Edge(final Location sourceLocation, final EdgeStatus status) {
         setSourceLocation(sourceLocation);
