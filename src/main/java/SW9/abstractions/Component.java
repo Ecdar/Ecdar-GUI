@@ -91,35 +91,36 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
 
         locations.add(initialLocation);
 
-        /*inputStrings.addListener((ListChangeListener<String>) c -> {
+        inputStrings.addListener((ListChangeListener<String>) c -> {
            System.out.println(inputStrings.toString());
         });
         outputStrings.addListener((ListChangeListener<String>) c -> {
             System.out.println(outputStrings.toString());
-        });*/
+        });
 
-        edges.addListener((ListChangeListener<Edge>) c -> {
+        final javafx.beans.value.ChangeListener<String> listener = (observable, oldValue, newValue) -> {
+            inputStrings.clear();
+            outputStrings.clear();
 
-            javafx.beans.value.ChangeListener<String> listener = (observable, oldValue, newValue) -> {
-                inputStrings.clear();
-                outputStrings.clear();
-
-                for (Edge edge : edges) {
-                    if(edge.getStatus() == EdgeStatus.INPUT){
-                        if(!inputStrings.contains(edge.getSync())){
-                            inputStrings.add(edge.getSync());
-                        }
-                    } else if (edge.getStatus() == EdgeStatus.OUTPUT) {
-                        if(!outputStrings.contains(edge.getSync())){
-                            outputStrings.add(edge.getSync());
-                        }
+            for (Edge edge : edges) {
+                if(edge.getStatus() == EdgeStatus.INPUT){
+                    if(!inputStrings.contains(edge.getSync())){
+                        inputStrings.add(edge.getSync());
+                    }
+                } else if (edge.getStatus() == EdgeStatus.OUTPUT) {
+                    if(!outputStrings.contains(edge.getSync())){
+                        outputStrings.add(edge.getSync());
                     }
                 }
-            };
+            }
+        };
+
+        edges.addListener((ListChangeListener<Edge>) c -> {
 
             while(c.next()) {
                 for (Edge e : c.getAddedSubList()) {
                     e.syncProperty().addListener(listener);
+                    e.io
                 }
 
                 for (Edge e : c.getRemoved()) {
