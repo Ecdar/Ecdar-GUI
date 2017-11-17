@@ -2,6 +2,7 @@ package SW9.presentations;
 
 import SW9.abstractions.Component;
 import SW9.abstractions.Edge;
+import SW9.abstractions.EdgeStatus;
 import SW9.abstractions.Nail;
 import SW9.controllers.EdgeController;
 import SW9.controllers.NailController;
@@ -12,6 +13,8 @@ import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.scene.Group;
@@ -129,8 +132,8 @@ public class NailPresentation extends Group implements SelectHelper.Selectable {
                     propertyTag.setAndBindString(controller.getEdge().guardProperty());
                 } else if(propertyType.equals(Edge.PropertyType.SYNCHRONIZATION)) {
                     propertyTag.setPlaceholder("Sync");
-                    propertyLabel.setText("!?");
-                    propertyLabel.setTranslateX(-6);
+                    updateSyncLabel();
+                    propertyLabel.setTranslateX(-3);
                     propertyLabel.setTranslateY(-7);
                     propertyTag.setAndBindString(controller.getEdge().syncProperty());
                 } else if(propertyType.equals(Edge.PropertyType.UPDATE)) {
@@ -156,8 +159,23 @@ public class NailPresentation extends Group implements SelectHelper.Selectable {
             updatePropertyType.accept(newPropertyType);
         });
 
+        // Whenever the edge changes I/O status
+        controller.getEdge().ioStatus.addListener((observable, oldValue, newValue) -> updateSyncLabel());
+
         // Update the tag initially
         updatePropertyType.accept(controller.getNail().getPropertyType());
+    }
+
+    /**
+     * Updates the synchronization label.
+     * The label depends on the edge I/O status.
+     */
+    private void updateSyncLabel() {
+        final Label propertyLabel = controller.propertyLabel;
+
+        // show ? or ! dependent on edge I/O status
+        if (controller.getEdge().ioStatus.get().equals(EdgeStatus.INPUT)) propertyLabel.setText("?");
+        else propertyLabel.setText("!");
     }
 
     private void initializeNailCircleColor() {

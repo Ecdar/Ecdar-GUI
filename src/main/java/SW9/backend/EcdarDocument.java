@@ -236,7 +236,7 @@ class EcdarDocument {
             }
 
             if (!Strings.isNullOrEmpty(ecdarEdge.getSync()) && ecdarNail.getPropertyType().equals(Edge.PropertyType.SYNCHRONIZATION)) {
-                xmlEdge.setProperty(SYNC_PROPERTY_TAG, ecdarEdge.getSync());
+                xmlEdge.setProperty(SYNC_PROPERTY_TAG, ecdarEdge.getSyncWithSymbol());
                 final Property p = xmlEdge.getProperty(SYNC_PROPERTY_TAG);
                 p.setProperty("x", x + ((int) ecdarNail.getPropertyX()));
                 p.setProperty("y", y + ((int) ecdarNail.getPropertyY()));

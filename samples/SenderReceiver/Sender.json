@@ -39,7 +39,7 @@
       "select": "",
       "guard": "",
       "update": "",
-      "sync": "c!",
+      "sync": "c",
       "nails": [
         {
           "x": 370.0,
@@ -71,7 +71,7 @@
       "select": "",
       "guard": "",
       "update": "",
-      "sync": "c!",
+      "sync": "c",
       "nails": [
         {
           "x": 230.0,
