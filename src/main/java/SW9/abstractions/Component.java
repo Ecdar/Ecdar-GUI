@@ -123,10 +123,6 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
      * Also adds listeners to all current edges in edges.
      */
     private void initializeIOListeners() {
-        // TODO Delete when done with IO signatures
-        inputStrings.addListener((ListChangeListener<String>) c -> System.out.println(inputStrings.toString()));
-        outputStrings.addListener((ListChangeListener<String>) c -> System.out.println(outputStrings.toString()));
-
         final ChangeListener<Object> listener = (observable, oldValue, newValue) -> updateIOList();
 
         edges.addListener((ListChangeListener<Edge>) c -> {
