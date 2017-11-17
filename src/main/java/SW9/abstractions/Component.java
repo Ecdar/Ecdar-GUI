@@ -51,14 +51,27 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
 
     private final BooleanProperty firsTimeShown = new SimpleBooleanProperty(false);
 
+    /**
+     * Creates a component with a random generated name but no random colouring
+     */
     public Component() {
         this(false);
     }
 
+    /**
+     * Creates a componenet with a random generated name and
+     * a given boolean value that chooses whether the colour for this component is chosen at random
+     * @param doRandomColor boolean that is true if the component should choose a colour at random and false if not
+     */
     public Component(final boolean doRandomColor) {
         this("Component" + hiddenID.getAndIncrement(), doRandomColor);
     }
 
+    /**
+     * Creates a component with a specific name and a boolean value that chooses whether the colour for this component is chosen at random
+     * @param name name of the componenet
+     * @param doRandomColor boolean that is true if the component should choose a colour at random and false if not
+     */
     public Component(final String name, final boolean doRandomColor) {
         setName(name);
 
@@ -105,6 +118,10 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         bindReachabilityAnalysis();
     }
 
+    /**
+     * Initialises IO listeners, adding change listener to the list of edges
+     * Also adds listeners to all current edges in edges.
+     */
     private void initializeIOListeners() {
         // TODO Delete when done with IO signatures
         inputStrings.addListener((ListChangeListener<String>) c -> System.out.println(inputStrings.toString()));
@@ -139,6 +156,9 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         edge.ioStatus.addListener(listener);
     }
 
+    /**
+     * Method used for updating the inputstrings and outputstrings list
+     */
     private void updateIOList() {
         final List<String> localInputStrings = new ArrayList<>();
         final List<String> localOutputStrings = new ArrayList<>();
