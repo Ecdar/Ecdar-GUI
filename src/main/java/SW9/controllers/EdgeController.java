@@ -378,7 +378,6 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
 
                         addEdgePropertyRow(dropDownMenu, "Add Select", Edge.PropertyType.SELECTION, link);
                         addEdgePropertyRow(dropDownMenu, "Add Guard", Edge.PropertyType.GUARD, link);
-                        addEdgePropertyRow(dropDownMenu, "Add Synchronization", Edge.PropertyType.SYNCHRONIZATION, link);
                         addEdgePropertyRow(dropDownMenu, "Add Update", Edge.PropertyType.UPDATE, link);
 
                         dropDownMenu.addSpacerElement();
