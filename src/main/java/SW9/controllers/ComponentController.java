@@ -35,8 +35,6 @@ import javafx.util.Duration;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.StyleClassedTextArea;
 
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -419,6 +417,9 @@ public class ComponentController implements Initializable {
                 unfinishedEdge.setTargetLocation(location);
 
                 setCoordinates.accept(location);
+
+                // If edge has no sync, add one
+                if (!unfinishedEdge.hasSyncNail()) unfinishedEdge.makeSyncNailBetweenLocations();
 
                 // Add a new location
                 UndoRedoStack.pushAndPerform(() -> { // Perform

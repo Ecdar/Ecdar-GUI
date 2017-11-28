@@ -10,13 +10,12 @@ import SW9.utility.colors.EnabledColor;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import javafx.beans.property.*;
-import javafx.beans.value.ObservableStringValue;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.util.Pair;
 
-import javax.swing.event.ChangeListener;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -56,14 +55,27 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
 
     private final BooleanProperty firsTimeShown = new SimpleBooleanProperty(false);
 
+    /**
+     * Creates a component with a random generated name but no random colouring
+     */
     public Component() {
         this(false);
     }
 
+    /**
+     * Creates a componenet with a random generated name and
+     * a given boolean value that chooses whether the colour for this component is chosen at random
+     * @param doRandomColor boolean that is true if the component should choose a colour at random and false if not
+     */
     public Component(final boolean doRandomColor) {
         this("Component" + hiddenID.getAndIncrement(), doRandomColor);
     }
 
+    /**
+     * Creates a component with a specific name and a boolean value that chooses whether the colour for this component is chosen at random
+     * @param name name of the componenet
+     * @param doRandomColor boolean that is true if the component should choose a colour at random and false if not
+     */
     public Component(final String name, final boolean doRandomColor) {
         setName(name);
 
@@ -95,33 +107,53 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
 
         locations.add(initialLocation);
 
-        inputStrings.addListener((ListChangeListener<String>) c -> {
-           System.out.println(inputStrings.toString());
-        });
-        outputStrings.addListener((ListChangeListener<String>) c -> {
-            System.out.println(outputStrings.toString());
-        });
+        initializeIOListeners();
 
-        final javafx.beans.value.ChangeListener<Object> listener = (observable, oldValue, newValue) -> {
-            updateIOList();
-        };
+        bindReachabilityAnalysis();
+    }
+
+    public Component(final JsonObject object) {
+        hiddenID.incrementAndGet();
+        setFirsTimeShown(true);
+        deserialize(object);
+
+        initializeIOListeners();
+
+        bindReachabilityAnalysis();
+    }
+
+    /**
+     * Initialises IO listeners, adding change listener to the list of edges
+     * Also adds listeners to all current edges in edges.
+     */
+    private void initializeIOListeners() {
+        final ChangeListener<Object> listener = (observable, oldValue, newValue) -> updateIOList();
 
         edges.addListener((ListChangeListener<Edge>) c -> {
-
             while(c.next()) {
-                for (Edge e : c.getAddedSubList()) {
-                    e.syncProperty().addListener(listener);
-                    e.ioStatus.addListener(listener);
+                for (final Edge e : c.getAddedSubList()) {
+                    addListener(listener, e);
                 }
 
-                for (Edge e : c.getRemoved()) {
+                for (final Edge e : c.getRemoved()) {
                     e.syncProperty().removeListener(listener);
                     e.ioStatus.removeListener(listener);
                 }
             }
         });
 
-        bindReachabilityAnalysis();
+        // Add listener to edges initially
+        edges.forEach(edge -> addListener(listener, edge));
+    }
+
+    /**
+     * Adds a listener to the sync property and is status of an edge.
+     * @param listener the listener
+     * @param edge the edge
+     */
+    public static void addListener(final ChangeListener<Object> listener, final Edge edge) {
+        edge.syncProperty().addListener(listener);
+        edge.ioStatus.addListener(listener);
     }
 
     public int getUniversalId() {
@@ -140,33 +172,30 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         return inconsistentId;
     }
 
+    /**
+     * Method used for updating the inputstrings and outputstrings list
+     */
     private void updateIOList() {
-        List<String> localInputStrings = new ArrayList<>();
-        List<String> localOutputStrings = new ArrayList<>();
+        final List<String> localInputStrings = new ArrayList<>();
+        final List<String> localOutputStrings = new ArrayList<>();
 
-        for (Edge edge : edges) {
-            
+        for (final Edge edge : edges) {
+            // Extract channel id based on UPPAAL id definition
+            final String channel = edge.getSync().replaceAll("^([a-zA-Z_][a-zA-Z0-9_]*).*$", "$1");
+
             if(edge.getStatus() == EdgeStatus.INPUT){
-                if(!edge.getSync().equals("*") && !localInputStrings.contains(edge.getSync())){
-                    localInputStrings.add(edge.getSync());
+                if(!edge.getSync().equals("*") && !localInputStrings.contains(channel)){
+                    localInputStrings.add(channel);
                 }
             } else if (edge.getStatus() == EdgeStatus.OUTPUT) {
-                if(!edge.getSync().equals("*") && !localOutputStrings.contains(edge.getSync())){
-                    localOutputStrings.add(edge.getSync());
+                if(!edge.getSync().equals("*") && !localOutputStrings.contains(channel)){
+                    localOutputStrings.add(channel);
                 }
             }
         }
 
         inputStrings.setAll(localInputStrings);
-
         outputStrings.setAll(localOutputStrings);
-    }
-
-    public Component(final JsonObject object) {
-        hiddenID.incrementAndGet();
-        setFirsTimeShown(true);
-        deserialize(object);
-        bindReachabilityAnalysis();
     }
 
     /**
