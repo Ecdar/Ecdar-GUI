@@ -22,6 +22,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Component extends VerificationObject implements DropDownMenu.HasColor {
     private static final AtomicInteger hiddenID = new AtomicInteger(0); // Used to generate unique IDs
+    private static final AtomicInteger atomicUniversalId = new AtomicInteger(0);
+    private static final AtomicInteger atomicInconsistentId = new AtomicInteger(0);
 
     private static final String LOCATIONS = "locations";
     private static final String EDGES = "edges";
@@ -39,6 +41,8 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
     private final ObservableList<String> inputStrings = FXCollections.observableArrayList();
     private final ObservableList<String> outputStrings = FXCollections.observableArrayList();
     private final StringProperty description = new SimpleStringProperty("");
+    private int universalId = -1;
+    private int inconsistentId = -1;
 
     // Background check
     private final BooleanProperty includeInPeriodicCheck = new SimpleBooleanProperty(true);
@@ -120,6 +124,22 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         bindReachabilityAnalysis();
     }
 
+    public int getUniversalId() {
+        if(universalId == -1){
+            universalId = atomicUniversalId.getAndIncrement();
+            inconsistentId = atomicInconsistentId.getAndIncrement();
+        }
+        return universalId;
+    }
+
+    public int getInconsistentId() {
+        if(inconsistentId == -1){
+            universalId = atomicUniversalId.getAndIncrement();
+            inconsistentId = atomicInconsistentId.getAndIncrement();
+        }
+        return inconsistentId;
+    }
+
     private void updateIOList() {
         List<String> localInputStrings = new ArrayList<>();
         List<String> localOutputStrings = new ArrayList<>();
@@ -127,11 +147,11 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         for (Edge edge : edges) {
             
             if(edge.getStatus() == EdgeStatus.INPUT){
-                if(!localInputStrings.contains(edge.getSync())){
+                if(!edge.getSync().equals("*") && !localInputStrings.contains(edge.getSync())){
                     localInputStrings.add(edge.getSync());
                 }
             } else if (edge.getStatus() == EdgeStatus.OUTPUT) {
-                if(!localOutputStrings.contains(edge.getSync())){
+                if(!edge.getSync().equals("*") && !localOutputStrings.contains(edge.getSync())){
                     localOutputStrings.add(edge.getSync());
                 }
             }

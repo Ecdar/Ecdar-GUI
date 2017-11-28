@@ -39,6 +39,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -50,6 +51,8 @@ public class ComponentController implements Initializable {
 
     private static final Map<Component, ListChangeListener<Location>> locationListChangeListenerMap = new HashMap<>();
     private static final Map<Component, Boolean> errorsAndWarningsInitialized = new HashMap<>();
+    private static final AtomicInteger universalId = new AtomicInteger(0);
+    private static final AtomicInteger inconsistentId = new AtomicInteger(0);
     private static Location placingLocation = null;
     private final ObjectProperty<Component> component = new SimpleObjectProperty<>(null);
     private final Map<Edge, EdgePresentation> edgePresentationMap = new HashMap<>();
@@ -144,6 +147,9 @@ public class ComponentController implements Initializable {
                 errorsAndWarningsInitialized.put(component, true);
             }
         });
+
+        universalId.incrementAndGet();
+        inconsistentId.incrementAndGet();
     }
 
     private void initializeNoIncomingEdgesWarning() {
@@ -278,7 +284,7 @@ public class ComponentController implements Initializable {
                 newLocation.setColorIntensity(component.getColorIntensity());
                 newLocation.setColor(component.getColor());
 
-                newLocation.setId("U1");
+                newLocation.setId("U" + component.getUniversalId());
 
                 final Edge inputEdge = new Edge(newLocation, EdgeStatus.INPUT);
                 inputEdge.setIsLocked(true);
@@ -335,7 +341,7 @@ public class ComponentController implements Initializable {
                 newLocation.setColorIntensity(component.getColorIntensity());
                 newLocation.setColor(component.getColor());
 
-                newLocation.setId("I1");
+                newLocation.setId("I" + component.getInconsistentId());
 
                 // Add a new location
                 UndoRedoStack.pushAndPerform(() -> { // Perform

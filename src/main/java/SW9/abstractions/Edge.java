@@ -59,7 +59,14 @@ public class Edge implements Serializable, Nearable {
     public Edge(final Location sourceLocation, final Location targetLocation, final String syncString ,final EdgeStatus status) {
         this(sourceLocation, status);
         setTargetLocation(targetLocation);
-        setSync(syncString);
+        setProperty(Edge.PropertyType.SYNCHRONIZATION, syncString);
+        Nail inputNail1 = new Nail(sourceLocation.getX() - 40, sourceLocation.getY() - 10);
+        Nail inputNailSync = new Nail(sourceLocation.getX() - 60, sourceLocation.getY());
+        Nail inputNail2 = new Nail(sourceLocation.getX() - 40 , sourceLocation.getY() + 10);
+        inputNailSync.setPropertyType(Edge.PropertyType.SYNCHRONIZATION);
+        addNail(inputNail1);
+        addNail(inputNailSync);
+        addNail(inputNail2);
     }
 
     public Edge(final JsonObject jsonObject, final Component component) {
