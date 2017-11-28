@@ -260,20 +260,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
             final Link lastLink = links.get(links.size() - 1);
             final ObservableList<Nail> nails = getEdge().getNails();
             if (nails.size() == 0) {
-                // Check if the source and target locations are the same, if they are, add proper amount of nails
-                if (newEdge.getSourceCircular().equals(newTargetCircular)) {
-                    final Nail nail1 = new Nail(newTargetCircular.xProperty().add(4 * GRID_SIZE), newTargetCircular.yProperty().subtract(GRID_SIZE));
-                    final Nail nail2 = new Nail(newTargetCircular.xProperty().add(4 * GRID_SIZE), newTargetCircular.yProperty().add(GRID_SIZE));
-
-                    // Add the nails to the nails collection (will draw links between them)
-                    nails.addAll(nail1, nail2);
-
-                    // Find the new last link (updated by adding nails to the collection) and bind it from the last nail to the target location
-                    final Link newLastLink = links.get(links.size() - 1);
-                    BindingHelper.bind(newLastLink, simpleArrowHead, nail2, newTargetCircular);
-                } else {
-                    BindingHelper.bind(lastLink, simpleArrowHead, newEdge.getSourceCircular(), newEdge.getTargetCircular());
-                }
+                BindingHelper.bind(lastLink, simpleArrowHead, newEdge.getSourceCircular(), newEdge.getTargetCircular());
             } else {
                 final Nail lastNail = nails.get(nails.size() - 1);
                 BindingHelper.bind(lastLink, simpleArrowHead, lastNail, newEdge.getTargetCircular());
