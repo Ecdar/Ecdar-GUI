@@ -88,13 +88,11 @@ class EcdarDocument {
         xmlDocument.insert(template, null);
 
         // Add an universal location
-        universalLocation = new Location("U" + component.getUniversalId());
-        addUniversalLocation(component, template, universalLocation);
+        addUniversalLocation(component, template);
 
 
         // Add an inconsistent location
-        inconsistentLocation = new Location("I" + component.getInconsistentId());
-        addInconsistentLocation(template, inconsistentLocation);
+        addInconsistentLocation(component, template);
 
         // Add all locations from the model to our conversion map and to the template
         for (final Location ecdarLocation : component.getLocations()) {
@@ -117,13 +115,29 @@ class EcdarDocument {
 
     }
 
-    private void addInconsistentLocation(Template template, Location inconsistentLocation) {
+    /**
+     * Generate the inconsistent location
+     * @param component the component we want to extract the id from
+     * @param template the xml template we want to add the location to
+     */
+    private void addInconsistentLocation(Component component, Template template) {
+        //inconsistentLocation = new Location("I" + component.getInconsistentId());
+
+        inconsistentLocation = new Location("Inconsistent");
         inconsistentLocation.setUrgency(Location.Urgency.URGENT);
         final com.uppaal.model.core2.Location xmlInconsistentLocation = addLocation(template, inconsistentLocation);
         addLocationsToMaps(inconsistentLocation, xmlInconsistentLocation);
     }
 
-    private void addUniversalLocation(Component component, Template template, Location universalLocation) throws BackendException {
+    /**
+     * Generate the universal location
+     * @param component the component we want to extract the id and input/output strings
+     * @param template the xml template we want to add the location to
+     */
+    private void addUniversalLocation(Component component, Template template) throws BackendException {
+        //universalLocation = new Location("U" + component.getUniversalId());
+
+        universalLocation = new Location("Universal");
         final com.uppaal.model.core2.Location xmlUniversalLocation = addLocation(template, universalLocation);
         addLocationsToMaps(universalLocation, xmlUniversalLocation);
         for (String input : component.getInputStrings()) {
