@@ -5,10 +5,7 @@ import SW9.abstractions.*;
 import SW9.backend.UPPAALDriver;
 import SW9.code_analysis.CodeAnalysis;
 import SW9.code_analysis.Nearable;
-import SW9.presentations.ComponentPresentation;
-import SW9.presentations.DropDownMenu;
-import SW9.presentations.LocationPresentation;
-import SW9.presentations.TagPresentation;
+import SW9.presentations.*;
 import SW9.utility.UndoRedoStack;
 import SW9.utility.colors.Color;
 import SW9.utility.helpers.ItemDragHelper;
@@ -371,7 +368,19 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                     unfinishedEdge.setTargetLocation(getLocation());
 
                     // If edge has no sync, add one
-                    if (!unfinishedEdge.hasSyncNail()) unfinishedEdge.makeSyncNailBetweenLocations();
+                    if (!unfinishedEdge.hasSyncNail()) {
+                        // If self loop, make it pretty
+                        if (getLocation().equals(unfinishedEdge.getSourceLocation())) {
+                            final Nail nail = new Nail(getX() + 4 * GRID_SIZE, getY() - GRID_SIZE);
+                            nail.setPropertyType(Edge.PropertyType.SYNCHRONIZATION);
+                            unfinishedEdge.addNail(nail);
+
+                            final Nail nail2 = new Nail(getX() + 4 * GRID_SIZE, getY() + GRID_SIZE);
+                            unfinishedEdge.addNail(nail2);
+                        } else {
+                            unfinishedEdge.makeSyncNailBetweenLocations();
+                        }
+                    }
                 } else {
                     // If shift is being held down, start drawing a new edge
                     if ((event.isShiftDown() && event.isPrimaryButtonDown()) || event.isMiddleButtonDown()) {
