@@ -90,7 +90,6 @@ class EcdarDocument {
         // Add an universal location
         addUniversalLocation(component, template);
 
-
         // Add an inconsistent location
         addInconsistentLocation(component, template);
 
@@ -141,12 +140,12 @@ class EcdarDocument {
         final com.uppaal.model.core2.Location xmlUniversalLocation = addLocation(template, universalLocation);
         addLocationsToMaps(universalLocation, xmlUniversalLocation);
         for (String input : component.getInputStrings()) {
-            Edge edge = new Edge(universalLocation, universalLocation, input, EdgeStatus.INPUT);
+            Edge edge = new Edge(universalLocation, input, EdgeStatus.INPUT, Edge.Side.LEFT);
             xmlToEcdarEdges.put(addEdge(template, edge), edge);
 
         }
         for (String output : component.getOutputStrings()) {
-            Edge edge = new Edge(universalLocation, universalLocation, output, EdgeStatus.OUTPUT);
+            Edge edge = new Edge(universalLocation, output, EdgeStatus.OUTPUT, Edge.Side.RIGHT);
             xmlToEcdarEdges.put(addEdge(template, edge), edge);
         }
     }

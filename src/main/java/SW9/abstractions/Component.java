@@ -156,6 +156,10 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         edge.ioStatus.addListener(listener);
     }
 
+    /**
+     * Gets the universal location id for this component, if no universal id has been assigned yet it gets it from the atomic universal id and increments it.
+     * @return the universal location id for this component
+     */
     public int getUniversalId() {
         if(universalId == -1){
             universalId = atomicUniversalId.getAndIncrement();
@@ -164,6 +168,10 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         return universalId;
     }
 
+    /**
+     * Gets the inconsistent location id for this component, if no inconsistent location id has been assigned yet it gets it from the atomic inconsistent id and increments
+     * @return the inconsistent location id for this component
+     */
     public int getInconsistentId() {
         if(inconsistentId == -1){
             universalId = atomicUniversalId.getAndIncrement();

@@ -282,8 +282,16 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
         this.reachability.set(reachability);
     }
 
+    /**
+     * Gets whether the location is locked
+     * @return true if it is locked, false if not
+     */
     public SimpleBooleanProperty getIsLocked() {return isLocked;}
 
+    /**
+     * Sets whether this location is locked
+     * @param bool the value that isLocked is set to, true if the location is meant to be locked, false if it not
+     */
     public void setIsLocked(final boolean bool) {isLocked.setValue(bool); }
 
     @Override

@@ -264,6 +264,7 @@ public class ComponentController implements Initializable {
                 }, "Added location '" + newLocation.toString() + "' to component '" + component.getName() + "'", "add-circle");
             });
 
+            // Adds the add universal location element to the drop down menu, this element adds an universal location and its required edges
             contextMenu.addClickableListElement("Add Universal Location", event -> {
                 contextMenu.close();
 
@@ -284,29 +285,11 @@ public class ComponentController implements Initializable {
 
                 newLocation.setId("U" + component.getUniversalId());
 
-                final Edge inputEdge = new Edge(newLocation, EdgeStatus.INPUT);
+                final Edge inputEdge = new Edge(newLocation, "*", EdgeStatus.INPUT, Edge.Side.LEFT);
                 inputEdge.setIsLocked(true);
-                inputEdge.setProperty(Edge.PropertyType.SYNCHRONIZATION, "*");
-                Nail inputNail1 = new Nail(newLocation.getX() - 40, newLocation.getY() - 10);
-                Nail inputNailSync = new Nail(newLocation.getX() - 60, newLocation.getY());
-                Nail inputNail2 = new Nail(newLocation.getX() - 40 , newLocation.getY() + 10);
-                inputNailSync.setPropertyType(Edge.PropertyType.SYNCHRONIZATION);
-                inputEdge.addNail(inputNail1);
-                inputEdge.addNail(inputNailSync);
-                inputEdge.addNail(inputNail2);
-                inputEdge.setTargetLocation(newLocation);
 
-                final Edge outputEdge = new Edge(newLocation, EdgeStatus.OUTPUT);
+                final Edge outputEdge = new Edge(newLocation, "*", EdgeStatus.OUTPUT, Edge.Side.RIGHT);
                 outputEdge.setIsLocked(true);
-                outputEdge.setProperty(Edge.PropertyType.SYNCHRONIZATION, "*");
-                Nail outputNail1 = new Nail(newLocation.getX() + 40, newLocation.getY() - 10);
-                Nail outputNailSync = new Nail(newLocation.getX() + 60, newLocation.getY());
-                Nail outputNail2 = new Nail(newLocation.getX() + 40, newLocation.getY() + 10);
-                outputNailSync.setPropertyType(Edge.PropertyType.SYNCHRONIZATION);
-                outputEdge.addNail(outputNail1);
-                outputEdge.addNail(outputNailSync);
-                outputEdge.addNail(outputNail2);
-                outputEdge.setTargetLocation(newLocation);
 
                 // Add a new location
                 UndoRedoStack.pushAndPerform(() -> { // Perform
@@ -320,6 +303,7 @@ public class ComponentController implements Initializable {
                 }, "Added universal location '" + newLocation.toString() + "' to component '" + component.getName() + "'", "add-circle");
             });
 
+            // Adds the add inconsistent location element to the drop down menu, this element adds an inconsistent location
             contextMenu.addClickableListElement("Add Inconsistent Location", event -> {
                 contextMenu.close();
 
