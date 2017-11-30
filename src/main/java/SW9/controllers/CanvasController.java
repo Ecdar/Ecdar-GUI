@@ -33,6 +33,7 @@ public class CanvasController implements Initializable {
 
     private static DoubleProperty width, height;
     private static BooleanProperty insetShouldShow;
+    private ComponentPresentation activeComponentPresentation;
 
     public static DoubleProperty getWidthProperty() {
         return width;
@@ -136,12 +137,13 @@ public class CanvasController implements Initializable {
                 root.setTranslateY(GRID_SIZE * 8);
             }
 
-            final ComponentPresentation newComponentPresentation = new ComponentPresentation((Component) newVeriObj);
-            root.getChildren().add(newComponentPresentation);
+            activeComponentPresentation = new ComponentPresentation((Component) newVeriObj);
+            root.getChildren().add(activeComponentPresentation);
         } else if (newVeriObj instanceof Declarations) {
             root.setTranslateX(0);
             root.setTranslateY(DECLARATION_X_MARGIN);
 
+            activeComponentPresentation = null;
             root.getChildren().add(new DeclarationPresentation((Declarations) newVeriObj));
         }
 
@@ -155,5 +157,14 @@ public class CanvasController implements Initializable {
      */
     public static void updateOffset(final Boolean shouldHave) {
         insetShouldShow.set(shouldHave);
+    }
+
+    /**
+     * Gets the active component presentation.
+     * This is null, if the declarations presentation is shown instead.
+     * @return the active component presentation
+     */
+    ComponentPresentation getActiveComponentPresentation() {
+        return activeComponentPresentation;
     }
 }

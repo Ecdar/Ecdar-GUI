@@ -124,6 +124,7 @@ public class EcdarController implements Initializable {
     public MenuItem menuBarFileCreateNewProject;
     public MenuItem menuBarFileOpenProject;
     public MenuItem menuBarFileExportAsPng;
+    public MenuItem menuBarFileExportAsPngNoBorder;
     public MenuItem menuBarHelpHelp;
     public MenuItem menuBarEditBalance;
 
@@ -598,65 +599,98 @@ public class EcdarController implements Initializable {
     private void initializeFileExportAsPng() {
         menuBarFileExportAsPng.setAccelerator(new KeyCodeCombination(KeyCode.L, KeyCombination.SHORTCUT_DOWN));
         menuBarFileExportAsPng.setOnAction(event -> {
+            //If there is no active verification object
+            if (CanvasController.getActiveVerificationObject() == null){
+                Ecdar.showToast("No component or declarations to export");
+                return;
+            }
+
+            final WritableImage image = takeSnapshot();
+
+            CropAndExportImage(image);
+        });
+
+        menuBarFileExportAsPngNoBorder.setOnAction(event -> {
+            final ComponentPresentation presentation = canvas.getController().getActiveComponentPresentation();
+
             //If there is no active component
-            if(CanvasController.getActiveVerificationObject() == null){
+            if (presentation == null){
                 Ecdar.showToast("No component to export");
                 return;
             }
 
-            //Save as png in picked directory
-            final WritableImage image;
-            final String name = CanvasController.getActiveVerificationObject().getName();
-            if (canvas.isGridOn()) {
-                canvas.toggleGrid();
-                image = scaleAndTakeSnapshot();
-                canvas.toggleGrid();
-            } else {
-                image = scaleAndTakeSnapshot();
-            }
+            presentation.getController().hideBorderAndBackground();
+            final WritableImage image = takeSnapshot();
+            presentation.getController().showBorderAndBorder();
 
-            final FileChooser filePicker = new FileChooser();
-            filePicker.setTitle("Export png");
-            filePicker.setInitialFileName(name);
-            filePicker.setInitialDirectory(new File(Ecdar.projectDirectory.get()));
-            filePicker.getExtensionFilters().add(new FileChooser.ExtensionFilter("PNG File", "*.png"));
-
-            final BufferedImage finalImage;
-            try {
-                finalImage = autoCropImage(SwingFXUtils.fromFXImage(image, null));
-            } catch (final IllegalArgumentException e) {
-                Ecdar.showToast("Export failed. " + e.getMessage());
-                return;
-            }
-
-
-            final File file = filePicker.showSaveDialog(root.getScene().getWindow());
-            if (file != null){
-                try {
-                    ImageIO.write(finalImage, "png", file);
-                    Ecdar.showToast("Export succeeded");
-                } catch (final IOException e) {
-                    Ecdar.showToast("Export failed "+ e.getMessage());
-                }
-            } else {
-                Ecdar.showToast("Export was cancelled");
-            }
+            CropAndExportImage(image);
         });
     }
 
     /**
-     * Zooms in times 2 to get a higher resolution.
+     * Take a snapshot with the grid hidden.
+     * The grid is put into its original state afterwards.
+     * @return the snapshot
+     */
+    private WritableImage takeSnapshot() {
+        final WritableImage image;
+        if (canvas.isGridOn()) {
+            canvas.toggleGrid();
+            image = scaleAndTakeSnapshot();
+            canvas.toggleGrid();
+        } else {
+            image = scaleAndTakeSnapshot();
+        }
+        return image;
+    }
+
+    /**
+     * Zooms in times 4 to get a higher resolution.
      * Then take snapshot and zoom to times 1 again.
      * @return the snapshot
      */
     private WritableImage scaleAndTakeSnapshot() {
         final WritableImage image;
-        canvas.setScaleX(2.0);
-        canvas.setScaleY(2.0);
+        canvas.setScaleX(4.0);
+        canvas.setScaleY(4.0);
         image = canvas.snapshot(new SnapshotParameters(), null);
         canvas.setScaleX(1.0);
         canvas.setScaleY(1.0);
         return image;
+    }
+
+    /**
+     * Crops and exports an image.
+     * @param image the image
+     */
+    private void CropAndExportImage(final WritableImage image) {
+        final String name = CanvasController.getActiveVerificationObject().getName();
+
+        final FileChooser filePicker = new FileChooser();
+        filePicker.setTitle("Export png");
+        filePicker.setInitialFileName(name);
+        filePicker.setInitialDirectory(new File(Ecdar.projectDirectory.get()));
+        filePicker.getExtensionFilters().add(new FileChooser.ExtensionFilter("PNG File", "*.png"));
+
+        final BufferedImage finalImage;
+        try {
+            finalImage = autoCropImage(SwingFXUtils.fromFXImage(image, null));
+        } catch (final IllegalArgumentException e) {
+            Ecdar.showToast("Export failed. " + e.getMessage());
+            return;
+        }
+
+        final File file = filePicker.showSaveDialog(root.getScene().getWindow());
+        if (file != null){
+            try {
+                ImageIO.write(finalImage, "png", file);
+                Ecdar.showToast("Export succeeded");
+            } catch (final IOException e) {
+                Ecdar.showToast("Export failed "+ e.getMessage());
+            }
+        } else {
+            Ecdar.showToast("Export was cancelled");
+        }
     }
 
     /**
