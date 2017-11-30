@@ -673,7 +673,12 @@ public class EcdarController implements Initializable {
         final FileChooser filePicker = new FileChooser();
         filePicker.setTitle("Export png");
         filePicker.setInitialFileName(name);
-        filePicker.setInitialDirectory(new File(Ecdar.projectDirectory.get()));
+
+        // Set initial directory to project directory (if saved) or user.home (otherwise)
+        String directory = Ecdar.projectDirectory.get();
+        if (directory == null) directory = System.getProperty("user.home");
+
+        filePicker.setInitialDirectory(new File(directory));
         filePicker.getExtensionFilters().add(new FileChooser.ExtensionFilter("PNG File", "*.png"));
 
         final BufferedImage finalImage;
