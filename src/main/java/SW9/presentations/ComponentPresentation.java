@@ -337,8 +337,6 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
 
             wasResized.set(false);
         });
-
-
     }
 
     private void initializeName() {

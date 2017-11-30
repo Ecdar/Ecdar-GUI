@@ -14,7 +14,7 @@
          fx:controller="SW9.controllers.SignatureArrowController">
 
 
-        <VBox alignment="CENTER_RIGHT">
+        <VBox fx:id="arrowBox" alignment="CENTER_LEFT">
                 <Group>
                         <Circle fx:id="signatureArrowCircle" styleClass="nail"/>
                         <Path fx:id="signatureArrowPath" />

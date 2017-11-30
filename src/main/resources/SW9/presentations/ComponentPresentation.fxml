@@ -12,9 +12,9 @@
          fx:controller="SW9.controllers.ComponentController">
 
     <HBox spacing="0" alignment="CENTER">
-        <VBox fx:id="inputSignatureContainer" spacing="10" alignment="CENTER_RIGHT"/>
+        <VBox fx:id="inputSignatureContainer" maxWidth="100" minWidth="100" spacing="10" alignment="CENTER_RIGHT" />
 
-        <StackPane>
+        <StackPane fx:id="componentPane">
             <Rectangle fx:id="background" StackPane.alignment="TOP_LEFT"/>
 
             <StackPane>
@@ -59,7 +59,7 @@
             <Rectangle opacity="0" fx:id="rightAnchor" StackPane.alignment="TOP_RIGHT"/>
         </StackPane>
 
-        <VBox fx:id="outputSignatureContainer" spacing="10" alignment="CENTER_LEFT" />
+        <VBox fx:id="outputSignatureContainer" maxWidth="100" minWidth="100" spacing="10" alignment="CENTER_LEFT" />
     </HBox>
 
 </fx:root>

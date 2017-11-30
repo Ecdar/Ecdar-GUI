@@ -171,6 +171,7 @@ public class ComponentController implements Initializable {
                 }
             }
         });
+
     }
 
     private void initializeNoIncomingEdgesWarning() {
