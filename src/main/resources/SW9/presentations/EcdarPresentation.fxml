@@ -150,6 +150,11 @@
                             <FontIcon iconLiteral="gmi-image" iconSize="24" fill="black"/>
                         </graphic>
                     </MenuItem>
+                    <MenuItem fx:id="menuBarFileExportAsPngNoBorder" text="Export without border as Png">
+                        <graphic>
+                            <FontIcon iconLiteral="gmi-image" iconSize="24" fill="black"/>
+                        </graphic>
+                    </MenuItem>
                 </Menu>
 
                 <Menu text="Edit">
