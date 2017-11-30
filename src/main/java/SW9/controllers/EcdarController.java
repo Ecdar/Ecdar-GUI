@@ -599,13 +599,17 @@ public class EcdarController implements Initializable {
     private void initializeFileExportAsPng() {
         menuBarFileExportAsPng.setAccelerator(new KeyCodeCombination(KeyCode.L, KeyCombination.SHORTCUT_DOWN));
         menuBarFileExportAsPng.setOnAction(event -> {
-            //If there is no active verification object
-            if (CanvasController.getActiveVerificationObject() == null){
-                Ecdar.showToast("No component or declarations to export");
+            final ComponentPresentation presentation = canvas.getController().getActiveComponentPresentation();
+
+            //If there is no active component
+            if (presentation == null){
+                Ecdar.showToast("No component to export");
                 return;
             }
 
+            presentation.getController().toggleDeclarationButton.setVisible(false);
             final WritableImage image = takeSnapshot();
+            presentation.getController().toggleDeclarationButton.setVisible(true);
 
             CropAndExportImage(image);
         });
