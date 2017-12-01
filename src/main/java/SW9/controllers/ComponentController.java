@@ -268,22 +268,15 @@ public class ComponentController implements Initializable {
             contextMenu.addClickableListElement("Add Universal Location", event -> {
                 contextMenu.close();
 
-                final Location newLocation = new Location();
-                newLocation.setIsLocked(true);
-                newLocation.setType(Location.Type.UNIVERSAL);
+                final Location newLocation = createUniversalLocation(component);
 
                 double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
-                x = Math.round(x / GRID_SIZE) * GRID_SIZE;
+                x = Grid.snap(x);
                 newLocation.setX(x);
 
                 double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
-                y = Math.round(y / GRID_SIZE) * GRID_SIZE;
+                y = Grid.snap(y);
                 newLocation.setY(y);
-
-                newLocation.setColorIntensity(component.getColorIntensity());
-                newLocation.setColor(component.getColor());
-
-                newLocation.setId("U" + component.getUniversalId());
 
                 final Edge inputEdge = new Edge(newLocation, "*", EdgeStatus.INPUT, Edge.Side.LEFT);
                 inputEdge.setIsLocked(true);
@@ -307,23 +300,7 @@ public class ComponentController implements Initializable {
             contextMenu.addClickableListElement("Add Inconsistent Location", event -> {
                 contextMenu.close();
 
-                final Location newLocation = new Location();
-                newLocation.setIsLocked(true);
-                newLocation.setType(Location.Type.INCONSISTENT);
-                newLocation.setUrgency(Location.Urgency.URGENT);
-
-                double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
-                x = Math.round(x / GRID_SIZE) * GRID_SIZE;
-                newLocation.setX(x);
-
-                double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
-                y = Math.round(y / GRID_SIZE) * GRID_SIZE;
-                newLocation.setY(y);
-
-                newLocation.setColorIntensity(component.getColorIntensity());
-                newLocation.setColor(component.getColor());
-
-                newLocation.setId("I" + component.getInconsistentId());
+                final Location newLocation = createInconsistentLocation(component);
 
                 // Add a new location
                 UndoRedoStack.pushAndPerform(() -> { // Perform
@@ -405,15 +382,93 @@ public class ComponentController implements Initializable {
                 // If edge has no sync, add one
                 if (!unfinishedEdge.hasSyncNail()) unfinishedEdge.makeSyncNailBetweenLocations();
 
+                getComponent().addLocation(location);
+
                 // Add a new location
-                UndoRedoStack.pushAndPerform(() -> { // Perform
+                UndoRedoStack.push(() -> { // Perform
                     getComponent().addLocation(location);
-                    UndoRedoStack.redo();
+                    getComponent().addEdge(unfinishedEdge);
                 }, () -> { // Undo
                     getComponent().removeLocation(location);
-                    UndoRedoStack.undo();
+                    getComponent().removeEdge(unfinishedEdge);
                 }, "Finished edge '" + unfinishedEdge + "' by adding '" + location + "' to component '" + component.getName() + "'", "add-circle");
             });
+
+            finishEdgeContextMenu.addClickableListElement("Universal Location", event -> {
+                finishEdgeContextMenu.close();
+
+                final Location newLocation = createUniversalLocation(component);
+
+                final Edge inputEdge = new Edge(newLocation, "*", EdgeStatus.INPUT, Edge.Side.LEFT);
+                inputEdge.setIsLocked(true);
+
+                final Edge outputEdge = new Edge(newLocation, "*", EdgeStatus.OUTPUT, Edge.Side.RIGHT);
+                outputEdge.setIsLocked(true);
+
+                double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
+                x = Math.round(x / GRID_SIZE) * GRID_SIZE;
+                newLocation.setX(x);
+
+                double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
+                y = Math.round(y / GRID_SIZE) * GRID_SIZE;
+                newLocation.setY(y);
+
+                unfinishedEdge.setTargetLocation(newLocation);
+
+                setCoordinates.accept(newLocation);
+
+                // If edge has no sync, add one
+                if (!unfinishedEdge.hasSyncNail()) unfinishedEdge.makeSyncNailBetweenLocations();
+
+                getComponent().addLocation(newLocation);
+                getComponent().addEdge(inputEdge);
+                getComponent().addEdge(outputEdge);
+
+                // Add a new location
+                UndoRedoStack.push(() -> { // Perform
+                    getComponent().addLocation(newLocation);
+                    getComponent().addEdge(inputEdge);
+                    getComponent().addEdge(outputEdge);
+                    getComponent().addEdge(unfinishedEdge);
+                }, () -> { // Undo
+                    getComponent().removeLocation(newLocation);
+                    getComponent().removeEdge(inputEdge);
+                    getComponent().removeEdge(outputEdge);
+                    getComponent().removeEdge(unfinishedEdge);
+                }, "Finished edge '" + unfinishedEdge + "' by adding '" + newLocation + "' to component '" + component.getName() + "'", "add-circle");
+            });
+
+            finishEdgeContextMenu.addClickableListElement("Inconsistent Location", event -> {
+                finishEdgeContextMenu.close();
+
+                final Location newLocation = createInconsistentLocation(component);
+
+                double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
+                x = Grid.snap(x);
+                newLocation.setX(x);
+
+                double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
+                y = Grid.snap(y);
+                newLocation.setY(y);
+
+                unfinishedEdge.setTargetLocation(newLocation);
+
+                setCoordinates.accept(newLocation);
+
+                // If edge has no sync, add one
+                if (!unfinishedEdge.hasSyncNail()) unfinishedEdge.makeSyncNailBetweenLocations();
+
+                getComponent().addLocation(newLocation);
+
+                UndoRedoStack.push(() -> { // Redo
+                    getComponent().addLocation(newLocation);
+                    getComponent().addEdge(unfinishedEdge);
+                }, () -> { // Undo
+                    getComponent().removeLocation(newLocation);
+                    getComponent().removeEdge(unfinishedEdge);
+                }, "Finished edge '" + unfinishedEdge + "' by adding '" + newLocation + "' to component '" + component.getName() + "'", "add-circle");
+            });
+
         };
 
         component.addListener((obs, oldComponent, newComponent) -> {
@@ -421,6 +476,45 @@ public class ComponentController implements Initializable {
         });
 
         initializeDropDownMenu.accept(getComponent());
+    }
+
+    private Location createInconsistentLocation(Component component) {
+        final Location newLocation = new Location();
+
+        double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
+        x = Grid.snap(x);
+        newLocation.setX(x);
+
+        double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
+        y = Grid.snap(y);
+        newLocation.setY(y);
+
+        newLocation.setIsLocked(true);
+        newLocation.setType(Location.Type.INCONSISTENT);
+        newLocation.setUrgency(Location.Urgency.URGENT);
+        newLocation.setColorIntensity(component.getColorIntensity());
+        newLocation.setColor(component.getColor());
+        newLocation.setId("I" + component.getInconsistentId());
+        return newLocation;
+    }
+
+    private Location createUniversalLocation(Component component) {
+        final Location newLocation = new Location();
+
+        double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
+        x = Grid.snap(x);
+        newLocation.setX(x);
+
+        double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
+        y = Grid.snap(y);
+        newLocation.setY(y);
+
+        newLocation.setIsLocked(true);
+        newLocation.setType(Location.Type.UNIVERSAL);
+        newLocation.setColorIntensity(component.getColorIntensity());
+        newLocation.setColor(component.getColor());
+        newLocation.setId("U" + component.getUniversalId());
+        return newLocation;
     }
 
     private void initializeLocationHandling(final Component newComponent) {
@@ -582,12 +676,12 @@ public class ComponentController implements Initializable {
             UndoRedoStack.pushAndPerform(() -> { // Perform
                 getComponent().addLocation(location);
                 if (unfinishedEdge != null) {
-                    UndoRedoStack.redo();
+                    getComponent().addEdge(unfinishedEdge);
                 }
             }, () -> { // Undo
                 getComponent().removeLocation(location);
                 if (unfinishedEdge != null) {
-                    UndoRedoStack.undo();
+                    getComponent().removeEdge(unfinishedEdge);
                 }
             }, "Finished edge '" + unfinishedEdge + "' by adding '" + location + "' to component '" + component.getName() + "'", "add-circle");
 

@@ -45,6 +45,23 @@ public class UndoRedoStack {
         return command;
     }
 
+    public static Command push(final Runnable redo, final Runnable undo, final String description, final String icon) {
+        final Command item = new Command(redo, undo, description, icon);
+
+        // Empty the redo stack (new changes may be conflicting with redoing)
+        while (!redoStack.isEmpty()) {
+            redoStack.pop();
+        }
+
+        final Command command = undoStack.push(item);
+
+        updateState();
+
+        return command;
+    }
+
+
+
     /**
      * Clears the stacks.
      */

@@ -117,14 +117,9 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
                         KeyboardTracker.registerKeybind(KeyboardTracker.ABANDON_EDGE, new Keybind(new KeyCodeCombination(KeyCode.ESCAPE), () -> {
                             getComponent().removeEdge(newEdge);
-                            UndoRedoStack.forgetLast();
                         }));
 
-                        UndoRedoStack.pushAndPerform(() -> { // Perform
-                            getComponent().addEdge(newEdge);
-                        }, () -> { // Undo
-                            getComponent().removeEdge(newEdge);
-                        }, "Created edge starting from location " + getLocation().getNickname(), "add-circle");
+                        getComponent().addEdge(newEdge);
 
                         dropDownMenu.close();
                     }
@@ -380,7 +375,15 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                         } else {
                             unfinishedEdge.makeSyncNailBetweenLocations();
                         }
+
+                        UndoRedoStack.push(() -> { // Perform
+                            component.addEdge(unfinishedEdge);
+                        }, () -> { // Undo
+                            component.removeEdge(unfinishedEdge);
+                        }, "Created edge starting from location " + getLocation().getNickname(), "add-circle");
                     }
+
+
                 } else {
                     // If shift is being held down, start drawing a new edge
                     if ((event.isShiftDown() && event.isPrimaryButtonDown()) || event.isMiddleButtonDown()) {
@@ -388,14 +391,9 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
                         KeyboardTracker.registerKeybind(KeyboardTracker.ABANDON_EDGE, new Keybind(new KeyCodeCombination(KeyCode.ESCAPE), () -> {
                             component.removeEdge(newEdge);
-                            UndoRedoStack.forgetLast();
                         }));
 
-                        UndoRedoStack.pushAndPerform(() -> { // Perform
-                            component.addEdge(newEdge);
-                        }, () -> { // Undo
-                            component.removeEdge(newEdge);
-                        }, "Created edge starting from location " + getLocation().getNickname(), "add-circle");
+                        component.addEdge(newEdge);
                     }
                     // Otherwise, select the location
                     else {
