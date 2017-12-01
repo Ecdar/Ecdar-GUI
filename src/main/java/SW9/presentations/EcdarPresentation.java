@@ -561,6 +561,9 @@ public class EcdarPresentation extends StackPane {
                 ));
     }
 
+    /**
+     * Initialize image views.
+     */
     private void initializeHelpImages() {
         controller.helpInitialImage.setImage(new Image(Ecdar.class.getResource("ic_help_initial.png").toExternalForm()));
         controller.helpInitialPane.widthProperty().addListener((observable, oldValue, newValue) ->
