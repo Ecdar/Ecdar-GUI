@@ -90,6 +90,15 @@ public class EcdarController implements Initializable {
     public ImageView inputModeImage;
     public ImageView outputModeImage;
 
+    public ImageView helpInitialImage;
+    public StackPane helpInitialPane;
+    public ImageView helpUrgentImage;
+    public StackPane helpUrgentPane;
+    public ImageView helpInputImage;
+    public StackPane helpInputPane;
+    public ImageView helpOutputImage;
+    public StackPane helpOutputPane;
+
     private double expandHeight = 300;
 
     public final Transition expandMessagesContainer = new Transition() {

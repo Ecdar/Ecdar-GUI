@@ -52,10 +52,6 @@ public class LocationPresentation extends Group implements MouseTrackable, Selec
     private BooleanProperty isPlaced = new SimpleBooleanProperty(true);
     private Timeline shakeDeleteAnimation = new Timeline();
 
-    public LocationPresentation(@NamedArg("initial") final String initial) {
-        this(initialHelpDialogLocation(initial), null, false);
-    }
-
     public LocationPresentation(final Location location, final Component component) {
         this(location, component, true);
     }
@@ -97,20 +93,6 @@ public class LocationPresentation extends Group implements MouseTrackable, Selec
         } catch (final IOException ioe) {
             throw new IllegalStateException(ioe);
         }
-    }
-
-    private static Location initialHelpDialogLocation(final String initial) {
-        final Location location = new Location("L" + id++);
-
-        if (initial.equals("INITIAL")) {
-            location.setType(Location.Type.INITIAL);
-        } else if (initial.equals("URGENT")) {
-            location.setUrgency(Location.Urgency.URGENT);
-        } else if (initial.equals("COMMITTED")) {
-            location.setUrgency(Location.Urgency.COMMITTED);
-        }
-
-        return location;
     }
 
     private void initializeReachabilityStyle() {
