@@ -92,12 +92,12 @@ public class EcdarController implements Initializable {
 
     public ImageView helpInitialImage;
     public StackPane helpInitialPane;
-    public StackPane helpUrgentPane;
     public ImageView helpUrgentImage;
-    public StackPane helpInputPane;
+    public StackPane helpUrgentPane;
     public ImageView helpInputImage;
-    public StackPane helpOutputPane;
+    public StackPane helpInputPane;
     public ImageView helpOutputImage;
+    public StackPane helpOutputPane;
 
     private double expandHeight = 300;
 

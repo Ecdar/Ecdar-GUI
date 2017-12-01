@@ -26,6 +26,7 @@ import javafx.scene.Cursor;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Circle;
 import javafx.util.Duration;
@@ -343,16 +344,10 @@ public class EcdarPresentation extends StackPane {
 
     private void initializeEdgeStatusIcons() {
         controller.inputModeImage.setImage(new Image(Ecdar.class.getResource("ic_input_mode.png").toExternalForm()));
-        controller.inputModePane.widthProperty().addListener((observable, oldValue, newValue) ->
-                controller.inputModeImage.setFitWidth(controller.inputModePane.getWidth()));
-        controller.inputModePane.heightProperty().addListener((observable, oldValue, newValue) ->
-                controller.inputModeImage.setFitHeight(controller.inputModePane.getHeight()));
+        fitSizeWhenAvailable(controller.inputModeImage, controller.inputModePane);
 
         controller.outputModeImage.setImage(new Image(Ecdar.class.getResource("ic_output_mode.png").toExternalForm()));
-        controller.outputModePane.widthProperty().addListener((observable, oldValue, newValue) ->
-                controller.outputModeImage.setFitWidth(controller.outputModePane.getWidth()));
-        controller.outputModePane.heightProperty().addListener((observable, oldValue, newValue) ->
-                controller.outputModeImage.setFitHeight(controller.outputModePane.getHeight()));
+        fitSizeWhenAvailable(controller.outputModeImage, controller.outputModePane);
     }
 
     private void initializeGenerateUppaalModelButton() {
@@ -562,32 +557,27 @@ public class EcdarPresentation extends StackPane {
     }
 
     /**
-     * Initialize image views.
+     * Initialize help image views.
      */
     private void initializeHelpImages() {
         controller.helpInitialImage.setImage(new Image(Ecdar.class.getResource("ic_help_initial.png").toExternalForm()));
-        controller.helpInitialPane.widthProperty().addListener((observable, oldValue, newValue) ->
-                controller.helpInitialImage.setFitWidth(controller.helpInitialPane.getWidth()));
-        controller.helpInitialPane.heightProperty().addListener((observable, oldValue, newValue) ->
-                controller.helpInitialImage.setFitHeight(controller.helpInitialPane.getHeight()));
+        fitSizeWhenAvailable(controller.helpInitialImage, controller.helpInitialPane);
 
         controller.helpUrgentImage.setImage(new Image(Ecdar.class.getResource("ic_help_urgent.png").toExternalForm()));
-        controller.helpUrgentPane.widthProperty().addListener((observable, oldValue, newValue) ->
-                controller.helpUrgentImage.setFitWidth(controller.helpUrgentPane.getWidth()));
-        controller.helpUrgentPane.heightProperty().addListener((observable, oldValue, newValue) ->
-                controller.helpUrgentImage.setFitHeight(controller.helpUrgentPane.getHeight()));
+        fitSizeWhenAvailable(controller.helpUrgentImage, controller.helpUrgentPane);
 
         controller.helpInputImage.setImage(new Image(Ecdar.class.getResource("ic_help_input.png").toExternalForm()));
-        controller.helpInputPane.widthProperty().addListener((observable, oldValue, newValue) ->
-                controller.helpInputImage.setFitWidth(controller.helpInputPane.getWidth()));
-        controller.helpInputPane.heightProperty().addListener((observable, oldValue, newValue) ->
-                controller.helpInputImage.setFitHeight(controller.helpInputPane.getHeight()));
+        fitSizeWhenAvailable(controller.helpInputImage, controller.helpInputPane);
 
         controller.helpOutputImage.setImage(new Image(Ecdar.class.getResource("ic_help_output.png").toExternalForm()));
-        controller.helpOutputPane.widthProperty().addListener((observable, oldValue, newValue) ->
-                controller.helpOutputImage.setFitWidth(controller.helpOutputPane.getWidth()));
-        controller.helpOutputPane.heightProperty().addListener((observable, oldValue, newValue) ->
-                controller.helpOutputImage.setFitHeight(controller.helpOutputPane.getHeight()));
+        fitSizeWhenAvailable(controller.helpOutputImage, controller.helpOutputPane);
+    }
+
+    private static void fitSizeWhenAvailable(final ImageView imageView, final StackPane pane) {
+        pane.widthProperty().addListener((observable, oldValue, newValue) ->
+                imageView.setFitWidth(pane.getWidth()));
+        pane.heightProperty().addListener((observable, oldValue, newValue) ->
+                imageView.setFitHeight(pane.getHeight()));
     }
 
     public BooleanProperty toggleQueryPane() {
