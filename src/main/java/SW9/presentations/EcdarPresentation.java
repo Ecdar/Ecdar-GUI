@@ -100,6 +100,8 @@ public class EcdarPresentation extends StackPane {
         } catch (final IOException ioe) {
             throw new IllegalStateException(ioe);
         }
+
+        initializeHelpImages();
     }
 
     private void initializeSnackbar() {
@@ -557,6 +559,32 @@ public class EcdarPresentation extends StackPane {
                         CornerRadii.EMPTY,
                         Insets.EMPTY)
                 ));
+    }
+
+    private void initializeHelpImages() {
+        controller.helpInitialImage.setImage(new Image(Ecdar.class.getResource("ic_help_initial.png").toExternalForm()));
+        controller.helpInitialPane.widthProperty().addListener((observable, oldValue, newValue) ->
+                controller.helpInitialImage.setFitWidth(controller.helpInitialPane.getWidth()));
+        controller.helpInitialPane.heightProperty().addListener((observable, oldValue, newValue) ->
+                controller.helpInitialImage.setFitHeight(controller.helpInitialPane.getHeight()));
+
+        controller.helpUrgentImage.setImage(new Image(Ecdar.class.getResource("ic_help_urgent.png").toExternalForm()));
+        controller.helpUrgentPane.widthProperty().addListener((observable, oldValue, newValue) ->
+                controller.helpUrgentImage.setFitWidth(controller.helpUrgentPane.getWidth()));
+        controller.helpUrgentPane.heightProperty().addListener((observable, oldValue, newValue) ->
+                controller.helpUrgentImage.setFitHeight(controller.helpUrgentPane.getHeight()));
+
+        controller.helpInputImage.setImage(new Image(Ecdar.class.getResource("ic_help_input.png").toExternalForm()));
+        controller.helpInputPane.widthProperty().addListener((observable, oldValue, newValue) ->
+                controller.helpInputImage.setFitWidth(controller.helpInputPane.getWidth()));
+        controller.helpInputPane.heightProperty().addListener((observable, oldValue, newValue) ->
+                controller.helpInputImage.setFitHeight(controller.helpInputPane.getHeight()));
+
+        controller.helpOutputImage.setImage(new Image(Ecdar.class.getResource("ic_help_output.png").toExternalForm()));
+        controller.helpOutputPane.widthProperty().addListener((observable, oldValue, newValue) ->
+                controller.helpOutputImage.setFitWidth(controller.helpOutputPane.getWidth()));
+        controller.helpOutputPane.heightProperty().addListener((observable, oldValue, newValue) ->
+                controller.helpOutputImage.setFitHeight(controller.helpOutputPane.getHeight()));
     }
 
     public BooleanProperty toggleQueryPane() {
