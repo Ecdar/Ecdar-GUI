@@ -10,7 +10,7 @@ import javafx.beans.property.StringProperty;
 
 /**
  * An object used for verifications.
- * This could be a component or a declarations object.
+ * This could be a component, a global declarations object, or a system.
  */
 public abstract class VerificationObject implements Serializable {
     private static final String NAME = "name";

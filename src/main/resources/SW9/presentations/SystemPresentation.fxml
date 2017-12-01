@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <?import com.jfoenix.controls.JFXRippler?>
 <?import com.jfoenix.controls.JFXTextField?>
 <?import javafx.scene.layout.*?>
@@ -9,7 +10,7 @@
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="StackPane"
          fx:id="root"
-         fx:controller="SW9.controllers.ComponentController">
+         fx:controller="SW9.controllers.SystemController">
 
     <Rectangle fx:id="background" StackPane.alignment="TOP_LEFT"/>
 

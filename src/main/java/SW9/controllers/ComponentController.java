@@ -44,21 +44,20 @@ import java.util.regex.Pattern;
 
 import static SW9.presentations.Grid.GRID_SIZE;
 
-public class ComponentController implements Initializable {
-
+public class ComponentController extends ModelController implements Initializable {
     private static final Map<Component, ListChangeListener<Location>> locationListChangeListenerMap = new HashMap<>();
     private static final Map<Component, Boolean> errorsAndWarningsInitialized = new HashMap<>();
     private static Location placingLocation = null;
     private final ObjectProperty<Component> component = new SimpleObjectProperty<>(null);
     private final Map<Edge, EdgePresentation> edgePresentationMap = new HashMap<>();
     private final Map<Location, LocationPresentation> locationPresentationMap = new HashMap<>();
+
     public BorderPane toolbar;
     public Rectangle background;
     public StyleClassedTextArea declarationTextArea;
     public JFXRippler toggleDeclarationButton;
     public BorderPane frame;
     public JFXTextField name;
-    public StackPane root;
     public Line line1;
     public Line line2;
     public Label x;
