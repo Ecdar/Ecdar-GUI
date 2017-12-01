@@ -336,37 +336,43 @@
                         <Region minHeight="20"/>
 
                         <HBox>
-                            <StackPane fx:id="helpInitialPane" minWidth="30" maxWidth="30" minHeight="30" maxHeight="30">
+                            <StackPane fx:id="helpInitialPane" minWidth="60" maxWidth="60" minHeight="30" maxHeight="30">
                                 <ImageView fx:id="helpInitialImage"/>
                             </StackPane>
-                            <Label styleClass="body1" style="-fx-padding: 9 0 0 5">
+                            <Label styleClass="body1" style="-fx-padding: 5 0 0 5">
                                 This is an initial location.
                             </Label>
                         </HBox>
 
+                        <Region minHeight="4"/>
+
                         <HBox>
-                            <StackPane fx:id="helpUrgentPane" minWidth="30" maxWidth="30" minHeight="30" maxHeight="30">
+                            <StackPane fx:id="helpUrgentPane" minWidth="60" maxWidth="60" minHeight="30" maxHeight="30">
                                 <ImageView fx:id="helpUrgentImage"/>
                             </StackPane>
-                            <Label styleClass="body1" style="-fx-padding: 9 0 0 5">
+                            <Label styleClass="body1" style="-fx-padding: 5 0 0 5">
                                 This is an urgent location.
                             </Label>
                         </HBox>
 
+                        <Region minHeight="4"/>
+
                         <HBox>
-                            <StackPane fx:id="helpInputPane" minWidth="41.86" maxWidth="41.86" minHeight="30" maxHeight="30">
+                            <StackPane fx:id="helpInputPane" minWidth="60" maxWidth="60" minHeight="30" maxHeight="30">
                                 <ImageView fx:id="helpInputImage"/>
                             </StackPane>
-                            <Label styleClass="body1" style="-fx-padding: 9 0 0 5">
+                            <Label styleClass="body1" style="-fx-padding: 5 0 0 5">
                                 This is an input edge.
                             </Label>
                         </HBox>
 
+                        <Region minHeight="4"/>
+
                         <HBox>
-                            <StackPane fx:id="helpOutputPane" minWidth="41.86" maxWidth="41.86" minHeight="30" maxHeight="30">
+                            <StackPane fx:id="helpOutputPane" minWidth="60" maxWidth="60" minHeight="30" maxHeight="30">
                                 <ImageView fx:id="helpOutputImage"/>
                             </StackPane>
-                            <Label styleClass="body1" style="-fx-padding: 9 0 0 5">
+                            <Label styleClass="body1" style="-fx-padding: 5 0 0 5">
                                 This is an output edge.
                             </Label>
                         </HBox>
