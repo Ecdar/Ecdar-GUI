@@ -11,9 +11,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * A model of a system
  */
 public class SystemModel extends HighLevelModelObject {
-    private static final double INITIAL_HEIGHT = 600d;
-    private static final double INITIAL_WIDTH = 450d;
-
     private static final AtomicInteger hiddenId = new AtomicInteger(0); // Used to generate unique IDs
 
     // Verification properties
