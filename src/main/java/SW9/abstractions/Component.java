@@ -126,6 +126,9 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         final ChangeListener<Object> listener = (observable, oldValue, newValue) -> updateIOList();
 
         edges.addListener((ListChangeListener<Edge>) c -> {
+            // Update the list so empty I/O status is also added to I/OLists
+            updateIOList();
+
             while(c.next()) {
                 for (final Edge e : c.getAddedSubList()) {
                     addSyncListener(listener, e);
