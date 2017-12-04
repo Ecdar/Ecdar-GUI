@@ -12,7 +12,7 @@ import java.net.URL;
 /**
  * Presentation for overall declarations.
  */
-public class DeclarationPresentation extends StackPane {
+public class DeclarationPresentation extends HighLevelModelPresentation {
     private final DeclarationsController controller;
 
     public DeclarationPresentation(final Declarations declarations) {

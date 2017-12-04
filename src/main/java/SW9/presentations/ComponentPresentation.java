@@ -42,10 +42,7 @@ import java.util.regex.Pattern;
 import static SW9.presentations.Grid.GRID_SIZE;
 import static javafx.util.Duration.millis;
 
-public class ComponentPresentation extends StackPane implements MouseTrackable, SelectHelper.Selectable {
-
-    public final static double CORNER_SIZE = 4 * GRID_SIZE;
-    public static final double TOOL_BAR_HEIGHT = CORNER_SIZE / 2;
+public class ComponentPresentation extends ModelPresentation implements MouseTrackable, SelectHelper.Selectable {
     private static final Pattern XML_TAG = Pattern.compile("(?<ELEMENT>(</?\\h*)(\\w+)([^<>]*)(\\h*/?>))" + "|(?<COMMENT><!--[^<>]+-->)");
     private static final Pattern ATTRIBUTES = Pattern.compile("(\\w+\\h*)(=)(\\h*\"[^\"]+\")");
     private static final int GROUP_OPEN_BRACKET = 2;
@@ -396,7 +393,7 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
             controller.toggleDeclarationButton.setBackground(Background.EMPTY);
         };
 
-        updateColorDelegates.add(updateColor);
+        updateColorDelegates.add(updateColor); // TODO maybe move to ModelPresentation
 
         controller.getComponent().colorProperty().addListener(observable -> updateColor.accept(component.getColor(), component.getColorIntensity()));
 
@@ -414,44 +411,21 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
         final Shape[] mask = new Shape[1];
         final Rectangle rectangle = new Rectangle(component.getBox().getWidth(), component.getBox().getHeight());
 
-        // Generate first corner (to subtract)
-        final Polygon corner1 = new Polygon(
-                0, 0,
-                CORNER_SIZE + 2, 0,
-                0, CORNER_SIZE + 2
-        );
-
-        // Generate second corner (to subtract)
-        final Polygon corner2 = new Polygon(
-                component.getBox().getWidth(), component.getBox().getHeight(),
-                component.getBox().getWidth() - CORNER_SIZE - 2, component.getBox().getHeight(),
-                component.getBox().getWidth(), component.getBox().getHeight() - CORNER_SIZE - 2
-        );
-
         final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
             // Mask the parent of the frame (will also mask the background)
-            mask[0] = Path.subtract(rectangle, corner1);
-            mask[0] = Path.subtract(mask[0], corner2);
+            mask[0] = Path.subtract(rectangle, TOP_LEFT_CORNER);
             controller.frame.setClip(mask[0]);
             controller.background.setClip(Path.union(mask[0], mask[0]));
             controller.background.setOpacity(0.5);
 
             // Bind the missing lines that we cropped away
-            controller.line1.setStartX(CORNER_SIZE);
-            controller.line1.setStartY(0);
-            controller.line1.setEndX(0);
-            controller.line1.setEndY(CORNER_SIZE);
-            controller.line1.setStroke(newColor.getColor(newIntensity.next(2)));
-            controller.line1.setStrokeWidth(1.25);
-            StackPane.setAlignment(controller.line1, Pos.TOP_LEFT);
-
-            controller.line2.setStartX(CORNER_SIZE);
-            controller.line2.setStartY(0);
-            controller.line2.setEndX(0);
-            controller.line2.setEndY(CORNER_SIZE);
-            controller.line2.setStroke(newColor.getColor(newIntensity.next(2)));
-            controller.line2.setStrokeWidth(1.25);
-            StackPane.setAlignment(controller.line2, Pos.BOTTOM_RIGHT);
+            controller.topLeftLine.setStartX(CORNER_SIZE);
+            controller.topLeftLine.setStartY(0);
+            controller.topLeftLine.setEndX(0);
+            controller.topLeftLine.setEndY(CORNER_SIZE);
+            controller.topLeftLine.setStroke(newColor.getColor(newIntensity.next(2)));
+            controller.topLeftLine.setStrokeWidth(1.25);
+            StackPane.setAlignment(controller.topLeftLine, Pos.TOP_LEFT);
 
             // Set the stroke color to two shades darker
             controller.frame.setBorder(new Border(new BorderStroke(
@@ -463,7 +437,7 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
             )));
         };
 
-        updateColorDelegates.add(updateColor);
+        updateColorDelegates.add(updateColor); // TODO maybe move to ModelPresentation
 
         component.colorProperty().addListener(observable -> {
             updateColor.accept(component.getColor(), component.getColorIntensity());
@@ -484,7 +458,7 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
             controller.background.setFill(newColor.getColor(newIntensity.next(-10).next(2)));
         };
 
-        updateColorDelegates.add(updateColor);
+        updateColorDelegates.add(updateColor);  // TODO maybe move to ModelPresentation
 
         component.colorProperty().addListener(observable -> {
             updateColor.accept(component.getColor(), component.getColorIntensity());

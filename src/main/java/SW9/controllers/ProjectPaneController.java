@@ -39,7 +39,7 @@ public class ProjectPaneController implements Initializable {
         final FilePresentation globalDclPresentation = new FilePresentation(Ecdar.getProject().getGlobalDeclarations());
         globalDclPresentation.setOnMousePressed(event -> {
             event.consume();
-            CanvasController.setActiveVerificationObject(Ecdar.getProject().getGlobalDeclarations());
+            CanvasController.setActiveObject(Ecdar.getProject().getGlobalDeclarations());
         });
         filesList.getChildren().add(globalDclPresentation);
 
@@ -47,7 +47,7 @@ public class ProjectPaneController implements Initializable {
         final FilePresentation systemDclPresentation = new FilePresentation(Ecdar.getProject().getSystemDeclarations());
         systemDclPresentation.setOnMousePressed(event -> {
             event.consume();
-            CanvasController.setActiveVerificationObject(Ecdar.getProject().getSystemDeclarations());
+            CanvasController.setActiveObject(Ecdar.getProject().getSystemDeclarations());
         });
         filesList.getChildren().add(systemDclPresentation);
 
@@ -63,10 +63,10 @@ public class ProjectPaneController implements Initializable {
                         if (Ecdar.getProject().getComponents().size() > 0) {
                             // Find the first available component and show it instead of the removed one
                             final Component component = Ecdar.getProject().getComponents().get(0);
-                            CanvasController.setActiveVerificationObject(component);
+                            CanvasController.setActiveObject(component);
                         } else {
                             // Show no components (since there are none in the project)
-                            CanvasController.setActiveVerificationObject(null);
+                            CanvasController.setActiveObject(null);
                         }
                     }
                     // Sort the children alphabetically
@@ -168,7 +168,7 @@ public class ProjectPaneController implements Initializable {
         // Open the component if the presentation is pressed
         filePresentation.setOnMousePressed(event -> {
             event.consume();
-            CanvasController.setActiveVerificationObject(component);
+            CanvasController.setActiveObject(component);
         });
         component.nameProperty().addListener(obs -> sortPresentations());
     }
@@ -188,7 +188,7 @@ public class ProjectPaneController implements Initializable {
             Ecdar.getProject().getComponents().remove(newComponent);
         }, "Created new component: " + newComponent.getName(), "add-circle");
 
-        CanvasController.setActiveVerificationObject(newComponent);
+        CanvasController.setActiveObject(newComponent);
     }
 
 }

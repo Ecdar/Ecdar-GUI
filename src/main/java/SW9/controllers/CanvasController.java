@@ -3,9 +3,8 @@ package SW9.controllers;
 import SW9.abstractions.Component;
 import SW9.abstractions.Declarations;
 import SW9.abstractions.HighLevelModelObject;
-import SW9.presentations.CanvasPresentation;
-import SW9.presentations.ComponentPresentation;
-import SW9.presentations.DeclarationPresentation;
+import SW9.abstractions.SystemModel;
+import SW9.presentations.*;
 import SW9.utility.helpers.SelectHelper;
 import javafx.application.Platform;
 import javafx.beans.property.*;
@@ -28,8 +27,8 @@ public class CanvasController implements Initializable {
 
     public Pane root;
 
-    private final static ObjectProperty<HighLevelModelObject> activeVerificationObject = new SimpleObjectProperty<>(null);
-    private final static HashMap<Component, Pair<Double, Double>> componentTranslateMap = new HashMap<>();
+    private final static ObjectProperty<HighLevelModelObject> activeObject = new SimpleObjectProperty<>(null);
+    private final static HashMap<HighLevelModelObject, Pair<Double, Double>> ModelObjectTranslateMap = new HashMap<>();
 
     private static DoubleProperty width, height;
     private static BooleanProperty insetShouldShow;
@@ -47,21 +46,21 @@ public class CanvasController implements Initializable {
         return insetShouldShow;
     }
 
-    public static HighLevelModelObject getActiveVerificationObject() {
-        return activeVerificationObject.get();
+    public static HighLevelModelObject getActiveObject() {
+        return activeObject.get();
     }
 
     /**
-     * Sets the given HighLevelModelObject as the one to be active / to be shown on the screen
-     * @param object the given HighLevelModelObject
+     * Sets the given object as the one to be active, e.g. to be shown on the screen.
+     * @param object the given object
      */
-    public static void setActiveVerificationObject(final HighLevelModelObject object) {
-        CanvasController.activeVerificationObject.set(object);
+    public static void setActiveObject(final HighLevelModelObject object) {
+        CanvasController.activeObject.set(object);
         Platform.runLater(CanvasController::leaveTextAreas);
     }
 
     public static ObjectProperty<HighLevelModelObject> activeComponentProperty() {
-        return activeVerificationObject;
+        return activeObject;
     }
 
     public static void leaveTextAreas() {
@@ -97,8 +96,7 @@ public class CanvasController implements Initializable {
             SelectHelper.clearSelectedElements();
         });
 
-        activeVerificationObject.addListener((obs, oldVeriObj, newVeriObj) ->
-                onActiveVerificationObjectChanged(oldVeriObj, newVeriObj));
+        activeObject.addListener((obs, oldVeriObj, newVeriObj) -> onActiveObjectChanged(oldVeriObj, newVeriObj));
 
         leaveTextAreas = () -> root.requestFocus();
 
@@ -111,43 +109,53 @@ public class CanvasController implements Initializable {
     }
 
     /**
-     * Updates component translate map with old verification object.
-     * Removes old verification object from view and shows new one.
-     * @param oldVeriObj old verification object
-     * @param newVeriObj new verification object
+     * Updates the component translate map with the old object.
+     * Then removes old object from view and shows the new one.
+     * @param oldObject old object
+     * @param newObject new object
      */
-    private void onActiveVerificationObjectChanged(final HighLevelModelObject oldVeriObj, final HighLevelModelObject newVeriObj) {
-        // If old object is a component, add to map
-        if (oldVeriObj != null && oldVeriObj instanceof Component) {
-            componentTranslateMap.put((Component) oldVeriObj, new Pair<>(root.getTranslateX(), root.getTranslateY()));
+    private void onActiveObjectChanged(final HighLevelModelObject oldObject, final HighLevelModelObject newObject) {
+        // If old object is a component or system, add to map in order to remember coordinate
+        if (oldObject != null && (oldObject instanceof Component || oldObject instanceof SystemModel)) {
+            ModelObjectTranslateMap.put(oldObject, new Pair<>(root.getTranslateX(), root.getTranslateY()));
         }
 
-        if (newVeriObj == null) return; // We should not add the new component since it is null (clear the view)
+        // We should not add the new object if it is null (e.g. when clearing the view)
+        if (newObject == null) return;
 
-        // Remove verification object from view
-        root.getChildren().removeIf(node -> node instanceof ComponentPresentation || node instanceof DeclarationPresentation);
+        // Remove old object from view
+        root.getChildren().removeIf(node -> node instanceof HighLevelModelPresentation);
 
-        if (newVeriObj instanceof Component) {
-            if (componentTranslateMap.containsKey(newVeriObj)) {
-                final Pair<Double, Double> restoreCoordinates = componentTranslateMap.get(newVeriObj);
-                root.setTranslateX(restoreCoordinates.getKey());
-                root.setTranslateY(restoreCoordinates.getValue());
-            } else {
-                root.setTranslateX(GRID_SIZE * 3);
-                root.setTranslateY(GRID_SIZE * 8);
-            }
-
-            activeComponentPresentation = new ComponentPresentation((Component) newVeriObj);
+        if (newObject instanceof Component) {
+            setTranslateOfBox(newObject);
+            activeComponentPresentation = new ComponentPresentation((Component) newObject);
             root.getChildren().add(activeComponentPresentation);
-        } else if (newVeriObj instanceof Declarations) {
+        } else if (newObject instanceof Declarations) {
             root.setTranslateX(0);
             root.setTranslateY(DECLARATION_X_MARGIN);
 
             activeComponentPresentation = null;
-            root.getChildren().add(new DeclarationPresentation((Declarations) newVeriObj));
+            root.getChildren().add(new DeclarationPresentation((Declarations) newObject));
+        } else if (newObject instanceof SystemModel) {
+            setTranslateOfBox(newObject);
+            activeComponentPresentation = null;
+            root.getChildren().add(new SystemPresentation((SystemModel) newObject));
+        } else {
+            throw new IllegalStateException("Type of object is not supported.");
         }
 
         root.requestFocus();
+    }
+
+    private void setTranslateOfBox(final HighLevelModelObject newObject) {
+        if (ModelObjectTranslateMap.containsKey(newObject)) {
+            final Pair<Double, Double> restoreCoordinates = ModelObjectTranslateMap.get(newObject);
+            root.setTranslateX(restoreCoordinates.getKey());
+            root.setTranslateY(restoreCoordinates.getValue());
+        } else {
+            root.setTranslateX(GRID_SIZE * 3);
+            root.setTranslateY(GRID_SIZE * 8);
+        }
     }
 
     /**

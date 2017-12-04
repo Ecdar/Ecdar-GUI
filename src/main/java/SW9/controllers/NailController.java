@@ -4,7 +4,6 @@ import SW9.Debug;
 import SW9.Ecdar;
 import SW9.abstractions.Component;
 import SW9.abstractions.Edge;
-import SW9.abstractions.EdgeStatus;
 import SW9.abstractions.Nail;
 import SW9.presentations.*;
 import SW9.utility.UndoRedoStack;
@@ -253,7 +252,7 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
     public ItemDragHelper.DragBounds getDragBounds() {
         final ObservableDoubleValue minX = new SimpleDoubleProperty(Grid.GRID_SIZE);
         final ObservableDoubleValue maxX = getComponent().getBox().widthProperty().subtract(Grid.GRID_SIZE);
-        final ObservableDoubleValue minY = new SimpleDoubleProperty(ComponentPresentation.TOOL_BAR_HEIGHT + Grid.GRID_SIZE);
+        final ObservableDoubleValue minY = new SimpleDoubleProperty(ModelPresentation.TOOL_BAR_HEIGHT + Grid.GRID_SIZE);
         final ObservableDoubleValue maxY = getComponent().getBox().heightProperty().subtract(Grid.GRID_SIZE);
 
         return new ItemDragHelper.DragBounds(minX, maxX, minY, maxY);

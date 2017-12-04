@@ -98,9 +98,9 @@ public class MessagePresentation extends HBox {
                             }
 
                             if (openComponent[0] != null) {
-                                if (!CanvasController.getActiveVerificationObject().equals(openComponent[0])) {
+                                if (!CanvasController.getActiveObject().equals(openComponent[0])) {
                                     SelectHelper.elementsToBeSelected = FXCollections.observableArrayList();
-                                    CanvasController.setActiveVerificationObject(openComponent[0]);
+                                    CanvasController.setActiveObject(openComponent[0]);
                                 }
 
                                 SelectHelper.clearSelectedElements();

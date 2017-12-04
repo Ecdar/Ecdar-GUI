@@ -118,7 +118,7 @@ public class MessageCollectionPresentation extends VBox {
         };
 
         final EventHandler<MouseEvent> onMousePressed = event -> {
-            CanvasController.setActiveVerificationObject(component);
+            CanvasController.setActiveObject(component);
         };
 
         headline.setOnMouseEntered(onMouseEntered);

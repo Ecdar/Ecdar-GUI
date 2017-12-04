@@ -136,6 +136,7 @@ public class EcdarController implements Initializable {
     public MenuItem menuBarFileExportAsPngNoBorder;
     public MenuItem menuBarHelpHelp;
     public MenuItem menuBarEditBalance;
+    public MenuItem menuBarEditNewSystem;
 
     public JFXSnackbar snackbar;
     public HBox statusBar;
@@ -201,7 +202,7 @@ public class EcdarController implements Initializable {
                 Ecdar.getProject().getComponents().remove(newComponent);
             }, "Created new component: " + newComponent.getName(), "add-circle");
 
-            CanvasController.setActiveVerificationObject(newComponent);
+            CanvasController.setActiveObject(newComponent);
         });
         KeyboardTracker.registerKeybind(KeyboardTracker.CREATE_COMPONENT, binding);
 
@@ -401,9 +402,26 @@ public class EcdarController implements Initializable {
 
         initializeEditBalanceMenuItem();
 
+        menuBarEditNewSystem.setOnAction(event -> createSystem());
+
         initializeViewMenu();
 
         menuBarHelpHelp.setOnAction(event -> Ecdar.showHelp());
+    }
+
+    /**
+     * Creates a system system and set it as the active model object on the canvas.
+     */
+    private static void createSystem() {
+        final SystemModel system = new SystemModel();
+
+        UndoRedoStack.pushAndPerform(() -> { // Perform
+            Ecdar.getProject().getSystemsProperty().add(system);
+        }, () -> { // Undo
+            Ecdar.getProject().getSystemsProperty().remove(system);
+        }, "Created new system: " + system.getName(), "add-circle");
+
+        CanvasController.setActiveObject(system);
     }
 
     /**
@@ -595,7 +613,7 @@ public class EcdarController implements Initializable {
         Ecdar.projectDirectory.set(null);
 
         Ecdar.getProject().reset();
-        CanvasController.setActiveVerificationObject(Ecdar.getProject().getComponents().get(0));
+        CanvasController.setActiveObject(Ecdar.getProject().getComponents().get(0));
 
         UndoRedoStack.clear();
 
@@ -677,7 +695,7 @@ public class EcdarController implements Initializable {
      * @param image the image
      */
     private void CropAndExportImage(final WritableImage image) {
-        final String name = CanvasController.getActiveVerificationObject().getName();
+        final String name = CanvasController.getActiveObject().getName();
 
         final FileChooser filePicker = new FileChooser();
         filePicker.setTitle("Export png");

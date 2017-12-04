@@ -27,10 +27,7 @@ import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.Line;
-import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.StyleClassedTextArea;
@@ -52,18 +49,11 @@ public class ComponentController extends ModelController implements Initializabl
     private final Map<Edge, EdgePresentation> edgePresentationMap = new HashMap<>();
     private final Map<Location, LocationPresentation> locationPresentationMap = new HashMap<>();
 
-    public BorderPane toolbar;
-    public Rectangle background;
     public StyleClassedTextArea declarationTextArea;
     public JFXRippler toggleDeclarationButton;
-    public BorderPane frame;
     public JFXTextField name;
-    public Line line1;
-    public Line line2;
     public Label x;
     public Label y;
-    public Rectangle rightAnchor;
-    public Rectangle bottomAnchor;
     public Pane modelContainerLocation;
     public Pane modelContainerEdge;
 
@@ -551,25 +541,5 @@ public class ComponentController extends ModelController implements Initializabl
     }
     public MouseTracker getMouseTracker() {
         return mouseTracker;
-    }
-
-    /**
-     * Hides the border and background.
-     */
-    void hideBorderAndBackground() {
-        frame.setVisible(false);
-        line1.setVisible(false);
-        line2.setVisible(false);
-        background.setVisible(false);
-    }
-
-    /**
-     * Shows the border and background.
-     */
-    void showBorderAndBorder() {
-        frame.setVisible(true);
-        line1.setVisible(true);
-        line2.setVisible(true);
-        background.setVisible(true);
     }
 }
