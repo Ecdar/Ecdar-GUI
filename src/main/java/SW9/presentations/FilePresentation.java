@@ -117,7 +117,7 @@ public class FilePresentation extends AnchorPane {
 
         // Update the background when hovered
         setOnMouseEntered(event -> {
-            if(CanvasController.getActiveObject().equals(model.get())) {
+            if(CanvasController.getActiveModel().equals(model.get())) {
                 setBackground.accept(color, colorIntensity.next(2));
             } else {
                 setBackground.accept(color, colorIntensity.next());
@@ -125,7 +125,7 @@ public class FilePresentation extends AnchorPane {
             setCursor(Cursor.HAND);
         });
         setOnMouseExited(event -> {
-            if(CanvasController.getActiveObject().equals(model.get())) {
+            if(CanvasController.getActiveModel().equals(model.get())) {
                 setBackground.accept(color, colorIntensity.next(1));
             } else {
                 setBackground.accept(color, colorIntensity);

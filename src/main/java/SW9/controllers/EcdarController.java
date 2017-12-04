@@ -695,7 +695,7 @@ public class EcdarController implements Initializable {
      * @param image the image
      */
     private void CropAndExportImage(final WritableImage image) {
-        final String name = CanvasController.getActiveObject().getName();
+        final String name = CanvasController.getActiveModel().getName();
 
         final FileChooser filePicker = new FileChooser();
         filePicker.setTitle("Export png");

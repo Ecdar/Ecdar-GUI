@@ -27,7 +27,7 @@ public class CanvasController implements Initializable {
 
     public Pane root;
 
-    private final static ObjectProperty<HighLevelModelObject> activeObject = new SimpleObjectProperty<>(null);
+    private final static ObjectProperty<HighLevelModelObject> activeModel = new SimpleObjectProperty<>(null);
     private final static HashMap<HighLevelModelObject, Pair<Double, Double>> ModelObjectTranslateMap = new HashMap<>();
 
     private static DoubleProperty width, height;
@@ -46,8 +46,8 @@ public class CanvasController implements Initializable {
         return insetShouldShow;
     }
 
-    public static HighLevelModelObject getActiveObject() {
-        return activeObject.get();
+    public static HighLevelModelObject getActiveModel() {
+        return activeModel.get();
     }
 
     /**
@@ -55,12 +55,12 @@ public class CanvasController implements Initializable {
      * @param model the given model
      */
     public static void setActiveModel(final HighLevelModelObject model) {
-        CanvasController.activeObject.set(model);
+        CanvasController.activeModel.set(model);
         Platform.runLater(CanvasController::leaveTextAreas);
     }
 
     public static ObjectProperty<HighLevelModelObject> activeComponentProperty() {
-        return activeObject;
+        return activeModel;
     }
 
     public static void leaveTextAreas() {
@@ -96,7 +96,7 @@ public class CanvasController implements Initializable {
             SelectHelper.clearSelectedElements();
         });
 
-        activeObject.addListener((obs, oldVeriObj, newVeriObj) -> onActiveObjectChanged(oldVeriObj, newVeriObj));
+        activeModel.addListener((obs, oldVeriObj, newVeriObj) -> onActiveModelChanged(oldVeriObj, newVeriObj));
 
         leaveTextAreas = () -> root.requestFocus();
 
@@ -114,7 +114,7 @@ public class CanvasController implements Initializable {
      * @param oldObject old object
      * @param newObject new object
      */
-    private void onActiveObjectChanged(final HighLevelModelObject oldObject, final HighLevelModelObject newObject) {
+    private void onActiveModelChanged(final HighLevelModelObject oldObject, final HighLevelModelObject newObject) {
         // If old object is a component or system, add to map in order to remember coordinate
         if (oldObject != null && (oldObject instanceof Component || oldObject instanceof SystemModel)) {
             ModelObjectTranslateMap.put(oldObject, new Pair<>(root.getTranslateX(), root.getTranslateY()));
