@@ -1,5 +1,6 @@
 package SW9.controllers;
 
+import SW9.abstractions.HighLevelModelObject;
 import SW9.abstractions.SystemModel;
 import javafx.fxml.FXML;
 import javafx.scene.input.MouseEvent;
@@ -23,5 +24,10 @@ public class SystemController extends ModelController {
     @FXML
     private void modelContainerPressed(final MouseEvent event) {
 
+    }
+
+    @Override
+    public HighLevelModelObject getModel() {
+        return system;
     }
 }

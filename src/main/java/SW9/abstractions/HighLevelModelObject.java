@@ -1,13 +1,19 @@
 package SW9.abstractions;
 
+import SW9.Ecdar;
 import SW9.presentations.DropDownMenu;
 import SW9.utility.colors.Color;
+import SW9.utility.colors.EnabledColor;
 import SW9.utility.serialize.Serializable;
 import com.google.gson.JsonObject;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 /**
  * An object used for verifications.
@@ -18,28 +24,14 @@ public abstract class HighLevelModelObject implements Serializable, DropDownMenu
 
     static final String DECLARATIONS = "declarations";
 
-    private final StringProperty declarationsText;
     private final StringProperty name;
     private final ObjectProperty<Color> color;
     private final ObjectProperty<Color.Intensity> colorIntensity;
 
     HighLevelModelObject() {
-        declarationsText = new SimpleStringProperty("");
         name = new SimpleStringProperty("");
         color = new SimpleObjectProperty<>(Color.GREY_BLUE);
         colorIntensity = new SimpleObjectProperty<>(Color.Intensity.I700);
-    }
-
-    public String getDeclarationsText() {
-        return declarationsText.get();
-    }
-
-    public void setDeclarationsText(final String declarationsText) {
-        this.declarationsText.set(declarationsText);
-    }
-
-    public StringProperty declarationsTextProperty() {
-        return declarationsText;
     }
 
     public String getName() {
@@ -79,6 +71,22 @@ public abstract class HighLevelModelObject implements Serializable, DropDownMenu
         return colorIntensity;
     }
 
+    public void setRandomColor() {
+        // Color the new component in such a way that we avoid clashing with other components if possible
+        final List<EnabledColor> availableColors = new ArrayList<>();
+        EnabledColor.enabledColors.forEach(availableColors::add);
+        Ecdar.getProject().getComponents().forEach(component -> {
+            availableColors.removeIf(enabledColor -> enabledColor.color.equals(component.getColor()));
+        });
+        if (availableColors.size() == 0) {
+            EnabledColor.enabledColors.forEach(availableColors::add);
+        }
+        final int randomIndex = (new Random()).nextInt(availableColors.size());
+        final EnabledColor selectedColor = availableColors.get(randomIndex);
+        setColorIntensity(selectedColor.intensity);
+        setColor(selectedColor.color);
+    }
+
     @Override
     public JsonObject serialize() {
         final JsonObject result = new JsonObject();
@@ -91,9 +99,5 @@ public abstract class HighLevelModelObject implements Serializable, DropDownMenu
     @Override
     public void deserialize(final JsonObject json) {
         setName(json.getAsJsonPrimitive(NAME).getAsString());
-    }
-
-    public void clearDeclarationsText() {
-        setDeclarationsText("");
     }
 }

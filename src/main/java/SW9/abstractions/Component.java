@@ -33,6 +33,7 @@ public class Component extends HighLevelModelObject {
     private final ObservableList<String> inputStrings = FXCollections.observableArrayList();
     private final ObservableList<String> outputStrings = FXCollections.observableArrayList();
     private final StringProperty description = new SimpleStringProperty("");
+    private final StringProperty declarationsText;
 
     // Background check
     private final BooleanProperty includeInPeriodicCheck = new SimpleBooleanProperty(true);
@@ -68,20 +69,10 @@ public class Component extends HighLevelModelObject {
         setName(name);
 
         if(doRandomColor) {
-            // Color the new component in such a way that we avoid clashing with other components if possible
-            final List<EnabledColor> availableColors = new ArrayList<>();
-            EnabledColor.enabledColors.forEach(availableColors::add);
-            Ecdar.getProject().getComponents().forEach(component -> {
-                availableColors.removeIf(enabledColor -> enabledColor.color.equals(component.getColor()));
-            });
-            if (availableColors.size() == 0) {
-                EnabledColor.enabledColors.forEach(availableColors::add);
-            }
-            final int randomIndex = (new Random()).nextInt(availableColors.size());
-            final EnabledColor selectedColor = availableColors.get(randomIndex);
-            setColorIntensity(selectedColor.intensity);
-            setColor(selectedColor.color);
+            setRandomColor();
         }
+
+        declarationsText = new SimpleStringProperty("");
 
         // Make initial location
         final Location initialLocation = new Location();
@@ -103,6 +94,9 @@ public class Component extends HighLevelModelObject {
     public Component(final JsonObject object) {
         hiddenId.incrementAndGet();
         setFirsTimeShown(true);
+
+        declarationsText = new SimpleStringProperty("");
+
         deserialize(object);
 
         initializeIOListeners();
@@ -414,6 +408,18 @@ public class Component extends HighLevelModelObject {
 
     public ObservableList<String> getOutputStrings() {
         return outputStrings;
+    }
+
+    public String getDeclarationsText() {
+        return declarationsText.get();
+    }
+
+    public void setDeclarationsText(final String declarationsText) {
+        this.declarationsText.set(declarationsText);
+    }
+
+    public StringProperty declarationsTextProperty() {
+        return declarationsText;
     }
 
     public Box getBox() {

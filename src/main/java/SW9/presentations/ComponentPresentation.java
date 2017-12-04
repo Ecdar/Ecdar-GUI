@@ -3,6 +3,7 @@ package SW9.presentations;
 import SW9.abstractions.Component;
 import SW9.controllers.CanvasController;
 import SW9.controllers.ComponentController;
+import SW9.controllers.ModelController;
 import SW9.utility.UndoRedoStack;
 import SW9.utility.colors.Color;
 import SW9.utility.helpers.MouseTrackable;
@@ -56,18 +57,12 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
             fxmlLoader.setRoot(this);
             fxmlLoader.load(location.openStream());
 
-            // Set the width and the height of the view to the values in the abstraction
-            setMinWidth(component.getBox().getWidth());
-            setMaxWidth(component.getBox().getWidth());
-            setMinHeight(component.getBox().getHeight());
-            setMaxHeight(component.getBox().getHeight());
-            minHeightProperty().bindBidirectional(component.getBox().heightProperty());
-            maxHeightProperty().bindBidirectional(component.getBox().heightProperty());
-            minWidthProperty().bindBidirectional(component.getBox().widthProperty());
-            maxWidthProperty().bindBidirectional(component.getBox().widthProperty());
-
             controller = fxmlLoader.getController();
             controller.setComponent(component);
+
+            super.initialize();
+
+            initializeDimensions(component.getBox());
 
             // Initializer methods that is sensitive to width and height
             final Runnable onUpdateSize = () -> {
@@ -76,7 +71,6 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
                 initializeBackground();
             };
 
-            initializeName();
             initializeDragAnchors();
             onUpdateSize.run();
 
@@ -250,42 +244,6 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
 
     }
 
-    private void initializeName() {
-        final Component component = controller.getComponent();
-        final BooleanProperty initialized = new SimpleBooleanProperty(false);
-
-        controller.name.focusedProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue && !initialized.get()) {
-                controller.root.requestFocus();
-                initialized.setValue(true);
-            }
-        });
-
-        // Set the text field to the name in the model, and bind the model to the text field
-        controller.name.setText(component.getName());
-        controller.name.textProperty().addListener((obs, oldName, newName) -> {
-            component.nameProperty().unbind();
-            component.setName(newName);
-        });
-
-        final Runnable updateColor = () -> {
-            final Color color = component.getColor();
-            final Color.Intensity colorIntensity = component.getColorIntensity();
-
-            // Set the text color for the label
-            controller.name.setStyle("-fx-text-fill: " + color.getTextColorRgbaString(colorIntensity) + ";");
-            controller.name.setFocusColor(color.getTextColor(colorIntensity));
-            controller.name.setUnFocusColor(javafx.scene.paint.Color.TRANSPARENT);
-        };
-
-        controller.getComponent().colorProperty().addListener(observable -> updateColor.run());
-        updateColor.run();
-
-        // Center the text vertically and aff a left padding of CORNER_SIZE
-        controller.name.setPadding(new Insets(2, 0, 0, CORNER_SIZE));
-        controller.name.setOnKeyPressed(CanvasController.getLeaveTextAreaKeyHandler());
-    }
-
     private void initializeToolbar() {
         final Component component = controller.getComponent();
 
@@ -419,5 +377,10 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
 
             colorConsumer.accept(component.getColor(), component.getColorIntensity());
         });
+    }
+
+    @Override
+    ModelController getModelController() {
+        return getController();
     }
 }

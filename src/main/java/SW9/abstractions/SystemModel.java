@@ -16,6 +16,10 @@ public class SystemModel extends HighLevelModelObject {
     // Verification properties
     private final StringProperty description = new SimpleStringProperty("");
 
+    public SystemModel() {
+        setRandomColor();
+    }
+
     // Styling properties
     private final Box box = new Box();
 

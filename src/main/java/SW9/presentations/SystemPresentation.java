@@ -1,13 +1,13 @@
 package SW9.presentations;
 
-import SW9.abstractions.*;
+import SW9.abstractions.SystemModel;
+import SW9.controllers.ModelController;
 import SW9.controllers.SystemController;
 import SW9.utility.colors.Color;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Cursor;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.Polygon;
@@ -24,7 +24,7 @@ import java.util.function.BiConsumer;
 public class SystemPresentation extends ModelPresentation {
     private final SystemController controller;
 
-    public SystemPresentation(final SystemModel systemModel) {
+    public SystemPresentation(final SystemModel system) {
         final URL url = this.getClass().getResource("SystemPresentation.fxml");
 
         final FXMLLoader fxmlLoader = new FXMLLoader();
@@ -38,18 +38,12 @@ public class SystemPresentation extends ModelPresentation {
             throw new IllegalStateException(e);
         }
 
-        // Set the width and the height of the view to the values in the abstraction
-        setMinWidth(systemModel.getBox().getWidth());
-        setMaxWidth(systemModel.getBox().getWidth());
-        setMinHeight(systemModel.getBox().getHeight());
-        setMaxHeight(systemModel.getBox().getHeight());
-        minHeightProperty().bindBidirectional(systemModel.getBox().heightProperty());
-        maxHeightProperty().bindBidirectional(systemModel.getBox().heightProperty());
-        minWidthProperty().bindBidirectional(systemModel.getBox().widthProperty());
-        maxWidthProperty().bindBidirectional(systemModel.getBox().widthProperty());
-
         controller = fxmlLoader.getController();
-        controller.setSystem(systemModel);
+        controller.setSystem(system);
+
+        super.initialize();
+
+        initializeDimensions(system.getBox());
 
         initializeToolbar();
         initializeFrame();
@@ -148,5 +142,10 @@ public class SystemPresentation extends ModelPresentation {
 
         system.colorProperty().addListener(observable -> updateColor.accept(system.getColor(), system.getColorIntensity()));
         updateColor.accept(system.getColor(), system.getColorIntensity());
+    }
+
+    @Override
+    ModelController getModelController() {
+        return controller;
     }
 }

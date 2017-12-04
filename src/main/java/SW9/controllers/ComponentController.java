@@ -51,7 +51,6 @@ public class ComponentController extends ModelController implements Initializabl
 
     public StyleClassedTextArea declarationTextArea;
     public JFXRippler toggleDeclarationButton;
-    public JFXTextField name;
     public Label x;
     public Label y;
     public Pane modelContainerLocation;
@@ -541,5 +540,10 @@ public class ComponentController extends ModelController implements Initializabl
     }
     public MouseTracker getMouseTracker() {
         return mouseTracker;
+    }
+
+    @Override
+    public HighLevelModelObject getModel() {
+        return getComponent();
     }
 }
