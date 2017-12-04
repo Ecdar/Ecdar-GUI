@@ -89,11 +89,11 @@ public class ProjectPaneController implements Initializable {
         final JFXRippler moreInformation = (JFXRippler) filePresentation.lookup("#moreInformation");
         final int listWidth = 230;
         final DropDownMenu moreInformationDropDown = new DropDownMenu(root, moreInformation, listWidth, true);
-        final HighLevelModelObject verificationObject = filePresentation.getModel();
+        final HighLevelModelObject model = filePresentation.getModel();
 
         moreInformationDropDown.addListElement("Configuration");
 
-        initializeTogglePeriodicCheck(moreInformationDropDown, (Component) verificationObject);
+        initializeTogglePeriodicCheck(moreInformationDropDown, (Component) model);
 
         moreInformationDropDown.addSpacerElement();
 
@@ -102,8 +102,8 @@ public class ProjectPaneController implements Initializable {
         final JFXTextArea textArea = new JFXTextArea();
         textArea.setMinHeight(30);
 
-        if (verificationObject instanceof Component) {
-            ((Component) verificationObject).descriptionProperty().bindBidirectional(textArea.textProperty());
+        if (model instanceof Component) {
+            ((Component) model).descriptionProperty().bindBidirectional(textArea.textProperty());
         }
 
         textArea.textProperty().addListener((obs, oldText, newText) -> {
@@ -122,7 +122,7 @@ public class ProjectPaneController implements Initializable {
         moreInformationDropDown.addSpacerElement();
 
         // Color picker button
-        if (verificationObject instanceof Component) {
+        if (model instanceof Component) {
             moreInformationDropDown.addColorPicker((Component) filePresentation.getModel(),
                     ((Component) filePresentation.getModel())::dye);
 
@@ -131,10 +131,10 @@ public class ProjectPaneController implements Initializable {
             // Delete button
             moreInformationDropDown.addClickableListElement("Delete", event -> {
                 UndoRedoStack.pushAndPerform(() -> { // Perform
-                    Ecdar.getProject().getComponents().remove(verificationObject);
+                    Ecdar.getProject().getComponents().remove(model);
                 }, () -> { // Undo
-                    Ecdar.getProject().getComponents().add((Component) verificationObject);
-                }, "Deleted component " + verificationObject.getName(), "delete");
+                    Ecdar.getProject().getComponents().add((Component) model);
+                }, "Deleted component " + model.getName(), "delete");
 
                 moreInformationDropDown.close();
             });
