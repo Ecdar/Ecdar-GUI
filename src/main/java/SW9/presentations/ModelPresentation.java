@@ -5,11 +5,18 @@ import SW9.abstractions.Component;
 import SW9.abstractions.HighLevelModelObject;
 import SW9.controllers.CanvasController;
 import SW9.controllers.ModelController;
+import SW9.utility.UndoRedoStack;
 import SW9.utility.colors.Color;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Insets;
+import javafx.scene.Cursor;
 import javafx.scene.shape.Polygon;
+import javafx.scene.shape.Rectangle;
+
+import java.util.function.Supplier;
 
 import static SW9.presentations.Grid.GRID_SIZE;
 
@@ -89,5 +96,106 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
         maxHeightProperty().bindBidirectional(box.heightProperty());
         minWidthProperty().bindBidirectional(box.widthProperty());
         maxWidthProperty().bindBidirectional(box.widthProperty());
+    }
+
+    private void initializeDragAnchors(final Box box, final Supplier<Double> minHeightSupplier, final Supplier<Double> minWidthSupplier) {
+        final BooleanProperty wasResized = new SimpleBooleanProperty(false);
+
+        // Bottom anchor
+        final Rectangle bottomAnchor = getModelController().bottomAnchor;
+
+        bottomAnchor.setCursor(Cursor.S_RESIZE);
+
+        // Bind the place and size of bottom anchor
+        bottomAnchor.widthProperty().bind(box.widthProperty().subtract(CORNER_SIZE));
+        bottomAnchor.setHeight(5);
+
+        final DoubleProperty prevY = new SimpleDoubleProperty();
+        final DoubleProperty prevHeight = new SimpleDoubleProperty();
+
+        bottomAnchor.setOnMousePressed(event -> {
+            prevY.set(event.getScreenY());
+            prevHeight.set(box.getHeight());
+        });
+
+        bottomAnchor.setOnMouseDragged(event -> {
+            double diff = event.getScreenY() - prevY.get();
+            diff -= diff % GRID_SIZE;
+
+            final double newHeight = prevHeight.get() + diff;
+            final double minHeight = minHeightSupplier.get();
+
+            box.setHeight(Math.max(newHeight, minHeight));
+            wasResized.set(true);
+        });
+
+        bottomAnchor.setOnMouseReleased(event -> {
+            if (!wasResized.get()) return;
+            final double previousHeight = prevHeight.doubleValue();
+            final double currentHeight = box.getHeight();
+
+            // If no difference do not save change
+            if (previousHeight == currentHeight) return;
+
+            UndoRedoStack.pushAndPerform(() -> { // Perform
+                        box.setHeight(currentHeight);
+                    }, () -> { // Undo
+                        box.setHeight(previousHeight);
+                    },
+                    "Component height resized",
+                    "settings-overscan"
+            );
+
+            wasResized.set(false);
+        });
+
+        // Right anchor
+        final Rectangle rightAnchor = getModelController().rightAnchor;
+
+        rightAnchor.setCursor(Cursor.E_RESIZE);
+
+        // Bind the place and size of bottom anchor
+        rightAnchor.setWidth(5);
+        rightAnchor.heightProperty().bind(box.heightProperty().subtract(CORNER_SIZE));
+
+        final DoubleProperty prevX = new SimpleDoubleProperty();
+        final DoubleProperty prevWidth = new SimpleDoubleProperty();
+
+        rightAnchor.setOnMousePressed(event -> {
+            prevX.set(event.getScreenX());
+            prevWidth.set(box.getWidth());
+        });
+
+        rightAnchor.setOnMouseDragged(event -> {
+            double diff = event.getScreenX() - prevX.get();
+            diff -= diff % GRID_SIZE;
+
+            final double newWidth = prevWidth.get() + diff;
+            final double minWidth = minWidthSupplier.get();
+            box.setWidth(Math.max(newWidth, minWidth));
+            wasResized.set(true);
+        });
+
+        rightAnchor.setOnMouseReleased(event -> {
+            if (!wasResized.get()) return;
+            final double previousWidth = prevWidth.doubleValue();
+            final double currentWidth = box.getWidth();
+
+            // If no difference do not save change
+            if (previousWidth == currentWidth) return;
+
+            UndoRedoStack.pushAndPerform(() -> { // Perform
+                        box.setWidth(currentWidth);
+                    }, () -> { // Undo
+                        box.setWidth(previousWidth);
+                    },
+                    "Component width resized",
+                    "settings-overscan"
+            );
+
+            wasResized.set(false);
+        });
+
+
     }
 }
