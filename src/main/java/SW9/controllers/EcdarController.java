@@ -202,7 +202,7 @@ public class EcdarController implements Initializable {
                 Ecdar.getProject().getComponents().remove(newComponent);
             }, "Created new component: " + newComponent.getName(), "add-circle");
 
-            CanvasController.setActiveObject(newComponent);
+            CanvasController.setActiveModel(newComponent);
         });
         KeyboardTracker.registerKeybind(KeyboardTracker.CREATE_COMPONENT, binding);
 
@@ -421,7 +421,7 @@ public class EcdarController implements Initializable {
             Ecdar.getProject().getSystemsProperty().remove(system);
         }, "Created new system: " + system.getName(), "add-circle");
 
-        CanvasController.setActiveObject(system);
+        CanvasController.setActiveModel(system);
     }
 
     /**
@@ -613,7 +613,7 @@ public class EcdarController implements Initializable {
         Ecdar.projectDirectory.set(null);
 
         Ecdar.getProject().reset();
-        CanvasController.setActiveObject(Ecdar.getProject().getComponents().get(0));
+        CanvasController.setActiveModel(Ecdar.getProject().getComponents().get(0));
 
         UndoRedoStack.clear();
 

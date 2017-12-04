@@ -51,10 +51,10 @@ public class CanvasController implements Initializable {
     }
 
     /**
-     * Sets the given object as the one to be active, e.g. to be shown on the screen.
-     * @param object the given object
+     * Sets the given model as the one to be active, e.g. to be shown on the screen.
+     * @param model the given model
      */
-    public static void setActiveObject(final HighLevelModelObject model) {
+    public static void setActiveModel(final HighLevelModelObject model) {
         CanvasController.activeObject.set(model);
         Platform.runLater(CanvasController::leaveTextAreas);
     }

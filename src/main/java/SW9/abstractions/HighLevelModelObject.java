@@ -71,7 +71,12 @@ public abstract class HighLevelModelObject implements Serializable, DropDownMenu
         return colorIntensity;
     }
 
-    public void setRandomColor() {
+    /**
+     * Sets a random color.
+     * If some colors are not currently in use, choose among those.
+     * Otherwise choose a between all available colors.
+     */
+    void setRandomColor() {
         // Color the new component in such a way that we avoid clashing with other components if possible
         final List<EnabledColor> availableColors = new ArrayList<>();
         EnabledColor.enabledColors.forEach(availableColors::add);

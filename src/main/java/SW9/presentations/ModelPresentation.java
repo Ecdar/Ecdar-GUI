@@ -28,10 +28,16 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
 
     abstract ModelController getModelController();
 
+    /**
+     * Initializes this.
+     */
     void initialize() {
         initializeName();
     }
 
+    /**
+     * Initializes handling of name.
+     */
     private void initializeName() {
         final ModelController controller = getModelController();
         final HighLevelModelObject model = controller.getModel();
