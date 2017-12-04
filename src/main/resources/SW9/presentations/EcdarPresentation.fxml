@@ -150,6 +150,11 @@
                             <FontIcon iconLiteral="gmi-image" iconSize="24" fill="black"/>
                         </graphic>
                     </MenuItem>
+                    <MenuItem fx:id="menuBarFileExportAsPngNoBorder" text="Export without border as Png">
+                        <graphic>
+                            <FontIcon iconLiteral="gmi-image" iconSize="24" fill="black"/>
+                        </graphic>
+                    </MenuItem>
                 </Menu>
 
                 <Menu text="Edit">
@@ -331,20 +336,44 @@
                         <Region minHeight="20"/>
 
                         <HBox>
-                            <LocationPresentation mouseTransparent="true">
-                                <initial>INITIAL</initial>
-                            </LocationPresentation>
-                            <Label styleClass="body1" style="-fx-padding: 9 0 0 5">
-                                This is an initial location (top left in a component)
+                            <StackPane fx:id="helpInitialPane" minWidth="60" maxWidth="60" minHeight="30" maxHeight="30">
+                                <ImageView fx:id="helpInitialImage"/>
+                            </StackPane>
+                            <Label styleClass="body1" style="-fx-padding: 5 0 0 5">
+                                This is an initial location.
                             </Label>
                         </HBox>
 
+                        <Region minHeight="4"/>
+
                         <HBox>
-                            <LocationPresentation mouseTransparent="true">
-                                <initial>URGENT</initial>
-                            </LocationPresentation>
-                            <Label styleClass="body1" style="-fx-padding: 9 0 0 5">
-                                This is an urgent location
+                            <StackPane fx:id="helpUrgentPane" minWidth="60" maxWidth="60" minHeight="30" maxHeight="30">
+                                <ImageView fx:id="helpUrgentImage"/>
+                            </StackPane>
+                            <Label styleClass="body1" style="-fx-padding: 5 0 0 5">
+                                This is an urgent location.
+                            </Label>
+                        </HBox>
+
+                        <Region minHeight="4"/>
+
+                        <HBox>
+                            <StackPane fx:id="helpInputPane" minWidth="60" maxWidth="60" minHeight="30" maxHeight="30">
+                                <ImageView fx:id="helpInputImage"/>
+                            </StackPane>
+                            <Label styleClass="body1" style="-fx-padding: 5 0 0 5">
+                                This is an input edge.
+                            </Label>
+                        </HBox>
+
+                        <Region minHeight="4"/>
+
+                        <HBox>
+                            <StackPane fx:id="helpOutputPane" minWidth="60" maxWidth="60" minHeight="30" maxHeight="30">
+                                <ImageView fx:id="helpOutputImage"/>
+                            </StackPane>
+                            <Label styleClass="body1" style="-fx-padding: 5 0 0 5">
+                                This is an output edge.
                             </Label>
                         </HBox>
 

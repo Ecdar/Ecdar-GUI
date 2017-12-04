@@ -588,4 +588,24 @@ public class ComponentController implements Initializable {
     public MouseTracker getMouseTracker() {
         return mouseTracker;
     }
+
+    /**
+     * Hides the border and background.
+     */
+    void hideBorderAndBackground() {
+        frame.setVisible(false);
+        line1.setVisible(false);
+        line2.setVisible(false);
+        background.setVisible(false);
+    }
+
+    /**
+     * Shows the border and background.
+     */
+    void showBorderAndBorder() {
+        frame.setVisible(true);
+        line1.setVisible(true);
+        line2.setVisible(true);
+        background.setVisible(true);
+    }
 }

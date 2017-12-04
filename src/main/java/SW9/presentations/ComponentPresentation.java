@@ -513,6 +513,10 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
         return yProperty().get();
     }
 
+    public ComponentController getController() {
+        return controller;
+    }
+
     @Override
     public MouseTracker getMouseTracker() {
         return controller.getMouseTracker();
