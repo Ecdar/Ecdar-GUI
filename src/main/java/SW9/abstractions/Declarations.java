@@ -25,8 +25,8 @@ public class Declarations extends HighLevelModelObject {
     }
 
 
-    public Declarations(final JsonObject object) {
-        deserialize(object);
+    public Declarations(final JsonObject json) {
+        deserialize(json);
         setColor(Color.AMBER);
         declarationsText = new SimpleStringProperty("");
     }

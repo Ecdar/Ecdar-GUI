@@ -8,7 +8,7 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 
 /**
- *
+ * Controller for a high level model, such as a component or a system.
  */
 public abstract class ModelController {
     public StackPane root;

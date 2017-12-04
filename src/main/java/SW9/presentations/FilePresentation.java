@@ -21,11 +21,11 @@ import java.net.URL;
 import java.util.function.BiConsumer;
 
 public class FilePresentation extends AnchorPane {
-    private final SimpleObjectProperty<HighLevelModelObject> verificationObject = new SimpleObjectProperty<>(null);
+    private final SimpleObjectProperty<HighLevelModelObject> model = new SimpleObjectProperty<>(null);
 
-    private FileController controller;
+    private final FileController controller;
 
-    public FilePresentation(final HighLevelModelObject verificationObject) {
+    public FilePresentation(final HighLevelModelObject model) {
         final URL location = this.getClass().getResource("FilePresentation.fxml");
 
         final FXMLLoader fxmlLoader = new FXMLLoader();
@@ -38,7 +38,7 @@ public class FilePresentation extends AnchorPane {
 
             controller = fxmlLoader.getController();
 
-            this.verificationObject.set(verificationObject);
+            this.model.set(model);
 
             initializeIcon();
             initializeFileName();
@@ -52,7 +52,7 @@ public class FilePresentation extends AnchorPane {
     }
 
     private void initializeMoreInformationButton() {
-        if (getVerificationObject() instanceof Component) {
+        if (getModel() instanceof Component) {
             controller.moreInformation.setVisible(true);
             controller.moreInformation.setMaskType(JFXRippler.RipplerMask.CIRCLE);
             controller.moreInformation.setPosition(JFXRippler.RipplerPos.BACK);
@@ -75,21 +75,21 @@ public class FilePresentation extends AnchorPane {
     private void initializeFileName() {
         final Label label = (Label) lookup("#fileName");
 
-        verificationObject.get().nameProperty().addListener((obs, oldName, newName) -> label.setText(newName));
-        label.setText(verificationObject.get().getName());
+        model.get().nameProperty().addListener((obs, oldName, newName) -> label.setText(newName));
+        label.setText(model.get().getName());
     }
 
     private void initializeIcon() {
         final Circle circle = (Circle) lookup("#iconBackground");
         final FontIcon icon = (FontIcon) lookup("#icon");
 
-        verificationObject.get().colorProperty().addListener((obs, oldColor, newColor) -> {
-            circle.setFill(newColor.getColor(verificationObject.get().getColorIntensity()));
-            icon.setFill(newColor.getTextColor(verificationObject.get().getColorIntensity()));
+        model.get().colorProperty().addListener((obs, oldColor, newColor) -> {
+            circle.setFill(newColor.getColor(model.get().getColorIntensity()));
+            icon.setFill(newColor.getTextColor(model.get().getColorIntensity()));
         });
 
-        circle.setFill(verificationObject.get().getColor().getColor(verificationObject.get().getColorIntensity()));
-        icon.setFill(verificationObject.get().getColor().getTextColor(verificationObject.get().getColorIntensity()));
+        circle.setFill(model.get().getColor().getColor(model.get().getColorIntensity()));
+        icon.setFill(model.get().getColor().getTextColor(model.get().getColorIntensity()));
     }
 
     private void initializeColors() {
@@ -117,7 +117,7 @@ public class FilePresentation extends AnchorPane {
 
         // Update the background when hovered
         setOnMouseEntered(event -> {
-            if(CanvasController.getActiveObject().equals(verificationObject.get())) {
+            if(CanvasController.getActiveObject().equals(model.get())) {
                 setBackground.accept(color, colorIntensity.next(2));
             } else {
                 setBackground.accept(color, colorIntensity.next());
@@ -125,7 +125,7 @@ public class FilePresentation extends AnchorPane {
             setCursor(Cursor.HAND);
         });
         setOnMouseExited(event -> {
-            if(CanvasController.getActiveObject().equals(verificationObject.get())) {
+            if(CanvasController.getActiveObject().equals(model.get())) {
                 setBackground.accept(color, colorIntensity.next(1));
             } else {
                 setBackground.accept(color, colorIntensity);
@@ -137,7 +137,7 @@ public class FilePresentation extends AnchorPane {
             if (newActiveComponent == null) return;
 
 
-            if (newActiveComponent.equals(verificationObject.get())) {
+            if (newActiveComponent.equals(model.get())) {
                 setBackground.accept(color, colorIntensity.next(2));
             } else {
                 setBackground.accept(color, colorIntensity);
@@ -148,7 +148,7 @@ public class FilePresentation extends AnchorPane {
         setBackground.accept(color, colorIntensity);
     }
 
-    public HighLevelModelObject getVerificationObject() {
-        return verificationObject.get();
+    public HighLevelModelObject getModel() {
+        return model.get();
     }
 }

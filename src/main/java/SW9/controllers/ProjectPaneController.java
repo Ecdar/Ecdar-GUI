@@ -89,7 +89,7 @@ public class ProjectPaneController implements Initializable {
         final JFXRippler moreInformation = (JFXRippler) filePresentation.lookup("#moreInformation");
         final int listWidth = 230;
         final DropDownMenu moreInformationDropDown = new DropDownMenu(root, moreInformation, listWidth, true);
-        final HighLevelModelObject verificationObject = filePresentation.getVerificationObject();
+        final HighLevelModelObject verificationObject = filePresentation.getModel();
 
         moreInformationDropDown.addListElement("Configuration");
 
@@ -102,9 +102,8 @@ public class ProjectPaneController implements Initializable {
         final JFXTextArea textArea = new JFXTextArea();
         textArea.setMinHeight(30);
 
-        final HighLevelModelObject object = filePresentation.getVerificationObject();
-        if (object instanceof Component) {
-            ((Component) object).descriptionProperty().bindBidirectional(textArea.textProperty());
+        if (verificationObject instanceof Component) {
+            ((Component) verificationObject).descriptionProperty().bindBidirectional(textArea.textProperty());
         }
 
         textArea.textProperty().addListener((obs, oldText, newText) -> {
@@ -124,8 +123,8 @@ public class ProjectPaneController implements Initializable {
 
         // Color picker button
         if (verificationObject instanceof Component) {
-            moreInformationDropDown.addColorPicker((Component) filePresentation.getVerificationObject(),
-                    ((Component) filePresentation.getVerificationObject())::dye);
+            moreInformationDropDown.addColorPicker((Component) filePresentation.getModel(),
+                    ((Component) filePresentation.getModel())::dye);
 
             moreInformationDropDown.addSpacerElement();
 

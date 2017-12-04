@@ -5,7 +5,7 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 
 /**
- *
+ * A box with a two dimensional coordinate (top left corner) and width and height.
  */
 public class Box {
     private static final double INITIAL_HEIGHT = 600d;
@@ -68,6 +68,10 @@ public class Box {
         return height;
     }
 
+    /**
+     * Add properties of this is a JSON object.
+     * @param json the JSON object
+     */
     public void addProperties(final JsonObject json) {
         json.addProperty(X, getX());
         json.addProperty(Y, getY());
@@ -75,6 +79,10 @@ public class Box {
         json.addProperty(HEIGHT, getHeight());
     }
 
+    /**
+     * Sets properties of this based on a JSON object.
+     * @param json the JSON object
+     */
     public void setProperties(final JsonObject json) {
         setX(json.getAsJsonPrimitive(X).getAsDouble());
         setY(json.getAsJsonPrimitive(Y).getAsDouble());

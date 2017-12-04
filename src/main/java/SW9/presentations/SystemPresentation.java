@@ -19,7 +19,7 @@ import java.net.URL;
 import java.util.function.BiConsumer;
 
 /**
- *
+ * Presentation for a system.
  */
 public class SystemPresentation extends ModelPresentation {
     private final SystemController controller;

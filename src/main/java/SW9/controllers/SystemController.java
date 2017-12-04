@@ -7,7 +7,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Line;
 
 /**
- *
+ * Controller for a system.
  */
 public class SystemController extends ModelController {
     private SystemModel system;

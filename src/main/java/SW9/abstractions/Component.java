@@ -91,13 +91,13 @@ public class Component extends HighLevelModelObject {
         bindReachabilityAnalysis();
     }
 
-    public Component(final JsonObject object) {
+    public Component(final JsonObject json) {
         hiddenId.incrementAndGet();
         setFirsTimeShown(true);
 
         declarationsText = new SimpleStringProperty("");
 
-        deserialize(object);
+        deserialize(json);
 
         initializeIOListeners();
 
