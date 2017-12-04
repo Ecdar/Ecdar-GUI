@@ -11,8 +11,9 @@
          fx:id="root"
          fx:controller="SW9.controllers.ComponentController">
 
-    <HBox spacing="0" alignment="CENTER">
-        <VBox fx:id="inputSignatureContainer" maxWidth="100" minWidth="100" spacing="10" alignment="CENTER_RIGHT" />
+    <HBox spacing="0" alignment="CENTER" >
+        <VBox fx:id="inputSignatureContainer" maxHeight="20" maxWidth="100" minWidth="100" spacing="10" alignment="CENTER_RIGHT" />
+
 
         <StackPane fx:id="componentPane">
             <Rectangle fx:id="background" StackPane.alignment="TOP_LEFT"/>

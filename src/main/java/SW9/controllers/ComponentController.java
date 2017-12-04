@@ -22,13 +22,10 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
@@ -169,6 +166,14 @@ public class ComponentController implements Initializable {
                     SignatureArrow newArrow = new SignatureArrow(channel, EdgeStatus.INPUT);
                     inputSignatureContainer.getChildren().add(newArrow);
                 }
+            }
+
+            // If inputsignature container is taller than the current component height
+            // we update the component's height to be as tall as the container
+            double newHeight = inputSignatureContainer.getHeight();
+            double currentHeight = component.get().getHeight();
+            if (newHeight> currentHeight) {
+                component.get().setHeight(newHeight);
             }
         });
 

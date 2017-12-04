@@ -255,7 +255,10 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
             final double newHeight = prevHeight.get() + diff;
             final double minHeight = componentMinHeight.get();
 
-            component.setHeight(Math.max(newHeight, minHeight));
+            System.out.println("Height: " + controller.inputSignatureContainer.getHeight() + " MinHeight: " + controller.inputSignatureContainer.getMinHeight() + " MaxHeight: " + controller.inputSignatureContainer.getMaxHeight());
+            final double minMinHeight = Math.max(controller.inputSignatureContainer.getHeight(), minHeight);
+
+            component.setHeight(Math.max(newHeight, minMinHeight));
             wasResized.set(true);
         });
 

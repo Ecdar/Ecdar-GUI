@@ -20,7 +20,7 @@
                         <Path fx:id="signatureArrowPath" />
                 </Group>
                 <HBox alignment="CENTER">
-                        <Label fx:id="signatureArrowLabel" styleClass="caption-mono" />
+                        <Label fx:id="signatureArrowLabel" styleClass="sub-caption-mono" />
                 </HBox>
         </VBox>
 
