@@ -240,6 +240,10 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
                 });
             });
 
+            //Component should not get smaller than the height of the input/output signature containers
+            minHeight.set(Math.max(controller.inputSignatureContainer.getHeight(), minHeight.doubleValue()));
+            minHeight.set(Math.max(controller.outputSignatureContainer.getHeight(), minHeight.doubleValue()));
+
             return minHeight.get();
         };
 
@@ -255,10 +259,7 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
             final double newHeight = prevHeight.get() + diff;
             final double minHeight = componentMinHeight.get();
 
-            System.out.println("Height: " + controller.inputSignatureContainer.getHeight() + " MinHeight: " + controller.inputSignatureContainer.getMinHeight() + " MaxHeight: " + controller.inputSignatureContainer.getMaxHeight());
-            final double minMinHeight = Math.max(controller.inputSignatureContainer.getHeight(), minHeight);
-
-            component.setHeight(Math.max(newHeight, minMinHeight));
+            component.setHeight(Math.max(newHeight, minHeight));
             wasResized.set(true);
         });
 

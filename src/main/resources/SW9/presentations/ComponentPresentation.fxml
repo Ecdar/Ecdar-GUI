@@ -60,7 +60,7 @@
             <Rectangle opacity="0" fx:id="rightAnchor" StackPane.alignment="TOP_RIGHT"/>
         </StackPane>
 
-        <VBox fx:id="outputSignatureContainer" maxWidth="100" minWidth="100" spacing="10" alignment="CENTER_LEFT" />
+        <VBox fx:id="outputSignatureContainer" maxHeight="20" maxWidth="100" minWidth="100" spacing="10" alignment="CENTER_LEFT" />
     </HBox>
 
 </fx:root>

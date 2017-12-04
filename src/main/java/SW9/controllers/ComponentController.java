@@ -157,6 +157,7 @@ public class ComponentController implements Initializable {
                        outputSignatureContainer.getChildren().add(newArrow);
                    }
             }
+            updateMaxHeight();
         });
 
         newComponent.getInputStrings().addListener((ListChangeListener<String>) c -> {
@@ -168,15 +169,36 @@ public class ComponentController implements Initializable {
                 }
             }
 
-            // If inputsignature container is taller than the current component height
-            // we update the component's height to be as tall as the container
-            double newHeight = inputSignatureContainer.getHeight();
-            double currentHeight = component.get().getHeight();
-            if (newHeight> currentHeight) {
-                component.get().setHeight(newHeight);
-            }
+            updateMaxHeight();
         });
+    }
 
+    /***
+     * Updates the component's height to match the input/output signature containers
+     * if the container is smaller than either of them
+     */
+    private void updateMaxHeight() {
+        // If input/outputsignature container is taller than the current component height
+        // we update the component's height to be as tall as the container
+        double maxHeight = findMaxHeight();
+        if(maxHeight > component.get().getHeight()) {
+            component.get().setHeight(maxHeight);
+        }
+    }
+
+    /***
+     * Finds the max height of the input/output signature container and the component
+     * @return a double of the largest height
+     */
+
+    private double findMaxHeight() {
+        double outputHeight = outputSignatureContainer.getHeight();
+        double inputHeight = inputSignatureContainer.getHeight();
+        double componentHeight = component.get().getHeight();
+
+        double maxSignatureHeight = Math.max(outputHeight, inputHeight);
+
+        return Math.max(maxSignatureHeight, componentHeight);
     }
 
     private void initializeNoIncomingEdgesWarning() {
