@@ -96,7 +96,7 @@ public class CanvasController implements Initializable {
             SelectHelper.clearSelectedElements();
         });
 
-        activeModel.addListener((obs, oldVeriObj, newVeriObj) -> onActiveModelChanged(oldVeriObj, newVeriObj));
+        activeModel.addListener((obs, oldModel, newModel) -> onActiveModelChanged(oldModel, newModel));
 
         leaveTextAreas = () -> root.requestFocus();
 
