@@ -89,15 +89,15 @@ public class ComponentController extends ModelController implements Initializabl
             // Bind the position of the abstraction to the values in the view
 
             // Ensure that the component snaps to the grid
-            if(newComponent.getX() == 0 && newComponent.getY() == 0) {
-                newComponent.setX(GRID_SIZE * 0.5);
-                newComponent.setY(GRID_SIZE * 0.5);
+            if(newComponent.getBox().getX() == 0 && newComponent.getBox().getY() == 0) {
+                newComponent.getBox().setX(GRID_SIZE * 0.5);
+                newComponent.getBox().setY(GRID_SIZE * 0.5);
             }
 
-            root.layoutXProperty().set(newComponent.getX());
-            root.layoutYProperty().set(newComponent.getY());
-            newComponent.xProperty().bindBidirectional(root.layoutXProperty());
-            newComponent.yProperty().bindBidirectional(root.layoutYProperty());
+            root.layoutXProperty().set(newComponent.getBox().getX());
+            root.layoutYProperty().set(newComponent.getBox().getY());
+            newComponent.getBox().xProperty().bindBidirectional(root.layoutXProperty());
+            newComponent.getBox().yProperty().bindBidirectional(root.layoutYProperty());
 
             // Bind the declarations of the abstraction the the view
             declarationTextArea.replaceText(0, declarationTextArea.getLength(), newComponent.getDeclarationsText());
@@ -359,7 +359,7 @@ public class ComponentController extends ModelController implements Initializabl
             // Bind the newly created location to the mouse and tell the ui that it is not placed yet
             if (loc.getX() == 0) {
                 newLocationPresentation.setPlaced(false);
-                BindingHelper.bind(loc, newComponent.xProperty(), newComponent.yProperty());
+                BindingHelper.bind(loc, newComponent.getBox().xProperty(), newComponent.getBox().yProperty());
             }
         };
 
@@ -438,14 +438,14 @@ public class ComponentController extends ModelController implements Initializabl
 
     public void toggleDeclaration(final MouseEvent mouseEvent) {
         final Circle circle = new Circle(0);
-        circle.setCenterX(component.get().getWidth() - (toggleDeclarationButton.getWidth() - mouseEvent.getX()));
+        circle.setCenterX(component.get().getBox().getWidth() - (toggleDeclarationButton.getWidth() - mouseEvent.getX()));
         circle.setCenterY(-1 * mouseEvent.getY());
 
         final ObjectProperty<Node> clip = new SimpleObjectProperty<>(circle);
         declarationTextArea.clipProperty().bind(clip);
 
         final Transition rippleEffect = new Transition() {
-            private final double maxRadius = Math.sqrt(Math.pow(getComponent().getWidth(), 2) + Math.pow(getComponent().getHeight(), 2));
+            private final double maxRadius = Math.sqrt(Math.pow(getComponent().getBox().getWidth(), 2) + Math.pow(getComponent().getBox().getHeight(), 2));
             {
                 setCycleDuration(Duration.millis(500));
             }
@@ -532,8 +532,8 @@ public class ComponentController extends ModelController implements Initializabl
             // We are drawing an edge
             if (unfinishedEdge != null) {
                 // Calculate the position for the new nail (based on the component position and the canvas mouse tracker)
-                final DoubleBinding x = CanvasPresentation.mouseTracker.gridXProperty().subtract(getComponent().xProperty());
-                final DoubleBinding y = CanvasPresentation.mouseTracker.gridYProperty().subtract(getComponent().yProperty());
+                final DoubleBinding x = CanvasPresentation.mouseTracker.gridXProperty().subtract(getComponent().getBox().xProperty());
+                final DoubleBinding y = CanvasPresentation.mouseTracker.gridYProperty().subtract(getComponent().getBox().yProperty());
 
                 // Create the abstraction for the new nail and add it to the unfinished edge
                 final Nail newNail = new Nail(x, y);

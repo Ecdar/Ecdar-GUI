@@ -1,8 +1,7 @@
 package SW9.presentations;
 
-import SW9.abstractions.System;
-import SW9.controllers.ComponentController;
-import SW9.controllers.SystemController;
+import SW9.abstractions.SystemModel;
+import SW9.controllers.SystemModelController;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.scene.layout.StackPane;
@@ -14,9 +13,9 @@ import java.net.URL;
  *
  */
 public class SystemPresentation extends StackPane {
-    private final SystemController controller;
+    private final SystemModelController controller;
 
-    public SystemPresentation(final System system) {
+    public SystemPresentation(final SystemModel systemModel) {
         final URL url = this.getClass().getResource("ComponentPresentation.fxml");
 
         final FXMLLoader fxmlLoader = new FXMLLoader();
@@ -31,16 +30,16 @@ public class SystemPresentation extends StackPane {
         }
 
         // Set the width and the height of the view to the values in the abstraction
-        setMinWidth(system.getWidth());
-        setMaxWidth(system.getWidth());
-        setMinHeight(system.getHeight());
-        setMaxHeight(system.getHeight());
-        minHeightProperty().bindBidirectional(system.heightProperty());
-        maxHeightProperty().bindBidirectional(system.heightProperty());
-        minWidthProperty().bindBidirectional(system.widthProperty());
-        maxWidthProperty().bindBidirectional(system.widthProperty());
+        setMinWidth(systemModel.getBox().getWidth());
+        setMaxWidth(systemModel.getBox().getWidth());
+        setMinHeight(systemModel.getBox().getHeight());
+        setMaxHeight(systemModel.getBox().getHeight());
+        minHeightProperty().bindBidirectional(systemModel.getBox().heightProperty());
+        maxHeightProperty().bindBidirectional(systemModel.getBox().heightProperty());
+        minWidthProperty().bindBidirectional(systemModel.getBox().widthProperty());
+        maxWidthProperty().bindBidirectional(systemModel.getBox().widthProperty());
 
         controller = fxmlLoader.getController();
-        controller.setSystem(system);
+        controller.setSystemModel(systemModel);
     }
 }

@@ -24,14 +24,8 @@ public class Component extends HighLevelModelObject {
     private static final String LOCATIONS = "locations";
     private static final String EDGES = "edges";
     private static final String DESCRIPTION = "description";
-    private static final String X = "x";
-    private static final String Y = "y";
-    private static final String WIDTH = "width";
-    private static final String HEIGHT = "height";
     private static final String INCLUDE_IN_PERIODIC_CHECK = "include_in_periodic_check";
     private static final String COLOR = "color";
-    private static final double INITIAL_HEIGHT = 600d;
-    private static final double INITIAL_WIDTH = 450d;
 
     // Verification properties
     private final ObservableList<Location> locations = FXCollections.observableArrayList();
@@ -44,10 +38,7 @@ public class Component extends HighLevelModelObject {
     private final BooleanProperty includeInPeriodicCheck = new SimpleBooleanProperty(true);
 
     // Styling properties
-    private final DoubleProperty x = new SimpleDoubleProperty(0d);
-    private final DoubleProperty y = new SimpleDoubleProperty(0d);
-    private final DoubleProperty width = new SimpleDoubleProperty(INITIAL_WIDTH);
-    private final DoubleProperty height = new SimpleDoubleProperty(INITIAL_HEIGHT);
+    private final Box box = new Box();
     private final BooleanProperty declarationOpen = new SimpleBooleanProperty(false);
 
     private final BooleanProperty firsTimeShown = new SimpleBooleanProperty(false);
@@ -99,8 +90,8 @@ public class Component extends HighLevelModelObject {
         initialLocation.setColor(getColor());
 
         // Place in center
-        initialLocation.setX(Grid.snap(getX() + getWidth() / 2));
-        initialLocation.setY(Grid.snap(getY() + getHeight() / 2));
+        initialLocation.setX(Grid.snap(box.getX() + box.getWidth() / 2));
+        initialLocation.setY(Grid.snap(box.getY() + box.getHeight() / 2));
 
         locations.add(initialLocation);
 
@@ -233,54 +224,6 @@ public class Component extends HighLevelModelObject {
         return relatedEdges;
     }
 
-    public double getX() {
-        return x.get();
-    }
-
-    public void setX(final double x) {
-        this.x.set(x);
-    }
-
-    public DoubleProperty xProperty() {
-        return x;
-    }
-
-    public double getY() {
-        return y.get();
-    }
-
-    public void setY(final double y) {
-        this.y.set(y);
-    }
-
-    public DoubleProperty yProperty() {
-        return y;
-    }
-
-    public double getWidth() {
-        return width.get();
-    }
-
-    public void setWidth(final double width) {
-        this.width.set(width);
-    }
-
-    public DoubleProperty widthProperty() {
-        return width;
-    }
-
-    public double getHeight() {
-        return height.get();
-    }
-
-    public void setHeight(final double height) {
-        this.height.set(height);
-    }
-
-    public DoubleProperty heightProperty() {
-        return height;
-    }
-
     public boolean isDeclarationOpen() {
         return declarationOpen.get();
     }
@@ -369,10 +312,7 @@ public class Component extends HighLevelModelObject {
 
         result.addProperty(DESCRIPTION, getDescription());
 
-        result.addProperty(X, getX());
-        result.addProperty(Y, getY());
-        result.addProperty(WIDTH, getWidth());
-        result.addProperty(HEIGHT, getHeight());
+        box.addProperties(result);
 
         result.addProperty(COLOR, EnabledColor.getIdentifier(getColor()));
 
@@ -399,10 +339,7 @@ public class Component extends HighLevelModelObject {
 
         setDescription(json.getAsJsonPrimitive(DESCRIPTION).getAsString());
 
-        setX(json.getAsJsonPrimitive(X).getAsDouble());
-        setY(json.getAsJsonPrimitive(Y).getAsDouble());
-        setWidth(json.getAsJsonPrimitive(WIDTH).getAsDouble());
-        setHeight(json.getAsJsonPrimitive(HEIGHT).getAsDouble());
+        box.setProperties(json);
 
         final EnabledColor enabledColor = EnabledColor.fromIdentifier(json.getAsJsonPrimitive(COLOR).getAsString());
         if (enabledColor != null) {
@@ -477,5 +414,9 @@ public class Component extends HighLevelModelObject {
 
     public ObservableList<String> getOutputStrings() {
         return outputStrings;
+    }
+
+    public Box getBox() {
+        return box;
     }
 }

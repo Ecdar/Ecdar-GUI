@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * A model of a system
  */
-public class System extends HighLevelModelObject {
+public class SystemModel extends HighLevelModelObject {
     private static final double INITIAL_HEIGHT = 600d;
     private static final double INITIAL_WIDTH = 450d;
 
@@ -20,7 +20,9 @@ public class System extends HighLevelModelObject {
     private final StringProperty description = new SimpleStringProperty("");
 
     // Styling properties
-    private final DoubleProperty width = new SimpleDoubleProperty(INITIAL_WIDTH);
-    private final DoubleProperty height = new SimpleDoubleProperty(INITIAL_HEIGHT);
+    private final Box box = new Box();
 
+    public Box getBox() {
+        return box;
+    }
 }

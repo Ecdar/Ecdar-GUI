@@ -80,14 +80,14 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
             fxmlLoader.load(location.openStream());
 
             // Set the width and the height of the view to the values in the abstraction
-            setMinWidth(component.getWidth());
-            setMaxWidth(component.getWidth());
-            setMinHeight(component.getHeight());
-            setMaxHeight(component.getHeight());
-            minHeightProperty().bindBidirectional(component.heightProperty());
-            maxHeightProperty().bindBidirectional(component.heightProperty());
-            minWidthProperty().bindBidirectional(component.widthProperty());
-            maxWidthProperty().bindBidirectional(component.widthProperty());
+            setMinWidth(component.getBox().getWidth());
+            setMaxWidth(component.getBox().getWidth());
+            setMinHeight(component.getBox().getHeight());
+            setMaxHeight(component.getBox().getHeight());
+            minHeightProperty().bindBidirectional(component.getBox().heightProperty());
+            maxHeightProperty().bindBidirectional(component.getBox().heightProperty());
+            minWidthProperty().bindBidirectional(component.getBox().widthProperty());
+            maxWidthProperty().bindBidirectional(component.getBox().widthProperty());
 
             controller = fxmlLoader.getController();
             controller.setComponent(component);
@@ -104,10 +104,10 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
             onUpdateSize.run();
 
             // Re run initialisation on update of width and height property
-            component.widthProperty().addListener(observable -> {
+            component.getBox().widthProperty().addListener(observable -> {
                 onUpdateSize.run();
             });
-            component.heightProperty().addListener(observable -> {
+            component.getBox().heightProperty().addListener(observable -> {
                 onUpdateSize.run();
             });
 
@@ -221,7 +221,7 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
         bottomAnchor.setCursor(Cursor.S_RESIZE);
 
         // Bind the place and size of bottom anchor
-        bottomAnchor.widthProperty().bind(component.widthProperty().subtract(CORNER_SIZE));
+        bottomAnchor.widthProperty().bind(component.getBox().widthProperty().subtract(CORNER_SIZE));
         bottomAnchor.setHeight(5);
 
         final DoubleProperty prevY = new SimpleDoubleProperty();
@@ -246,7 +246,7 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
 
         bottomAnchor.setOnMousePressed(event -> {
             prevY.set(event.getScreenY());
-            prevHeight.set(component.getHeight());
+            prevHeight.set(component.getBox().getHeight());
         });
 
         bottomAnchor.setOnMouseDragged(event -> {
@@ -256,22 +256,22 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
             final double newHeight = prevHeight.get() + diff;
             final double minHeight = componentMinHeight.get();
 
-            component.setHeight(Math.max(newHeight, minHeight));
+            component.getBox().setHeight(Math.max(newHeight, minHeight));
             wasResized.set(true);
         });
 
         bottomAnchor.setOnMouseReleased(event -> {
             if (!wasResized.get()) return;
             final double previousHeight = prevHeight.doubleValue();
-            final double currentHeight = component.getHeight();
+            final double currentHeight = component.getBox().getHeight();
 
             // If no difference do not save change
             if (previousHeight == currentHeight) return;
 
             UndoRedoStack.pushAndPerform(() -> { // Perform
-                        component.setHeight(currentHeight);
+                        component.getBox().setHeight(currentHeight);
                     }, () -> { // Undo
-                        component.setHeight(previousHeight);
+                        component.getBox().setHeight(previousHeight);
                     },
                     "Component height resized", "settings-overscan");
 
@@ -285,7 +285,7 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
 
         // Bind the place and size of bottom anchor
         rightAnchor.setWidth(5);
-        rightAnchor.heightProperty().bind(component.heightProperty().subtract(CORNER_SIZE));
+        rightAnchor.heightProperty().bind(component.getBox().heightProperty().subtract(CORNER_SIZE));
 
         final DoubleProperty prevX = new SimpleDoubleProperty();
         final DoubleProperty prevWidth = new SimpleDoubleProperty();
@@ -308,7 +308,7 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
 
         rightAnchor.setOnMousePressed(event -> {
             prevX.set(event.getScreenX());
-            prevWidth.set(component.getWidth());
+            prevWidth.set(component.getBox().getWidth());
         });
 
         rightAnchor.setOnMouseDragged(event -> {
@@ -317,22 +317,22 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
 
             final double newWidth = prevWidth.get() + diff;
             final double minWidth = componentMinWidth.get();
-            component.setWidth(Math.max(newWidth, minWidth));
+            component.getBox().setWidth(Math.max(newWidth, minWidth));
             wasResized.set(true);
         });
 
         rightAnchor.setOnMouseReleased(event -> {
             if (!wasResized.get()) return;
             final double previousWidth = prevWidth.doubleValue();
-            final double currentWidth = component.getWidth();
+            final double currentWidth = component.getBox().getWidth();
 
             // If no difference do not save change
             if (previousWidth == currentWidth) return;
 
             UndoRedoStack.pushAndPerform(() -> { // Perform
-                        component.setWidth(currentWidth);
+                        component.getBox().setWidth(currentWidth);
                     }, () -> { // Undo
-                        component.setWidth(previousWidth);
+                        component.getBox().setWidth(previousWidth);
                     },
                     "Component width resized", "settings-overscan");
 
@@ -412,7 +412,7 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
         final Component component = controller.getComponent();
 
         final Shape[] mask = new Shape[1];
-        final Rectangle rectangle = new Rectangle(component.getWidth(), component.getHeight());
+        final Rectangle rectangle = new Rectangle(component.getBox().getWidth(), component.getBox().getHeight());
 
         // Generate first corner (to subtract)
         final Polygon corner1 = new Polygon(
@@ -423,9 +423,9 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
 
         // Generate second corner (to subtract)
         final Polygon corner2 = new Polygon(
-                component.getWidth(), component.getHeight(),
-                component.getWidth() - CORNER_SIZE - 2, component.getHeight(),
-                component.getWidth(), component.getHeight() - CORNER_SIZE - 2
+                component.getBox().getWidth(), component.getBox().getHeight(),
+                component.getBox().getWidth() - CORNER_SIZE - 2, component.getBox().getHeight(),
+                component.getBox().getWidth(), component.getBox().getHeight() - CORNER_SIZE - 2
         );
 
         final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
@@ -476,8 +476,8 @@ public class ComponentPresentation extends StackPane implements MouseTrackable, 
         final Component component = controller.getComponent();
 
         // Bind the background width and height to the values in the model
-        controller.background.widthProperty().bindBidirectional(component.widthProperty());
-        controller.background.heightProperty().bindBidirectional(component.heightProperty());
+        controller.background.widthProperty().bindBidirectional(component.getBox().widthProperty());
+        controller.background.heightProperty().bindBidirectional(component.getBox().heightProperty());
 
         final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
             // Set the background color to the lightest possible version of the color
