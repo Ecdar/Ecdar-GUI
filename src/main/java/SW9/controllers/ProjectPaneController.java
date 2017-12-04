@@ -2,7 +2,7 @@ package SW9.controllers;
 
 import SW9.Ecdar;
 import SW9.abstractions.Component;
-import SW9.abstractions.VerificationObject;
+import SW9.abstractions.HighLevelModelObject;
 import SW9.presentations.DropDownMenu;
 import SW9.presentations.FilePresentation;
 import SW9.utility.UndoRedoStack;
@@ -89,7 +89,7 @@ public class ProjectPaneController implements Initializable {
         final JFXRippler moreInformation = (JFXRippler) filePresentation.lookup("#moreInformation");
         final int listWidth = 230;
         final DropDownMenu moreInformationDropDown = new DropDownMenu(root, moreInformation, listWidth, true);
-        final VerificationObject verificationObject = filePresentation.getVerificationObject();
+        final HighLevelModelObject verificationObject = filePresentation.getVerificationObject();
 
         moreInformationDropDown.addListElement("Configuration");
 
@@ -102,7 +102,7 @@ public class ProjectPaneController implements Initializable {
         final JFXTextArea textArea = new JFXTextArea();
         textArea.setMinHeight(30);
 
-        final VerificationObject object = filePresentation.getVerificationObject();
+        final HighLevelModelObject object = filePresentation.getVerificationObject();
         if (object instanceof Component) {
             ((Component) object).descriptionProperty().bindBidirectional(textArea.textProperty());
         }

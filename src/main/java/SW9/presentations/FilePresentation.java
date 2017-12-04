@@ -1,7 +1,7 @@
 package SW9.presentations;
 
 import SW9.abstractions.Component;
-import SW9.abstractions.VerificationObject;
+import SW9.abstractions.HighLevelModelObject;
 import SW9.controllers.CanvasController;
 import SW9.controllers.FileController;
 import SW9.utility.colors.Color;
@@ -21,11 +21,11 @@ import java.net.URL;
 import java.util.function.BiConsumer;
 
 public class FilePresentation extends AnchorPane {
-    private final SimpleObjectProperty<VerificationObject> verificationObject = new SimpleObjectProperty<>(null);
+    private final SimpleObjectProperty<HighLevelModelObject> verificationObject = new SimpleObjectProperty<>(null);
 
     private FileController controller;
 
-    public FilePresentation(final VerificationObject verificationObject) {
+    public FilePresentation(final HighLevelModelObject verificationObject) {
         final URL location = this.getClass().getResource("FilePresentation.fxml");
 
         final FXMLLoader fxmlLoader = new FXMLLoader();
@@ -148,7 +148,7 @@ public class FilePresentation extends AnchorPane {
         setBackground.accept(color, colorIntensity);
     }
 
-    public VerificationObject getVerificationObject() {
+    public HighLevelModelObject getVerificationObject() {
         return verificationObject.get();
     }
 }

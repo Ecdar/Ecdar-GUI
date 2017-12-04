@@ -2,7 +2,7 @@ package SW9.controllers;
 
 import SW9.abstractions.Component;
 import SW9.abstractions.Declarations;
-import SW9.abstractions.VerificationObject;
+import SW9.abstractions.HighLevelModelObject;
 import SW9.presentations.CanvasPresentation;
 import SW9.presentations.ComponentPresentation;
 import SW9.presentations.DeclarationPresentation;
@@ -28,7 +28,7 @@ public class CanvasController implements Initializable {
 
     public Pane root;
 
-    private final static ObjectProperty<VerificationObject> activeVerificationObject = new SimpleObjectProperty<>(null);
+    private final static ObjectProperty<HighLevelModelObject> activeVerificationObject = new SimpleObjectProperty<>(null);
     private final static HashMap<Component, Pair<Double, Double>> componentTranslateMap = new HashMap<>();
 
     private static DoubleProperty width, height;
@@ -47,20 +47,20 @@ public class CanvasController implements Initializable {
         return insetShouldShow;
     }
 
-    public static VerificationObject getActiveVerificationObject() {
+    public static HighLevelModelObject getActiveVerificationObject() {
         return activeVerificationObject.get();
     }
 
     /**
-     * Sets the given VerificationObject as the one to be active / to be shown on the screen
-     * @param object the given VerificationObject
+     * Sets the given HighLevelModelObject as the one to be active / to be shown on the screen
+     * @param object the given HighLevelModelObject
      */
-    public static void setActiveVerificationObject(final VerificationObject object) {
+    public static void setActiveVerificationObject(final HighLevelModelObject object) {
         CanvasController.activeVerificationObject.set(object);
         Platform.runLater(CanvasController::leaveTextAreas);
     }
 
-    public static ObjectProperty<VerificationObject> activeComponentProperty() {
+    public static ObjectProperty<HighLevelModelObject> activeComponentProperty() {
         return activeVerificationObject;
     }
 
@@ -116,7 +116,7 @@ public class CanvasController implements Initializable {
      * @param oldVeriObj old verification object
      * @param newVeriObj new verification object
      */
-    private void onActiveVerificationObjectChanged(final VerificationObject oldVeriObj, final VerificationObject newVeriObj) {
+    private void onActiveVerificationObjectChanged(final HighLevelModelObject oldVeriObj, final HighLevelModelObject newVeriObj) {
         // If old object is a component, add to map
         if (oldVeriObj != null && oldVeriObj instanceof Component) {
             componentTranslateMap.put((Component) oldVeriObj, new Pair<>(root.getTranslateX(), root.getTranslateY()));

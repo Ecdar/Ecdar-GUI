@@ -1,5 +1,6 @@
 package SW9.abstractions;
 
+import SW9.presentations.DropDownMenu;
 import SW9.utility.colors.Color;
 import SW9.utility.serialize.Serializable;
 import com.google.gson.JsonObject;
@@ -12,16 +13,17 @@ import javafx.beans.property.StringProperty;
  * An object used for verifications.
  * This could be a component, a global declarations object, or a system.
  */
-public abstract class VerificationObject implements Serializable {
+public abstract class HighLevelModelObject implements Serializable, DropDownMenu.HasColor {
     private static final String NAME = "name";
-    private static final String DECLARATIONS = "declarations";
+
+    static final String DECLARATIONS = "declarations";
 
     private final StringProperty declarationsText;
     private final StringProperty name;
     private final ObjectProperty<Color> color;
     private final ObjectProperty<Color.Intensity> colorIntensity;
 
-    VerificationObject() {
+    HighLevelModelObject() {
         declarationsText = new SimpleStringProperty("");
         name = new SimpleStringProperty("");
         color = new SimpleObjectProperty<>(Color.GREY_BLUE);
@@ -82,7 +84,6 @@ public abstract class VerificationObject implements Serializable {
         final JsonObject result = new JsonObject();
 
         result.addProperty(NAME, getName());
-        result.addProperty(DECLARATIONS, getDeclarationsText());
 
         return result;
     }
@@ -90,7 +91,6 @@ public abstract class VerificationObject implements Serializable {
     @Override
     public void deserialize(final JsonObject json) {
         setName(json.getAsJsonPrimitive(NAME).getAsString());
-        setDeclarationsText(json.getAsJsonPrimitive(DECLARATIONS).getAsString());
     }
 
     public void clearDeclarationsText() {
