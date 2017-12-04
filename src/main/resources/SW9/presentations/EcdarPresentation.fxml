@@ -163,6 +163,11 @@
                             <FontIcon iconLiteral="gmi-shuffle" iconSize="24" fill="black"/>
                         </graphic>
                     </MenuItem>
+                    <MenuItem fx:id="menuBarEditNewSystem" text="New System">
+                        <graphic>
+                            <FontIcon iconLiteral="gmi-create-new-folder" iconSize="24" fill="black"/>
+                        </graphic>
+                    </MenuItem>
                 </Menu>
 
                 <Menu text="View">

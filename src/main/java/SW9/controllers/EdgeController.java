@@ -125,7 +125,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                 edgeRoot.getChildren().addAll(link, simpleArrowHead);
 
                 // Bind the first link and the arrowhead from the source location to the mouse
-                BindingHelper.bind(link, simpleArrowHead, newEdge.getSourceCircular(), newComponent.xProperty(), newComponent.yProperty());
+                BindingHelper.bind(link, simpleArrowHead, newEdge.getSourceCircular(), newComponent.getBox().xProperty(), newComponent.getBox().yProperty());
             } else if (newEdge.getTargetCircular() != null) {
 
                 edgeRoot.getChildren().add(simpleArrowHead);
@@ -218,7 +218,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                         // Create a new link that will bind from the new nail to the mouse
                         final Link newLink = new Link(edge.get().getStatus());
                         links.add(newLink);
-                        BindingHelper.bind(newLink, simpleArrowHead, newNail, newComponent.xProperty(), newComponent.yProperty());
+                        BindingHelper.bind(newLink, simpleArrowHead, newNail, newComponent.getBox().xProperty(), newComponent.getBox().yProperty());
                         edgeRoot.getChildren().add(newLink);
                     }
                 });
@@ -371,8 +371,8 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                         dropDownMenu.addSpacerElement();
 
                         dropDownMenu.addClickableAndDisableableListElement("Add Nail", getEdge().getIsLocked(), mouseEvent -> {
-                            final double nailX = Math.round((DropDownMenu.x - getComponent().getX()) / GRID_SIZE) * GRID_SIZE;
-                            final double nailY = Math.round((DropDownMenu.y - getComponent().getY()) / GRID_SIZE) * GRID_SIZE;
+                            final double nailX = Math.round((DropDownMenu.x - getComponent().getBox().getX()) / GRID_SIZE) * GRID_SIZE;
+                            final double nailY = Math.round((DropDownMenu.y - getComponent().getBox().getY()) / GRID_SIZE) * GRID_SIZE;
                             final Nail newNail = new Nail(nailX, nailY);
 
                             UndoRedoStack.pushAndPerform(
@@ -399,8 +399,8 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                         dropDownMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX(), event.getY());
 
                     } else if ((event.isShiftDown() && event.isPrimaryButtonDown()) || event.isMiddleButtonDown()) {
-                        final double nailX = CanvasPresentation.mouseTracker.gridXProperty().subtract(getComponent().xProperty()).doubleValue();
-                        final double nailY = CanvasPresentation.mouseTracker.gridYProperty().subtract(getComponent().yProperty()).doubleValue();
+                        final double nailX = CanvasPresentation.mouseTracker.gridXProperty().subtract(getComponent().getBox().xProperty()).doubleValue();
+                        final double nailY = CanvasPresentation.mouseTracker.gridYProperty().subtract(getComponent().getBox().yProperty()).doubleValue();
 
                         final Nail newNail = new Nail(nailX, nailY);
 
@@ -482,8 +482,8 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
         }
 
         dropDownMenu.addClickableAndDisableableListElement(rowTitle, isDisabled, event -> {
-            final double nailX = Math.round((DropDownMenu.x - getComponent().getX()) / GRID_SIZE) * GRID_SIZE;
-            final double nailY = Math.round((DropDownMenu.y - getComponent().getY()) / GRID_SIZE) * GRID_SIZE;
+            final double nailX = Math.round((DropDownMenu.x - getComponent().getBox().getX()) / GRID_SIZE) * GRID_SIZE;
+            final double nailY = Math.round((DropDownMenu.y - getComponent().getBox().getY()) / GRID_SIZE) * GRID_SIZE;
 
             final Nail newNail = new Nail(nailX, nailY);
             newNail.setPropertyType(type);

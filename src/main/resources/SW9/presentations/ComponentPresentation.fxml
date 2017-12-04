@@ -14,7 +14,6 @@
     <HBox spacing="0" alignment="CENTER" >
         <VBox fx:id="inputSignatureContainer" maxHeight="20" maxWidth="100" minWidth="100" spacing="10" alignment="CENTER_RIGHT" />
 
-
         <StackPane fx:id="componentPane">
             <Rectangle fx:id="background" StackPane.alignment="TOP_LEFT"/>
 
@@ -53,8 +52,7 @@
                 </center>
             </BorderPane>
 
-            <Line fx:id="line1"/>
-            <Line fx:id="line2"/>
+            <Line fx:id="topLeftLine"/>
 
             <Rectangle opacity="0" fx:id="bottomAnchor" StackPane.alignment="BOTTOM_LEFT"/>
             <Rectangle opacity="0" fx:id="rightAnchor" StackPane.alignment="TOP_RIGHT"/>
