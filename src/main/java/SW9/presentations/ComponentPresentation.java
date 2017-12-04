@@ -1,7 +1,6 @@
 package SW9.presentations;
 
 import SW9.abstractions.Component;
-import SW9.abstractions.Location;
 import SW9.controllers.CanvasController;
 import SW9.controllers.ComponentController;
 import SW9.utility.UndoRedoStack;
@@ -9,10 +8,6 @@ import SW9.utility.colors.Color;
 import SW9.utility.helpers.MouseTrackable;
 import SW9.utility.helpers.SelectHelper;
 import SW9.utility.mouse.MouseTracker;
-import javafx.animation.Interpolator;
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.Timeline;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -22,7 +17,6 @@ import javafx.fxml.JavaFXBuilderFactory;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
-import javafx.scene.Group;
 import javafx.scene.layout.*;
 import javafx.scene.shape.*;
 import org.fxmisc.richtext.StyleSpans;
@@ -40,18 +34,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static SW9.presentations.Grid.GRID_SIZE;
-import static javafx.util.Duration.millis;
 
 public class ComponentPresentation extends ModelPresentation implements MouseTrackable, SelectHelper.Selectable {
-    private static final Pattern XML_TAG = Pattern.compile("(?<ELEMENT>(</?\\h*)(\\w+)([^<>]*)(\\h*/?>))" + "|(?<COMMENT><!--[^<>]+-->)");
-    private static final Pattern ATTRIBUTES = Pattern.compile("(\\w+\\h*)(=)(\\h*\"[^\"]+\")");
-    private static final int GROUP_OPEN_BRACKET = 2;
-    private static final int GROUP_ELEMENT_NAME = 3;
-    private static final int GROUP_ATTRIBUTES_SECTION = 4;
-    private static final int GROUP_CLOSE_BRACKET = 5;
-    private static final int GROUP_ATTRIBUTE_NAME = 1;
-    private static final int GROUP_EQUAL_SYMBOL = 2;
-    private static final int GROUP_ATTRIBUTE_VALUE = 3;
     private static final String uppaalKeywords = "clock|chan|urgent|broadcast";
     private static final String cKeywords = "auto|bool|break|case|char|const|continue|default|do|double|else|enum|extern|float|for|goto|if|int|long|register|return|short|signed|sizeof|static|struct|switch|typedef|union|unsigned|void|volatile|while";
     private static final Pattern UPPAAL = Pattern.compile(""
@@ -60,10 +44,6 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
             + "|(//.*|(\"(?:\\\\[^\"]|\\\\\"|.)*?\")|(?s)/\\*.*?\\*/)");
     private final ComponentController controller;
     private final List<BiConsumer<Color, Color.Intensity>> updateColorDelegates = new ArrayList<>();
-
-    public ComponentPresentation() {
-        this(new Component());
-    }
 
     public ComponentPresentation(final Component component) {
         final URL location = this.getClass().getResource("ComponentPresentation.fxml");
@@ -114,75 +94,6 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
         } catch (final IOException ioe) {
             throw new IllegalStateException(ioe);
         }
-    }
-
-    private void drawIndicatorArrow(final Path initialLocationGuideArrow) {
-        final MoveTo i1 = new MoveTo(-1 * GRID_SIZE, GRID_SIZE);
-        final LineTo i2 = new LineTo(4 * GRID_SIZE, GRID_SIZE);
-        final LineTo i3 = new LineTo(4 * GRID_SIZE, 0);
-        final LineTo i4 = new LineTo(6 * GRID_SIZE, 2 * GRID_SIZE);
-        final LineTo i5 = new LineTo(4 * GRID_SIZE, 4 * GRID_SIZE);
-        final LineTo i6 = new LineTo(4 * GRID_SIZE, 3 * GRID_SIZE);
-        final LineTo i7 = new LineTo(-1 * GRID_SIZE, 3 * GRID_SIZE);
-        final LineTo i8 = new LineTo(-1 * GRID_SIZE, GRID_SIZE);
-
-        initialLocationGuideArrow.getElements().addAll(i1, i2, i3, i4, i5, i6, i7, i8);
-        final Color componentColor = controller.getComponent().getColor();
-        final Color.Intensity componentColorIntensity = controller.getComponent().getColorIntensity();
-
-        initialLocationGuideArrow.setFill(componentColor.getColor(componentColorIntensity.next(-1)));
-        initialLocationGuideArrow.setStroke(componentColor.getColor(componentColorIntensity.next(2)));
-    }
-
-    private void playIndicatorAnimations(final Location.Type type, final Group container) {
-        final Timeline moveAnimation = new Timeline();
-        final Timeline disappearAnimation = new Timeline();
-
-        final double startX = container.getTranslateX();
-        final double startY = container.getTranslateY();
-
-        final Interpolator interpolator = Interpolator.SPLINE(0.645, 0.045, 0.355, 1);
-
-        double otherX = 0, otherY = 0;
-
-        if(type.equals(Location.Type.INITIAL))
-        {
-            otherX = startX + 2 * GRID_SIZE;
-            otherY = startY + 2 * GRID_SIZE;
-        } else {
-            otherX = startX - 2 * GRID_SIZE;
-            otherY = startY - 2 * GRID_SIZE;
-        }
-
-        final KeyValue kvx1 = new KeyValue(container.translateXProperty(), otherX, interpolator);
-        final KeyValue kvx2 = new KeyValue(container.translateXProperty(), startX, interpolator);
-
-        final KeyValue kvy1 = new KeyValue(container.translateYProperty(), otherY, interpolator);
-        final KeyValue kvy2 = new KeyValue(container.translateYProperty(), startY, interpolator);
-
-        final List<KeyFrame> frames = new ArrayList<>();
-
-        frames.add(new KeyFrame(millis(400), kvx2, kvy2));
-
-        for(int i = 1; i < 6; i ++) {
-            if(i % 2 == 1) {
-                frames.add(new KeyFrame(millis(400 * (i + 1)), kvx2, kvy2));
-            } else {
-                frames.add(new KeyFrame(millis(400 * (i + 1)), kvx1, kvy1));
-            }
-        }
-
-        moveAnimation.getKeyFrames().addAll(frames);
-
-        final KeyValue kvPresent = new KeyValue(container.opacityProperty(), 1, interpolator);
-        final KeyValue kvGone = new KeyValue(container.opacityProperty(), 0, interpolator);
-        final KeyFrame kf1 = new KeyFrame(millis(5000), kvPresent);
-        final KeyFrame kf2 = new KeyFrame(millis(5500), kvGone);
-        disappearAnimation.getKeyFrames().addAll(kf1, kf2);
-
-
-        moveAnimation.play();
-        disappearAnimation.play();
     }
 
     public static StyleSpans<Collection<String>> computeHighlighting(final String text) {
