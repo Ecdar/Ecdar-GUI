@@ -176,10 +176,10 @@ public class TagPresentation extends StackPane {
         shape.setOnMouseDragged(event -> {
             event.consume();
 
-            final double newX = CanvasPresentation.mouseTracker.gridXProperty().subtract(getComponent().xProperty()).subtract(getLocationAware().xProperty()).doubleValue() - getMinWidth() / 2;
+            final double newX = CanvasPresentation.mouseTracker.gridXProperty().subtract(getComponent().getBox().xProperty()).subtract(getLocationAware().xProperty()).doubleValue() - getMinWidth() / 2;
             setTranslateX(newX);
 
-            final double newY = CanvasPresentation.mouseTracker.gridYProperty().subtract(getComponent().yProperty()).subtract(getLocationAware().yProperty()).doubleValue() - getHeight() / 2;
+            final double newY = CanvasPresentation.mouseTracker.gridYProperty().subtract(getComponent().getBox().yProperty()).subtract(getLocationAware().yProperty()).doubleValue() - getHeight() / 2;
             setTranslateY(newY - 2);
 
             // Tell the mouse release action that we can store an update

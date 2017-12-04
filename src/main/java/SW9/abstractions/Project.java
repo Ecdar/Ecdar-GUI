@@ -27,12 +27,14 @@ public class Project {
 
     private final ObservableList<Query> queries;
     private final ObservableList<Component> components;
+    private final ObservableList<SystemModel> systems;
     private final ObjectProperty<Declarations> globalDeclarations;
     private final ObjectProperty<Declarations> systemDeclarations;
 
     public Project() {
         queries = FXCollections.observableArrayList();
         components = FXCollections.observableArrayList();
+        systems = FXCollections.observableArrayList();
         globalDeclarations = new SimpleObjectProperty<>(new Declarations("Global Declarations"));
         systemDeclarations = new SimpleObjectProperty<>(new Declarations("System Declarations"));
     }
@@ -43,6 +45,10 @@ public class Project {
 
     public ObservableList<Component> getComponents() {
         return components;
+    }
+
+    public ObservableList<SystemModel> getSystemsProperty() {
+        return systems;
     }
 
     public Declarations getGlobalDeclarations() {
