@@ -379,9 +379,8 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
                 } else {
                     // If shift is being held down, start drawing a new edge
-                    if ((!getLocation().getIsLocked().get() && (event.isShiftDown() && event.isPrimaryButtonDown() || event.isMiddleButtonDown()))){
+                    if (canCreateEdgeShortcut(event)) {
                         final Edge newEdge = new Edge(getLocation(), EcdarController.getGlobalEdgeStatus());
-
                         KeyboardTracker.registerKeybind(KeyboardTracker.ABANDON_EDGE, new Keybind(new KeyCodeCombination(KeyCode.ESCAPE), () -> {
                             component.removeEdge(newEdge);
                         }));
@@ -488,6 +487,17 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
         root.layoutYProperty().set(newY);
 
         return oldX != newX || oldY != newY;
+    }
+
+    /**'
+     * Method which has the logical expression for the shortcut of adding a new edge,
+     * checks whether the location is locked and the correct buttons are held down
+     * @param event the mouse event
+     * @return the result of the boolean expression, false if the location is locked or the incorrect buttons are held down,
+     * true if the correct buttons are down
+     */
+    private boolean canCreateEdgeShortcut(MouseEvent event){
+        return (!getLocation().getIsLocked().get() && ((event.isShiftDown() && event.isPrimaryButtonDown()) || event.isMiddleButtonDown()));
     }
 
     @Override
