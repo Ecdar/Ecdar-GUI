@@ -34,10 +34,6 @@ public class SignatureArrow extends Group {
 
             controller = fxmlLoader.getController();
 
-
-            //if(edgeName.isEmpty())
-             //   return;
-
             final Path signatureArrow = controller.signatureArrowPath;
             controller.signatureArrowLabel.setText(edgeName);
             controller.signatureArrowLabel.setMaxWidth(100); // Limit the length of text on the arrow

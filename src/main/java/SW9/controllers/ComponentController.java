@@ -13,7 +13,6 @@ import SW9.utility.helpers.SelectHelper;
 import SW9.utility.mouse.MouseTracker;
 import com.jfoenix.controls.JFXPopup;
 import com.jfoenix.controls.JFXRippler;
-import com.jfoenix.controls.JFXTextField;
 import javafx.animation.Interpolator;
 import javafx.animation.Transition;
 import javafx.beans.binding.DoubleBinding;
@@ -91,6 +90,9 @@ public class ComponentController extends ModelController implements Initializabl
             newComponent.getBox().xProperty().bindBidirectional(root.layoutXProperty());
             newComponent.getBox().yProperty().bindBidirectional(root.layoutYProperty());
 
+            inputSignatureContainer.heightProperty().addListener((change) -> updateMaxHeight() );
+            outputSignatureContainer.heightProperty().addListener((change) -> updateMaxHeight() );
+
             // Bind the declarations of the abstraction the the view
             declarationTextArea.replaceText(0, declarationTextArea.getLength(), newComponent.getDeclarationsText());
             declarationTextArea.textProperty().addListener((observable, oldDeclaration, newDeclaration) -> newComponent.setDeclarationsText(newDeclaration));
@@ -147,7 +149,6 @@ public class ComponentController extends ModelController implements Initializabl
                        outputSignatureContainer.getChildren().add(newArrow);
                    }
             }
-            updateMaxHeight();
         });
 
         newComponent.getInputStrings().addListener((ListChangeListener<String>) c -> {
@@ -158,21 +159,19 @@ public class ComponentController extends ModelController implements Initializabl
                     inputSignatureContainer.getChildren().add(newArrow);
                 }
             }
-
-            updateMaxHeight();
         });
     }
 
     /***
      * Updates the component's height to match the input/output signature containers
-     * if the container is smaller than either of them
+     * if the component is smaller than either of them
      */
     private void updateMaxHeight() {
         // If input/outputsignature container is taller than the current component height
         // we update the component's height to be as tall as the container
         double maxHeight = findMaxHeight();
         if(maxHeight > component.get().getBox().getHeight()) {
-            component.get().getBox().setHeight(maxHeight);
+            component.get().getBox().heightProperty().set(maxHeight);
         }
     }
 
@@ -182,8 +181,8 @@ public class ComponentController extends ModelController implements Initializabl
      */
 
     private double findMaxHeight() {
-        double outputHeight = outputSignatureContainer.getHeight();
         double inputHeight = inputSignatureContainer.getHeight();
+        double outputHeight = outputSignatureContainer.getHeight();
         double componentHeight = component.get().getBox().getHeight();
 
         double maxSignatureHeight = Math.max(outputHeight, inputHeight);
