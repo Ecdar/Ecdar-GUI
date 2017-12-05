@@ -2,6 +2,7 @@ package SW9.presentations;
 
 import SW9.abstractions.Component;
 import SW9.abstractions.HighLevelModelObject;
+import SW9.abstractions.SystemModel;
 import SW9.controllers.CanvasController;
 import SW9.controllers.FileController;
 import SW9.utility.colors.Color;
@@ -52,7 +53,7 @@ public class FilePresentation extends AnchorPane {
     }
 
     private void initializeMoreInformationButton() {
-        if (getModel() instanceof Component) {
+        if (getModel() instanceof Component || getModel() instanceof SystemModel) {
             controller.moreInformation.setVisible(true);
             controller.moreInformation.setMaskType(JFXRippler.RipplerMask.CIRCLE);
             controller.moreInformation.setPosition(JFXRippler.RipplerPos.BACK);

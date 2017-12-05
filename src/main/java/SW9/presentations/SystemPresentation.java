@@ -41,13 +41,22 @@ public class SystemPresentation extends ModelPresentation {
         controller = fxmlLoader.getController();
         controller.setSystem(system);
 
-        super.initialize();
+        super.initialize(system.getBox());
 
         initializeDimensions(system.getBox());
 
-        initializeToolbar();
-        initializeFrame();
-        initializeBackground();
+        // Initialize methods that is sensitive to width and height
+        final Runnable onUpdateSize = () -> {
+            initializeToolbar();
+            initializeFrame();
+            initializeBackground();
+        };
+
+        onUpdateSize.run();
+
+        // Re run initialisation on update of width and height property
+        system.getBox().widthProperty().addListener(observable -> onUpdateSize.run());
+        system.getBox().heightProperty().addListener(observable -> onUpdateSize.run());
     }
 
     private void initializeToolbar() {
@@ -147,5 +156,17 @@ public class SystemPresentation extends ModelPresentation {
     @Override
     ModelController getModelController() {
         return controller;
+    }
+
+    // TODO
+    @Override
+    double getDragAnchorMinWidth() {
+        return 0;
+    }
+
+    // TODO
+    @Override
+    double getDragAnchorMinHeight() {
+        return 0;
     }
 }
