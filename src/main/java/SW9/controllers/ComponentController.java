@@ -246,6 +246,50 @@ public class ComponentController extends ModelController implements Initializabl
                 }, "Added location '" + newLocation.toString() + "' to component '" + component.getName() + "'", "add-circle");
             });
 
+            // Adds the add universal location element to the drop down menu, this element adds an universal location and its required edges
+            contextMenu.addClickableListElement("Add Universal Location", event -> {
+                contextMenu.close();
+
+                double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
+                double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
+
+                final Location newLocation = new Location(component, Location.Type.UNIVERSAL, x, y);
+
+                final Edge inputEdge = newLocation.addLeftEdge("*", EdgeStatus.INPUT);
+                inputEdge.setIsLocked(true);
+
+                final Edge outputEdge = newLocation.addRightEdge("*", EdgeStatus.OUTPUT);
+                outputEdge.setIsLocked(true);
+
+                // Add a new location
+                UndoRedoStack.pushAndPerform(() -> { // Perform
+                    component.addLocation(newLocation);
+                    component.addEdge(inputEdge);
+                    component.addEdge(outputEdge);
+                }, () -> { // Undo
+                    component.removeLocation(newLocation);
+                    component.removeEdge(inputEdge);
+                    component.removeEdge(outputEdge);
+                }, "Added universal location '" + newLocation.toString() + "' to component '" + component.getName() + "'", "add-circle");
+            });
+
+            // Adds the add inconsistent location element to the drop down menu, this element adds an inconsistent location
+            contextMenu.addClickableListElement("Add Inconsistent Location", event -> {
+                contextMenu.close();
+
+                double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
+                double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
+
+                final Location newLocation = new Location(component, Location.Type.INCONSISTENT, x, y);
+
+                // Add a new location
+                UndoRedoStack.pushAndPerform(() -> { // Perform
+                    component.addLocation(newLocation);
+                }, () -> { // Undo
+                    component.removeLocation(newLocation);
+                }, "Added inconsistent location '" + newLocation.toString() + "' to component '" + component.getName() + "'", "add-circle");
+            });
+
             contextMenu.addSpacerElement();
 
             contextMenu.addClickableListElement("Contains deadlock?", event -> {
@@ -318,15 +362,84 @@ public class ComponentController extends ModelController implements Initializabl
                 // If edge has no sync, add one
                 if (!unfinishedEdge.hasSyncNail()) unfinishedEdge.makeSyncNailBetweenLocations();
 
+                getComponent().addLocation(location);
+
                 // Add a new location
-                UndoRedoStack.pushAndPerform(() -> { // Perform
+                UndoRedoStack.push(() -> { // Perform
                     getComponent().addLocation(location);
-                    UndoRedoStack.redo();
+                    getComponent().addEdge(unfinishedEdge);
                 }, () -> { // Undo
                     getComponent().removeLocation(location);
-                    UndoRedoStack.undo();
+                    getComponent().removeEdge(unfinishedEdge);
                 }, "Finished edge '" + unfinishedEdge + "' by adding '" + location + "' to component '" + component.getName() + "'", "add-circle");
             });
+
+
+            finishEdgeContextMenu.addClickableListElement("Universal Location", event -> {
+                finishEdgeContextMenu.close();
+
+                double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
+                double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
+
+                final Location newLocation = new Location(component, Location.Type.UNIVERSAL, x, y);
+
+                final Edge inputEdge = newLocation.addLeftEdge("*", EdgeStatus.INPUT);
+                inputEdge.setIsLocked(true);
+
+                final Edge outputEdge = newLocation.addRightEdge("*", EdgeStatus.OUTPUT);
+                outputEdge.setIsLocked(true);
+
+                unfinishedEdge.setTargetLocation(newLocation);
+
+                setCoordinates.accept(newLocation);
+
+                // If edge has no sync, add one
+                if (!unfinishedEdge.hasSyncNail()) unfinishedEdge.makeSyncNailBetweenLocations();
+
+                getComponent().addLocation(newLocation);
+                getComponent().addEdge(inputEdge);
+                getComponent().addEdge(outputEdge);
+
+                // Add a new location
+                UndoRedoStack.push(() -> { // Perform
+                    getComponent().addLocation(newLocation);
+                    getComponent().addEdge(inputEdge);
+                    getComponent().addEdge(outputEdge);
+                    getComponent().addEdge(unfinishedEdge);
+                }, () -> { // Undo
+                    getComponent().removeLocation(newLocation);
+                    getComponent().removeEdge(inputEdge);
+                    getComponent().removeEdge(outputEdge);
+                    getComponent().removeEdge(unfinishedEdge);
+                }, "Finished edge '" + unfinishedEdge + "' by adding '" + newLocation + "' to component '" + component.getName() + "'", "add-circle");
+            });
+
+            finishEdgeContextMenu.addClickableListElement("Inconsistent Location", event -> {
+                finishEdgeContextMenu.close();
+
+                double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
+                double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
+
+                final Location newLocation = new Location(component, Location.Type.INCONSISTENT, x, y);
+
+                unfinishedEdge.setTargetLocation(newLocation);
+
+                setCoordinates.accept(newLocation);
+
+                // If edge has no sync, add one
+                if (!unfinishedEdge.hasSyncNail()) unfinishedEdge.makeSyncNailBetweenLocations();
+
+                getComponent().addLocation(newLocation);
+
+                UndoRedoStack.push(() -> { // Redo
+                    getComponent().addLocation(newLocation);
+                    getComponent().addEdge(unfinishedEdge);
+                }, () -> { // Undo
+                    getComponent().removeLocation(newLocation);
+                    getComponent().removeEdge(unfinishedEdge);
+                }, "Finished edge '" + unfinishedEdge + "' by adding '" + newLocation + "' to component '" + component.getName() + "'", "add-circle");
+            });
+
         };
 
         component.addListener((obs, oldComponent, newComponent) -> {
@@ -495,12 +608,12 @@ public class ComponentController extends ModelController implements Initializabl
             UndoRedoStack.pushAndPerform(() -> { // Perform
                 getComponent().addLocation(location);
                 if (unfinishedEdge != null) {
-                    UndoRedoStack.redo();
+                    getComponent().addEdge(unfinishedEdge);
                 }
             }, () -> { // Undo
                 getComponent().removeLocation(location);
                 if (unfinishedEdge != null) {
-                    UndoRedoStack.undo();
+                    getComponent().removeEdge(unfinishedEdge);
                 }
             }, "Finished edge '" + unfinishedEdge + "' by adding '" + location + "' to component '" + component.getName() + "'", "add-circle");
 
