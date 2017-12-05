@@ -21,8 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Component extends VerificationObject implements DropDownMenu.HasColor {
     private static final AtomicInteger hiddenID = new AtomicInteger(0); // Used to generate unique IDs
-    private static final AtomicInteger atomicUniversalId = new AtomicInteger(0);
-    private static final AtomicInteger atomicInconsistentId = new AtomicInteger(0);
+    private static final AtomicInteger atomicComponentId = new AtomicInteger(0);
 
     private static final String LOCATIONS = "locations";
     private static final String EDGES = "edges";
@@ -40,8 +39,6 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
     private final ObservableList<String> inputStrings = FXCollections.observableArrayList();
     private final ObservableList<String> outputStrings = FXCollections.observableArrayList();
     private final StringProperty description = new SimpleStringProperty("");
-    private int universalId = -1;
-    private int inconsistentId = -1;
 
     // Background check
     private final BooleanProperty includeInPeriodicCheck = new SimpleBooleanProperty(true);
@@ -54,6 +51,9 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
     private final BooleanProperty declarationOpen = new SimpleBooleanProperty(false);
 
     private final BooleanProperty firsTimeShown = new SimpleBooleanProperty(false);
+
+    //Inconsistent and Universal integer
+    private int componentId;
 
     /**
      * Creates a component with a random generated name but no random colouring
@@ -78,7 +78,7 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
      */
     public Component(final String name, final boolean doRandomColor) {
         setName(name);
-
+        componentId = atomicComponentId.getAndIncrement();
         if(doRandomColor) {
             // Color the new component in such a way that we avoid clashing with other components if possible
             final List<EnabledColor> availableColors = new ArrayList<>();
@@ -114,6 +114,7 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
 
     public Component(final JsonObject object) {
         hiddenID.incrementAndGet();
+        componentId = atomicComponentId.getAndIncrement();
         setFirsTimeShown(true);
         deserialize(object);
 
@@ -154,30 +155,6 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
     public static void addListener(final ChangeListener<Object> listener, final Edge edge) {
         edge.syncProperty().addListener(listener);
         edge.ioStatus.addListener(listener);
-    }
-
-    /**
-     * Gets the universal location id for this component, if no universal id has been assigned yet it gets it from the atomic universal id and increments it.
-     * @return the universal location id for this component
-     */
-    public int getUniversalId() {
-        if(universalId == -1){
-            universalId = atomicUniversalId.getAndIncrement();
-            inconsistentId = atomicInconsistentId.getAndIncrement();
-        }
-        return universalId;
-    }
-
-    /**
-     * Gets the inconsistent location id for this component, if no inconsistent location id has been assigned yet it gets it from the atomic inconsistent id and increments
-     * @return the inconsistent location id for this component
-     */
-    public int getInconsistentId() {
-        if(inconsistentId == -1){
-            universalId = atomicUniversalId.getAndIncrement();
-            inconsistentId = atomicInconsistentId.getAndIncrement();
-        }
-        return inconsistentId;
     }
 
     /**
@@ -500,5 +477,9 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
 
     public ObservableList<String> getOutputStrings() {
         return outputStrings;
+    }
+
+    public int getComponentId() {
+        return componentId;
     }
 }

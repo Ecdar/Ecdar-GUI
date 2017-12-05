@@ -3,6 +3,7 @@ package SW9.abstractions;
 import SW9.code_analysis.Nearable;
 import SW9.controllers.EcdarController;
 import SW9.presentations.DropDownMenu;
+import SW9.presentations.Grid;
 import SW9.utility.colors.Color;
 import SW9.utility.colors.EnabledColor;
 import SW9.utility.helpers.Circular;
@@ -62,6 +63,22 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     public Location(final String id) {
         setId(id);
         bindReachabilityAnalysis();
+    }
+
+    public Location(Component component, Type type, double x, double y){
+        setX(Grid.snap(x));
+        setY(Grid.snap(y));
+        setType(type);
+        if(type == Type.UNIVERSAL){
+            setIsLocked(true);
+            setId("U" + component.getComponentId());
+        } else if (type == Type.INCONSISTENT) {
+            setIsLocked(true);
+            setUrgency(Location.Urgency.URGENT);
+            setId("I" + component.getComponentId());
+        }
+        setColorIntensity(component.getColorIntensity());
+        setColor(component.getColor());
     }
 
     public Location(final JsonObject jsonObject) {
@@ -268,6 +285,52 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
         } else {
             return getId();
         }
+    }
+
+    /**
+     * Adds an edge to the left side of a location
+     * @param syncString the string of the channel to synchronize over
+     * @param status the status of the edge
+     * @return the finished edge
+     */
+    public Edge addLeftEdge(final String syncString ,final EdgeStatus status) {
+        Edge edge = new Edge(this, status);
+        edge.setTargetLocation(this);
+        edge.setProperty(Edge.PropertyType.SYNCHRONIZATION, syncString);
+        Nail inputNail1;
+        Nail inputNailSync;
+        Nail inputNail2;
+        inputNail1 = new Nail(getX() - 40, getY() - 10);
+        inputNailSync = new Nail(getX() - 60, getY());
+        inputNail2 = new Nail(getX() - 40, getY() + 10);
+        inputNailSync.setPropertyType(Edge.PropertyType.SYNCHRONIZATION);
+        edge.addNail(inputNail1);
+        edge.addNail(inputNailSync);
+        edge.addNail(inputNail2);
+        return edge;
+    }
+
+    /**
+     * Adds an edge to the right side of a location
+     * @param syncString the string of the channel to synchronize over
+     * @param status the status of the edge
+     * @return the finished edge
+     */
+    public Edge addRightEdge(final String syncString ,final EdgeStatus status){
+        Edge edge = new Edge(this, status);
+        edge.setTargetLocation(this);
+        edge.setProperty(Edge.PropertyType.SYNCHRONIZATION, syncString);
+        Nail inputNail1;
+        Nail inputNailSync;
+        Nail inputNail2;
+        inputNail1 = new Nail(getX() + 40, getY() - 10);
+        inputNailSync = new Nail(getX() + 60, getY());
+        inputNail2 = new Nail(getX() + 40, getY() + 10);
+        inputNailSync.setPropertyType(Edge.PropertyType.SYNCHRONIZATION);
+        edge.addNail(inputNail1);
+        edge.addNail(inputNailSync);
+        edge.addNail(inputNail2);
+        return edge;
     }
 
     public Reachability getReachability() {

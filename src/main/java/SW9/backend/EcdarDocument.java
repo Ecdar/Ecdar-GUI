@@ -87,10 +87,10 @@ class EcdarDocument {
 
         xmlDocument.insert(template, null);
 
-        // Add an universal location
+        // Add default universal location
         addUniversalLocation(component, template);
 
-        // Add an inconsistent location
+        // Add default inconsistent location
         addInconsistentLocation(component, template);
 
         // Add all locations from the model to our conversion map and to the template
@@ -107,7 +107,9 @@ class EcdarDocument {
 
         for (final Edge ecdarEdge : component.getEdges()) {
             // Draw edges that are purely location to location edges
-            if (ecdarEdge.getSourceLocation() != null && ecdarEdge.getSourceLocation().getType() != Location.Type.UNIVERSAL && ecdarEdge.getTargetLocation() != null) {
+            if (ecdarEdge.getSourceLocation() != null && ecdarEdge.getSourceLocation().getType() != Location.Type.UNIVERSAL
+                && ecdarEdge.getTargetLocation() != null) {
+
                 xmlToEcdarEdges.put(addEdge(template, ecdarEdge), ecdarEdge);
             }
         }
@@ -120,7 +122,6 @@ class EcdarDocument {
      * @param template the xml template we want to add the location to
      */
     private void addInconsistentLocation(Component component, Template template) {
-        //inconsistentLocation = new Location("I" + component.getInconsistentId());
 
         inconsistentLocation = new Location("Inconsistent");
         inconsistentLocation.setUrgency(Location.Urgency.URGENT);
@@ -132,20 +133,19 @@ class EcdarDocument {
      * Generate the universal location
      * @param component the component we want to extract the id and input/output strings
      * @param template the xml template we want to add the location to
+     * @throws BackendException throws a backend exception if addEdge fails
      */
     private void addUniversalLocation(Component component, Template template) throws BackendException {
-        //universalLocation = new Location("U" + component.getUniversalId());
-
         universalLocation = new Location("Universal");
         final com.uppaal.model.core2.Location xmlUniversalLocation = addLocation(template, universalLocation);
         addLocationsToMaps(universalLocation, xmlUniversalLocation);
         for (String input : component.getInputStrings()) {
-            Edge edge = new Edge(universalLocation, input, EdgeStatus.INPUT, Edge.Side.LEFT);
+            Edge edge = universalLocation.addLeftEdge(input, EdgeStatus.INPUT);
             xmlToEcdarEdges.put(addEdge(template, edge), edge);
 
         }
         for (String output : component.getOutputStrings()) {
-            Edge edge = new Edge(universalLocation, output, EdgeStatus.OUTPUT, Edge.Side.RIGHT);
+            Edge edge = universalLocation.addRightEdge(output, EdgeStatus.OUTPUT);
             xmlToEcdarEdges.put(addEdge(template, edge), edge);
         }
     }

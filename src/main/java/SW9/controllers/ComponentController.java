@@ -37,7 +37,6 @@ import org.fxmisc.richtext.StyleClassedTextArea;
 
 import java.net.URL;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -49,8 +48,6 @@ public class ComponentController implements Initializable {
 
     private static final Map<Component, ListChangeListener<Location>> locationListChangeListenerMap = new HashMap<>();
     private static final Map<Component, Boolean> errorsAndWarningsInitialized = new HashMap<>();
-    private static final AtomicInteger universalId = new AtomicInteger(0);
-    private static final AtomicInteger inconsistentId = new AtomicInteger(0);
     private static Location placingLocation = null;
     private final ObjectProperty<Component> component = new SimpleObjectProperty<>(null);
     private final Map<Edge, EdgePresentation> edgePresentationMap = new HashMap<>();
@@ -145,9 +142,6 @@ public class ComponentController implements Initializable {
                 errorsAndWarningsInitialized.put(component, true);
             }
         });
-
-        universalId.incrementAndGet();
-        inconsistentId.incrementAndGet();
     }
 
     private void initializeNoIncomingEdgesWarning() {
@@ -268,20 +262,15 @@ public class ComponentController implements Initializable {
             contextMenu.addClickableListElement("Add Universal Location", event -> {
                 contextMenu.close();
 
-                final Location newLocation = createUniversalLocation(component);
-
                 double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
-                x = Grid.snap(x);
-                newLocation.setX(x);
-
                 double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
-                y = Grid.snap(y);
-                newLocation.setY(y);
 
-                final Edge inputEdge = new Edge(newLocation, "*", EdgeStatus.INPUT, Edge.Side.LEFT);
+                final Location newLocation = new Location(component, Location.Type.UNIVERSAL, x, y);
+
+                final Edge inputEdge = newLocation.addLeftEdge("*", EdgeStatus.INPUT);
                 inputEdge.setIsLocked(true);
 
-                final Edge outputEdge = new Edge(newLocation, "*", EdgeStatus.OUTPUT, Edge.Side.RIGHT);
+                final Edge outputEdge = newLocation.addRightEdge("*", EdgeStatus.OUTPUT);
                 outputEdge.setIsLocked(true);
 
                 // Add a new location
@@ -300,7 +289,10 @@ public class ComponentController implements Initializable {
             contextMenu.addClickableListElement("Add Inconsistent Location", event -> {
                 contextMenu.close();
 
-                final Location newLocation = createInconsistentLocation(component);
+                double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
+                double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
+
+                final Location newLocation = new Location(component, Location.Type.INCONSISTENT, x, y);
 
                 // Add a new location
                 UndoRedoStack.pushAndPerform(() -> { // Perform
@@ -394,24 +386,20 @@ public class ComponentController implements Initializable {
                 }, "Finished edge '" + unfinishedEdge + "' by adding '" + location + "' to component '" + component.getName() + "'", "add-circle");
             });
 
+
             finishEdgeContextMenu.addClickableListElement("Universal Location", event -> {
                 finishEdgeContextMenu.close();
 
-                final Location newLocation = createUniversalLocation(component);
+                double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
+                double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
 
-                final Edge inputEdge = new Edge(newLocation, "*", EdgeStatus.INPUT, Edge.Side.LEFT);
+                final Location newLocation = new Location(component, Location.Type.UNIVERSAL, x, y);
+
+                final Edge inputEdge = newLocation.addLeftEdge("*", EdgeStatus.INPUT);
                 inputEdge.setIsLocked(true);
 
-                final Edge outputEdge = new Edge(newLocation, "*", EdgeStatus.OUTPUT, Edge.Side.RIGHT);
+                final Edge outputEdge = newLocation.addRightEdge("*", EdgeStatus.OUTPUT);
                 outputEdge.setIsLocked(true);
-
-                double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
-                x = Math.round(x / GRID_SIZE) * GRID_SIZE;
-                newLocation.setX(x);
-
-                double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
-                y = Math.round(y / GRID_SIZE) * GRID_SIZE;
-                newLocation.setY(y);
 
                 unfinishedEdge.setTargetLocation(newLocation);
 
@@ -441,15 +429,10 @@ public class ComponentController implements Initializable {
             finishEdgeContextMenu.addClickableListElement("Inconsistent Location", event -> {
                 finishEdgeContextMenu.close();
 
-                final Location newLocation = createInconsistentLocation(component);
-
                 double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
-                x = Grid.snap(x);
-                newLocation.setX(x);
-
                 double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
-                y = Grid.snap(y);
-                newLocation.setY(y);
+
+                final Location newLocation = new Location(component, Location.Type.INCONSISTENT, x, y);
 
                 unfinishedEdge.setTargetLocation(newLocation);
 
@@ -476,45 +459,6 @@ public class ComponentController implements Initializable {
         });
 
         initializeDropDownMenu.accept(getComponent());
-    }
-
-    private Location createInconsistentLocation(Component component) {
-        final Location newLocation = new Location();
-
-        double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
-        x = Grid.snap(x);
-        newLocation.setX(x);
-
-        double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
-        y = Grid.snap(y);
-        newLocation.setY(y);
-
-        newLocation.setIsLocked(true);
-        newLocation.setType(Location.Type.INCONSISTENT);
-        newLocation.setUrgency(Location.Urgency.URGENT);
-        newLocation.setColorIntensity(component.getColorIntensity());
-        newLocation.setColor(component.getColor());
-        newLocation.setId("I" + component.getInconsistentId());
-        return newLocation;
-    }
-
-    private Location createUniversalLocation(Component component) {
-        final Location newLocation = new Location();
-
-        double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
-        x = Grid.snap(x);
-        newLocation.setX(x);
-
-        double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
-        y = Grid.snap(y);
-        newLocation.setY(y);
-
-        newLocation.setIsLocked(true);
-        newLocation.setType(Location.Type.UNIVERSAL);
-        newLocation.setColorIntensity(component.getColorIntensity());
-        newLocation.setColor(component.getColor());
-        newLocation.setId("U" + component.getUniversalId());
-        return newLocation;
     }
 
     private void initializeLocationHandling(final Component newComponent) {

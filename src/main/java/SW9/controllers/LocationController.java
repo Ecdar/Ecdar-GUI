@@ -160,12 +160,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                     dropDownMenu.close();
                 }
         );
-
         dropDownMenu.addSpacerElement();
-
-
-        //dropDownMenu.addListElement("Set Urgency");
-
         final BooleanProperty isUrgent = new SimpleBooleanProperty(false);
         isUrgent.bind(getLocation().urgencyProperty().isEqualTo(Location.Urgency.URGENT));
         dropDownMenu.addTogglableAndDisableableListElement("Urgent", isUrgent, getLocation().getIsLocked(), event -> {
@@ -369,13 +364,11 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                             final Nail nail = new Nail(getX() + 4 * GRID_SIZE, getY() - GRID_SIZE);
                             nail.setPropertyType(Edge.PropertyType.SYNCHRONIZATION);
                             unfinishedEdge.addNail(nail);
-
                             final Nail nail2 = new Nail(getX() + 4 * GRID_SIZE, getY() + GRID_SIZE);
                             unfinishedEdge.addNail(nail2);
                         } else {
                             unfinishedEdge.makeSyncNailBetweenLocations();
                         }
-
                         UndoRedoStack.push(() -> { // Perform
                             component.addEdge(unfinishedEdge);
                         }, () -> { // Undo
@@ -386,7 +379,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
                 } else {
                     // If shift is being held down, start drawing a new edge
-                    if ((event.isShiftDown() && event.isPrimaryButtonDown()) || event.isMiddleButtonDown()) {
+                    if ((!getLocation().getIsLocked().get() && event.isShiftDown() && event.isPrimaryButtonDown()) || event.isMiddleButtonDown()) {
                         final Edge newEdge = new Edge(getLocation(), EcdarController.getGlobalEdgeStatus());
 
                         KeyboardTracker.registerKeybind(KeyboardTracker.ABANDON_EDGE, new Keybind(new KeyCodeCombination(KeyCode.ESCAPE), () -> {

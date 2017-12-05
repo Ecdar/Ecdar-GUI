@@ -45,6 +45,15 @@ public class UndoRedoStack {
         return command;
     }
 
+    /**
+     * pushes changes to the undoredo stack without performing them,
+     * useful when there must be a change between the first perform and the redo and undo
+     * @param redo the code to be run when redoing
+     * @param undo the code to be run when undoing
+     * @param description the description of this set of redo/undo commands
+     * @param icon icon of the redo-undo command
+     * @return a command with information for code to run when redoing, undoing, description and icon
+     */
     public static Command push(final Runnable redo, final Runnable undo, final String description, final String icon) {
         final Command item = new Command(redo, undo, description, icon);
 
@@ -52,11 +61,8 @@ public class UndoRedoStack {
         while (!redoStack.isEmpty()) {
             redoStack.pop();
         }
-
         final Command command = undoStack.push(item);
-
         updateState();
-
         return command;
     }
 

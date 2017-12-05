@@ -26,9 +26,6 @@ public class Edge implements Serializable, Nearable {
     // Defines if this is an input or an output edge
     public ObjectProperty<EdgeStatus> ioStatus;
 
-    //Adds side enum
-    public enum Side {LEFT, RIGHT}
-
     // Verification properties
     private final ObjectProperty<Location> sourceLocation = new SimpleObjectProperty<>();
     private final ObjectProperty<Location> targetLocation = new SimpleObjectProperty<>();
@@ -55,36 +52,6 @@ public class Edge implements Serializable, Nearable {
         ioStatus = new SimpleObjectProperty<>(status);
 
         bindReachabilityAnalysis();
-    }
-
-    /**
-     * Adds a looping edge on the left or right side of the source location with a defined sync string and status
-     * @param sourceLocation the location the edge is coming from
-     * @param syncString the synchronization string used by the edge
-     * @param status the status of the edge
-     * @param side indicates whether it is on the LEFT or RIGHT side
-     */
-    public Edge(final Location sourceLocation, final String syncString ,final EdgeStatus status, final Side side) {
-        this(sourceLocation, status);
-        setTargetLocation(sourceLocation);
-        setProperty(Edge.PropertyType.SYNCHRONIZATION, syncString);
-        Nail inputNail1;
-        Nail inputNailSync;
-        Nail inputNail2;
-        if(side == Side.LEFT) {
-            inputNail1 = new Nail(sourceLocation.getX() - 40, sourceLocation.getY() - 10);
-            inputNailSync = new Nail(sourceLocation.getX() - 60, sourceLocation.getY());
-            inputNail2 = new Nail(sourceLocation.getX() - 40, sourceLocation.getY() + 10);
-        } else {
-            inputNail1 = new Nail(sourceLocation.getX() + 40, sourceLocation.getY() - 10);
-            inputNailSync = new Nail(sourceLocation.getX() + 60, sourceLocation.getY());
-            inputNail2 = new Nail(sourceLocation.getX() + 40, sourceLocation.getY() + 10);
-        }
-
-        inputNailSync.setPropertyType(Edge.PropertyType.SYNCHRONIZATION);
-        addNail(inputNail1);
-        addNail(inputNailSync);
-        addNail(inputNail2);
     }
 
     public Edge(final JsonObject jsonObject, final Component component) {
