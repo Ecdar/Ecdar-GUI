@@ -24,6 +24,8 @@ public class Project {
     private final static String SYSTEM_DCL_FILENAME = "SystemDeclarations";
     private final static String QUERIES_FILENAME = "Queries";
     private final static String JSON_FILENAME_EXTENSION = ".json";
+    private static final String FOLDER_NAME_COMPONENTS = "Components";
+    private static final String FOLDER_NAME_SYSTEMS = "Systems";
 
     private final ObservableList<Query> queries;
     private final ObservableList<Component> components;
@@ -77,39 +79,52 @@ public class Project {
         FileUtils.forceMkdir(directory);
         FileUtils.cleanDirectory(directory);
 
-        // Save global declarations
-        Writer writer = getSaveFileWriter(GLOBAL_DCL_FILENAME);
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        gson.toJson(getGlobalDeclarations().serialize(), writer);
-        writer.close();
+        {
+            // Save global declarations
+            final Writer globalWriter = getSaveFileWriter(GLOBAL_DCL_FILENAME);
+            getNewGson().toJson(getGlobalDeclarations().serialize(), globalWriter);
+            globalWriter.close();
+        }
 
-        // Save system declarations
-        writer = getSaveFileWriter(SYSTEM_DCL_FILENAME);
-        gson = new GsonBuilder().setPrettyPrinting().create();
-        gson.toJson(getSystemDeclarations().serialize(), writer);
-        writer.close();
+        {
+            // Save system declarations
+            final Writer systemDclWriter = getSaveFileWriter(SYSTEM_DCL_FILENAME);
+            getNewGson().toJson(getSystemDeclarations().serialize(), systemDclWriter);
+            systemDclWriter.close();
+        }
 
         // Save components
         for (final Component component : getComponents()) {
-            writer = getSaveFileWriter(component.getName());
-            gson = new GsonBuilder().setPrettyPrinting().create();
+            final Writer writer = getSaveFileWriter(component.getName(), FOLDER_NAME_COMPONENTS);
+            getNewGson().toJson(component.serialize(), writer);
+            writer.close();
+        }
 
-            gson.toJson(component.serialize(), writer);
-
+        // Save systems
+        for (final SystemModel system : getSystemsProperty()) {
+            final Writer writer = getSaveFileWriter(system.getName(), FOLDER_NAME_SYSTEMS);
+            getNewGson().toJson(system.serialize(), writer);
             writer.close();
         }
 
         // Serializes queries
-        final JsonArray queries = new JsonArray();
-        getQueries().forEach(query -> queries.add(query.serialize()));
-
-        writer = getSaveFileWriter(QUERIES_FILENAME);
-        gson = new GsonBuilder().setPrettyPrinting().create();
-
-        gson.toJson(queries, writer);
-        writer.close();
+        {
+            final JsonArray queries = new JsonArray();
+            getQueries().forEach(query -> queries.add(query.serialize()));
+            final Writer queriesWriter = getSaveFileWriter(QUERIES_FILENAME);
+            getNewGson().toJson(queries, queriesWriter);
+            queriesWriter.close();
+        }
 
         Ecdar.showToast("Project saved!");
+    }
+
+    /**
+     * Gets a new GSON object.
+     * @return the GSON object
+     */
+    private static Gson getNewGson() {
+        return new GsonBuilder().setPrettyPrinting().create();
     }
 
     /**
@@ -119,6 +134,10 @@ public class Project {
      */
     private static FileWriter getSaveFileWriter(final String filename) throws IOException {
         return new FileWriter(Ecdar.projectDirectory.getValue() + File.separator + filename + ".json");
+    }
+
+    private static FileWriter getSaveFileWriter(final String filename, final String folderName) throws IOException {
+        return new FileWriter(Ecdar.projectDirectory.getValue() + File.separator + folderName + File.separator + filename + ".json");
     }
 
     /**
@@ -131,10 +150,17 @@ public class Project {
         final File[] projectFiles = projectFolder.listFiles();
         if (projectFiles == null || projectFiles.length == 0) return;
 
-        // Create map for deserialization
-        final Map<String, JsonObject> componentJsonMap = new HashMap<>();
-
         for (final File file : projectFiles) {
+            if (file.isDirectory()) {
+                // If components folder
+                if (file.getName().equals(FOLDER_NAME_COMPONENTS)) {
+                    deserializeComponents(file);
+                } else if (file.getName().equals(FOLDER_NAME_SYSTEMS)) {
+                    deserializeSystems(file);
+                }
+                continue;
+            }
+
             final String fileContent = Files.toString(file, Charset.defaultCharset());
 
             if (file.getName().equals(GLOBAL_DCL_FILENAME + JSON_FILENAME_EXTENSION)) {
@@ -155,22 +181,40 @@ public class Project {
                     final Query newQuery = new Query((JsonObject) jsonElement);
                     getQueries().add(newQuery);
                 });
-                // Do not parse Queries.json as a component
-                continue;
             }
+        }
+    }
 
-            // Parse the file to an json object
-            final JsonObject jsonObject = new JsonParser().parse(fileContent).getAsJsonObject();
+    /**
+     * Deserializes the components in a folder.
+     * @param componentsFolder the folder containing the JSON components files
+     * @throws IOException if an IO error occurs
+     */
+    private void deserializeComponents(final File componentsFolder) throws IOException {
+        // If there are no files do not try to deserialize
+        final File[] files = componentsFolder.listFiles();
+        if (files == null || files.length == 0) return;
 
-            // Fetch the name of the component
-            final String componentName = jsonObject.get("name").getAsString();
+        // Create map for deserialization
+        final Map<String, JsonObject> nameJsonMap = new HashMap<>();
 
-            // Add the name and the json object to the map
-            componentJsonMap.put(componentName, jsonObject);
+        for (final File file : files) {
+            // If JSON file
+            if (file.getName().endsWith(JSON_FILENAME_EXTENSION)) {
+                final String fileContent = Files.toString(file, Charset.defaultCharset());
 
+                // Parse the file to an json object
+                final JsonObject jsonObject = new JsonParser().parse(fileContent).getAsJsonObject();
+
+                // Fetch the name of the component
+                final String componentName = jsonObject.get("name").getAsString();
+
+                // Add the name and the json object to the map
+                nameJsonMap.put(componentName, jsonObject);
+            }
         }
 
-        final List<Map.Entry<String, JsonObject>> list = new LinkedList<>(componentJsonMap.entrySet());
+        final List<Map.Entry<String, JsonObject>> list = new LinkedList<>(nameJsonMap.entrySet());
         // Defined Custom Comparator here
         list.sort(Comparator.comparing(Map.Entry::getKey));
 
@@ -185,6 +229,41 @@ public class Project {
 
         // Add the components to the list
         orderedJsonComponents.forEach(jsonObject -> getComponents().add(new Component(jsonObject)));
+    }
+
+    private void deserializeSystems(final File systemsFolder) throws IOException {
+        // If there are no files do not try to deserialize
+        final File[] files = systemsFolder.listFiles();
+        if (files == null || files.length == 0) return;
+
+        // Create map for deserialization
+        final Map<String, JsonObject> nameJsonMap = new HashMap<>();
+
+        for (final File file : files) {
+            // If JSON file
+            if (file.getName().endsWith(JSON_FILENAME_EXTENSION)) {
+                final String fileContent = Files.toString(file, Charset.defaultCharset());
+                final JsonObject json = new JsonParser().parse(fileContent).getAsJsonObject();
+                final String name = json.get("name").getAsString();
+                nameJsonMap.put(name, json);
+            }
+        }
+
+        final List<Map.Entry<String, JsonObject>> list = new LinkedList<>(nameJsonMap.entrySet());
+
+        list.sort(Comparator.comparing(Map.Entry::getKey));
+
+        final List<JsonObject> orderedJsonSystems = new ArrayList<>();
+
+        for (final Map.Entry<String, JsonObject> mapEntry : list) {
+            orderedJsonSystems.add(mapEntry.getValue());
+        }
+
+        // Reverse the list such that the greatest depth is first in the list
+        Collections.reverse(orderedJsonSystems);
+
+        // Add the systems to the list
+        orderedJsonSystems.forEach(json -> getSystemsProperty().add(new SystemModel(json)));
     }
 
     /**

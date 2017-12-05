@@ -24,9 +24,7 @@ public class Component extends HighLevelModelObject {
 
     private static final String LOCATIONS = "locations";
     private static final String EDGES = "edges";
-    private static final String DESCRIPTION = "description";
     private static final String INCLUDE_IN_PERIODIC_CHECK = "include_in_periodic_check";
-    private static final String COLOR = "color";
 
     // Verification properties
     private final ObservableList<Location> locations = FXCollections.observableArrayList();

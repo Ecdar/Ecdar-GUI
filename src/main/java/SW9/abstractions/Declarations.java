@@ -12,7 +12,7 @@ import javafx.beans.property.StringProperty;
  * This could be global declarations or system declarations.
  */
 public class Declarations extends HighLevelModelObject {
-    private final StringProperty declarationsText;
+    private final StringProperty declarationsText = new SimpleStringProperty("");
 
     /**
      * Constructor with a name.
@@ -21,14 +21,12 @@ public class Declarations extends HighLevelModelObject {
     public Declarations(final String name) {
         setName(name);
         setColor(Color.AMBER);
-        declarationsText = new SimpleStringProperty("");
     }
 
 
     public Declarations(final JsonObject json) {
         deserialize(json);
         setColor(Color.AMBER);
-        declarationsText = new SimpleStringProperty("");
     }
 
     public String getDeclarationsText() {
