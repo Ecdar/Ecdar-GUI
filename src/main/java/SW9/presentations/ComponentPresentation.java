@@ -1,6 +1,9 @@
 package SW9.presentations;
 
 import SW9.abstractions.Component;
+import SW9.abstractions.Edge;
+import SW9.abstractions.Location;
+import SW9.abstractions.Nail;
 import SW9.controllers.CanvasController;
 import SW9.controllers.ComponentController;
 import SW9.controllers.ModelController;
@@ -60,27 +63,20 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
             controller = fxmlLoader.getController();
             controller.setComponent(component);
 
-            super.initialize();
+            super.initialize(component.getBox());
 
-            initializeDimensions(component.getBox());
-
-            // Initializer methods that is sensitive to width and height
+            // Initialize methods that is sensitive to width and height
             final Runnable onUpdateSize = () -> {
                 initializeToolbar();
                 initializeFrame();
                 initializeBackground();
             };
 
-            initializeDragAnchors();
             onUpdateSize.run();
 
             // Re run initialisation on update of width and height property
-            component.getBox().widthProperty().addListener(observable -> {
-                onUpdateSize.run();
-            });
-            component.getBox().heightProperty().addListener(observable -> {
-                onUpdateSize.run();
-            });
+            component.getBox().widthProperty().addListener(observable -> onUpdateSize.run());
+            component.getBox().heightProperty().addListener(observable -> onUpdateSize.run());
 
             controller.declarationTextArea.textProperty().addListener((obs, oldText, newText) ->
                     controller.declarationTextArea.setStyleSpans(0, computeHighlighting(newText)));
@@ -383,5 +379,46 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
     @Override
     ModelController getModelController() {
         return getController();
+    }
+
+    @Override
+    double getDragAnchorMinWidth() {
+        final Component component = controller.getComponent();
+        double minWidth = 10 * GRID_SIZE;
+
+        for (final Location location : component.getLocations()) {
+            minWidth = Math.max(minWidth, location.getX() + GRID_SIZE * 2);
+        }
+
+        for (final Edge edge : component.getEdges()) {
+            for (final Nail nail : edge.getNails()) {
+                minWidth = Math.max(minWidth, nail.getX() + GRID_SIZE);
+            }
+        }
+
+        return minWidth;
+    }
+
+    /**
+     * Gets the minimum possible height when dragging the anchor.
+     * The height is based on the y coordinate of locations and nails.
+     * @return the minimum possible height.
+     */
+    @Override
+    double getDragAnchorMinHeight() {
+        final Component component = controller.getComponent();
+        double minHeight = 10 * GRID_SIZE;
+
+        for (final Location location : component.getLocations()) {
+            minHeight = Math.max(minHeight, location.getY() + GRID_SIZE * 2);
+        }
+
+        for (final Edge edge : component.getEdges()) {
+            for (final Nail nail : edge.getNails()) {
+                minHeight = Math.max(minHeight, nail.getY() + GRID_SIZE);
+            }
+        }
+
+        return minHeight;
     }
 }

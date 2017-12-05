@@ -663,8 +663,10 @@ public class ComponentController extends ModelController implements Initializabl
                 if (!unfinishedEdge.hasSyncNail()) unfinishedEdge.makeSyncNailBetweenLocations();
             }
 
+            getComponent().addLocation(location);
+
             // Add the new location
-            UndoRedoStack.pushAndPerform(() -> { // Perform
+            UndoRedoStack.push(() -> { // Perform
                 getComponent().addLocation(location);
                 if (unfinishedEdge != null) {
                     getComponent().addEdge(unfinishedEdge);
