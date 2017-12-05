@@ -86,9 +86,9 @@ public class EcdarPresentation extends StackPane {
     }
 
     private void initializeSnackbar() {
-        controller.snackbar.registerSnackbarContainer(controller.root);
+        //controller.snackbar.registerSnackbarContainer(controller.root);
         controller.snackbar.setPrefWidth(568);
-        controller.snackbar.autosize();
+        //controller.snackbar.autosize();
 
         final StackPane parentFix = (StackPane) controller.root.lookup(".jfx-snackbar-toast").getParent();
         parentFix.setPadding(new Insets(14, 24, 14, 24));
@@ -289,7 +289,7 @@ public class EcdarPresentation extends StackPane {
                     });
                 }, String.format("Changed the color of %d elements to %s", previousColor.size(), color.color.name()), "color-lens");
 
-                popup.close();
+                popup.hide();
                 SelectHelper.clearSelectedElements();
             });
 
@@ -299,9 +299,9 @@ public class EcdarPresentation extends StackPane {
         list.setMaxWidth(listWidth);
         list.setStyle("-fx-background-color: white; -fx-padding: 8;");
 
-        popup.setContent(list);
-        popup.setPopupContainer(controller.root);
-        popup.setSource(controller.toolbar);
+        popup.setPopupContent(list);
+        //popup.setPopupContainer(controller.root);
+        //popup.set(controller.toolbar);
 
         controller.colorSelected.setOnMouseClicked((e) -> {
             if (SelectHelper.getSelectedElements().size() == 0) return;
@@ -318,7 +318,7 @@ public class EcdarPresentation extends StackPane {
                 System.out.println(controller.filePane.getWidth());
             }
 
-            popup.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, fromLeft, boundsInScreenButton.getMinY() - boundsInScreenRoot.getMinY());
+            popup.show(controller.toolbar, JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, fromLeft, boundsInScreenButton.getMinY() - boundsInScreenRoot.getMinY());
         });
     }
 
@@ -588,9 +588,7 @@ public class EcdarPresentation extends StackPane {
     }
 
     public void showSnackbarMessage(final String message) {
-        controller.snackbar.enqueue(new JFXSnackbar.SnackbarEvent(message, "", 3000, event -> {
-
-        }));
+        controller.snackbar.enqueue(new JFXSnackbar.SnackbarEvent(message));
     }
 
     public void showHelp() {

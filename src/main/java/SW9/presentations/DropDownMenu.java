@@ -32,6 +32,7 @@ public class DropDownMenu {
 
     public static double x = 0;
     public static double y = 0;
+    private final Node source;
     private final int width;
     private final StackPane content;
     private final VBox list;
@@ -40,7 +41,7 @@ public class DropDownMenu {
     private final SimpleBooleanProperty isHoveringMenu = new SimpleBooleanProperty(false);
     private final SimpleBooleanProperty canIShowSubMenu = new SimpleBooleanProperty(false);
 
-    public DropDownMenu(final Pane container, final Node source, final int width, final boolean closeOnMouseExit) {
+    public DropDownMenu(final Pane container, final Node src, final int width, final boolean closeOnMouseExit) {
         this.width = width;
 
         popup = new JFXPopup();
@@ -74,17 +75,17 @@ public class DropDownMenu {
         list.setOnMouseExited(event -> isHoveringMenu.set(false));
         list.setOnMouseEntered(event -> isHoveringMenu.set(true));
 
-        popup.setContent(content);
-        popup.setPopupContainer(container);
-        popup.setSource(source);
+        popup.setPopupContent(content);
+        //popup.setPopupContainer(container);
+        source = src;
     }
 
     public void close() {
-        popup.close();
+        popup.hide();
     }
 
     public void show(final JFXPopup.PopupVPosition vAlign, final JFXPopup.PopupHPosition hAlign, final double initOffsetX, final double initOffsetY) {
-        popup.show(vAlign, hAlign, initOffsetX, initOffsetY);
+        popup.show(source, vAlign, hAlign, initOffsetX, initOffsetY);
     }
 
     public void addListElement(final String s) {
