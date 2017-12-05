@@ -15,6 +15,8 @@ import javafx.scene.Cursor;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
 
+import static SW9.presentations.Grid.GRID_SIZE;
+
 /**
  *
  */
@@ -89,6 +91,18 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
      * @param box The dimensions to set
      */
     void initializeDimensions(final Box box) {
+        // Ensure that the component snaps to the grid
+        if (box.getX() == 0 && box.getY() == 0) {
+            box.setX(GRID_SIZE * 0.5);
+            box.setY(GRID_SIZE * 0.5);
+        }
+
+        // Bind the position of the abstraction to the values in the view
+        layoutXProperty().set(box.getX());
+        layoutYProperty().set(box.getY());
+        box.xProperty().bindBidirectional(layoutXProperty());
+        box.yProperty().bindBidirectional(layoutYProperty());
+
         setMinWidth(box.getWidth());
         setMaxWidth(box.getWidth());
         setMinHeight(box.getHeight());

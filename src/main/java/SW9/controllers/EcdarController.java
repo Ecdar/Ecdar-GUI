@@ -603,7 +603,7 @@ public class EcdarController implements Initializable {
 
             presentation.getController().hideBorderAndBackground();
             final WritableImage image = takeSnapshot();
-            presentation.getController().showBorderAndBorder();
+            presentation.getController().showBorderAndBackground();
 
             CropAndExportImage(image);
         });

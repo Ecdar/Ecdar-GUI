@@ -15,6 +15,8 @@ import javafx.scene.shape.Line;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import static SW9.presentations.Grid.GRID_SIZE;
+
 /**
  * Controller for a system.
  */
@@ -32,6 +34,7 @@ public class SystemController extends ModelController implements Initializable {
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
         system.addListener((observable, oldValue, newValue) -> {
+            super.initialize(newValue.getBox());
             initializeSystemContextMenu();
         });
     }
@@ -74,5 +77,23 @@ public class SystemController extends ModelController implements Initializable {
         contextMenu = new DropDownMenu(root, dropDownMenuHelperCircle, 230, true);
 
         contextMenu.addColorPicker(system.get(), system.get()::dye);
+    }
+
+    /**
+     * Hides the border and background.
+     */
+    @Override
+    void hideBorderAndBackground() {
+        super.hideBorderAndBackground();
+        topRightLine.setVisible(false);
+    }
+
+    /**
+     * Shows the border and background.
+     */
+    @Override
+    void showBorderAndBackground() {
+        super.showBorderAndBackground();
+        topRightLine.setVisible(true);
     }
 }
