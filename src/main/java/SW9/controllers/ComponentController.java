@@ -76,8 +76,6 @@ public class ComponentController extends ModelController implements Initializabl
         declarationTextArea.setParagraphGraphicFactory(LineNumberFactory.get(declarationTextArea));
 
         component.addListener((obs, oldComponent, newComponent) -> {
-            super.initialize(newComponent.getBox());
-
             inputSignatureContainer.heightProperty().addListener((change) -> updateMaxHeight() );
             outputSignatureContainer.heightProperty().addListener((change) -> updateMaxHeight() );
 

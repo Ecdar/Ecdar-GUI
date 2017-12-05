@@ -15,8 +15,6 @@ import javafx.scene.shape.Line;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import static SW9.presentations.Grid.GRID_SIZE;
-
 /**
  * Controller for a system.
  */
@@ -33,10 +31,7 @@ public class SystemController extends ModelController implements Initializable {
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
-        system.addListener((observable, oldValue, newValue) -> {
-            super.initialize(newValue.getBox());
-            initializeSystemContextMenu();
-        });
+        system.addListener((observable, oldValue, newValue) -> initializeSystemContextMenu());
     }
 
     public SystemModel getSystem() {

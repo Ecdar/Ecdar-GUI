@@ -18,7 +18,7 @@ import javafx.scene.shape.Rectangle;
 import static SW9.presentations.Grid.GRID_SIZE;
 
 /**
- *
+ * Presentation for high level graphical models such as systems and components
  */
 public abstract class ModelPresentation extends HighLevelModelPresentation {
     static final double CORNER_SIZE = 4 * Grid.GRID_SIZE;
