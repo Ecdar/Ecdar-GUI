@@ -118,6 +118,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                             getComponent().removeEdge(newEdge);
                         }));
                         getComponent().addEdge(newEdge);
+                        dropDownMenu.hide();
                     }
                 );
 
@@ -127,6 +128,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                     nicknameTag.setOpacity(1);
                     nicknameTag.requestTextFieldFocus();
                     nicknameTag.requestTextFieldFocus(); // Requesting it twice is needed for some reason
+                    dropDownMenu.hide();
                 }
         );
 
@@ -136,6 +138,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                     invariantTag.setOpacity(1);
                     invariantTag.requestTextFieldFocus();
                     invariantTag.requestTextFieldFocus(); // Requesting it twice is needed for some reason
+                    dropDownMenu.hide();
                 }
         );
 
@@ -150,6 +153,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                     }, () -> { // Undo
                         getComponent().setInitialLocation(previousInitLoc);
                     }, String.format("Made %s initial", location), "initial");
+                    dropDownMenu.hide();
                 }
         );
         dropDownMenu.addSpacerElement();
@@ -161,11 +165,13 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
             } else {
                 getLocation().setUrgency(Location.Urgency.URGENT);
             }
+            dropDownMenu.hide();
         });
 
         dropDownMenu.addSpacerElement();
 
         dropDownMenu.addClickableListElement("Is " + getLocation().getId() + " reachable?", event -> {
+            dropDownMenu.hide();
             // Generate the query from the backend
             final String reachabilityQuery = UPPAALDriver.getLocationReachableQuery(getLocation(), getComponent());
 
@@ -176,6 +182,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
             final Query query = new Query(reachabilityQuery, reachabilityComment, QueryState.UNKNOWN);
             Ecdar.getProject().getQueries().add(query);
             query.run();
+            dropDownMenu.hide();
         });
 
         dropDownMenu.addSpacerElement();
@@ -189,6 +196,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
         dropDownMenu.addClickableListElement("Delete", event -> {
             tryDelete();
+            dropDownMenu.hide();
         });
     }
 

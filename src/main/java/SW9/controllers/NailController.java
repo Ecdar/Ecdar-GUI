@@ -121,6 +121,7 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
                         message,
                         "delete"
                 );
+                contextMenu.hide();
             }));
         }
 

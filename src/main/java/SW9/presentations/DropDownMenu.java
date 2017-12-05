@@ -191,6 +191,10 @@ public class DropDownMenu {
         addCustomChild(flowPane);
     }
 
+    public void hide(){
+        if (popup.isShowing()) popup.hide();
+    }
+
     public void addCustomChild(final Node child) {
         list.getChildren().add(child);
     }

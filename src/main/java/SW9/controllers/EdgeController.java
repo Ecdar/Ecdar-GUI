@@ -390,6 +390,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                                     "Nail added",
                                     "add-circle"
                             );
+                            dropDownMenu.hide();
                         });
                         dropDownMenu.addSpacerElement();
 
@@ -399,6 +400,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                             }, () -> { // Undo
                                 getComponent().addEdge(getEdge());
                             }, "Deleted edge " + getEdge(), "delete");
+                            dropDownMenu.hide();
                         });
 
                         DropDownMenu.x = CanvasPresentation.mouseTracker.getGridX();
@@ -439,6 +441,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                     "Switch edge status",
                     "switch"
             );
+            dropDownMenu.hide();
         }).setDisableable(getEdge().getIsLocked());
     }
 
@@ -504,6 +507,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                     "Nail property added (" + type + ")",
                     "add-circle"
             );
+            dropDownMenu.hide();
         });
     }
 

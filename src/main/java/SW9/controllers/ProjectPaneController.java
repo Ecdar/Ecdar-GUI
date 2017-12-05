@@ -178,6 +178,7 @@ public class ProjectPaneController implements Initializable {
                 }, () -> { // Undo
                     Ecdar.getProject().getComponents().add((Component) model);
                 }, "Deleted component " + model.getName(), "delete");
+                moreInformationDropDown.hide();
             });
         }
 
@@ -189,6 +190,7 @@ public class ProjectPaneController implements Initializable {
                 }, () -> { // Undo
                     Ecdar.getProject().getSystemsProperty().add((EcdarSystem) model);
                 }, "Deleted system " + model.getName(), "delete");
+                moreInformationDropDown.hide();
             });
         }
 
@@ -207,6 +209,7 @@ public class ProjectPaneController implements Initializable {
             }, () -> { // Undo
                 component.includeInPeriodicCheckProperty().set(didIncludeInPeriodicCheck);
             }, "Component " + component.getName() + " is included in periodic check: " + !didIncludeInPeriodicCheck, "search");
+            moreInformationDropDown.hide();
         });
     }
 

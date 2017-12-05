@@ -71,6 +71,7 @@ public class QueryPresentation extends AnchorPane {
         dropDownMenu.addTogglableListElement("Run periodically", query.isPeriodicProperty(), event -> {
             // Toggle the property
             query.setIsPeriodic(!query.isPeriodic());
+            dropDownMenu.hide();
         });
 
         dropDownMenu.addSpacerElement();
@@ -78,6 +79,7 @@ public class QueryPresentation extends AnchorPane {
         dropDownMenu.addClickableListElement("Clear Status", event -> {
             // Clear the state
             query.setQueryState(QueryState.UNKNOWN);
+            dropDownMenu.hide();
         });
 
         dropDownMenu.addSpacerElement();
@@ -85,6 +87,7 @@ public class QueryPresentation extends AnchorPane {
         dropDownMenu.addClickableListElement("Delete", event -> {
             // Remove the query
             Ecdar.getProject().getQueries().remove(query);
+            dropDownMenu.hide();
         });
 
         detailsButton.getChildren().get(0).setOnMousePressed(event -> {
