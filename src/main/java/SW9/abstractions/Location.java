@@ -1,5 +1,6 @@
 package SW9.abstractions;
 
+import SW9.Ecdar;
 import SW9.code_analysis.Nearable;
 import SW9.controllers.EcdarController;
 import SW9.presentations.DropDownMenu;
@@ -13,6 +14,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import javafx.beans.property.*;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Location implements Circular, Serializable, Nearable, DropDownMenu.HasColor {
@@ -56,7 +59,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     private final SimpleBooleanProperty isLocked = new SimpleBooleanProperty(false);
 
     public Location() {
-        resetId();
+        setId();
         bindReachabilityAnalysis();
     }
 
@@ -103,16 +106,59 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
         return nickname;
     }
 
+    /**
+     * gets the id of all locations in the project and inserts it into a set
+     * @return the set of all location ids
+     */
+    public Set<String> getLocationIds(){
+        Set<String> ids = new HashSet<>();
+
+        for(Component component : Ecdar.getProject().getComponents()){
+            getLocationIds(ids, component);
+        }
+
+        return ids;
+    }
+
+    /**
+     * gets the id of all locations in a specific component
+     * @param ids the set to insert location ids into
+     * @param component the component from which we check the locations
+     */
+    private void getLocationIds(Set<String> ids, Component component) {
+        for (Location location : component.getLocations()){
+            if(location.getType() != Type.UNIVERSAL || location.getType() != Type.INCONSISTENT){
+                ids.add(location.getId().substring(1));
+            }
+        }
+    }
+
     public String getId() {
         return id.get();
     }
 
-    public void setId(String id) {
-        this.id.set(id);
+    /**
+     * Generate and sets a unique id for this location
+     */
+    public void setId() {
+        for(int counter = 0; ; counter++) {
+            if(!getLocationIds().contains(String.valueOf(counter))){
+                id.set("L" + counter);
+                return;
+            }
+        }
+    }
+
+    /**
+     * Sets a specific id for this location
+     * @param string id to set
+     */
+    private void setId(String string){
+        id.set(string);
     }
 
     public void resetId() {
-        setId("L" + hiddenID.getAndIncrement());
+        setId();
     }
 
     public StringProperty idProperty() {

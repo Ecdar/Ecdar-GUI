@@ -491,7 +491,7 @@ public class EcdarController implements Initializable {
                     resetLocationsInComponent.accept(missingComponents.get(0));
                 }
             }, () -> { // Undo
-                previousIdentifiers.forEach(Location::setId);
+                //previousIdentifiers.forEach(Location::setId);
             }, "Balanced location identifiers", "shuffle");
         });
     }

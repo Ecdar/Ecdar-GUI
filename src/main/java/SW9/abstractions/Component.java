@@ -20,7 +20,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Component extends HighLevelModelObject {
     private static final AtomicInteger hiddenId = new AtomicInteger(0); // Used to generate unique IDs
-    private static final AtomicInteger atomicComponentId = new AtomicInteger(0);
 
     private static final String LOCATIONS = "locations";
     private static final String EDGES = "edges";
@@ -40,11 +39,8 @@ public class Component extends HighLevelModelObject {
     // Styling properties
     private final Box box = new Box();
     private final BooleanProperty declarationOpen = new SimpleBooleanProperty(false);
-
     private final BooleanProperty firsTimeShown = new SimpleBooleanProperty(false);
 
-    //Inconsistent and Universal integer
-    private int componentId;
 
     /**
      * Creates a component with a random generated name but no random colouring
@@ -69,7 +65,6 @@ public class Component extends HighLevelModelObject {
      */
     public Component(final String name, final boolean doRandomColor) {
         setName(name);
-        componentId = atomicComponentId.getAndIncrement();
         if(doRandomColor) {
             setRandomColor();
         }
@@ -95,7 +90,6 @@ public class Component extends HighLevelModelObject {
 
     public Component(final JsonObject json) {
         hiddenId.incrementAndGet();
-        componentId = atomicComponentId.getAndIncrement();
         setFirsTimeShown(true);
 
         declarationsText = new SimpleStringProperty("");
@@ -413,8 +407,53 @@ public class Component extends HighLevelModelObject {
         return outputStrings;
     }
 
-    public int getComponentId() {
-        return componentId;
+
+    /**
+     * gets the id used by universal and inconsistent locations located in this component
+     * @return universal id
+     */
+    public String getComponentId(){
+        Set<String> set = new HashSet<>();
+
+        if(getComponentId(set,this)){
+            return set.iterator().next();
+        }
+
+        for(int counter = 0; ;counter++){
+            if(!getComponentsId().contains(String.valueOf(counter))){
+                return String.valueOf(counter);
+            }
+        }
+    }
+
+    /**
+     * Gets ids from all components in the project
+     * @return a set of component ids
+     */
+    private Set<String> getComponentsId() {
+        Set<String> ids = new HashSet();
+
+        for (Component component : Ecdar.getProject().getComponents()){
+            getComponentId(ids, component);
+        }
+
+        return ids;
+    }
+
+    /**
+     * Gets the id of a specific component
+     * @param ids the set in which the id is inserted
+     * @param component the component we want to extract the id from
+     * @return true if an id was added to the set, false if not
+     */
+    private boolean getComponentId(Set<String> ids, Component component) {
+        for (Location location : component.getLocations()){
+            if(location.getType() == Location.Type.UNIVERSAL || location.getType() == Location.Type.INCONSISTENT){
+                ids.add(location.getId().substring(1));
+                return true;
+            }
+        }
+        return false;
     }
 
     public String getDeclarationsText() {
