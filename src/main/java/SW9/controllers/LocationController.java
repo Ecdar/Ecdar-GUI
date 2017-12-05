@@ -111,20 +111,15 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
         dropDownMenu = new DropDownMenu(((Pane) root.getParent().getParent().getParent()), root, 230, true);
 
-        dropDownMenu.addClickableListElement("Draw edge",
+        dropDownMenu.addClickableAndDisableableListElement("Draw edge", getLocation().getIsLocked(),
                 (event) -> {
                         final Edge newEdge = new Edge(getLocation(), EcdarController.getGlobalEdgeStatus());
 
                         KeyboardTracker.registerKeybind(KeyboardTracker.ABANDON_EDGE, new Keybind(new KeyCodeCombination(KeyCode.ESCAPE), () -> {
                             getComponent().removeEdge(newEdge);
-                            UndoRedoStack.forgetLast();
                         }));
 
-                        UndoRedoStack.pushAndPerform(() -> { // Perform
-                            getComponent().addEdge(newEdge);
-                        }, () -> { // Undo
-                            getComponent().removeEdge(newEdge);
-                        }, "Created edge starting from location " + getLocation().getNickname(), "add-circle");
+                        getComponent().addEdge(newEdge);
 
                         dropDownMenu.close();
                     }
@@ -141,7 +136,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
         );
 
         dropDownMenu.addClickableAndDisableableListElement("Add Invariant",
-                getLocation().invariantProperty().isNotEmpty().or(invariantTag.textFieldFocusProperty()),
+                getLocation().invariantProperty().isNotEmpty().or(invariantTag.textFieldFocusProperty()).or(getLocation().getIsLocked()),
                 event -> {
                     invariantTag.setOpacity(1);
                     invariantTag.requestTextFieldFocus();
@@ -165,14 +160,10 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                     dropDownMenu.close();
                 }
         );
-
         dropDownMenu.addSpacerElement();
-
-        dropDownMenu.addListElement("Set Urgency");
-
         final BooleanProperty isUrgent = new SimpleBooleanProperty(false);
         isUrgent.bind(getLocation().urgencyProperty().isEqualTo(Location.Urgency.URGENT));
-        dropDownMenu.addTogglableListElement("Urgent", isUrgent, event -> {
+        dropDownMenu.addTogglableAndDisableableListElement("Urgent", isUrgent, getLocation().getIsLocked(), event -> {
             if (isUrgent.get()) {
                 getLocation().setUrgency(Location.Urgency.NORMAL);
             } else {
@@ -373,28 +364,28 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                             final Nail nail = new Nail(getX() + 4 * GRID_SIZE, getY() - GRID_SIZE);
                             nail.setPropertyType(Edge.PropertyType.SYNCHRONIZATION);
                             unfinishedEdge.addNail(nail);
-
                             final Nail nail2 = new Nail(getX() + 4 * GRID_SIZE, getY() + GRID_SIZE);
                             unfinishedEdge.addNail(nail2);
                         } else {
                             unfinishedEdge.makeSyncNailBetweenLocations();
                         }
+                        UndoRedoStack.push(() -> { // Perform
+                            component.addEdge(unfinishedEdge);
+                        }, () -> { // Undo
+                            component.removeEdge(unfinishedEdge);
+                        }, "Created edge starting from location " + getLocation().getNickname(), "add-circle");
                     }
+
+
                 } else {
                     // If shift is being held down, start drawing a new edge
-                    if ((event.isShiftDown() && event.isPrimaryButtonDown()) || event.isMiddleButtonDown()) {
+                    if (canCreateEdgeShortcut(event)) {
                         final Edge newEdge = new Edge(getLocation(), EcdarController.getGlobalEdgeStatus());
-
                         KeyboardTracker.registerKeybind(KeyboardTracker.ABANDON_EDGE, new Keybind(new KeyCodeCombination(KeyCode.ESCAPE), () -> {
                             component.removeEdge(newEdge);
-                            UndoRedoStack.forgetLast();
                         }));
 
-                        UndoRedoStack.pushAndPerform(() -> { // Perform
-                            component.addEdge(newEdge);
-                        }, () -> { // Undo
-                            component.removeEdge(newEdge);
-                        }, "Created edge starting from location " + getLocation().getNickname(), "add-circle");
+                        component.addEdge(newEdge);
                     }
                     // Otherwise, select the location
                     else {
@@ -496,6 +487,17 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
         root.layoutYProperty().set(newY);
 
         return oldX != newX || oldY != newY;
+    }
+
+    /**'
+     * Method which has the logical expression for the shortcut of adding a new edge,
+     * checks whether the location is locked and the correct buttons are held down
+     * @param event the mouse event
+     * @return the result of the boolean expression, false if the location is locked or the incorrect buttons are held down,
+     * true if the correct buttons are down
+     */
+    private boolean canCreateEdgeShortcut(MouseEvent event){
+        return (!getLocation().getIsLocked().get() && ((event.isShiftDown() && event.isPrimaryButtonDown()) || event.isMiddleButtonDown()));
     }
 
     @Override

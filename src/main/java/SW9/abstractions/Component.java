@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Component extends HighLevelModelObject {
     private static final AtomicInteger hiddenId = new AtomicInteger(0); // Used to generate unique IDs
+    private static final AtomicInteger atomicComponentId = new AtomicInteger(0);
 
     private static final String LOCATIONS = "locations";
     private static final String EDGES = "edges";
@@ -44,6 +45,9 @@ public class Component extends HighLevelModelObject {
 
     private final BooleanProperty firsTimeShown = new SimpleBooleanProperty(false);
 
+    //Inconsistent and Universal integer
+    private int componentId;
+
     /**
      * Creates a component with a random generated name but no random colouring
      */
@@ -67,7 +71,7 @@ public class Component extends HighLevelModelObject {
      */
     public Component(final String name, final boolean doRandomColor) {
         setName(name);
-
+        componentId = atomicComponentId.getAndIncrement();
         if(doRandomColor) {
             setRandomColor();
         }
@@ -93,6 +97,7 @@ public class Component extends HighLevelModelObject {
 
     public Component(final JsonObject json) {
         hiddenId.incrementAndGet();
+        componentId = atomicComponentId.getAndIncrement();
         setFirsTimeShown(true);
 
         declarationsText = new SimpleStringProperty("");
@@ -153,11 +158,11 @@ public class Component extends HighLevelModelObject {
             final String channel = edge.getSync().replaceAll("^([a-zA-Z_][a-zA-Z0-9_]*).*$", "$1");
 
             if(edge.getStatus() == EdgeStatus.INPUT){
-                if(!localInputStrings.contains(channel)){
+                if(!edge.getSync().equals("*") && !localInputStrings.contains(channel)){
                     localInputStrings.add(channel);
                 }
             } else if (edge.getStatus() == EdgeStatus.OUTPUT) {
-                if(!localOutputStrings.contains(channel)){
+                if(!edge.getSync().equals("*") && !localOutputStrings.contains(channel)){
                     localOutputStrings.add(channel);
                 }
             }
@@ -411,6 +416,10 @@ public class Component extends HighLevelModelObject {
 
     public ObservableList<String> getOutputStrings() {
         return outputStrings;
+    }
+
+    public int getComponentId() {
+        return componentId;
     }
 
     public String getDeclarationsText() {
