@@ -1,7 +1,6 @@
 package SW9.presentations;
 
 import SW9.abstractions.Box;
-import SW9.abstractions.Component;
 import SW9.abstractions.HighLevelModelObject;
 import SW9.controllers.CanvasController;
 import SW9.controllers.ModelController;
@@ -16,15 +15,11 @@ import javafx.scene.Cursor;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
 
-import java.util.function.Supplier;
-
-import static SW9.presentations.Grid.GRID_SIZE;
-
 /**
  *
  */
 public abstract class ModelPresentation extends HighLevelModelPresentation {
-    static final double CORNER_SIZE = 4 * GRID_SIZE;
+    static final double CORNER_SIZE = 4 * Grid.GRID_SIZE;
     public static final double TOOL_BAR_HEIGHT = CORNER_SIZE / 2;
 
     static final Polygon TOP_LEFT_CORNER = new Polygon(
@@ -34,12 +29,18 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
     );
 
     abstract ModelController getModelController();
+    abstract double getDragAnchorMinWidth();
+    abstract double getDragAnchorMinHeight();
 
     /**
      * Initializes this.
+     * @param box the box of the model
      */
-    void initialize() {
+    void initialize(final Box box) {
         initializeName();
+        initializeDimensions(box);
+        initializesBottomDragAnchor(box);
+        initializesRightDragAnchor(box);
     }
 
     /**
@@ -98,16 +99,74 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
         maxWidthProperty().bindBidirectional(box.widthProperty());
     }
 
-    private void initializeDragAnchors(final Box box, final Supplier<Double> minHeightSupplier, final Supplier<Double> minWidthSupplier) {
+    /**
+     * Initializes the right drag anchor.
+     * @param box the box of the model
+     */
+    private void initializesRightDragAnchor(final Box box) {
         final BooleanProperty wasResized = new SimpleBooleanProperty(false);
 
+        // Right anchor
+        final Rectangle rightAnchor = getModelController().rightAnchor;
+
+        rightAnchor.setCursor(Cursor.E_RESIZE);
+
+        // Bind the place and size of bottom anchor
+        rightAnchor.setWidth(5);
+        rightAnchor.heightProperty().bind(box.heightProperty());
+
+        final DoubleProperty prevX = new SimpleDoubleProperty();
+        final DoubleProperty prevWidth = new SimpleDoubleProperty();
+
+        rightAnchor.setOnMousePressed(event -> {
+            prevX.set(event.getScreenX());
+            prevWidth.set(box.getWidth());
+        });
+
+        rightAnchor.setOnMouseDragged(event -> {
+            double diff = event.getScreenX() - prevX.get();
+            diff -= diff % Grid.GRID_SIZE;
+
+            final double newWidth = prevWidth.get() + diff;
+            final double minWidth = getDragAnchorMinWidth();
+            box.setWidth(Math.max(newWidth, minWidth));
+            wasResized.set(true);
+        });
+
+        rightAnchor.setOnMouseReleased(event -> {
+            if (!wasResized.get()) return;
+            final double previousWidth = prevWidth.doubleValue();
+            final double currentWidth = box.getWidth();
+
+            // If no difference do not save change
+            if (previousWidth == currentWidth) return;
+
+            UndoRedoStack.pushAndPerform(() -> { // Perform
+                        box.setWidth(currentWidth);
+                    }, () -> { // Undo
+                        box.setWidth(previousWidth);
+                    },
+                    "Component width resized",
+                    "settings-overscan"
+            );
+
+            wasResized.set(false);
+        });
+    }
+
+    /**
+     * Initializes the bottom drag anchor.
+     * @param box the box of the model
+     */
+    private void initializesBottomDragAnchor(final Box box) {
+        final BooleanProperty wasResized = new SimpleBooleanProperty(false);
         // Bottom anchor
         final Rectangle bottomAnchor = getModelController().bottomAnchor;
 
         bottomAnchor.setCursor(Cursor.S_RESIZE);
 
         // Bind the place and size of bottom anchor
-        bottomAnchor.widthProperty().bind(box.widthProperty().subtract(CORNER_SIZE));
+        bottomAnchor.widthProperty().bind(box.widthProperty());
         bottomAnchor.setHeight(5);
 
         final DoubleProperty prevY = new SimpleDoubleProperty();
@@ -120,10 +179,10 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
 
         bottomAnchor.setOnMouseDragged(event -> {
             double diff = event.getScreenY() - prevY.get();
-            diff -= diff % GRID_SIZE;
+            diff -= diff % Grid.GRID_SIZE;
 
             final double newHeight = prevHeight.get() + diff;
-            final double minHeight = minHeightSupplier.get();
+            final double minHeight = getDragAnchorMinHeight();
 
             box.setHeight(Math.max(newHeight, minHeight));
             wasResized.set(true);
@@ -148,54 +207,5 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
 
             wasResized.set(false);
         });
-
-        // Right anchor
-        final Rectangle rightAnchor = getModelController().rightAnchor;
-
-        rightAnchor.setCursor(Cursor.E_RESIZE);
-
-        // Bind the place and size of bottom anchor
-        rightAnchor.setWidth(5);
-        rightAnchor.heightProperty().bind(box.heightProperty().subtract(CORNER_SIZE));
-
-        final DoubleProperty prevX = new SimpleDoubleProperty();
-        final DoubleProperty prevWidth = new SimpleDoubleProperty();
-
-        rightAnchor.setOnMousePressed(event -> {
-            prevX.set(event.getScreenX());
-            prevWidth.set(box.getWidth());
-        });
-
-        rightAnchor.setOnMouseDragged(event -> {
-            double diff = event.getScreenX() - prevX.get();
-            diff -= diff % GRID_SIZE;
-
-            final double newWidth = prevWidth.get() + diff;
-            final double minWidth = minWidthSupplier.get();
-            box.setWidth(Math.max(newWidth, minWidth));
-            wasResized.set(true);
-        });
-
-        rightAnchor.setOnMouseReleased(event -> {
-            if (!wasResized.get()) return;
-            final double previousWidth = prevWidth.doubleValue();
-            final double currentWidth = box.getWidth();
-
-            // If no difference do not save change
-            if (previousWidth == currentWidth) return;
-
-            UndoRedoStack.pushAndPerform(() -> { // Perform
-                        box.setWidth(currentWidth);
-                    }, () -> { // Undo
-                        box.setWidth(previousWidth);
-                    },
-                    "Component width resized",
-                    "settings-overscan"
-            );
-
-            wasResized.set(false);
-        });
-
-
     }
 }

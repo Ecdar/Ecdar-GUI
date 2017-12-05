@@ -1,6 +1,9 @@
 package SW9.presentations;
 
 import SW9.abstractions.Component;
+import SW9.abstractions.Edge;
+import SW9.abstractions.Location;
+import SW9.abstractions.Nail;
 import SW9.controllers.CanvasController;
 import SW9.controllers.ComponentController;
 import SW9.controllers.ModelController;
@@ -60,27 +63,20 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
             controller = fxmlLoader.getController();
             controller.setComponent(component);
 
-            super.initialize();
+            super.initialize(component.getBox());
 
-            initializeDimensions(component.getBox());
-
-            // Initializer methods that is sensitive to width and height
+            // Initialize methods that is sensitive to width and height
             final Runnable onUpdateSize = () -> {
                 initializeToolbar();
                 initializeFrame();
                 initializeBackground();
             };
 
-            initializeDragAnchors();
             onUpdateSize.run();
 
             // Re run initialisation on update of width and height property
-            component.getBox().widthProperty().addListener(observable -> {
-                onUpdateSize.run();
-            });
-            component.getBox().heightProperty().addListener(observable -> {
-                onUpdateSize.run();
-            });
+            component.getBox().widthProperty().addListener(observable -> onUpdateSize.run());
+            component.getBox().heightProperty().addListener(observable -> onUpdateSize.run());
 
             controller.declarationTextArea.textProperty().addListener((obs, oldText, newText) ->
                     controller.declarationTextArea.setStyleSpans(0, computeHighlighting(newText)));
@@ -111,137 +107,6 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
 
         spansBuilder.add(Collections.emptyList(), text.length() - lastKwEnd);
         return spansBuilder.create();
-    }
-
-    private void initializeDragAnchors() {
-        final Component component = controller.getComponent();
-        final BooleanProperty wasResized = new SimpleBooleanProperty(false);
-
-        // Bottom anchor
-        final Rectangle bottomAnchor = controller.bottomAnchor;
-
-        bottomAnchor.setCursor(Cursor.S_RESIZE);
-
-        // Bind the place and size of bottom anchor
-        bottomAnchor.widthProperty().bind(component.getBox().widthProperty().subtract(CORNER_SIZE));
-        bottomAnchor.setHeight(5);
-
-        final DoubleProperty prevY = new SimpleDoubleProperty();
-        final DoubleProperty prevHeight = new SimpleDoubleProperty();
-
-        final Supplier<Double> componentMinHeight = () -> {
-
-            final DoubleProperty minHeight = new SimpleDoubleProperty(10 * GRID_SIZE);
-
-            component.getLocations().forEach(location -> {
-                minHeight.set(Math.max(minHeight.doubleValue(), location.getY() + GRID_SIZE * 2));
-            });
-
-            component.getEdges().forEach(edge -> {
-                edge.getNails().forEach(nail -> {
-                    minHeight.set(Math.max(minHeight.doubleValue(), nail.getY() + GRID_SIZE));
-                });
-            });
-
-            return minHeight.get();
-        };
-
-        bottomAnchor.setOnMousePressed(event -> {
-            prevY.set(event.getScreenY());
-            prevHeight.set(component.getBox().getHeight());
-        });
-
-        bottomAnchor.setOnMouseDragged(event -> {
-            double diff = event.getScreenY() - prevY.get();
-            diff -= diff % GRID_SIZE;
-
-            final double newHeight = prevHeight.get() + diff;
-            final double minHeight = componentMinHeight.get();
-
-            component.getBox().setHeight(Math.max(newHeight, minHeight));
-            wasResized.set(true);
-        });
-
-        bottomAnchor.setOnMouseReleased(event -> {
-            if (!wasResized.get()) return;
-            final double previousHeight = prevHeight.doubleValue();
-            final double currentHeight = component.getBox().getHeight();
-
-            // If no difference do not save change
-            if (previousHeight == currentHeight) return;
-
-            UndoRedoStack.pushAndPerform(() -> { // Perform
-                        component.getBox().setHeight(currentHeight);
-                    }, () -> { // Undo
-                        component.getBox().setHeight(previousHeight);
-                    },
-                    "Component height resized", "settings-overscan");
-
-            wasResized.set(false);
-        });
-
-        // Right anchor
-        final Rectangle rightAnchor = controller.rightAnchor;
-
-        rightAnchor.setCursor(Cursor.E_RESIZE);
-
-        // Bind the place and size of bottom anchor
-        rightAnchor.setWidth(5);
-        rightAnchor.heightProperty().bind(component.getBox().heightProperty().subtract(CORNER_SIZE));
-
-        final DoubleProperty prevX = new SimpleDoubleProperty();
-        final DoubleProperty prevWidth = new SimpleDoubleProperty();
-
-        final Supplier<Double> componentMinWidth = () -> {
-            final DoubleProperty minWidth = new SimpleDoubleProperty(10 * GRID_SIZE);
-
-            component.getLocations().forEach(location -> {
-                minWidth.set(Math.max(minWidth.doubleValue(), location.getX() + GRID_SIZE * 2));
-            });
-
-            component.getEdges().forEach(edge -> {
-                edge.getNails().forEach(nail -> {
-                    minWidth.set(Math.max(minWidth.doubleValue(), nail.getX() + GRID_SIZE));
-                });
-            });
-
-            return minWidth.get();
-        };
-
-        rightAnchor.setOnMousePressed(event -> {
-            prevX.set(event.getScreenX());
-            prevWidth.set(component.getBox().getWidth());
-        });
-
-        rightAnchor.setOnMouseDragged(event -> {
-            double diff = event.getScreenX() - prevX.get();
-            diff -= diff % GRID_SIZE;
-
-            final double newWidth = prevWidth.get() + diff;
-            final double minWidth = componentMinWidth.get();
-            component.getBox().setWidth(Math.max(newWidth, minWidth));
-            wasResized.set(true);
-        });
-
-        rightAnchor.setOnMouseReleased(event -> {
-            if (!wasResized.get()) return;
-            final double previousWidth = prevWidth.doubleValue();
-            final double currentWidth = component.getBox().getWidth();
-
-            // If no difference do not save change
-            if (previousWidth == currentWidth) return;
-
-            UndoRedoStack.pushAndPerform(() -> { // Perform
-                        component.getBox().setWidth(currentWidth);
-                    }, () -> { // Undo
-                        component.getBox().setWidth(previousWidth);
-                    },
-                    "Component width resized", "settings-overscan");
-
-            wasResized.set(false);
-        });
-
-
     }
 
     private void initializeToolbar() {
@@ -382,5 +247,46 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
     @Override
     ModelController getModelController() {
         return getController();
+    }
+
+    @Override
+    double getDragAnchorMinWidth() {
+        final Component component = controller.getComponent();
+        double minWidth = 10 * GRID_SIZE;
+
+        for (final Location location : component.getLocations()) {
+            minWidth = Math.max(minWidth, location.getX() + GRID_SIZE * 2);
+        }
+
+        for (final Edge edge : component.getEdges()) {
+            for (final Nail nail : edge.getNails()) {
+                minWidth = Math.max(minWidth, nail.getX() + GRID_SIZE);
+            }
+        }
+
+        return minWidth;
+    }
+
+    /**
+     * Gets the minimum possible height when dragging the anchor.
+     * The height is based on the y coordinate of locations and nails.
+     * @return the minimum possible height.
+     */
+    @Override
+    double getDragAnchorMinHeight() {
+        final Component component = controller.getComponent();
+        double minHeight = 10 * GRID_SIZE;
+
+        for (final Location location : component.getLocations()) {
+            minHeight = Math.max(minHeight, location.getY() + GRID_SIZE * 2);
+        }
+
+        for (final Edge edge : component.getEdges()) {
+            for (final Nail nail : edge.getNails()) {
+                minHeight = Math.max(minHeight, nail.getY() + GRID_SIZE);
+            }
+        }
+
+        return minHeight;
     }
 }
