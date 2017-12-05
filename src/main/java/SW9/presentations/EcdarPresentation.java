@@ -69,9 +69,7 @@ public class EcdarPresentation extends StackPane {
         initializeToolbarButton(controller.undo);
         initializeToolbarButton(controller.redo);
         initializeUndoRedoButtons();
-
         initializeMessageContainer();
-
         initializeSnackbar();
 
         // Open the file and query panel initially
@@ -81,14 +79,12 @@ public class EcdarPresentation extends StackPane {
             toggleFilePane();
             ranInitialToggle.set(true);
         });
-
         initializeHelpImages();
     }
 
     private void initializeSnackbar() {
-        //controller.snackbar.registerSnackbarContainer(controller.root);
+        controller.snackbar = new JFXSnackbar(this);
         controller.snackbar.setPrefWidth(568);
-        //controller.snackbar.autosize();
 
         final StackPane parentFix = (StackPane) controller.root.lookup(".jfx-snackbar-toast").getParent();
         parentFix.setPadding(new Insets(14, 24, 14, 24));

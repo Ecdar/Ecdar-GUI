@@ -262,7 +262,6 @@ public class EcdarController implements Initializable {
         initializeMessages();
         initializeMenuBar();
         initializeReachabilityAnalysisThread();
-        snackbar = new JFXSnackbar(root);
     }
 
     /**
