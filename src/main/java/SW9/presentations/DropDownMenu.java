@@ -43,6 +43,9 @@ public class DropDownMenu extends JFXPopup{
     private final SimpleBooleanProperty canIShowSubMenu = new SimpleBooleanProperty(false);
 
     public DropDownMenu(final Node src) {
+        popup = new JFXPopup();
+
+    public DropDownMenu(final Node src) {
         list = new VBox();
         list.setStyle("-fx-background-color: white; -fx-padding: 8 0 8 0;");
         list.setMaxHeight(1);
