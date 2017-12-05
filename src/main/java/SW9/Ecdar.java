@@ -155,7 +155,7 @@ public class Ecdar extends Application {
         stage.show();
 
         project.reset();
-        CanvasController.setActiveVerificationObject(Ecdar.getProject().getComponents().get(0));
+        CanvasController.setActiveModel(Ecdar.getProject().getComponents().get(0));
 
         EcdarController.reachabilityServiceEnabled = true;
 
@@ -231,12 +231,12 @@ public class Ecdar extends Application {
             if (initialShownComponent == null) {
                 initialShownComponent = component;
             }
-            CanvasController.setActiveVerificationObject(component);
+            CanvasController.setActiveModel(component);
         }
 
         // If we found a component set that as active
         if (initialShownComponent != null) {
-            CanvasController.setActiveVerificationObject(initialShownComponent);
+            CanvasController.setActiveModel(initialShownComponent);
         }
         serializationDone = true;
     }

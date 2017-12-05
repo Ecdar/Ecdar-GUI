@@ -2,7 +2,6 @@ package SW9.abstractions;
 
 import SW9.Ecdar;
 import SW9.controllers.EcdarController;
-import SW9.presentations.DropDownMenu;
 import SW9.presentations.Grid;
 import SW9.utility.UndoRedoStack;
 import SW9.utility.colors.Color;
@@ -19,17 +18,13 @@ import javafx.util.Pair;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class Component extends VerificationObject implements DropDownMenu.HasColor {
-    private static final AtomicInteger hiddenID = new AtomicInteger(0); // Used to generate unique IDs
+public class Component extends HighLevelModelObject {
+    private static final AtomicInteger hiddenId = new AtomicInteger(0); // Used to generate unique IDs
     private static final AtomicInteger atomicComponentId = new AtomicInteger(0);
 
     private static final String LOCATIONS = "locations";
     private static final String EDGES = "edges";
     private static final String DESCRIPTION = "description";
-    private static final String X = "x";
-    private static final String Y = "y";
-    private static final String WIDTH = "width";
-    private static final String HEIGHT = "height";
     private static final String INCLUDE_IN_PERIODIC_CHECK = "include_in_periodic_check";
     private static final String COLOR = "color";
 
@@ -39,15 +34,13 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
     private final ObservableList<String> inputStrings = FXCollections.observableArrayList();
     private final ObservableList<String> outputStrings = FXCollections.observableArrayList();
     private final StringProperty description = new SimpleStringProperty("");
+    private final StringProperty declarationsText;
 
     // Background check
     private final BooleanProperty includeInPeriodicCheck = new SimpleBooleanProperty(true);
 
     // Styling properties
-    private final DoubleProperty x = new SimpleDoubleProperty(0d);
-    private final DoubleProperty y = new SimpleDoubleProperty(0d);
-    private final DoubleProperty width = new SimpleDoubleProperty(450d);
-    private final DoubleProperty height = new SimpleDoubleProperty(600d);
+    private final Box box = new Box();
     private final BooleanProperty declarationOpen = new SimpleBooleanProperty(false);
 
     private final BooleanProperty firsTimeShown = new SimpleBooleanProperty(false);
@@ -68,7 +61,7 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
      * @param doRandomColor boolean that is true if the component should choose a colour at random and false if not
      */
     public Component(final boolean doRandomColor) {
-        this("Component" + hiddenID.getAndIncrement(), doRandomColor);
+        this("Component" + hiddenId.getAndIncrement(), doRandomColor);
     }
 
     /**
@@ -80,20 +73,10 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         setName(name);
         componentId = atomicComponentId.getAndIncrement();
         if(doRandomColor) {
-            // Color the new component in such a way that we avoid clashing with other components if possible
-            final List<EnabledColor> availableColors = new ArrayList<>();
-            EnabledColor.enabledColors.forEach(availableColors::add);
-            Ecdar.getProject().getComponents().forEach(component -> {
-                availableColors.removeIf(enabledColor -> enabledColor.color.equals(component.getColor()));
-            });
-            if (availableColors.size() == 0) {
-                EnabledColor.enabledColors.forEach(availableColors::add);
-            }
-            final int randomIndex = (new Random()).nextInt(availableColors.size());
-            final EnabledColor selectedColor = availableColors.get(randomIndex);
-            setColorIntensity(selectedColor.intensity);
-            setColor(selectedColor.color);
+            setRandomColor();
         }
+
+        declarationsText = new SimpleStringProperty("");
 
         // Make initial location
         final Location initialLocation = new Location();
@@ -102,8 +85,8 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         initialLocation.setColor(getColor());
 
         // Place in center
-        initialLocation.setX(Grid.snap(getX() + getWidth() / 2));
-        initialLocation.setY(Grid.snap(getY() + getHeight() / 2));
+        initialLocation.setX(Grid.snap(box.getX() + box.getWidth() / 2));
+        initialLocation.setY(Grid.snap(box.getY() + box.getHeight() / 2));
 
         locations.add(initialLocation);
 
@@ -112,11 +95,14 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         bindReachabilityAnalysis();
     }
 
-    public Component(final JsonObject object) {
-        hiddenID.incrementAndGet();
+    public Component(final JsonObject json) {
+        hiddenId.incrementAndGet();
         componentId = atomicComponentId.getAndIncrement();
         setFirsTimeShown(true);
-        deserialize(object);
+
+        declarationsText = new SimpleStringProperty("");
+
+        deserialize(json);
 
         initializeIOListeners();
 
@@ -237,54 +223,6 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
         return relatedEdges;
     }
 
-    public double getX() {
-        return x.get();
-    }
-
-    public void setX(final double x) {
-        this.x.set(x);
-    }
-
-    public DoubleProperty xProperty() {
-        return x;
-    }
-
-    public double getY() {
-        return y.get();
-    }
-
-    public void setY(final double y) {
-        this.y.set(y);
-    }
-
-    public DoubleProperty yProperty() {
-        return y;
-    }
-
-    public double getWidth() {
-        return width.get();
-    }
-
-    public void setWidth(final double width) {
-        this.width.set(width);
-    }
-
-    public DoubleProperty widthProperty() {
-        return width;
-    }
-
-    public double getHeight() {
-        return height.get();
-    }
-
-    public void setHeight(final double height) {
-        this.height.set(height);
-    }
-
-    public DoubleProperty heightProperty() {
-        return height;
-    }
-
     public boolean isDeclarationOpen() {
         return declarationOpen.get();
     }
@@ -361,6 +299,8 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
     public JsonObject serialize() {
         final JsonObject result = super.serialize();
 
+        result.addProperty(DECLARATIONS, getDeclarationsText());
+
         final JsonArray locations = new JsonArray();
         getLocations().forEach(location -> locations.add(location.serialize()));
         result.add(LOCATIONS, locations);
@@ -371,10 +311,7 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
 
         result.addProperty(DESCRIPTION, getDescription());
 
-        result.addProperty(X, getX());
-        result.addProperty(Y, getY());
-        result.addProperty(WIDTH, getWidth());
-        result.addProperty(HEIGHT, getHeight());
+        box.addProperties(result);
 
         result.addProperty(COLOR, EnabledColor.getIdentifier(getColor()));
 
@@ -386,6 +323,8 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
     @Override
     public void deserialize(final JsonObject json) {
         super.deserialize(json);
+
+        setDeclarationsText(json.getAsJsonPrimitive(DECLARATIONS).getAsString());
 
         json.getAsJsonArray(LOCATIONS).forEach(jsonElement -> {
             final Location newLocation = new Location((JsonObject) jsonElement);
@@ -399,10 +338,7 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
 
         setDescription(json.getAsJsonPrimitive(DESCRIPTION).getAsString());
 
-        setX(json.getAsJsonPrimitive(X).getAsDouble());
-        setY(json.getAsJsonPrimitive(Y).getAsDouble());
-        setWidth(json.getAsJsonPrimitive(WIDTH).getAsDouble());
-        setHeight(json.getAsJsonPrimitive(HEIGHT).getAsDouble());
+        box.setProperties(json);
 
         final EnabledColor enabledColor = EnabledColor.fromIdentifier(json.getAsJsonPrimitive(COLOR).getAsString());
         if (enabledColor != null) {
@@ -481,5 +417,21 @@ public class Component extends VerificationObject implements DropDownMenu.HasCol
 
     public int getComponentId() {
         return componentId;
+    }
+
+    public String getDeclarationsText() {
+        return declarationsText.get();
+    }
+
+    public void setDeclarationsText(final String declarationsText) {
+        this.declarationsText.set(declarationsText);
+    }
+
+    public StringProperty declarationsTextProperty() {
+        return declarationsText;
+    }
+
+    public Box getBox() {
+        return box;
     }
 }
