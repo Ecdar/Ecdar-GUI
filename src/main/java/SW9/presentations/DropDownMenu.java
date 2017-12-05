@@ -82,30 +82,30 @@ public class DropDownMenu {
     }
 
     public void addListElement(final String s) {
-        MenuElement element = new MenuElement(s);
+        final MenuElement element = new MenuElement(s);
         list.getChildren().add(element.getItem());
     }
 
     public void addClickableListElement(final String s, final Consumer<MouseEvent> mouseEventConsumer) {
-        MenuElement element = new MenuElement(s, mouseEventConsumer);
+        final MenuElement element = new MenuElement(s, mouseEventConsumer);
         list.getChildren().add(element.getItem());
     }
 
     public void addTogglableListElement(final String s, final ObservableBooleanValue isToggled, final Consumer<MouseEvent> mouseEventConsumer) {
-        MenuElement element = new MenuElement(s, "gmi-done", mouseEventConsumer);
+        final MenuElement element = new MenuElement(s, "gmi-done", mouseEventConsumer);
         element.setToggleable(isToggled);
         list.getChildren().add(element.getItem());
     }
 
     public void addTogglableAndDisableableListElement(final String s, final ObservableBooleanValue isToggled, final ObservableBooleanValue isDisableable, final Consumer<MouseEvent> mouseEventConsumer) {
-        MenuElement element = new MenuElement(s, "gmi-done", mouseEventConsumer);
+        final MenuElement element = new MenuElement(s, "gmi-done", mouseEventConsumer);
         element.setToggleable(isToggled);
         element.setDisableable(isDisableable);
         list.getChildren().add(element.getItem());
     }
 
     public void addClickableAndDisableableListElement(final String s, final ObservableBooleanValue isDisabled, final Consumer<MouseEvent> mouseEventConsumer) {
-        MenuElement element = new MenuElement(s, mouseEventConsumer);
+        final MenuElement element = new MenuElement(s, mouseEventConsumer);
         element.setDisableable(isDisabled);
         list.getChildren().add(element.getItem());
     }
@@ -114,7 +114,7 @@ public class DropDownMenu {
      * Add a custom menu element
      * @param element the constructed menu element to be added
      */
-    public void addMenuElement(MenuElement element) {
+    public void addMenuElement(final MenuElement element) {
         list.getChildren().add(element.getItem());
     }
 
