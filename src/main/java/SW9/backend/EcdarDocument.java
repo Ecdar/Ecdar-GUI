@@ -95,10 +95,10 @@ class EcdarDocument {
 
         // Add all locations from the model to our conversion map and to the template
         for (final Location ecdarLocation : component.getLocations()) {
-            // Add the location to the template
             final com.uppaal.model.core2.Location xmlLocation;
 
             if(ecdarLocation.getType() != Location.Type.UNIVERSAL && ecdarLocation.getType() != Location.Type.INCONSISTENT){
+                // Add the location to the template
                 xmlLocation = addLocation(template, ecdarLocation);
                 // Populate the map
                 addLocationsToMaps(ecdarLocation, xmlLocation);
