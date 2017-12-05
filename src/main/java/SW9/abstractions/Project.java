@@ -78,6 +78,8 @@ public class Project {
         // Clear the project folder
         FileUtils.forceMkdir(directory);
         FileUtils.cleanDirectory(directory);
+        FileUtils.forceMkdir(new File(getComponentsFolderName()));
+        FileUtils.forceMkdir(new File(getSystemsFolderName()));
 
         {
             // Save global declarations
@@ -138,6 +140,14 @@ public class Project {
 
     private static FileWriter getSaveFileWriter(final String filename, final String folderName) throws IOException {
         return new FileWriter(Ecdar.projectDirectory.getValue() + File.separator + folderName + File.separator + filename + ".json");
+    }
+
+    private static String getComponentsFolderName() {
+        return Ecdar.projectDirectory.getValue() + File.separator + FOLDER_NAME_COMPONENTS;
+    }
+
+    private static String getSystemsFolderName() {
+        return Ecdar.projectDirectory.getValue() + File.separator + FOLDER_NAME_SYSTEMS;
     }
 
     /**
