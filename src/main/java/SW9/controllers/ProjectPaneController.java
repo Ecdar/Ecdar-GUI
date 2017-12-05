@@ -3,6 +3,7 @@ package SW9.controllers;
 import SW9.Ecdar;
 import SW9.abstractions.Component;
 import SW9.abstractions.HighLevelModelObject;
+import SW9.abstractions.SystemModel;
 import SW9.presentations.DropDownMenu;
 import SW9.presentations.FilePresentation;
 import SW9.utility.UndoRedoStack;
@@ -31,7 +32,7 @@ public class ProjectPaneController implements Initializable {
     public VBox filesList;
     public JFXRippler createComponent;
 
-    private final HashMap<Component, FilePresentation> componentPresentationMap = new HashMap<>();
+    private final HashMap<HighLevelModelObject, FilePresentation> modelPresentationMap = new HashMap<>();
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
@@ -55,8 +56,8 @@ public class ProjectPaneController implements Initializable {
             @Override
             public void onChanged(final Change<? extends Component> c) {
                 while (c.next()) {
-                    c.getAddedSubList().forEach(o -> handleAddedComponent(o));
-                    c.getRemoved().forEach(o -> handleRemovedComponent(o));
+                    c.getAddedSubList().forEach(o -> handleAddedModel(o));
+                    c.getRemoved().forEach(o -> handleRemovedModel(o));
 
                     // We should make a new component active
                     if (c.getRemoved().size() > 0) {
@@ -75,27 +76,52 @@ public class ProjectPaneController implements Initializable {
             }
         });
 
-        Ecdar.getProject().getComponents().forEach(this::handleAddedComponent);
+        Ecdar.getProject().getComponents().forEach(this::handleAddedModel);
+
+        // Listen to added and removed systems
+        Ecdar.getProject().getSystemsProperty().addListener((ListChangeListener<SystemModel>) change -> {
+            while (change.next()) {
+                change.getAddedSubList().forEach(this::handleAddedModel);
+                change.getRemoved().forEach(this::handleRemovedModel);
+
+                // We should make a new component active
+                if (change.getRemoved().size() > 0) {
+                    if (Ecdar.getProject().getComponents().size() > 0) {
+                        // Find the first available component and show it instead of the removed one
+                        final Component component = Ecdar.getProject().getComponents().get(0);
+                        CanvasController.setActiveModel(component);
+                    } else {
+                        // Show no components (since there are none in the project)
+                        CanvasController.setActiveModel(null);
+                    }
+                }
+                // Sort the children alphabetically
+                sortPresentations();
+            }
+        });
+
     }
 
     private void sortPresentations() {
-        final ArrayList<Component> sortedComponentList = new ArrayList<>();
-        componentPresentationMap.keySet().forEach(sortedComponentList::add);
+        final ArrayList<HighLevelModelObject> sortedComponentList = new ArrayList<>();
+        modelPresentationMap.keySet().forEach(sortedComponentList::add);
         sortedComponentList.sort((o1, o2) -> o1.getName().compareTo(o2.getName()));
-        sortedComponentList.forEach(component -> componentPresentationMap.get(component).toFront());
+        sortedComponentList.forEach(component -> modelPresentationMap.get(component).toFront());
     }
 
-    private void initializeColorSelector(final FilePresentation filePresentation) {
+    private void initializeMoreInformationDropDown(final FilePresentation filePresentation) {
         final JFXRippler moreInformation = (JFXRippler) filePresentation.lookup("#moreInformation");
-        final int listWidth = 230;
-        final DropDownMenu moreInformationDropDown = new DropDownMenu(root, moreInformation, listWidth, true);
+        final DropDownMenu moreInformationDropDown = new DropDownMenu(root, moreInformation, 230, true);
         final HighLevelModelObject model = filePresentation.getModel();
 
-        moreInformationDropDown.addListElement("Configuration");
+        // If component, added toggle for periodic check
+        if (model instanceof Component) {
+            moreInformationDropDown.addListElement("Configuration");
 
-        initializeTogglePeriodicCheck(moreInformationDropDown, (Component) model);
+            initializeTogglePeriodicCheck(moreInformationDropDown, (Component) model);
 
-        moreInformationDropDown.addSpacerElement();
+            moreInformationDropDown.addSpacerElement();
+        }
 
         moreInformationDropDown.addListElement("Description");
 
@@ -104,6 +130,8 @@ public class ProjectPaneController implements Initializable {
 
         if (model instanceof Component) {
             ((Component) model).descriptionProperty().bindBidirectional(textArea.textProperty());
+        } else if (model instanceof SystemModel) {
+            ((SystemModel) model).getDescriptionProperty().bindBidirectional(textArea.textProperty());
         }
 
         textArea.textProperty().addListener((obs, oldText, newText) -> {
@@ -121,20 +149,41 @@ public class ProjectPaneController implements Initializable {
 
         moreInformationDropDown.addSpacerElement();
 
-        // Color picker button
+        // Add color picker
         if (model instanceof Component) {
-            moreInformationDropDown.addColorPicker((Component) filePresentation.getModel(),
-                    ((Component) filePresentation.getModel())::dye);
+            moreInformationDropDown.addColorPicker(
+                    filePresentation.getModel(),
+                    ((Component) filePresentation.getModel())::dye
+            );
+        } else if (model instanceof SystemModel) {
+            moreInformationDropDown.addColorPicker(
+                    filePresentation.getModel(),
+                    ((SystemModel) filePresentation.getModel())::dye
+            );
+        }
+        moreInformationDropDown.addSpacerElement();
 
-            moreInformationDropDown.addSpacerElement();
-
-            // Delete button
+        // Delete button for components
+        if (model instanceof Component) {
             moreInformationDropDown.addClickableListElement("Delete", event -> {
                 UndoRedoStack.pushAndPerform(() -> { // Perform
                     Ecdar.getProject().getComponents().remove(model);
                 }, () -> { // Undo
                     Ecdar.getProject().getComponents().add((Component) model);
                 }, "Deleted component " + model.getName(), "delete");
+
+                moreInformationDropDown.close();
+            });
+        }
+
+        // Delete button for systems
+        if (model instanceof SystemModel) {
+            moreInformationDropDown.addClickableListElement("Delete", event -> {
+                UndoRedoStack.pushAndPerform(() -> { // Perform
+                    Ecdar.getProject().getSystemsProperty().remove(model);
+                }, () -> { // Undo
+                    Ecdar.getProject().getSystemsProperty().add((SystemModel) model);
+                }, "Deleted system " + model.getName(), "delete");
 
                 moreInformationDropDown.close();
             });
@@ -158,23 +207,25 @@ public class ProjectPaneController implements Initializable {
         });
     }
 
-    private void handleAddedComponent(final Component component) {
-        final FilePresentation filePresentation = new FilePresentation(component);
-        initializeColorSelector(filePresentation);
+    private void handleAddedModel(final HighLevelModelObject model) {
+        final FilePresentation filePresentation = new FilePresentation(model);
+
+        initializeMoreInformationDropDown(filePresentation);
+
         filesList.getChildren().add(filePresentation);
-        componentPresentationMap.put(component, filePresentation);
+        modelPresentationMap.put(model, filePresentation);
 
         // Open the component if the presentation is pressed
         filePresentation.setOnMousePressed(event -> {
             event.consume();
-            CanvasController.setActiveModel(component);
+            CanvasController.setActiveModel(model);
         });
-        component.nameProperty().addListener(obs -> sortPresentations());
+        model.nameProperty().addListener(obs -> sortPresentations());
     }
 
-    private void handleRemovedComponent(final Component component) {
-        filesList.getChildren().remove(componentPresentationMap.get(component));
-        componentPresentationMap.remove(component);
+    private void handleRemovedModel(final HighLevelModelObject model) {
+        filesList.getChildren().remove(modelPresentationMap.get(model));
+        modelPresentationMap.remove(model);
     }
 
     @FXML
