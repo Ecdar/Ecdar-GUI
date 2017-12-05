@@ -23,6 +23,8 @@ public abstract class HighLevelModelObject implements Serializable, DropDownMenu
     private static final String NAME = "name";
 
     static final String DECLARATIONS = "declarations";
+    static final String DESCRIPTION = "description";
+    static final String COLOR = "color";
 
     private final StringProperty name;
     private final ObjectProperty<Color> color;
