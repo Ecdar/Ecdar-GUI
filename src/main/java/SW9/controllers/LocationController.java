@@ -369,13 +369,13 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                         } else {
                             unfinishedEdge.makeSyncNailBetweenLocations();
                         }
-                        UndoRedoStack.push(() -> { // Perform
-                            component.addEdge(unfinishedEdge);
-                        }, () -> { // Undo
-                            component.removeEdge(unfinishedEdge);
-                        }, "Created edge starting from location " + getLocation().getNickname(), "add-circle");
                     }
 
+                    UndoRedoStack.push(() -> { // Perform
+                        component.addEdge(unfinishedEdge);
+                    }, () -> { // Undo
+                        component.removeEdge(unfinishedEdge);
+                    }, "Created edge starting from location " + getLocation().getNickname(), "add-circle");
 
                 } else {
                     // If shift is being held down, start drawing a new edge
