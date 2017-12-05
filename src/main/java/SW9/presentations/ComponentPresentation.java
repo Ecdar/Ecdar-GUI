@@ -107,7 +107,7 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
         spansBuilder.add(Collections.emptyList(), text.length() - lastKwEnd);
         return spansBuilder.create();
     }
-    
+
     private void initializeToolbar() {
         final Component component = controller.getComponent();
 
@@ -268,7 +268,7 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
 
     /**
      * Gets the minimum possible height when dragging the anchor.
-     * The height is based on the y coordinate of locations and nails.
+     * The height is based on the y coordinate of locations, nails and the signature arrows
      * @return the minimum possible height.
      */
     @Override
