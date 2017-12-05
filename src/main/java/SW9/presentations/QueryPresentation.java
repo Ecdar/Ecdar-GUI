@@ -66,7 +66,7 @@ public class QueryPresentation extends AnchorPane {
         detailsButton.setRipplerFill(Color.GREY.getColor(Color.Intensity.I500));
         detailsButton.setMaskType(JFXRippler.RipplerMask.CIRCLE);
 
-        final DropDownMenu dropDownMenu = new DropDownMenu((Pane) getParent(), detailsButton, 230, true);
+        final DropDownMenu dropDownMenu = new DropDownMenu(detailsButton);
 
         dropDownMenu.addTogglableListElement("Run periodically", query.isPeriodicProperty(), event -> {
             // Toggle the property
@@ -78,9 +78,6 @@ public class QueryPresentation extends AnchorPane {
         dropDownMenu.addClickableListElement("Clear Status", event -> {
             // Clear the state
             query.setQueryState(QueryState.UNKNOWN);
-
-            // Close the menu
-            dropDownMenu.close();
         });
 
         dropDownMenu.addSpacerElement();
@@ -88,9 +85,6 @@ public class QueryPresentation extends AnchorPane {
         dropDownMenu.addClickableListElement("Delete", event -> {
             // Remove the query
             Ecdar.getProject().getQueries().remove(query);
-
-            // Close the menu
-            dropDownMenu.close();
         });
 
         detailsButton.getChildren().get(0).setOnMousePressed(event -> {

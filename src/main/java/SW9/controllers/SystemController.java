@@ -103,7 +103,7 @@ public class SystemController extends ModelController implements Initializable {
 
         root.getChildren().add(dropDownMenuHelperCircle);
 
-        contextMenu = new DropDownMenu(root, dropDownMenuHelperCircle, 230, true);
+        contextMenu = new DropDownMenu(dropDownMenuHelperCircle);
 
         // Component instance sub menu
         final DropDownMenu componentInstanceSubMenu = new DropDownMenu(root, dropDownMenuHelperCircle, 150, false);

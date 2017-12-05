@@ -27,7 +27,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Path;
@@ -109,7 +108,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
         if (dropDownMenuInitialized) return;
         dropDownMenuInitialized = true;
 
-        dropDownMenu = new DropDownMenu(((Pane) root.getParent().getParent().getParent()), root, 230, true);
+        dropDownMenu = new DropDownMenu(root);
 
         dropDownMenu.addClickableAndDisableableListElement("Draw edge", getLocation().getIsLocked(),
                 (event) -> {
@@ -118,10 +117,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                         KeyboardTracker.registerKeybind(KeyboardTracker.ABANDON_EDGE, new Keybind(new KeyCodeCombination(KeyCode.ESCAPE), () -> {
                             getComponent().removeEdge(newEdge);
                         }));
-
                         getComponent().addEdge(newEdge);
-
-                        dropDownMenu.close();
                     }
                 );
 
@@ -131,7 +127,6 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                     nicknameTag.setOpacity(1);
                     nicknameTag.requestTextFieldFocus();
                     nicknameTag.requestTextFieldFocus(); // Requesting it twice is needed for some reason
-                    dropDownMenu.close();
                 }
         );
 
@@ -141,7 +136,6 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                     invariantTag.setOpacity(1);
                     invariantTag.requestTextFieldFocus();
                     invariantTag.requestTextFieldFocus(); // Requesting it twice is needed for some reason
-                    dropDownMenu.close();
                 }
         );
 
@@ -156,8 +150,6 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                     }, () -> { // Undo
                         getComponent().setInitialLocation(previousInitLoc);
                     }, String.format("Made %s initial", location), "initial");
-
-                    dropDownMenu.close();
                 }
         );
         dropDownMenu.addSpacerElement();
@@ -184,8 +176,6 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
             final Query query = new Query(reachabilityQuery, reachabilityComment, QueryState.UNKNOWN);
             Ecdar.getProject().getQueries().add(query);
             query.run();
-
-            dropDownMenu.close();
         });
 
         dropDownMenu.addSpacerElement();
@@ -199,7 +189,6 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
         dropDownMenu.addClickableListElement("Delete", event -> {
             tryDelete();
-            dropDownMenu.close();
         });
     }
 

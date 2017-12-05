@@ -118,7 +118,7 @@ public class ProjectPaneController implements Initializable {
 
     private void initializeMoreInformationDropDown(final FilePresentation filePresentation) {
         final JFXRippler moreInformation = (JFXRippler) filePresentation.lookup("#moreInformation");
-        final DropDownMenu moreInformationDropDown = new DropDownMenu(root, moreInformation, 230, true);
+        final DropDownMenu moreInformationDropDown = new DropDownMenu(moreInformation);
         final HighLevelModelObject model = filePresentation.getModel();
 
         // If component, added toggle for periodic check
@@ -178,8 +178,6 @@ public class ProjectPaneController implements Initializable {
                 }, () -> { // Undo
                     Ecdar.getProject().getComponents().add((Component) model);
                 }, "Deleted component " + model.getName(), "delete");
-
-                moreInformationDropDown.close();
             });
         }
 
@@ -191,8 +189,6 @@ public class ProjectPaneController implements Initializable {
                 }, () -> { // Undo
                     Ecdar.getProject().getSystemsProperty().add((EcdarSystem) model);
                 }, "Deleted system " + model.getName(), "delete");
-
-                moreInformationDropDown.close();
             });
         }
 

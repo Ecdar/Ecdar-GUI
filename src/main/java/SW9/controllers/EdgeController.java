@@ -24,7 +24,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
 import javafx.util.Duration;
 
@@ -366,10 +365,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                         event.consume();
 
                         final DropDownMenu dropDownMenu = new DropDownMenu(
-                                ((Pane) edgeRoot.getParent().getParent().getParent().getParent()),
-                                dropDownMenuHelperCircle,
-                                230,
-                                true
+                                dropDownMenuHelperCircle
                         );
 
 
@@ -394,12 +390,10 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                                     "Nail added",
                                     "add-circle"
                             );
-                            dropDownMenu.close();
                         });
                         dropDownMenu.addSpacerElement();
 
                         dropDownMenu.addClickableAndDisableableListElement("Delete",getEdge().getIsLocked(), mouseEvent -> {
-                            dropDownMenu.close();
                             UndoRedoStack.pushAndPerform(() -> { // Perform
                                 getComponent().removeEdge(getEdge());
                             }, () -> { // Undo
@@ -445,7 +439,6 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                     "Switch edge status",
                     "switch"
             );
-            dropDownMenu.close();
         }).setDisableable(getEdge().getIsLocked());
     }
 
@@ -511,7 +504,6 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                     "Nail property added (" + type + ")",
                     "add-circle"
             );
-            dropDownMenu.close();
         });
     }
 
