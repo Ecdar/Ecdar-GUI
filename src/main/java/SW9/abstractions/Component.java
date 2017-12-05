@@ -28,7 +28,7 @@ public class Component extends HighLevelModelObject {
 
     // Verification properties
     private final ObservableList<Location> locations = FXCollections.observableArrayList();
-    public final ObservableList<Edge> edges = FXCollections.observableArrayList();
+    private final ObservableList<Edge> edges = FXCollections.observableArrayList();
     private final ObservableList<String> inputStrings = FXCollections.observableArrayList();
     private final ObservableList<String> outputStrings = FXCollections.observableArrayList();
     private final StringProperty description = new SimpleStringProperty("");
