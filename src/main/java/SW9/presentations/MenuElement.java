@@ -130,10 +130,6 @@ public class MenuElement {
                 event.consume();
                 return;
             }
-            // If we do not do this, the method below will be called twice
-            if (!(event.getTarget() instanceof StackPane)) return;
-            if (!(((StackPane)(event.getTarget())).getChildren().get(0) instanceof HBox)) return;
-
             mouseEventConsumer.accept(event);
         });
     }
