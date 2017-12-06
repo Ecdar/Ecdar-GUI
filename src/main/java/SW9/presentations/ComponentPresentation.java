@@ -80,7 +80,6 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
 
             controller.declarationTextArea.textProperty().addListener((obs, oldText, newText) ->
                     controller.declarationTextArea.setStyleSpans(0, computeHighlighting(newText)));
-
         } catch (final IOException ioe) {
             throw new IllegalStateException(ioe);
         }
@@ -269,7 +268,7 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
 
     /**
      * Gets the minimum possible height when dragging the anchor.
-     * The height is based on the y coordinate of locations and nails.
+     * The height is based on the y coordinate of locations, nails and the signature arrows
      * @return the minimum possible height.
      */
     @Override
@@ -286,6 +285,10 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
                 minHeight = Math.max(minHeight, nail.getY() + GRID_SIZE);
             }
         }
+
+        //Component should not get smaller than the height of the input/output signature containers
+        minHeight = Math.max(controller.inputSignatureContainer.getHeight(), minHeight);
+        minHeight = Math.max(controller.outputSignatureContainer.getHeight(), minHeight);
 
         return minHeight;
     }

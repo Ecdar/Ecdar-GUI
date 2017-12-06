@@ -77,6 +77,7 @@ public class Component extends HighLevelModelObject {
         deserialize(json);
 
         initializeIOListeners();
+        updateIOList();
 
         bindReachabilityAnalysis();
     }
@@ -89,9 +90,12 @@ public class Component extends HighLevelModelObject {
         final ChangeListener<Object> listener = (observable, oldValue, newValue) -> updateIOList();
 
         edges.addListener((ListChangeListener<Edge>) c -> {
+            // Update the list so empty I/O status is also added to I/OLists
+            updateIOList();
+
             while(c.next()) {
                 for (final Edge e : c.getAddedSubList()) {
-                    addListener(listener, e);
+                    addSyncListener(listener, e);
                 }
 
                 for (final Edge e : c.getRemoved()) {
@@ -102,7 +106,7 @@ public class Component extends HighLevelModelObject {
         });
 
         // Add listener to edges initially
-        edges.forEach(edge -> addListener(listener, edge));
+        edges.forEach(edge -> addSyncListener(listener, edge));
     }
 
     /**
@@ -110,13 +114,14 @@ public class Component extends HighLevelModelObject {
      * @param listener the listener
      * @param edge the edge
      */
-    public static void addListener(final ChangeListener<Object> listener, final Edge edge) {
+    public static void addSyncListener(final ChangeListener<Object> listener, final Edge edge) {
         edge.syncProperty().addListener(listener);
         edge.ioStatus.addListener(listener);
     }
 
     /**
      * Method used for updating the inputstrings and outputstrings list
+     * Sorts the list alphabetically, ignoring case
      */
     private void updateIOList() {
         final List<String> localInputStrings = new ArrayList<>();
@@ -136,6 +141,10 @@ public class Component extends HighLevelModelObject {
                 }
             }
         }
+
+        // Sort the String alphabetically, ignoring case (e.g. all strings starting with "C" are placed together)
+        localInputStrings.sort((item1, item2) -> item1.compareToIgnoreCase(item2));
+        localOutputStrings.sort((item1, item2) -> item1.compareToIgnoreCase(item2));
 
         inputStrings.setAll(localInputStrings);
         outputStrings.setAll(localOutputStrings);

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.scene.shape.Path?>
+<?import javafx.scene.shape.Circle?>
+<fx:root xmlns="http://javafx.com/javafx"
+         xmlns:fx="http://javafx.com/fxml"
+         type="Group"
+         fx:controller="SW9.controllers.SignatureArrowController">
+
+
+        <VBox fx:id="arrowBox" alignment="CENTER_LEFT">
+                <HBox alignment="CENTER">
+                        <Label fx:id="signatureArrowLabel" styleClass="sub-caption-mono" />
+                </HBox>
+                <Group>
+                        <Circle fx:id="signatureArrowCircle" styleClass="nail"/>
+                        <Path fx:id="signatureArrowPath" />
+                        <Path fx:id="signatureArrowHeadPath" />
+                </Group>
+        </VBox>
+
+</fx:root>
