@@ -315,7 +315,7 @@ public class Project {
 
     /**
      * gets the id of all systems in the project and inserts it into a set
-     * @return the set of all location ids
+     * @return the set of all system names
      */
     HashSet<String> getSystemNames(){
         final HashSet<String> names = new HashSet<>();
@@ -328,12 +328,11 @@ public class Project {
     }
 
     /**
-     * Gets uni-inc ids all components in the project
-     * @return a set of component ids
+     * Gets universal/inconsistent ids for all components in the project
+     * @return a set of universal/inconsistent ids
      */
     HashSet<String> getUniIncIds() {
         final HashSet<String> ids = new HashSet<>();
-
         for (final Component component : getComponents()){
             ids.add(component.getUniIncId());
         }
@@ -342,8 +341,8 @@ public class Project {
     }
 
     /**
-     * gets the name of all components in the project and inserts it into a set
-     * @return the set of all components
+     * Gets the name of all components in the project and inserts it into a set
+     * @return the set of all component names
      */
     HashSet<String> getComponentNames(){
         final HashSet<String> names = new HashSet<>();
