@@ -1,5 +1,6 @@
 package SW9.abstractions;
 
+import SW9.Ecdar;
 import SW9.utility.UndoRedoStack;
 import SW9.utility.colors.Color;
 import SW9.utility.colors.EnabledColor;
@@ -8,12 +9,16 @@ import com.google.gson.JsonObject;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A model of a system
  */
 public class SystemModel extends HighLevelModelObject {
+    private static final String SYSTEM = "System";
+
     // TODO brug Christians løsning
     private static final AtomicInteger hiddenId = new AtomicInteger(0); // Used to generate unique IDs
 
@@ -84,6 +89,34 @@ public class SystemModel extends HighLevelModelObject {
         if (enabledColor != null) {
             setColorIntensity(enabledColor.intensity);
             setColor(enabledColor.color);
+        }
+    }
+
+    /**
+     * gets the id of all systems in the project and inserts it into a set
+     * @return the set of all location ids
+     */
+    public Set<String> getSystemIds(){
+        Set<String> ids = new HashSet<>();
+
+        for(Component component : Ecdar.getProject().getComponents()){
+            if(component.getName().length() > SYSTEM.length()) {
+                ids.add(component.getName().substring(SYSTEM.length()));
+            }
+        }
+
+        return ids;
+    }
+
+    /**
+     * Generate and sets a unique id for this system
+     */
+    public void setSystemId() {
+        for(int counter = 0; ; counter++) {
+            if(!getSystemIds().contains(String.valueOf(counter))){
+                setName((SYSTEM + counter));
+                return;
+            }
         }
     }
 

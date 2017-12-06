@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Component extends HighLevelModelObject {
     private static final AtomicInteger hiddenId = new AtomicInteger(0); // Used to generate unique IDs
 
+    private static final String COMPONENT = "component";
     private static final String LOCATIONS = "locations";
     private static final String EDGES = "edges";
     private static final String INCLUDE_IN_PERIODIC_CHECK = "include_in_periodic_check";
@@ -52,19 +53,21 @@ public class Component extends HighLevelModelObject {
     /**
      * Creates a componenet with a random generated name and
      * a given boolean value that chooses whether the colour for this component is chosen at random
+     * @param name name of the component
      * @param doRandomColor boolean that is true if the component should choose a colour at random and false if not
      */
-    public Component(final boolean doRandomColor) {
-        this("Component" + hiddenId.getAndIncrement(), doRandomColor);
+    public Component(final boolean doRandomColor, final String name) {
+        this(doRandomColor);
+        setName(name);
     }
 
     /**
      * Creates a component with a specific name and a boolean value that chooses whether the colour for this component is chosen at random
-     * @param name name of the componenet
      * @param doRandomColor boolean that is true if the component should choose a colour at random and false if not
      */
-    public Component(final String name, final boolean doRandomColor) {
-        setName(name);
+    public Component(final boolean doRandomColor) {
+        setComponentId();
+
         if(doRandomColor) {
             setRandomColor();
         }
@@ -407,34 +410,62 @@ public class Component extends HighLevelModelObject {
         return outputStrings;
     }
 
+    /**
+     * gets the id of all systems in the project and inserts it into a set
+     * @return the set of all location ids
+     */
+    public Set<String> getComponentIds(){
+        Set<String> ids = new HashSet<>();
+
+        for(Component component : Ecdar.getProject().getComponents()){
+            if(component.getName().length() > COMPONENT.length()) {
+                ids.add(component.getName().substring(COMPONENT.length()));
+            }
+        }
+
+        return ids;
+    }
 
     /**
-     * gets the id used by universal and inconsistent locations located in this component
+     * Generate and sets a unique id for this system
+     */
+    public void setComponentId() {
+        for(int counter = 0; ; counter++) {
+            if(!getComponentIds().contains(String.valueOf(counter))){
+                setName((COMPONENT + counter));
+                return;
+            }
+        }
+    }
+
+    /**
+     * gets the id used by universal and inconsistent locations located in this component,
+     * if none is used generate and return a new one
      * @return universal id
      */
-    public String getComponentId(){
+    public String getLocalUniIncId(){
         Set<String> set = new HashSet<>();
 
-        if(getComponentId(set,this)){
+        if(getUniIncId(set,this)){
             return set.iterator().next();
         }
 
         for(int counter = 0; ;counter++){
-            if(!getComponentsId().contains(String.valueOf(counter))){
+            if(!getUniIncIds().contains(String.valueOf(counter))){
                 return String.valueOf(counter);
             }
         }
     }
 
     /**
-     * Gets ids from all components in the project
+     * Gets uni-inc ids all components in the project
      * @return a set of component ids
      */
-    private Set<String> getComponentsId() {
+    private Set<String> getUniIncIds() {
         Set<String> ids = new HashSet();
 
         for (Component component : Ecdar.getProject().getComponents()){
-            getComponentId(ids, component);
+            getUniIncId(ids, component);
         }
 
         return ids;
@@ -446,10 +477,12 @@ public class Component extends HighLevelModelObject {
      * @param component the component we want to extract the id from
      * @return true if an id was added to the set, false if not
      */
-    private boolean getComponentId(Set<String> ids, Component component) {
+    private boolean getUniIncId(Set<String> ids, Component component) {
         for (Location location : component.getLocations()){
-            if(location.getType() == Location.Type.UNIVERSAL || location.getType() == Location.Type.INCONSISTENT){
-                ids.add(location.getId().substring(1));
+            if (location.getType() == Location.Type.UNIVERSAL || location.getType() == Location.Type.INCONSISTENT) {
+                if(component.getName().length() > Location.ID_LENGTH) {
+                    ids.add(location.getId().substring(Location.ID_LENGTH));
+                }
                 return true;
             }
         }

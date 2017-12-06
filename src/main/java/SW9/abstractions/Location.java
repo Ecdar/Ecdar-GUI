@@ -33,6 +33,10 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     private static final String NICKNAME_Y = "nickname_y";
     private static final String INVARIANT_X = "invariant_x";
     private static final String INVARIANT_Y = "invariant_y";
+    private static final String UNI = "U";
+    private static final String INC = "I";
+    public static final String LOCATION = "L";
+    public static final int ID_LENGTH = 1;
 
     // Verification properties
     private final StringProperty nickname = new SimpleStringProperty("");
@@ -74,11 +78,11 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
         setType(type);
         if(type == Type.UNIVERSAL){
             setIsLocked(true);
-            setId("U" + component.getComponentId());
+            setId(UNI + component.getLocalUniIncId());
         } else if (type == Type.INCONSISTENT) {
             setIsLocked(true);
             setUrgency(Location.Urgency.URGENT);
-            setId("I" + component.getComponentId());
+            setId(INC + component.getLocalUniIncId());
         }
         setColorIntensity(component.getColorIntensity());
         setColor(component.getColor());
@@ -128,7 +132,9 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     private void getLocationIds(Set<String> ids, Component component) {
         for (Location location : component.getLocations()){
             if(location.getType() != Type.UNIVERSAL || location.getType() != Type.INCONSISTENT){
-                ids.add(location.getId().substring(1));
+                if(component.getName().length() > ID_LENGTH) {
+                    ids.add(location.getId().substring(ID_LENGTH));
+                }
             }
         }
     }
@@ -143,7 +149,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     public void setId() {
         for(int counter = 0; ; counter++) {
             if(!getLocationIds().contains(String.valueOf(counter))){
-                id.set("L" + counter);
+                id.set(LOCATION + counter);
                 return;
             }
         }

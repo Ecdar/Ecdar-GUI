@@ -64,7 +64,7 @@ class EcdarDocument {
      * @return the XML name
      */
     private static String generateName(final Location location) {
-        String result = "L";
+        String result = Location.LOCATION;
 
         // Add the identifier for the location
         result += location.getId();
