@@ -18,7 +18,7 @@ import javafx.util.Pair;
 import java.util.*;
 
 public class Component extends HighLevelModelObject {
-    static final String COMPONENT = "component ";
+    static final String COMPONENT = "Component";
     private static final String LOCATIONS = "locations";
     private static final String EDGES = "edges";
     private static final String INCLUDE_IN_PERIODIC_CHECK = "include_in_periodic_check";
@@ -392,7 +392,7 @@ public class Component extends HighLevelModelObject {
      * Generate and sets a unique id for this system
      */
     private void setComponentName() {
-        for(int counter = 0; ; counter++) {
+        for(int counter = 1; ; counter++) {
             if(!Ecdar.getProject().getComponentNames().contains(COMPONENT + counter)){
                 setName((COMPONENT + counter));
                 return;

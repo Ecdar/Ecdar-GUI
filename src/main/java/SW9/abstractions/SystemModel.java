@@ -91,7 +91,7 @@ public class SystemModel extends HighLevelModelObject {
      * Generate and sets a unique id for this system
      */
     public void setSystemName() {
-        for(int counter = 0; ; counter++) {
+        for(int counter = 1; ; counter++) {
             if(!Ecdar.getProject().getSystemNames().contains(SYSTEM + counter)){
                 setName((SYSTEM + counter));
                 return;

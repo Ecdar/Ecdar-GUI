@@ -293,7 +293,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
      * @param status the status of the edge
      * @return the finished edge
      */
-    public Edge addLeftEdge(final String syncString ,final EdgeStatus status) {
+    public Edge addLeftEdge(final String syncString, final EdgeStatus status) {
         final Edge edge = new Edge(this, status);
         edge.setTargetLocation(this);
         edge.setProperty(Edge.PropertyType.SYNCHRONIZATION, syncString);
@@ -316,7 +316,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
      * @param status the status of the edge
      * @return the finished edge
      */
-    public Edge addRightEdge(final String syncString ,final EdgeStatus status){
+    public Edge addRightEdge(final String syncString, final EdgeStatus status){
         final Edge edge = new Edge(this, status);
         edge.setTargetLocation(this);
         edge.setProperty(Edge.PropertyType.SYNCHRONIZATION, syncString);
