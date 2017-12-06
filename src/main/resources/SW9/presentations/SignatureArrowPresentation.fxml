@@ -15,13 +15,13 @@
 
 
         <VBox fx:id="arrowBox" alignment="CENTER_LEFT">
+                <HBox alignment="CENTER">
+                        <Label fx:id="signatureArrowLabel" styleClass="sub-caption-mono" />
+                </HBox>
                 <Group>
                         <Circle fx:id="signatureArrowCircle" styleClass="nail"/>
                         <Path fx:id="signatureArrowPath" />
                 </Group>
-                <HBox alignment="CENTER">
-                        <Label fx:id="signatureArrowLabel" styleClass="sub-caption-mono" />
-                </HBox>
         </VBox>
 
 </fx:root>
