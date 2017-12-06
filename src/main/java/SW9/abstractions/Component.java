@@ -392,11 +392,11 @@ public class Component extends HighLevelModelObject {
     }
 
     /**
-     * gets the id used by universal and inconsistent locations located in this component,
-     * if none is used generate and return a new one
-     * @return universal id
+     * Generates an id to be used by universal and inconsistent locations in this component,
+     * if one has already been generated, return that instead
+     * @return generated universal/inconsistent id
      */
-    String setUniInc(){
+    String generateUniIncId(){
         final String id = getUniIncId();
         if(id != null){
             return id;
@@ -410,7 +410,8 @@ public class Component extends HighLevelModelObject {
     }
 
     /**
-     * Gets the id used by universal and inconsistent locations located in this component
+     * Gets the id used by universal and inconsistent locations located in this component,
+     * if neither universal nor inconsistent locations exist in this component it returns null
      */
     String getUniIncId() {
         for (final Location location : getLocations()){

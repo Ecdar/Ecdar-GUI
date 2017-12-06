@@ -59,21 +59,6 @@ class EcdarDocument {
     }
 
     /**
-     * Generate XML name of a location.
-     * @param location the location to be used
-     * @return the XML name
-     */
-    private static String generateName(final Location location) {
-        String result = Location.LOCATION;
-
-        // Add the identifier for the location
-        result += location.getId();
-
-        // Return the result
-        return result;
-    }
-
-    /**
      * Generates a template for a component and adds it to the xml document.
      * @param component the component to use
      * @throws BackendException if an error occurs during generation

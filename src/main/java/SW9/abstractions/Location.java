@@ -72,11 +72,11 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
         setType(type);
         if(type == Type.UNIVERSAL){
             setIsLocked(true);
-            setId(UNI + component.setUniInc());
+            setId(UNI + component.generateUniIncId());
         } else if (type == Type.INCONSISTENT) {
             setIsLocked(true);
             setUrgency(Location.Urgency.URGENT);
-            setId(INC + component.setUniInc());
+            setId(INC + component.generateUniIncId());
         }
         setColorIntensity(component.getColorIntensity());
         setColor(component.getColor());
