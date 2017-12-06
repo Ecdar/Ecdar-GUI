@@ -14,13 +14,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import javafx.beans.property.*;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-
 public class Location implements Circular, Serializable, Nearable, DropDownMenu.HasColor {
-
-    private static final AtomicInteger hiddenID = new AtomicInteger(0); // Used to generate unique IDs
     private static final String NICKNAME = "nickname";
     private static final String ID = "id";
     private static final String INVARIANT = "invariant";
@@ -36,7 +30,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     private static final String UNI = "U";
     private static final String INC = "I";
     public static final String LOCATION = "L";
-    public static final int ID_LENGTH = 1;
+    static final int ID_LENGTH = 1;
 
     // Verification properties
     private final StringProperty nickname = new SimpleStringProperty("");
@@ -72,17 +66,17 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
         bindReachabilityAnalysis();
     }
 
-    public Location(Component component, Type type, double x, double y){
+    public Location(final Component component, final Type type, final double x, final double y){
         setX(Grid.snap(x));
         setY(Grid.snap(y));
         setType(type);
         if(type == Type.UNIVERSAL){
             setIsLocked(true);
-            setId(UNI + component.getLocalUniIncId());
+            setId(UNI + component.setUniInc());
         } else if (type == Type.INCONSISTENT) {
             setIsLocked(true);
             setUrgency(Location.Urgency.URGENT);
-            setId(INC + component.getLocalUniIncId());
+            setId(INC + component.setUniInc());
         }
         setColorIntensity(component.getColorIntensity());
         setColor(component.getColor());
@@ -93,49 +87,16 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
         bindReachabilityAnalysis();
     }
 
-    public static void resetHiddenID() {
-        hiddenID.set(0);
-    }
-
     public String getNickname() {
         return nickname.get();
     }
 
-    public void setNickname(final String nickname) {
+    private void setNickname(final String nickname) {
         this.nickname.set(nickname);
     }
 
     public StringProperty nicknameProperty() {
         return nickname;
-    }
-
-    /**
-     * gets the id of all locations in the project and inserts it into a set
-     * @return the set of all location ids
-     */
-    public Set<String> getLocationIds(){
-        Set<String> ids = new HashSet<>();
-
-        for (Component component : Ecdar.getProject().getComponents()) {
-            getLocationIds(ids, component);
-        }
-
-        return ids;
-    }
-
-    /**
-     * gets the id of all locations in a specific component
-     * @param ids the set to insert location ids into
-     * @param component the component from which we check the locations
-     */
-    private void getLocationIds(Set<String> ids, Component component) {
-        for (Location location : component.getLocations()){
-            if(location.getType() != Type.UNIVERSAL || location.getType() != Type.INCONSISTENT){
-                if(component.getName().length() > ID_LENGTH) {
-                    ids.add(location.getId().substring(ID_LENGTH));
-                }
-            }
-        }
     }
 
     public String getId() {
@@ -145,9 +106,9 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     /**
      * Generate and sets a unique id for this location
      */
-    public void setId() {
+    private void setId() {
         for(int counter = 0; ; counter++) {
-            if(!getLocationIds().contains(String.valueOf(counter))){
+            if(!Ecdar.getProject().getLocationIds().contains(String.valueOf(counter))){
                 id.set(LOCATION + counter);
                 return;
             }
@@ -158,12 +119,8 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
      * Sets a specific id for this location
      * @param string id to set
      */
-    private void setId(String string){
+    private void setId(final String string){
         id.set(string);
-    }
-
-    public void resetId() {
-        setId();
     }
 
     public StringProperty idProperty() {
@@ -174,7 +131,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
         return invariant.get();
     }
 
-    public void setInvariant(final String invariant) {
+    private void setInvariant(final String invariant) {
         this.invariant.set(invariant);
     }
 
@@ -268,14 +225,6 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
         return radius;
     }
 
-    public double getScale() {
-        return scale.get();
-    }
-
-    public void setScale(final double scale) {
-        this.scale.set(scale);
-    }
-
     @Override
     public DoubleProperty scaleProperty() {
         return scale;
@@ -285,7 +234,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
         return nicknameX.get();
     }
 
-    public void setNicknameX(final double nicknameX) {
+    private void setNicknameX(final double nicknameX) {
         this.nicknameX.set(nicknameX);
     }
 
@@ -297,7 +246,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
         return nicknameY.get();
     }
 
-    public void setNicknameY(final double nicknameY) {
+    private void setNicknameY(final double nicknameY) {
         this.nicknameY.set(nicknameY);
     }
 
@@ -309,7 +258,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
         return invariantX.get();
     }
 
-    public void setInvariantX(final double invariantX) {
+    private void setInvariantX(final double invariantX) {
         this.invariantX.set(invariantX);
     }
 
@@ -321,7 +270,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
         return invariantY.get();
     }
 
-    public void setInvariantY(final double invariantY) {
+    private void setInvariantY(final double invariantY) {
         EcdarController.runReachabilityAnalysis();
         this.invariantY.set(invariantY);
     }
@@ -345,12 +294,12 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
      * @return the finished edge
      */
     public Edge addLeftEdge(final String syncString ,final EdgeStatus status) {
-        Edge edge = new Edge(this, status);
+        final Edge edge = new Edge(this, status);
         edge.setTargetLocation(this);
         edge.setProperty(Edge.PropertyType.SYNCHRONIZATION, syncString);
-        Nail inputNail1;
-        Nail inputNailSync;
-        Nail inputNail2;
+        final Nail inputNail1;
+        final Nail inputNailSync;
+        final Nail inputNail2;
         inputNail1 = new Nail(getX() - 40, getY() - 10);
         inputNailSync = new Nail(getX() - 60, getY());
         inputNail2 = new Nail(getX() - 40, getY() + 10);
@@ -368,12 +317,12 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
      * @return the finished edge
      */
     public Edge addRightEdge(final String syncString ,final EdgeStatus status){
-        Edge edge = new Edge(this, status);
+        final Edge edge = new Edge(this, status);
         edge.setTargetLocation(this);
         edge.setProperty(Edge.PropertyType.SYNCHRONIZATION, syncString);
-        Nail inputNail1;
-        Nail inputNailSync;
-        Nail inputNail2;
+        final Nail inputNail1;
+        final Nail inputNailSync;
+        final Nail inputNail2;
         inputNail1 = new Nail(getX() + 40, getY() - 10);
         inputNailSync = new Nail(getX() + 60, getY());
         inputNail2 = new Nail(getX() + 40, getY() + 10);
@@ -406,7 +355,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
      * Sets whether this location is locked
      * @param bool the value that isLocked is set to, true if the location is meant to be locked, false if it not
      */
-    public void setIsLocked(final boolean bool) {isLocked.setValue(bool); }
+    private void setIsLocked(final boolean bool) {isLocked.setValue(bool); }
 
     @Override
     public JsonObject serialize() {

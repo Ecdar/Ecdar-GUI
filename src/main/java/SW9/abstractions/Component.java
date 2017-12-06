@@ -16,10 +16,9 @@ import javafx.collections.ObservableList;
 import javafx.util.Pair;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Component extends HighLevelModelObject {
-    private static final String COMPONENT = "component";
+    static final String COMPONENT = "component ";
     private static final String LOCATIONS = "locations";
     private static final String EDGES = "edges";
     private static final String INCLUDE_IN_PERIODIC_CHECK = "include_in_periodic_check";
@@ -40,31 +39,12 @@ public class Component extends HighLevelModelObject {
     private final BooleanProperty declarationOpen = new SimpleBooleanProperty(false);
     private final BooleanProperty firsTimeShown = new SimpleBooleanProperty(false);
 
-
-    /**
-     * Creates a component with a random generated name but no random colouring
-     */
-    public Component() {
-        this(false);
-    }
-
-    /**
-     * Creates a componenet with a random generated name and
-     * a given boolean value that chooses whether the colour for this component is chosen at random
-     * @param name name of the component
-     * @param doRandomColor boolean that is true if the component should choose a colour at random and false if not
-     */
-    public Component(final boolean doRandomColor, final String name) {
-        this(doRandomColor);
-        setName(name);
-    }
-
     /**
      * Creates a component with a specific name and a boolean value that chooses whether the colour for this component is chosen at random
      * @param doRandomColor boolean that is true if the component should choose a colour at random and false if not
      */
     public Component(final boolean doRandomColor) {
-        setComponentId();
+        setComponentName();
 
         if(doRandomColor) {
             setRandomColor();
@@ -183,12 +163,12 @@ public class Component extends HighLevelModelObject {
         return locations;
     }
 
-    public boolean addLocation(final Location location) {
-        return locations.add(location);
+    public void addLocation(final Location location) {
+        locations.add(location);
     }
 
-    public boolean removeLocation(final Location location) {
-        return locations.remove(location);
+    public void removeLocation(final Location location) {
+        locations.remove(location);
     }
 
     public ObservableList<Edge> getEdges() {
@@ -263,15 +243,7 @@ public class Component extends HighLevelModelObject {
         return null;
     }
 
-    public boolean isFirsTimeShown() {
-        return firsTimeShown.get();
-    }
-
-    public BooleanProperty firsTimeShownProperty() {
-        return firsTimeShown;
-    }
-
-    public void setFirsTimeShown(final boolean firsTimeShown) {
+    private void setFirsTimeShown(final boolean firsTimeShown) {
         this.firsTimeShown.set(firsTimeShown);
     }
 
@@ -283,7 +255,7 @@ public class Component extends HighLevelModelObject {
         return includeInPeriodicCheck;
     }
 
-    public void setIncludeInPeriodicCheck(final boolean includeInPeriodicCheck) {
+    private void setIncludeInPeriodicCheck(final boolean includeInPeriodicCheck) {
         this.includeInPeriodicCheck.set(includeInPeriodicCheck);
     }
 
@@ -408,27 +380,11 @@ public class Component extends HighLevelModelObject {
     }
 
     /**
-     * gets the id of all systems in the project and inserts it into a set
-     * @return the set of all location ids
-     */
-    public Set<String> getComponentIds(){
-        Set<String> ids = new HashSet<>();
-
-        for(Component component : Ecdar.getProject().getComponents()){
-            if(component.getName().length() > COMPONENT.length()) {
-                ids.add(component.getName().substring(COMPONENT.length()));
-            }
-        }
-
-        return ids;
-    }
-
-    /**
      * Generate and sets a unique id for this system
      */
-    public void setComponentId() {
+    private void setComponentName() {
         for(int counter = 0; ; counter++) {
-            if(!getComponentIds().contains(String.valueOf(counter))){
+            if(!Ecdar.getProject().getComponentNames().contains(COMPONENT + counter)){
                 setName((COMPONENT + counter));
                 return;
             }
@@ -440,50 +396,43 @@ public class Component extends HighLevelModelObject {
      * if none is used generate and return a new one
      * @return universal id
      */
-    public String getLocalUniIncId(){
-        Set<String> set = new HashSet<>();
-
-        if(getUniIncId(set,this)){
-            return set.iterator().next();
-        }
-
-        for(int counter = 0; ;counter++){
-            if(!getUniIncIds().contains(String.valueOf(counter))){
-                return String.valueOf(counter);
-            }
-        }
-    }
-
-    /**
-     * Gets uni-inc ids all components in the project
-     * @return a set of component ids
-     */
-    private Set<String> getUniIncIds() {
-        Set<String> ids = new HashSet();
-
-        for (Component component : Ecdar.getProject().getComponents()){
-            getUniIncId(ids, component);
-        }
-
-        return ids;
-    }
-
-    /**
-     * Gets the id of a specific component
-     * @param ids the set in which the id is inserted
-     * @param component the component we want to extract the id from
-     * @return true if an id was added to the set, false if not
-     */
-    private boolean getUniIncId(Set<String> ids, Component component) {
-        for (Location location : component.getLocations()){
-            if (location.getType() == Location.Type.UNIVERSAL || location.getType() == Location.Type.INCONSISTENT) {
-                if(component.getName().length() > Location.ID_LENGTH) {
-                    ids.add(location.getId().substring(Location.ID_LENGTH));
+    String setUniInc(){
+        final String id = getUniIncId();
+        if(id != null){
+            return id;
+        } else {
+            for(int counter = 0; ;counter++){
+                if(!Ecdar.getProject().getUniIncIds().contains(String.valueOf(counter))){
+                    return String.valueOf(counter);
                 }
-                return true;
             }
         }
-        return false;
+    }
+
+    /**
+     * Gets the id used by universal and inconsistent locations located in this component
+     */
+    String getUniIncId() {
+        for (final Location location : getLocations()){
+            if (location.getType() == Location.Type.UNIVERSAL || location.getType() == Location.Type.INCONSISTENT) {
+                return location.getId().substring(Location.ID_LENGTH);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets the id of all locations in this component
+     * @return ids of all locations in this component
+     */
+    HashSet<String> getLocationIds() {
+        final HashSet<String> ids = new HashSet<>();
+        for (final Location location : getLocations()){
+            if(location.getType() != Location.Type.UNIVERSAL || location.getType() != Location.Type.INCONSISTENT){
+                ids.add(location.getId().substring(Location.ID_LENGTH));
+            }
+        }
+        return ids;
     }
 
     public String getDeclarationsText() {

@@ -57,7 +57,7 @@ public class Project {
         return globalDeclarations.get();
     }
 
-    public void setGlobalDeclarations(final Declarations declarations) {
+    private void setGlobalDeclarations(final Declarations declarations) {
         globalDeclarations.set(declarations);
     }
 
@@ -65,7 +65,7 @@ public class Project {
         return systemDeclarations.get();
     }
 
-    public void setSystemDeclarations(final Declarations declarations) {
+    private void setSystemDeclarations(final Declarations declarations) {
         systemDeclarations.set(declarations);
     }
 
@@ -297,5 +297,61 @@ public class Project {
         queries.clear();
 
         components.clear();
+    }
+
+    /**
+     * gets the id of all locations in the project and inserts it into a set
+     * @return the set of all location ids
+     */
+    Set<String> getLocationIds(){
+        final Set<String> ids = new HashSet<>();
+
+        for (final Component component : getComponents()) {
+            ids.addAll(component.getLocationIds());
+        }
+
+        return ids;
+    }
+
+    /**
+     * gets the id of all systems in the project and inserts it into a set
+     * @return the set of all location ids
+     */
+    HashSet<String> getSystemNames(){
+        final HashSet<String> names = new HashSet<>();
+
+        for(final SystemModel system : getSystemsProperty()){
+            names.add(system.getName());
+        }
+
+        return names;
+    }
+
+    /**
+     * Gets uni-inc ids all components in the project
+     * @return a set of component ids
+     */
+    HashSet<String> getUniIncIds() {
+        final HashSet<String> ids = new HashSet<>();
+
+        for (final Component component : getComponents()){
+            ids.add(component.getUniIncId());
+        }
+
+        return ids;
+    }
+
+    /**
+     * gets the name of all components in the project and inserts it into a set
+     * @return the set of all components
+     */
+    HashSet<String> getComponentNames(){
+        final HashSet<String> names = new HashSet<>();
+
+        for(final Component component : getComponents()){
+            names.add(component.getName());
+        }
+
+        return names;
     }
 }
