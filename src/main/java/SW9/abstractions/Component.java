@@ -147,6 +147,7 @@ public class Component extends HighLevelModelObject {
 
     /**
      * Method used for updating the inputstrings and outputstrings list
+     * Sorts the list alphabetically, ignoring case
      */
     private void updateIOList() {
         final List<String> localInputStrings = new ArrayList<>();
@@ -166,6 +167,10 @@ public class Component extends HighLevelModelObject {
                 }
             }
         }
+
+        // Sort the String alphabetically, ignoring case (e.g. all strings starting with "C" are placed together)
+        localInputStrings.sort((item1, item2) -> item1.compareToIgnoreCase(item2));
+        localOutputStrings.sort((item1, item2) -> item1.compareToIgnoreCase(item2));
 
         inputStrings.setAll(localInputStrings);
         outputStrings.setAll(localOutputStrings);
