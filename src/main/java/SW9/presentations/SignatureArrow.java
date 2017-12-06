@@ -16,6 +16,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
+/***
+ * Creates input and output arrows, that can for example be used on the side of components to show its signature
+ */
 public class SignatureArrow extends Group {
 
     private SignatureArrowController controller;
