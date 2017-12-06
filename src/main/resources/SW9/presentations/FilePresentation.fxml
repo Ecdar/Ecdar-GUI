@@ -27,7 +27,7 @@
 
             <Region minWidth="16"/>
 
-            <!-- MORE INFORMATION (REFACTOR ?) -->
+            <!-- MORE INFORMATION -->
             <JFXRippler fx:id="moreInformation" visible="false">
                 <StackPane minWidth="40" minHeight="40">
                     <FontIcon id="moreInformationIcon" iconLiteral="gmi-more-vert" iconSize="24" fill="white"/>

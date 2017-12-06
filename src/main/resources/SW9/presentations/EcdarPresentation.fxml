@@ -53,7 +53,7 @@
                         </JFXRippler>
                         <JFXRippler fx:id="switchToOutput">
                             <StackPane fx:id="inputModePane" minWidth="50" maxWidth="50" minHeight="25" maxHeight="25" onMouseClicked="#switchToOutputClicked">
-                                <ImageView fx:id="inputModeImage"  />
+                                <ImageView fx:id="inputModeImage" />
                             </StackPane>
                         </JFXRippler>
 
