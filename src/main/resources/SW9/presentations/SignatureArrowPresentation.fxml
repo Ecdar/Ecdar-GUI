@@ -21,6 +21,7 @@
                 <Group>
                         <Circle fx:id="signatureArrowCircle" styleClass="nail"/>
                         <Path fx:id="signatureArrowPath" />
+                        <Path fx:id="signatureArrowHeadPath" />
                 </Group>
         </VBox>
 

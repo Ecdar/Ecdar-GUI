@@ -15,6 +15,7 @@ import java.util.ResourceBundle;
 public class SignatureArrowController {
     public Label signatureArrowLabel;
     public Path signatureArrowPath;
+    public Path signatureArrowHeadPath;
     public Circle signatureArrowCircle;
     public VBox arrowBox;
 
