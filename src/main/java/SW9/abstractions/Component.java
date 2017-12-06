@@ -19,8 +19,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Component extends HighLevelModelObject {
-    private static final AtomicInteger hiddenId = new AtomicInteger(0); // Used to generate unique IDs
-
     private static final String COMPONENT = "component";
     private static final String LOCATIONS = "locations";
     private static final String EDGES = "edges";
@@ -92,7 +90,6 @@ public class Component extends HighLevelModelObject {
     }
 
     public Component(final JsonObject json) {
-        hiddenId.incrementAndGet();
         setFirsTimeShown(true);
 
         declarationsText = new SimpleStringProperty("");
