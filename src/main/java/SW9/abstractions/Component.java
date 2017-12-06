@@ -103,6 +103,7 @@ public class Component extends HighLevelModelObject {
         deserialize(json);
 
         initializeIOListeners();
+        updateIOList();
 
         bindReachabilityAnalysis();
     }
