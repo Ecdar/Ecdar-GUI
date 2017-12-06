@@ -116,7 +116,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     public Set<String> getLocationIds(){
         Set<String> ids = new HashSet<>();
 
-        for(Component component : Ecdar.getProject().getComponents()){
+        for (Component component : Ecdar.getProject().getComponents()) {
             getLocationIds(ids, component);
         }
 

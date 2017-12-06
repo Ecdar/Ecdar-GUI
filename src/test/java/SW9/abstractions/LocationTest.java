@@ -1,5 +1,6 @@
 package SW9.abstractions;
 
+import SW9.Ecdar;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -8,9 +9,8 @@ import org.junit.Test;
  */
 public class LocationTest {
     @Test
-    public void getNickname() {
-        final Location location = new Location();
-        location.setNickname("test");
-        Assert.assertEquals("test", location.getNickname());
+    public void getSync() {
+        Location location = new Location("test");
+        Assert.assertEquals("test", location.getId());
     }
 }
