@@ -13,7 +13,6 @@ import SW9.utility.helpers.SelectHelper;
 import SW9.utility.mouse.MouseTracker;
 import com.jfoenix.controls.JFXPopup;
 import com.jfoenix.controls.JFXRippler;
-import com.jfoenix.controls.JFXTextField;
 import javafx.animation.Interpolator;
 import javafx.animation.Transition;
 import javafx.beans.binding.DoubleBinding;
@@ -22,10 +21,10 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.layout.*;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
 import javafx.util.Duration;
@@ -55,6 +54,9 @@ public class ComponentController extends ModelController implements Initializabl
     public Label y;
     public Pane modelContainerLocation;
     public Pane modelContainerEdge;
+
+    public VBox outputSignatureContainer;
+    public VBox inputSignatureContainer;
 
     private MouseTracker mouseTracker;
     private DropDownMenu contextMenu;
@@ -88,6 +90,9 @@ public class ComponentController extends ModelController implements Initializabl
             newComponent.getBox().xProperty().bindBidirectional(root.layoutXProperty());
             newComponent.getBox().yProperty().bindBidirectional(root.layoutYProperty());
 
+            inputSignatureContainer.heightProperty().addListener((change) -> updateMaxHeight() );
+            outputSignatureContainer.heightProperty().addListener((change) -> updateMaxHeight() );
+
             // Bind the declarations of the abstraction the the view
             declarationTextArea.replaceText(0, declarationTextArea.getLength(), newComponent.getDeclarationsText());
             declarationTextArea.textProperty().addListener((observable, oldDeclaration, newDeclaration) -> newComponent.setDeclarationsText(newDeclaration));
@@ -115,7 +120,10 @@ public class ComponentController extends ModelController implements Initializabl
             initializeEdgeHandling(newComponent);
             initializeLocationHandling(newComponent);
             initializeDeclarations();
+            initializeSignature(newComponent);
+            initializeSignatureListeners(newComponent);
         });
+
 
         // The root view have been inflated, initialize the mouse tracker on it
         mouseTracker = new MouseTracker(root);
@@ -130,6 +138,80 @@ public class ComponentController extends ModelController implements Initializabl
                 errorsAndWarningsInitialized.put(component, true);
             }
         });
+    }
+
+    /***
+     * Inserts the initial edges of the component to the input/output signature
+     * @param newComponent The component that should be presented with its signature
+     */
+    private void initializeSignature(final Component newComponent) {
+        newComponent.getOutputStrings().forEach((channel) -> insertSignatureArrow(channel, EdgeStatus.OUTPUT));
+        newComponent.getInputStrings().forEach((channel) -> insertSignatureArrow(channel, EdgeStatus.INPUT));
+    }
+
+    /***
+     * Initialize the listeners, that listen for changes in the input and output edges of the presented component.
+     * The view is updated whenever an insert (deletions are also a type of insert) is reported
+     * @param newComponent The component that should be presented with its signature
+     */
+    private void initializeSignatureListeners(final Component newComponent) {
+        newComponent.getOutputStrings().addListener((ListChangeListener<String>) c -> {
+            // By clearing the container we don't have to fiddle with which elements are removed and added
+            outputSignatureContainer.getChildren().clear();
+            while (c.next()){
+                c.getAddedSubList().forEach((channel) -> insertSignatureArrow(channel, EdgeStatus.OUTPUT));
+            }
+        });
+
+        newComponent.getInputStrings().addListener((ListChangeListener<String>) c -> {
+            inputSignatureContainer.getChildren().clear();
+            while (c.next()){
+                c.getAddedSubList().forEach((channel) -> insertSignatureArrow(channel, EdgeStatus.INPUT));
+            }
+        });
+    }
+
+    /***
+     * Inserts a new {@link SW9.presentations.SignatureArrow} in the containers for either input or output signature
+     * @param channel A String with the channel name that should be shown with the arrow
+     * @param status An EdgeStatus for the type of arrow to insert
+     */
+    private void insertSignatureArrow(final String channel, final EdgeStatus status) {
+        SignatureArrow newArrow = new SignatureArrow(channel, status);
+        if(status == EdgeStatus.INPUT) {
+            inputSignatureContainer.getChildren().add(newArrow);
+        } else {
+            outputSignatureContainer.getChildren().add(newArrow);
+        }
+    }
+
+
+    /***
+     * Updates the component's height to match the input/output signature containers
+     * if the component is smaller than either of them
+     */
+    private void updateMaxHeight() {
+        // If input/outputsignature container is taller than the current component height
+        // we update the component's height to be as tall as the container
+        double maxHeight = findMaxHeight();
+        if(maxHeight > component.get().getBox().getHeight()) {
+            component.get().getBox().heightProperty().set(maxHeight);
+        }
+    }
+
+    /***
+     * Finds the max height of the input/output signature container and the component
+     * @return a double of the largest height
+     */
+
+    private double findMaxHeight() {
+        double inputHeight = inputSignatureContainer.getHeight();
+        double outputHeight = outputSignatureContainer.getHeight();
+        double componentHeight = component.get().getBox().getHeight();
+
+        double maxSignatureHeight = Math.max(outputHeight, inputHeight);
+
+        return Math.max(maxSignatureHeight, componentHeight);
     }
 
     private void initializeNoIncomingEdgesWarning() {

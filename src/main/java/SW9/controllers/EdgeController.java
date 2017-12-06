@@ -359,6 +359,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                                 true
                         );
 
+
                         dropDownMenu.addMenuElement(getChangeStatusMenuElement(dropDownMenu));
 
                         dropDownMenu.addSpacerElement();
@@ -393,10 +394,9 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                             }, "Deleted edge " + getEdge(), "delete");
                         });
 
-                        dropDownMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX(), event.getY());
-
                         DropDownMenu.x = CanvasPresentation.mouseTracker.getGridX();
                         DropDownMenu.y = CanvasPresentation.mouseTracker.getGridY();
+                        dropDownMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX(), event.getY());
 
                     } else if ((event.isShiftDown() && event.isPrimaryButtonDown()) || event.isMiddleButtonDown()) {
                         final double nailX = CanvasPresentation.mouseTracker.gridXProperty().subtract(getComponent().getBox().xProperty()).doubleValue();
