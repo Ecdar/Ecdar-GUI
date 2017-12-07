@@ -298,4 +298,59 @@ public class Project {
 
         components.clear();
     }
+
+    /**
+     * gets the id of all locations in the project and inserts it into a set
+     * @return the set of all location ids
+     */
+    Set<String> getLocationIds(){
+        final Set<String> ids = new HashSet<>();
+
+        for (final Component component : getComponents()) {
+            ids.addAll(component.getLocationIds());
+        }
+
+        return ids;
+    }
+
+    /**
+     * gets the id of all systems in the project and inserts it into a set
+     * @return the set of all system names
+     */
+    HashSet<String> getSystemNames(){
+        final HashSet<String> names = new HashSet<>();
+
+        for(final SystemModel system : getSystemsProperty()){
+            names.add(system.getName());
+        }
+
+        return names;
+    }
+
+    /**
+     * Gets universal/inconsistent ids for all components in the project
+     * @return a set of universal/inconsistent ids
+     */
+    HashSet<String> getUniIncIds() {
+        final HashSet<String> ids = new HashSet<>();
+        for (final Component component : getComponents()){
+            ids.add(component.getUniIncId());
+        }
+
+        return ids;
+    }
+
+    /**
+     * Gets the name of all components in the project and inserts it into a set
+     * @return the set of all component names
+     */
+    HashSet<String> getComponentNames(){
+        final HashSet<String> names = new HashSet<>();
+
+        for(final Component component : getComponents()){
+            names.add(component.getName());
+        }
+
+        return names;
+    }
 }

@@ -16,12 +16,9 @@ import javafx.collections.ObservableList;
 import javafx.util.Pair;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Component extends HighLevelModelObject {
-    private static final AtomicInteger hiddenId = new AtomicInteger(0); // Used to generate unique IDs
-    private static final AtomicInteger atomicComponentId = new AtomicInteger(0);
-
+    static final String COMPONENT = "Component";
     private static final String LOCATIONS = "locations";
     private static final String EDGES = "edges";
     private static final String INCLUDE_IN_PERIODIC_CHECK = "include_in_periodic_check";
@@ -40,36 +37,15 @@ public class Component extends HighLevelModelObject {
     // Styling properties
     private final Box box = new Box();
     private final BooleanProperty declarationOpen = new SimpleBooleanProperty(false);
-
     private final BooleanProperty firsTimeShown = new SimpleBooleanProperty(false);
-
-    //Inconsistent and Universal integer
-    private int componentId;
-
-    /**
-     * Creates a component with a random generated name but no random colouring
-     */
-    public Component() {
-        this(false);
-    }
-
-    /**
-     * Creates a componenet with a random generated name and
-     * a given boolean value that chooses whether the colour for this component is chosen at random
-     * @param doRandomColor boolean that is true if the component should choose a colour at random and false if not
-     */
-    public Component(final boolean doRandomColor) {
-        this("Component" + hiddenId.getAndIncrement(), doRandomColor);
-    }
 
     /**
      * Creates a component with a specific name and a boolean value that chooses whether the colour for this component is chosen at random
-     * @param name name of the componenet
      * @param doRandomColor boolean that is true if the component should choose a colour at random and false if not
      */
-    public Component(final String name, final boolean doRandomColor) {
-        setName(name);
-        componentId = atomicComponentId.getAndIncrement();
+    public Component(final boolean doRandomColor) {
+        setComponentName();
+
         if(doRandomColor) {
             setRandomColor();
         }
@@ -94,8 +70,6 @@ public class Component extends HighLevelModelObject {
     }
 
     public Component(final JsonObject json) {
-        hiddenId.incrementAndGet();
-        componentId = atomicComponentId.getAndIncrement();
         setFirsTimeShown(true);
 
         declarationsText = new SimpleStringProperty("");
@@ -422,8 +396,61 @@ public class Component extends HighLevelModelObject {
         return outputStrings;
     }
 
-    public int getComponentId() {
-        return componentId;
+    /**
+     * Generate and sets a unique id for this system
+     */
+    private void setComponentName() {
+        for(int counter = 1; ; counter++) {
+            if(!Ecdar.getProject().getComponentNames().contains(COMPONENT + counter)){
+                setName((COMPONENT + counter));
+                return;
+            }
+        }
+    }
+
+    /**
+     * Generates an id to be used by universal and inconsistent locations in this component,
+     * if one has already been generated, return that instead
+     * @return generated universal/inconsistent id
+     */
+    String generateUniIncId(){
+        final String id = getUniIncId();
+        if(id != null){
+            return id;
+        } else {
+            for(int counter = 0; ;counter++){
+                if(!Ecdar.getProject().getUniIncIds().contains(String.valueOf(counter))){
+                    return String.valueOf(counter);
+                }
+            }
+        }
+    }
+
+    /**
+     * Gets the id used by universal and inconsistent locations located in this component,
+     * if neither universal nor inconsistent locations exist in this component it returns null
+     */
+    String getUniIncId() {
+        for (final Location location : getLocations()){
+            if (location.getType() == Location.Type.UNIVERSAL || location.getType() == Location.Type.INCONSISTENT) {
+                return location.getId().substring(Location.ID_LETTER_LENGTH);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets the id of all locations in this component
+     * @return ids of all locations in this component
+     */
+    HashSet<String> getLocationIds() {
+        final HashSet<String> ids = new HashSet<>();
+        for (final Location location : getLocations()){
+            if(location.getType() != Location.Type.UNIVERSAL || location.getType() != Location.Type.INCONSISTENT){
+                ids.add(location.getId().substring(Location.ID_LETTER_LENGTH));
+            }
+        }
+        return ids;
     }
 
     public String getDeclarationsText() {
