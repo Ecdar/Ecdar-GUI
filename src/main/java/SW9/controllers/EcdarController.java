@@ -278,11 +278,23 @@ public class EcdarController implements Initializable {
         });
     }
 
-        initializeTabPane();
-        initializeStatusBar();
-        initializeMessages();
-        initializeMenuBar();
-        initializeReachabilityAnalysisThread();
+    /**
+     * Handles the change of color
+     * @param enabledColor The new color
+     * @param previousColor The color there were before
+     */
+    public void changeColor(final EnabledColor enabledColor,
+                            final List<Pair<SelectHelper.ItemSelectable, EnabledColor>> previousColor)
+    {
+        UndoRedoStack.pushAndPerform(() -> { // Perform
+            SelectHelper.getSelectedElements().forEach(selectable -> {
+                selectable.color(enabledColor.color, enabledColor.intensity);
+            });
+        }, () -> { // Undo
+            previousColor.forEach(selectableEnabledColorPair -> {
+                selectableEnabledColorPair.getKey().color(selectableEnabledColorPair.getValue().color, selectableEnabledColorPair.getValue().intensity);
+            });
+        }, String.format("Changed the color of %d elements to %s", previousColor.size(), enabledColor.color.name()), "color-lens");
     }
 
     /**
