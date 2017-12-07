@@ -10,19 +10,14 @@ import SW9.utility.helpers.MouseTrackable;
 import SW9.utility.helpers.SelectHelper;
 import SW9.utility.mouse.MouseTracker;
 import javafx.animation.*;
-import javafx.beans.NamedArg;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.*;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.JavaFXBuilderFactory;
 import javafx.scene.Group;
 import javafx.scene.control.Label;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.shape.*;
 import javafx.util.Duration;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -58,41 +53,27 @@ public class LocationPresentation extends Group implements MouseTrackable, Selec
 
     public LocationPresentation(final Location location, final Component component, final boolean interactable) {
         this.interactable = interactable;
-        final URL url = this.getClass().getResource("LocationPresentation.fxml");
+        controller = new EcdarFXMLLoader().loadAndGetController("LocationPresentation.fxml", this);
 
-        final FXMLLoader fxmlLoader = new FXMLLoader();
-        fxmlLoader.setLocation(url);
-        fxmlLoader.setBuilderFactory(new JavaFXBuilderFactory());
+        // Bind the component with the one of the controller
+        controller.setComponent(component);
 
-        try {
-            fxmlLoader.setRoot(this);
-            fxmlLoader.load(url.openStream());
+        // Bind the location with the one of the controller
+        controller.setLocation(location);
 
-            controller = fxmlLoader.getController();
+        controller.initializeInvalidNameError();
 
-            // Bind the component with the one of the controller
-            controller.setComponent(component);
-
-            // Bind the location with the one of the controller
-            controller.setLocation(location);
-
-            controller.initializeInvalidNameError();
-
-            initializeIdLabel();
-            initializeTypeGraphics();
-            initializeLocationShapes();
-            initializeTags();
-            initializeInitialAnimation();
-            initializeHoverAnimationEntered();
-            initializeHoverAnimationExited();
-            initializeDeleteShakeAnimation();
-            initializeShakeAnimation();
-            initializeCircle();
-            initializeReachabilityStyle();
-
-        } catch (final IOException ioe) {
-            throw new IllegalStateException(ioe);
-        }
+        initializeIdLabel();
+        initializeTypeGraphics();
+        initializeLocationShapes();
+        initializeTags();
+        initializeInitialAnimation();
+        initializeHoverAnimationEntered();
+        initializeHoverAnimationExited();
+        initializeDeleteShakeAnimation();
+        initializeShakeAnimation();
+        initializeCircle();
+        initializeReachabilityStyle();
     }
 
     private void initializeReachabilityStyle() {

@@ -4,20 +4,13 @@ import SW9.abstractions.Component;
 import SW9.abstractions.Edge;
 import SW9.abstractions.Location;
 import SW9.abstractions.Nail;
-import SW9.controllers.CanvasController;
 import SW9.controllers.ComponentController;
 import SW9.controllers.ModelController;
-import SW9.utility.UndoRedoStack;
 import SW9.utility.colors.Color;
 import SW9.utility.helpers.MouseTrackable;
 import SW9.utility.helpers.SelectHelper;
 import SW9.utility.mouse.MouseTracker;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.JavaFXBuilderFactory;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
@@ -26,14 +19,11 @@ import javafx.scene.shape.*;
 import org.fxmisc.richtext.StyleSpans;
 import org.fxmisc.richtext.StyleSpansBuilder;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -50,39 +40,26 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
     private final List<BiConsumer<Color, Color.Intensity>> updateColorDelegates = new ArrayList<>();
 
     public ComponentPresentation(final Component component) {
-        final URL location = this.getClass().getResource("ComponentPresentation.fxml");
+        controller = new EcdarFXMLLoader().loadAndGetController("ComponentPresentation.fxml", this);
+        controller.setComponent(component);
 
-        final FXMLLoader fxmlLoader = new FXMLLoader();
-        fxmlLoader.setLocation(location);
-        fxmlLoader.setBuilderFactory(new JavaFXBuilderFactory());
+        super.initialize(component.getBox());
 
-        try {
-            fxmlLoader.setRoot(this);
-            fxmlLoader.load(location.openStream());
+        // Initialize methods that is sensitive to width and height
+        final Runnable onUpdateSize = () -> {
+            initializeToolbar();
+            initializeFrame();
+            initializeBackground();
+        };
 
-            controller = fxmlLoader.getController();
-            controller.setComponent(component);
+        onUpdateSize.run();
 
-            super.initialize(component.getBox());
+        // Re run initialisation on update of width and height property
+        component.getBox().widthProperty().addListener(observable -> onUpdateSize.run());
+        component.getBox().heightProperty().addListener(observable -> onUpdateSize.run());
 
-            // Initialize methods that is sensitive to width and height
-            final Runnable onUpdateSize = () -> {
-                initializeToolbar();
-                initializeFrame();
-                initializeBackground();
-            };
-
-            onUpdateSize.run();
-
-            // Re run initialisation on update of width and height property
-            component.getBox().widthProperty().addListener(observable -> onUpdateSize.run());
-            component.getBox().heightProperty().addListener(observable -> onUpdateSize.run());
-
-            controller.declarationTextArea.textProperty().addListener((obs, oldText, newText) ->
-                    controller.declarationTextArea.setStyleSpans(0, computeHighlighting(newText)));
-        } catch (final IOException ioe) {
-            throw new IllegalStateException(ioe);
-        }
+        controller.declarationTextArea.textProperty().addListener((obs, oldText, newText) ->
+                controller.declarationTextArea.setStyleSpans(0, computeHighlighting(newText)));
     }
 
     public static StyleSpans<Collection<String>> computeHighlighting(final String text) {
