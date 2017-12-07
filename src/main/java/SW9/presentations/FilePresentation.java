@@ -8,8 +8,6 @@ import SW9.controllers.FileController;
 import SW9.utility.colors.Color;
 import com.jfoenix.controls.JFXRippler;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.JavaFXBuilderFactory;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.control.Label;
@@ -17,8 +15,6 @@ import javafx.scene.layout.*;
 import javafx.scene.shape.Circle;
 import org.kordamp.ikonli.javafx.FontIcon;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.function.BiConsumer;
 
 public class FilePresentation extends AnchorPane {

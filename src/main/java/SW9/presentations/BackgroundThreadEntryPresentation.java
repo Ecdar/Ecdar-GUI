@@ -4,14 +4,9 @@ package SW9.presentations;
 import SW9.utility.colors.Color;
 import com.jfoenix.controls.JFXRippler;
 import com.jfoenix.controls.JFXSpinner;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.JavaFXBuilderFactory;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
-
-import java.io.IOException;
-import java.net.URL;
 
 import static java.lang.Thread.State.TERMINATED;
 

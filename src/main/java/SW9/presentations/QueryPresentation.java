@@ -10,16 +10,12 @@ import com.jfoenix.controls.JFXRippler;
 import com.jfoenix.controls.JFXSpinner;
 import com.jfoenix.controls.JFXTextField;
 import javafx.beans.binding.When;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.JavaFXBuilderFactory;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import org.kordamp.ikonli.javafx.FontIcon;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.function.Consumer;
 
 import static javafx.scene.paint.Color.TRANSPARENT;

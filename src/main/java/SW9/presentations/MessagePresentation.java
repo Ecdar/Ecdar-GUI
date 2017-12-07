@@ -10,15 +10,10 @@ import SW9.controllers.CanvasController;
 import SW9.utility.helpers.SelectHelper;
 import javafx.beans.InvalidationListener;
 import javafx.collections.FXCollections;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.JavaFXBuilderFactory;
 import javafx.scene.Cursor;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
-
-import java.io.IOException;
-import java.net.URL;
 
 public class MessagePresentation extends HBox {
 

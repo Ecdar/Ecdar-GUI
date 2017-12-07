@@ -13,14 +13,10 @@ import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.JavaFXBuilderFactory;
 import javafx.scene.Group;
 import javafx.scene.control.Label;
 import javafx.scene.shape.Line;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.function.Consumer;
 
 import static javafx.util.Duration.millis;

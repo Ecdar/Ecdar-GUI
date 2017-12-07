@@ -4,14 +4,9 @@ import SW9.controllers.ProjectPaneController;
 import SW9.utility.colors.Color;
 import SW9.utility.helpers.DropShadowHelper;
 import com.jfoenix.controls.JFXRippler;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.JavaFXBuilderFactory;
 import javafx.geometry.Insets;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.*;
-
-import java.io.IOException;
-import java.net.URL;
 
 public class ProjectPanePresentation extends StackPane {
 

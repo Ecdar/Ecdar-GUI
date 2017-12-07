@@ -1,7 +1,6 @@
 package SW9.presentations;
 
 import SW9.abstractions.Component;
-import SW9.abstractions.Nail;
 import SW9.controllers.CanvasController;
 import SW9.utility.UndoRedoStack;
 import SW9.utility.colors.Color;
@@ -13,8 +12,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableBooleanValue;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.JavaFXBuilderFactory;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.control.Label;
@@ -23,8 +20,6 @@ import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.function.BiConsumer;
 
 import static SW9.presentations.Grid.GRID_SIZE;

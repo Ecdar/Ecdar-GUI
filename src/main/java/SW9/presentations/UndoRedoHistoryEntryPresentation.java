@@ -3,16 +3,11 @@ package SW9.presentations;
 import SW9.utility.UndoRedoStack;
 import SW9.utility.colors.Color;
 import com.jfoenix.controls.JFXRippler;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.JavaFXBuilderFactory;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Circle;
 import org.kordamp.ikonli.javafx.FontIcon;
-
-import java.io.IOException;
-import java.net.URL;
 
 public class UndoRedoHistoryEntryPresentation extends AnchorPane {
 

@@ -4,8 +4,6 @@ import SW9.abstractions.SystemModel;
 import SW9.controllers.ModelController;
 import SW9.controllers.SystemController;
 import SW9.utility.colors.Color;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.JavaFXBuilderFactory;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.layout.*;
@@ -14,8 +12,6 @@ import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.function.BiConsumer;
 
 /**

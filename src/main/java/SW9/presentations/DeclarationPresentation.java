@@ -2,12 +2,6 @@ package SW9.presentations;
 
 import SW9.abstractions.Declarations;
 import SW9.controllers.DeclarationsController;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.JavaFXBuilderFactory;
-import javafx.scene.layout.StackPane;
-
-import java.io.IOException;
-import java.net.URL;
 
 /**
  * Presentation for overall declarations.
