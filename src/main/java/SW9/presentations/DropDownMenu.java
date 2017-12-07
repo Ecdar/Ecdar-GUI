@@ -118,6 +118,9 @@ public class DropDownMenu {
         list.getChildren().add(element.getItem());
     }
 
+    /**
+     * Adds a spacing element to the DropDownMenu
+     */
     public void addSpacerElement() {
         final Region space1 = new Region();
         space1.setMinHeight(8);
@@ -135,6 +138,11 @@ public class DropDownMenu {
         space2.setOnMouseEntered(event -> canIShowSubMenu.set(false));
     }
 
+    /**
+     * Adds a color picker to the DropDownMenu with the title color
+     * @param hasColor the current color
+     * @param consumer A consumer for the color property
+     */
     public void addColorPicker(final HasColor hasColor, final BiConsumer<Color, Color.Intensity> consumer) {
         addListElement("Color");
 
