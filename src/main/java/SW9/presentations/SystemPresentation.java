@@ -25,20 +25,8 @@ public class SystemPresentation extends ModelPresentation {
     private final SystemController controller;
 
     public SystemPresentation(final SystemModel system) {
-        final URL url = this.getClass().getResource("SystemPresentation.fxml");
+        controller = new EcdarFXMLLoader().loadAndGetController("SystemPresentation.fxml", this);
 
-        final FXMLLoader fxmlLoader = new FXMLLoader();
-        fxmlLoader.setLocation(url);
-        fxmlLoader.setBuilderFactory(new JavaFXBuilderFactory());
-
-        fxmlLoader.setRoot(this);
-        try {
-            fxmlLoader.load(url.openStream());
-        } catch (final IOException e) {
-            throw new IllegalStateException(e);
-        }
-
-        controller = fxmlLoader.getController();
         controller.setSystem(system);
 
         super.initialize(system.getBox());

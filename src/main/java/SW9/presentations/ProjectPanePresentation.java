@@ -18,28 +18,14 @@ public class ProjectPanePresentation extends StackPane {
     private final ProjectPaneController controller;
 
     public ProjectPanePresentation() {
-        final URL location = this.getClass().getResource("ProjectPanePresentation.fxml");
+        controller = new EcdarFXMLLoader().loadAndGetController("ProjectPanePresentation.fxml", this);
 
-        final FXMLLoader fxmlLoader = new FXMLLoader();
-        fxmlLoader.setLocation(location);
-        fxmlLoader.setBuilderFactory(new JavaFXBuilderFactory());
+        initializeRightBorder();
+        initializeBackground();
+        initializeToolbar();
 
-        try {
-            fxmlLoader.setRoot(this);
-            fxmlLoader.load(location.openStream());
-
-            controller = fxmlLoader.getController();
-
-            initializeRightBorder();
-            initializeBackground();
-            initializeToolbar();
-
-            initializeToolbarButton(controller.createComponent);
-            Tooltip.install(controller.createComponent, new Tooltip("Add component"));
-
-        } catch (final IOException ioe) {
-            throw new IllegalStateException(ioe);
-        }
+        initializeToolbarButton(controller.createComponent);
+        Tooltip.install(controller.createComponent, new Tooltip("Add component"));
     }
 
     private void initializeRightBorder() {

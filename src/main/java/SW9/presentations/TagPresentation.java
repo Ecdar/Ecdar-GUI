@@ -48,24 +48,12 @@ public class TagPresentation extends StackPane {
     private static double TAG_HEIGHT = 1.6 * GRID_SIZE;
 
     public TagPresentation() {
-        final URL location = this.getClass().getResource("TagPresentation.fxml");
+        new EcdarFXMLLoader().loadAndGetController("TagPresentation.fxml", this);
 
-        final FXMLLoader fxmlLoader = new FXMLLoader();
-        fxmlLoader.setLocation(location);
-        fxmlLoader.setBuilderFactory(new JavaFXBuilderFactory());
-
-        try {
-            fxmlLoader.setRoot(this);
-            fxmlLoader.load(location.openStream());
-
-            initializeShape();
-            initializeLabel();
-            initializeMouseTransparency();
-            initializeTextFocusHandler();
-
-        } catch (final IOException ioe) {
-            throw new IllegalStateException(ioe);
-        }
+        initializeShape();
+        initializeLabel();
+        initializeMouseTransparency();
+        initializeTextFocusHandler();
     }
 
     private void initializeTextFocusHandler() {
