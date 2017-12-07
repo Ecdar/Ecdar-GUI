@@ -275,15 +275,7 @@ public class EcdarPresentation extends StackPane {
                     previousColor.add(new Pair<>(selectable, new EnabledColor(selectable.getColor(), selectable.getColorIntensity())));
                 });
 
-                UndoRedoStack.pushAndPerform(() -> { // Perform
-                    SelectHelper.getSelectedElements().forEach(selectable -> {
-                        selectable.color(color.color, color.intensity);
-                    });
-                }, () -> { // Undo
-                    previousColor.forEach(selectableEnabledColorPair -> {
-                        selectableEnabledColorPair.getKey().color(selectableEnabledColorPair.getValue().color, selectableEnabledColorPair.getValue().intensity);
-                    });
-                }, String.format("Changed the color of %d elements to %s", previousColor.size(), color.color.name()), "color-lens");
+                controller.changeColor(color, previousColor);
 
                 popup.hide();
                 SelectHelper.clearSelectedElements();

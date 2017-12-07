@@ -187,6 +187,23 @@ public class EcdarController implements Initializable {
 
         initializeEdgeStatusHandling();
 
+        initializeKeybindings();
+        initializeTabPane();
+        initializeStatusBar();
+        initializeMessages();
+        initializeMenuBar();
+        initializeReachabilityAnalysisThread();
+    }
+
+    /**
+     * Initializes the keybinding for:
+     *  - New component
+     *  - Nudging with arrow keys
+     *  - Nudging with WASD
+     *  - Deletion
+     *  - Colors
+     */
+    private void initializeKeybindings() {
         //Press ctrl+N or cmd+N to create a new component. The canvas changes to this new component
         KeyCodeCombination combination = new KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN);
         Keybind binding = new Keybind(combination, (event) -> {
@@ -202,66 +219,82 @@ public class EcdarController implements Initializable {
         KeyboardTracker.registerKeybind(KeyboardTracker.CREATE_COMPONENT, binding);
 
         // Keybind for nudging the selected elements
-        KeyboardTracker.registerKeybind(KeyboardTracker.NUDGE_UP, new Keybind(new KeyCodeCombination(KeyCode.UP), (event) -> {
+        KeyboardTracker.registerKeybind(KeyboardTracker.NUDGE_UP,
+                new Keybind(new KeyCodeCombination(KeyCode.UP), (event) -> {
             event.consume();
             nudgeSelected(NudgeDirection.UP);
         }));
 
-        KeyboardTracker.registerKeybind(KeyboardTracker.NUDGE_DOWN, new Keybind(new KeyCodeCombination(KeyCode.DOWN), (event) -> {
+        KeyboardTracker.registerKeybind(KeyboardTracker.NUDGE_DOWN,
+                new Keybind(new KeyCodeCombination(KeyCode.DOWN), (event) -> {
             event.consume();
             nudgeSelected(NudgeDirection.DOWN);
         }));
 
-        KeyboardTracker.registerKeybind(KeyboardTracker.NUDGE_LEFT, new Keybind(new KeyCodeCombination(KeyCode.LEFT), (event) -> {
+        KeyboardTracker.registerKeybind(KeyboardTracker.NUDGE_LEFT,
+                new Keybind(new KeyCodeCombination(KeyCode.LEFT), (event) -> {
             event.consume();
             nudgeSelected(NudgeDirection.LEFT);
         }));
 
-        KeyboardTracker.registerKeybind(KeyboardTracker.NUDGE_RIGHT, new Keybind(new KeyCodeCombination(KeyCode.RIGHT), (event) -> {
+        KeyboardTracker.registerKeybind(KeyboardTracker.NUDGE_RIGHT,
+                new Keybind(new KeyCodeCombination(KeyCode.RIGHT), (event) -> {
             event.consume();
             nudgeSelected(NudgeDirection.RIGHT);
         }));
 
-        KeyboardTracker.registerKeybind(KeyboardTracker.DESELECT, new Keybind(new KeyCodeCombination(KeyCode.ESCAPE), (event) -> {
+        KeyboardTracker.registerKeybind(KeyboardTracker.DESELECT,
+                new Keybind(new KeyCodeCombination(KeyCode.ESCAPE), (event) -> {
             SelectHelper.clearSelectedElements();
         }));
 
-        KeyboardTracker.registerKeybind(KeyboardTracker.NUDGE_W, new Keybind(new KeyCodeCombination(KeyCode.W), () -> nudgeSelected(NudgeDirection.UP)));
-        KeyboardTracker.registerKeybind(KeyboardTracker.NUDGE_A, new Keybind(new KeyCodeCombination(KeyCode.A), () -> nudgeSelected(NudgeDirection.LEFT)));
-        KeyboardTracker.registerKeybind(KeyboardTracker.NUDGE_S, new Keybind(new KeyCodeCombination(KeyCode.S), () -> nudgeSelected(NudgeDirection.DOWN)));
-        KeyboardTracker.registerKeybind(KeyboardTracker.NUDGE_D, new Keybind(new KeyCodeCombination(KeyCode.D), () -> nudgeSelected(NudgeDirection.RIGHT)));
+        KeyboardTracker.registerKeybind(KeyboardTracker.NUDGE_W,
+                new Keybind(new KeyCodeCombination(KeyCode.W), () -> nudgeSelected(NudgeDirection.UP)));
+        KeyboardTracker.registerKeybind(KeyboardTracker.NUDGE_A,
+                new Keybind(new KeyCodeCombination(KeyCode.A), () -> nudgeSelected(NudgeDirection.LEFT)));
+        KeyboardTracker.registerKeybind(KeyboardTracker.NUDGE_S,
+                new Keybind(new KeyCodeCombination(KeyCode.S), () -> nudgeSelected(NudgeDirection.DOWN)));
+        KeyboardTracker.registerKeybind(KeyboardTracker.NUDGE_D,
+                new Keybind(new KeyCodeCombination(KeyCode.D), () -> nudgeSelected(NudgeDirection.RIGHT)));
 
         // Keybind for deleting the selected elements
-        KeyboardTracker.registerKeybind(KeyboardTracker.DELETE_SELECTED, new Keybind(new KeyCodeCombination(KeyCode.DELETE), this::deleteSelectedClicked));
+        KeyboardTracker.registerKeybind(KeyboardTracker.DELETE_SELECTED,
+                new Keybind(new KeyCodeCombination(KeyCode.DELETE), this::deleteSelectedClicked));
 
         // Keybinds for coloring the selected elements
         EnabledColor.enabledColors.forEach(enabledColor -> {
-            KeyboardTracker.registerKeybind(KeyboardTracker.COLOR_SELECTED + "_" + enabledColor.keyCode.getName(), new Keybind(new KeyCodeCombination(enabledColor.keyCode), () -> {
+            KeyboardTracker.registerKeybind(KeyboardTracker.COLOR_SELECTED + "_" + enabledColor.keyCode.getName(),
+                    new Keybind(new KeyCodeCombination(enabledColor.keyCode), () -> {
+
                 final List<Pair<SelectHelper.ItemSelectable, EnabledColor>> previousColor = new ArrayList<>();
 
                 SelectHelper.getSelectedElements().forEach(selectable -> {
-                    previousColor.add(new Pair<>(selectable, new EnabledColor(selectable.getColor(), selectable.getColorIntensity())));
+                    previousColor.add(new Pair<>(selectable,
+                            new EnabledColor(selectable.getColor(), selectable.getColorIntensity())));
                 });
-
-                UndoRedoStack.pushAndPerform(() -> { // Perform
-                    SelectHelper.getSelectedElements().forEach(selectable -> {
-                        selectable.color(enabledColor.color, enabledColor.intensity);
-                    });
-                }, () -> { // Undo
-                    previousColor.forEach(selectableEnabledColorPair -> {
-                        selectableEnabledColorPair.getKey().color(selectableEnabledColorPair.getValue().color, selectableEnabledColorPair.getValue().intensity);
-                    });
-                }, String.format("Changed the color of %d elements to %s", previousColor.size(), enabledColor.color.name()), "color-lens");
-
+                changeColor(enabledColor, previousColor);
                 SelectHelper.clearSelectedElements();
             }));
         });
+    }
 
-        initializeTabPane();
-        initializeStatusBar();
-        initializeMessages();
-        initializeMenuBar();
-        initializeReachabilityAnalysisThread();
+    /**
+     * Handles the change of color
+     * @param enabledColor The new color
+     * @param previousColor The color there were before
+     */
+    public void changeColor(final EnabledColor enabledColor,
+                            final List<Pair<SelectHelper.ItemSelectable, EnabledColor>> previousColor)
+    {
+        UndoRedoStack.pushAndPerform(() -> { // Perform
+            SelectHelper.getSelectedElements().forEach(selectable -> {
+                selectable.color(enabledColor.color, enabledColor.intensity);
+            });
+        }, () -> { // Undo
+            previousColor.forEach(selectableEnabledColorPair -> {
+                selectableEnabledColorPair.getKey().color(selectableEnabledColorPair.getValue().color, selectableEnabledColorPair.getValue().intensity);
+            });
+        }, String.format("Changed the color of %d elements to %s", previousColor.size(), enabledColor.color.name()), "color-lens");
     }
 
     /**
