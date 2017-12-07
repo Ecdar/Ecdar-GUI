@@ -34,7 +34,7 @@ public abstract class ModelController {
     /**
      * Shows the border and background.
      */
-    void showBorderAndBorder() {
+    void showBorderAndBackground() {
         frame.setVisible(true);
         topLeftLine.setVisible(true);
         background.setVisible(true);
