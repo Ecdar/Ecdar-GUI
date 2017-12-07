@@ -91,7 +91,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
         return nickname.get();
     }
 
-    private void setNickname(final String nickname) {
+    public void setNickname(final String nickname) {
         this.nickname.set(nickname);
     }
 
@@ -131,7 +131,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
         return invariant.get();
     }
 
-    private void setInvariant(final String invariant) {
+    public void setInvariant(final String invariant) {
         this.invariant.set(invariant);
     }
 
@@ -234,7 +234,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
         return nicknameX.get();
     }
 
-    private void setNicknameX(final double nicknameX) {
+    public void setNicknameX(final double nicknameX) {
         this.nicknameX.set(nicknameX);
     }
 
@@ -246,7 +246,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
         return nicknameY.get();
     }
 
-    private void setNicknameY(final double nicknameY) {
+    public void setNicknameY(final double nicknameY) {
         this.nicknameY.set(nicknameY);
     }
 
@@ -258,7 +258,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
         return invariantX.get();
     }
 
-    private void setInvariantX(final double invariantX) {
+    public void setInvariantX(final double invariantX) {
         this.invariantX.set(invariantX);
     }
 
@@ -270,7 +270,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
         return invariantY.get();
     }
 
-    private void setInvariantY(final double invariantY) {
+    public void setInvariantY(final double invariantY) {
         EcdarController.runReachabilityAnalysis();
         this.invariantY.set(invariantY);
     }
@@ -355,7 +355,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
      * Sets whether this location is locked
      * @param bool the value that isLocked is set to, true if the location is meant to be locked, false if it not
      */
-    private void setIsLocked(final boolean bool) {isLocked.setValue(bool); }
+    public void setIsLocked(final boolean bool) {isLocked.setValue(bool); }
 
     @Override
     public JsonObject serialize() {

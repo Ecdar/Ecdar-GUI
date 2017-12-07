@@ -90,9 +90,6 @@ public class Component extends HighLevelModelObject {
         final ChangeListener<Object> listener = (observable, oldValue, newValue) -> updateIOList();
 
         edges.addListener((ListChangeListener<Edge>) c -> {
-            // Update the list so empty I/O status is also added to I/OLists
-            updateIOList();
-
             while(c.next()) {
                 for (final Edge e : c.getAddedSubList()) {
                     addSyncListener(listener, e);
@@ -172,12 +169,12 @@ public class Component extends HighLevelModelObject {
         return locations;
     }
 
-    public void addLocation(final Location location) {
-        locations.add(location);
+    public boolean addLocation(final Location location) {
+        return locations.add(location);
     }
 
-    public void removeLocation(final Location location) {
-        locations.remove(location);
+    public boolean removeLocation(final Location location) {
+        return locations.remove(location);
     }
 
     public ObservableList<Edge> getEdges() {
@@ -252,7 +249,15 @@ public class Component extends HighLevelModelObject {
         return null;
     }
 
-    private void setFirsTimeShown(final boolean firsTimeShown) {
+    public boolean isFirsTimeShown() {
+        return firsTimeShown.get();
+    }
+
+    public BooleanProperty firsTimeShownProperty() {
+        return firsTimeShown;
+    }
+
+    public void setFirsTimeShown(final boolean firsTimeShown) {
         this.firsTimeShown.set(firsTimeShown);
     }
 
@@ -386,6 +391,22 @@ public class Component extends HighLevelModelObject {
 
     public ObservableList<String> getOutputStrings() {
         return outputStrings;
+    }
+
+    /**
+     * gets the id of all systems in the project and inserts it into a set
+     * @return the set of all location ids
+     */
+    public Set<String> getComponentIds(){
+        Set<String> ids = new HashSet<>();
+
+        for(Component component : Ecdar.getProject().getComponents()){
+            if(component.getName().length() > COMPONENT.length()) {
+                ids.add(component.getName().substring(COMPONENT.length()));
+            }
+        }
+
+        return ids;
     }
 
     /**

@@ -57,7 +57,7 @@ public class Project {
         return globalDeclarations.get();
     }
 
-    private void setGlobalDeclarations(final Declarations declarations) {
+    public void setGlobalDeclarations(final Declarations declarations) {
         globalDeclarations.set(declarations);
     }
 
@@ -65,7 +65,7 @@ public class Project {
         return systemDeclarations.get();
     }
 
-    private void setSystemDeclarations(final Declarations declarations) {
+    public void setSystemDeclarations(final Declarations declarations) {
         systemDeclarations.set(declarations);
     }
 
