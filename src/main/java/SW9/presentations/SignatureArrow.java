@@ -1,8 +1,12 @@
 package SW9.presentations;
 
+import SW9.abstractions.Component;
 import SW9.abstractions.Edge;
 import SW9.abstractions.EdgeStatus;
 import SW9.controllers.SignatureArrowController;
+import SW9.utility.colors.Color;
+import SW9.utility.Highlightable;
+import javafx.collections.ListChangeListener;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.geometry.Pos;
@@ -19,7 +23,7 @@ import java.util.List;
 /***
  * Creates input and output arrows, that can for example be used on the side of components to show its signature
  */
-public class SignatureArrow extends Group {
+public class SignatureArrow extends Group implements Highlightable {
 
     private SignatureArrowController controller;
 
@@ -28,8 +32,9 @@ public class SignatureArrow extends Group {
      * an input or output arrow
      * @param edgeName The string to show in the arrow's label
      * @param edgeStatus The EdgeStatus of the arrow
+     * @param component The Component where the edge is located
      */
-    public SignatureArrow(final String edgeName, final EdgeStatus edgeStatus){
+    public SignatureArrow(final String edgeName, final EdgeStatus edgeStatus, final Component component){
 
         final URL location = this.getClass().getResource("SignatureArrowPresentation.fxml");
 
@@ -42,11 +47,31 @@ public class SignatureArrow extends Group {
             fxmlLoader.load(location.openStream());
 
             controller = fxmlLoader.getController();
+            controller.setComponent(component);
+            controller.setEdgeStatus(edgeStatus);
+            controller.setSyncText(edgeName);
+
             drawArrow(edgeName, edgeStatus);
+
+            initializeMouseEvents();
 
         } catch (final IOException ioe) {
             throw new IllegalStateException(ioe);
         }
+    }
+
+    /***
+     * Initializes the mouse events e.g. mouseEntered leads to the arrow being highlighted
+     */
+    private void initializeMouseEvents() {
+        controller.arrowBox.onMouseEnteredProperty().set(event -> {
+            controller.mouseEntered();
+            this.highlight();
+        });
+        controller.arrowBox.onMouseExitedProperty().set(event -> {
+            controller.mouseExited();
+            this.unhighlight();
+        });
     }
 
     /***
@@ -91,5 +116,45 @@ public class SignatureArrow extends Group {
             controller.signatureArrowCircle.setCenterY(yValue);
             controller.signatureArrowCircle.setRadius(radius);
         }
+    }
+
+    /***
+     * Highlights the arrow's components by coloring them orange
+     */
+    @Override
+    public void highlight() {
+        final Color color = Color.DEEP_ORANGE;
+        final Color.Intensity intensity = Color.Intensity.I500;
+
+        this.colorArrowComponents(color, intensity);
+    }
+
+    /***
+     * Removes the highlight from the arrow's components
+     */
+    @Override
+    public void unhighlight() {
+        Color color = Color.GREY_BLUE;
+        Color.Intensity intensity = Color.Intensity.I800;
+
+        this.colorArrowComponents(color, intensity);
+    }
+
+    /***
+     * Colors the components of the arrow
+     * @param color The Color to color the components
+     * @param intensity The Intensity of the color
+     */
+    private void colorArrowComponents(Color color, Color.Intensity intensity) {
+        controller.signatureArrowPath.setFill(color.getColor(intensity));
+        controller.signatureArrowPath.setStroke(color.getColor(intensity.next(2)));
+
+        controller.signatureArrowHeadPath.setFill(color.getColor(intensity));
+        controller.signatureArrowHeadPath.setStroke(color.getColor(intensity.next(2)));
+
+        controller.signatureArrowCircle.setFill(color.getColor(intensity));
+        controller.signatureArrowCircle.setStroke(color.getColor(intensity.next(2)));
+
+        controller.signatureArrowLabel.setTextFill(color.getColor(intensity));
     }
 }

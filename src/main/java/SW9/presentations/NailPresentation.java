@@ -8,6 +8,7 @@ import SW9.controllers.EdgeController;
 import SW9.controllers.NailController;
 import SW9.utility.colors.Color;
 import SW9.utility.helpers.BindingHelper;
+import SW9.utility.Highlightable;
 import SW9.utility.helpers.SelectHelper;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
@@ -25,7 +26,7 @@ import java.util.function.Consumer;
 
 import static javafx.util.Duration.millis;
 
-public class NailPresentation extends Group implements SelectHelper.Selectable {
+public class NailPresentation extends Group implements SelectHelper.Selectable, Highlightable {
 
     public static final double COLLAPSED_RADIUS = 2d;
     public static final double HOVERED_RADIUS = 7d;
@@ -252,6 +253,22 @@ public class NailPresentation extends Group implements SelectHelper.Selectable {
 
         controller.nailCircle.setFill(color.getColor(intensity));
         controller.nailCircle.setStroke(color.getColor(intensity.next(2)));
+    }
+
+    /***
+     * Highlights the nail
+     */
+    @Override
+    public void highlight() {
+        this.select();
+    }
+
+    /***
+     * Removes the highlight from the nail
+     */
+    @Override
+    public void unhighlight() {
+        this.deselect();
 
     }
 }

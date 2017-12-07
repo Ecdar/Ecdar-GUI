@@ -33,7 +33,6 @@ public class EdgePresentation extends Group {
             controller = fxmlLoader.getController();
 
             controller.setEdge(edge);
-            this.edge.bind(controller.edgeProperty());
 
             controller.setComponent(component);
             this.component.bind(controller.componentProperty());

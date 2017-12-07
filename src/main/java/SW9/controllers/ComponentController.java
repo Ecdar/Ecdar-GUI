@@ -177,7 +177,7 @@ public class ComponentController extends ModelController implements Initializabl
      * @param status An EdgeStatus for the type of arrow to insert
      */
     private void insertSignatureArrow(final String channel, final EdgeStatus status) {
-        SignatureArrow newArrow = new SignatureArrow(channel, status);
+        SignatureArrow newArrow = new SignatureArrow(channel, status, component.get());
         if(status == EdgeStatus.INPUT) {
             inputSignatureContainer.getChildren().add(newArrow);
         } else {
