@@ -30,7 +30,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     private static final String UNI = "U";
     private static final String INC = "I";
     public static final String LOCATION = "L";
-    static final int ID_LENGTH = 1;
+    static final int ID_LETTER_LENGTH = 1;
 
     // Verification properties
     private final StringProperty nickname = new SimpleStringProperty("");

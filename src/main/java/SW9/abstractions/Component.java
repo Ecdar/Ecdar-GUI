@@ -272,7 +272,7 @@ public class Component extends HighLevelModelObject {
         return includeInPeriodicCheck;
     }
 
-    private void setIncludeInPeriodicCheck(final boolean includeInPeriodicCheck) {
+    public void setIncludeInPeriodicCheck(final boolean includeInPeriodicCheck) {
         this.includeInPeriodicCheck.set(includeInPeriodicCheck);
     }
 
@@ -397,22 +397,6 @@ public class Component extends HighLevelModelObject {
     }
 
     /**
-     * gets the id of all systems in the project and inserts it into a set
-     * @return the set of all location ids
-     */
-    public Set<String> getComponentIds(){
-        Set<String> ids = new HashSet<>();
-
-        for(Component component : Ecdar.getProject().getComponents()){
-            if(component.getName().length() > COMPONENT.length()) {
-                ids.add(component.getName().substring(COMPONENT.length()));
-            }
-        }
-
-        return ids;
-    }
-
-    /**
      * Generate and sets a unique id for this system
      */
     private void setComponentName() {
@@ -449,7 +433,7 @@ public class Component extends HighLevelModelObject {
     String getUniIncId() {
         for (final Location location : getLocations()){
             if (location.getType() == Location.Type.UNIVERSAL || location.getType() == Location.Type.INCONSISTENT) {
-                return location.getId().substring(Location.ID_LENGTH);
+                return location.getId().substring(Location.ID_LETTER_LENGTH);
             }
         }
         return null;
@@ -463,7 +447,7 @@ public class Component extends HighLevelModelObject {
         final HashSet<String> ids = new HashSet<>();
         for (final Location location : getLocations()){
             if(location.getType() != Location.Type.UNIVERSAL || location.getType() != Location.Type.INCONSISTENT){
-                ids.add(location.getId().substring(Location.ID_LENGTH));
+                ids.add(location.getId().substring(Location.ID_LETTER_LENGTH));
             }
         }
         return ids;
