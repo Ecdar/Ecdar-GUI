@@ -8,8 +8,6 @@ import SW9.controllers.FileController;
 import SW9.utility.colors.Color;
 import com.jfoenix.controls.JFXRippler;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.JavaFXBuilderFactory;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.control.Label;
@@ -17,8 +15,6 @@ import javafx.scene.layout.*;
 import javafx.scene.shape.Circle;
 import org.kordamp.ikonli.javafx.FontIcon;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.function.BiConsumer;
 
 public class FilePresentation extends AnchorPane {
@@ -27,29 +23,15 @@ public class FilePresentation extends AnchorPane {
     private final FileController controller;
 
     public FilePresentation(final HighLevelModelObject model) {
-        final URL location = this.getClass().getResource("FilePresentation.fxml");
+        controller = new EcdarFXMLLoader().loadAndGetController("FilePresentation.fxml", this);
 
-        final FXMLLoader fxmlLoader = new FXMLLoader();
-        fxmlLoader.setLocation(location);
-        fxmlLoader.setBuilderFactory(new JavaFXBuilderFactory());
+        this.model.set(model);
 
-        try {
-            fxmlLoader.setRoot(this);
-            fxmlLoader.load(location.openStream());
-
-            controller = fxmlLoader.getController();
-
-            this.model.set(model);
-
-            initializeIcon();
-            initializeFileName();
-            initializeColors();
-            initializeRippler();
-            initializeMoreInformationButton();
-
-        } catch (final IOException ioe) {
-            throw new IllegalStateException(ioe);
-        }
+        initializeIcon();
+        initializeFileName();
+        initializeColors();
+        initializeRippler();
+        initializeMoreInformationButton();
     }
 
     private void initializeMoreInformationButton() {

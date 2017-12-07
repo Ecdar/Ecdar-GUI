@@ -10,16 +10,12 @@ import com.jfoenix.controls.JFXRippler;
 import com.jfoenix.controls.JFXSpinner;
 import com.jfoenix.controls.JFXTextField;
 import javafx.beans.binding.When;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.JavaFXBuilderFactory;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import org.kordamp.ikonli.javafx.FontIcon;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.function.Consumer;
 
 import static javafx.scene.paint.Color.TRANSPARENT;
@@ -30,27 +26,15 @@ public class QueryPresentation extends AnchorPane {
     private JFXRippler actionButton;
 
     public QueryPresentation(final Query query) {
-        final URL location = this.getClass().getResource("QueryPresentation.fxml");
+        new EcdarFXMLLoader().loadAndGetController("QueryPresentation.fxml", this);
 
-        final FXMLLoader fxmlLoader = new FXMLLoader();
-        fxmlLoader.setLocation(location);
-        fxmlLoader.setBuilderFactory(new JavaFXBuilderFactory());
+        this.query = query;
 
-        try {
-            fxmlLoader.setRoot(this);
-            fxmlLoader.load(location.openStream());
-
-            this.query = query;
-
-            initializeStateIndicator();
-            initializeProgressIndicator();
-            initializeActionButton();
-            initializeDetailsButton();
-            initializeTextFields();
-
-        } catch (final IOException ioe) {
-            throw new IllegalStateException(ioe);
-        }
+        initializeStateIndicator();
+        initializeProgressIndicator();
+        initializeActionButton();
+        initializeDetailsButton();
+        initializeTextFields();
     }
 
     private void initializeTextFields() {

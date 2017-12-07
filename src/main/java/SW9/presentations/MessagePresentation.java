@@ -10,15 +10,10 @@ import SW9.controllers.CanvasController;
 import SW9.utility.helpers.SelectHelper;
 import javafx.beans.InvalidationListener;
 import javafx.collections.FXCollections;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.JavaFXBuilderFactory;
 import javafx.scene.Cursor;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
-
-import java.io.IOException;
-import java.net.URL;
 
 public class MessagePresentation extends HBox {
 
@@ -27,23 +22,11 @@ public class MessagePresentation extends HBox {
     public MessagePresentation(final CodeAnalysis.Message message) {
         this.message = message;
 
-        final URL location = this.getClass().getResource("MessagePresentation.fxml");
+        new EcdarFXMLLoader().loadAndGetController("MessagePresentation.fxml", this);
 
-        final FXMLLoader fxmlLoader = new FXMLLoader();
-        fxmlLoader.setLocation(location);
-        fxmlLoader.setBuilderFactory(new JavaFXBuilderFactory());
-
-        try {
-            fxmlLoader.setRoot(this);
-            fxmlLoader.load(location.openStream());
-
-            // Initialize
-            initializeMessage();
-            initializeNearLabel();
-
-        } catch (final IOException ioe) {
-            throw new IllegalStateException(ioe);
-        }
+        // Initialize
+        initializeMessage();
+        initializeNearLabel();
     }
 
     private void initializeMessage() {

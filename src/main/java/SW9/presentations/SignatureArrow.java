@@ -1,24 +1,15 @@
 package SW9.presentations;
 
 import SW9.abstractions.Component;
-import SW9.abstractions.Edge;
 import SW9.abstractions.EdgeStatus;
 import SW9.controllers.SignatureArrowController;
 import SW9.utility.colors.Color;
 import SW9.utility.Highlightable;
-import javafx.collections.ListChangeListener;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.JavaFXBuilderFactory;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
-import javafx.scene.shape.Circle;
 import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
-
-import java.io.IOException;
-import java.net.URL;
-import java.util.List;
 
 /***
  * Creates input and output arrows, that can for example be used on the side of components to show its signature
@@ -34,31 +25,18 @@ public class SignatureArrow extends Group implements Highlightable {
      * @param edgeStatus The EdgeStatus of the arrow
      * @param component The Component where the edge is located
      */
-    public SignatureArrow(final String edgeName, final EdgeStatus edgeStatus, final Component component){
+    public SignatureArrow(final String edgeName, final EdgeStatus edgeStatus, final Component component) {
+        controller = new EcdarFXMLLoader().loadAndGetController("SignatureArrowPresentation.fxml", this);
 
-        final URL location = this.getClass().getResource("SignatureArrowPresentation.fxml");
+        controller.setComponent(component);
+        controller.setEdgeStatus(edgeStatus);
+        controller.setSyncText(edgeName);
 
-        final FXMLLoader fxmlLoader = new FXMLLoader();
-        fxmlLoader.setLocation(location);
-        fxmlLoader.setBuilderFactory(new JavaFXBuilderFactory());
+        drawArrow(edgeName, edgeStatus);
 
-        try {
-            fxmlLoader.setRoot(this);
-            fxmlLoader.load(location.openStream());
-
-            controller = fxmlLoader.getController();
-            controller.setComponent(component);
-            controller.setEdgeStatus(edgeStatus);
-            controller.setSyncText(edgeName);
-
-            drawArrow(edgeName, edgeStatus);
-
-            initializeMouseEvents();
-
-        } catch (final IOException ioe) {
-            throw new IllegalStateException(ioe);
-        }
+        initializeMouseEvents();
     }
+
 
     /***
      * Initializes the mouse events e.g. mouseEntered leads to the arrow being highlighted

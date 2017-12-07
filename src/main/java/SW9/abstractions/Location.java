@@ -1,5 +1,6 @@
 package SW9.abstractions;
 
+import SW9.Ecdar;
 import SW9.code_analysis.Nearable;
 import SW9.controllers.EcdarController;
 import SW9.presentations.DropDownMenu;
@@ -13,11 +14,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import javafx.beans.property.*;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 public class Location implements Circular, Serializable, Nearable, DropDownMenu.HasColor {
-
-    private static final AtomicInteger hiddenID = new AtomicInteger(0); // Used to generate unique IDs
     private static final String NICKNAME = "nickname";
     private static final String ID = "id";
     private static final String INVARIANT = "invariant";
@@ -30,6 +27,10 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     private static final String NICKNAME_Y = "nickname_y";
     private static final String INVARIANT_X = "invariant_x";
     private static final String INVARIANT_Y = "invariant_y";
+    private static final String UNI = "U";
+    private static final String INC = "I";
+    public static final String LOCATION = "L";
+    static final int ID_LETTER_LENGTH = 1;
 
     // Verification properties
     private final StringProperty nickname = new SimpleStringProperty("");
@@ -56,7 +57,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     private final SimpleBooleanProperty isLocked = new SimpleBooleanProperty(false);
 
     public Location() {
-        resetId();
+        setId();
         bindReachabilityAnalysis();
     }
 
@@ -65,30 +66,25 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
         bindReachabilityAnalysis();
     }
 
-    public Location(Component component, Type type, double x, double y){
+    public Location(final Component component, final Type type, final double x, final double y){
         setX(Grid.snap(x));
         setY(Grid.snap(y));
         setType(type);
         if(type == Type.UNIVERSAL){
             setIsLocked(true);
-            setId("U" + component.getComponentId());
+            setId(UNI + component.generateUniIncId());
         } else if (type == Type.INCONSISTENT) {
             setIsLocked(true);
             setUrgency(Location.Urgency.URGENT);
-            setId("I" + component.getComponentId());
+            setId(INC + component.generateUniIncId());
         }
         setColorIntensity(component.getColorIntensity());
         setColor(component.getColor());
     }
 
     public Location(final JsonObject jsonObject) {
-        hiddenID.incrementAndGet();
         deserialize(jsonObject);
         bindReachabilityAnalysis();
-    }
-
-    public static void resetHiddenID() {
-        hiddenID.set(0);
     }
 
     public String getNickname() {
@@ -107,12 +103,24 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
         return id.get();
     }
 
-    public void setId(String id) {
-        this.id.set(id);
+    /**
+     * Generate and sets a unique id for this location
+     */
+    private void setId() {
+        for(int counter = 0; ; counter++) {
+            if(!Ecdar.getProject().getLocationIds().contains(String.valueOf(counter))){
+                id.set(LOCATION + counter);
+                return;
+            }
+        }
     }
 
-    public void resetId() {
-        setId("L" + hiddenID.getAndIncrement());
+    /**
+     * Sets a specific id for this location
+     * @param string id to set
+     */
+    private void setId(final String string){
+        id.set(string);
     }
 
     public StringProperty idProperty() {
@@ -217,14 +225,6 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
         return radius;
     }
 
-    public double getScale() {
-        return scale.get();
-    }
-
-    public void setScale(final double scale) {
-        this.scale.set(scale);
-    }
-
     @Override
     public DoubleProperty scaleProperty() {
         return scale;
@@ -293,13 +293,13 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
      * @param status the status of the edge
      * @return the finished edge
      */
-    public Edge addLeftEdge(final String syncString ,final EdgeStatus status) {
-        Edge edge = new Edge(this, status);
+    public Edge addLeftEdge(final String syncString, final EdgeStatus status) {
+        final Edge edge = new Edge(this, status);
         edge.setTargetLocation(this);
         edge.setProperty(Edge.PropertyType.SYNCHRONIZATION, syncString);
-        Nail inputNail1;
-        Nail inputNailSync;
-        Nail inputNail2;
+        final Nail inputNail1;
+        final Nail inputNailSync;
+        final Nail inputNail2;
         inputNail1 = new Nail(getX() - 40, getY() - 10);
         inputNailSync = new Nail(getX() - 60, getY());
         inputNail2 = new Nail(getX() - 40, getY() + 10);
@@ -316,13 +316,13 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
      * @param status the status of the edge
      * @return the finished edge
      */
-    public Edge addRightEdge(final String syncString ,final EdgeStatus status){
-        Edge edge = new Edge(this, status);
+    public Edge addRightEdge(final String syncString, final EdgeStatus status){
+        final Edge edge = new Edge(this, status);
         edge.setTargetLocation(this);
         edge.setProperty(Edge.PropertyType.SYNCHRONIZATION, syncString);
-        Nail inputNail1;
-        Nail inputNailSync;
-        Nail inputNail2;
+        final Nail inputNail1;
+        final Nail inputNailSync;
+        final Nail inputNail2;
         inputNail1 = new Nail(getX() + 40, getY() - 10);
         inputNailSync = new Nail(getX() + 60, getY());
         inputNail2 = new Nail(getX() + 40, getY() + 10);

@@ -14,14 +14,10 @@ import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.JavaFXBuilderFactory;
 import javafx.scene.Group;
 import javafx.scene.control.Label;
 import javafx.scene.shape.Line;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.function.Consumer;
 
 import static javafx.util.Duration.millis;
@@ -35,37 +31,23 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
     private final Timeline shakeAnimation = new Timeline();
 
     public NailPresentation(final Nail nail, final Edge edge, final Component component, final EdgeController edgeController) {
-        final URL url = this.getClass().getResource("NailPresentation.fxml");
+        controller = new EcdarFXMLLoader().loadAndGetController("NailPresentation.fxml", this);
 
-        final FXMLLoader fxmlLoader = new FXMLLoader();
-        fxmlLoader.setLocation(url);
-        fxmlLoader.setBuilderFactory(new JavaFXBuilderFactory());
+        // Bind the component with the one of the controller
+        controller.setComponent(component);
 
-        try {
-            fxmlLoader.setRoot(this);
-            fxmlLoader.load(url.openStream());
+        // Bind the edge with the one of the controller
+        controller.setEdge(edge);
 
-            controller = fxmlLoader.getController();
+        // Bind the nail with the one of the controller
+        controller.setNail(nail);
 
-            // Bind the component with the one of the controller
-            controller.setComponent(component);
+        controller.setEdgeController(edgeController);
 
-            // Bind the edge with the one of the controller
-            controller.setEdge(edge);
-
-            // Bind the nail with the one of the controller
-            controller.setNail(nail);
-
-            controller.setEdgeController(edgeController);
-
-            initializeNailCircleColor();
-            initializePropertyTag();
-            initializeRadius();
-            initializeShakeAnimation();
-
-        } catch (final IOException ioe) {
-            throw new IllegalStateException(ioe);
-        }
+        initializeNailCircleColor();
+        initializePropertyTag();
+        initializeRadius();
+        initializeShakeAnimation();
     }
 
     private void initializeRadius() {

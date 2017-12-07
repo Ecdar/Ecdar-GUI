@@ -11,16 +11,11 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.JavaFXBuilderFactory;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
-
-import java.io.IOException;
-import java.net.URL;
 
 public class CanvasPresentation extends Pane implements MouseTrackable {
     public static MouseTracker mouseTracker;
@@ -32,28 +27,16 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
     private final CanvasController controller;
 
     public CanvasPresentation() {
-        final URL location = this.getClass().getResource("CanvasPresentation.fxml");
-
-        final FXMLLoader fxmlLoader = new FXMLLoader();
-        fxmlLoader.setLocation(location);
-        fxmlLoader.setBuilderFactory(new JavaFXBuilderFactory());
-
         mouseTracker = new MouseTracker(this);
 
         KeyboardTracker.registerKeybind(KeyboardTracker.UNDO, new Keybind(new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN), UndoRedoStack::undo));
         KeyboardTracker.registerKeybind(KeyboardTracker.REDO, new Keybind(new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN), UndoRedoStack::redo));
 
-        try {
-            fxmlLoader.setRoot(this);
-            fxmlLoader.load(location.openStream());
-            controller = fxmlLoader.getController();
+        controller = new EcdarFXMLLoader().loadAndGetController("CanvasPresentation.fxml", this);
 
-            initializeGrid();
+        initializeGrid();
 
-            CanvasDragHelper.makeDraggable(this, mouseEvent -> mouseEvent.getButton().equals(MouseButton.SECONDARY));
-        } catch (final IOException ioe) {
-            throw new IllegalStateException(ioe);
-        }
+        CanvasDragHelper.makeDraggable(this, mouseEvent -> mouseEvent.getButton().equals(MouseButton.SECONDARY));
     }
 
     private void initializeGrid() {

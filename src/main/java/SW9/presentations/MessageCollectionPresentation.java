@@ -9,8 +9,6 @@ import javafx.beans.Observable;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.JavaFXBuilderFactory;
 import javafx.scene.Cursor;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
@@ -18,8 +16,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -32,24 +28,11 @@ public class MessageCollectionPresentation extends VBox {
     public MessageCollectionPresentation(final Component component, final ObservableList<CodeAnalysis.Message> messages) {
         this.messages = messages;
 
-        final URL location = this.getClass().getResource("MessageCollectionPresentation.fxml");
+        new EcdarFXMLLoader().loadAndGetController("MessageCollectionPresentation.fxml", this);
 
-        final FXMLLoader fxmlLoader = new FXMLLoader();
-        fxmlLoader.setLocation(location);
-        fxmlLoader.setBuilderFactory(new JavaFXBuilderFactory());
-
-        try {
-            fxmlLoader.setRoot(this);
-            fxmlLoader.load(location.openStream());
-
-            initializeHeadline(component);
-            initializeLine();
-            initializeErrorsListener();
-
-
-        } catch (final IOException ioe) {
-            throw new IllegalStateException(ioe);
-        }
+        initializeHeadline(component);
+        initializeLine();
+        initializeErrorsListener();
     }
 
     private void initializeErrorsListener() {

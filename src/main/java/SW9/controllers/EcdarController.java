@@ -135,7 +135,6 @@ public class EcdarController implements Initializable {
     public MenuItem menuBarFileExportAsPng;
     public MenuItem menuBarFileExportAsPngNoBorder;
     public MenuItem menuBarHelpHelp;
-    public MenuItem menuBarEditBalance;
     public MenuItem menuBarEditNewSystem;
 
     public JFXSnackbar snackbar;
@@ -400,8 +399,6 @@ public class EcdarController implements Initializable {
 
         initializeFileExportAsPng();
 
-        initializeEditBalanceMenuItem();
-
         menuBarEditNewSystem.setOnAction(event -> createSystem());
 
         initializeViewMenu();
@@ -447,52 +444,6 @@ public class EcdarController implements Initializable {
         menuBarViewGrid.setOnAction(event -> {
             final BooleanProperty isOn = Ecdar.toggleGrid();
             menuBarViewGrid.getGraphic().opacityProperty().bind(new When(isOn).then(1).otherwise(0));
-        });
-    }
-
-    /**
-     * Initializes the Edit Balance menu item.
-     */
-    private void initializeEditBalanceMenuItem() {
-        menuBarEditBalance.setAccelerator(new KeyCodeCombination(KeyCode.B, KeyCombination.SHORTCUT_DOWN));
-        menuBarEditBalance.setOnAction(event -> {
-            // Map to store the previous identifiers (to undo/redo)
-            final Map<Location, String> previousIdentifiers = new HashMap<>();
-
-            UndoRedoStack.pushAndPerform(() -> { // Perform
-                // Set the counter used to generate the identifiers
-                Location.resetHiddenID();
-
-                // A list of components we have not ordered yet
-                final List<Component> missingComponents = new ArrayList<>();
-                Ecdar.getProject().getComponents().forEach(missingComponents::add);
-
-
-                // Consumer to reset the location identifier
-                final Consumer<Location> resetLocation = (location -> {
-                    previousIdentifiers.put(location, location.getId());
-                    location.resetId();
-                });
-
-                // Consumer to reset the location identifiers in a given component
-                final Consumer<Component> resetLocationsInComponent = (component) -> {
-                    // Check if we already balanced this component
-                    if(!missingComponents.contains(component)) return;
-
-                    // Set the identifiers for the locations
-                    component.getLocations().forEach(resetLocation);
-
-                    // We are now finished with this component, remove it from the list
-                    missingComponents.remove(component);
-                };
-
-                // If we still need to balance some component (they might not be used) then do it now
-                while(!missingComponents.isEmpty()) {
-                    resetLocationsInComponent.accept(missingComponents.get(0));
-                }
-            }, () -> { // Undo
-                previousIdentifiers.forEach(Location::setId);
-            }, "Balanced location identifiers", "shuffle");
         });
     }
 
@@ -652,7 +603,7 @@ public class EcdarController implements Initializable {
 
             presentation.getController().hideBorderAndBackground();
             final WritableImage image = takeSnapshot();
-            presentation.getController().showBorderAndBorder();
+            presentation.getController().showBorderAndBackground();
 
             CropAndExportImage(image);
         });

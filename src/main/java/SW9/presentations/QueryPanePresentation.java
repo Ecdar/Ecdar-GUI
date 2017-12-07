@@ -4,39 +4,20 @@ import SW9.controllers.QueryPaneController;
 import SW9.utility.colors.Color;
 import SW9.utility.helpers.DropShadowHelper;
 import com.jfoenix.controls.JFXRippler;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.JavaFXBuilderFactory;
 import javafx.geometry.Insets;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.*;
-
-import java.io.IOException;
-import java.net.URL;
 
 public class QueryPanePresentation extends StackPane {
 
     private final QueryPaneController controller;
 
     public QueryPanePresentation() {
-        final URL location = this.getClass().getResource("QueryPanePresentation.fxml");
+        controller = new EcdarFXMLLoader().loadAndGetController("QueryPanePresentation.fxml", this);
 
-        final FXMLLoader fxmlLoader = new FXMLLoader();
-        fxmlLoader.setLocation(location);
-        fxmlLoader.setBuilderFactory(new JavaFXBuilderFactory());
-
-        try {
-            fxmlLoader.setRoot(this);
-            fxmlLoader.load(location.openStream());
-
-            controller = fxmlLoader.getController();
-
-            initializeLeftBorder();
-            initializeToolbar();
-            initializeBackground();
-
-        } catch (final IOException ioe) {
-            throw new IllegalStateException(ioe);
-        }
+        initializeLeftBorder();
+        initializeToolbar();
+        initializeBackground();
     }
 
     private void initializeLeftBorder() {

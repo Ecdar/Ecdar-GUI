@@ -4,42 +4,23 @@ import SW9.controllers.ProjectPaneController;
 import SW9.utility.colors.Color;
 import SW9.utility.helpers.DropShadowHelper;
 import com.jfoenix.controls.JFXRippler;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.JavaFXBuilderFactory;
 import javafx.geometry.Insets;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.*;
-
-import java.io.IOException;
-import java.net.URL;
 
 public class ProjectPanePresentation extends StackPane {
 
     private final ProjectPaneController controller;
 
     public ProjectPanePresentation() {
-        final URL location = this.getClass().getResource("ProjectPanePresentation.fxml");
+        controller = new EcdarFXMLLoader().loadAndGetController("ProjectPanePresentation.fxml", this);
 
-        final FXMLLoader fxmlLoader = new FXMLLoader();
-        fxmlLoader.setLocation(location);
-        fxmlLoader.setBuilderFactory(new JavaFXBuilderFactory());
+        initializeRightBorder();
+        initializeBackground();
+        initializeToolbar();
 
-        try {
-            fxmlLoader.setRoot(this);
-            fxmlLoader.load(location.openStream());
-
-            controller = fxmlLoader.getController();
-
-            initializeRightBorder();
-            initializeBackground();
-            initializeToolbar();
-
-            initializeToolbarButton(controller.createComponent);
-            Tooltip.install(controller.createComponent, new Tooltip("Add component"));
-
-        } catch (final IOException ioe) {
-            throw new IllegalStateException(ioe);
-        }
+        initializeToolbarButton(controller.createComponent);
+        Tooltip.install(controller.createComponent, new Tooltip("Add component"));
     }
 
     private void initializeRightBorder() {

@@ -1,9 +1,9 @@
 package SW9.abstractions;
 
+import SW9.Ecdar;
 import SW9.utility.UndoRedoStack;
 import SW9.utility.colors.Color;
 import SW9.utility.colors.EnabledColor;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -14,8 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * A model of a system
  */
 public class SystemModel extends HighLevelModelObject {
-    // TODO brug Christians løsning
-    private static final AtomicInteger hiddenId = new AtomicInteger(0); // Used to generate unique IDs
+    static final String SYSTEM = "System ";
 
     // Verification properties
     private final StringProperty description = new SimpleStringProperty("");
@@ -24,6 +23,7 @@ public class SystemModel extends HighLevelModelObject {
     private final Box box = new Box();
 
     public SystemModel() {
+        setSystemName();
         setRandomColor();
     }
 
@@ -84,6 +84,18 @@ public class SystemModel extends HighLevelModelObject {
         if (enabledColor != null) {
             setColorIntensity(enabledColor.intensity);
             setColor(enabledColor.color);
+        }
+    }
+
+    /**
+     * Generate and sets a unique id for this system
+     */
+    public void setSystemName() {
+        for(int counter = 1; ; counter++) {
+            if(!Ecdar.getProject().getSystemNames().contains(SYSTEM + counter)){
+                setName((SYSTEM + counter));
+                return;
+            }
         }
     }
 

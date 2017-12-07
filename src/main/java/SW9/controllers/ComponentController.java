@@ -76,20 +76,6 @@ public class ComponentController extends ModelController implements Initializabl
         declarationTextArea.setParagraphGraphicFactory(LineNumberFactory.get(declarationTextArea));
 
         component.addListener((obs, oldComponent, newComponent) -> {
-            // Bind the width and the height of the abstraction to the values in the view todo: reflect the height and width from the presentation into the abstraction
-            // Bind the position of the abstraction to the values in the view
-
-            // Ensure that the component snaps to the grid
-            if(newComponent.getBox().getX() == 0 && newComponent.getBox().getY() == 0) {
-                newComponent.getBox().setX(GRID_SIZE * 0.5);
-                newComponent.getBox().setY(GRID_SIZE * 0.5);
-            }
-
-            root.layoutXProperty().set(newComponent.getBox().getX());
-            root.layoutYProperty().set(newComponent.getBox().getY());
-            newComponent.getBox().xProperty().bindBidirectional(root.layoutXProperty());
-            newComponent.getBox().yProperty().bindBidirectional(root.layoutYProperty());
-
             inputSignatureContainer.heightProperty().addListener((change) -> updateMaxHeight() );
             outputSignatureContainer.heightProperty().addListener((change) -> updateMaxHeight() );
 
@@ -99,7 +85,6 @@ public class ComponentController extends ModelController implements Initializabl
 
             // Find the clocks in the decls
             newComponent.declarationsTextProperty().addListener((observable, oldValue, newValue) -> {
-
                 final List<String> clocks = new ArrayList<String>();
 
                 final String strippedDecls = newValue.replaceAll("[\\r\\n]+", "");

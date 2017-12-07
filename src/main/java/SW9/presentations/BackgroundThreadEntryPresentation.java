@@ -4,14 +4,9 @@ package SW9.presentations;
 import SW9.utility.colors.Color;
 import com.jfoenix.controls.JFXRippler;
 import com.jfoenix.controls.JFXSpinner;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.JavaFXBuilderFactory;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
-
-import java.io.IOException;
-import java.net.URL;
 
 import static java.lang.Thread.State.TERMINATED;
 
@@ -24,24 +19,12 @@ public class BackgroundThreadEntryPresentation extends AnchorPane {
     public BackgroundThreadEntryPresentation(final Thread thread) {
         this.thread = thread;
 
-        final URL location = this.getClass().getResource("BackgroundThreadEntryPresentation.fxml");
+        new EcdarFXMLLoader().loadAndGetController("BackgroundThreadEntryPresentation.fxml", this);
 
-        final FXMLLoader fxmlLoader = new FXMLLoader();
-        fxmlLoader.setLocation(location);
-        fxmlLoader.setBuilderFactory(new JavaFXBuilderFactory());
-
-        try {
-            fxmlLoader.setRoot(this);
-            fxmlLoader.load(location.openStream());
-
-            initializeRippler();
-            initializeBackground();
-            initializeLabel();
-            initializeThreadRunningCheck();
-
-        } catch (final IOException ioe) {
-            throw new IllegalStateException(ioe);
-        }
+        initializeRippler();
+        initializeBackground();
+        initializeLabel();
+        initializeThreadRunningCheck();
     }
 
     private void initializeThreadRunningCheck() {

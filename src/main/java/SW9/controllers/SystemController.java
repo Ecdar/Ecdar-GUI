@@ -31,9 +31,7 @@ public class SystemController extends ModelController implements Initializable {
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
-        system.addListener((observable, oldValue, newValue) -> {
-            initializeSystemContextMenu();
-        });
+        system.addListener((observable, oldValue, newValue) -> initializeSystemContextMenu());
     }
 
     public SystemModel getSystem() {
@@ -74,5 +72,23 @@ public class SystemController extends ModelController implements Initializable {
         contextMenu = new DropDownMenu(root, dropDownMenuHelperCircle, 230, true);
 
         contextMenu.addColorPicker(system.get(), system.get()::dye);
+    }
+
+    /**
+     * Hides the border and background.
+     */
+    @Override
+    void hideBorderAndBackground() {
+        super.hideBorderAndBackground();
+        topRightLine.setVisible(false);
+    }
+
+    /**
+     * Shows the border and background.
+     */
+    @Override
+    void showBorderAndBackground() {
+        super.showBorderAndBackground();
+        topRightLine.setVisible(true);
     }
 }

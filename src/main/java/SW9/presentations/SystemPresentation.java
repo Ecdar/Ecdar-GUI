@@ -4,8 +4,6 @@ import SW9.abstractions.SystemModel;
 import SW9.controllers.ModelController;
 import SW9.controllers.SystemController;
 import SW9.utility.colors.Color;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.JavaFXBuilderFactory;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.layout.*;
@@ -14,8 +12,6 @@ import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.function.BiConsumer;
 
 /**
@@ -25,20 +21,8 @@ public class SystemPresentation extends ModelPresentation {
     private final SystemController controller;
 
     public SystemPresentation(final SystemModel system) {
-        final URL url = this.getClass().getResource("SystemPresentation.fxml");
+        controller = new EcdarFXMLLoader().loadAndGetController("SystemPresentation.fxml", this);
 
-        final FXMLLoader fxmlLoader = new FXMLLoader();
-        fxmlLoader.setLocation(url);
-        fxmlLoader.setBuilderFactory(new JavaFXBuilderFactory());
-
-        fxmlLoader.setRoot(this);
-        try {
-            fxmlLoader.load(url.openStream());
-        } catch (final IOException e) {
-            throw new IllegalStateException(e);
-        }
-
-        controller = fxmlLoader.getController();
         controller.setSystem(system);
 
         super.initialize(system.getBox());
