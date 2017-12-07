@@ -50,39 +50,26 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
     private final List<BiConsumer<Color, Color.Intensity>> updateColorDelegates = new ArrayList<>();
 
     public ComponentPresentation(final Component component) {
-        final URL location = this.getClass().getResource("ComponentPresentation.fxml");
+        controller = new EcdarFXMLLoader().loadAndGetController("ComponentPresentation.fxml", this);
+        controller.setComponent(component);
 
-        final FXMLLoader fxmlLoader = new FXMLLoader();
-        fxmlLoader.setLocation(location);
-        fxmlLoader.setBuilderFactory(new JavaFXBuilderFactory());
+        super.initialize(component.getBox());
 
-        try {
-            fxmlLoader.setRoot(this);
-            fxmlLoader.load(location.openStream());
+        // Initialize methods that is sensitive to width and height
+        final Runnable onUpdateSize = () -> {
+            initializeToolbar();
+            initializeFrame();
+            initializeBackground();
+        };
 
-            controller = fxmlLoader.getController();
-            controller.setComponent(component);
+        onUpdateSize.run();
 
-            super.initialize(component.getBox());
+        // Re run initialisation on update of width and height property
+        component.getBox().widthProperty().addListener(observable -> onUpdateSize.run());
+        component.getBox().heightProperty().addListener(observable -> onUpdateSize.run());
 
-            // Initialize methods that is sensitive to width and height
-            final Runnable onUpdateSize = () -> {
-                initializeToolbar();
-                initializeFrame();
-                initializeBackground();
-            };
-
-            onUpdateSize.run();
-
-            // Re run initialisation on update of width and height property
-            component.getBox().widthProperty().addListener(observable -> onUpdateSize.run());
-            component.getBox().heightProperty().addListener(observable -> onUpdateSize.run());
-
-            controller.declarationTextArea.textProperty().addListener((obs, oldText, newText) ->
-                    controller.declarationTextArea.setStyleSpans(0, computeHighlighting(newText)));
-        } catch (final IOException ioe) {
-            throw new IllegalStateException(ioe);
-        }
+        controller.declarationTextArea.textProperty().addListener((obs, oldText, newText) ->
+                controller.declarationTextArea.setStyleSpans(0, computeHighlighting(newText)));
     }
 
     public static StyleSpans<Collection<String>> computeHighlighting(final String text) {

@@ -16,24 +16,11 @@ public class DeclarationPresentation extends HighLevelModelPresentation {
     private final DeclarationsController controller;
 
     public DeclarationPresentation(final Declarations declarations) {
-        final URL location = this.getClass().getResource("DeclarationPresentation.fxml");
+        controller = new EcdarFXMLLoader().loadAndGetController("DeclarationPresentation.fxml", this);
+        controller.setDeclarations(declarations);
 
-        final FXMLLoader fxmlLoader = new FXMLLoader();
-        fxmlLoader.setLocation(location);
-        fxmlLoader.setBuilderFactory(new JavaFXBuilderFactory());
-
-        try {
-            fxmlLoader.setRoot(this);
-            fxmlLoader.load(location.openStream());
-
-            controller = fxmlLoader.getController();
-            controller.setDeclarations(declarations);
-
-            // Listen to changes and
-            controller.textArea.textProperty().addListener((obs, oldText, newText) ->
-                    controller.updateHighlighting());
-        } catch (final IOException ioe) {
-            throw new IllegalStateException(ioe);
-        }
+        // Listen to changes and
+        controller.textArea.textProperty().addListener((obs, oldText, newText) ->
+                controller.updateHighlighting());
     }
 }

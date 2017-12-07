@@ -29,24 +29,9 @@ public class SignatureArrow extends Group {
      * @param edgeName The string to show in the arrow's label
      * @param edgeStatus The EdgeStatus of the arrow
      */
-    public SignatureArrow(final String edgeName, final EdgeStatus edgeStatus){
-
-        final URL location = this.getClass().getResource("SignatureArrowPresentation.fxml");
-
-        final FXMLLoader fxmlLoader = new FXMLLoader();
-        fxmlLoader.setLocation(location);
-        fxmlLoader.setBuilderFactory(new JavaFXBuilderFactory());
-
-        try {
-            fxmlLoader.setRoot(this);
-            fxmlLoader.load(location.openStream());
-
-            controller = fxmlLoader.getController();
-            drawArrow(edgeName, edgeStatus);
-
-        } catch (final IOException ioe) {
-            throw new IllegalStateException(ioe);
-        }
+    public SignatureArrow(final String edgeName, final EdgeStatus edgeStatus) {
+        controller = new EcdarFXMLLoader().loadAndGetController("SignatureArrowPresentation.fxml", this);
+        drawArrow(edgeName, edgeStatus);
     }
 
     /***

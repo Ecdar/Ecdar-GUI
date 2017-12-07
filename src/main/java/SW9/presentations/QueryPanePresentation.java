@@ -18,25 +18,11 @@ public class QueryPanePresentation extends StackPane {
     private final QueryPaneController controller;
 
     public QueryPanePresentation() {
-        final URL location = this.getClass().getResource("QueryPanePresentation.fxml");
+        controller = new EcdarFXMLLoader().loadAndGetController("QueryPanePresentation.fxml", this);
 
-        final FXMLLoader fxmlLoader = new FXMLLoader();
-        fxmlLoader.setLocation(location);
-        fxmlLoader.setBuilderFactory(new JavaFXBuilderFactory());
-
-        try {
-            fxmlLoader.setRoot(this);
-            fxmlLoader.load(location.openStream());
-
-            controller = fxmlLoader.getController();
-
-            initializeLeftBorder();
-            initializeToolbar();
-            initializeBackground();
-
-        } catch (final IOException ioe) {
-            throw new IllegalStateException(ioe);
-        }
+        initializeLeftBorder();
+        initializeToolbar();
+        initializeBackground();
     }
 
     private void initializeLeftBorder() {

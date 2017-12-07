@@ -30,27 +30,15 @@ public class QueryPresentation extends AnchorPane {
     private JFXRippler actionButton;
 
     public QueryPresentation(final Query query) {
-        final URL location = this.getClass().getResource("QueryPresentation.fxml");
+        new EcdarFXMLLoader().loadAndGetController("QueryPresentation.fxml", this);
 
-        final FXMLLoader fxmlLoader = new FXMLLoader();
-        fxmlLoader.setLocation(location);
-        fxmlLoader.setBuilderFactory(new JavaFXBuilderFactory());
+        this.query = query;
 
-        try {
-            fxmlLoader.setRoot(this);
-            fxmlLoader.load(location.openStream());
-
-            this.query = query;
-
-            initializeStateIndicator();
-            initializeProgressIndicator();
-            initializeActionButton();
-            initializeDetailsButton();
-            initializeTextFields();
-
-        } catch (final IOException ioe) {
-            throw new IllegalStateException(ioe);
-        }
+        initializeStateIndicator();
+        initializeProgressIndicator();
+        initializeActionButton();
+        initializeDetailsButton();
+        initializeTextFields();
     }
 
     private void initializeTextFields() {

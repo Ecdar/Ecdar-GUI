@@ -53,54 +53,40 @@ public class EcdarPresentation extends StackPane {
     private Timeline openFilePaneAnimation;
 
     public EcdarPresentation() {
-        final URL location = this.getClass().getResource("EcdarPresentation.fxml");
+        controller = new EcdarFXMLLoader().loadAndGetController("EcdarPresentation.fxml", this);
 
-        final FXMLLoader fxmlLoader = new FXMLLoader();
-        fxmlLoader.setLocation(location);
-        fxmlLoader.setBuilderFactory(new JavaFXBuilderFactory());
+        initializeTopBar();
+        initializeToolbar();
+        initializeQueryDetailsDialog();
+        initializeGenerateUppaalModelButton();
+        initializeColorSelector();
 
-        try {
-            fxmlLoader.setRoot(this);
-            fxmlLoader.load(location.openStream());
+        initializeEdgeStatusIcons();
 
-            controller = fxmlLoader.getController();
+        initializeToggleQueryPaneFunctionality();
+        initializeToggleFilePaneFunctionality();
 
-            initializeTopBar();
-            initializeToolbar();
-            initializeQueryDetailsDialog();
-            initializeGenerateUppaalModelButton();
-            initializeColorSelector();
+        initializeSelectDependentToolbarButton(controller.colorSelected);
+        Tooltip.install(controller.colorSelected, new Tooltip("Colour"));
 
-            initializeEdgeStatusIcons();
+        initializeSelectDependentToolbarButton(controller.deleteSelected);
+        Tooltip.install(controller.deleteSelected, new Tooltip("Delete"));
 
-            initializeToggleQueryPaneFunctionality();
-            initializeToggleFilePaneFunctionality();
+        initializeToolbarButton(controller.undo);
+        initializeToolbarButton(controller.redo);
+        initializeUndoRedoButtons();
 
-            initializeSelectDependentToolbarButton(controller.colorSelected);
-            Tooltip.install(controller.colorSelected, new Tooltip("Colour"));
+        initializeMessageContainer();
 
-            initializeSelectDependentToolbarButton(controller.deleteSelected);
-            Tooltip.install(controller.deleteSelected, new Tooltip("Delete"));
+        initializeSnackbar();
 
-            initializeToolbarButton(controller.undo);
-            initializeToolbarButton(controller.redo);
-            initializeUndoRedoButtons();
-
-            initializeMessageContainer();
-
-            initializeSnackbar();
-
-            // Open the file and query panel initially
-            final BooleanProperty ranInitialToggle = new SimpleBooleanProperty(false);
-            controller.filePane.widthProperty().addListener((observable) -> {
-                if (ranInitialToggle.get()) return;
-                toggleFilePane();
-                ranInitialToggle.set(true);
-            });
-
-        } catch (final IOException ioe) {
-            throw new IllegalStateException(ioe);
-        }
+        // Open the file and query panel initially
+        final BooleanProperty ranInitialToggle = new SimpleBooleanProperty(false);
+        controller.filePane.widthProperty().addListener((observable) -> {
+            if (ranInitialToggle.get()) return;
+            toggleFilePane();
+            ranInitialToggle.set(true);
+        });
 
         initializeHelpImages();
     }

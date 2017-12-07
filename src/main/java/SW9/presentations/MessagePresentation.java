@@ -27,23 +27,11 @@ public class MessagePresentation extends HBox {
     public MessagePresentation(final CodeAnalysis.Message message) {
         this.message = message;
 
-        final URL location = this.getClass().getResource("MessagePresentation.fxml");
+        new EcdarFXMLLoader().loadAndGetController("TagPresentation.fxml", this);
 
-        final FXMLLoader fxmlLoader = new FXMLLoader();
-        fxmlLoader.setLocation(location);
-        fxmlLoader.setBuilderFactory(new JavaFXBuilderFactory());
-
-        try {
-            fxmlLoader.setRoot(this);
-            fxmlLoader.load(location.openStream());
-
-            // Initialize
-            initializeMessage();
-            initializeNearLabel();
-
-        } catch (final IOException ioe) {
-            throw new IllegalStateException(ioe);
-        }
+        // Initialize
+        initializeMessage();
+        initializeNearLabel();
     }
 
     private void initializeMessage() {

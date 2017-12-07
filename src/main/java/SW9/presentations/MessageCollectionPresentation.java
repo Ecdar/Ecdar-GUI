@@ -32,24 +32,11 @@ public class MessageCollectionPresentation extends VBox {
     public MessageCollectionPresentation(final Component component, final ObservableList<CodeAnalysis.Message> messages) {
         this.messages = messages;
 
-        final URL location = this.getClass().getResource("MessageCollectionPresentation.fxml");
+        new EcdarFXMLLoader().loadAndGetController("MessageCollectionPresentation.fxml", this);
 
-        final FXMLLoader fxmlLoader = new FXMLLoader();
-        fxmlLoader.setLocation(location);
-        fxmlLoader.setBuilderFactory(new JavaFXBuilderFactory());
-
-        try {
-            fxmlLoader.setRoot(this);
-            fxmlLoader.load(location.openStream());
-
-            initializeHeadline(component);
-            initializeLine();
-            initializeErrorsListener();
-
-
-        } catch (final IOException ioe) {
-            throw new IllegalStateException(ioe);
-        }
+        initializeHeadline(component);
+        initializeLine();
+        initializeErrorsListener();
     }
 
     private void initializeErrorsListener() {

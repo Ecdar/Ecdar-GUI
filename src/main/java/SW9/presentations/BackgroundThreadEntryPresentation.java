@@ -24,24 +24,12 @@ public class BackgroundThreadEntryPresentation extends AnchorPane {
     public BackgroundThreadEntryPresentation(final Thread thread) {
         this.thread = thread;
 
-        final URL location = this.getClass().getResource("BackgroundThreadEntryPresentation.fxml");
+        new EcdarFXMLLoader().loadAndGetController("BackgroundThreadEntryPresentation.fxml", this);
 
-        final FXMLLoader fxmlLoader = new FXMLLoader();
-        fxmlLoader.setLocation(location);
-        fxmlLoader.setBuilderFactory(new JavaFXBuilderFactory());
-
-        try {
-            fxmlLoader.setRoot(this);
-            fxmlLoader.load(location.openStream());
-
-            initializeRippler();
-            initializeBackground();
-            initializeLabel();
-            initializeThreadRunningCheck();
-
-        } catch (final IOException ioe) {
-            throw new IllegalStateException(ioe);
-        }
+        initializeRippler();
+        initializeBackground();
+        initializeLabel();
+        initializeThreadRunningCheck();
     }
 
     private void initializeThreadRunningCheck() {
