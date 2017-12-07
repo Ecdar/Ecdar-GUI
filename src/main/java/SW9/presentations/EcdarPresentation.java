@@ -50,7 +50,6 @@ public class EcdarPresentation extends StackPane {
 
     public EcdarPresentation() {
         controller = new EcdarFXMLLoader().loadAndGetController("EcdarPresentation.fxml", this);
-
         initializeTopBar();
         initializeToolbar();
         initializeQueryDetailsDialog();
@@ -288,25 +287,11 @@ public class EcdarPresentation extends StackPane {
         list.setStyle("-fx-background-color: white; -fx-padding: 8;");
 
         popup.setPopupContent(list);
-        //popup.setPopupContainer(controller.root);
-        //popup.set(controller.toolbar);
 
         controller.colorSelected.setOnMouseClicked((e) -> {
+            // If nothing is selected
             if (SelectHelper.getSelectedElements().size() == 0) return;
-
-            final Bounds boundsInScreenButton = controller.colorSelected.localToScreen(controller.colorSelected.getBoundsInLocal());
-            final Bounds boundsInScreenRoot = controller.root.localToScreen(controller.root.getBoundsInLocal());
-
-            double fromLeft = 0;
-            fromLeft = boundsInScreenButton.getMinX() - boundsInScreenRoot.getMinX();
-            fromLeft -= listWidth;
-            fromLeft += boundsInScreenButton.getWidth();
-            if (!filePaneOpen.get()) {
-                fromLeft -= controller.filePane.getWidth();
-                System.out.println(controller.filePane.getWidth());
-            }
-
-            popup.show(controller.toolbar, JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, fromLeft, boundsInScreenButton.getMinY() - boundsInScreenRoot.getMinY());
+            popup.show(controller.colorSelected, JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.RIGHT, -10, 15);
         });
     }
 
