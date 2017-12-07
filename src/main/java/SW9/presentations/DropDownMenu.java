@@ -29,7 +29,6 @@ import static SW9.utility.colors.EnabledColor.enabledColors;
 import static javafx.scene.paint.Color.TRANSPARENT;
 
 public class DropDownMenu {
-
     public static double x = 0;
     public static double y = 0;
     private final Node source;
@@ -172,7 +171,6 @@ public class DropDownMenu {
                 scaleTransition.setToY(1.1);
                 scaleTransition.play();
             });
-
             child.setOnMouseExited(event -> {
                 final ScaleTransition scaleTransition = new ScaleTransition(Duration.millis(100), circle);
                 scaleTransition.setFromX(circle.getScaleX());
@@ -193,7 +191,6 @@ public class DropDownMenu {
 
             flowPane.getChildren().add(child);
         }
-
         flowPane.setOnMouseEntered(event -> canIShowSubMenu.set(false));
 
         addCustomChild(flowPane);
