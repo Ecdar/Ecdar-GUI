@@ -27,7 +27,7 @@ public class MessagePresentation extends HBox {
     public MessagePresentation(final CodeAnalysis.Message message) {
         this.message = message;
 
-        new EcdarFXMLLoader().loadAndGetController("TagPresentation.fxml", this);
+        new EcdarFXMLLoader().loadAndGetController("MessagePresentation.fxml", this);
 
         // Initialize
         initializeMessage();
