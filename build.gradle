@@ -26,7 +26,7 @@ repositories {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
-    compile 'com.jfoenix:jfoenix:1.11.0'
+    compile 'com.jfoenix:jfoenix:1.11.1'
     compile group: 'de.codecentric.centerdevice', name: 'javafxsvg', version: '1.0.0'
     compile group: 'com.github.jiconfont', name: 'jiconfont-javafx', version: '1.0.0'
     compile group: 'com.github.jiconfont', name: 'jiconfont-google_material_design_icons', version: '2.2.0.1'
