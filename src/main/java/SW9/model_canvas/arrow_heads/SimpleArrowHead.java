@@ -2,10 +2,11 @@ package SW9.model_canvas.arrow_heads;
 
 import SW9.presentations.Grid;
 import SW9.utility.colors.Color;
+import SW9.utility.Highlightable;
 import SW9.utility.helpers.SelectHelper;
 import javafx.scene.shape.Line;
 
-public class SimpleArrowHead extends ArrowHead implements SelectHelper.Selectable {
+public class SimpleArrowHead extends ArrowHead implements SelectHelper.Selectable, Highlightable {
 
     private static final double TRIANGLE_LENGTH = Grid.GRID_SIZE * 1.5;
     private static final double TRIANGLE_WIDTH = Grid.GRID_SIZE;
@@ -78,6 +79,24 @@ public class SimpleArrowHead extends ArrowHead implements SelectHelper.Selectabl
 
     @Override
     public void deselect() {
+        leftArrow.setStroke(Color.GREY.getColor(Color.Intensity.I900));
+        rightArrow.setStroke(Color.GREY.getColor(Color.Intensity.I900));
+    }
+
+    /***
+     * Highlights the two lines in the arrow head by setting their stroke to the normal color
+     */
+    @Override
+    public void highlight() {
+        leftArrow.setStroke(SelectHelper.getNormalColor());
+        rightArrow.setStroke(SelectHelper.getNormalColor());
+    }
+
+    /***
+     * Removes the highlight by setting the stroke to grey
+     */
+    @Override
+    public void unhighlight() {
         leftArrow.setStroke(Color.GREY.getColor(Color.Intensity.I900));
         rightArrow.setStroke(Color.GREY.getColor(Color.Intensity.I900));
     }

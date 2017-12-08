@@ -5,12 +5,10 @@ import SW9.code_analysis.CodeAnalysis;
 import SW9.code_analysis.Nearable;
 import SW9.model_canvas.arrow_heads.SimpleArrowHead;
 import SW9.presentations.*;
+import SW9.utility.Highlightable;
 import SW9.utility.UndoRedoStack;
 import SW9.utility.colors.Color;
-import SW9.utility.helpers.BindingHelper;
-import SW9.utility.helpers.Circular;
-import SW9.utility.helpers.ItemDragHelper;
-import SW9.utility.helpers.SelectHelper;
+import SW9.utility.helpers.*;
 import SW9.utility.keyboard.KeyboardTracker;
 import com.jfoenix.controls.JFXPopup;
 import javafx.animation.KeyFrame;
@@ -40,7 +38,7 @@ import java.util.function.Consumer;
 
 import static SW9.presentations.Grid.GRID_SIZE;
 
-public class EdgeController implements Initializable, SelectHelper.ItemSelectable {
+public class EdgeController implements Initializable, SelectHelper.ItemSelectable, Highlightable {
     private final ObservableList<Link> links = FXCollections.observableArrayList();
     private final ObjectProperty<Edge> edge = new SimpleObjectProperty<>();
     private final ObjectProperty<Component> component = new SimpleObjectProperty<>();
@@ -68,7 +66,18 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                 getComponent().removeEdge(getEdge());
                 getComponent().addEdge(getEdge());
             });
+
+            // When an edge updates highlight property,
+            // we want to update the view to reflect current highlight property
+            edge.get().isHighlightedProperty().addListener(v -> {
+                if(edge.get().getIsHighlighted()) {
+                    this.highlight();
+                } else {
+                    this.unhighlight();
+                }
+            });
         });
+
 
         initializeLinksListener();
 
@@ -588,6 +597,32 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
         edgeRoot.getChildren().forEach(node -> {
             if (node instanceof SelectHelper.Selectable) {
                 ((SelectHelper.Selectable) node).deselect();
+            }
+        });
+    }
+
+    /***
+     * Highlights the child nodes of the edge
+     */
+    @Override
+    public void highlight() {
+        // Clear the currently selected elements, so we don't have multiple things highlighted/selected
+        SelectHelper.clearSelectedElements();
+        edgeRoot.getChildren().forEach(node -> {
+            if(node instanceof Highlightable) {
+                ((Highlightable) node).highlight();
+            }
+        });
+    }
+
+    /***
+     * Removes the highlight from child nodes
+     */
+    @Override
+    public void unhighlight() {
+        edgeRoot.getChildren().forEach(node -> {
+            if(node instanceof Highlightable) {
+                ((Highlightable) node).unhighlight();
             }
         });
     }
