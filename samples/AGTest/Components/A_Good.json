@@ -1,0 +1,104 @@
+{
+  "name": "A_Good",
+  "declarations": "",
+  "locations": [
+    {
+      "id": "L2",
+      "nickname": "",
+      "invariant": "",
+      "type": "INITIAL",
+      "urgency": "NORMAL",
+      "x": 210.0,
+      "y": 190.0,
+      "color": "9",
+      "nickname_x": 30.0,
+      "nickname_y": -10.0,
+      "invariant_x": 30.0,
+      "invariant_y": 10.0
+    }
+  ],
+  "edges": [
+    {
+      "source_location": "L2",
+      "target_location": "L2",
+      "status": "OUTPUT",
+      "select": "",
+      "guard": "",
+      "update": "",
+      "sync": "button1",
+      "nails": [
+        {
+          "x": 150.0,
+          "y": 210.0,
+          "property_type": "SYNCHRONIZATION",
+          "property_x": -30.0,
+          "property_y": 10.0
+        },
+        {
+          "x": 150.0,
+          "y": 160.0,
+          "property_type": "NONE",
+          "property_x": 0.0,
+          "property_y": 0.0
+        }
+      ]
+    },
+    {
+      "source_location": "L2",
+      "target_location": "L2",
+      "status": "INPUT",
+      "select": "",
+      "guard": "",
+      "update": "",
+      "sync": "bad",
+      "nails": [
+        {
+          "x": 180.0,
+          "y": 140.0,
+          "property_type": "SYNCHRONIZATION",
+          "property_x": 10.0,
+          "property_y": -10.0
+        },
+        {
+          "x": 240.0,
+          "y": 140.0,
+          "property_type": "NONE",
+          "property_x": 0.0,
+          "property_y": 0.0
+        }
+      ]
+    },
+    {
+      "source_location": "L2",
+      "target_location": "L2",
+      "status": "INPUT",
+      "select": "",
+      "guard": "",
+      "update": "",
+      "sync": "good",
+      "nails": [
+        {
+          "x": 240.0,
+          "y": 240.0,
+          "property_type": "SYNCHRONIZATION",
+          "property_x": 10.0,
+          "property_y": -10.0
+        },
+        {
+          "x": 180.0,
+          "y": 240.0,
+          "property_type": "NONE",
+          "property_x": 0.0,
+          "property_y": 0.0
+        }
+      ]
+    }
+  ],
+  "description": "",
+  "x": 5.0,
+  "y": 5.0,
+  "width": 450.0,
+  "height": 600.0,
+  "color": "9",
+  "include_in_periodic_check": true
+}
