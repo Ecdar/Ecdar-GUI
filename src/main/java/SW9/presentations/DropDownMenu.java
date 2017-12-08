@@ -78,7 +78,6 @@ public class DropDownMenu {
         source = src;
 
         initializeClosingClock();
-
     }
 
     /**
@@ -224,7 +223,9 @@ public class DropDownMenu {
     }
 
     public void hide(){
-        if (popup.isShowing()) popup.hide();
+        if (popup.isShowing()) {
+            popup.hide();
+        }
     }
 
     public void addCustomChild(final Node child) {
