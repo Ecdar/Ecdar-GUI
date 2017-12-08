@@ -38,7 +38,5 @@
 </BorderPane>
 
 <Line fx:id="line1"/>
-<Line fx:id="line2"/>
-<Pane fx:id="defaultLocationsContainer" pickOnBounds="false"/>
 
 </fx:root>
