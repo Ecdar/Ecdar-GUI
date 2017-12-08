@@ -5,7 +5,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
 /**
- *
+ * Instance of a component.
  */
 public class ComponentInstance {
     private final ObjectProperty<Component> component = new SimpleObjectProperty<>();
