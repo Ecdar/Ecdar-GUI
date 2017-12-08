@@ -43,6 +43,9 @@ public class SystemPresentation extends ModelPresentation {
         system.getBox().getHeightProperty().addListener(observable -> onUpdateSize.run());
     }
 
+    /**
+     * Initializes the toolbar.
+     */
     private void initializeToolbar() {
         final SystemModel system = controller.getSystem();
 

@@ -1,13 +1,12 @@
 package SW9.controllers;
 
-import SW9.abstractions.Component;
 import SW9.abstractions.ComponentInstance;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 
 /**
- *
+ * Controller for a component instance.
  */
 public class ComponentInstanceController {
     public BorderPane frame;

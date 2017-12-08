@@ -15,7 +15,7 @@ import javafx.scene.shape.Shape;
 import java.util.function.BiConsumer;
 
 /**
- *
+ * Presentation for a component instance.
  */
 public class ComponentInstancePresentation extends StackPane {
     private final ComponentInstanceController controller;
@@ -25,12 +25,17 @@ public class ComponentInstancePresentation extends StackPane {
 
         controller.setInstance(instance);
 
-        initializeDimensions(instance);
+        initializeDimensions();
         initializeFrame();
         initializeBackground();
     }
 
-    private void initializeDimensions(final ComponentInstance instance) {
+    /**
+     * Initializes the dimensions.
+     */
+    private void initializeDimensions() {
+        final ComponentInstance instance = controller.getInstance();
+
         setMinWidth(Grid.GRID_SIZE * 24);
         setMaxWidth(Grid.GRID_SIZE * 24);
         setMinHeight(Grid.GRID_SIZE * 12);
@@ -46,6 +51,9 @@ public class ComponentInstancePresentation extends StackPane {
         instance.getBox().getYProperty().bind(layoutYProperty());
     }
 
+    /**
+     * Initializes the frame.
+     */
     private void initializeFrame() {
         final Component component = controller.getInstance().getComponent();
 
@@ -106,6 +114,9 @@ public class ComponentInstancePresentation extends StackPane {
 
     }
 
+    /**
+     * Initializes the background.
+     */
     private void initializeBackground() {
         final Component component = controller.getInstance().getComponent();
 

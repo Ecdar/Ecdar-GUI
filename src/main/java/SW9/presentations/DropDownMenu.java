@@ -201,6 +201,12 @@ public class DropDownMenu {
         list.getChildren().add(child);
     }
 
+    /**
+     * Adds a sub menu.
+     * @param s the text of the label use for showing the sub menu
+     * @param subMenu the sub menu
+     * @param offset the vertical offset of the sub menu content
+     */
     public void addSubMenu(final String s, final DropDownMenu subMenu, final int offset) {
         final Label label = new Label(s);
         final ObjectProperty<Boolean> isHoveringLabel = new SimpleObjectProperty<>(false);
