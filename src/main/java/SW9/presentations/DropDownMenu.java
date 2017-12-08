@@ -5,6 +5,7 @@ import SW9.utility.colors.EnabledColor;
 import com.jfoenix.controls.JFXPopup;
 import com.jfoenix.controls.JFXRippler;
 import javafx.animation.ScaleTransition;
+import javafx.application.Platform;
 import javafx.beans.binding.When;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -38,6 +39,7 @@ public class DropDownMenu {
     private final JFXPopup popup;
     private final SimpleBooleanProperty isHoveringASubMenu = new SimpleBooleanProperty(false);
     private final SimpleBooleanProperty isHoveringMenu = new SimpleBooleanProperty(false);
+    private final SimpleBooleanProperty isHoveringSubMenu = new SimpleBooleanProperty(false);
     private final SimpleBooleanProperty canIShowSubMenu = new SimpleBooleanProperty(false);
 
     public DropDownMenu(final Node src) {
@@ -74,6 +76,31 @@ public class DropDownMenu {
 
         popup.setPopupContent(content);
         source = src;
+
+        initializeClosingClock();
+
+    }
+
+    /**
+     * Initializer for the closing clock.
+     * Makes sure that the DropDownMenu closes/hides after a short time
+     */
+    private void initializeClosingClock() {
+        final Runnable checkIfWeShouldClose = () -> {
+            if (!isHoveringMenu.get() && !isHoveringSubMenu.get()) {
+                final Timer timer = new Timer(200, arg0 -> {
+                    Platform.runLater(() -> {
+                        if (!isHoveringMenu.get() && !isHoveringSubMenu.get()) {
+                            hide();
+                        }
+                    });
+                });
+                timer.setRepeats(false); // Only execute once
+                timer.start(); // Go go go!
+            }
+        };
+        isHoveringMenu.addListener(observable -> checkIfWeShouldClose.run());
+        isHoveringSubMenu.addListener(observable -> checkIfWeShouldClose.run());
     }
 
     public void show(final JFXPopup.PopupVPosition vAlign, final JFXPopup.PopupHPosition hAlign, final double initOffsetX, final double initOffsetY) {
