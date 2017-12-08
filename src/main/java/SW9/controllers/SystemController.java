@@ -21,6 +21,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 /**
  * Controller for a system.
@@ -124,13 +125,17 @@ public class SystemController extends ModelController implements Initializable {
      * @param system system model of this controller
      */
     private void initializeComponentInstanceHandling(final SystemModel system) {
+        final Consumer<ComponentInstance> addedConsumer = instance -> {
+            final ComponentInstancePresentation presentation = new ComponentInstancePresentation(instance);
+            componentInstancePresentationMap.put(instance, presentation);
+            componentInstanceContainer.getChildren().add(presentation);
+        };
+
+        // Handle current instances and every change from this point on
+        system.getComponentInstances().forEach(addedConsumer);
         system.getComponentInstances().addListener((ListChangeListener<ComponentInstance>) change -> {
             if (change.next()) {
-                change.getAddedSubList().forEach(instance -> {
-                    final ComponentInstancePresentation presentation = new ComponentInstancePresentation(instance);
-                    componentInstancePresentationMap.put(instance, presentation);
-                    componentInstanceContainer.getChildren().add(presentation);
-                });
+                change.getAddedSubList().forEach(addedConsumer);
 
                 change.getRemoved().forEach(instance -> {
                     componentInstanceContainer.getChildren().remove(componentInstancePresentationMap.get(instance));
