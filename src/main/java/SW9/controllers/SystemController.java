@@ -121,28 +121,37 @@ public class SystemController extends ModelController implements Initializable {
     }
 
     /**
-     * Initializes handling of added and removed component instances
+     * Handles already added component instances.
+     * Initializes handling of added and removed component instances.
      * @param system system model of this controller
      */
     private void initializeComponentInstanceHandling(final SystemModel system) {
-        final Consumer<ComponentInstance> addedConsumer = instance -> {
-            final ComponentInstancePresentation presentation = new ComponentInstancePresentation(instance);
-            componentInstancePresentationMap.put(instance, presentation);
-            componentInstanceContainer.getChildren().add(presentation);
-        };
-
-        // Handle current instances and every change from this point on
-        system.getComponentInstances().forEach(addedConsumer);
+        system.getComponentInstances().forEach(this::handleAddedComponentInstance);
         system.getComponentInstances().addListener((ListChangeListener<ComponentInstance>) change -> {
             if (change.next()) {
-                change.getAddedSubList().forEach(addedConsumer);
-
-                change.getRemoved().forEach(instance -> {
-                    componentInstanceContainer.getChildren().remove(componentInstancePresentationMap.get(instance));
-                    componentInstancePresentationMap.remove(instance);
-                });
+                change.getAddedSubList().forEach(this::handleAddedComponentInstance);
+                change.getRemoved().forEach(this::handleRemovedComponentInstance);
             }
         });
+    }
+
+    /**
+     * Handles an added component instance.
+     * @param instance the component instance
+     */
+    private void handleAddedComponentInstance(final ComponentInstance instance) {
+        final ComponentInstancePresentation presentation = new ComponentInstancePresentation(instance);
+        componentInstancePresentationMap.put(instance, presentation);
+        componentInstanceContainer.getChildren().add(presentation);
+    }
+
+    /**
+     * Handles a removed component instance.
+     * @param instance the component instance.
+     */
+    private void handleRemovedComponentInstance(final ComponentInstance instance) {
+        componentInstanceContainer.getChildren().remove(componentInstancePresentationMap.get(instance));
+        componentInstancePresentationMap.remove(instance);
     }
 
     /**
