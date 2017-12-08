@@ -47,6 +47,8 @@ public class Edge implements Serializable, Nearable {
     // Boolean for if this edge is locked or can be edited
     private final BooleanProperty isLocked = new SimpleBooleanProperty(false);
 
+    private final BooleanProperty isHighlighted = new SimpleBooleanProperty(false);
+
     public Edge(final Location sourceLocation, final EdgeStatus status) {
         setSourceLocation(sourceLocation);
         ioStatus = new SimpleObjectProperty<>(status);
@@ -168,6 +170,12 @@ public class Edge implements Serializable, Nearable {
     public ObjectProperty<Color.Intensity> colorIntensityProperty() {
         return colorIntensity;
     }
+
+    public void setIsHighlighted(final boolean highlight){ this.isHighlighted.set(highlight);}
+
+    public boolean getIsHighlighted(){ return this.isHighlighted.get(); }
+
+    public BooleanProperty isHighlightedProperty() { return this.isHighlighted; }
 
     public ObservableList<Nail> getNails() {
         return nails;

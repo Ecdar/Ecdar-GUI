@@ -3,13 +3,14 @@ package SW9.presentations;
 import SW9.Debug;
 import SW9.abstractions.EdgeStatus;
 import SW9.utility.colors.Color;
+import SW9.utility.Highlightable;
 import SW9.utility.helpers.SelectHelper;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.Group;
 import javafx.scene.shape.Line;
 
-public class Link extends Group implements SelectHelper.Selectable {
+public class Link extends Group implements SelectHelper.Selectable, Highlightable {
 
     private final static double HOVER_LINE_STROKE_WIDTH = 10d;
     private final DoubleProperty startX;
@@ -136,6 +137,20 @@ public class Link extends Group implements SelectHelper.Selectable {
 
     @Override
     public void deselect() {
+        shownLine.setStroke(Color.GREY.getColor(Color.Intensity.I900));
+    }
+
+    /***
+     * Highlights the Link with the normal color
+     */
+    @Override
+    public void highlight() { shownLine.setStroke(SelectHelper.getNormalColor()); }
+
+    /***
+     * Removes the highlight by setting the color to grey
+     */
+    @Override
+    public void unhighlight() {
         shownLine.setStroke(Color.GREY.getColor(Color.Intensity.I900));
     }
 }
