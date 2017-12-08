@@ -58,25 +58,25 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
         initializeNailCollapse();
 
         edge.addListener((obsEdge, oldEdge, newEdge) -> {
-                    newEdge.targetCircularProperty().addListener(getNewTargetCircularListener(newEdge));
-                    component.addListener(getComponentChangeListener(newEdge));
+            newEdge.targetCircularProperty().addListener(getNewTargetCircularListener(newEdge));
+            component.addListener(getComponentChangeListener(newEdge));
 
-                    // Invalidate the list of edges (to update UI and errors)
-                    newEdge.targetCircularProperty().addListener(observable -> {
-                        getComponent().removeEdge(getEdge());
-                        getComponent().addEdge(getEdge());
-                    });
+            // Invalidate the list of edges (to update UI and errors)
+            newEdge.targetCircularProperty().addListener(observable -> {
+                getComponent().removeEdge(getEdge());
+                getComponent().addEdge(getEdge());
+            });
 
-                    // When an edge updates highlight property,
-                    // we want to update the view to reflect current highlight property
-                    edge.get().isHighlightedProperty().addListener(v -> {
-                        if(edge.get().getIsHighlighted()) {
-                            this.highlight();
-                        } else {
-                            this.unhighlight();
-                        }
-                    });
-                });
+            // When an edge updates highlight property,
+            // we want to update the view to reflect current highlight property
+            edge.get().isHighlightedProperty().addListener(v -> {
+                if(edge.get().getIsHighlighted()) {
+                    this.highlight();
+                } else {
+                    this.unhighlight();
+                }
+            });
+        });
 
 
         initializeLinksListener();

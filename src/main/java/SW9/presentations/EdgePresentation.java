@@ -17,8 +17,6 @@ public class EdgePresentation extends Group {
         controller = new EcdarFXMLLoader().loadAndGetController("EdgePresentation.fxml", this);
 
         controller.setEdge(edge);
-
-        controller.setEdge(edge);
         this.edge.bind(controller.edgeProperty());
 
         controller.setComponent(component);
