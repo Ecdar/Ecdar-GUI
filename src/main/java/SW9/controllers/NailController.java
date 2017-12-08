@@ -251,9 +251,9 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
     @Override
     public ItemDragHelper.DragBounds getDragBounds() {
         final ObservableDoubleValue minX = new SimpleDoubleProperty(Grid.GRID_SIZE);
-        final ObservableDoubleValue maxX = getComponent().getBox().widthProperty().subtract(Grid.GRID_SIZE);
+        final ObservableDoubleValue maxX = getComponent().getBox().getWidthProperty().subtract(Grid.GRID_SIZE);
         final ObservableDoubleValue minY = new SimpleDoubleProperty(ModelPresentation.TOOL_BAR_HEIGHT + Grid.GRID_SIZE);
-        final ObservableDoubleValue maxY = getComponent().getBox().heightProperty().subtract(Grid.GRID_SIZE);
+        final ObservableDoubleValue maxY = getComponent().getBox().getHeightProperty().subtract(Grid.GRID_SIZE);
 
         return new ItemDragHelper.DragBounds(minX, maxX, minY, maxY);
     }

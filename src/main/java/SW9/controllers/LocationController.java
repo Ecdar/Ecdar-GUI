@@ -460,9 +460,9 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
     @Override
     public ItemDragHelper.DragBounds getDragBounds() {
         final ObservableDoubleValue minX = new SimpleDoubleProperty(GRID_SIZE * 2);
-        final ObservableDoubleValue maxX = getComponent().getBox().widthProperty().subtract(GRID_SIZE * 2);
+        final ObservableDoubleValue maxX = getComponent().getBox().getWidthProperty().subtract(GRID_SIZE * 2);
         final ObservableDoubleValue minY = new SimpleDoubleProperty(ComponentPresentation.TOOL_BAR_HEIGHT + GRID_SIZE * 2);
-        final ObservableDoubleValue maxY = getComponent().getBox().heightProperty().subtract(GRID_SIZE * 2);
+        final ObservableDoubleValue maxY = getComponent().getBox().getHeightProperty().subtract(GRID_SIZE * 2);
         return new ItemDragHelper.DragBounds(minX, maxX, minY, maxY);
     }
 

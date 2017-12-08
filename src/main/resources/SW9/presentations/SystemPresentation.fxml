@@ -13,6 +13,7 @@
 
     <StackPane>
         <Pane onMousePressed="#modelContainerPressed"/>
+        <Pane fx:id="componentInstanceContainer" pickOnBounds="false"/>
     </StackPane>
 
     <BorderPane fx:id="frame" pickOnBounds="false">

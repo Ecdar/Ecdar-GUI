@@ -39,8 +39,8 @@ public class SystemPresentation extends ModelPresentation {
         onUpdateSize.run();
 
         // Re run initialisation on update of width and height property
-        system.getBox().widthProperty().addListener(observable -> onUpdateSize.run());
-        system.getBox().heightProperty().addListener(observable -> onUpdateSize.run());
+        system.getBox().getWidthProperty().addListener(observable -> onUpdateSize.run());
+        system.getBox().getHeightProperty().addListener(observable -> onUpdateSize.run());
     }
 
     private void initializeToolbar() {
@@ -114,8 +114,9 @@ public class SystemPresentation extends ModelPresentation {
             )));
         };
 
-        system.colorProperty().addListener(observable -> updateColor.accept(system.getColor(), system.getColorIntensity()));
+        // Update now, and update on color change
         updateColor.accept(system.getColor(), system.getColorIntensity());
+        system.colorProperty().addListener(observable -> updateColor.accept(system.getColor(), system.getColorIntensity()));
     }
 
     /**
@@ -125,8 +126,8 @@ public class SystemPresentation extends ModelPresentation {
         final SystemModel system = controller.getSystem();
 
         // Bind the background width and height to the values in the model
-        controller.background.widthProperty().bindBidirectional(system.getBox().widthProperty());
-        controller.background.heightProperty().bindBidirectional(system.getBox().heightProperty());
+        controller.background.widthProperty().bindBidirectional(system.getBox().getWidthProperty());
+        controller.background.heightProperty().bindBidirectional(system.getBox().getHeightProperty());
 
         final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
             // Set the background color to the lightest possible version of the color
