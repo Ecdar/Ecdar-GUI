@@ -2,12 +2,17 @@ package SW9.presentations;
 
 import SW9.abstractions.Component;
 import SW9.abstractions.ComponentInstance;
+import SW9.abstractions.Location;
 import SW9.abstractions.SystemModel;
+import SW9.code_analysis.Nearable;
 import SW9.controllers.CanvasController;
 import SW9.controllers.ComponentInstanceController;
+import SW9.controllers.LocationController;
 import SW9.utility.colors.Color;
+import SW9.utility.helpers.SelectHelper;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.collections.ListChangeListener;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.layout.*;
@@ -21,7 +26,7 @@ import java.util.function.BiConsumer;
 /**
  * Presentation for a component instance.
  */
-public class ComponentInstancePresentation extends StackPane {
+public class ComponentInstancePresentation extends StackPane implements SelectHelper.Selectable {
     private final ComponentInstanceController controller;
 
     public ComponentInstancePresentation(final ComponentInstance instance, final SystemModel system) {
@@ -190,4 +195,13 @@ public class ComponentInstancePresentation extends StackPane {
 
     }
 
+    @Override
+    public void select() {
+
+    }
+
+    @Override
+    public void deselect() {
+
+    }
 }
