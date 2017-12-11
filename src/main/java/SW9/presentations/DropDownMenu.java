@@ -71,8 +71,8 @@ public class DropDownMenu extends JFXPopup{
     private void initializeClosingClock() {
         final Runnable checkIfWeShouldClose = () -> {
             if (!isHoveringMenu.get() && !isHoveringSubMenu.get()) {
-                final Timer timer = new Timer(200, arg0 -> {
-                    Platform.runLater(() -> {
+                final Timer timer = new Timer(400, arg0 -> {
+                        Platform.runLater(() -> {
                         if (!isHoveringMenu.get() && !isHoveringSubMenu.get()) {
                             hide();
                         }
