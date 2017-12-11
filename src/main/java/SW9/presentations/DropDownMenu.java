@@ -38,7 +38,6 @@ public class DropDownMenu extends JFXPopup{
     private final VBox list;
 
     private final SimpleBooleanProperty isHidden = new SimpleBooleanProperty(true);
-    private final SimpleBooleanProperty isHoveringASubMenu = new SimpleBooleanProperty(false);
     private final SimpleBooleanProperty isHoveringMenu = new SimpleBooleanProperty(false);
     private final SimpleBooleanProperty isHoveringSubMenu = new SimpleBooleanProperty(false);
     private final SimpleBooleanProperty canIShowSubMenu = new SimpleBooleanProperty(false);
