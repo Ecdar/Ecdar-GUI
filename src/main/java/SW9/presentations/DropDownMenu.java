@@ -29,22 +29,21 @@ import java.util.function.Consumer;
 import static SW9.utility.colors.EnabledColor.enabledColors;
 import static javafx.scene.paint.Color.TRANSPARENT;
 
-public class DropDownMenu {
+public class DropDownMenu extends JFXPopup{
     public static double x = 0;
     public static double y = 0;
     private final Node source;
     private final int width = 230;
     private final StackPane content;
     private final VBox list;
-    private final JFXPopup popup;
+
+    private final SimpleBooleanProperty isHidden = new SimpleBooleanProperty(true);
     private final SimpleBooleanProperty isHoveringASubMenu = new SimpleBooleanProperty(false);
     private final SimpleBooleanProperty isHoveringMenu = new SimpleBooleanProperty(false);
     private final SimpleBooleanProperty isHoveringSubMenu = new SimpleBooleanProperty(false);
     private final SimpleBooleanProperty canIShowSubMenu = new SimpleBooleanProperty(false);
 
     public DropDownMenu(final Node src) {
-        popup = new JFXPopup();
-
         list = new VBox();
         list.setStyle("-fx-background-color: white; -fx-padding: 8 0 8 0;");
         list.setMaxHeight(1);
@@ -54,27 +53,10 @@ public class DropDownMenu {
         content.setMinWidth(width);
         content.setMaxWidth(width);
 
-        if (closeOnMouseExit) {
-            final Runnable checkIfWeShouldClose = () -> {
-                if (!isHoveringMenu.get() && !isHoveringASubMenu.get()) {
-                    final Timer timer = new Timer(20, arg0 -> {
-                        if (!isHoveringMenu.get() && !isHoveringASubMenu.get()) {
-                            close();
-                        }
-                    });
-                    timer.setRepeats(false); // Only execute once
-                    timer.start(); // Go go go!
-                }
-            };
-            isHoveringMenu.addListener(observable -> checkIfWeShouldClose.run());
-            isHoveringASubMenu.addListener(observable -> checkIfWeShouldClose.run());
-        }
-
-
         list.setOnMouseExited(event -> isHoveringMenu.set(false));
         list.setOnMouseEntered(event -> isHoveringMenu.set(true));
 
-        popup.setPopupContent(content);
+        this.setPopupContent(content);
         source = src;
 
         initializeClosingClock();
@@ -103,27 +85,32 @@ public class DropDownMenu {
     }
 
     public void show(final JFXPopup.PopupVPosition vAlign, final JFXPopup.PopupHPosition hAlign, final double initOffsetX, final double initOffsetY) {
-        popup.show(source, vAlign, hAlign, initOffsetX, initOffsetY);
+        this.isHidden.set(false);
+        super.show(source, vAlign, hAlign, initOffsetX, initOffsetY);
     }
 
     public void addListElement(final String s) {
         final MenuElement element = new MenuElement(s);
+        addHideListener(element);
         list.getChildren().add(element.getItem());
     }
 
     public void addClickableListElement(final String s, final Consumer<MouseEvent> mouseEventConsumer) {
         final MenuElement element = new MenuElement(s, mouseEventConsumer);
+        addHideListener(element);
         list.getChildren().add(element.getItem());
     }
 
     public void addTogglableListElement(final String s, final ObservableBooleanValue isToggled, final Consumer<MouseEvent> mouseEventConsumer) {
         final MenuElement element = new MenuElement(s, "gmi-done", mouseEventConsumer);
+        addHideListener(element);
         element.setToggleable(isToggled);
         list.getChildren().add(element.getItem());
     }
 
     public void addTogglableAndDisableableListElement(final String s, final ObservableBooleanValue isToggled, final ObservableBooleanValue isDisableable, final Consumer<MouseEvent> mouseEventConsumer) {
         final MenuElement element = new MenuElement(s, "gmi-done", mouseEventConsumer);
+        addHideListener(element);
         element.setToggleable(isToggled);
         element.setDisableable(isDisableable);
         list.getChildren().add(element.getItem());
@@ -131,6 +118,7 @@ public class DropDownMenu {
 
     public void addClickableAndDisableableListElement(final String s, final ObservableBooleanValue isDisabled, final Consumer<MouseEvent> mouseEventConsumer) {
         final MenuElement element = new MenuElement(s, mouseEventConsumer);
+        addHideListener(element);
         element.setDisableable(isDisabled);
         list.getChildren().add(element.getItem());
     }
@@ -140,6 +128,7 @@ public class DropDownMenu {
      * @param element the constructed menu element to be added
      */
     public void addMenuElement(final MenuElement element) {
+        addHideListener(element);
         list.getChildren().add(element.getItem());
     }
 
@@ -222,9 +211,23 @@ public class DropDownMenu {
         addCustomChild(flowPane);
     }
 
+    private void addHideListener(MenuElement element){
+        this.isHidden.addListener(((observable, oldValue, newValue) -> {
+            System.out.println("Adding " + element.getItem().toString());
+            if(newValue) element.setHideColor();
+            else element.show();
+        }));
+        if(isHidden.get()) element.setHideColor();
+        else element.show();
+
+    }
+
+    @Override
     public void hide(){
-        if (popup.isShowing()) {
-            popup.hide();
+        if (this.isShowing()) {
+            this.isHidden.set(true);
+            System.out.println("I am hiding this DropDownMenu!");
+            super.hide();
         }
     }
 
@@ -280,12 +283,10 @@ public class DropDownMenu {
         // Set properties in order to prevent closing when hovering sub menu
         subMenuContent.setOnMouseEntered(event -> {
             isHoveringSubMenu.set(true);
-            isHoveringASubMenu.set(true);
             show.run();
         });
         subMenuContent.setOnMouseExited(event -> {
             isHoveringSubMenu.set(false);
-            isHoveringASubMenu.set(false);
 
             if (!isHoveringLabel.get()) {
                 hide.run();
