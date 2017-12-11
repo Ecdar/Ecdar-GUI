@@ -1,7 +1,6 @@
 package SW9.controllers;
 
 import SW9.abstractions.*;
-import SW9.code_analysis.CodeAnalysis;
 import SW9.code_analysis.Nearable;
 import SW9.model_canvas.arrow_heads.SimpleArrowHead;
 import SW9.presentations.*;
@@ -15,7 +14,6 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
-import javafx.beans.InvalidationListener;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -134,7 +132,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                 edgeRoot.getChildren().addAll(link, simpleArrowHead);
 
                 // Bind the first link and the arrowhead from the source location to the mouse
-                BindingHelper.bind(link, simpleArrowHead, newEdge.getSourceCircular(), newComponent.getBox().xProperty(), newComponent.getBox().yProperty());
+                BindingHelper.bind(link, simpleArrowHead, newEdge.getSourceCircular(), newComponent.getBox().getXProperty(), newComponent.getBox().getYProperty());
             } else if (newEdge.getTargetCircular() != null) {
 
                 edgeRoot.getChildren().add(simpleArrowHead);
@@ -227,7 +225,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                         // Create a new link that will bind from the new nail to the mouse
                         final Link newLink = new Link(edge.get().getStatus());
                         links.add(newLink);
-                        BindingHelper.bind(newLink, simpleArrowHead, newNail, newComponent.getBox().xProperty(), newComponent.getBox().yProperty());
+                        BindingHelper.bind(newLink, simpleArrowHead, newNail, newComponent.getBox().getXProperty(), newComponent.getBox().getYProperty());
                         edgeRoot.getChildren().add(newLink);
                     }
                 });
@@ -408,8 +406,8 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                         dropDownMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX(), event.getY());
 
                     } else if ((event.isShiftDown() && event.isPrimaryButtonDown()) || event.isMiddleButtonDown()) {
-                        final double nailX = CanvasPresentation.mouseTracker.gridXProperty().subtract(getComponent().getBox().xProperty()).doubleValue();
-                        final double nailY = CanvasPresentation.mouseTracker.gridYProperty().subtract(getComponent().getBox().yProperty()).doubleValue();
+                        final double nailX = CanvasPresentation.mouseTracker.gridXProperty().subtract(getComponent().getBox().getXProperty()).doubleValue();
+                        final double nailY = CanvasPresentation.mouseTracker.gridYProperty().subtract(getComponent().getBox().getYProperty()).doubleValue();
 
                         final Nail newNail = new Nail(nailX, nailY);
 

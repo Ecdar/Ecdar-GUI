@@ -113,7 +113,7 @@ public class ComponentController extends ModelController implements Initializabl
         // The root view have been inflated, initialize the mouse tracker on it
         mouseTracker = new MouseTracker(root);
 
-        initializeComponentContextMenu();
+        initializeContextMenu();
 
         component.addListener((obs, old, component) -> {
             if (component == null) return;
@@ -180,7 +180,7 @@ public class ComponentController extends ModelController implements Initializabl
         // we update the component's height to be as tall as the container
         double maxHeight = findMaxHeight();
         if(maxHeight > component.get().getBox().getHeight()) {
-            component.get().getBox().heightProperty().set(maxHeight);
+            component.get().getBox().getHeightProperty().set(maxHeight);
         }
     }
 
@@ -275,7 +275,7 @@ public class ComponentController extends ModelController implements Initializabl
         });
     }
 
-    private void initializeComponentContextMenu() {
+    private void initializeContextMenu() {
         dropDownMenuHelperCircle = new Circle(5);
         dropDownMenuHelperCircle.setOpacity(0);
         dropDownMenuHelperCircle.setMouseTransparent(true);
@@ -528,7 +528,7 @@ public class ComponentController extends ModelController implements Initializabl
             // Bind the newly created location to the mouse and tell the ui that it is not placed yet
             if (loc.getX() == 0) {
                 newLocationPresentation.setPlaced(false);
-                BindingHelper.bind(loc, newComponent.getBox().xProperty(), newComponent.getBox().yProperty());
+                BindingHelper.bind(loc, newComponent.getBox().getXProperty(), newComponent.getBox().getYProperty());
             }
         };
 
@@ -703,8 +703,8 @@ public class ComponentController extends ModelController implements Initializabl
             // We are drawing an edge
             if (unfinishedEdge != null) {
                 // Calculate the position for the new nail (based on the component position and the canvas mouse tracker)
-                final DoubleBinding x = CanvasPresentation.mouseTracker.gridXProperty().subtract(getComponent().getBox().xProperty());
-                final DoubleBinding y = CanvasPresentation.mouseTracker.gridYProperty().subtract(getComponent().getBox().yProperty());
+                final DoubleBinding x = CanvasPresentation.mouseTracker.gridXProperty().subtract(getComponent().getBox().getXProperty());
+                final DoubleBinding y = CanvasPresentation.mouseTracker.gridYProperty().subtract(getComponent().getBox().getYProperty());
 
                 // Create the abstraction for the new nail and add it to the unfinished edge
                 final Nail newNail = new Nail(x, y);

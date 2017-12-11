@@ -55,8 +55,8 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
         onUpdateSize.run();
 
         // Re run initialisation on update of width and height property
-        component.getBox().widthProperty().addListener(observable -> onUpdateSize.run());
-        component.getBox().heightProperty().addListener(observable -> onUpdateSize.run());
+        component.getBox().getWidthProperty().addListener(observable -> onUpdateSize.run());
+        component.getBox().getHeightProperty().addListener(observable -> onUpdateSize.run());
 
         controller.declarationTextArea.textProperty().addListener((obs, oldText, newText) ->
                 controller.declarationTextArea.setStyleSpans(0, computeHighlighting(newText)));
@@ -160,8 +160,8 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
         final Component component = controller.getComponent();
 
         // Bind the background width and height to the values in the model
-        controller.background.widthProperty().bindBidirectional(component.getBox().widthProperty());
-        controller.background.heightProperty().bindBidirectional(component.getBox().heightProperty());
+        controller.background.widthProperty().bindBidirectional(component.getBox().getWidthProperty());
+        controller.background.heightProperty().bindBidirectional(component.getBox().getHeightProperty());
 
         final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
             // Set the background color to the lightest possible version of the color

@@ -3,13 +3,17 @@ package SW9.presentations;
 import SW9.utility.colors.Color;
 import SW9.utility.colors.EnabledColor;
 import com.jfoenix.controls.JFXPopup;
+import com.jfoenix.controls.JFXRippler;
 import javafx.animation.ScaleTransition;
 import javafx.beans.binding.When;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableBooleanValue;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Circle;
@@ -22,6 +26,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import static SW9.utility.colors.EnabledColor.enabledColors;
+import static javafx.scene.paint.Color.TRANSPARENT;
 
 public class DropDownMenu {
 
@@ -31,7 +36,7 @@ public class DropDownMenu {
     private final StackPane content;
     private final VBox list;
     private final JFXPopup popup;
-    private final SimpleBooleanProperty isHoveringSubMenu = new SimpleBooleanProperty(false);
+    private final SimpleBooleanProperty isHoveringASubMenu = new SimpleBooleanProperty(false);
     private final SimpleBooleanProperty isHoveringMenu = new SimpleBooleanProperty(false);
     private final SimpleBooleanProperty canIShowSubMenu = new SimpleBooleanProperty(false);
 
@@ -51,9 +56,9 @@ public class DropDownMenu {
 
         if (closeOnMouseExit) {
             final Runnable checkIfWeShouldClose = () -> {
-                if (!isHoveringMenu.get() && !isHoveringSubMenu.get()) {
+                if (!isHoveringMenu.get() && !isHoveringASubMenu.get()) {
                     final Timer timer = new Timer(20, arg0 -> {
-                        if (!isHoveringMenu.get() && !isHoveringSubMenu.get()) {
+                        if (!isHoveringMenu.get() && !isHoveringASubMenu.get()) {
                             close();
                         }
                     });
@@ -62,7 +67,7 @@ public class DropDownMenu {
                 }
             };
             isHoveringMenu.addListener(observable -> checkIfWeShouldClose.run());
-            isHoveringSubMenu.addListener(observable -> checkIfWeShouldClose.run());
+            isHoveringASubMenu.addListener(observable -> checkIfWeShouldClose.run());
         }
 
 
@@ -194,6 +199,102 @@ public class DropDownMenu {
 
     public void addCustomChild(final Node child) {
         list.getChildren().add(child);
+    }
+
+    /**
+     * Adds a sub menu.
+     * @param s the text of the label use for showing the sub menu
+     * @param subMenu the sub menu
+     * @param offset the vertical offset of the sub menu content
+     */
+    public void addSubMenu(final String s, final DropDownMenu subMenu, final int offset) {
+        final Label label = new Label(s);
+        final ObjectProperty<Boolean> isHoveringLabel = new SimpleObjectProperty<>(false);
+        final ObjectProperty<Boolean> isHoveringSubMenu = new SimpleObjectProperty<>(false);
+
+        label.setStyle("-fx-padding: 8 16 8 16;");
+        label.getStyleClass().add("body2");
+        label.setMinWidth(width);
+
+        final StackPane subMenuContent = subMenu.content;
+        subMenuContent.setStyle("-fx-padding: 0 0 0 5;");
+        subMenuContent.setMinWidth(subMenuContent.getMinWidth() + 1);
+        subMenuContent.setMaxWidth(subMenuContent.getMinWidth() + 1);
+        subMenuContent.setTranslateX(width - 40);
+        subMenuContent.setTranslateY(offset);
+        subMenuContent.setOpacity(0);
+
+        final Runnable show = () -> {
+            // Set the background to a light grey
+            label.setBackground(new Background(new BackgroundFill(
+                    Color.GREY.getColor(Color.Intensity.I200),
+                    CornerRadii.EMPTY,
+                    Insets.EMPTY
+            )));
+
+            subMenuContent.setOpacity(1);
+        };
+
+        final Runnable hide = () -> {
+            // Set the background to be transparent
+            label.setBackground(new Background(new BackgroundFill(
+                    TRANSPARENT,
+                    CornerRadii.EMPTY,
+                    Insets.EMPTY
+            )));
+
+            subMenuContent.setOpacity(0);
+        };
+
+        // Set properties in order to prevent closing when hovering sub menu
+        subMenuContent.setOnMouseEntered(event -> {
+            isHoveringSubMenu.set(true);
+            isHoveringASubMenu.set(true);
+            show.run();
+        });
+        subMenuContent.setOnMouseExited(event -> {
+            isHoveringSubMenu.set(false);
+            isHoveringASubMenu.set(false);
+
+            if (!isHoveringLabel.get()) {
+                hide.run();
+            }
+        });
+
+        this.content.getChildren().add(subMenuContent);
+
+        final JFXRippler rippler = new JFXRippler(label);
+        rippler.setRipplerFill(Color.GREY_BLUE.getColor(Color.Intensity.I300));
+
+        rippler.setOnMouseEntered(event -> {
+            isHoveringLabel.set(true);
+
+            show.run();
+        });
+
+        rippler.setOnMouseExited(event -> {
+            isHoveringLabel.set(false);
+
+            if (!isHoveringSubMenu.get()) {
+                hide.run();
+            }
+        });
+
+        final FontIcon icon = new FontIcon();
+        icon.setIconLiteral("gmi-chevron-right");
+        icon.setFill(Color.GREY.getColor(Color.Intensity.I600));
+        icon.setIconSize(20);
+
+        final StackPane iconContainer = new StackPane(icon);
+        iconContainer.setMaxWidth(20);
+        iconContainer.setMaxHeight(20);
+        iconContainer.setStyle("-fx-padding: 8;");
+        iconContainer.setMouseTransparent(true);
+
+        rippler.getChildren().add(iconContainer);
+        StackPane.setAlignment(iconContainer, Pos.CENTER_RIGHT);
+
+        list.getChildren().add(rippler);
     }
 
     public interface HasColor {

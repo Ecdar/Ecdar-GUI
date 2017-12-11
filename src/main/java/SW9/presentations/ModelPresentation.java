@@ -21,7 +21,7 @@ import static SW9.presentations.Grid.GRID_SIZE;
  * Presentation for high level graphical models such as systems and components
  */
 public abstract class ModelPresentation extends HighLevelModelPresentation {
-    static final double CORNER_SIZE = 4 * Grid.GRID_SIZE;
+    static final int CORNER_SIZE = 4 * Grid.GRID_SIZE;
     public static final double TOOL_BAR_HEIGHT = CORNER_SIZE / 2;
 
     static final Polygon TOP_LEFT_CORNER = new Polygon(
@@ -100,17 +100,17 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
         // Bind the position of the abstraction to the values in the view
         layoutXProperty().set(box.getX());
         layoutYProperty().set(box.getY());
-        box.xProperty().bindBidirectional(layoutXProperty());
-        box.yProperty().bindBidirectional(layoutYProperty());
+        box.getXProperty().bindBidirectional(layoutXProperty());
+        box.getYProperty().bindBidirectional(layoutYProperty());
 
         setMinWidth(box.getWidth());
         setMaxWidth(box.getWidth());
         setMinHeight(box.getHeight());
         setMaxHeight(box.getHeight());
-        minHeightProperty().bindBidirectional(box.heightProperty());
-        maxHeightProperty().bindBidirectional(box.heightProperty());
-        minWidthProperty().bindBidirectional(box.widthProperty());
-        maxWidthProperty().bindBidirectional(box.widthProperty());
+        minHeightProperty().bindBidirectional(box.getHeightProperty());
+        maxHeightProperty().bindBidirectional(box.getHeightProperty());
+        minWidthProperty().bindBidirectional(box.getWidthProperty());
+        maxWidthProperty().bindBidirectional(box.getWidthProperty());
     }
 
     /**
@@ -127,7 +127,7 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
 
         // Bind the place and size of bottom anchor
         rightAnchor.setWidth(5);
-        rightAnchor.heightProperty().bind(box.heightProperty());
+        rightAnchor.heightProperty().bind(box.getHeightProperty());
 
         final DoubleProperty prevX = new SimpleDoubleProperty();
         final DoubleProperty prevWidth = new SimpleDoubleProperty();
@@ -180,7 +180,7 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
         bottomAnchor.setCursor(Cursor.S_RESIZE);
 
         // Bind the place and size of bottom anchor
-        bottomAnchor.widthProperty().bind(box.widthProperty());
+        bottomAnchor.widthProperty().bind(box.getWidthProperty());
         bottomAnchor.setHeight(5);
 
         final DoubleProperty prevY = new SimpleDoubleProperty();
