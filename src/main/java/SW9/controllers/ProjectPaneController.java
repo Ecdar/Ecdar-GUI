@@ -201,7 +201,7 @@ public class ProjectPaneController implements Initializable {
     }
 
     private void initializeTogglePeriodicCheck(DropDownMenu moreInformationDropDown, final Component component) {
-        moreInformationDropDown.addTogglableListElement("Include in periodic check", component.includeInPeriodicCheckProperty(), event -> {
+        moreInformationDropDown.addToggleableListElement("Include in periodic check", component.includeInPeriodicCheckProperty(), event -> {
             final boolean didIncludeInPeriodicCheck = component.includeInPeriodicCheckProperty().get();
 
             UndoRedoStack.pushAndPerform(() -> { // Perform

@@ -68,7 +68,7 @@ public class QueryPresentation extends AnchorPane {
 
         final DropDownMenu dropDownMenu = new DropDownMenu(detailsButton);
 
-        dropDownMenu.addTogglableListElement("Run Periodically", query.isPeriodicProperty(), event -> {
+        dropDownMenu.addToggleableListElement("Run Periodically", query.isPeriodicProperty(), event -> {
             // Toggle the property
             query.setIsPeriodic(!query.isPeriodic());
             dropDownMenu.hide();

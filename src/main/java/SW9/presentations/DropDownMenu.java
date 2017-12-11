@@ -103,18 +103,18 @@ public class DropDownMenu extends JFXPopup {
         list.getChildren().add(element.getItem());
     }
 
-    public void addTogglableListElement(final String s, final ObservableBooleanValue isToggled, final Consumer<MouseEvent> mouseEventConsumer) {
+    public void addToggleableListElement(final String s, final ObservableBooleanValue isToggled, final Consumer<MouseEvent> mouseEventConsumer) {
         final MenuElement element = new MenuElement(s, "gmi-done", mouseEventConsumer);
         addHideListener(element);
         element.setToggleable(isToggled);
         list.getChildren().add(element.getItem());
     }
 
-    public void addTogglableAndDisableableListElement(final String s, final ObservableBooleanValue isToggled, final ObservableBooleanValue isDisableable, final Consumer<MouseEvent> mouseEventConsumer) {
+    public void addToggleableAndDisableableListElement(final String s, final ObservableBooleanValue isToggled, final ObservableBooleanValue isDisabled, final Consumer<MouseEvent> mouseEventConsumer) {
         final MenuElement element = new MenuElement(s, "gmi-done", mouseEventConsumer);
         addHideListener(element);
         element.setToggleable(isToggled);
-        element.setDisableable(isDisableable);
+        element.setDisableable(isDisabled);
         list.getChildren().add(element.getItem());
     }
 
