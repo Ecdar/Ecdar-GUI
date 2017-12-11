@@ -13,6 +13,7 @@ import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.util.function.Consumer;
 
+import static javafx.scene.paint.Color.TRANSPARENT;
 import static javafx.scene.paint.Color.WHITE;
 
 /**
@@ -26,6 +27,7 @@ public class MenuElement {
     private Region spacer;
     private HBox container;
     private FontIcon icon;
+    private boolean hasExited = false;
     private ObservableBooleanValue isDisabled = new SimpleBooleanProperty(false);
 
     /**
@@ -35,7 +37,6 @@ public class MenuElement {
     public MenuElement(final String s){
         createLabel(s);
         container.getChildren().addAll(spacer, label);
-        setHideColor();
         item = container;
     }
 
@@ -71,7 +72,6 @@ public class MenuElement {
         clickListenerFix = new StackPane(container);
 
         createRippler(mouseEventConsumer);
-        setHideColor();
         item = rippler;
     }
 
@@ -90,7 +90,6 @@ public class MenuElement {
         clickListenerFix = new StackPane(container);
 
         createRippler(mouseEventConsumer);
-        setHideColor();
 
         item = rippler;
     }
@@ -113,7 +112,7 @@ public class MenuElement {
                     CornerRadii.EMPTY,
                     Insets.EMPTY
             )));
-
+            hasExited = false;
         });
 
         rippler.setOnMouseExited(event -> {
@@ -122,6 +121,7 @@ public class MenuElement {
                 System.out.println("Exiting while pressed");
                 rippler.release();
             }
+            hasExited = true;
 
 
             //System.out.println("Exited the item - " + label.getText());
@@ -147,6 +147,10 @@ public class MenuElement {
             //System.out.println("Released the item - " + label.getText());
             mouseEventConsumer.accept(event);
             setHideColor();
+            if (rippler.isPressed() || !hasExited) {
+                mouseEventConsumer.accept(event);
+            }
+            hasExited = false;
         });
     }
 

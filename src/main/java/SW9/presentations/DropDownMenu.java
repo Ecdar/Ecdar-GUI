@@ -216,12 +216,10 @@ public class DropDownMenu extends JFXPopup{
     private void addHideListener(MenuElement element){
         this.isHidden.addListener(((observable, oldValue, newValue) -> {
             System.out.println("Adding " + element.getItem().toString());
-            if(newValue) element.setHideColor();
-            else element.show();
+            if(newValue) element.hide();
         }));
-        if(isHidden.get()) element.setHideColor();
-        else element.show();
 
+        if(isHidden.get()) element.hide();
     }
 
     @Override
