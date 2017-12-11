@@ -110,7 +110,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
         dropDownMenu = new DropDownMenu(root);
 
-        dropDownMenu.addClickableAndDisableableListElement("Draw edge", getLocation().getIsLocked(),
+        dropDownMenu.addClickableAndDisableableListElement("Draw Edge", getLocation().getIsLocked(),
                 (event) -> {
                         final Edge newEdge = new Edge(getLocation(), EcdarController.getGlobalEdgeStatus());
 
@@ -143,7 +143,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
         );
 
         // For when non-initial
-        dropDownMenu.addClickableAndDisableableListElement("Make initial",
+        dropDownMenu.addClickableAndDisableableListElement("Make Initial",
                 getLocation().typeProperty().isEqualTo(Location.Type.INITIAL), // disable if already initial
                 event -> {
                     final Location previousInitLoc = getComponent().getInitialLocation();
