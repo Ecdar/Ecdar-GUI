@@ -28,7 +28,6 @@ import java.util.function.Consumer;
 
 import static SW9.utility.colors.EnabledColor.enabledColors;
 import static javafx.scene.paint.Color.TRANSPARENT;
-import static javafx.scene.paint.Color.WHITE;
 
 public class DropDownMenu extends JFXPopup{
     public static double x = 0;
