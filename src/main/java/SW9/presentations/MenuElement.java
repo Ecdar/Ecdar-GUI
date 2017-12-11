@@ -1,7 +1,6 @@
 package SW9.presentations;
 
 import SW9.utility.colors.Color;
-import com.jfoenix.controls.JFXRippler;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableBooleanValue;
 import javafx.geometry.Insets;
@@ -23,7 +22,7 @@ public class MenuElement {
     private StackPane clickListenerFix;
     private Node item;
     private Label label;
-    private JFXRippler rippler;
+    private ReleaseRippler rippler;
     private Region spacer;
     private HBox container;
     private FontIcon icon;
@@ -101,7 +100,7 @@ public class MenuElement {
      * @param mouseEventConsumer the event to be triggered along the ripple effect
      */
     private void createRippler(final Consumer<MouseEvent> mouseEventConsumer){
-        rippler = new JFXRippler(clickListenerFix);
+        rippler = new ReleaseRippler(clickListenerFix);
         rippler.setRipplerFill(javafx.scene.paint.Color.TRANSPARENT);
 
         rippler.setOnMouseEntered(event -> {
@@ -119,7 +118,11 @@ public class MenuElement {
 
         rippler.setOnMouseExited(event -> {
             if (isDisabled.get()) return;
-            if (rippler.isPressed()) System.out.println("Exiting while pressed");
+            if (rippler.isPressed()) {
+                System.out.println("Exiting while pressed");
+                rippler.release();
+            }
+
 
             //System.out.println("Exited the item - " + label.getText());
             // Set the background to be transparent
@@ -224,6 +227,7 @@ public class MenuElement {
                 CornerRadii.EMPTY,
                 Insets.EMPTY)));
         System.out.println("I am hiding " + label.getText());
+        rippler.release();
     }
 
     public void show() {
@@ -233,6 +237,7 @@ public class MenuElement {
                 Color.BROWN.getColor(Color.Intensity.I500),
                 CornerRadii.EMPTY,
                 Insets.EMPTY)));
+        rippler.release();
 
     }
 }
