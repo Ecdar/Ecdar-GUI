@@ -214,6 +214,11 @@ public class DropDownMenu extends JFXPopup{
     }
 
 
+    /***
+     * Makes the elements of the menu listen to the isHidden property,
+     * so they can react to when the menu is hidden/shown
+     * @param element The MenuElement that should hide() when isHidden is changed
+     */
     private void addHideListener(MenuElement element){
         final Consumer<Boolean> updateHide = (hidden) -> { if(hidden) element.hide(); };
 
@@ -221,6 +226,11 @@ public class DropDownMenu extends JFXPopup{
         updateHide.accept(this.isHidden.get());
     }
 
+    /***
+     * An overridden method that lets us set the isHidden property when the menu is hidden
+     * It's called manually when we want to close the DropDownMenu,
+     * but also automatically for example when changing window and the menu is open
+     */
     @Override
     public void hide(){
         if (this.isShowing()) {

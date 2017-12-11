@@ -139,6 +139,9 @@ public class MenuElement {
                 event.consume();
                 return;
             }
+
+            // Only execute the mouseEventConsumer, if the mouse is still inside of the rippler when released
+            // otherwise nothing should happen (the rippler is deselected)
             if (rippler.isPressed() || !hasExited) {
                 mouseEventConsumer.accept(event);
             }
@@ -215,6 +218,9 @@ public class MenuElement {
         return this;
     }
 
+    /***
+     * Sets the color of the MenuElement to transparent, so it doesn't stay marked
+     */
     public void setHideColor() {
         if (clickListenerFix == null) return;
 
@@ -224,6 +230,10 @@ public class MenuElement {
                 Insets.EMPTY)));
     }
 
+    /***
+     * Should be called when a menu containing this item is closed/hidden
+     * Sets the background color and releases the button so it's not marked
+     */
     public void hide() {
         setHideColor();
         if (rippler == null) return;
