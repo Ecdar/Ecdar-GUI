@@ -29,7 +29,7 @@ import java.util.function.Consumer;
 import static SW9.utility.colors.EnabledColor.enabledColors;
 import static javafx.scene.paint.Color.TRANSPARENT;
 
-public class DropDownMenu extends JFXPopup{
+public class DropDownMenu extends JFXPopup {
     public static double x = 0;
     public static double y = 0;
     private final Node source;
@@ -252,17 +252,16 @@ public class DropDownMenu extends JFXPopup{
     public void addSubMenu(final String s, final DropDownMenu subMenu, final int offset) {
         final Label label = new Label(s);
         final ObjectProperty<Boolean> isHoveringLabel = new SimpleObjectProperty<>(false);
-        final ObjectProperty<Boolean> isHoveringSubMenu = new SimpleObjectProperty<>(false);
 
         label.setStyle("-fx-padding: 8 16 8 16;");
         label.getStyleClass().add("body2");
         label.setMinWidth(width);
 
         final StackPane subMenuContent = subMenu.content;
-        subMenuContent.setStyle("-fx-padding: 0 0 0 5;");
+        subMenuContent.setStyle("-fx-padding: 0 0 0 2;");
         subMenuContent.setMinWidth(subMenuContent.getMinWidth() + 1);
         subMenuContent.setMaxWidth(subMenuContent.getMinWidth() + 1);
-        subMenuContent.setTranslateX(width - 40);
+        subMenuContent.setTranslateX(width);
         subMenuContent.setTranslateY(offset);
         subMenuContent.setOpacity(0);
 
@@ -293,6 +292,7 @@ public class DropDownMenu extends JFXPopup{
             isHoveringSubMenu.set(true);
             show.run();
         });
+
         subMenuContent.setOnMouseExited(event -> {
             isHoveringSubMenu.set(false);
 

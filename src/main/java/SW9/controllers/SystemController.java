@@ -123,7 +123,6 @@ public class SystemController extends ModelController implements Initializable {
                         "Added component instance '" + instance.toString() + "' to system '" + system.getName() + "'",
                         "add-circle"
                 );
-
                 contextMenu.hide();
             }));
         });
