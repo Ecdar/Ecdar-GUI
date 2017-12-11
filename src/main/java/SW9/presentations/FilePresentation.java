@@ -132,11 +132,14 @@ public class FilePresentation extends AnchorPane {
         setBackground.accept(color, colorIntensity);
     }
 
+    /**
+     * Initialises the icons for the three different file types in Ecdar: Component, System and Declarations
+     */
     private void initializeFileIcons() {
         if(model.get() instanceof Component){
             controller.fileImage.setImage(new Image(Ecdar.class.getResource("component_frame.png").toExternalForm()));
         } else if(model.get() instanceof  SystemModel){
-            controller.fileImage.setImage(new Image(Ecdar.class.getResource("system_frame_s.png").toExternalForm()));
+            controller.fileImage.setImage(new Image(Ecdar.class.getResource("system_frame.png").toExternalForm()));
         } else {
             controller.fileImage.setImage(new Image(Ecdar.class.getResource("description_frame.png").toExternalForm()));
         }

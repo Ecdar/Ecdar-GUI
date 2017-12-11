@@ -20,12 +20,9 @@ public class ProjectPanePresentation extends StackPane {
         initializeRightBorder();
         initializeBackground();
         initializeToolbar();
-
         initializeToolbarButton(controller.createComponent);
         initializeToolbarButton(controller.createSystem);
-
         initializeAddModelIcons();
-
         Tooltip.install(controller.createComponent, new Tooltip("Add component"));
         Tooltip.install(controller.createSystem, new Tooltip("Add system"));
     }
@@ -75,12 +72,14 @@ public class ProjectPanePresentation extends StackPane {
         button.setPosition(JFXRippler.RipplerPos.BACK);
     }
 
+    /**
+     * Initialises the icons for the two buttons for adding a system or a component
+     */
     private void initializeAddModelIcons() {
         controller.createComponentImage.setImage(new Image(Ecdar.class.getResource("add_component_frame.png").toExternalForm()));
         EcdarPresentation.fitSizeWhenAvailable(controller.createComponentImage, controller.createComponentPane);
         controller.createSystemImage.setImage(new Image(Ecdar.class.getResource("add_system_frame.png").toExternalForm()));
         EcdarPresentation.fitSizeWhenAvailable(controller.createSystemImage, controller.createSystemPane);
-        //controller.createSystemImage.setImage(new Image(Ecdar.class.getResource("add_component.png").toExternalForm()));
     }
 
     /**
