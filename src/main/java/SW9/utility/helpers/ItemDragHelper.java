@@ -114,8 +114,8 @@ public class ItemDragHelper {
 
             final DragBounds dragBounds = getDragBounds.get();
 
-            final double newX = CanvasPresentation.mouseTracker.getGridX() - ((Component) CanvasController.getActiveModel()).getBox().getX();
-            final double newY = CanvasPresentation.mouseTracker.getGridY() - ((Component) CanvasController.getActiveModel()).getBox().getY();
+            final double newX = CanvasPresentation.mouseTracker.getGridX() - ((Boxed) CanvasController.getActiveModel()).getBox().getX();
+            final double newY = CanvasPresentation.mouseTracker.getGridY() - ((Boxed) CanvasController.getActiveModel()).getBox().getY();
 
             final double unRoundedX = dragBounds.trimX(newX - xDiff.get());
             final double unRoundedY = dragBounds.trimY(newY - yDiff.get());

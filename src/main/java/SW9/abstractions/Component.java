@@ -6,6 +6,7 @@ import SW9.presentations.Grid;
 import SW9.utility.UndoRedoStack;
 import SW9.utility.colors.Color;
 import SW9.utility.colors.EnabledColor;
+import SW9.utility.helpers.Boxed;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import javafx.beans.property.*;
@@ -17,7 +18,10 @@ import javafx.util.Pair;
 
 import java.util.*;
 
-public class Component extends HighLevelModelObject {
+/**
+ * A component that models an I/O automata.
+ */
+public class Component extends HighLevelModelObject implements Boxed {
     static final String COMPONENT = "Component";
     private static final String LOCATIONS = "locations";
     private static final String EDGES = "edges";
@@ -465,6 +469,7 @@ public class Component extends HighLevelModelObject {
         return declarationsText;
     }
 
+    @Override
     public Box getBox() {
         return box;
     }

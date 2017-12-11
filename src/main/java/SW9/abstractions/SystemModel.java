@@ -4,6 +4,7 @@ import SW9.Ecdar;
 import SW9.utility.UndoRedoStack;
 import SW9.utility.colors.Color;
 import SW9.utility.colors.EnabledColor;
+import SW9.utility.helpers.Boxed;
 import com.google.gson.JsonObject;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -15,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * A model of a system
  */
-public class SystemModel extends EcdarModel {
+public class SystemModel extends EcdarModel implements Boxed {
     private static final String SYSTEM = "System";
 
     // Verification properties
@@ -34,6 +35,7 @@ public class SystemModel extends EcdarModel {
         deserialize(json);
     }
 
+    @Override
     public Box getBox() {
         return box;
     }

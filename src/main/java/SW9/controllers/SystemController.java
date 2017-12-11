@@ -21,6 +21,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 /**
  * Controller for a system.
@@ -120,24 +121,37 @@ public class SystemController extends ModelController implements Initializable {
     }
 
     /**
-     * Initializes handling of added and removed component instances
+     * Handles already added component instances.
+     * Initializes handling of added and removed component instances.
      * @param system system model of this controller
      */
     private void initializeComponentInstanceHandling(final SystemModel system) {
+        system.getComponentInstances().forEach(this::handleAddedComponentInstance);
         system.getComponentInstances().addListener((ListChangeListener<ComponentInstance>) change -> {
             if (change.next()) {
-                change.getAddedSubList().forEach(instance -> {
-                    final ComponentInstancePresentation presentation = new ComponentInstancePresentation(instance);
-                    componentInstancePresentationMap.put(instance, presentation);
-                    componentInstanceContainer.getChildren().add(presentation);
-                });
-
-                change.getRemoved().forEach(instance -> {
-                    componentInstanceContainer.getChildren().remove(componentInstancePresentationMap.get(instance));
-                    componentInstancePresentationMap.remove(instance);
-                });
+                change.getAddedSubList().forEach(this::handleAddedComponentInstance);
+                change.getRemoved().forEach(this::handleRemovedComponentInstance);
             }
         });
+    }
+
+    /**
+     * Handles an added component instance.
+     * @param instance the component instance
+     */
+    private void handleAddedComponentInstance(final ComponentInstance instance) {
+        final ComponentInstancePresentation presentation = new ComponentInstancePresentation(instance, getSystem());
+        componentInstancePresentationMap.put(instance, presentation);
+        componentInstanceContainer.getChildren().add(presentation);
+    }
+
+    /**
+     * Handles a removed component instance.
+     * @param instance the component instance.
+     */
+    private void handleRemovedComponentInstance(final ComponentInstance instance) {
+        componentInstanceContainer.getChildren().remove(componentInstancePresentationMap.get(instance));
+        componentInstancePresentationMap.remove(instance);
     }
 
     /**
