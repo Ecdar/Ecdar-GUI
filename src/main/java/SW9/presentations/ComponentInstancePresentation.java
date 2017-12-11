@@ -37,6 +37,9 @@ public class ComponentInstancePresentation extends StackPane {
         initializeBackground();
     }
 
+    /**
+     * Initializes handling of the name.
+     */
     private void initializeName() {
         final ComponentInstance instance = controller.getInstance();
         final BooleanProperty initialized = new SimpleBooleanProperty(false);
@@ -97,6 +100,9 @@ public class ComponentInstancePresentation extends StackPane {
     }
 
 
+    /**
+     * Initializes handling of the toolbar.
+     */
     private void initializeToolbar() {
         final Component component = controller.getInstance().getComponent();
 

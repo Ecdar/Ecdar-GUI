@@ -18,6 +18,9 @@ import javafx.util.Pair;
 
 import java.util.*;
 
+/**
+ * A component that models an I/O automata.
+ */
 public class Component extends HighLevelModelObject implements Boxed {
     static final String COMPONENT = "Component";
     private static final String LOCATIONS = "locations";

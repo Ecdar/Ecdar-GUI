@@ -26,6 +26,9 @@ import java.util.function.Function;
 
 import static javafx.util.Duration.millis;
 
+/**
+ * Presentation for a location.
+ */
 public class LocationPresentation extends Group implements SelectHelper.Selectable {
 
     public static final double RADIUS = 15;
