@@ -7,17 +7,20 @@ import SW9.utility.colors.EnabledColor;
 import com.google.gson.JsonObject;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A model of a system
  */
-public class SystemModel extends HighLevelModelObject {
-    static final String SYSTEM = "System ";
+public class SystemModel extends EcdarModel {
+    private static final String SYSTEM = "System";
 
     // Verification properties
     private final StringProperty description = new SimpleStringProperty("");
+    private final ObservableList<ComponentInstance> componentInstances = FXCollections.observableArrayList();
 
     // Styling properties
     private final Box box = new Box();
@@ -35,8 +38,28 @@ public class SystemModel extends HighLevelModelObject {
         return box;
     }
 
+    public String getDescription() {
+        return description.get();
+    }
+
     public StringProperty getDescriptionProperty() {
         return description;
+    }
+
+    public void setDescription(final String description) {
+        this.description.setValue(description);
+    }
+
+    public ObservableList<ComponentInstance> getComponentInstances() {
+        return componentInstances;
+    }
+
+    public void addComponentInstance(final ComponentInstance instance) {
+        componentInstances.add(instance);
+    }
+
+    public void removeComponentInstance(final ComponentInstance instance) {
+        componentInstances.remove(instance);
     }
 
     /**
@@ -97,13 +120,5 @@ public class SystemModel extends HighLevelModelObject {
                 return;
             }
         }
-    }
-
-    public String getDescription() {
-        return description.get();
-    }
-
-    public void setDescription(final String description) {
-        this.description.setValue(description);
     }
 }

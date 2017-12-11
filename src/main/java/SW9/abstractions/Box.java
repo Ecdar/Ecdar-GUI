@@ -28,7 +28,7 @@ public class Box {
         this.x.set(x);
     }
 
-    public DoubleProperty xProperty() {
+    public DoubleProperty getXProperty() {
         return x;
     }
 
@@ -40,7 +40,7 @@ public class Box {
         this.y.set(y);
     }
 
-    public DoubleProperty yProperty() {
+    public DoubleProperty getYProperty() {
         return y;
     }
 
@@ -52,7 +52,7 @@ public class Box {
         this.width.set(width);
     }
 
-    public DoubleProperty widthProperty() {
+    public DoubleProperty getWidthProperty() {
         return width;
     }
 
@@ -64,7 +64,7 @@ public class Box {
         this.height.set(height);
     }
 
-    public DoubleProperty heightProperty() {
+    public DoubleProperty getHeightProperty() {
         return height;
     }
 

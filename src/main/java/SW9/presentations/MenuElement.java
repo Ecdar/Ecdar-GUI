@@ -48,9 +48,27 @@ public class MenuElement {
     public MenuElement(final String s, final Consumer<MouseEvent> mouseEventConsumer) {
         createLabel(s);
 
-        spacer.setMinWidth(28);
         container.getChildren().addAll(spacer, label);
 
+        spacer.setMinWidth(28);
+        setClickable(mouseEventConsumer);
+    }
+
+    /**
+     * Set this element to be clickable.
+     * @param mouseEvent event to be run when clicked
+     * @return this element
+     */
+    public MenuElement setClickable(final Runnable mouseEvent) {
+        setClickable(event -> mouseEvent.run());
+        return this;
+    }
+
+    /**
+     * Set this elements to be clickable.
+     * @param mouseEventConsumer event to be run when clicked
+     */
+    private void setClickable(final Consumer<MouseEvent> mouseEventConsumer) {
         clickListenerFix = new StackPane(container);
 
         createRippler(mouseEventConsumer);
