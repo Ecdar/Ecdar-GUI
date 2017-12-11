@@ -1,11 +1,13 @@
 package SW9.presentations;
 
+import SW9.Ecdar;
 import SW9.controllers.ProjectPaneController;
 import SW9.utility.colors.Color;
 import SW9.utility.helpers.DropShadowHelper;
 import com.jfoenix.controls.JFXRippler;
 import javafx.geometry.Insets;
 import javafx.scene.control.Tooltip;
+import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 
 public class ProjectPanePresentation extends StackPane {
@@ -20,7 +22,12 @@ public class ProjectPanePresentation extends StackPane {
         initializeToolbar();
 
         initializeToolbarButton(controller.createComponent);
+        initializeToolbarButton(controller.createSystem);
+
+        initializeAddModelIcons();
+
         Tooltip.install(controller.createComponent, new Tooltip("Add component"));
+        Tooltip.install(controller.createSystem, new Tooltip("Add system"));
     }
 
     private void initializeRightBorder() {
@@ -66,6 +73,14 @@ public class ProjectPanePresentation extends StackPane {
         button.setMaskType(JFXRippler.RipplerMask.CIRCLE);
         button.setRipplerFill(color.getTextColor(colorIntensity));
         button.setPosition(JFXRippler.RipplerPos.BACK);
+    }
+
+    private void initializeAddModelIcons() {
+        controller.createComponentImage.setImage(new Image(Ecdar.class.getResource("add_component_frame.png").toExternalForm()));
+        EcdarPresentation.fitSizeWhenAvailable(controller.createComponentImage, controller.createComponentPane);
+        controller.createSystemImage.setImage(new Image(Ecdar.class.getResource("add_system_frame.png").toExternalForm()));
+        EcdarPresentation.fitSizeWhenAvailable(controller.createSystemImage, controller.createSystemPane);
+        //controller.createSystemImage.setImage(new Image(Ecdar.class.getResource("add_component.png").toExternalForm()));
     }
 
     /**

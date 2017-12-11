@@ -555,7 +555,7 @@ public class EcdarPresentation extends StackPane {
         fitSizeWhenAvailable(controller.helpOutputImage, controller.helpOutputPane);
     }
 
-    private static void fitSizeWhenAvailable(final ImageView imageView, final StackPane pane) {
+    public static void fitSizeWhenAvailable(final ImageView imageView, final StackPane pane) {
         pane.widthProperty().addListener((observable, oldValue, newValue) ->
                 imageView.setFitWidth(pane.getWidth()));
         pane.heightProperty().addListener((observable, oldValue, newValue) ->

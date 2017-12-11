@@ -15,6 +15,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
@@ -32,6 +33,12 @@ public class ProjectPaneController implements Initializable {
     public ScrollPane scrollPane;
     public VBox filesList;
     public JFXRippler createComponent;
+    public JFXRippler createSystem;
+
+    public ImageView createComponentImage;
+    public StackPane createComponentPane;
+    public ImageView createSystemImage;
+    public StackPane createSystemPane;
 
     private final HashMap<HighLevelModelObject, FilePresentation> modelPresentationMap = new HashMap<>();
 
@@ -240,6 +247,22 @@ public class ProjectPaneController implements Initializable {
         }, "Created new component: " + newComponent.getName(), "add-circle");
 
         CanvasController.setActiveModel(newComponent);
+    }
+
+    /**
+     * Method for creating a new system
+     */
+    @FXML
+    private void createSystemClicked() {
+        final SystemModel newSystem = new SystemModel();
+
+        UndoRedoStack.pushAndPerform(() -> { // Perform
+            Ecdar.getProject().getSystemsProperty().add(newSystem);
+        }, () -> { // Undo
+            Ecdar.getProject().getSystemsProperty().remove(newSystem);
+        }, "Created new system: " + newSystem.getName(), "add-circle");
+
+        CanvasController.setActiveModel(newSystem);
     }
 
 }

@@ -2,6 +2,8 @@ package SW9.controllers;
 
 import com.jfoenix.controls.JFXRippler;
 import javafx.fxml.Initializable;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -11,6 +13,8 @@ import java.util.ResourceBundle;
  */
 public class FileController implements Initializable {
     public JFXRippler moreInformation;
+    public ImageView fileImage;
+    public StackPane filePane;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
