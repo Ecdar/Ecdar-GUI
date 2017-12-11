@@ -1,5 +1,6 @@
 package SW9.presentations;
 
+import SW9.Ecdar;
 import SW9.abstractions.Component;
 import SW9.abstractions.HighLevelModelObject;
 import SW9.abstractions.SystemModel;
@@ -11,6 +12,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Circle;
 import org.kordamp.ikonli.javafx.FontIcon;
@@ -28,6 +30,7 @@ public class FilePresentation extends AnchorPane {
         this.model.set(model);
 
         initializeIcon();
+        initializeFileIcons();
         initializeFileName();
         initializeColors();
         initializeRippler();
@@ -64,15 +67,12 @@ public class FilePresentation extends AnchorPane {
 
     private void initializeIcon() {
         final Circle circle = (Circle) lookup("#iconBackground");
-        final FontIcon icon = (FontIcon) lookup("#icon");
 
         model.get().colorProperty().addListener((obs, oldColor, newColor) -> {
             circle.setFill(newColor.getColor(model.get().getColorIntensity()));
-            icon.setFill(newColor.getTextColor(model.get().getColorIntensity()));
         });
 
         circle.setFill(model.get().getColor().getColor(model.get().getColorIntensity()));
-        icon.setFill(model.get().getColor().getTextColor(model.get().getColorIntensity()));
     }
 
     private void initializeColors() {
@@ -129,6 +129,20 @@ public class FilePresentation extends AnchorPane {
 
         // Update the background initially
         setBackground.accept(color, colorIntensity);
+    }
+
+    /**
+     * Initialises the icons for the three different file types in Ecdar: Component, System and Declarations
+     */
+    private void initializeFileIcons() {
+        if(model.get() instanceof Component){
+            controller.fileImage.setImage(new Image(Ecdar.class.getResource("component_frame.png").toExternalForm()));
+        } else if(model.get() instanceof  SystemModel){
+            controller.fileImage.setImage(new Image(Ecdar.class.getResource("system_frame.png").toExternalForm()));
+        } else {
+            controller.fileImage.setImage(new Image(Ecdar.class.getResource("description_frame.png").toExternalForm()));
+        }
+        EcdarPresentation.fitSizeWhenAvailable(controller.fileImage, controller.filePane);
     }
 
     public HighLevelModelObject getModel() {

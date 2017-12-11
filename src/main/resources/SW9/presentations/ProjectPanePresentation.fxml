@@ -4,7 +4,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.*?>
-<?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import javafx.scene.image.ImageView?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="StackPane"
@@ -24,11 +24,24 @@
                        text="Project"/>
             </StackPane>
 
+            <HBox AnchorPane.rightAnchor="48" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0">
+                <!-- CREATE SYSTEM -->
+                <JFXRippler fx:id="createSystem">
+                    <StackPane minWidth="40" maxHeight="40" onMouseClicked="#createSystemClicked">
+                        <StackPane fx:id="createSystemPane" minWidth="23" maxWidth="23" minHeight="30" maxHeight="30">
+                            <ImageView fx:id="createSystemImage" />
+                        </StackPane>
+                    </StackPane>
+                </JFXRippler>
+            </HBox>
+
             <HBox AnchorPane.rightAnchor="8" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0">
                 <!-- CREATE COMPONENT -->
                 <JFXRippler fx:id="createComponent">
-                    <StackPane minWidth="40" minHeight="40" onMouseClicked="#createComponentClicked">
-                        <FontIcon iconLiteral="gmi-add" iconSize="24" fill="white"/>
+                    <StackPane minWidth="40" maxHeight="40" onMouseClicked="#createComponentClicked">
+                        <StackPane fx:id="createComponentPane" minWidth="23" maxWidth="23" minHeight="30" maxHeight="30">
+                            <ImageView fx:id="createComponentImage" />
+                        </StackPane>
                     </StackPane>
                 </JFXRippler>
             </HBox>

@@ -157,14 +157,6 @@
                     </MenuItem>
                 </Menu>
 
-                <Menu text="Edit">
-                    <MenuItem fx:id="menuBarEditNewSystem" text="New System">
-                        <graphic>
-                            <FontIcon iconLiteral="gmi-create-new-folder" iconSize="24" fill="black"/>
-                        </graphic>
-                    </MenuItem>
-                </Menu>
-
                 <Menu text="View">
                     <MenuItem fx:id="menuBarViewFilePanel" text="Project Panel">
                         <graphic>
