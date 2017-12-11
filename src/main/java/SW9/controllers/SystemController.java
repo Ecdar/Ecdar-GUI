@@ -57,10 +57,15 @@ public class SystemController extends ModelController implements Initializable {
         this.system.setValue(system);
     }
 
+    /**
+     * Handles when tapping on the background of the system view.
+     * @param event mouse event
+     */
     @FXML
     private void modelContainerPressed(final MouseEvent event) {
         event.consume();
         CanvasController.leaveTextAreas();
+        SelectHelper.clearSelectedElements();
 
         if (event.isSecondaryButtonDown()) {
             dropDownMenuHelperCircle.setLayoutX(event.getX());
@@ -70,8 +75,6 @@ public class SystemController extends ModelController implements Initializable {
 
             contextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, 0, 0);
         }
-        
-        SelectHelper.clearSelectedElements();
     }
 
     @Override

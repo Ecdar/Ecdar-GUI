@@ -8,7 +8,10 @@ import SW9.controllers.ComponentInstanceController;
 import SW9.utility.colors.Color;
 import SW9.utility.helpers.ItemDragHelper;
 import SW9.utility.helpers.SelectHelper;
-import javafx.beans.property.*;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ObservableDoubleValue;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -200,6 +203,10 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
         updateColorDelegates.add(updateColor);
     }
 
+    /**
+     * Initializes the mouse controls.
+     * This includes handling of selection and making this draggable.
+     */
     private void initializeMouseControls() {
         addEventHandler(MouseEvent.MOUSE_PRESSED, (event) -> {
             event.consume();
