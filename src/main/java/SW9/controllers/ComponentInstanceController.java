@@ -36,7 +36,7 @@ import static SW9.presentations.Grid.GRID_SIZE;
 /**
  * Controller for a component instance.
  */
-public class ComponentInstanceController implements Initializable, SelectHelper.ItemSelectable {
+public class ComponentInstanceController implements Initializable {
     public BorderPane frame;
     public Line line1;
     public Rectangle background;
@@ -50,37 +50,6 @@ public class ComponentInstanceController implements Initializable, SelectHelper.
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
-        initializeSelectListener();
-        initializeMouseControls();
-    }
-
-    private void initializeSelectListener() {
-        SelectHelper.elementsToBeSelected.addListener((ListChangeListener<Nearable>) change -> {
-            while (change.next()) {
-                if (change.getAddedSize() == 0) return;
-
-                for (final Nearable nearable : SelectHelper.elementsToBeSelected) {
-                    if (nearable instanceof ComponentInstance && nearable == getInstance()) {
-                        SelectHelper.addToSelection(ComponentInstanceController.this);
-                        break;
-                    }
-                }
-            }
-        });
-    }
-
-    private void initializeMouseControls() {
-        root.addEventHandler(MouseEvent.MOUSE_PRESSED, (event) -> {
-            event.consume();
-
-            if (event.isShortcutDown()) {
-                SelectHelper.addToSelection(this);
-            } else {
-                SelectHelper.select(this);
-            }
-        });
-
-        ItemDragHelper.makeDraggable(root, this::getDragBounds);
     }
 
     public ComponentInstance getInstance() {
@@ -97,67 +66,5 @@ public class ComponentInstanceController implements Initializable, SelectHelper.
 
     public SystemModel getSystem() {
         return system;
-    }
-
-    @Override
-    public void color(Color color, Color.Intensity intensity) {
-
-    }
-
-    @Override
-    public Color getColor() {
-        return null;
-    }
-
-    @Override
-    public Color.Intensity getColorIntensity() {
-        return null;
-    }
-
-    /**
-     * Gets the bound that it is valid to drag the instance within.
-     * @return the bounds
-     */
-    @Override
-    public ItemDragHelper.DragBounds getDragBounds() {
-        final ObservableDoubleValue minX = new SimpleDoubleProperty(GRID_SIZE * 2);
-        final ObservableDoubleValue maxX = getSystem().getBox().getWidthProperty()
-                .subtract(GRID_SIZE * 2)
-                .subtract(getInstance().getBox().getWidth());
-        final ObservableDoubleValue minY = new SimpleDoubleProperty(ComponentPresentation.TOOL_BAR_HEIGHT + GRID_SIZE * 2);
-        final ObservableDoubleValue maxY = getSystem().getBox().getHeightProperty()
-                .subtract(GRID_SIZE * 2)
-                .subtract(getInstance().getBox().getHeight());
-        return new ItemDragHelper.DragBounds(minX, maxX, minY, maxY);
-    }
-
-    @Override
-    public DoubleProperty xProperty() {
-        return root.layoutXProperty();
-    }
-
-    @Override
-    public DoubleProperty yProperty() {
-        return root.layoutYProperty();
-    }
-
-    @Override
-    public double getX() {
-        return xProperty().get();
-    }
-
-    @Override
-    public double getY() {
-        return yProperty().get();
-    }
-
-    @Override
-    public void select() {
-        root.sele
-    }
-
-    @Override
-    public void deselect() {
-
     }
 }

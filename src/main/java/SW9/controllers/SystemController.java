@@ -21,7 +21,6 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.function.Consumer;
 
 /**
  * Controller for a system.
@@ -99,8 +98,8 @@ public class SystemController extends ModelController implements Initializable {
                 final ComponentInstance instance = new ComponentInstance();
 
                 instance.setComponent(component);
-                instance.getColor().set(system.getColor());
-                instance.getColorIntensity().set(system.getColorIntensity());
+                instance.getColorProperty().set(system.getColor());
+                instance.getColorIntensityProperty().set(system.getColorIntensity());
                 instance.getBox().setX(DropDownMenu.x);
                 instance.getBox().setY(DropDownMenu.y);
 
