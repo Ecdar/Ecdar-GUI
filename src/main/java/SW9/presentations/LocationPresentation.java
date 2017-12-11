@@ -26,13 +26,12 @@ import java.util.function.Function;
 
 import static javafx.util.Duration.millis;
 
-public class LocationPresentation extends Group implements MouseTrackable, SelectHelper.Selectable {
+public class LocationPresentation extends Group implements SelectHelper.Selectable {
 
     public static final double RADIUS = 15;
     public static final double INITIAL_RADIUS = RADIUS / 4 * 3;
     private static int id = 0;
     private final LocationController controller;
-    private final MouseTracker mouseTracker = new MouseTracker(this);
     private final Timeline initialAnimation = new Timeline();
     private final Timeline hoverAnimationEntered = new Timeline();
     private final Timeline hoverAnimationExited = new Timeline();
@@ -485,31 +484,6 @@ public class LocationPresentation extends Group implements MouseTrackable, Selec
 
     public void shake() {
         shakeDeleteAnimation.play();
-    }
-
-    @Override
-    public DoubleProperty xProperty() {
-        return layoutXProperty();
-    }
-
-    @Override
-    public DoubleProperty yProperty() {
-        return layoutYProperty();
-    }
-
-    @Override
-    public double getX() {
-        return xProperty().get();
-    }
-
-    @Override
-    public double getY() {
-        return yProperty().get();
-    }
-
-    @Override
-    public MouseTracker getMouseTracker() {
-        return mouseTracker;
     }
 
     public boolean isPlaced() {
