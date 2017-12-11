@@ -67,7 +67,6 @@ public class FilePresentation extends AnchorPane {
 
     private void initializeIcon() {
         final Circle circle = (Circle) lookup("#iconBackground");
-        final FontIcon icon = (FontIcon) lookup("#icon");
 
         model.get().colorProperty().addListener((obs, oldColor, newColor) -> {
             circle.setFill(newColor.getColor(model.get().getColorIntensity()));
