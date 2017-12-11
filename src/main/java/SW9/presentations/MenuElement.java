@@ -14,7 +14,6 @@ import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.util.function.Consumer;
 
-import static javafx.scene.paint.Color.TRANSPARENT;
 import static javafx.scene.paint.Color.WHITE;
 
 /**
@@ -37,6 +36,7 @@ public class MenuElement {
     public MenuElement(final String s){
         createLabel(s);
         container.getChildren().addAll(spacer, label);
+        setHideColor();
         item = container;
     }
 
@@ -72,7 +72,7 @@ public class MenuElement {
         clickListenerFix = new StackPane(container);
 
         createRippler(mouseEventConsumer);
-
+        setHideColor();
         item = rippler;
     }
 
@@ -91,6 +91,7 @@ public class MenuElement {
         clickListenerFix = new StackPane(container);
 
         createRippler(mouseEventConsumer);
+        setHideColor();
 
         item = rippler;
     }
@@ -101,9 +102,11 @@ public class MenuElement {
      */
     private void createRippler(final Consumer<MouseEvent> mouseEventConsumer){
         rippler = new JFXRippler(clickListenerFix);
+        rippler.setRipplerFill(javafx.scene.paint.Color.TRANSPARENT);
 
         rippler.setOnMouseEntered(event -> {
             if (isDisabled.get()) return;
+            //System.out.println("Entered the item - " + label.getText());
 
             // Set the background to a light grey
             clickListenerFix.setBackground(new Background(new BackgroundFill(
@@ -111,17 +114,16 @@ public class MenuElement {
                     CornerRadii.EMPTY,
                     Insets.EMPTY
             )));
+
         });
 
         rippler.setOnMouseExited(event -> {
             if (isDisabled.get()) return;
+            if (rippler.isPressed()) System.out.println("Exiting while pressed");
 
+            //System.out.println("Exited the item - " + label.getText());
             // Set the background to be transparent
-            clickListenerFix.setBackground(new Background(new BackgroundFill(
-                    TRANSPARENT,
-                    CornerRadii.EMPTY,
-                    Insets.EMPTY
-            )));
+            setHideColor();
         });
 
         // When the rippler is pressed, run the provided consumer.
@@ -130,7 +132,18 @@ public class MenuElement {
                 event.consume();
                 return;
             }
+            //System.out.println("Pressed the item - " + label.getText());
+
+        });
+
+        rippler.setOnMouseReleased(event -> {
+            if (isDisabled.get()) {
+                event.consume();
+                return;
+            }
+            //System.out.println("Released the item - " + label.getText());
             mouseEventConsumer.accept(event);
+            setHideColor();
         });
     }
 
@@ -201,5 +214,25 @@ public class MenuElement {
     public MenuElement setToggleable(ObservableBooleanValue isToggled){
         icon.visibleProperty().bind(isToggled);
         return this;
+    }
+
+    public void setHideColor() {
+        if (clickListenerFix == null) return;
+
+        clickListenerFix.setBackground(new Background(new BackgroundFill(
+                Color.PINK.getColor(Color.Intensity.I500),
+                CornerRadii.EMPTY,
+                Insets.EMPTY)));
+        System.out.println("I am hiding " + label.getText());
+    }
+
+    public void show() {
+        if (clickListenerFix == null) return;
+        System.out.println("I am showing " + label.getText());
+        clickListenerFix.setBackground(new Background(new BackgroundFill(
+                Color.BROWN.getColor(Color.Intensity.I500),
+                CornerRadii.EMPTY,
+                Insets.EMPTY)));
+
     }
 }
