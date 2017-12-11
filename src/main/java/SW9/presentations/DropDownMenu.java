@@ -213,9 +213,9 @@ public class DropDownMenu extends JFXPopup{
         addCustomChild(flowPane);
     }
 
+
     private void addHideListener(MenuElement element){
         this.isHidden.addListener(((observable, oldValue, newValue) -> {
-            System.out.println("Adding " + element.getItem().toString());
             if(newValue) element.hide();
         }));
 
@@ -226,7 +226,6 @@ public class DropDownMenu extends JFXPopup{
     public void hide(){
         if (this.isShowing()) {
             this.isHidden.set(true);
-            System.out.println("I am hiding this DropDownMenu!");
             super.hide();
         }
     }

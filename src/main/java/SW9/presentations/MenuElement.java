@@ -28,6 +28,7 @@ public class MenuElement {
     private HBox container;
     private FontIcon icon;
     private boolean hasExited = false;
+
     private ObservableBooleanValue isDisabled = new SimpleBooleanProperty(false);
 
     /**
@@ -104,7 +105,6 @@ public class MenuElement {
 
         rippler.setOnMouseEntered(event -> {
             if (isDisabled.get()) return;
-            //System.out.println("Entered the item - " + label.getText());
 
             // Set the background to a light grey
             clickListenerFix.setBackground(new Background(new BackgroundFill(
@@ -117,14 +117,12 @@ public class MenuElement {
 
         rippler.setOnMouseExited(event -> {
             if (isDisabled.get()) return;
+
             if (rippler.isPressed()) {
-                System.out.println("Exiting while pressed");
                 rippler.release();
             }
             hasExited = true;
 
-
-            //System.out.println("Exited the item - " + label.getText());
             // Set the background to be transparent
             setHideColor();
         });
@@ -133,10 +131,7 @@ public class MenuElement {
         rippler.setOnMousePressed(event -> {
             if (isDisabled.get()) {
                 event.consume();
-                return;
             }
-            //System.out.println("Pressed the item - " + label.getText());
-
         });
 
         rippler.setOnMouseReleased(event -> {
@@ -144,9 +139,6 @@ public class MenuElement {
                 event.consume();
                 return;
             }
-            //System.out.println("Released the item - " + label.getText());
-            mouseEventConsumer.accept(event);
-            setHideColor();
             if (rippler.isPressed() || !hasExited) {
                 mouseEventConsumer.accept(event);
             }
@@ -227,21 +219,14 @@ public class MenuElement {
         if (clickListenerFix == null) return;
 
         clickListenerFix.setBackground(new Background(new BackgroundFill(
-                Color.PINK.getColor(Color.Intensity.I500),
+                TRANSPARENT,
                 CornerRadii.EMPTY,
                 Insets.EMPTY)));
-        System.out.println("I am hiding " + label.getText());
-        rippler.release();
     }
 
-    public void show() {
-        if (clickListenerFix == null) return;
-        System.out.println("I am showing " + label.getText());
-        clickListenerFix.setBackground(new Background(new BackgroundFill(
-                Color.BROWN.getColor(Color.Intensity.I500),
-                CornerRadii.EMPTY,
-                Insets.EMPTY)));
+    public void hide() {
+        setHideColor();
+        if (rippler == null) return;
         rippler.release();
-
     }
 }
