@@ -152,7 +152,7 @@ public class ProjectPaneController implements Initializable {
             textArea.setMinHeight(i * 17 + 30);
         });
 
-        moreInformationDropDown.addCustomChild(textArea);
+        moreInformationDropDown.addCustomElement(textArea);
 
         moreInformationDropDown.addSpacerElement();
 

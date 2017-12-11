@@ -210,7 +210,7 @@ public class DropDownMenu extends JFXPopup {
         }
         flowPane.setOnMouseEntered(event -> canIShowSubMenu.set(false));
 
-        addCustomChild(flowPane);
+        addCustomElement(flowPane);
     }
 
 
@@ -239,8 +239,8 @@ public class DropDownMenu extends JFXPopup {
         }
     }
 
-    public void addCustomChild(final Node child) {
-        list.getChildren().add(child);
+    public void addCustomElement(final Node element) {
+        list.getChildren().add(element);
     }
 
     /**
