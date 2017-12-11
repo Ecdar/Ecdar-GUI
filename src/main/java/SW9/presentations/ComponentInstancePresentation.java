@@ -268,13 +268,13 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
      */
     @Override
     public ItemDragHelper.DragBounds getDragBounds() {
-        final ObservableDoubleValue minX = new SimpleDoubleProperty(GRID_SIZE * 2);
+        final ObservableDoubleValue minX = new SimpleDoubleProperty(GRID_SIZE);
         final ObservableDoubleValue maxX = controller.getSystem().getBox().getWidthProperty()
-                .subtract(GRID_SIZE * 2)
+                .subtract(GRID_SIZE)
                 .subtract(controller.getInstance().getBox().getWidth());
-        final ObservableDoubleValue minY = new SimpleDoubleProperty(ComponentPresentation.TOOL_BAR_HEIGHT + GRID_SIZE * 2);
+        final ObservableDoubleValue minY = new SimpleDoubleProperty(ComponentPresentation.TOOL_BAR_HEIGHT + GRID_SIZE);
         final ObservableDoubleValue maxY = controller.getSystem().getBox().getHeightProperty()
-                .subtract(GRID_SIZE * 2)
+                .subtract(GRID_SIZE)
                 .subtract(controller.getInstance().getBox().getHeight());
         return new ItemDragHelper.DragBounds(minX, maxX, minY, maxY);
     }
