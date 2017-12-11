@@ -2,6 +2,7 @@ package SW9.presentations;
 
 import SW9.abstractions.Component;
 import SW9.abstractions.ComponentInstance;
+import SW9.abstractions.SystemModel;
 import SW9.controllers.CanvasController;
 import SW9.controllers.ComponentInstanceController;
 import SW9.utility.colors.Color;
@@ -23,10 +24,11 @@ import java.util.function.BiConsumer;
 public class ComponentInstancePresentation extends StackPane {
     private final ComponentInstanceController controller;
 
-    public ComponentInstancePresentation(final ComponentInstance instance) {
+    public ComponentInstancePresentation(final ComponentInstance instance, final SystemModel system) {
         controller = new EcdarFXMLLoader().loadAndGetController("ComponentInstancePresentation.fxml", this);
 
         controller.setInstance(instance);
+        controller.setSystem(system);
 
         initializeName();
         initializeDimensions();

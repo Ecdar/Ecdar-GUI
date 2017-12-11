@@ -140,7 +140,7 @@ public class SystemController extends ModelController implements Initializable {
      * @param instance the component instance
      */
     private void handleAddedComponentInstance(final ComponentInstance instance) {
-        final ComponentInstancePresentation presentation = new ComponentInstancePresentation(instance);
+        final ComponentInstancePresentation presentation = new ComponentInstancePresentation(instance, getSystem());
         componentInstancePresentationMap.put(instance, presentation);
         componentInstanceContainer.getChildren().add(presentation);
     }
