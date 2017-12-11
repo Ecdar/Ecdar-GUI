@@ -28,6 +28,7 @@ import java.util.function.Consumer;
 
 import static SW9.utility.colors.EnabledColor.enabledColors;
 import static javafx.scene.paint.Color.TRANSPARENT;
+import static javafx.scene.paint.Color.WHITE;
 
 public class DropDownMenu extends JFXPopup{
     public static double x = 0;
@@ -215,11 +216,10 @@ public class DropDownMenu extends JFXPopup{
 
 
     private void addHideListener(MenuElement element){
-        this.isHidden.addListener(((observable, oldValue, newValue) -> {
-            if(newValue) element.hide();
-        }));
+        final Consumer<Boolean> updateHide = (hidden) -> { if(hidden) element.hide(); };
 
-        if(isHidden.get()) element.hide();
+        this.isHidden.addListener((obs, oldValue, newValue) -> updateHide.accept(newValue));
+        updateHide.accept(this.isHidden.get());
     }
 
     @Override
