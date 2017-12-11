@@ -6,6 +6,7 @@ import SW9.abstractions.HighLevelModelObject;
 import SW9.abstractions.SystemModel;
 import SW9.presentations.*;
 import SW9.utility.UndoRedoStack;
+import SW9.utility.helpers.SelectHelper;
 import com.jfoenix.controls.JFXPopup;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -69,6 +70,8 @@ public class SystemController extends ModelController implements Initializable {
 
             contextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, 0, 0);
         }
+        
+        SelectHelper.clearSelectedElements();
     }
 
     @Override
