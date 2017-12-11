@@ -29,11 +29,27 @@ import java.util.function.Consumer;
 import static SW9.utility.colors.EnabledColor.enabledColors;
 import static javafx.scene.paint.Color.TRANSPARENT;
 
+/**
+ * DropDownMenu is a {@link JFXPopup} which is used as the right-click menu and options menu on for instance
+ * {@link QueryPresentation#actionButton}.
+ * The DropDownMenu includes methods for adding elements to the menu itself.
+ *
+ * Batteries included
+ */
 public class DropDownMenu extends JFXPopup {
     public static double x = 0;
     public static double y = 0;
     private final Node source;
+    /**
+     * The width of the {@link DropDownMenu}.
+     * the value 230 showed to be a good base for all {@link DropDownMenu}s.
+     * In this way the {@link DropDownMenu} will always stay consistent
+     */
     private final int width = 230;
+
+    /**
+     * The {@link StackPane} with all the added content from the add methods
+     */
     private final StackPane content;
     private final VBox list;
 
@@ -42,6 +58,11 @@ public class DropDownMenu extends JFXPopup {
     private final SimpleBooleanProperty isHoveringSubMenu = new SimpleBooleanProperty(false);
     private final SimpleBooleanProperty canIShowSubMenu = new SimpleBooleanProperty(false);
 
+    /**
+     * Constructor for the {@link DropDownMenu}.
+     * The {@link DropDownMenu} is places on top of all the views, and does even go outside of the window/screen for now.
+     * @param src The view where the {@link DropDownMenu} should be shown
+     */
     public DropDownMenu(final Node src) {
         popup = new JFXPopup();
 
@@ -66,7 +87,7 @@ public class DropDownMenu extends JFXPopup {
 
     /**
      * Initializer for the closing clock.
-     * Makes sure that the DropDownMenu closes/hides after a short time
+     * Makes sure that the {@link DropDownMenu} closes/hides after a short time
      */
     private void initializeClosingClock() {
         final Runnable checkIfWeShouldClose = () -> {
@@ -86,23 +107,47 @@ public class DropDownMenu extends JFXPopup {
         isHoveringSubMenu.addListener(observable -> checkIfWeShouldClose.run());
     }
 
+    /**
+     * Shows the DropDownMenu with the added content, gotten from the add* methods
+     * Remember to call {@link #hide()} when you want to hide the {@link DropDownMenu}
+     * @param vAlign Vertically alignment
+     * @param hAlign Horizontal alignment
+     * @param initOffsetX Offset on the X-axis of the view
+     * @param initOffsetY Offset on the Y-axis of the view
+     */
     public void show(final JFXPopup.PopupVPosition vAlign, final JFXPopup.PopupHPosition hAlign, final double initOffsetX, final double initOffsetY) {
         this.isHidden.set(false);
         super.show(source, vAlign, hAlign, initOffsetX, initOffsetY);
     }
 
+    /**
+     * Adds a {@link MenuElement} to the {@link DropDownMenu}
+     * @param s The title of the element
+     */
     public void addListElement(final String s) {
         final MenuElement element = new MenuElement(s);
         addHideListener(element);
         list.getChildren().add(element.getItem());
     }
 
+    /**
+     * Adds a clickable {@link MenuElement} to the {@link DropDownMenu}
+     * @param s The title of the element
+     * @param mouseEventConsumer The event that is triggered when clicked
+     */
     public void addClickableListElement(final String s, final Consumer<MouseEvent> mouseEventConsumer) {
         final MenuElement element = new MenuElement(s, mouseEventConsumer);
         addHideListener(element);
         list.getChildren().add(element.getItem());
     }
 
+    /**
+     * Adds a toggleable {@link MenuElement} to the {@link DropDownMenu}
+     * @param s The title of the element
+     * @param isToggled Defines if the element should be disabled of enabled.
+     *                  Enabled if it is true, disabled if false
+     * @param mouseEventConsumer The event that is triggered when clicked
+     */
     public void addToggleableListElement(final String s, final ObservableBooleanValue isToggled, final Consumer<MouseEvent> mouseEventConsumer) {
         final MenuElement element = new MenuElement(s, "gmi-done", mouseEventConsumer);
         addHideListener(element);
@@ -110,6 +155,15 @@ public class DropDownMenu extends JFXPopup {
         list.getChildren().add(element.getItem());
     }
 
+    /**
+     * Adds a toggleable and disableable {@link MenuElement} to {@link #content}
+     * @param s The title of the element
+     * @param isToggled Defines if the element should be disabled of enabled.
+     *                  Enabled if it is true, disabled if false
+     * @param isDisabled Determines whether it is currently disabled or enabled.
+     *                      True means disabled, false means enabled
+     * @param mouseEventConsumer The event that is triggered when clicked
+     */
     public void addToggleableAndDisableableListElement(final String s, final ObservableBooleanValue isToggled, final ObservableBooleanValue isDisabled, final Consumer<MouseEvent> mouseEventConsumer) {
         final MenuElement element = new MenuElement(s, "gmi-done", mouseEventConsumer);
         addHideListener(element);
@@ -118,6 +172,13 @@ public class DropDownMenu extends JFXPopup {
         list.getChildren().add(element.getItem());
     }
 
+    /**
+     * Adds a clickable and disableable {@link MenuElement} to {@link #content}
+     * @param s The title of the element
+     * @param isDisabled Determines whether it is currently disabled or enabled.
+     *                      True means disabled, false means enabled
+     * @param mouseEventConsumer The event that is triggered when clicked
+     */
     public void addClickableAndDisableableListElement(final String s, final ObservableBooleanValue isDisabled, final Consumer<MouseEvent> mouseEventConsumer) {
         final MenuElement element = new MenuElement(s, mouseEventConsumer);
         addHideListener(element);
@@ -126,8 +187,8 @@ public class DropDownMenu extends JFXPopup {
     }
 
     /**
-     * Add a custom menu element
-     * @param element the constructed menu element to be added
+     * Adds a custom {@link MenuElement} to {@link #content}
+     * @param element The constructed menu element to be added
      */
     public void addMenuElement(final MenuElement element) {
         addHideListener(element);
@@ -135,7 +196,7 @@ public class DropDownMenu extends JFXPopup {
     }
 
     /**
-     * Adds a spacing element to the DropDownMenu
+     * Adds a spacing element to the {@link DropDownMenu}
      */
     public void addSpacerElement() {
         final Region space1 = new Region();
@@ -155,8 +216,8 @@ public class DropDownMenu extends JFXPopup {
     }
 
     /**
-     * Adds a color picker to the DropDownMenu with the title color
-     * @param hasColor the current color
+     * Adds a color picker to the {@link DropDownMenu}s to {@link #content} with the title color
+     * @param hasColor The current color
      * @param consumer A consumer for the color property
      */
     public void addColorPicker(final HasColor hasColor, final BiConsumer<Color, Color.Intensity> consumer) {
@@ -215,9 +276,9 @@ public class DropDownMenu extends JFXPopup {
 
 
     /***
-     * Makes the elements of the menu listen to the isHidden property,
-     * so they can react to when the menu is hidden/shown
-     * @param element The MenuElement that should hide() when isHidden is changed
+     * Makes the elements of the {@link DropDownMenu} listen to the {@link #isHidden} property,
+     * such that they can react when the menu is hidden/shown
+     * @param element The {@link MenuElement} that should {@link #hide()} when {@link #isHidden} is changed
      */
     private void addHideListener(MenuElement element){
         final Consumer<Boolean> updateHide = (hidden) -> { if(hidden) element.hide(); };
@@ -226,10 +287,10 @@ public class DropDownMenu extends JFXPopup {
         updateHide.accept(this.isHidden.get());
     }
 
-    /***
-     * An overridden method that lets us set the isHidden property when the menu is hidden
-     * It's called manually when we want to close the DropDownMenu,
-     * but also automatically for example when changing window and the menu is open
+    /**
+     * An overridden method that lets us set {@link #isHidden} when the {@link DropDownMenu} is hidden
+     * It is called manually when we want to close {@link DropDownMenu},
+     * but also automatically for example when changing window and the {@link DropDownMenu} is open
      */
     @Override
     public void hide(){
@@ -239,15 +300,19 @@ public class DropDownMenu extends JFXPopup {
         }
     }
 
+    /**
+     * Adds a custom element to the {@link DropDownMenu}.
+     * @param element The element to add to the {@link DropDownMenu}.
+     */
     public void addCustomElement(final Node element) {
         list.getChildren().add(element);
     }
 
     /**
-     * Adds a sub menu.
-     * @param s the text of the label use for showing the sub menu
-     * @param subMenu the sub menu
-     * @param offset the vertical offset of the sub menu content
+     * Adds a sub menu to the {@link DropDownMenu}.
+     * @param s The text of the label use for showing the sub menu
+     * @param subMenu The sub menu
+     * @param offset The vertical offset of the sub menu's content
      */
     public void addSubMenu(final String s, final DropDownMenu subMenu, final int offset) {
         final Label label = new Label(s);
