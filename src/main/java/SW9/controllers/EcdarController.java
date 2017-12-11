@@ -135,7 +135,6 @@ public class EcdarController implements Initializable {
     public MenuItem menuBarFileExportAsPng;
     public MenuItem menuBarFileExportAsPngNoBorder;
     public MenuItem menuBarHelpHelp;
-    public MenuItem menuBarEditNewSystem;
 
     public JFXSnackbar snackbar;
     public HBox statusBar;
@@ -399,26 +398,9 @@ public class EcdarController implements Initializable {
 
         initializeFileExportAsPng();
 
-        menuBarEditNewSystem.setOnAction(event -> createSystem());
-
         initializeViewMenu();
 
         menuBarHelpHelp.setOnAction(event -> Ecdar.showHelp());
-    }
-
-    /**
-     * Creates a system system and set it as the active model object on the canvas.
-     */
-    private static void createSystem() {
-        final SystemModel system = new SystemModel();
-
-        UndoRedoStack.pushAndPerform(() -> { // Perform
-            Ecdar.getProject().getSystemsProperty().add(system);
-        }, () -> { // Undo
-            Ecdar.getProject().getSystemsProperty().remove(system);
-        }, "Created new system: " + system.getName(), "add-circle");
-
-        CanvasController.setActiveModel(system);
     }
 
     /**
