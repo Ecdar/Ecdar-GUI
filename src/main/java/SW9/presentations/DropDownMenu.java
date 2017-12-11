@@ -64,9 +64,6 @@ public class DropDownMenu extends JFXPopup {
      * @param src The view where the {@link DropDownMenu} should be shown
      */
     public DropDownMenu(final Node src) {
-        popup = new JFXPopup();
-
-    public DropDownMenu(final Node src) {
         list = new VBox();
         list.setStyle("-fx-background-color: white; -fx-padding: 8 0 8 0;");
         list.setMaxHeight(1);
@@ -280,7 +277,7 @@ public class DropDownMenu extends JFXPopup {
      * such that they can react when the menu is hidden/shown
      * @param element The {@link MenuElement} that should {@link #hide()} when {@link #isHidden} is changed
      */
-    private void addHideListener(MenuElement element){
+    private void addHideListener(MenuElement element) {
         final Consumer<Boolean> updateHide = (hidden) -> { if(hidden) element.hide(); };
 
         this.isHidden.addListener((obs, oldValue, newValue) -> updateHide.accept(newValue));
