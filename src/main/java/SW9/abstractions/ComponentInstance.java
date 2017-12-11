@@ -28,11 +28,27 @@ public class ComponentInstance {
         this.component.set(component);
     }
 
-    public ObjectProperty<Color> getColor() {
+    public Color getColor() {
+        return color.get();
+    }
+
+    public void setColor(final Color color) {
+        this.color.set(color);
+    }
+
+    public ObjectProperty<Color> getColorProperty() {
         return color;
     }
 
-    public ObjectProperty<Color.Intensity> getColorIntensity() {
+    public Color.Intensity getColorIntensity() {
+        return colorIntensity.get();
+    }
+
+    public void setColorIntensity(final Color.Intensity intensity) {
+        this.colorIntensity.set(intensity);
+    }
+
+    public ObjectProperty<Color.Intensity> getColorIntensityProperty() {
         return colorIntensity;
     }
 
