@@ -18,7 +18,6 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.ListChangeListener;
-import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.control.Label;
@@ -274,7 +273,7 @@ public class EcdarPresentation extends StackPane {
                     previousColor.add(new Pair<>(selectable, new EnabledColor(selectable.getColor(), selectable.getColorIntensity())));
                 });
 
-                controller.changeColor(color, previousColor);
+                controller.changeColorOnSelectedElements(color, previousColor);
 
                 popup.hide();
                 SelectHelper.clearSelectedElements();

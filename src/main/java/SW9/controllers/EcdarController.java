@@ -272,7 +272,7 @@ public class EcdarController implements Initializable {
                     previousColor.add(new Pair<>(selectable,
                             new EnabledColor(selectable.getColor(), selectable.getColorIntensity())));
                 });
-                changeColor(enabledColor, previousColor);
+                changeColorOnSelectedElements(enabledColor, previousColor);
                 SelectHelper.clearSelectedElements();
             }));
         });
@@ -283,17 +283,16 @@ public class EcdarController implements Initializable {
      * @param enabledColor The new color
      * @param previousColor The color there were before
      */
-    public void changeColor(final EnabledColor enabledColor,
-                            final List<Pair<SelectHelper.ItemSelectable, EnabledColor>> previousColor)
+    public void changeColorOnSelectedElements(final EnabledColor enabledColor,
+                                              final List<Pair<SelectHelper.ItemSelectable, EnabledColor>> previousColor)
     {
         UndoRedoStack.pushAndPerform(() -> { // Perform
-            SelectHelper.getSelectedElements().forEach(selectable -> {
-                selectable.color(enabledColor.color, enabledColor.intensity);
-            });
+            SelectHelper.getSelectedElements()
+                    .forEach(selectable -> selectable.color(enabledColor.color, enabledColor.intensity));
         }, () -> { // Undo
-            previousColor.forEach(selectableEnabledColorPair -> {
-                selectableEnabledColorPair.getKey().color(selectableEnabledColorPair.getValue().color, selectableEnabledColorPair.getValue().intensity);
-            });
+            previousColor.forEach(selectableEnabledColorPair ->
+                    selectableEnabledColorPair.getKey().color(selectableEnabledColorPair.getValue().color,
+                    selectableEnabledColorPair.getValue().intensity));
         }, String.format("Changed the color of %d elements to %s", previousColor.size(), enabledColor.color.name()), "color-lens");
     }
 
