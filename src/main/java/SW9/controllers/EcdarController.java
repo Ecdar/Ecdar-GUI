@@ -82,13 +82,6 @@ public class EcdarController implements Initializable {
     public Tab warningsTab;
     public Rectangle tabPaneResizeElement;
     public StackPane tabPaneContainer;
-    public JFXRippler switchToInput;
-    public JFXRippler switchToOutput;
-
-    public StackPane inputModePane;
-    public StackPane outputModePane;
-    public ImageView inputModeImage;
-    public ImageView outputModeImage;
 
     public ImageView helpInitialImage;
     public StackPane helpInitialPane;
@@ -98,6 +91,9 @@ public class EcdarController implements Initializable {
     public StackPane helpInputPane;
     public ImageView helpOutputImage;
     public StackPane helpOutputPane;
+
+    public JFXButton switchToInputButton;
+    public JFXButton switchToOutputButton;
 
     private double expandHeight = 300;
 
@@ -187,8 +183,8 @@ public class EcdarController implements Initializable {
 
         globalEdgeStatus = EdgeStatus.INPUT;
 
-        Tooltip.install(switchToInput, new Tooltip("Switch to input mode"));
-        Tooltip.install(switchToOutput, new Tooltip("Switch to output mode"));
+        Tooltip.install(switchToInputButton, new Tooltip("Switch to input mode"));
+        Tooltip.install(switchToOutputButton, new Tooltip("Switch to output mode"));
 
         //Press ctrl+N or cmd+N to create a new component. The canvas changes to this new component
         KeyCodeCombination combination = new KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN);
@@ -1035,11 +1031,8 @@ public class EcdarController implements Initializable {
     @FXML
     private void switchToInputClicked() {
         setGlobalEdgeStatus(EdgeStatus.INPUT);
-
-        switchToInput.setManaged(false);
-        switchToInput.setVisible(false);
-        switchToOutput.setManaged(true);
-        switchToOutput.setVisible(true);
+        switchToInputButton.setDisable(true);
+        switchToOutputButton.setDisable(false);
     }
 
     /**
@@ -1048,11 +1041,8 @@ public class EcdarController implements Initializable {
     @FXML
     private void switchToOutputClicked() {
         setGlobalEdgeStatus(EdgeStatus.OUTPUT);
-
-        switchToInput.setManaged(true);
-        switchToInput.setVisible(true);
-        switchToOutput.setManaged(false);
-        switchToOutput.setVisible(false);
+        switchToOutputButton.setDisable(true);
+        switchToInputButton.setDisable(false);
     }
 
     /**

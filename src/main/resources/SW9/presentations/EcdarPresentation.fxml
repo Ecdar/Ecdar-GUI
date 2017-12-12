@@ -46,16 +46,14 @@
                         <Region minWidth="16"/>
 
                         <!-- Switch between input and output edges -->
-                        <JFXRippler fx:id="switchToInput" managed="false" visible="false">
-                            <StackPane fx:id="outputModePane" minWidth="50" maxWidth="50" minHeight="25" maxHeight="25" onMouseClicked="#switchToInputClicked">
-                                <ImageView fx:id="outputModeImage"/>
-                            </StackPane>
-                        </JFXRippler>
-                        <JFXRippler fx:id="switchToOutput">
-                            <StackPane fx:id="inputModePane" minWidth="50" maxWidth="50" minHeight="25" maxHeight="25" onMouseClicked="#switchToOutputClicked">
-                                <ImageView fx:id="inputModeImage" />
-                            </StackPane>
-                        </JFXRippler>
+                        <HBox alignment="CENTER">
+                            <JFXButton fx:id="switchToInputButton" text="Input" textFill="white"
+                                       disable="true" onMouseClicked="#switchToInputClicked"
+                                       styleClass="button" style="-fx-background-color:darkslategray"/>
+                            <JFXButton fx:id="switchToOutputButton" text="Output" textFill="white"
+                                       onMouseClicked="#switchToOutputClicked"
+                                       styleClass="button" style="-fx-background-color:darkslategray"/>
+                        </HBox>
 
                         <Region HBox.hgrow="ALWAYS" />
 

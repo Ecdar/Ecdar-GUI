@@ -57,8 +57,6 @@ public class EcdarPresentation extends StackPane {
         initializeGenerateUppaalModelButton();
         initializeColorSelector();
 
-        initializeEdgeStatusIcons();
-
         initializeToggleQueryPaneFunctionality();
         initializeToggleFilePaneFunctionality();
 
@@ -322,14 +320,6 @@ public class EcdarPresentation extends StackPane {
 
             popup.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, fromLeft, boundsInScreenButton.getMinY() - boundsInScreenRoot.getMinY());
         });
-    }
-
-    private void initializeEdgeStatusIcons() {
-        controller.inputModeImage.setImage(new Image(Ecdar.class.getResource("ic_input_mode.png").toExternalForm()));
-        fitSizeWhenAvailable(controller.inputModeImage, controller.inputModePane);
-
-        controller.outputModeImage.setImage(new Image(Ecdar.class.getResource("ic_output_mode.png").toExternalForm()));
-        fitSizeWhenAvailable(controller.outputModeImage, controller.outputModePane);
     }
 
     private void initializeGenerateUppaalModelButton() {
