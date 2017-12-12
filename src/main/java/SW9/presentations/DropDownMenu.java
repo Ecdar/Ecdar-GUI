@@ -45,7 +45,7 @@ public class DropDownMenu extends JFXPopup {
      * the value 230 showed to be a good base for all {@link DropDownMenu}s.
      * In this way the {@link DropDownMenu} will always stay consistent
      */
-    private final int width = 230;
+    private static final int WIDTH = 230;
 
     /**
      * The {@link StackPane} with all the added content from the add methods
@@ -82,8 +82,8 @@ public class DropDownMenu extends JFXPopup {
         StackPane.setAlignment(list, Pos.TOP_CENTER);
 
         content = new StackPane(list);
-        content.setMinWidth(width);
-        content.setMaxWidth(width);
+        content.setMinWidth(WIDTH);
+        content.setMaxWidth(WIDTH);
 
         list.setOnMouseExited(event -> isHoveringMenu.set(false));
         list.setOnMouseEntered(event -> isHoveringMenu.set(true));
@@ -212,7 +212,7 @@ public class DropDownMenu extends JFXPopup {
         space1.setMinHeight(8);
         list.getChildren().add(space1);
 
-        final Line sep = new Line(0, 0, width - 1, 0);
+        final Line sep = new Line(0, 0, WIDTH - 1, 0);
         sep.setStroke(Color.GREY.getColor(Color.Intensity.I300));
         list.getChildren().add(sep);
 
@@ -330,13 +330,13 @@ public class DropDownMenu extends JFXPopup {
 
         label.setStyle("-fx-padding: 8 16 8 16;");
         label.getStyleClass().add("body2");
-        label.setMinWidth(width);
+        label.setMinWidth(WIDTH);
 
         final StackPane subMenuContent = subMenu.content;
         subMenuContent.setStyle("-fx-padding: 0 0 0 2;");
         subMenuContent.setMinWidth(subMenuContent.getMinWidth() + 1);
         subMenuContent.setMaxWidth(subMenuContent.getMinWidth() + 1);
-        subMenuContent.setTranslateX(width);
+        subMenuContent.setTranslateX(WIDTH);
         subMenuContent.setTranslateY(offset);
         subMenuContent.setOpacity(0);
 
