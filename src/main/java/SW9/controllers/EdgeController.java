@@ -314,8 +314,8 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
             final int interval = 50;
             int previousValue = 1;
 
-            try {
-                while (true) {
+            /*try {
+                /*while (true) {
                     Thread.sleep(interval);
 
                     if (isHoveringEdge.get()) {
@@ -340,7 +340,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
 
             } catch (final InterruptedException e) {
                 e.printStackTrace();
-            }
+            }*/
         };
     }
 
