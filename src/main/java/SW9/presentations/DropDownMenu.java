@@ -55,7 +55,7 @@ public class DropDownMenu extends JFXPopup {
 
     private final SimpleBooleanProperty isHidden = new SimpleBooleanProperty(true);
     private final SimpleBooleanProperty isHoveringMenu = new SimpleBooleanProperty(false);
-    private final SimpleBooleanProperty isHoveringSubMenu = new SimpleBooleanProperty(false);
+    private final SimpleBooleanProperty isHoveringASubMenu = new SimpleBooleanProperty(false);
     private final SimpleBooleanProperty canIShowSubMenu = new SimpleBooleanProperty(false);
 
     /**
@@ -88,10 +88,10 @@ public class DropDownMenu extends JFXPopup {
      */
     private void initializeClosingClock() {
         final Runnable checkIfWeShouldClose = () -> {
-            if (!isHoveringMenu.get() && !isHoveringSubMenu.get()) {
+            if (!isHoveringMenu.get() && !isHoveringASubMenu.get()) {
                 final Timer timer = new Timer(400, arg0 -> {
                         Platform.runLater(() -> {
-                        if (!isHoveringMenu.get() && !isHoveringSubMenu.get()) {
+                        if (!isHoveringMenu.get() && !isHoveringASubMenu.get()) {
                             hide();
                         }
                     });
@@ -101,7 +101,7 @@ public class DropDownMenu extends JFXPopup {
             }
         };
         isHoveringMenu.addListener(observable -> checkIfWeShouldClose.run());
-        isHoveringSubMenu.addListener(observable -> checkIfWeShouldClose.run());
+        isHoveringASubMenu.addListener(observable -> checkIfWeShouldClose.run());
     }
 
     /**
@@ -314,6 +314,7 @@ public class DropDownMenu extends JFXPopup {
     public void addSubMenu(final String s, final DropDownMenu subMenu, final int offset) {
         final Label label = new Label(s);
         final ObjectProperty<Boolean> isHoveringLabel = new SimpleObjectProperty<>(false);
+        final SimpleBooleanProperty isHoveringSubMenu = new SimpleBooleanProperty(false);
 
         label.setStyle("-fx-padding: 8 16 8 16;");
         label.getStyleClass().add("body2");
@@ -352,11 +353,13 @@ public class DropDownMenu extends JFXPopup {
         // Set properties in order to prevent closing when hovering sub menu
         subMenuContent.setOnMouseEntered(event -> {
             isHoveringSubMenu.set(true);
+            isHoveringASubMenu.set(true);
             show.run();
         });
 
         subMenuContent.setOnMouseExited(event -> {
             isHoveringSubMenu.set(false);
+            isHoveringASubMenu.set(false);
 
             if (!isHoveringLabel.get()) {
                 hide.run();
