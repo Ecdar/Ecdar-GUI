@@ -106,7 +106,7 @@ public class SystemController extends ModelController implements Initializable {
         contextMenu = new DropDownMenu(dropDownMenuHelperCircle);
 
         // Component instance sub menu
-        final DropDownMenu componentInstanceSubMenu = new DropDownMenu(root);
+        final DropDownMenu componentInstanceSubMenu = new DropDownMenu(root, 150);
 
         // Add sub menu element for each component
         Ecdar.getProject().getComponents().forEach(component -> {
