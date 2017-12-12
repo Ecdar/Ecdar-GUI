@@ -260,8 +260,93 @@ public class EcdarController implements Initializable {
         initializeStatusBar();
         initializeMessages();
         initializeMenuBar();
-        //initializeReachabilityAnalysisThread();
+        initializeReachabilityAnalysisThread();
 
+    }
+
+    private void initializeReachabilityAnalysisThread() {
+        new Thread(() -> {
+            while (true) {
+
+                // Wait for the reachability (the last time we changed the model) becomes smaller than the current time
+                while (reachabilityTime > System.currentTimeMillis()) {
+                    try {
+                        Thread.sleep(2000);
+                        Debug.backgroundThreads.removeIf(thread -> !thread.isAlive());
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                // We are now performing the analysis. Do not do another analysis before another change is introduced
+                reachabilityTime = Long.MAX_VALUE;
+
+                // Cancel any ongoing analysis
+                if (reachabilityService != null) {
+                    reachabilityService.shutdownNow();
+                }
+
+                // Start new analysis
+                reachabilityService = Executors.newFixedThreadPool(10);
+
+                while (Debug.backgroundThreads.size() > 0) {
+                    final Thread thread = Debug.backgroundThreads.get(0);
+                    thread.interrupt();
+                    Debug.removeThread(thread);
+                }
+
+                try {
+                    // Make sure that the model is generated
+                    UPPAALDriver.buildEcdarDocument();
+                } catch (final BackendException e) {
+                    // Something went wrong with creating the document
+                    Ecdar.showToast("Could not build XML model. I got the error: " + e.getMessage());
+                    e.printStackTrace();
+                    return;
+                }
+
+                Ecdar.getProject().getQueries().forEach(query -> {
+                    if (query.isPeriodic()) query.run();
+                });
+
+                // List of threads to start
+                List<Thread> threads = new ArrayList<>();
+
+                // Submit all background reachability queries
+                Ecdar.getProject().getComponents().forEach(component -> {
+                    // Check if we should consider this component
+                    if (!component.isIncludeInPeriodicCheck()) {
+                        component.getLocations().forEach(location -> location.setReachability(Location.Reachability.EXCLUDED));
+                    } else {
+                        component.getLocations().forEach(location -> {
+                            final String locationReachableQuery = UPPAALDriver.getLocationReachableQuery(location, component);
+                            final Thread verifyThread = UPPAALDriver.runQuery(
+                                    locationReachableQuery,
+                                    (result -> {
+                                        if (result) {
+                                            location.setReachability(Location.Reachability.REACHABLE);
+                                        } else {
+                                            location.setReachability(Location.Reachability.UNREACHABLE);
+                                        }
+                                        Debug.removeThread(Thread.currentThread());
+                                    }),
+                                    (e) -> {
+                                        location.setReachability(Location.Reachability.UNKNOWN);
+                                        Debug.removeThread(Thread.currentThread());
+                                    },
+                                    2000
+                            );
+
+                            verifyThread.setName(locationReachableQuery + " (" + verifyThread.getName() + ")");
+                            Debug.addThread(verifyThread);
+                            threads.add(verifyThread);
+                        });
+                    }
+                });
+
+                threads.forEach((verifyThread) -> reachabilityService.submit(verifyThread::start));
+            }
+        }).start();
     }
 
     private void initializeStatusBar() {
@@ -277,6 +362,22 @@ public class EcdarController implements Initializable {
 
         queryLabel.setTextFill(Color.GREY_BLUE.getColor(Color.Intensity.I50));
         queryLabel.setOpacity(0.5);
+
+        Debug.backgroundThreads.addListener(new ListChangeListener<Thread>() {
+            @Override
+            public void onChanged(final Change<? extends Thread> c) {
+                while (c.next()) {
+                    Platform.runLater(() -> {
+                        if(Debug.backgroundThreads.size() == 0) {
+                            queryStatusContainer.setOpacity(0);
+                        } else {
+                            queryStatusContainer.setOpacity(1);
+                            queryLabel.setText(Debug.backgroundThreads.size() + " background queries running");
+                        }
+                    });
+                }
+            }
+        });
     }
 
     private void initializeMenuBar() {
