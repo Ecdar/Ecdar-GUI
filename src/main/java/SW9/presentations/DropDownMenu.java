@@ -395,7 +395,7 @@ public class DropDownMenu extends JFXPopup {
 
         this.content.getChildren().add(subMenuContent);
 
-        final JFXRippler rippler = new JFXRippler(label);
+        final ReleaseRippler rippler = new ReleaseRippler(label);
         rippler.setRipplerFill(Color.GREY_BLUE.getColor(Color.Intensity.I300));
 
         rippler.setOnMouseEntered(event -> {
@@ -410,6 +410,7 @@ public class DropDownMenu extends JFXPopup {
             if (!isHoveringSubMenu.get()) {
                 hide.run();
             }
+            rippler.release();
         });
 
         final FontIcon icon = new FontIcon();
