@@ -20,9 +20,9 @@
                   promptText="Query"/>
 
     <JFXTextField id="comment" HBox.hgrow="ALWAYS"
-                  AnchorPane.topAnchor="36"
+                  AnchorPane.topAnchor="42"
                   AnchorPane.rightAnchor="128"
-                  AnchorPane.bottomAnchor="4"
+                  AnchorPane.bottomAnchor="8"
                   AnchorPane.leftAnchor="8"
                   style="-fx-unfocus-color:transparent;" styleClass="caption"
                   promptText="Comment"/>
