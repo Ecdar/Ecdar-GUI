@@ -4,7 +4,7 @@ import com.jfoenix.controls.JFXRippler;
 import javafx.scene.Node;
 
 /***
- * We really needed the releaseRipple() method, so we made this wrapper class to expose it... shhh....
+ * We really needed the {@link JFXRippler#releaseRipple()} method, so we made this wrapper class to expose it...shhh....
  */
 public class ReleaseRippler extends JFXRippler {
     public ReleaseRippler(Node node) {
@@ -12,7 +12,7 @@ public class ReleaseRippler extends JFXRippler {
     }
 
     /***
-     * Exposes the private releaseRipple() method to the public
+     * Exposes the protected {@link JFXRippler#releaseRipple()} method to the public
      */
     public void release() {
         this.releaseRipple();
