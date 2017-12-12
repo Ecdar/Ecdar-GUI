@@ -279,9 +279,9 @@ public class EcdarController implements Initializable {
     }
 
     /**
-     * Handles the change of color
-     * @param enabledColor The new color
-     * @param previousColor The color there were before
+     * Handles the change of color on selected objects
+     * @param enabledColor The new color for the selected objects
+     * @param previousColor The color old color of the selected objects
      */
     public void changeColorOnSelectedElements(final EnabledColor enabledColor,
                                               final List<Pair<SelectHelper.ItemSelectable, EnabledColor>> previousColor)
