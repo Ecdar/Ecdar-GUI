@@ -53,9 +53,21 @@ public class DropDownMenu extends JFXPopup {
     private final StackPane content;
     private final VBox list;
 
+    /**
+     * Defines if the {@link DropDownMenu} is hidden on the view
+     */
     private final SimpleBooleanProperty isHidden = new SimpleBooleanProperty(true);
+
+    /**
+     * Defines if the {@link DropDownMenu} is getting hovered by the mouse
+     */
     private final SimpleBooleanProperty isHoveringMenu = new SimpleBooleanProperty(false);
+
+    /**
+     * Defines if the mouse is hovering a sub menu (of type {@link DropDownMenu}) belonging to this {@link DropDownMenu}
+     */
     private final SimpleBooleanProperty isHoveringASubMenu = new SimpleBooleanProperty(false);
+
     private final SimpleBooleanProperty canIShowSubMenu = new SimpleBooleanProperty(false);
 
     /**
