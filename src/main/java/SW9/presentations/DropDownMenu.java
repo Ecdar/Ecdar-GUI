@@ -9,6 +9,7 @@ import javafx.application.Platform;
 import javafx.beans.binding.When;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableBooleanValue;
 import javafx.geometry.Insets;
@@ -40,18 +41,19 @@ public class DropDownMenu extends JFXPopup {
     public static double x = 0;
     public static double y = 0;
     private final Node source;
-    /**
-     * The width of the {@link DropDownMenu}.
-     * the value 230 showed to be a good base for all {@link DropDownMenu}s.
-     * In this way the {@link DropDownMenu} will always stay consistent
-     */
-    private static final int WIDTH = 230;
 
     /**
      * The {@link StackPane} with all the added content from the add methods
      */
     private final StackPane content;
     private final VBox list;
+
+    /**
+     * The width of the {@link DropDownMenu}.
+     * the value 230 showed to be a good base for all {@link DropDownMenu}s.
+     * In this way the {@link DropDownMenu} will always stay consistent
+     */
+    private final SimpleIntegerProperty dropDownMenuWidth = new SimpleIntegerProperty(230);
 
     /**
      * Defines if the {@link DropDownMenu} is hidden on the view
@@ -73,17 +75,30 @@ public class DropDownMenu extends JFXPopup {
     /**
      * Constructor for the {@link DropDownMenu}.
      * The {@link DropDownMenu} is places on top of all the views, and does even go outside of the window/screen for now.
+     * The width is, when using this constructor, set to be 230.
      * @param src The view where the {@link DropDownMenu} should be shown
+     * @see DropDownMenu#DropDownMenu(Node, int)
      */
     public DropDownMenu(final Node src) {
+        this(src, 230);
+    }
+
+    /**
+     * Constructor for the {@link DropDownMenu}.
+     * The {@link DropDownMenu} is places on top of all the views, and does even go outside of the window/screen for now.
+     * @param src The view where the {@link DropDownMenu} should be shown
+     * @param width The width of the {@link DropDownMenu}
+     */
+    public DropDownMenu(final Node src, int width)  {
+        dropDownMenuWidth.set(width);
         list = new VBox();
         list.setStyle("-fx-background-color: white; -fx-padding: 8 0 8 0;");
         list.setMaxHeight(1);
         StackPane.setAlignment(list, Pos.TOP_CENTER);
 
         content = new StackPane(list);
-        content.setMinWidth(WIDTH);
-        content.setMaxWidth(WIDTH);
+        content.setMinWidth(dropDownMenuWidth.get());
+        content.setMaxWidth(dropDownMenuWidth.get());
 
         list.setOnMouseExited(event -> isHoveringMenu.set(false));
         list.setOnMouseEntered(event -> isHoveringMenu.set(true));
@@ -212,7 +227,7 @@ public class DropDownMenu extends JFXPopup {
         space1.setMinHeight(8);
         list.getChildren().add(space1);
 
-        final Line sep = new Line(0, 0, WIDTH - 1, 0);
+        final Line sep = new Line(0, 0, dropDownMenuWidth.get() - 1, 0);
         sep.setStroke(Color.GREY.getColor(Color.Intensity.I300));
         list.getChildren().add(sep);
 
@@ -330,13 +345,13 @@ public class DropDownMenu extends JFXPopup {
 
         label.setStyle("-fx-padding: 8 16 8 16;");
         label.getStyleClass().add("body2");
-        label.setMinWidth(WIDTH);
+        label.setMinWidth(dropDownMenuWidth.get());
 
         final StackPane subMenuContent = subMenu.content;
         subMenuContent.setStyle("-fx-padding: 0 0 0 2;");
         subMenuContent.setMinWidth(subMenuContent.getMinWidth() + 1);
         subMenuContent.setMaxWidth(subMenuContent.getMinWidth() + 1);
-        subMenuContent.setTranslateX(WIDTH);
+        subMenuContent.setTranslateX(dropDownMenuWidth.get());
         subMenuContent.setTranslateY(offset);
         subMenuContent.setOpacity(0);
 
