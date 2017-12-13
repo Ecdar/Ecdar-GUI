@@ -402,6 +402,9 @@ public class EcdarController implements Initializable {
         menuBarHelpHelp.setOnAction(event -> Ecdar.showHelp());
     }
 
+    /**
+     * Initializes the UI Cache menu element.
+     */
     private void initializeUICacheMenuElement() {
         menuBarOptionsCache.setOnAction(event -> {
             final BooleanProperty isCached = Ecdar.toggleUICache();
