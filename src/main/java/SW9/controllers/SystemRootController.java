@@ -70,13 +70,13 @@ public class SystemRootController implements Initializable {
     }
 
     private void initializeDropDownMenu(final EcdarSystem system) {
-        contextMenu = new DropDownMenu(contextMenuContainer, contextMenuSource, 230, true);
+        contextMenu = new DropDownMenu(contextMenuSource);
 
         contextMenu.addMenuElement(new MenuElement("Draw Edge")
                 .setClickable(() -> {
                     createNewSystemEdge();
 
-                    contextMenu.close();
+                    contextMenu.hide();
                 })
                 .setDisableable(hasEdge));
     }

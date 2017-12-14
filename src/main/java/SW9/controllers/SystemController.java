@@ -127,7 +127,7 @@ public class SystemController extends ModelController implements Initializable {
             }));
         });
 
-        final DropDownMenu operatorSubMenu = new DropDownMenu(root, dropDownMenuHelperCircle, 150, false);
+        final DropDownMenu operatorSubMenu = new DropDownMenu(dropDownMenuHelperCircle, 150);
 
 
         operatorSubMenu.addMenuElement(new MenuElement("Add Conjunction").setClickable(() -> {
@@ -143,7 +143,7 @@ public class SystemController extends ModelController implements Initializable {
                     "add-circle"
             );
 
-            contextMenu.close();
+            contextMenu.hide();
         }));
 
         operatorSubMenu.addMenuElement(new MenuElement("Add Composition").setClickable(() -> {
@@ -159,7 +159,7 @@ public class SystemController extends ModelController implements Initializable {
                     "add-circle"
             );
 
-            contextMenu.close();
+            contextMenu.hide();
         }));
 
         operatorSubMenu.addMenuElement(new MenuElement("Add Quotient").setClickable(() -> {
@@ -175,11 +175,11 @@ public class SystemController extends ModelController implements Initializable {
                     "add-circle"
             );
 
-            contextMenu.close();
+            contextMenu.hide();
         }));
-
-        contextMenu.addSubMenu("Add Component Instance", componentInstanceSubMenu, 0 * 35);
-        contextMenu.addSubMenu("Add Operator", operatorSubMenu, 1 * 35);
+        // 38 matched best when adding a new sub menu
+        contextMenu.addSubMenu("Add Component Instance", componentInstanceSubMenu, 0 * 38,0);
+        contextMenu.addSubMenu("Add Operator", operatorSubMenu, 1 * 38,0);
 
         contextMenu.addColorPicker(system, system::dye);
     }

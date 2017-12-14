@@ -75,12 +75,12 @@ public class ComponentInstanceController implements Initializable {
     }
 
     private void initializeDropDownMenu(final EcdarSystem system) {
-        dropDownMenu = new DropDownMenu(root, frame, 230, true);
+        dropDownMenu = new DropDownMenu(frame);
 
         dropDownMenu.addMenuElement(new MenuElement("Draw Edge")
                 .setClickable(() -> {
                     createNewSystemEdge();
-                    dropDownMenu.close();
+                    dropDownMenu.hide();
                 })
                 .setDisableable(hasEdge));
 
@@ -88,7 +88,7 @@ public class ComponentInstanceController implements Initializable {
 
         dropDownMenu.addClickableListElement("Delete", event -> {
             getSystem().removeComponentInstance(getInstance());
-            dropDownMenu.close();
+            dropDownMenu.hide();
         });
     }
 

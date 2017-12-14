@@ -336,9 +336,10 @@ public class DropDownMenu extends JFXPopup {
      * Adds a sub menu to the {@link DropDownMenu}.
      * @param s The text of the label use for showing the sub menu
      * @param subMenu The sub menu
-     * @param offset The vertical offset of the sub menu's content
+     * @param offsetY The vertical offset of the sub menu's content
+     * @param offsetX The horizontal offset of the sub menu's content
      */
-    public void addSubMenu(final String s, final DropDownMenu subMenu, final int offset) {
+    public void addSubMenu(final String s, final DropDownMenu subMenu, final int offsetY, final int offsetX) {
         final Label label = new Label(s);
         final ObjectProperty<Boolean> isHoveringLabel = new SimpleObjectProperty<>(false);
         final SimpleBooleanProperty isHoveringSubMenu = new SimpleBooleanProperty(false);
@@ -351,8 +352,8 @@ public class DropDownMenu extends JFXPopup {
         subMenuContent.setStyle("-fx-padding: 0 0 0 2;");
         subMenuContent.setMinWidth(subMenuContent.getMinWidth() + 1);
         subMenuContent.setMaxWidth(subMenuContent.getMinWidth() + 1);
-        subMenuContent.setTranslateX(dropDownMenuWidth.get());
-        subMenuContent.setTranslateY(offset);
+        subMenuContent.setTranslateX(dropDownMenuWidth.get() + offsetX);
+        subMenuContent.setTranslateY(offsetY);
         subMenuContent.setOpacity(0);
 
         final Runnable show = () -> {
