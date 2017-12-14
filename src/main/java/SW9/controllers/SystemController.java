@@ -106,7 +106,7 @@ public class SystemController extends ModelController implements Initializable {
         contextMenu = new DropDownMenu(dropDownMenuHelperCircle);
 
         // Component instance sub menu
-        final DropDownMenu componentInstanceSubMenu = new DropDownMenu(root, 150);
+        final DropDownMenu componentInstanceSubMenu = new DropDownMenu(dropDownMenuHelperCircle.getParent(), 150);
 
         // Add sub menu element for each component
         Ecdar.getProject().getComponents().forEach(component -> {
@@ -123,9 +123,13 @@ public class SystemController extends ModelController implements Initializable {
                         "Added component instance '" + instance.toString() + "' to system '" + system.getName() + "'",
                         "add-circle"
                 );
+                componentInstanceSubMenu.hide();
                 contextMenu.hide();
             }));
         });
+        // the space between elements in the dropdownmenu is 38
+        // The submenu is looking best with the -38 offset
+        contextMenu.addSubMenu("Add Component Instance", componentInstanceSubMenu, 0*38, -38);
 
         final DropDownMenu operatorSubMenu = new DropDownMenu(dropDownMenuHelperCircle, 150);
 
@@ -177,9 +181,7 @@ public class SystemController extends ModelController implements Initializable {
 
             contextMenu.hide();
         }));
-        // 38 matched best when adding a new sub menu
-        contextMenu.addSubMenu("Add Component Instance", componentInstanceSubMenu, 0 * 38,0);
-        contextMenu.addSubMenu("Add Operator", operatorSubMenu, 1 * 38,0);
+        contextMenu.addSubMenu("Add Operator", operatorSubMenu, 1 * 38,-38);
 
         contextMenu.addColorPicker(system, system::dye);
     }
