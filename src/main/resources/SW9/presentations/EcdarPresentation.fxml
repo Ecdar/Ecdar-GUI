@@ -173,6 +173,14 @@
                     </MenuItem>
                 </Menu>
 
+                <Menu text="Options">
+                    <MenuItem fx:id="menuBarOptionsCache" text="UI Cache">
+                        <graphic>
+                            <FontIcon iconLiteral="gmi-check" iconSize="24" fill="black"/>
+                        </graphic>
+                    </MenuItem>
+                </Menu>
+
                 <Menu text="Help">
                     <MenuItem fx:id="menuBarHelpHelp" text="Help">
                         <graphic>

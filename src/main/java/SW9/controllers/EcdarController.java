@@ -130,6 +130,7 @@ public class EcdarController implements Initializable {
     public MenuItem menuBarFileOpenProject;
     public MenuItem menuBarFileExportAsPng;
     public MenuItem menuBarFileExportAsPngNoBorder;
+    public MenuItem menuBarOptionsCache;
     public MenuItem menuBarHelpHelp;
 
     public JFXSnackbar snackbar;
@@ -396,7 +397,19 @@ public class EcdarController implements Initializable {
 
         initializeViewMenu();
 
+        initializeUICacheMenuElement();
+
         menuBarHelpHelp.setOnAction(event -> Ecdar.showHelp());
+    }
+
+    /**
+     * Initializes the UI Cache menu element.
+     */
+    private void initializeUICacheMenuElement() {
+        menuBarOptionsCache.setOnAction(event -> {
+            final BooleanProperty isCached = Ecdar.toggleUICache();
+            menuBarOptionsCache.getGraphic().opacityProperty().bind(new When(isCached).then(1).otherwise(0));
+        });
     }
 
     /**
