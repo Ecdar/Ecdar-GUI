@@ -4,6 +4,7 @@ import SW9.Ecdar;
 import SW9.abstractions.*;
 import SW9.presentations.*;
 import SW9.utility.UndoRedoStack;
+import SW9.utility.helpers.SelectHelper;
 import com.jfoenix.controls.JFXPopup;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -19,7 +20,6 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.function.Consumer;
 
 /**
  * Controller for a system.
@@ -33,6 +33,8 @@ public class SystemController extends ModelController implements Initializable {
     public Pane componentOperatorContainer;
     public Map<ComponentOperator, ComponentOperatorPresentation> componentOperatorPresentationMap = new HashMap<>();
 
+
+    public Pane systemRootContainer;
 
     private Circle dropDownMenuHelperCircle;
     private DropDownMenu contextMenu;
@@ -48,6 +50,7 @@ public class SystemController extends ModelController implements Initializable {
             initializeContextMenu(newValue);
             initializeComponentInstanceHandling(newValue);
             initializeComponentInstanceOperator(newValue);
+            initializeSystemRoot(newValue);
         });
     }
 
@@ -59,10 +62,15 @@ public class SystemController extends ModelController implements Initializable {
         this.system.setValue(system);
     }
 
+    /**
+     * Handles when tapping on the background of the system view.
+     * @param event mouse event
+     */
     @FXML
     private void modelContainerPressed(final MouseEvent event) {
         event.consume();
         CanvasController.leaveTextAreas();
+        SelectHelper.clearSelectedElements();
 
         if (event.isSecondaryButtonDown()) {
             dropDownMenuHelperCircle.setLayoutX(event.getX());
@@ -101,8 +109,8 @@ public class SystemController extends ModelController implements Initializable {
                 final ComponentInstance instance = new ComponentInstance();
 
                 instance.setComponent(component);
-                instance.getColor().set(system.getColor());
-                instance.getColorIntensity().set(system.getColorIntensity());
+                instance.getColorProperty().set(system.getColor());
+                instance.getColorIntensityProperty().set(system.getColorIntensity());
                 instance.getBox().setX(DropDownMenu.x);
                 instance.getBox().setY(DropDownMenu.y);
 
@@ -157,6 +165,10 @@ public class SystemController extends ModelController implements Initializable {
                 change.getRemoved().forEach(this::handleRemovedComponentInstance);
             }
         });
+    }
+
+    private void initializeSystemRoot(final SystemModel system) {
+        systemRootContainer.getChildren().add(new SystemRootPresentation(system));
     }
 
     /**

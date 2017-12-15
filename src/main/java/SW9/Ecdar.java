@@ -14,6 +14,7 @@ import SW9.utility.keyboard.KeyboardTracker;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ListChangeListener;
 import javafx.scene.Scene;
@@ -43,6 +44,7 @@ public class Ecdar extends Application {
     private static Project project;
     private static EcdarPresentation presentation;
     public static SimpleStringProperty projectDirectory = new SimpleStringProperty();
+    private static BooleanProperty isUICached = new SimpleBooleanProperty();
     private Stage debugStage;
 
     {
@@ -87,6 +89,18 @@ public class Ecdar extends Application {
         return presentation.toggleFilePane();
     }
 
+    /**
+     * Toggles whether to cache UI.
+     * Caching reduces CPU usage on some devices.
+     * It also increases GPU 3D engine usage on some devices.
+     * @return the property specifying whether to cache
+     */
+    public static BooleanProperty toggleUICache() {
+        isUICached.set(!isUICached.get());
+
+        return isUICached;
+    }
+
     public static BooleanProperty toggleQueryPane() {
         return presentation.toggleQueryPane();
     }
@@ -122,6 +136,10 @@ public class Ecdar extends Application {
 
         // Make the view used for the application
         presentation = new EcdarPresentation();
+
+        // Bind presentation to cached property
+        isUICached.addListener(((observable, oldValue, newValue) -> presentation.setCache(newValue)));
+        isUICached.set(true); // Set to true as default
 
         // Make the scene that we will use, and set its size to 80% of the primary screen
         final Screen screen = Screen.getPrimary();

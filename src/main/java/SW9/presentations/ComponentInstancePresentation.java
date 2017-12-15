@@ -6,23 +6,34 @@ import SW9.abstractions.SystemModel;
 import SW9.controllers.CanvasController;
 import SW9.controllers.ComponentInstanceController;
 import SW9.utility.colors.Color;
+import SW9.utility.helpers.ItemDragHelper;
+import SW9.utility.helpers.SelectHelper;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.value.ObservableDoubleValue;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiConsumer;
+
+import static SW9.presentations.Grid.GRID_SIZE;
 
 /**
  * Presentation for a component instance.
  */
-public class ComponentInstancePresentation extends StackPane {
+public class ComponentInstancePresentation extends StackPane implements SelectHelper.ItemSelectable {
     private final ComponentInstanceController controller;
+    private final List<BiConsumer<Color, Color.Intensity>> updateColorDelegates = new ArrayList<>();
 
     public ComponentInstancePresentation(final ComponentInstance instance, final SystemModel system) {
         controller = new EcdarFXMLLoader().loadAndGetController("ComponentInstancePresentation.fxml", this);
@@ -35,6 +46,7 @@ public class ComponentInstancePresentation extends StackPane {
         initializeToolbar();
         initializeFrame();
         initializeBackground();
+        initializeMouseControls();
     }
 
     /**
@@ -117,9 +129,10 @@ public class ComponentInstancePresentation extends StackPane {
             controller.toolbar.setPrefHeight(ModelPresentation.TOOL_BAR_HEIGHT); // TODO maybe move constant
         };
 
-        // Update color now and whenever color of component changes
+        // Update color now, whenever color of component changes, and when someone uses the color delegates
         updateColor.accept(component.getColor(), component.getColorIntensity());
         component.colorProperty().addListener(observable -> updateColor.accept(component.getColor(), component.getColorIntensity()));
+        updateColorDelegates.add(updateColor);
     }
 
     /**
@@ -163,10 +176,10 @@ public class ComponentInstancePresentation extends StackPane {
             )));
         };
 
-        // Update color now and on color change
+        // Update color now, whenever color of component changes, and when someone uses the color delegates
         updateColor.accept(component.getColor(), component.getColorIntensity());
         component.colorProperty().addListener(observable -> updateColor.accept(component.getColor(), component.getColorIntensity()));
-
+        updateColorDelegates.add(updateColor);
     }
 
     /**
@@ -184,10 +197,105 @@ public class ComponentInstancePresentation extends StackPane {
             controller.background.setFill(newColor.getColor(newIntensity.next(-20)));
         };
 
-        // Update color now and on color change
+        // Update color now, whenever color of component changes, and when someone uses the color delegates
         updateColor.accept(component.getColor(), component.getColorIntensity());
         component.colorProperty().addListener(observable -> updateColor.accept(component.getColor(), component.getColorIntensity()));
-
+        updateColorDelegates.add(updateColor);
     }
 
+    /**
+     * Initializes the mouse controls.
+     * This includes handling of selection and making this draggable.
+     */
+    private void initializeMouseControls() {
+        addEventHandler(MouseEvent.MOUSE_PRESSED, (event) -> {
+            event.consume();
+
+            if (event.isShortcutDown()) {
+                SelectHelper.addToSelection(this);
+            } else {
+                SelectHelper.select(this);
+            }
+        });
+
+        ItemDragHelper.makeDraggable(this, this::getDragBounds);
+    }
+
+    /**
+     * Dyes the delegates with the select color.
+     */
+    @Override
+    public void select() {
+        updateColorDelegates.forEach(colorConsumer -> colorConsumer.accept(SelectHelper.SELECT_COLOR, SelectHelper.SELECT_COLOR_INTENSITY_NORMAL));
+    }
+
+    /**
+     * Dyes the delegates with the component color.
+     */
+    @Override
+    public void deselect() {
+        updateColorDelegates.forEach(colorConsumer -> {
+            final Component component = controller.getInstance().getComponent();
+
+            colorConsumer.accept(component.getColor(), component.getColorIntensity());
+        });
+    }
+
+    /**
+     * Dyes the component instance model.
+     * @param color color to dye with
+     * @param intensity color intensity to dye with
+     */
+    @Override
+    public void color(final Color color, final Color.Intensity intensity) {
+        controller.getInstance().setColor(color);
+        controller.getInstance().setColorIntensity(intensity);
+    }
+
+    @Override
+    public Color getColor() {
+        return controller.getInstance().getColor();
+    }
+
+    @Override
+    public Color.Intensity getColorIntensity() {
+        return controller.getInstance().getColorIntensity();
+    }
+
+    /**
+     * Gets the bound that it is valid to drag the instance within.
+     * @return the bounds
+     */
+    @Override
+    public ItemDragHelper.DragBounds getDragBounds() {
+        final ObservableDoubleValue minX = new SimpleDoubleProperty(GRID_SIZE);
+        final ObservableDoubleValue maxX = controller.getSystem().getBox().getWidthProperty()
+                .subtract(GRID_SIZE)
+                .subtract(controller.getInstance().getBox().getWidth());
+        final ObservableDoubleValue minY = new SimpleDoubleProperty(ComponentPresentation.TOOL_BAR_HEIGHT + GRID_SIZE);
+        final ObservableDoubleValue maxY = controller.getSystem().getBox().getHeightProperty()
+                .subtract(GRID_SIZE)
+                .subtract(controller.getInstance().getBox().getHeight());
+        return new ItemDragHelper.DragBounds(minX, maxX, minY, maxY);
+    }
+
+    @Override
+    public DoubleProperty xProperty() {
+        return layoutXProperty();
+    }
+
+    @Override
+    public DoubleProperty yProperty() {
+        return layoutYProperty();
+    }
+
+    @Override
+    public double getX() {
+        return xProperty().get();
+    }
+
+    @Override
+    public double getY() {
+        return yProperty().get();
+    }
 }
