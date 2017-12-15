@@ -57,8 +57,18 @@ public class SystemRootPresentation extends Polygon implements Highlightable {
         });
 
         addEventHandler(MouseEvent.MOUSE_EXITED, event -> {
-            event.consume();
-            unhighlight();
+            // Button is down when dragging, and we want it to stay highlighted even if we exit on drag
+            if(!event.isPrimaryButtonDown()) {
+                event.consume();
+                unhighlight();
+            }
+        });
+
+        addEventHandler(MouseEvent.MOUSE_RELEASED, event -> {
+            if(!event.isStillSincePress()) { // Should not unhighlight if it's a simple press with no drag
+                event.consume();
+                unhighlight();
+            }
         });
 
         ItemDragHelper.makeDraggable(this, this::getDragBounds);
