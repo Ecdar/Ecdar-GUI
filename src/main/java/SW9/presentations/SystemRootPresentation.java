@@ -7,6 +7,8 @@ import SW9.utility.Highlightable;
 import SW9.utility.colors.Color;
 import SW9.utility.helpers.ItemDragHelper;
 import SW9.utility.helpers.SelectHelper;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ObservableDoubleValue;
 import javafx.scene.input.MouseEvent;
@@ -48,24 +50,38 @@ public class SystemRootPresentation extends Polygon implements Highlightable {
 
     /**
      * Initializes the mouse controls.
-     * This includes handling of selection and making this draggable.
+     * This includes handling of highlighting and making this draggable.
+     * The polygon is highlighted while mouse is entered or being pressed on.
      */
     private void initializeMouseControls() {
+        final BooleanProperty isEntered = new SimpleBooleanProperty(false);
+        final BooleanProperty isPressed = new SimpleBooleanProperty(false);
+
         addEventHandler(MouseEvent.MOUSE_ENTERED, (event) -> {
+            isEntered.set(true);
             event.consume();
             highlight();
         });
 
         addEventHandler(MouseEvent.MOUSE_EXITED, event -> {
-            // Button is down when dragging, and we want it to stay highlighted even if we exit on drag
-            if(!event.isPrimaryButtonDown()) {
+            isEntered.set(false);
+            // If mouse is also released, unhighlight
+            if(!isPressed.get()) {
                 event.consume();
                 unhighlight();
             }
         });
 
+        addEventHandler(MouseEvent.MOUSE_PRESSED, (event) -> {
+            isPressed.set(true);
+            event.consume();
+            highlight();
+        });
+
         addEventHandler(MouseEvent.MOUSE_RELEASED, event -> {
-            if(!event.isStillSincePress()) { // Should not unhighlight if it's a simple press with no drag
+            isPressed.set(false);
+            // If mouse is also exited, unhighlight
+            if(!isEntered.get()) {
                 event.consume();
                 unhighlight();
             }
