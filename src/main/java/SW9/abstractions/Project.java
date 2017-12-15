@@ -297,6 +297,8 @@ public class Project {
         queries.clear();
 
         components.clear();
+
+        systems.clear();
     }
 
     /**
