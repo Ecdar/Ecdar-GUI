@@ -1,9 +1,7 @@
 package SW9.controllers;
 
 import SW9.Ecdar;
-import SW9.abstractions.ComponentInstance;
-import SW9.abstractions.HighLevelModelObject;
-import SW9.abstractions.SystemModel;
+import SW9.abstractions.*;
 import SW9.presentations.*;
 import SW9.utility.UndoRedoStack;
 import com.jfoenix.controls.JFXPopup;
@@ -32,6 +30,9 @@ public class SystemController extends ModelController implements Initializable {
 
     public Pane componentInstanceContainer;
     public Map<ComponentInstance, ComponentInstancePresentation> componentInstancePresentationMap = new HashMap<>();
+    public Pane componentOperatorContainer;
+    public Map<ComponentOperator, ComponentOperatorPresentation> componentOperatorPresentationMap = new HashMap<>();
+
 
     private Circle dropDownMenuHelperCircle;
     private DropDownMenu contextMenu;
@@ -46,6 +47,7 @@ public class SystemController extends ModelController implements Initializable {
         system.addListener((observable, oldValue, newValue) -> {
             initializeContextMenu(newValue);
             initializeComponentInstanceHandling(newValue);
+            initializeComponentInstanceOperator(newValue);
         });
     }
 
@@ -115,7 +117,29 @@ public class SystemController extends ModelController implements Initializable {
             }));
         });
 
+        final DropDownMenu operatorSubMenu = new DropDownMenu(root, dropDownMenuHelperCircle, 150, false);
+
+
+        operatorSubMenu.addMenuElement(new MenuElement("Add Conjunction").setClickable(() -> {
+            final Conjunction operator = new Conjunction();
+
+            operator.getColor().set(system.getColor());
+            operator.getColorIntensity().set(system.getColorIntensity());
+            operator.getBox().setX(DropDownMenu.x);
+            operator.getBox().setY(DropDownMenu.y);
+
+            UndoRedoStack.pushAndPerform(
+                    () -> getSystem().addComponentOperator(operator),
+                    () -> getSystem().removeComponentOperator(operator),
+                    "Added operator '" + operator.toString() + "' to system '" + system.getName() + "'",
+                    "add-circle"
+            );
+
+            contextMenu.close();
+        }));
+
         contextMenu.addSubMenu("Add Component Instance", componentInstanceSubMenu, 0 * 35);
+        contextMenu.addSubMenu("Add Operator", operatorSubMenu, 1 * 35);
 
         contextMenu.addColorPicker(system, system::dye);
     }
@@ -152,6 +176,40 @@ public class SystemController extends ModelController implements Initializable {
     private void handleRemovedComponentInstance(final ComponentInstance instance) {
         componentInstanceContainer.getChildren().remove(componentInstancePresentationMap.get(instance));
         componentInstancePresentationMap.remove(instance);
+    }
+
+    /**
+     * Handles already added component instances.
+     * Initializes handling of added and removed component instances.
+     * @param system system model of this controller
+     */
+    private void initializeComponentInstanceOperator(final SystemModel system) {
+        system.getComponentOperators().forEach(this::handleAddedComponentOperator);
+        system.getComponentOperators().addListener((ListChangeListener<ComponentOperator>) change -> {
+            if (change.next()) {
+                change.getAddedSubList().forEach(this::handleAddedComponentOperator);
+                change.getRemoved().forEach(this::handleRemovedComponentOperator);
+            }
+        });
+    }
+
+    /**
+     * Handles an added component instance.
+     * @param operator the component instance
+     */
+    private void handleAddedComponentOperator(final ComponentOperator operator) {
+        final ComponentOperatorPresentation presentation = new ComponentOperatorPresentation(operator, getSystem());
+        componentOperatorPresentationMap.put(operator, presentation);
+        componentOperatorContainer.getChildren().add(presentation);
+    }
+
+    /**
+     * Handles a removed component instance.
+     * @param operator the component instance.
+     */
+    private void handleRemovedComponentOperator(final ComponentOperator operator) {
+        componentOperatorContainer.getChildren().remove(componentOperatorPresentationMap.get(operator));
+        componentOperatorPresentationMap.remove(operator);
     }
 
     /**

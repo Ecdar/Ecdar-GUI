@@ -69,10 +69,10 @@ public class ComponentOperatorPresentation extends StackPane {
     private void initializeDimensions() {
         final ComponentOperator instance = controller.getOperator();
 
-        setMinWidth(Grid.GRID_SIZE * 10);
-        setMaxWidth(Grid.GRID_SIZE * 10);
-        setMinHeight(Grid.GRID_SIZE * 10);
-        setMaxHeight(Grid.GRID_SIZE * 10);
+        setMinWidth(30);
+        setMaxWidth(30);
+        setMinHeight(30);
+        setMaxHeight(30);
 
         instance.getBox().getWidthProperty().bind(widthProperty());
         instance.getBox().getHeightProperty().bind(heightProperty());
@@ -97,28 +97,28 @@ public class ComponentOperatorPresentation extends StackPane {
         // Upper left
         final Polygon corner1 = new Polygon(
                 0, 0,
-                ModelPresentation.CORNER_SIZE + 2, 0,
-                0, ModelPresentation.CORNER_SIZE + 2
+                ModelPresentation.COMPONENT_CORNER_SIZE + 2, 0,
+                0, ModelPresentation.COMPONENT_CORNER_SIZE + 2
         );
 
         // Upper right
         final Polygon corner2 = new Polygon(
-                getMinWidth() - ModelPresentation.CORNER_SIZE - 2, 0,
+                getMinWidth() - ModelPresentation.COMPONENT_CORNER_SIZE - 2, 0,
                 getMinWidth(), 0,
-                getMinWidth(), getMinHeight() - ModelPresentation.CORNER_SIZE + 2
+                getMinWidth(), ModelPresentation.COMPONENT_CORNER_SIZE + 2
         );
 
         // Lower left
         final Polygon corner3 = new Polygon(
-                0, getMinHeight() - ModelPresentation.CORNER_SIZE - 2,
+                0, getMinHeight() - ModelPresentation.COMPONENT_CORNER_SIZE - 2,
                 0, getMinHeight(),
-                ModelPresentation.CORNER_SIZE + 2, getMinHeight()
+                ModelPresentation.COMPONENT_CORNER_SIZE + 2, getMinHeight()
         );
 
         //Lower right
         final Polygon corner4 = new Polygon(
-                getMinWidth(), getMinHeight() - ModelPresentation.CORNER_SIZE - 2,
-                getMinWidth() - ModelPresentation.CORNER_SIZE - 2, getMinHeight(),
+                getMinWidth(), getMinHeight() - ModelPresentation.COMPONENT_CORNER_SIZE - 2,
+                getMinWidth() - ModelPresentation.COMPONENT_CORNER_SIZE - 2, getMinHeight(),
                 getMinWidth(), getMinHeight()
         );
 
@@ -131,24 +131,6 @@ public class ComponentOperatorPresentation extends StackPane {
 
             controller.frame.setClip(mask[0]);
             controller.background.setClip(Path.union(mask[0], mask[0]));
-
-            // Bind the missing lines that we cropped away
-            controller.line1.setStartX(ModelPresentation.CORNER_SIZE);
-            controller.line1.setStartY(0);
-            controller.line1.setEndX(0);
-            controller.line1.setEndY(ModelPresentation.CORNER_SIZE);
-            controller.line1.setStroke(newColor.getColor(newIntensity.next(2)));
-            controller.line1.setStrokeWidth(1.25);
-            StackPane.setAlignment(controller.line1, Pos.TOP_LEFT);
-
-            // Set the stroke color to two shades darker
-            controller.frame.setBorder(new Border(new BorderStroke(
-                    newColor.getColor(newIntensity.next(2)),
-                    BorderStrokeStyle.SOLID,
-                    CornerRadii.EMPTY,
-                    new BorderWidths(1),
-                    Insets.EMPTY
-            )));
         };
 
         // Update color now and on color change
@@ -169,7 +151,7 @@ public class ComponentOperatorPresentation extends StackPane {
 
         final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
             // Set the background color to the lightest possible version of the color
-            controller.background.setFill(newColor.getColor(newIntensity.next(-20)));
+            controller.background.setFill(newColor.getColor(newIntensity));
         };
 
         // Update color now and on color change

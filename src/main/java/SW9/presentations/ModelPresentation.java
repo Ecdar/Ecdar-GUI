@@ -22,6 +22,7 @@ import static SW9.presentations.Grid.GRID_SIZE;
  */
 public abstract class ModelPresentation extends HighLevelModelPresentation {
     static final int CORNER_SIZE = 4 * Grid.GRID_SIZE;
+    static final int COMPONENT_CORNER_SIZE = 5;
     public static final double TOOL_BAR_HEIGHT = CORNER_SIZE / 2;
 
     static final Polygon TOP_LEFT_CORNER = new Polygon(

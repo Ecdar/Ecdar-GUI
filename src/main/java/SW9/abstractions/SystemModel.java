@@ -22,6 +22,7 @@ public class SystemModel extends EcdarModel implements Boxed {
     // Verification properties
     private final StringProperty description = new SimpleStringProperty("");
     private final ObservableList<ComponentInstance> componentInstances = FXCollections.observableArrayList();
+    private final ObservableList<ComponentOperator> componentOperators = FXCollections.observableArrayList();
 
     // Styling properties
     private final Box box = new Box();
@@ -56,12 +57,24 @@ public class SystemModel extends EcdarModel implements Boxed {
         return componentInstances;
     }
 
+    public ObservableList<ComponentOperator> getComponentOperators() {
+        return componentOperators;
+    }
+
     public void addComponentInstance(final ComponentInstance instance) {
         componentInstances.add(instance);
     }
 
     public void removeComponentInstance(final ComponentInstance instance) {
         componentInstances.remove(instance);
+    }
+
+    public void addComponentOperator(final ComponentOperator operator) {
+        componentOperators.add(operator);
+    }
+
+    public void removeComponentOperator(final ComponentOperator operator) {
+        componentOperators.remove(operator);
     }
 
     /**

@@ -16,6 +16,11 @@
         <Pane fx:id="componentInstanceContainer" pickOnBounds="false"/>
     </StackPane>
 
+    <StackPane>
+        <Pane onMousePressed="#modelContainerPressed"/>
+        <Pane fx:id="componentOperatorContainer" pickOnBounds="false"/>
+    </StackPane>
+
     <BorderPane fx:id="frame" pickOnBounds="false">
         <top>
             <BorderPane fx:id="toolbar">
