@@ -4,6 +4,7 @@ import SW9.Ecdar;
 import SW9.abstractions.ComponentInstance;
 import SW9.abstractions.HighLevelModelObject;
 import SW9.abstractions.SystemModel;
+import SW9.abstractions.SystemRoot;
 import SW9.presentations.*;
 import SW9.utility.UndoRedoStack;
 import SW9.utility.helpers.SelectHelper;
@@ -33,8 +34,12 @@ public class SystemController extends ModelController implements Initializable {
     public Pane componentInstanceContainer;
     public Map<ComponentInstance, ComponentInstancePresentation> componentInstancePresentationMap = new HashMap<>();
 
+    public Pane systemRootContainer;
+
     private Circle dropDownMenuHelperCircle;
     private DropDownMenu contextMenu;
+
+    private final SystemRoot systemRoot = new SystemRoot();;
 
     public SystemController() {
         system = new SimpleObjectProperty<>();
@@ -46,6 +51,9 @@ public class SystemController extends ModelController implements Initializable {
         system.addListener((observable, oldValue, newValue) -> {
             initializeContextMenu(newValue);
             initializeComponentInstanceHandling(newValue);
+
+            systemRoot.setX(Grid.snap(newValue.getBox().getWidth() / 2)); // Place in the middle, horizontally
+            systemRootContainer.getChildren().add(new SystemRootPresentation(systemRoot, newValue));
         });
     }
 

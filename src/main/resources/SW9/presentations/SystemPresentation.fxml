@@ -14,19 +14,22 @@
     <StackPane>
         <Pane onMousePressed="#modelContainerPressed"/>
         <Pane fx:id="componentInstanceContainer" pickOnBounds="false"/>
+        <Pane fx:id="systemRootContainer" pickOnBounds="false"/>
     </StackPane>
 
     <BorderPane fx:id="frame" pickOnBounds="false">
         <top>
-            <BorderPane fx:id="toolbar">
-                <center>
-                    <HBox>
-                        <StackPane>
-                            <JFXTextField fx:id="name" styleClass="sub-caption" translateY="1"/>
-                        </StackPane>
-                    </HBox>
-                </center>
-            </BorderPane>
+            <VBox>
+                <BorderPane fx:id="toolbar">
+                    <center>
+                        <HBox>
+                            <StackPane>
+                                <JFXTextField fx:id="name" styleClass="sub-caption" translateY="1"/>
+                            </StackPane>
+                        </HBox>
+                    </center>
+                </BorderPane>
+            </VBox>
         </top>
     </BorderPane>
 

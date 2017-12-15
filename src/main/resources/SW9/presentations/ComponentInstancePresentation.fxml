@@ -17,26 +17,26 @@
          layoutY="80"
          fx:controller="SW9.controllers.ComponentInstanceController">
 
-<Rectangle fx:id="background" fill="#ffffff"/>
+    <Rectangle fx:id="background" fill="#ffffff"/>
 
-<BorderPane fx:id="frame">
-    <top>
-        <HBox fx:id="toolbar">
+    <BorderPane fx:id="frame">
+        <top>
+            <HBox fx:id="toolbar">
 
-            <JFXTextField fx:id="identifier" styleClass="sub-caption" translateY="1"/>
-            <VBox alignment="CENTER_RIGHT" prefWidth="200.0">
-                <Label HBox.hgrow="ALWAYS" textAlignment="RIGHT" fx:id="originalComponentLabel"
-                       styleClass="sub-caption" translateY="-1"/>
-            </VBox>
-        </HBox>
-    </top>
+                <JFXTextField fx:id="identifier" styleClass="sub-caption" translateY="1"/>
+                <VBox alignment="CENTER_RIGHT" prefWidth="200.0">
+                    <Label HBox.hgrow="ALWAYS" textAlignment="RIGHT" fx:id="originalComponentLabel"
+                           styleClass="sub-caption" translateY="-1"/>
+                </VBox>
+            </HBox>
+        </top>
 
-    <center>
-        <Label fx:id="description" wrapText="true" styleClass="caption" mouseTransparent="true"
-               style="-fx-padding: 0 40 0 40"/>
-    </center>
-</BorderPane>
+        <center>
+            <Label fx:id="description" wrapText="true" styleClass="caption" mouseTransparent="true"
+                   style="-fx-padding: 0 40 0 40"/>
+        </center>
+    </BorderPane>
 
-<Line fx:id="line1"/>
+    <Line fx:id="line1"/>
 
 </fx:root>
