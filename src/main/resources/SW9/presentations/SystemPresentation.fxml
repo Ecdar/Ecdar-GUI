@@ -19,17 +19,15 @@
 
     <BorderPane fx:id="frame" pickOnBounds="false">
         <top>
-            <VBox>
-                <BorderPane fx:id="toolbar">
-                    <center>
-                        <HBox>
-                            <StackPane>
-                                <JFXTextField fx:id="name" styleClass="sub-caption" translateY="1"/>
-                            </StackPane>
-                        </HBox>
-                    </center>
-                </BorderPane>
-            </VBox>
+            <BorderPane fx:id="toolbar">
+                <center>
+                    <HBox>
+                        <StackPane>
+                            <JFXTextField fx:id="name" styleClass="sub-caption" translateY="1"/>
+                        </StackPane>
+                    </HBox>
+                </center>
+            </BorderPane>
         </top>
     </BorderPane>
 
