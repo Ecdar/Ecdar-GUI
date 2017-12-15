@@ -4,6 +4,7 @@ import SW9.Ecdar;
 import SW9.abstractions.ComponentInstance;
 import SW9.abstractions.HighLevelModelObject;
 import SW9.abstractions.SystemModel;
+import SW9.abstractions.SystemRoot;
 import SW9.presentations.*;
 import SW9.utility.UndoRedoStack;
 import SW9.utility.helpers.SelectHelper;
@@ -33,6 +34,8 @@ public class SystemController extends ModelController implements Initializable {
     public Pane componentInstanceContainer;
     public Map<ComponentInstance, ComponentInstancePresentation> componentInstancePresentationMap = new HashMap<>();
 
+    public Pane systemRootContainer;
+
     private Circle dropDownMenuHelperCircle;
     private DropDownMenu contextMenu;
 
@@ -46,6 +49,7 @@ public class SystemController extends ModelController implements Initializable {
         system.addListener((observable, oldValue, newValue) -> {
             initializeContextMenu(newValue);
             initializeComponentInstanceHandling(newValue);
+            initializeSystemRoot(newValue);
         });
     }
 
@@ -138,6 +142,10 @@ public class SystemController extends ModelController implements Initializable {
                 change.getRemoved().forEach(this::handleRemovedComponentInstance);
             }
         });
+    }
+
+    private void initializeSystemRoot(final SystemModel system) {
+        systemRootContainer.getChildren().add(new SystemRootPresentation(system));
     }
 
     /**

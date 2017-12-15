@@ -17,7 +17,7 @@ import java.util.ResourceBundle;
 /**
  * Controller for a component instance.
  */
-public class ComponentInstanceController implements Initializable {
+public class ComponentInstanceController {
     public BorderPane frame;
     public Line line1;
     public Rectangle background;
@@ -28,10 +28,6 @@ public class ComponentInstanceController implements Initializable {
 
     private ComponentInstance instance;
     private SystemModel system;
-
-    @Override
-    public void initialize(final URL location, final ResourceBundle resources) {
-    }
 
     public ComponentInstance getInstance() {
         return instance;
