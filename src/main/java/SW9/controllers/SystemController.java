@@ -39,8 +39,6 @@ public class SystemController extends ModelController implements Initializable {
     private Circle dropDownMenuHelperCircle;
     private DropDownMenu contextMenu;
 
-    private final SystemRoot systemRoot = new SystemRoot();
-
     public SystemController() {
         system = new SimpleObjectProperty<>();
     }
@@ -147,8 +145,7 @@ public class SystemController extends ModelController implements Initializable {
     }
 
     private void initializeSystemRoot(final SystemModel system) {
-        systemRoot.setX(Grid.snap(system.getBox().getWidth() / 2)); // Place in the middle, horizontally
-        systemRootContainer.getChildren().add(new SystemRootPresentation(systemRoot, system));
+        systemRootContainer.getChildren().add(new SystemRootPresentation(system));
     }
 
     /**

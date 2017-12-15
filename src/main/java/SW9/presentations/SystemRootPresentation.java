@@ -3,10 +3,10 @@ package SW9.presentations;
 import SW9.abstractions.SystemModel;
 import SW9.abstractions.SystemRoot;
 import SW9.controllers.SystemRootController;
+import SW9.utility.Highlightable;
 import SW9.utility.colors.Color;
 import SW9.utility.helpers.ItemDragHelper;
 import SW9.utility.helpers.SelectHelper;
-import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ObservableDoubleValue;
 import javafx.scene.input.MouseEvent;
@@ -15,12 +15,12 @@ import javafx.scene.shape.Polygon;
 /**
  * Presentation for a system root
  */
-public class SystemRootPresentation extends Polygon implements SelectHelper.ItemSelectable {
+public class SystemRootPresentation extends Polygon implements Highlightable {
     private final SystemRootController controller;
 
-    public SystemRootPresentation(final SystemRoot systemRoot, final SystemModel system) {
+    public SystemRootPresentation(final SystemModel system) {
         controller = new EcdarFXMLLoader().loadAndGetController("SystemRootPresentation.fxml", this);
-        controller.setSystemRoot(systemRoot);
+        controller.setSystemRoot(system.getSystemRoot());
         controller.setSystem(system);
 
         initializeDimensions();
@@ -51,14 +51,14 @@ public class SystemRootPresentation extends Polygon implements SelectHelper.Item
      * This includes handling of selection and making this draggable.
      */
     private void initializeMouseControls() {
-        addEventHandler(MouseEvent.MOUSE_PRESSED, (event) -> {
+        addEventHandler(MouseEvent.MOUSE_ENTERED, (event) -> {
             event.consume();
+            highlight();
+        });
 
-            if (event.isShortcutDown()) {
-                SelectHelper.addToSelection(this);
-            } else {
-                SelectHelper.select(this);
-            }
+        addEventHandler(MouseEvent.MOUSE_EXITED, event -> {
+            event.consume();
+            unhighlight();
         });
 
         ItemDragHelper.makeDraggable(this, this::getDragBounds);
@@ -78,7 +78,7 @@ public class SystemRootPresentation extends Polygon implements SelectHelper.Item
      * The color will be a bit darker than the color of the system.
      */
     private void dyeFromSystemColor() {
-        color(controller.getSystem().getColor(), controller.getSystem().getColorIntensity().next(2));
+        dye(controller.getSystem().getColor(), controller.getSystem().getColorIntensity().next(2));
     }
 
     /**
@@ -86,27 +86,8 @@ public class SystemRootPresentation extends Polygon implements SelectHelper.Item
      * @param color the color to dye with
      * @param intensity the intensity of the color to use
      */
-    @Override
-    public void color(final Color color, final Color.Intensity intensity) {
+    private void dye(final Color color, final Color.Intensity intensity) {
         setFill(color.getColor(intensity));
-    }
-
-    /**
-     * Gets the color of the system.
-     * @return the color
-     */
-    @Override
-    public Color getColor() {
-        return controller.getSystem().getColor();
-    }
-
-    /**
-     * Gets the color intensity of the system.
-     * @return the intensity
-     */
-    @Override
-    public Color.Intensity getColorIntensity() {
-        return controller.getSystem().getColorIntensity();
     }
 
     /**
@@ -115,8 +96,7 @@ public class SystemRootPresentation extends Polygon implements SelectHelper.Item
      * The drag bounds does not expand vertically to disable such dragging.
      * @return the drag bounds
      */
-    @Override
-    public ItemDragHelper.DragBounds getDragBounds() {
+    private ItemDragHelper.DragBounds getDragBounds() {
         final ObservableDoubleValue minX = new SimpleDoubleProperty(5d * Grid.GRID_SIZE);
         final ObservableDoubleValue maxX = controller.getSystem().getBox().getWidthProperty()
                 .subtract(5d * Grid.GRID_SIZE);
@@ -126,32 +106,12 @@ public class SystemRootPresentation extends Polygon implements SelectHelper.Item
     }
 
     @Override
-    public DoubleProperty xProperty() {
-        return layoutXProperty();
+    public void highlight() {
+        dye(SelectHelper.SELECT_COLOR, SelectHelper.SELECT_COLOR_INTENSITY_NORMAL);
     }
 
     @Override
-    public DoubleProperty yProperty() {
-        return layoutYProperty();
-    }
-
-    @Override
-    public double getX() {
-        return xProperty().get();
-    }
-
-    @Override
-    public double getY() {
-        return yProperty().get();
-    }
-
-    @Override
-    public void select() {
-        color(SelectHelper.SELECT_COLOR, SelectHelper.SELECT_COLOR_INTENSITY_NORMAL);
-    }
-
-    @Override
-    public void deselect() {
+    public void unhighlight() {
         dyeFromSystemColor();
     }
 }

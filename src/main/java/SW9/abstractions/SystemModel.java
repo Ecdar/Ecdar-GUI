@@ -1,6 +1,7 @@
 package SW9.abstractions;
 
 import SW9.Ecdar;
+import SW9.presentations.Grid;
 import SW9.utility.UndoRedoStack;
 import SW9.utility.colors.Color;
 import SW9.utility.colors.EnabledColor;
@@ -18,10 +19,12 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class SystemModel extends EcdarModel implements Boxed {
     private static final String SYSTEM = "System";
+    private static final String SYSTEM_ROOT_X = "systemRootX";
 
     // Verification properties
     private final StringProperty description = new SimpleStringProperty("");
     private final ObservableList<ComponentInstance> componentInstances = FXCollections.observableArrayList();
+    private final SystemRoot systemRoot = new SystemRoot();
 
     // Styling properties
     private final Box box = new Box();
@@ -29,6 +32,9 @@ public class SystemModel extends EcdarModel implements Boxed {
     public SystemModel() {
         setSystemName();
         setRandomColor();
+
+        // Create system root in the middle, horizontally
+        systemRoot.setX(Grid.snap(getBox().getWidth() / 2));
     }
 
     SystemModel(final JsonObject json) {
@@ -54,6 +60,10 @@ public class SystemModel extends EcdarModel implements Boxed {
 
     public ObservableList<ComponentInstance> getComponentInstances() {
         return componentInstances;
+    }
+
+    public SystemRoot getSystemRoot() {
+        return systemRoot;
     }
 
     public void addComponentInstance(final ComponentInstance instance) {
@@ -94,6 +104,8 @@ public class SystemModel extends EcdarModel implements Boxed {
 
         result.addProperty(COLOR, EnabledColor.getIdentifier(getColor()));
 
+        result.addProperty(SYSTEM_ROOT_X, systemRoot.getX());
+
         return result;
     }
 
@@ -110,6 +122,8 @@ public class SystemModel extends EcdarModel implements Boxed {
             setColorIntensity(enabledColor.intensity);
             setColor(enabledColor.color);
         }
+
+        systemRoot.setX(json.getAsJsonPrimitive(SYSTEM_ROOT_X).getAsDouble());
     }
 
     /**
