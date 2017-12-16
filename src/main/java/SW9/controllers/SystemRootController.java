@@ -1,13 +1,8 @@
 package SW9.controllers;
 
-import SW9.abstractions.ComponentInstance;
 import SW9.abstractions.SystemModel;
 import SW9.abstractions.SystemRoot;
-import javafx.fxml.Initializable;
 import javafx.scene.shape.Polygon;
-
-import java.net.URL;
-import java.util.ResourceBundle;
 
 /**
  * Controller for a system root.

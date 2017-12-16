@@ -3,16 +3,12 @@ package SW9.controllers;
 import SW9.abstractions.ComponentInstance;
 import SW9.abstractions.SystemModel;
 import com.jfoenix.controls.JFXTextField;
-import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
-
-import java.net.URL;
-import java.util.ResourceBundle;
 
 /**
  * Controller for a component instance.
