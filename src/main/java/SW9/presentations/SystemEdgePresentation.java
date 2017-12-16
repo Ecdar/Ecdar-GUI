@@ -1,13 +1,22 @@
 package SW9.presentations;
 
 import SW9.abstractions.EcdarSystemEdge;
+import SW9.abstractions.Edge;
+import SW9.abstractions.Location;
+import SW9.abstractions.Nail;
+import SW9.controllers.CanvasController;
 import SW9.controllers.SystemEdgeController;
+import SW9.utility.UndoRedoStack;
 import SW9.utility.colors.Color;
 import SW9.utility.helpers.ItemDragHelper;
 import SW9.utility.helpers.SelectHelper;
+import com.jfoenix.controls.JFXPopup;
 import com.uppaal.model.system.SystemEdge;
+import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.DoubleProperty;
+import javafx.fxml.FXML;
 import javafx.scene.Group;
+import javafx.scene.input.MouseEvent;
 
 public class SystemEdgePresentation extends Group implements SelectHelper.ItemSelectable {
     private final SystemEdgeController controller;

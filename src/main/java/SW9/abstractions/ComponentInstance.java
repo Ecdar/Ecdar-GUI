@@ -9,7 +9,7 @@ import javafx.beans.property.StringProperty;
 /**
  * Instance of a component.
  */
-public class ComponentInstance {
+public class ComponentInstance implements SystemElement {
     private final ObjectProperty<Component> component = new SimpleObjectProperty<>();
     private final ObjectProperty<Color> color = new SimpleObjectProperty<>();
     private final ObjectProperty<Color.Intensity> colorIntensity = new SimpleObjectProperty<>();

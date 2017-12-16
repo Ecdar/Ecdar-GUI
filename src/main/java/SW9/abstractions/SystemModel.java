@@ -24,6 +24,7 @@ public class SystemModel extends EcdarModel implements Boxed { // TODO name Ecda
     private final StringProperty description = new SimpleStringProperty("");
     private final ObservableList<ComponentInstance> componentInstances = FXCollections.observableArrayList();
     private final ObservableList<ComponentOperator> componentOperators = FXCollections.observableArrayList();
+    private final ObservableList<EcdarSystemEdge> edges = FXCollections.observableArrayList();
     private final SystemRoot systemRoot = new SystemRoot();
 
     // Styling properties
@@ -39,6 +40,14 @@ public class SystemModel extends EcdarModel implements Boxed { // TODO name Ecda
 
     SystemModel(final JsonObject json) {
         deserialize(json);
+    }
+
+    public void addEdge(final EcdarSystemEdge edge) {
+        edges.add(edge);
+    }
+
+    public void removeEdge(final EcdarSystemEdge edge) {
+        edges.remove(edge);
     }
 
     @Override
