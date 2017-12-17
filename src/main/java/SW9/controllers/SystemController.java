@@ -146,6 +146,42 @@ public class SystemController extends ModelController implements Initializable {
             contextMenu.close();
         }));
 
+        operatorSubMenu.addMenuElement(new MenuElement("Add Composition").setClickable(() -> {
+            final Composition operator = new Composition();
+
+            operator.getColor().set(system.getColor());
+            operator.getColorIntensity().set(system.getColorIntensity());
+            operator.getBox().setX(DropDownMenu.x);
+            operator.getBox().setY(DropDownMenu.y);
+
+            UndoRedoStack.pushAndPerform(
+                    () -> getSystem().addComponentOperator(operator),
+                    () -> getSystem().removeComponentOperator(operator),
+                    "Added operator '" + operator.toString() + "' to system '" + system.getName() + "'",
+                    "add-circle"
+            );
+
+            contextMenu.close();
+        }));
+
+        operatorSubMenu.addMenuElement(new MenuElement("Add Quotient").setClickable(() -> {
+            final Quotient operator = new Quotient();
+
+            operator.getColor().set(system.getColor());
+            operator.getColorIntensity().set(system.getColorIntensity());
+            operator.getBox().setX(DropDownMenu.x);
+            operator.getBox().setY(DropDownMenu.y);
+
+            UndoRedoStack.pushAndPerform(
+                    () -> getSystem().addComponentOperator(operator),
+                    () -> getSystem().removeComponentOperator(operator),
+                    "Added operator '" + operator.toString() + "' to system '" + system.getName() + "'",
+                    "add-circle"
+            );
+
+            contextMenu.close();
+        }));
+
         contextMenu.addSubMenu("Add Component Instance", componentInstanceSubMenu, 0 * 35);
         contextMenu.addSubMenu("Add Operator", operatorSubMenu, 1 * 35);
 

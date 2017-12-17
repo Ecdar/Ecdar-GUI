@@ -20,7 +20,6 @@ import static SW9.presentations.Grid.GRID_SIZE;
 
 public class ComponentOperatorController implements Initializable {
     public BorderPane frame;
-    public Line line1;
     public Rectangle background;
     public StackPane root;
 

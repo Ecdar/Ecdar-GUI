@@ -46,10 +46,8 @@ public class ComponentOperatorPresentation extends StackPane {
         idLabel.setEffect(ds);
 
         idLabel.textProperty().set(operator.getLabel());
-
-        // Center align the label
-        idLabel.widthProperty().addListener((obsWidth, oldWidth, newWidth) -> idLabel.translateXProperty().set(newWidth.doubleValue() / -2));
-        idLabel.heightProperty().addListener((obsHeight, oldHeight, newHeight) -> idLabel.translateYProperty().set(newHeight.doubleValue() / -2));
+        idLabel.setTranslateX(0);
+        idLabel.setTranslateY(-2);
 
         // Delegate to style the label based on the color of the location
         final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
