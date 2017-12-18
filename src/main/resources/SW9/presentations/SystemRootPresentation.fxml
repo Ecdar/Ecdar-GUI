@@ -5,6 +5,5 @@
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="Polygon"
          fx:id="root"
-         fx:controller="SW9.controllers.SystemRootController">
-
-</fx:root>
+         onMouseClicked="#onMouseClicked"
+         fx:controller="SW9.controllers.SystemRootController"/>

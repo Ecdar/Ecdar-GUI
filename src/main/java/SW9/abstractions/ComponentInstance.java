@@ -4,6 +4,7 @@ import SW9.presentations.Grid;
 import SW9.utility.colors.Color;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.*;
+import javafx.beans.value.ObservableValue;
 
 /**
  * Instance of a component.
@@ -67,12 +68,12 @@ public class ComponentInstance implements SystemElement {
     }
 
     @Override
-    public DoubleBinding getEdgeX() {
+    public ObservableValue<? extends Number> getEdgeX() {
         return box.getXProperty().add(WIDTH / 2);
     }
 
     @Override
-    public DoubleBinding getEdgeY() {
+    public ObservableValue<? extends Number> getEdgeY() {
         return box.getYProperty().add(HEIGHT / 2);
     }
 }

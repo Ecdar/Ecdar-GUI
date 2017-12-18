@@ -167,4 +167,16 @@ public class SystemModel extends EcdarModel implements Boxed { // TODO name Ecda
             }
         }
     }
+
+    /**
+     * Gets the first found unfinished edge.
+     * An edge is unfinished, if the has no target.
+     * @return The unfinished edge, or null if none was found.
+     */
+    public EcdarSystemEdge getUnfinishedEdge() {
+        for (final EcdarSystemEdge edge : edges) {
+            if (edge.getTarget() == null) return edge;
+        }
+        return null;
+    }
 }

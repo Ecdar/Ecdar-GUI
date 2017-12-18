@@ -23,14 +23,21 @@ public class SystemEdgePresentation extends Group implements SelectHelper.ItemSe
             final Link link = new Link();
             links.add(link);
 
-            // Add the link and its arrowhead to the view
+            // Add the link to the view
             controller.root.getChildren().add(link);
 
+            // Bind the link to the the edge source and the mouse position (snapped to the grid)
             link.startXProperty().bind(edge.getSource().getEdgeX());
             link.startYProperty().bind(edge.getSource().getEdgeY());
             link.endXProperty().bind(CanvasPresentation.mouseTracker.gridXProperty());
             link.endYProperty().bind(CanvasPresentation.mouseTracker.gridYProperty());
         }
+
+        // When edge target changes, bind the last link to the new target
+        edge.getTargetProperty().addListener(((observable, oldValue, newValue) -> {
+            links.get(links.size() - 1).endXProperty().bind(newValue.getEdgeX());
+            links.get(links.size() - 1).endYProperty().bind(newValue.getEdgeY());
+        }));
     }
 
     /**

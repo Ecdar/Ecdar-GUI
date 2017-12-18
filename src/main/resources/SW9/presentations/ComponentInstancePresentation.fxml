@@ -16,7 +16,7 @@
          layoutX="80"
          layoutY="80"
          fx:controller="SW9.controllers.ComponentInstanceController"
-          onMousePressed="#onMousePressed">
+         onMousePressed="#onMousePressed">
 
     <Rectangle fx:id="background" fill="#ffffff"/>
 
