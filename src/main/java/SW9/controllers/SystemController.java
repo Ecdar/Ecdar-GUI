@@ -104,24 +104,26 @@ public class SystemController extends ModelController implements Initializable {
         final DropDownMenu componentInstanceSubMenu = new DropDownMenu(root, dropDownMenuHelperCircle, 150, false);
 
         // Add sub menu element for each component
-        Ecdar.getProject().getComponents().forEach(component -> componentInstanceSubMenu.addMenuElement(new MenuElement(component.getName()).setClickable(() -> {
-            final ComponentInstance instance = new ComponentInstance();
+        Ecdar.getProject().getComponents().forEach(component -> {
+            componentInstanceSubMenu.addMenuElement(new MenuElement(component.getName()).setClickable(() -> {
+                final ComponentInstance instance = new ComponentInstance();
 
-            instance.setComponent(component);
-            instance.getColorProperty().set(system.getColor());
-            instance.getColorIntensityProperty().set(system.getColorIntensity());
-            instance.getBox().setX(DropDownMenu.x);
-            instance.getBox().setY(DropDownMenu.y);
+                instance.setComponent(component);
+                instance.getColorProperty().set(system.getColor());
+                instance.getColorIntensityProperty().set(system.getColorIntensity());
+                instance.getBox().setX(DropDownMenu.x);
+                instance.getBox().setY(DropDownMenu.y);
 
-            UndoRedoStack.pushAndPerform(
-                    () -> getSystem().addComponentInstance(instance),
-                    () -> getSystem().removeComponentInstance(instance),
-                    "Added component instance '" + instance.toString() + "' to system '" + system.getName() + "'",
-                    "add-circle"
-            );
+                UndoRedoStack.pushAndPerform(
+                        () -> getSystem().addComponentInstance(instance),
+                        () -> getSystem().removeComponentInstance(instance),
+                        "Added component instance '" + instance.toString() + "' to system '" + system.getName() + "'",
+                        "add-circle"
+                );
 
-            contextMenu.close();
-        })));
+                contextMenu.close();
+            }));
+        });
 
         final DropDownMenu operatorSubMenu = new DropDownMenu(root, dropDownMenuHelperCircle, 150, false);
 
