@@ -21,6 +21,8 @@ import javafx.animation.Transition;
 import javafx.application.Platform;
 import javafx.beans.binding.When;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ListChangeListener;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
@@ -57,7 +59,7 @@ public class EcdarController implements Initializable {
     private static long reachabilityTime = Long.MAX_VALUE;
     private static ExecutorService reachabilityService;
 
-    private static EdgeStatus globalEdgeStatus;
+    private static final ObjectProperty<EdgeStatus> globalEdgeStatus = new SimpleObjectProperty<>(EdgeStatus.INPUT);
 
     // View stuff
     public StackPane root;
@@ -94,6 +96,7 @@ public class EcdarController implements Initializable {
 
     public JFXButton switchToInputButton;
     public JFXButton switchToOutputButton;
+    public JFXToggleButton switchEdgeStatusButton;
 
     private double expandHeight = 300;
 
@@ -158,7 +161,7 @@ public class EcdarController implements Initializable {
     }
 
     public static EdgeStatus getGlobalEdgeStatus() {
-        return globalEdgeStatus;
+        return globalEdgeStatus.get();
     }
 
     @Override
@@ -182,10 +185,7 @@ public class EcdarController implements Initializable {
             queryDialogContainer.setMouseTransparent(false);
         });
 
-        globalEdgeStatus = EdgeStatus.INPUT;
-
-        Tooltip.install(switchToInputButton, new Tooltip("Switch to input mode"));
-        Tooltip.install(switchToOutputButton, new Tooltip("Switch to output mode"));
+        initializeEdgeStatusHandling();
 
         //Press ctrl+N or cmd+N to create a new component. The canvas changes to this new component
         KeyCodeCombination combination = new KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN);
@@ -263,6 +263,30 @@ public class EcdarController implements Initializable {
         initializeMenuBar();
         initializeReachabilityAnalysisThread();
 
+    }
+
+    /**
+     * Initializes edge status.
+     * Input is the default status.
+     * This method sets buttons for edge status whenever the status changes.
+     */
+    private void initializeEdgeStatusHandling() {
+        globalEdgeStatus.set(EdgeStatus.INPUT);
+
+        Tooltip.install(switchToInputButton, new Tooltip("Switch to input mode"));
+        Tooltip.install(switchToOutputButton, new Tooltip("Switch to output mode"));
+
+        globalEdgeStatus.addListener(((observable, oldValue, newValue) -> {
+            if (newValue.equals(EdgeStatus.INPUT)) {
+                switchToInputButton.setTextFill(javafx.scene.paint.Color.WHITE);
+                switchToOutputButton.setTextFill(javafx.scene.paint.Color.GREY);
+                switchEdgeStatusButton.setSelected(false);
+            } else {
+                switchToInputButton.setTextFill(javafx.scene.paint.Color.GREY);
+                switchToOutputButton.setTextFill(javafx.scene.paint.Color.WHITE);
+                switchEdgeStatusButton.setSelected(true);
+            }
+        }));
     }
 
     private void initializeReachabilityAnalysisThread() {
@@ -1044,8 +1068,6 @@ public class EcdarController implements Initializable {
     @FXML
     private void switchToInputClicked() {
         setGlobalEdgeStatus(EdgeStatus.INPUT);
-        switchToInputButton.setDisable(true);
-        switchToOutputButton.setDisable(false);
     }
 
     /**
@@ -1054,8 +1076,18 @@ public class EcdarController implements Initializable {
     @FXML
     private void switchToOutputClicked() {
         setGlobalEdgeStatus(EdgeStatus.OUTPUT);
-        switchToOutputButton.setDisable(true);
-        switchToInputButton.setDisable(false);
+    }
+
+    /**
+     * Switch edge status.
+     */
+    @FXML
+    private void switchEdgeStatusClicked() {
+        if (getGlobalEdgeStatus().equals(EdgeStatus.INPUT)) {
+            setGlobalEdgeStatus(EdgeStatus.OUTPUT);
+        } else {
+            setGlobalEdgeStatus(EdgeStatus.INPUT);
+        }
     }
 
     /**
@@ -1063,7 +1095,7 @@ public class EcdarController implements Initializable {
      * @param status the status
      */
     private void setGlobalEdgeStatus(EdgeStatus status) {
-        globalEdgeStatus = status;
+        globalEdgeStatus.set(status);
     }
 
     @FXML
