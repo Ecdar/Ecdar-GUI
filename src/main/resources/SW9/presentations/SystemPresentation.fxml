@@ -11,14 +11,6 @@
 
     <Rectangle fx:id="background" StackPane.alignment="TOP_LEFT"/>
 
-    <StackPane>
-        <Pane onMousePressed="#modelContainerPressed"/>
-        <Pane fx:id="edgeContainer" pickOnBounds="false"/>
-        <Pane fx:id="componentInstanceContainer" pickOnBounds="false"/>
-        <Pane fx:id="systemRootContainer" pickOnBounds="false"/>
-        <Pane fx:id="componentOperatorContainer" pickOnBounds="false"/>
-    </StackPane>
-
     <BorderPane fx:id="frame" pickOnBounds="false">
         <top>
             <BorderPane fx:id="toolbar">
@@ -35,6 +27,17 @@
 
     <Line fx:id="topLeftLine"/>
     <Line fx:id="topRightLine"/>
+
+    <StackPane>
+        <!-- translate y is 5 in order to push the root right below the toolbar -->
+        <Pane fx:id="systemRootContainer" translateY="5" pickOnBounds="false"/>
+        
+        <Pane onMousePressed="#modelContainerPressed"/>
+        
+        <Pane fx:id="componentInstanceContainer" pickOnBounds="false"/>
+        <Pane fx:id="componentOperatorContainer" pickOnBounds="false"/>
+        <Pane fx:id="edgeContainer" pickOnBounds="false"/>
+    </StackPane>
 
     <Rectangle opacity="0" fx:id="bottomAnchor" StackPane.alignment="BOTTOM_LEFT"/>
     <Rectangle opacity="0" fx:id="rightAnchor" StackPane.alignment="TOP_RIGHT"/>

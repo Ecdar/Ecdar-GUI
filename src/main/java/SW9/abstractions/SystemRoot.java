@@ -29,7 +29,7 @@ public class SystemRoot implements SystemElement {
 
     @Override
     public ObservableValue<? extends Number> getEdgeX() {
-        return getXProperty();
+        return getXProperty().add(3 * Grid.GRID_SIZE);
     }
 
     @Override

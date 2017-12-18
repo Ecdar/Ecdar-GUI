@@ -43,10 +43,10 @@ public class ComponentInstanceController implements Initializable {
     public StackPane root;
     public HBox toolbar;
 
-    public BooleanProperty hasEdge = new SimpleBooleanProperty(false);
+    private final BooleanProperty hasEdge = new SimpleBooleanProperty(false);
 
     private ComponentInstance instance;
-    private ObjectProperty<SystemModel> system = new SimpleObjectProperty<>();
+    private final ObjectProperty<SystemModel> system = new SimpleObjectProperty<>();
     private DropDownMenu dropDownMenu;
 
     @Override
@@ -56,12 +56,19 @@ public class ComponentInstanceController implements Initializable {
         }));
     }
 
-    public void initializeDropDownMenu(final SystemModel system) {
+    private void initializeDropDownMenu(final SystemModel system) {
         dropDownMenu = new DropDownMenu(root, frame, 230, true);
 
         dropDownMenu.addMenuElement(new MenuElement("Draw Edge")
                 .setClickable(() -> {
-                    system.addEdge(new EcdarSystemEdge(instance));
+                    final EcdarSystemEdge edge = new EcdarSystemEdge(instance);
+                    system.addEdge(edge);
+                    hasEdge.set(true);
+
+                    // If source become the component instance no longer, update state,
+                    // so the user can create another edge
+                    edge.getSourceProperty().addListener(((observable, oldValue, newValue) -> hasEdge.set(newValue.equals(instance))));
+
                     dropDownMenu.close();
                 })
                 .setDisableable(hasEdge));
