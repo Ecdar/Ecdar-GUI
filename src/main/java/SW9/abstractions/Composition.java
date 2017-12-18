@@ -1,7 +1,7 @@
 package SW9.abstractions;
 
 /**
- * Class representing the Composition operator
+ * Model of a Composition operator, extends ComponentOperator
  */
 public class Composition extends ComponentOperator {
     public Composition(){

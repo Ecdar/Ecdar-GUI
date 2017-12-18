@@ -1,7 +1,7 @@
 package SW9.abstractions;
 
 /**
- * Class representing the Conjunction operator
+ * Model of a Conjunction operator, extends ComponentOperator
  */
 public class Conjunction extends ComponentOperator {
     public Conjunction(){

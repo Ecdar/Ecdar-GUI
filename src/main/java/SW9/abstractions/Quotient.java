@@ -1,7 +1,7 @@
 package SW9.abstractions;
 
 /**
- * Class representing the quotient operator
+ * Model of a Quotient operator, extends ComponentOperator
  */
 public class Quotient extends ComponentOperator {
     public Quotient(){

@@ -29,9 +29,9 @@ public class SystemController extends ModelController implements Initializable {
     public Line topRightLine;
 
     public Pane componentInstanceContainer;
-    public Map<ComponentInstance, ComponentInstancePresentation> componentInstancePresentationMap = new HashMap<>();
+    private final Map<ComponentInstance, ComponentInstancePresentation> componentInstancePresentationMap = new HashMap<>();
     public Pane componentOperatorContainer;
-    public Map<ComponentOperator, ComponentOperatorPresentation> componentOperatorPresentationMap = new HashMap<>();
+    private final Map<ComponentOperator, ComponentOperatorPresentation> componentOperatorPresentationMap = new HashMap<>();
 
 
     public Pane systemRootContainer;
@@ -104,26 +104,24 @@ public class SystemController extends ModelController implements Initializable {
         final DropDownMenu componentInstanceSubMenu = new DropDownMenu(root, dropDownMenuHelperCircle, 150, false);
 
         // Add sub menu element for each component
-        Ecdar.getProject().getComponents().forEach(component -> {
-            componentInstanceSubMenu.addMenuElement(new MenuElement(component.getName()).setClickable(() -> {
-                final ComponentInstance instance = new ComponentInstance();
+        Ecdar.getProject().getComponents().forEach(component -> componentInstanceSubMenu.addMenuElement(new MenuElement(component.getName()).setClickable(() -> {
+            final ComponentInstance instance = new ComponentInstance();
 
-                instance.setComponent(component);
-                instance.getColorProperty().set(system.getColor());
-                instance.getColorIntensityProperty().set(system.getColorIntensity());
-                instance.getBox().setX(DropDownMenu.x);
-                instance.getBox().setY(DropDownMenu.y);
+            instance.setComponent(component);
+            instance.getColorProperty().set(system.getColor());
+            instance.getColorIntensityProperty().set(system.getColorIntensity());
+            instance.getBox().setX(DropDownMenu.x);
+            instance.getBox().setY(DropDownMenu.y);
 
-                UndoRedoStack.pushAndPerform(
-                        () -> getSystem().addComponentInstance(instance),
-                        () -> getSystem().removeComponentInstance(instance),
-                        "Added component instance '" + instance.toString() + "' to system '" + system.getName() + "'",
-                        "add-circle"
-                );
+            UndoRedoStack.pushAndPerform(
+                    () -> getSystem().addComponentInstance(instance),
+                    () -> getSystem().removeComponentInstance(instance),
+                    "Added component instance '" + instance.toString() + "' to system '" + system.getName() + "'",
+                    "add-circle"
+            );
 
-                contextMenu.close();
-            }));
-        });
+            contextMenu.close();
+        })));
 
         final DropDownMenu operatorSubMenu = new DropDownMenu(root, dropDownMenuHelperCircle, 150, false);
 
@@ -227,8 +225,8 @@ public class SystemController extends ModelController implements Initializable {
     }
 
     /**
-     * Handles already added component instances.
-     * Initializes handling of added and removed component instances.
+     * Handles already added component operators.
+     * Initializes handling of added and removed component operators.
      * @param system system model of this controller
      */
     private void initializeComponentInstanceOperator(final SystemModel system) {
@@ -242,8 +240,8 @@ public class SystemController extends ModelController implements Initializable {
     }
 
     /**
-     * Handles an added component instance.
-     * @param operator the component instance
+     * Handles an added component operator.
+     * @param operator the component operator
      */
     private void handleAddedComponentOperator(final ComponentOperator operator) {
         final ComponentOperatorPresentation presentation = new ComponentOperatorPresentation(operator, getSystem());
@@ -252,8 +250,8 @@ public class SystemController extends ModelController implements Initializable {
     }
 
     /**
-     * Handles a removed component instance.
-     * @param operator the component instance.
+     * Handles a removed component operator.
+     * @param operator the component operator.
      */
     private void handleRemovedComponentOperator(final ComponentOperator operator) {
         componentOperatorContainer.getChildren().remove(componentOperatorPresentationMap.get(operator));

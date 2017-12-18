@@ -7,7 +7,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 /**
- *
+ * Model of a Component Operator
  */
 public abstract class ComponentOperator {
     private final Box box = new Box();
@@ -17,7 +17,10 @@ public abstract class ComponentOperator {
     private final ObjectProperty<Color> color = new SimpleObjectProperty<>(Color.GREY_BLUE);
     private final ObjectProperty<Color.Intensity> colorIntensity = new SimpleObjectProperty<>(Color.Intensity.I700);
 
-    public ComponentOperator() {
+    /**
+     * Constructor, does nothing
+     */
+    ComponentOperator() {
 
     }
 

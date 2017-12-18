@@ -3,22 +3,19 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.shape.Polygon?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="StackPane"
          fx:id="root"
-         layoutX="80"
-         layoutY="80"
+         layoutX="40"
+         layoutY="40"
          fx:controller="SW9.controllers.ComponentOperatorController">
 
-<Rectangle fx:id="background" fill="#ffffff"/>
+    <Polygon fx:id="frame">
+    </Polygon>
 
-<BorderPane fx:id="frame">
-    <center>
-        <Label fx:id="label" wrapText="true" styleClass="caption" mouseTransparent="true"
-               style="-fx-padding: 0 0 0 0"/>
-    </center>
-</BorderPane>
+    <Label fx:id="label" wrapText="true" styleClass="caption" mouseTransparent="true"
+           style="-fx-padding: 0 0 0 0"/>
 
 </fx:root>

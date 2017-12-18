@@ -1,27 +1,34 @@
 package SW9.presentations;
-
 import SW9.abstractions.ComponentOperator;
 import SW9.abstractions.SystemModel;
 import SW9.controllers.ComponentOperatorController;
 import SW9.utility.colors.Color;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
+import SW9.utility.helpers.ItemDragHelper;
+import SW9.utility.helpers.SelectHelper;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.value.ObservableDoubleValue;
 import javafx.scene.control.Label;
-import javafx.scene.effect.DropShadow;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
-import javafx.scene.shape.Path;
-import javafx.scene.shape.Polygon;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
-
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiConsumer;
+
+import static SW9.presentations.Grid.GRID_SIZE;
 
 /**
  * Presentation of a component operator
  */
-public class ComponentOperatorPresentation extends StackPane {
+public class ComponentOperatorPresentation extends StackPane implements SelectHelper.ItemSelectable {
     private final ComponentOperatorController controller;
+    private final List<BiConsumer<Color, Color.Intensity>> updateColorDelegates = new ArrayList<>();
 
+    /**
+     * Constructor for ComponentOperatorPresentation, sets the controller and initializes label, dimensions, frame and mouse controls
+     * @param operator the ComponentOperator that we want to present
+     * @param system the system we want to present the operator within
+     */
     public ComponentOperatorPresentation(final ComponentOperator operator, final SystemModel system){
         controller = new EcdarFXMLLoader().loadAndGetController("ComponentOperatorPresentation.fxml", this);
 
@@ -31,33 +38,28 @@ public class ComponentOperatorPresentation extends StackPane {
         initializeIdLabel();
         initializeDimensions();
         initializeFrame();
-        initializeBackground();
+        initializeMouseControls();
     }
 
+    /**
+     * Initializes the label
+     */
     private void initializeIdLabel() {
         final SystemModel system = controller.getSystem();
         final ComponentOperator operator = controller.getOperator();
         final Label idLabel = controller.label;
-
-        final DropShadow ds = new DropShadow();
-        ds.setRadius(2);
-        ds.setSpread(1);
-
-        idLabel.setEffect(ds);
 
         idLabel.textProperty().set(operator.getLabel());
         idLabel.setTranslateX(0);
         idLabel.setTranslateY(-2);
 
         // Delegate to style the label based on the color of the location
-        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
-            idLabel.setTextFill(newColor.getTextColor(newIntensity));
-            ds.setColor(newColor.getColor(newIntensity));
-        };
+        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> idLabel.setTextFill(newColor.getTextColor(newIntensity));
 
         // Update color now and on color change
         updateColor.accept(system.getColor(), system.getColorIntensity());
         system.colorProperty().addListener(observable -> updateColor.accept(system.getColor(), system.getColorIntensity()));
+        updateColorDelegates.add(updateColor);
     }
 
 
@@ -67,10 +69,10 @@ public class ComponentOperatorPresentation extends StackPane {
     private void initializeDimensions() {
         final ComponentOperator instance = controller.getOperator();
 
-        setMinWidth(30);
-        setMaxWidth(30);
-        setMinHeight(30);
-        setMaxHeight(30);
+        setMinWidth(4 * GRID_SIZE);
+        setMaxWidth(4 * GRID_SIZE);
+        setMinHeight(2 * GRID_SIZE);
+        setMaxHeight(2 * GRID_SIZE);
 
         instance.getBox().getWidthProperty().bind(widthProperty());
         instance.getBox().getHeightProperty().bind(heightProperty());
@@ -88,73 +90,109 @@ public class ComponentOperatorPresentation extends StackPane {
     private void initializeFrame() {
         final SystemModel system = controller.getSystem();
 
-        final Shape[] mask = new Shape[1];
-        final Rectangle rectangle = new Rectangle(getMinWidth(), getMinHeight());
+        controller.frame.getPoints().addAll(1d * Grid.GRID_SIZE, - 1d * Grid.GRID_SIZE);
+        controller.frame.getPoints().addAll(- 1d * Grid.GRID_SIZE, - 1d * Grid.GRID_SIZE);
+        controller.frame.getPoints().addAll(- 2d * Grid.GRID_SIZE, 0d);
+        controller.frame.getPoints().addAll(- 1d * Grid.GRID_SIZE, 1d * Grid.GRID_SIZE);
+        controller.frame.getPoints().addAll(1d * Grid.GRID_SIZE, 1d * Grid.GRID_SIZE);
+        controller.frame.getPoints().addAll(2d * Grid.GRID_SIZE, 0d);
 
-        // Generate four corners (to subtract)
-        // Upper left
-        final Polygon corner1 = new Polygon(
-                0, 0,
-                ModelPresentation.COMPONENT_CORNER_SIZE + 2, 0,
-                0, ModelPresentation.COMPONENT_CORNER_SIZE + 2
-        );
+        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> controller.frame.setFill(newColor.getColor(newIntensity));
 
-        // Upper right
-        final Polygon corner2 = new Polygon(
-                getMinWidth() - ModelPresentation.COMPONENT_CORNER_SIZE - 2, 0,
-                getMinWidth(), 0,
-                getMinWidth(), ModelPresentation.COMPONENT_CORNER_SIZE + 2
-        );
-
-        // Lower left
-        final Polygon corner3 = new Polygon(
-                0, getMinHeight() - ModelPresentation.COMPONENT_CORNER_SIZE - 2,
-                0, getMinHeight(),
-                ModelPresentation.COMPONENT_CORNER_SIZE + 2, getMinHeight()
-        );
-
-        //Lower right
-        final Polygon corner4 = new Polygon(
-                getMinWidth(), getMinHeight() - ModelPresentation.COMPONENT_CORNER_SIZE - 2,
-                getMinWidth() - ModelPresentation.COMPONENT_CORNER_SIZE - 2, getMinHeight(),
-                getMinWidth(), getMinHeight()
-        );
-
-        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
-            // Mask the parent of the frame (will also mask the background)
-            mask[0] = Path.subtract(rectangle, corner1);
-            mask[0] = Path.subtract(mask[0], corner2);
-            mask[0] = Path.subtract(mask[0], corner3);
-            mask[0] = Path.subtract(mask[0], corner4);
-
-            controller.frame.setClip(mask[0]);
-            controller.background.setClip(Path.union(mask[0], mask[0]));
-        };
-
-        // Update color now and on color change
         updateColor.accept(system.getColor(), system.getColorIntensity());
         system.colorProperty().addListener(observable -> updateColor.accept(system.getColor(), system.getColorIntensity()));
-
+        updateColorDelegates.add(updateColor);
     }
 
     /**
-     * Initializes the background.
+     * Initialize the mouse controls
      */
-    private void initializeBackground() {
-        final SystemModel system = controller.getSystem();
+    private void initializeMouseControls() {
+        addEventHandler(MouseEvent.MOUSE_PRESSED, (event) -> {
+            event.consume();
 
-        // Bind the background width and height to the values in the model
-        controller.background.widthProperty().bind(minWidthProperty());
-        controller.background.heightProperty().bind(minHeightProperty());
+            if (event.isShortcutDown()) {
+                SelectHelper.addToSelection(this);
+            } else {
+                SelectHelper.select(this);
+            }
+        });
 
-        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
-            // Set the background color to the lightest possible version of the color
-            controller.background.setFill(newColor.getColor(newIntensity));
-        };
+        ItemDragHelper.makeDraggable(this, this::getDragBounds);
+    }
 
-        // Update color now and on color change
-        updateColor.accept(system.getColor(), system.getColorIntensity());
-        system.colorProperty().addListener(observable -> updateColor.accept(system.getColor(), system.getColorIntensity()));
+    /**
+     * Is meant to set the color, but this feature is not available for operators so this method does nothing
+     */
+    @Override
+    public void color(final Color color, final Color.Intensity intensity) {
+    }
+
+    @Override
+    public Color getColor() {
+        return controller.getOperator().getColor().getValue();
+    }
+
+    @Override
+    public Color.Intensity getColorIntensity() {
+        return controller.getOperator().getColorIntensity().getValue();
+    }
+
+    /**
+     * Gets the bound that it is valid to drag the operator within.
+     * @return the bounds
+     */
+    @Override
+    public ItemDragHelper.DragBounds getDragBounds() {
+        final ObservableDoubleValue minX = new SimpleDoubleProperty(GRID_SIZE * 2);
+        final ObservableDoubleValue maxX = controller.getSystem().getBox().getWidthProperty()
+                .subtract(GRID_SIZE * 2)
+                .subtract(controller.getOperator().getBox().getWidth());
+        final ObservableDoubleValue minY = new SimpleDoubleProperty(ComponentPresentation.TOOL_BAR_HEIGHT + GRID_SIZE * 2);
+        final ObservableDoubleValue maxY = controller.getSystem().getBox().getHeightProperty()
+                .subtract(GRID_SIZE * 2)
+                .subtract(controller.getOperator().getBox().getHeight());
+        return new ItemDragHelper.DragBounds(minX, maxX, minY, maxY);
+    }
+
+    @Override
+    public DoubleProperty xProperty() {
+        return controller.getOperator().getBox().getXProperty();
+    }
+
+    @Override
+    public DoubleProperty yProperty() {
+        return controller.getOperator().getBox().getYProperty();
+    }
+
+    @Override
+    public double getX() {
+        return controller.getOperator().getBox().getX();
+    }
+
+    @Override
+    public double getY() {
+        return controller.getOperator().getBox().getY();
+    }
+
+    /**
+     * Dyes the delegates with the select color.
+     */
+    @Override
+    public void select() {
+        updateColorDelegates.forEach(colorConsumer -> colorConsumer.accept(SelectHelper.SELECT_COLOR, SelectHelper.SELECT_COLOR_INTENSITY_NORMAL));
+    }
+
+    /**
+     * Dyes the delegates with the component color.
+     */
+    @Override
+    public void deselect() {
+        updateColorDelegates.forEach(colorConsumer -> {
+            final SystemModel system = controller.getSystem();
+
+            colorConsumer.accept(system.getColor(), system.getColorIntensity());
+        });
 
     }
 }
