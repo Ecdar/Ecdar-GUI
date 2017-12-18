@@ -29,8 +29,16 @@ public class SystemEdgePresentation extends Group implements SelectHelper.ItemSe
             // Bind the link to the the edge source and the mouse position (snapped to the grid)
             link.startXProperty().bind(edge.getSource().getEdgeX());
             link.startYProperty().bind(edge.getSource().getEdgeY());
-            link.endXProperty().bind(CanvasPresentation.mouseTracker.gridXProperty());
-            link.endYProperty().bind(CanvasPresentation.mouseTracker.gridYProperty());
+
+            // If target exists, bind to it
+            // Else, bind to mouse position (snapped to the grid)
+            if (edge.getTarget() != null) {
+                link.endXProperty().bind(edge.getTarget().getEdgeX());
+                link.endYProperty().bind(edge.getTarget().getEdgeY());
+            } else {
+                link.endXProperty().bind(CanvasPresentation.mouseTracker.gridXProperty());
+                link.endYProperty().bind(CanvasPresentation.mouseTracker.gridYProperty());
+            }
         }
 
         // When edge target changes, bind the last link to the new target
