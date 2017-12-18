@@ -14,8 +14,8 @@ public abstract class ComponentOperator {
     final StringProperty label = new SimpleStringProperty("");
 
     //Styling properties
-    private final ObjectProperty<Color> color = new SimpleObjectProperty<>(Color.GREY_BLUE);
-    private final ObjectProperty<Color.Intensity> colorIntensity = new SimpleObjectProperty<>(Color.Intensity.I700);
+    private final ObjectProperty<Color> color = new SimpleObjectProperty<>();
+    private final ObjectProperty<Color.Intensity> colorIntensity = new SimpleObjectProperty<>();
 
     /**
      * Constructor, does nothing
@@ -24,11 +24,11 @@ public abstract class ComponentOperator {
 
     }
 
-    public ObjectProperty<Color> getColor() {
+    public ObjectProperty<Color> getColorProperty() {
         return color;
     }
 
-    public ObjectProperty<Color.Intensity> getColorIntensity() {
+    public ObjectProperty<Color.Intensity> getColorIntensityProperty() {
         return colorIntensity;
     }
 

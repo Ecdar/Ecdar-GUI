@@ -130,12 +130,12 @@ public class ComponentOperatorPresentation extends StackPane implements SelectHe
 
     @Override
     public Color getColor() {
-        return controller.getOperator().getColor().getValue();
+        return controller.getOperator().getColorProperty().getValue();
     }
 
     @Override
     public Color.Intensity getColorIntensity() {
-        return controller.getOperator().getColorIntensity().getValue();
+        return controller.getOperator().getColorIntensityProperty().getValue();
     }
 
     /**

@@ -49,7 +49,7 @@ public class SystemController extends ModelController implements Initializable {
         system.addListener((observable, oldValue, newValue) -> {
             initializeContextMenu(newValue);
             initializeComponentInstanceHandling(newValue);
-            initializeComponentInstanceOperator(newValue);
+            initializeOperatorHandling(newValue);
             initializeSystemRoot(newValue);
         });
     }
@@ -131,15 +131,15 @@ public class SystemController extends ModelController implements Initializable {
         operatorSubMenu.addMenuElement(new MenuElement("Add Conjunction").setClickable(() -> {
             final Conjunction operator = new Conjunction();
 
-            operator.getColor().set(system.getColor());
-            operator.getColorIntensity().set(system.getColorIntensity());
+            operator.getColorProperty().set(system.getColor());
+            operator.getColorIntensityProperty().set(system.getColorIntensity());
             operator.getBox().setX(DropDownMenu.x);
             operator.getBox().setY(DropDownMenu.y);
 
             UndoRedoStack.pushAndPerform(
                     () -> getSystem().addComponentOperator(operator),
                     () -> getSystem().removeComponentOperator(operator),
-                    "Added operator '" + operator.toString() + "' to system '" + system.getName() + "'",
+                    "Added operator to system '" + system.getName() + "'",
                     "add-circle"
             );
 
@@ -149,15 +149,15 @@ public class SystemController extends ModelController implements Initializable {
         operatorSubMenu.addMenuElement(new MenuElement("Add Composition").setClickable(() -> {
             final Composition operator = new Composition();
 
-            operator.getColor().set(system.getColor());
-            operator.getColorIntensity().set(system.getColorIntensity());
+            operator.getColorProperty().set(system.getColor());
+            operator.getColorIntensityProperty().set(system.getColorIntensity());
             operator.getBox().setX(DropDownMenu.x);
             operator.getBox().setY(DropDownMenu.y);
 
             UndoRedoStack.pushAndPerform(
                     () -> getSystem().addComponentOperator(operator),
                     () -> getSystem().removeComponentOperator(operator),
-                    "Added operator '" + operator.toString() + "' to system '" + system.getName() + "'",
+                    "Added operator to system '" + system.getName() + "'",
                     "add-circle"
             );
 
@@ -167,15 +167,15 @@ public class SystemController extends ModelController implements Initializable {
         operatorSubMenu.addMenuElement(new MenuElement("Add Quotient").setClickable(() -> {
             final Quotient operator = new Quotient();
 
-            operator.getColor().set(system.getColor());
-            operator.getColorIntensity().set(system.getColorIntensity());
+            operator.getColorProperty().set(system.getColor());
+            operator.getColorIntensityProperty().set(system.getColorIntensity());
             operator.getBox().setX(DropDownMenu.x);
             operator.getBox().setY(DropDownMenu.y);
 
             UndoRedoStack.pushAndPerform(
                     () -> getSystem().addComponentOperator(operator),
                     () -> getSystem().removeComponentOperator(operator),
-                    "Added operator '" + operator.toString() + "' to system '" + system.getName() + "'",
+                    "Added operator to system '" + system.getName() + "'",
                     "add-circle"
             );
 
@@ -231,7 +231,7 @@ public class SystemController extends ModelController implements Initializable {
      * Initializes handling of added and removed component operators.
      * @param system system model of this controller
      */
-    private void initializeComponentInstanceOperator(final SystemModel system) {
+    private void initializeOperatorHandling(final SystemModel system) {
         system.getComponentOperators().forEach(this::handleAddedComponentOperator);
         system.getComponentOperators().addListener((ListChangeListener<ComponentOperator>) change -> {
             if (change.next()) {
