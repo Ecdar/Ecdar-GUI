@@ -2,6 +2,7 @@ package SW9.controllers;
 
 import SW9.abstractions.EcdarSystemEdge;
 import SW9.abstractions.SystemModel;
+import SW9.presentations.CanvasPresentation;
 import SW9.presentations.DropDownMenu;
 import SW9.presentations.MenuElement;
 import SW9.utility.colors.Color;
@@ -21,6 +22,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 
 import java.net.URL;
@@ -70,8 +72,10 @@ public class SystemEdgeController implements Initializable {
     }
 
     private void initializeDropDownMenu(final SystemModel system) {
-        contextMenu = new DropDownMenu(contextMenuContainer, contextMenuSource, 230, true);
+        contextMenu = new DropDownMenu((Pane) contextMenuContainer.getParent(), contextMenuSource, 230, true);
 
+        DropDownMenu.x = CanvasPresentation.mouseTracker.getGridX();
+        DropDownMenu.y = CanvasPresentation.mouseTracker.getGridY();
 
         contextMenu.addClickableListElement("Delete", event -> {
             // TODO
