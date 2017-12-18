@@ -36,7 +36,7 @@ public class SystemController extends ModelController implements Initializable {
     private final Map<ComponentOperator, ComponentOperatorPresentation> componentOperatorPresentationMap = new HashMap<>();
     private final Map<EcdarSystemEdge, SystemEdgePresentation> edgePresentationMap = new HashMap<>();
 
-    private final ObjectProperty<SystemModel> system;
+    private final ObjectProperty<SystemModel> system = new SimpleObjectProperty<>();
 
     private Circle dropDownMenuHelperCircle;
     private DropDownMenu contextMenu;
@@ -50,7 +50,7 @@ public class SystemController extends ModelController implements Initializable {
     }
 
     public SystemController() {
-        system = new SimpleObjectProperty<>();
+
     }
 
     @Override
@@ -282,7 +282,7 @@ public class SystemController extends ModelController implements Initializable {
      * @param edge the edge
      */
     private void handleAddedEdge(final EcdarSystemEdge edge) {
-        final SystemEdgePresentation presentation = new SystemEdgePresentation(edge);
+        final SystemEdgePresentation presentation = new SystemEdgePresentation(edge, getSystem());
         edgePresentationMap.put(edge, presentation);
         edgeContainer.getChildren().add(presentation);
     }

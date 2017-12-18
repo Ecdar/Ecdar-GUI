@@ -1,6 +1,7 @@
 package SW9.presentations;
 
 import SW9.abstractions.EcdarSystemEdge;
+import SW9.abstractions.SystemModel;
 import SW9.controllers.SystemEdgeController;
 import SW9.utility.colors.Color;
 import SW9.utility.helpers.ItemDragHelper;
@@ -15,9 +16,10 @@ public class SystemEdgePresentation extends Group implements SelectHelper.ItemSe
 
     private final ObservableList<Link> links = FXCollections.observableArrayList();
 
-    public SystemEdgePresentation(final EcdarSystemEdge edge) {
+    public SystemEdgePresentation(final EcdarSystemEdge edge, final SystemModel system) {
         controller = new EcdarFXMLLoader().loadAndGetController("SystemEdgePresentation.fxml", this);
         controller.setEdge(edge);
+        controller.setSystem(system);
 
         if (edge.getNails().isEmpty()) {
             final Link link = new Link();
