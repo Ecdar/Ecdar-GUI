@@ -10,6 +10,7 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.Group;
 import javafx.scene.shape.Line;
 
+// TODO refactor so Link does not use EdgeStatus, maybe make a makeDashed method
 public class Link extends Group implements SelectHelper.Selectable, Highlightable {
 
     private final static double HOVER_LINE_STROKE_WIDTH = 10d;
@@ -18,6 +19,10 @@ public class Link extends Group implements SelectHelper.Selectable, Highlightabl
     private final DoubleProperty startY;
     private final DoubleProperty endY;
     private Line shownLine;
+
+    public Link() {
+        this(EdgeStatus.INPUT);
+    }
 
     public Link(final EdgeStatus status) {
         this(0,0,0,0, status);

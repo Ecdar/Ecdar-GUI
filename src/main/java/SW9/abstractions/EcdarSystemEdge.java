@@ -2,6 +2,8 @@ package SW9.abstractions;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 /**
  * This is an edge in an Ecdar system.
@@ -11,6 +13,7 @@ public class EcdarSystemEdge {
     // Verification properties
     private final ObjectProperty<SystemElement> source = new SimpleObjectProperty<>();
     private final ObjectProperty<SystemElement> target = new SimpleObjectProperty<>();
+    private final ObservableList<SystemNail> nails = FXCollections.observableArrayList();
 
     public EcdarSystemEdge(final SystemElement source) {
         setSource(source);
@@ -38,5 +41,9 @@ public class EcdarSystemEdge {
 
     public void setTarget(final SystemElement target) {
         getTargetProperty().set(target);
+    }
+
+    public ObservableList<SystemNail> getNails() {
+        return nails;
     }
 }

@@ -1,10 +1,7 @@
 package SW9.abstractions;
 
 import SW9.utility.colors.Color;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 
 /**
  * Instance of a component.
@@ -62,5 +59,15 @@ public class ComponentInstance implements SystemElement {
 
     public StringProperty getIdProperty() {
         return id;
+    }
+
+    @Override
+    public DoubleProperty getXProperty() {
+        return box.getXProperty();
+    }
+
+    @Override
+    public DoubleProperty getYProperty() {
+        return box.getYProperty();
     }
 }
