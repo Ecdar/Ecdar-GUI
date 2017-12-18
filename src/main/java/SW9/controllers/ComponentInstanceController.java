@@ -85,6 +85,14 @@ public class ComponentInstanceController implements Initializable {
     private void onMousePressed(final MouseEvent event) {
         event.consume();
 
+        final EcdarSystemEdge unfinishedEdge = getSystem().getUnfinishedEdge();
+
+        // if primary clicked and there is an unfinished edge, finish it with the component instance as target
+        if (unfinishedEdge != null && event.getButton().equals(MouseButton.PRIMARY)) {
+            unfinishedEdge.setTarget(getInstance());
+            return;
+        }
+
         if (event.getButton().equals(MouseButton.SECONDARY)) {
             dropDownMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, 20, 20);
         }
