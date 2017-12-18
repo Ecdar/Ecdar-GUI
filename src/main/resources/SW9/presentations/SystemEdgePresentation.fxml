@@ -10,6 +10,11 @@
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="Group"
          fx:id="root"
+         onMouseClicked="#onMouseClicked"
          fx:controller="SW9.controllers.SystemEdgeController">
+
+    <StackPane fx:id="contextMenuContainer">
+        <Group fx:id="contextMenuSource"/>
+    </StackPane>
 
 </fx:root>
