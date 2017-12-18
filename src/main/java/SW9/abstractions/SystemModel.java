@@ -36,7 +36,7 @@ public class SystemModel extends EcdarModel implements Boxed { // TODO name Ecda
         setRandomColor();
 
         // Create system root in the middle, horizontally
-        systemRoot.setX(Grid.snap(getBox().getWidth() / 2));
+        systemRoot.setX(Grid.snap((getBox().getWidth() - SystemRoot.WIDTH) / 2));
     }
 
     SystemModel(final JsonObject json) {

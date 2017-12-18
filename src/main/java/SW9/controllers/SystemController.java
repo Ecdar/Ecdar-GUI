@@ -60,6 +60,7 @@ public class SystemController extends ModelController implements Initializable {
             initializeSystemRoot(newValue);
             initializeContextMenu(newValue);
             initializeComponentInstanceHandling(newValue);
+            initializeOperatorHandling(newValue);
             initializeSystemRoot(newValue);
         });
     }

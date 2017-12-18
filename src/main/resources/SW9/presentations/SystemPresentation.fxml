@@ -29,10 +29,10 @@
     <Line fx:id="topRightLine"/>
 
     <StackPane>
+        <Pane onMousePressed="#modelContainerPressed"/>
+
         <!-- translate y is 5 in order to push the root right below the toolbar -->
         <Pane fx:id="systemRootContainer" translateY="5" pickOnBounds="false"/>
-        
-        <Pane onMousePressed="#modelContainerPressed"/>
         
         <Pane fx:id="componentInstanceContainer" pickOnBounds="false"/>
         <Pane fx:id="componentOperatorContainer" pickOnBounds="false"/>

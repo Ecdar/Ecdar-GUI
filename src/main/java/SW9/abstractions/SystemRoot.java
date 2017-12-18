@@ -13,6 +13,8 @@ import javafx.beans.value.ObservableValue;
  * It has an x coordinate that enables the root to be dragged horizontally.
  */
 public class SystemRoot implements SystemElement {
+    public static final int WIDTH = 6 * Grid.GRID_SIZE;
+
     private final DoubleProperty x = new SimpleDoubleProperty(50d);
 
     public double getX() {
