@@ -25,19 +25,29 @@ import java.util.ResourceBundle;
  * Controller for a system.
  */
 public class SystemController extends ModelController implements Initializable {
-    private final ObjectProperty<SystemModel> system;
     public Line topRightLine;
 
-    public Pane componentInstanceContainer;
-    private final Map<ComponentInstance, ComponentInstancePresentation> componentInstancePresentationMap = new HashMap<>();
-    public Pane componentOperatorContainer;
-    private final Map<ComponentOperator, ComponentOperatorPresentation> componentOperatorPresentationMap = new HashMap<>();
-
-
     public Pane systemRootContainer;
+    public Pane componentInstanceContainer;
+    public Pane componentOperatorContainer;
+    public Pane edgeContainer;
+    
+    private final Map<ComponentInstance, ComponentInstancePresentation> componentInstancePresentationMap = new HashMap<>();
+    private final Map<ComponentOperator, ComponentOperatorPresentation> componentOperatorPresentationMap = new HashMap<>();
+    private final Map<EcdarSystemEdge, SystemEdgePresentation> edgePresentationMap = new HashMap<>();
+
+    private final ObjectProperty<SystemModel> system;
 
     private Circle dropDownMenuHelperCircle;
     private DropDownMenu contextMenu;
+
+    public SystemModel getSystem() {
+        return system.get();
+    }
+
+    public void setSystem(final SystemModel system) {
+        this.system.setValue(system);
+    }
 
     public SystemController() {
         system = new SimpleObjectProperty<>();
@@ -47,19 +57,15 @@ public class SystemController extends ModelController implements Initializable {
     public void initialize(final URL location, final ResourceBundle resources) {
         // Initialize when system is added
         system.addListener((observable, oldValue, newValue) -> {
+            initializeSystemRoot(newValue);
             initializeContextMenu(newValue);
             initializeComponentInstanceHandling(newValue);
-            initializeOperatorHandling(newValue);
             initializeSystemRoot(newValue);
         });
     }
 
-    public SystemModel getSystem() {
-        return system.get();
-    }
-
-    public void setSystem(final SystemModel system) {
-        this.system.setValue(system);
+    private void initializeSystemRoot(final SystemModel system) {
+        systemRootContainer.getChildren().add(new SystemRootPresentation(system));
     }
 
     /**
@@ -203,10 +209,6 @@ public class SystemController extends ModelController implements Initializable {
         });
     }
 
-    private void initializeSystemRoot(final SystemModel system) {
-        systemRootContainer.getChildren().add(new SystemRootPresentation(system));
-    }
-
     /**
      * Handles an added component instance.
      * @param instance the component instance
@@ -258,6 +260,40 @@ public class SystemController extends ModelController implements Initializable {
     private void handleRemovedComponentOperator(final ComponentOperator operator) {
         componentOperatorContainer.getChildren().remove(componentOperatorPresentationMap.get(operator));
         componentOperatorPresentationMap.remove(operator);
+    }
+
+    /**
+     * Handles already added edges.
+     * Initializes handling of added and removed edges.
+     * @param system system model of this controller
+     */
+    private void initializeEdgeHandling(final SystemModel system) {
+        system.getEdges().forEach(this::handleAddedEdge);
+        system.getEdges().addListener((ListChangeListener<EcdarSystemEdge>) change -> {
+            if (change.next()) {
+                change.getAddedSubList().forEach(this::handleAddedEdge);
+                change.getRemoved().forEach(this::handleRemovedEdge);
+            }
+        });
+    }
+
+    /**
+     * Handles an added edge.
+     * @param edge the edge
+     */
+    private void handleAddedEdge(final EcdarSystemEdge edge) {
+        final SystemEdgePresentation presentation = new SystemEdgePresentation(edge);
+        edgePresentationMap.put(edge, presentation);
+        edgeContainer.getChildren().add(presentation);
+    }
+
+    /**
+     * Handles a removed component instance.
+     * @param edge the edge
+     */
+    private void handleRemovedEdge(final EcdarSystemEdge edge) {
+        edgeContainer.getChildren().remove(edgePresentationMap.get(edge));
+        edgePresentationMap.remove(edge);
     }
 
     /**

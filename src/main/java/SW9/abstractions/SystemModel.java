@@ -7,6 +7,7 @@ import SW9.utility.colors.Color;
 import SW9.utility.colors.EnabledColor;
 import SW9.utility.helpers.Boxed;
 import com.google.gson.JsonObject;
+import com.uppaal.model.system.SystemEdge;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -42,13 +43,6 @@ public class SystemModel extends EcdarModel implements Boxed { // TODO name Ecda
         deserialize(json);
     }
 
-    public void addEdge(final EcdarSystemEdge edge) {
-        edges.add(edge);
-    }
-
-    public void removeEdge(final EcdarSystemEdge edge) {
-        edges.remove(edge);
-    }
 
     @Override
     public Box getBox() {
@@ -93,6 +87,21 @@ public class SystemModel extends EcdarModel implements Boxed { // TODO name Ecda
 
     public void removeComponentOperator(final ComponentOperator operator) {
         componentOperators.remove(operator);
+    }
+
+
+    /* Edges */
+
+    public ObservableList<EcdarSystemEdge> getEdges() {
+        return edges;
+    }
+
+    public void addEdge(final EcdarSystemEdge edge) {
+        edges.add(edge);
+    }
+
+    public void removeEdge(final EcdarSystemEdge edge) {
+        edges.remove(edge);
     }
 
     /**
