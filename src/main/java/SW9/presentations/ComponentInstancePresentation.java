@@ -137,10 +137,10 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
     private void initializeDimensions() {
         final ComponentInstance instance = controller.getInstance();
 
-        setMinWidth(Grid.GRID_SIZE * 22);
-        setMaxWidth(Grid.GRID_SIZE * 22);
-        setMinHeight(Grid.GRID_SIZE * 12);
-        setMaxHeight(Grid.GRID_SIZE * 12);
+        setMinWidth(ComponentInstance.WIDTH);
+        setMaxWidth(ComponentInstance.WIDTH);
+        setMinHeight(ComponentInstance.HEIGHT);
+        setMaxHeight(ComponentInstance.HEIGHT);
 
         instance.getBox().getWidthProperty().bind(widthProperty());
         instance.getBox().getHeightProperty().bind(heightProperty());

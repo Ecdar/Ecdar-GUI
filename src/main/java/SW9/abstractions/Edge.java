@@ -14,8 +14,8 @@ import javafx.collections.ObservableList;
 
 public class Edge implements Serializable, Nearable {
 
-    private static final String SOURCE_LOCATION = "source_location";
-    private static final String TARGET_LOCATION = "target_location";
+    private static final String SOURCE_LOCATION = "sourceLocation";
+    private static final String TARGET_LOCATION = "targetLocation";
     private static final String SELECT = "select";
     private static final String GUARD = "guard";
     private static final String UPDATE = "update";

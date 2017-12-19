@@ -12,12 +12,13 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ObservableDoubleValue;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Polygon;
 
 /**
  * Presentation for a system root
  */
-public class SystemRootPresentation extends Polygon implements Highlightable {
+public class SystemRootPresentation extends StackPane implements Highlightable {
     private final SystemRootController controller;
 
     public SystemRootPresentation(final SystemModel system) {
@@ -42,10 +43,10 @@ public class SystemRootPresentation extends Polygon implements Highlightable {
 
         setLayoutY(ComponentPresentation.TOOL_BAR_HEIGHT); // TODO move const
 
-        controller.root.getPoints().addAll(- 3d * Grid.GRID_SIZE, 0d);
-        controller.root.getPoints().addAll(- 1d * Grid.GRID_SIZE, 2d * Grid.GRID_SIZE);
-        controller.root.getPoints().addAll(1d * Grid.GRID_SIZE, 2d * Grid.GRID_SIZE);
-        controller.root.getPoints().addAll(3d * Grid.GRID_SIZE, 0d);
+        controller.shape.getPoints().addAll(0d, 0d);
+        controller.shape.getPoints().addAll(2d * Grid.GRID_SIZE, 1.5 * Grid.GRID_SIZE);
+        controller.shape.getPoints().addAll(4d * Grid.GRID_SIZE, 1.5 * Grid.GRID_SIZE);
+        controller.shape.getPoints().addAll(6d * Grid.GRID_SIZE, 0d);
     }
 
     /**
@@ -113,7 +114,7 @@ public class SystemRootPresentation extends Polygon implements Highlightable {
      * @param intensity the intensity of the color to use
      */
     private void dye(final Color color, final Color.Intensity intensity) {
-        setFill(color.getColor(intensity));
+        controller.shape.setFill(color.getColor(intensity));
     }
 
     /**
@@ -123,9 +124,9 @@ public class SystemRootPresentation extends Polygon implements Highlightable {
      * @return the drag bounds
      */
     private ItemDragHelper.DragBounds getDragBounds() {
-        final ObservableDoubleValue minX = new SimpleDoubleProperty(5d * Grid.GRID_SIZE);
+        final ObservableDoubleValue minX = new SimpleDoubleProperty(2d * Grid.GRID_SIZE);
         final ObservableDoubleValue maxX = controller.getSystem().getBox().getWidthProperty()
-                .subtract(5d * Grid.GRID_SIZE);
+                .subtract(8d * Grid.GRID_SIZE);
         final ObservableDoubleValue y = new SimpleDoubleProperty(ComponentPresentation.TOOL_BAR_HEIGHT);
 
         return new ItemDragHelper.DragBounds(minX, maxX, y, y);

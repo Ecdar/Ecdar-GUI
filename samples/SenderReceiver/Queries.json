@@ -2,16 +2,16 @@
   {
     "query": "E\u003c\u003e Receiver.L4",
     "comment": "",
-    "is_periodic": false
+    "isPeriodic": false
   },
   {
     "query": "specification: Sender",
     "comment": "",
-    "is_periodic": false
+    "isPeriodic": false
   },
   {
     "query": "implementation: Sender",
     "comment": "",
-    "is_periodic": false
+    "isPeriodic": false
   }
 ]

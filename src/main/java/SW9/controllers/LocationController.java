@@ -212,7 +212,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
         if (getLocation().getType() == Location.Type.INITIAL) {
             // You are not allowed to delete an initial location
             root.shake();
-            Ecdar.showToast("You cannot delete the initial location");
+            Ecdar.showToast("You cannot delete the initial location.");
         } else {
             final Component component = getComponent();
             final Location location = getLocation();

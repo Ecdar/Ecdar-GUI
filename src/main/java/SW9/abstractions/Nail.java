@@ -14,9 +14,9 @@ public class Nail implements Circular, Serializable {
 
     private static final String X = "x";
     private static final String Y = "y";
-    private static final String PROPERTY_TYPE = "property_type";
-    private static final String PROPERTY_X = "property_x";
-    private static final String PROPERTY_Y = "property_y";
+    private static final String PROPERTY_TYPE = "propertyType";
+    private static final String PROPERTY_X = "propertyX";
+    private static final String PROPERTY_Y = "propertyY";
 
     // Styling properties
     private final DoubleProperty x = new SimpleDoubleProperty(0d);

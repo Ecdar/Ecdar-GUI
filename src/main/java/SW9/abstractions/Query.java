@@ -16,7 +16,7 @@ import java.util.function.Consumer;
 public class Query implements Serializable {
     private static final String QUERY = "query";
     private static final String COMMENT = "comment";
-    private static final String IS_PERIODIC = "is_periodic";
+    private static final String IS_PERIODIC = "isPeriodic";
 
     private final ObjectProperty<QueryState> queryState = new SimpleObjectProperty<>(QueryState.UNKNOWN);
     private final StringProperty query = new SimpleStringProperty("");
