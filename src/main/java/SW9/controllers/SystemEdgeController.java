@@ -2,17 +2,10 @@ package SW9.controllers;
 
 import SW9.abstractions.EcdarSystemEdge;
 import SW9.abstractions.SystemModel;
-import SW9.presentations.CanvasPresentation;
 import SW9.presentations.DropDownMenu;
-import SW9.presentations.MenuElement;
-import SW9.utility.colors.Color;
-import SW9.utility.helpers.ItemDragHelper;
-import SW9.utility.helpers.SelectHelper;
 import SW9.utility.keyboard.Keybind;
 import SW9.utility.keyboard.KeyboardTracker;
 import com.jfoenix.controls.JFXPopup;
-import com.uppaal.model.system.SystemEdge;
-import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
@@ -23,19 +16,19 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
+import javafx.scene.shape.Circle;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 
 public class SystemEdgeController implements Initializable {
     public Group root;
-    public StackPane contextMenuContainer;
-    public Group contextMenuSource;
 
     private EcdarSystemEdge edge;
     private final ObjectProperty<SystemModel> system = new SimpleObjectProperty<>();
+
     private DropDownMenu contextMenu;
+    private Circle dropDownMenuHelperCircle;
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
@@ -72,16 +65,23 @@ public class SystemEdgeController implements Initializable {
     }
 
     private void initializeDropDownMenu(final SystemModel system) {
-        contextMenu = new DropDownMenu((Pane) contextMenuContainer.getParent(), contextMenuSource, 230, true);
+        dropDownMenuHelperCircle = new Circle(5);
+        dropDownMenuHelperCircle.setOpacity(0);
+        dropDownMenuHelperCircle.setMouseTransparent(true);
+        root.getChildren().add(dropDownMenuHelperCircle);
+    }
 
-        DropDownMenu.x = CanvasPresentation.mouseTracker.getGridX();
-        DropDownMenu.y = CanvasPresentation.mouseTracker.getGridY();
+    private void showContextMenu() {
+
+        contextMenu = new DropDownMenu((Pane) root.getParent().getParent(), dropDownMenuHelperCircle, 230, true);
 
         contextMenu.addClickableListElement("Delete", event -> {
             // TODO
 
             contextMenu.close();
         });
+
+        contextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, 0, 0);
     }
 
     @FXML
@@ -90,7 +90,10 @@ public class SystemEdgeController implements Initializable {
 
         // If secondary clicked, show context menu
         if (event.getButton().equals(MouseButton.SECONDARY)) {
-            contextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, 0, 0);
+            dropDownMenuHelperCircle.setLayoutX(event.getX());
+            dropDownMenuHelperCircle.setLayoutY(event.getY());
+
+            showContextMenu();
         }
     }
 }

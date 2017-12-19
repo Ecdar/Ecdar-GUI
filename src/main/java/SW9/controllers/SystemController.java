@@ -58,10 +58,12 @@ public class SystemController extends ModelController implements Initializable {
         // Initialize when system is added
         system.addListener((observable, oldValue, newValue) -> {
             initializeSystemRoot(newValue);
+
             initializeContextMenu(newValue);
+
             initializeComponentInstanceHandling(newValue);
             initializeOperatorHandling(newValue);
-            initializeSystemRoot(newValue);
+            initializeEdgeHandling(newValue);
         });
     }
 
