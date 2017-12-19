@@ -176,27 +176,34 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
         updateColorDelegates.add(updateColor);
     }
 
+    /***
+     * Initializes the line that separates the input and output signatures
+     * Updates the color of the line when the component color changes
+     * Updates(redraws) the line when the component size changes
+     */
     private void initializeSeparator() {
         final Component component = controller.getInstance().getComponent();
 
         final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
+            controller.separatorLine.setStroke(newColor.getColor(newIntensity.next(2)));
+        };
+
+        final Runnable drawLine = () -> {
             controller.separatorLine.setStartX(0);
             controller.separatorLine.setStartY(0);
             controller.separatorLine.setEndX(0);
 
             double lineHeight = heightProperty().get() - controller.toolbar.getHeight()-1;
             controller.separatorLine.setEndY(-lineHeight);
-            controller.separatorLine.setStroke(newColor.getColor(newIntensity.next(2)));
             controller.separatorLine.setStrokeWidth(1);
             StackPane.setAlignment(controller.separatorLine, Pos.BOTTOM_CENTER);
         };
 
+        heightProperty().addListener(observable -> drawLine.run());
+        controller.toolbar.heightProperty().addListener(obs -> drawLine.run());
+
         updateColor.accept(component.getColor(), component.getColorIntensity());
         component.colorProperty().addListener(observable -> updateColor.accept(component.getColor(), component.getColorIntensity()));
-
-        heightProperty().addListener(observable -> updateColor.accept(component.getColor(), component.getColorIntensity()));
-        controller.toolbar.heightProperty().addListener(obs -> updateColor.accept(component.getColor(), component.getColorIntensity()));
-
         updateColorDelegates.add(updateColor);
     }
 
