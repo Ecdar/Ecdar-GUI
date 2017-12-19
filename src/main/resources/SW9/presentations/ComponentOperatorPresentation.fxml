@@ -10,6 +10,7 @@
          fx:id="root"
          layoutX="40"
          layoutY="40"
+         onMouseClicked="#onMouseClicked"
          fx:controller="SW9.controllers.ComponentOperatorController">
 
     <Polygon fx:id="frame">
