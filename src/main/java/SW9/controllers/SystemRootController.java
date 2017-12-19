@@ -1,5 +1,6 @@
 package SW9.controllers;
 
+import SW9.Ecdar;
 import SW9.abstractions.EcdarSystemEdge;
 import SW9.abstractions.SystemModel;
 import SW9.abstractions.SystemRoot;
@@ -100,6 +101,12 @@ public class SystemRootController implements Initializable {
 
         // if primary clicked and there is an unfinished edge, finish it with the system root as target
         if (unfinishedEdge != null && event.getButton().equals(MouseButton.PRIMARY)) {
+            // If already has edge, give error
+            if (hasEdge.get()) {
+                Ecdar.showToast("This system root already has an edge.");
+                return;
+            }
+
             unfinishedEdge.setTarget(systemRoot);
             hasEdge.set(true);
 

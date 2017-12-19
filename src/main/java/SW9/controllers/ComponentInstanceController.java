@@ -89,6 +89,12 @@ public class ComponentInstanceController implements Initializable {
 
         // if primary clicked and there is an unfinished edge, finish it with the component instance as target
         if (unfinishedEdge != null && event.getButton().equals(MouseButton.PRIMARY)) {
+            // If already has edge, give error
+            if (hasEdge.get()) {
+                Ecdar.showToast("This component instance already has an edge.");
+                return;
+            }
+
             unfinishedEdge.setTarget(getInstance());
             hasEdge.set(true);
 
