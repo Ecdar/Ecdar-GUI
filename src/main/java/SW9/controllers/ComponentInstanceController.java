@@ -67,7 +67,7 @@ public class ComponentInstanceController implements Initializable {
 
                     // If source become the component instance no longer, update state,
                     // so the user can create another edge
-                    edge.getSourceProperty().addListener(((observable, oldValue, newValue) -> hasEdge.set(newValue.equals(instance))));
+                    edge.getSourceProperty().addListener(((observable, oldValue, newValue) -> hasEdge.set(instance.equals(newValue))));
 
                     dropDownMenu.close();
                 })

@@ -76,7 +76,7 @@ public class SystemEdgeController implements Initializable {
         contextMenu = new DropDownMenu((Pane) root.getParent().getParent(), dropDownMenuHelperCircle, 230, true);
 
         contextMenu.addClickableListElement("Delete", event -> {
-            // TODO
+            getSystem().removeEdge(getEdge());
 
             contextMenu.close();
         });

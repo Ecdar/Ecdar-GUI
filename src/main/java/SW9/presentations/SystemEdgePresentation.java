@@ -45,8 +45,10 @@ public class SystemEdgePresentation extends Group implements SelectHelper.ItemSe
 
         // When edge target changes, bind the last link to the new target
         edge.getTargetProperty().addListener(((observable, oldValue, newValue) -> {
-            links.get(links.size() - 1).endXProperty().bind(newValue.getEdgeX());
-            links.get(links.size() - 1).endYProperty().bind(newValue.getEdgeY());
+            if (newValue != null) {
+                links.get(links.size() - 1).endXProperty().bind(newValue.getEdgeX());
+                links.get(links.size() - 1).endYProperty().bind(newValue.getEdgeY());
+            }
         }));
     }
 
