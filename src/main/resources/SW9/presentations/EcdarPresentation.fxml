@@ -46,13 +46,16 @@
                         <Region minWidth="16"/>
 
                         <!-- Switch between input and output edges -->
-                        <HBox alignment="CENTER">
+                        <HBox alignment="CENTER" spacing="-5">
                             <JFXButton fx:id="switchToInputButton" text="Input" textFill="white"
-                                       disable="true" onMouseClicked="#switchToInputClicked"
-                                       styleClass="button" style="-fx-background-color:darkslategray"/>
-                            <JFXButton fx:id="switchToOutputButton" text="Output" textFill="white"
+                                       onMouseClicked="#switchToInputClicked"
+                                       styleClass="button" style="-fx-padding: 2 4 2 4"/>
+                            <JFXToggleButton fx:id="switchEdgeStatusButton"
+                                             onMouseClicked="#switchEdgeStatusClicked"
+                                             style="-fx-toggle-color:darkslategray;-fx-untoggle-color:darkslategray;-fx-padding: 0 0 0 0"/>
+                            <JFXButton fx:id="switchToOutputButton" text="Output" textFill="grey"
                                        onMouseClicked="#switchToOutputClicked"
-                                       styleClass="button" style="-fx-background-color:darkslategray"/>
+                                       styleClass="button" style="-fx-padding: 2 4 2 4"/>
                         </HBox>
 
                         <Region HBox.hgrow="ALWAYS" />

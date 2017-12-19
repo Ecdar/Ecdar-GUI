@@ -12,8 +12,6 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 /**
  * A model of a system
  */
@@ -24,6 +22,7 @@ public class SystemModel extends EcdarModel implements Boxed {
     // Verification properties
     private final StringProperty description = new SimpleStringProperty("");
     private final ObservableList<ComponentInstance> componentInstances = FXCollections.observableArrayList();
+    private final ObservableList<ComponentOperator> componentOperators = FXCollections.observableArrayList();
     private final SystemRoot systemRoot = new SystemRoot();
 
     // Styling properties
@@ -62,6 +61,10 @@ public class SystemModel extends EcdarModel implements Boxed {
         return componentInstances;
     }
 
+    public ObservableList<ComponentOperator> getComponentOperators() {
+        return componentOperators;
+    }
+
     public SystemRoot getSystemRoot() {
         return systemRoot;
     }
@@ -72,6 +75,14 @@ public class SystemModel extends EcdarModel implements Boxed {
 
     public void removeComponentInstance(final ComponentInstance instance) {
         componentInstances.remove(instance);
+    }
+
+    public void addComponentOperator(final ComponentOperator operator) {
+        componentOperators.add(operator);
+    }
+
+    public void removeComponentOperator(final ComponentOperator operator) {
+        componentOperators.remove(operator);
     }
 
     /**

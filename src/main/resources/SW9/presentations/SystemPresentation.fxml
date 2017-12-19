@@ -15,6 +15,7 @@
         <Pane onMousePressed="#modelContainerPressed"/>
         <Pane fx:id="componentInstanceContainer" pickOnBounds="false"/>
         <Pane fx:id="systemRootContainer" pickOnBounds="false"/>
+        <Pane fx:id="componentOperatorContainer" pickOnBounds="false"/>
     </StackPane>
 
     <BorderPane fx:id="frame" pickOnBounds="false">
