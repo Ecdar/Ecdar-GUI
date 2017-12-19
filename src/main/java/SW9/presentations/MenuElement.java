@@ -177,7 +177,7 @@ public class MenuElement {
      * @param isDisabled boolean value that determines wheter it is currently disabled or enabled, true means disabled, false means enabled
      * @return Returns the element itself
      */
-    public MenuElement setDisableable(ObservableBooleanValue isDisabled) {
+    public MenuElement setDisableable(ObservableBooleanValue isDisabled) { // TODO should also create the rippler if not alraedy created (e.g. when calling this method before setClickable)
 
         this.isDisabled = isDisabled;
         final Consumer<Boolean> updateTransparency = (disabled) -> {

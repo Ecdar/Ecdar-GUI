@@ -118,7 +118,7 @@ public class Project {
             queriesWriter.close();
         }
 
-        Ecdar.showToast("Project saved!");
+        Ecdar.showToast("Project saved.");
     }
 
     /**

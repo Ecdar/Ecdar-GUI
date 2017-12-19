@@ -7,15 +7,17 @@ import SW9.utility.colors.Color;
 import SW9.utility.colors.EnabledColor;
 import SW9.utility.helpers.Boxed;
 import com.google.gson.JsonObject;
+import com.uppaal.model.system.SystemEdge;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 /**
- * A model of a system
+ * A model of a system.
+ * The class is called SystemModel, since Java already has a System class.
  */
-public class SystemModel extends EcdarModel implements Boxed {
+public class SystemModel extends EcdarModel implements Boxed { // TODO name EcdarSystem
     private static final String SYSTEM = "System";
     private static final String SYSTEM_ROOT_X = "systemRootX";
 
@@ -23,6 +25,7 @@ public class SystemModel extends EcdarModel implements Boxed {
     private final StringProperty description = new SimpleStringProperty("");
     private final ObservableList<ComponentInstance> componentInstances = FXCollections.observableArrayList();
     private final ObservableList<ComponentOperator> componentOperators = FXCollections.observableArrayList();
+    private final ObservableList<EcdarSystemEdge> edges = FXCollections.observableArrayList();
     private final SystemRoot systemRoot = new SystemRoot();
 
     // Styling properties
@@ -33,12 +36,13 @@ public class SystemModel extends EcdarModel implements Boxed {
         setRandomColor();
 
         // Create system root in the middle, horizontally
-        systemRoot.setX(Grid.snap(getBox().getWidth() / 2));
+        systemRoot.setX(Grid.snap((getBox().getWidth() - SystemRoot.WIDTH) / 2));
     }
 
     SystemModel(final JsonObject json) {
         deserialize(json);
     }
+
 
     @Override
     public Box getBox() {
@@ -83,6 +87,21 @@ public class SystemModel extends EcdarModel implements Boxed {
 
     public void removeComponentOperator(final ComponentOperator operator) {
         componentOperators.remove(operator);
+    }
+
+
+    /* Edges */
+
+    public ObservableList<EcdarSystemEdge> getEdges() {
+        return edges;
+    }
+
+    public void addEdge(final EcdarSystemEdge edge) {
+        edges.add(edge);
+    }
+
+    public void removeEdge(final EcdarSystemEdge edge) {
+        edges.remove(edge);
     }
 
     /**
@@ -147,5 +166,17 @@ public class SystemModel extends EcdarModel implements Boxed {
                 return;
             }
         }
+    }
+
+    /**
+     * Gets the first found unfinished edge.
+     * An edge is unfinished, if the has no target.
+     * @return The unfinished edge, or null if none was found.
+     */
+    public EcdarSystemEdge getUnfinishedEdge() {
+        for (final EcdarSystemEdge edge : edges) {
+            if (edge.getTarget() == null) return edge;
+        }
+        return null;
     }
 }

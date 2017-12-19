@@ -1,15 +1,18 @@
 package SW9.abstractions;
 
+import SW9.presentations.Grid;
 import SW9.utility.colors.Color;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.binding.DoubleBinding;
+import javafx.beans.property.*;
+import javafx.beans.value.ObservableValue;
 
 /**
  * Instance of a component.
  */
-public class ComponentInstance {
+public class ComponentInstance implements SystemElement {
+    public final static int WIDTH = Grid.GRID_SIZE * 24;
+    public final static int HEIGHT = Grid.GRID_SIZE * 12;
+
     private final ObjectProperty<Component> component = new SimpleObjectProperty<>();
     private final ObjectProperty<Color> color = new SimpleObjectProperty<>();
     private final ObjectProperty<Color.Intensity> colorIntensity = new SimpleObjectProperty<>();
@@ -62,5 +65,15 @@ public class ComponentInstance {
 
     public StringProperty getIdProperty() {
         return id;
+    }
+
+    @Override
+    public ObservableValue<? extends Number> getEdgeX() {
+        return box.getXProperty().add(WIDTH / 2);
+    }
+
+    @Override
+    public ObservableValue<? extends Number> getEdgeY() {
+        return box.getYProperty().add(HEIGHT / 2);
     }
 }

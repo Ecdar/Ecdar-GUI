@@ -35,6 +35,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.CodeSource;
+import java.util.Random;
 
 public class Ecdar extends Application {
 
@@ -125,7 +126,9 @@ public class Ecdar extends Application {
         project = new Project();
 
         // Set the title for the application
-        stage.setTitle("Ecdar");
+        final String [] names = {"Ecdar", "UPPAAL I/O", "Ecdar I/O", "UPPAAL Ulrik", "Edgar", "Ecdar 2.0",
+                "Ecdar 0.11", "Ec/dar", "Æcdar"};
+        stage.setTitle(names[new Random().nextInt((names.length))]);
 
         // Load the fonts required for the project
         IconFontFX.register(GoogleMaterialDesignIcons.getIconFont());

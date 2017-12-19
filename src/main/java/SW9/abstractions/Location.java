@@ -23,10 +23,10 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     private static final String X = "x";
     private static final String Y = "y";
     private static final String COLOR = "color";
-    private static final String NICKNAME_X = "nickname_x";
-    private static final String NICKNAME_Y = "nickname_y";
-    private static final String INVARIANT_X = "invariant_x";
-    private static final String INVARIANT_Y = "invariant_y";
+    private static final String NICKNAME_X = "nicknameX";
+    private static final String NICKNAME_Y = "nicknameY";
+    private static final String INVARIANT_X = "invariantX";
+    private static final String INVARIANT_Y = "invariantY";
     private static final String UNI = "U";
     private static final String INC = "I";
     public static final String LOCATION = "L";
