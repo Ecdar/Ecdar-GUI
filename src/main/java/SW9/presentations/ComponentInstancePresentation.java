@@ -1,10 +1,9 @@
 package SW9.presentations;
 
-import SW9.abstractions.Component;
-import SW9.abstractions.ComponentInstance;
-import SW9.abstractions.SystemModel;
+import SW9.abstractions.*;
 import SW9.controllers.CanvasController;
 import SW9.controllers.ComponentInstanceController;
+import SW9.controllers.EdgeController;
 import SW9.utility.colors.Color;
 import SW9.utility.helpers.ItemDragHelper;
 import SW9.utility.helpers.SelectHelper;
@@ -45,6 +44,7 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
         initializeDimensions();
         initializeToolbar();
         initializeFrame();
+        initializeSeparator();
         initializeBackground();
         initializeMouseControls();
     }
@@ -96,8 +96,8 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
     private void initializeDimensions() {
         final ComponentInstance instance = controller.getInstance();
 
-        setMinWidth(Grid.GRID_SIZE * 24);
-        setMaxWidth(Grid.GRID_SIZE * 24);
+        setMinWidth(Grid.GRID_SIZE * 22);
+        setMaxWidth(Grid.GRID_SIZE * 22);
         setMinHeight(Grid.GRID_SIZE * 12);
         setMaxHeight(Grid.GRID_SIZE * 12);
 
@@ -132,6 +132,28 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
         // Update color now, whenever color of component changes, and when someone uses the color delegates
         updateColor.accept(component.getColor(), component.getColorIntensity());
         component.colorProperty().addListener(observable -> updateColor.accept(component.getColor(), component.getColorIntensity()));
+        updateColorDelegates.add(updateColor);
+    }
+
+    private void initializeSeparator() {
+        final Component component = controller.getInstance().getComponent();
+
+        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
+            controller.separatorLine.setStartX(0);
+            controller.separatorLine.setStartY(0);
+            controller.separatorLine.setEndX(0);
+            System.out.println("Height property: " + heightProperty().get() + " toolbar height: " + controller.toolbar.getHeight());
+            double lineHeight = heightProperty().get() - controller.toolbar.getHeight()-1;
+            controller.separatorLine.setEndY(-lineHeight);
+            controller.separatorLine.setStroke(newColor.getColor(newIntensity.next(2)));
+            controller.separatorLine.setStrokeWidth(1);
+            StackPane.setAlignment(controller.separatorLine, Pos.BOTTOM_CENTER);
+        };
+
+        updateColor.accept(component.getColor(), component.getColorIntensity());
+        component.colorProperty().addListener(observable -> updateColor.accept(component.getColor(), component.getColorIntensity()));
+        heightProperty().addListener(observable -> updateColor.accept(component.getColor(), component.getColorIntensity()));
+        controller.toolbar.heightProperty().addListener(obs -> updateColor.accept(component.getColor(), component.getColorIntensity()));
         updateColorDelegates.add(updateColor);
     }
 

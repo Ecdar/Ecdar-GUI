@@ -9,6 +9,9 @@
 <?import javafx.scene.shape.Rectangle?>
 <?import com.jfoenix.controls.JFXTextField?>
 <?import javafx.scene.shape.Line?>
+<?import SW9.presentations.SignatureArrow?>
+<?import javafx.scene.shape.Circle?>
+<?import SW9.presentations.TagPresentation?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="StackPane"
@@ -17,26 +20,35 @@
          layoutY="80"
          fx:controller="SW9.controllers.ComponentInstanceController">
 
-    <Rectangle fx:id="background" fill="#ffffff"/>
-
-    <BorderPane fx:id="frame">
-        <top>
-            <HBox fx:id="toolbar">
-
-                <JFXTextField fx:id="identifier" styleClass="sub-caption" translateY="1"/>
-                <VBox alignment="CENTER_RIGHT" prefWidth="200.0">
-                    <Label HBox.hgrow="ALWAYS" textAlignment="RIGHT" fx:id="originalComponentLabel"
-                           styleClass="sub-caption" translateY="-1"/>
-                </VBox>
-            </HBox>
-        </top>
-
-        <center>
-            <Label fx:id="description" wrapText="true" styleClass="caption" mouseTransparent="true"
-                   style="-fx-padding: 0 40 0 40"/>
-        </center>
-    </BorderPane>
+<Rectangle fx:id="background" fill="#ffffff"/>
+<BorderPane fx:id="frame">
+    <top>
+        <StackPane>
+                <HBox fx:id="toolbar">
+                    <JFXTextField fx:id="identifier" styleClass="sub-caption" translateY="1"/>
+                    <VBox alignment="CENTER_RIGHT" prefWidth="200.0">
+                        <Label HBox.hgrow="ALWAYS" textAlignment="RIGHT" fx:id="originalComponentLabel"
+                               styleClass="sub-caption" translateY="-1"/>
+                    </VBox>
+                </HBox>
+                <Group translateX="-50" translateY="20">
+                    <Circle fx:id="inputNailCircle" radius="8"/>
+                    <Label fx:id="inputNailLabel" styleClass="sub-caption-mono" textFill="white"/>
+                </Group>
+                <Group translateX="50" translateY="20">
+                    <Circle fx:id="outputNailCircle" radius="8"/>
+                    <Label fx:id="outputNailLabel" styleClass="sub-caption-mono" textFill="white"/>
+                </Group>
+        </StackPane>
+    </top>
+    <left>
+        <VBox fx:id="inputSignature" alignment="CENTER" minWidth="20" maxHeight="20" style="-fx-padding: 10 5 5 5;"/>
+    </left>
+    <right>
+        <VBox fx:id="outputSignature" alignment="CENTER" minWidth="20" maxHeight="20" style="-fx-padding: 10 5 5 5;" />
+    </right>
+</BorderPane>
 
     <Line fx:id="line1"/>
-
+    <Line fx:id="separatorLine" />
 </fx:root>
