@@ -37,7 +37,6 @@ public class SignatureArrow extends Group implements Highlightable {
         initializeMouseEvents();
     }
 
-
     /***
      * Initializes the mouse events e.g. mouseEntered leads to the arrow being highlighted
      */

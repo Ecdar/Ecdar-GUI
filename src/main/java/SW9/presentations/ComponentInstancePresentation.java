@@ -1,8 +1,6 @@
 package SW9.presentations;
 
-import SW9.abstractions.Component;
-import SW9.abstractions.ComponentInstance;
-import SW9.abstractions.SystemModel;
+import SW9.abstractions.*;
 import SW9.controllers.CanvasController;
 import SW9.controllers.ComponentInstanceController;
 import SW9.utility.colors.Color;
@@ -45,8 +43,51 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
         initializeDimensions();
         initializeToolbar();
         initializeFrame();
+        initializeSeparator();
         initializeBackground();
         initializeMouseControls();
+        initializeNails();
+
+        this.widthProperty().addListener((obs, oldValue, newValue) -> {
+            double halfWidth = newValue.intValue()/2;
+            controller.outputContainer.setPrefWidth(halfWidth - 1); // Magic 1 (without it it becomes too large due to the separator line)
+            controller.inputContainer.setPrefWidth(halfWidth - 1);
+
+            double nailX = newValue.intValue()/4; // Place nails at a quarter of the component width
+            controller.inputNailGroup.setTranslateX(-nailX);
+            controller.outputNailGroup.setTranslateX(nailX);
+        });
+    }
+
+    /***
+     * Initializes the nails representing the input and output halves of the component,
+     * so they change color whenever the component instance does e.g. on drag.
+     */
+    private void initializeNails() {
+        final Component component = controller.getInstance().getComponent();
+        final BiConsumer<Color, Color.Intensity> updateNailColor = (newColor, newIntensity) ->
+        {
+            final Color color = newColor;
+            final Color.Intensity colorIntensity = newIntensity;
+
+            controller.inputNailCircle.setFill(color.getColor(colorIntensity));
+            controller.inputNailCircle.setStroke(color.getColor(colorIntensity.next(2)));
+
+            controller.outputNailCircle.setFill(color.getColor(colorIntensity));
+            controller.outputNailCircle.setStroke(color.getColor(colorIntensity.next(2)));
+        };
+
+        // When the color of the component updates, update the nail indicator as well
+        controller.getInstance().getComponent().colorProperty().addListener(
+                (observable) -> updateNailColor.accept(component.getColor(), component.getColorIntensity()));
+
+        // When the color intensity of the component updates, update the nail indicator
+        controller.getInstance().getComponent().colorIntensityProperty().addListener(
+                (observable) -> updateNailColor.accept(component.getColor(), component.getColorIntensity()));
+
+        // Initialize the color of the nail with the current color
+        updateNailColor.accept(component.getColor(), component.getColorIntensity());
+        updateColorDelegates.add(updateNailColor);
     }
 
     /**
@@ -130,6 +171,37 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
         };
 
         // Update color now, whenever color of component changes, and when someone uses the color delegates
+        updateColor.accept(component.getColor(), component.getColorIntensity());
+        component.colorProperty().addListener(observable -> updateColor.accept(component.getColor(), component.getColorIntensity()));
+        updateColorDelegates.add(updateColor);
+    }
+
+    /***
+     * Initializes the line that separates the input and output signatures
+     * Updates the color of the line when the component color changes
+     * Updates(redraws) the line when the component size changes
+     */
+    private void initializeSeparator() {
+        final Component component = controller.getInstance().getComponent();
+
+        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
+            controller.separatorLine.setStroke(newColor.getColor(newIntensity.next(2)));
+        };
+
+        final Runnable drawLine = () -> {
+            controller.separatorLine.setStartX(0);
+            controller.separatorLine.setStartY(0);
+            controller.separatorLine.setEndX(0);
+
+            double lineHeight = heightProperty().get() - controller.toolbar.getHeight()-1;
+            controller.separatorLine.setEndY(-lineHeight);
+            controller.separatorLine.setStrokeWidth(1);
+            StackPane.setAlignment(controller.separatorLine, Pos.BOTTOM_CENTER);
+        };
+
+        heightProperty().addListener(observable -> drawLine.run());
+        controller.toolbar.heightProperty().addListener(obs -> drawLine.run());
+
         updateColor.accept(component.getColor(), component.getColorIntensity());
         component.colorProperty().addListener(observable -> updateColor.accept(component.getColor(), component.getColorIntensity()));
         updateColorDelegates.add(updateColor);
