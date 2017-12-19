@@ -20,6 +20,9 @@ public class Link extends Group implements SelectHelper.Selectable, Highlightabl
     private final DoubleProperty endY;
     private Line shownLine;
 
+    /**
+     * Creates a link with a solid line.
+     */
     public Link() {
         this(EdgeStatus.INPUT);
     }

@@ -61,10 +61,6 @@ public class SystemRootController implements Initializable {
         this.system.set(system);
     }
 
-    private void setEdgeAsSource(final EcdarSystemEdge edge) {
-
-    }
-
 
     // Initialization
 

@@ -21,13 +21,15 @@ import javafx.scene.shape.Circle;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+/**
+ * Controller for a system edge.
+ */
 public class SystemEdgeController implements Initializable {
     public Group root;
 
     private EcdarSystemEdge edge;
     private final ObjectProperty<SystemModel> system = new SimpleObjectProperty<>();
 
-    private DropDownMenu contextMenu;
     private Circle dropDownMenuHelperCircle;
 
     @Override
@@ -71,9 +73,14 @@ public class SystemEdgeController implements Initializable {
         root.getChildren().add(dropDownMenuHelperCircle);
     }
 
+    /**
+     * Shows a context menu.
+     * This method creates the menu object itself
+     * (rather than having it be created in an initialize method),
+     * since the parent of the root is not yet defined when initializing.
+     */
     private void showContextMenu() {
-
-        contextMenu = new DropDownMenu((Pane) root.getParent().getParent(), dropDownMenuHelperCircle, 230, true);
+        final DropDownMenu contextMenu = new DropDownMenu((Pane) root.getParent().getParent(), dropDownMenuHelperCircle, 230, true);
 
         contextMenu.addClickableListElement("Delete", event -> {
             getSystem().removeEdge(getEdge());

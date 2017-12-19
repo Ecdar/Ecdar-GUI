@@ -11,11 +11,19 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
 
+/**
+ * Presentation for a system edge.
+ */
 public class SystemEdgePresentation extends Group implements SelectHelper.ItemSelectable {
     private final SystemEdgeController controller;
 
     private final ObservableList<Link> links = FXCollections.observableArrayList();
 
+    /**
+     * Constructor.
+     * @param edge system edge to present
+     * @param system system of the system edge
+     */
     public SystemEdgePresentation(final EcdarSystemEdge edge, final SystemModel system) {
         controller = new EcdarFXMLLoader().loadAndGetController("SystemEdgePresentation.fxml", this);
         controller.setEdge(edge);
@@ -109,6 +117,9 @@ public class SystemEdgePresentation extends Group implements SelectHelper.ItemSe
         return yProperty().get();
     }
 
+    /**
+     * Calls select on all selectable children.
+     */
     @Override
     public void select() {
         getChildren().forEach(node -> {
@@ -118,6 +129,9 @@ public class SystemEdgePresentation extends Group implements SelectHelper.ItemSe
         });
     }
 
+    /**
+     * Calls deselect on all selectable children.
+     */
     @Override
     public void deselect() {
         getChildren().forEach(node -> {
