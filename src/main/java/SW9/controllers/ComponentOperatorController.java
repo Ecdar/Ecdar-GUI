@@ -15,7 +15,9 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 
 import java.net.URL;
@@ -32,7 +34,7 @@ public class ComponentOperatorController implements Initializable {
     private final ObjectProperty<SystemModel> system = new SimpleObjectProperty<>();
     private ComponentOperator operator;
     private final BooleanProperty hasParent = new SimpleBooleanProperty(false);
-    private DropDownMenu dropDownMenu;
+    private Circle dropDownMenuHelperCircle;
 
 
     // Properties
@@ -57,27 +59,47 @@ public class ComponentOperatorController implements Initializable {
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
         system.addListener(((observable, oldValue, newValue) -> {
-            initializeDropDownMenu(newValue);
+            initializeDropDownMenu();
         }));
     }
 
-    private void initializeDropDownMenu(final SystemModel system) {
-        dropDownMenu = new DropDownMenu(root, frame, 230, true);
+    private void initializeDropDownMenu() {
+        dropDownMenuHelperCircle = new Circle(5);
+        dropDownMenuHelperCircle.setOpacity(0);
+        dropDownMenuHelperCircle.setMouseTransparent(true);
+        root.getChildren().add(dropDownMenuHelperCircle);
+    }
 
-        dropDownMenu.addMenuElement(new MenuElement("Draw Edge")
+    /**
+     * Shows a context menu.
+     * This method creates the menu object itself
+     * (rather than having it be created in an initialize method),
+     * since the parent of the root is not yet defined when initializing.
+     * @param mouseEvent
+     */
+    private void showContextMenu(MouseEvent mouseEvent) {
+        dropDownMenuHelperCircle.setLayoutX(mouseEvent.getX());
+        dropDownMenuHelperCircle.setLayoutY(mouseEvent.getY());
+
+        final DropDownMenu contextMenu = new DropDownMenu((Pane) root.getParent().getParent(), dropDownMenuHelperCircle, 230, true);
+
+        contextMenu.addMenuElement(new MenuElement("Draw Edge")
                 .setClickable(() -> {
                     final EcdarSystemEdge edge = new EcdarSystemEdge(operator);
-                    system.addEdge(edge);
+                    getSystem().addEdge(edge);
 
-                    dropDownMenu.close();
+                    contextMenu.close();
                 }));
 
-        dropDownMenu.addSpacerElement();
+        contextMenu.addSpacerElement();
 
-        dropDownMenu.addClickableListElement("Delete", event -> {
-            // TODO
-            dropDownMenu.close();
-        });
+        contextMenu.addMenuElement(new MenuElement("Delete")
+                .setClickable(() -> {
+                    // TODO
+                    contextMenu.close();
+                }));
+
+        contextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, 0, 0);
     }
 
     @FXML
@@ -94,6 +116,12 @@ public class ComponentOperatorController implements Initializable {
             } else {
                 finishChildEdge(unfinishedEdge);
             }
+            return;
+        }
+
+        // If secondary clicked, show context menu
+        if (event.getButton().equals(MouseButton.SECONDARY)) {
+            showContextMenu(event);
         }
     }
 

@@ -19,7 +19,7 @@ public abstract class ComponentOperator implements SystemElement {
     final StringProperty label = new SimpleStringProperty("");
 
     //Styling properties
-    private final ObjectProperty<Color> color = new SimpleObjectProperty<>();
+    private final ObjectProperty<Color> color = new SimpleObjectProperty<>(); // TODO should not have color or intensity
     private final ObjectProperty<Color.Intensity> colorIntensity = new SimpleObjectProperty<>();
 
     /**
