@@ -37,30 +37,6 @@ public class SignatureArrow extends Group implements Highlightable {
         initializeMouseEvents();
     }
 
-    public SignatureArrow(final String edgeName, final EdgeStatus edgeStatus) {
-        controller = new EcdarFXMLLoader().loadAndGetController("SignatureArrowPresentation.fxml", this);
-
-        controller.setComponent(null);
-        controller.setEdgeStatus(edgeStatus);
-        controller.setSyncText(edgeName);
-
-        drawArrow(edgeName, edgeStatus);
-
-        initializeMouseEvents();
-    }
-
-    public SignatureArrow() {
-        controller = new EcdarFXMLLoader().loadAndGetController("SignatureArrowPresentation.fxml", this);
-
-        controller.setComponent(null);
-        controller.setEdgeStatus(EdgeStatus.INPUT);
-        controller.setSyncText("Hello");
-
-        drawArrow("Hello", EdgeStatus.INPUT);
-
-        initializeMouseEvents();
-    }
-
     /***
      * Initializes the mouse events e.g. mouseEntered leads to the arrow being highlighted
      */
