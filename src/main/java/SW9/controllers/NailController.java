@@ -135,11 +135,11 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
         // Do not delete nail if its edge is locked or nail is sync nail
         if (edge.getIsLocked().getValue()) {
             root.shake();
-            Ecdar.showToast("This nail is locked. You cannot delete it");
+            Ecdar.showToast("This nail is locked. You cannot delete it.");
             return;
         } else if (getNail().getPropertyType().equals(Edge.PropertyType.SYNCHRONIZATION)) {
             root.shake();
-            Ecdar.showToast("You cannot delete synchronization nails");
+            Ecdar.showToast("You cannot delete synchronization nails.");
             return;
         }
 

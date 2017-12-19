@@ -49,10 +49,6 @@ public class SystemController extends ModelController implements Initializable {
         this.system.setValue(system);
     }
 
-    public SystemController() {
-
-    }
-
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
         // Initialize when system is added

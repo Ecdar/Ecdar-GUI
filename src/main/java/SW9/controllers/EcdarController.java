@@ -521,7 +521,7 @@ public class EcdarController implements Initializable {
             Ecdar.projectDirectory.setValue(file.getPath());
             save(file);
         } else {
-            Ecdar.showToast("The project was not saved");
+            Ecdar.showToast("The project was not saved.");
         }
     }
 
@@ -596,7 +596,7 @@ public class EcdarController implements Initializable {
 
             //If there is no active component
             if (presentation == null){
-                Ecdar.showToast("No component to export");
+                Ecdar.showToast("No component to export.");
                 return;
             }
 
@@ -612,7 +612,7 @@ public class EcdarController implements Initializable {
 
             //If there is no active component
             if (presentation == null){
-                Ecdar.showToast("No component to export");
+                Ecdar.showToast("No component to export.");
                 return;
             }
 
@@ -686,12 +686,12 @@ public class EcdarController implements Initializable {
         if (file != null){
             try {
                 ImageIO.write(finalImage, "png", file);
-                Ecdar.showToast("Export succeeded");
+                Ecdar.showToast("Export succeeded.");
             } catch (final IOException e) {
-                Ecdar.showToast("Export failed "+ e.getMessage());
+                Ecdar.showToast("Export failed. "+ e.getMessage());
             }
         } else {
-            Ecdar.showToast("Export was cancelled");
+            Ecdar.showToast("Export was cancelled.");
         }
     }
 
@@ -983,9 +983,9 @@ public class EcdarController implements Initializable {
     private void generateXmlModelClicked() {
         try {
             UPPAALDriver.generateDebugUPPAALModel();
-            Ecdar.showToast("XML model stored");
+            Ecdar.showToast("XML model stored.");
         } catch (final BackendException | IOException e) {
-            Ecdar.showToast("Could not store XML debug model due to an error");
+            Ecdar.showToast("Could not store XML debug model due to an error.");
             e.printStackTrace();
         }
     }
