@@ -10,7 +10,7 @@ import javafx.beans.value.ObservableValue;
  * Instance of a component.
  */
 public class ComponentInstance implements SystemElement {
-    public final static int WIDTH = Grid.GRID_SIZE * 24;
+    public final static int WIDTH = Grid.GRID_SIZE * 22;
     public final static int HEIGHT = Grid.GRID_SIZE * 12;
 
     private final ObjectProperty<Component> component = new SimpleObjectProperty<>();
