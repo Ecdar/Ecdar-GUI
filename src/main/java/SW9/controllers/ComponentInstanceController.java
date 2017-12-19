@@ -83,8 +83,8 @@ public class ComponentInstanceController implements Initializable {
         }
 
         // Only add MAX_LABELS to the signature unless there are fewer channels than MAX_LABELS
-        int limit = Math.min(MAX_LABELS - 1, channels.size());
-        for (int i = 0; i <= limit; i++) {
+        int limit = Math.min(MAX_LABELS, channels.size());
+        for (int i = 0; i < limit; i++) {
             insertSignatureLabel(channels.get(i), status);
         }
     }
