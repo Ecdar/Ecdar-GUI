@@ -71,17 +71,21 @@ public class ComponentInstanceController implements Initializable {
      */
     private void insertSignature(List<String> channels, EdgeStatus status) {
         // Choose overflow label depending on edge status
-        final Label label = status == EdgeStatus.INPUT ? inputOverflowLabel : outputOverflowLabel;
+        final Label overflowLabel = status == EdgeStatus.INPUT ? inputOverflowLabel : outputOverflowLabel;
 
-        for (int i = 0; i < channels.size(); i++) {
-            if(i <= MAX_LABELS-1) { // Only add MAX_LABELS - 1 labels to the signature
-                insertSignatureLabel(channels.get(i), status);
-                label.setOpacity(0);
-            } else { // When reaching MAX_LABELS show an overflow label indicating how many labels are not shown
-                int currentOverflow = i - MAX_LABELS + 1;
-                label.setText(overflowText(currentOverflow));
-                label.setOpacity(1);
-            }
+        // Update the overflow label if needed, otherwise hide it
+        if(channels.size() > MAX_LABELS) {
+            int currentOverflow = channels.size() - MAX_LABELS;
+            overflowLabel.setText(overflowText(currentOverflow));
+            overflowLabel.setOpacity(1);
+        } else {
+            overflowLabel.setOpacity(0);
+        }
+
+        // Only add MAX_LABELS to the signature unless there are fewer channels than MAX_LABELS
+        int limit = Math.min(MAX_LABELS - 1, channels.size());
+        for (int i = 0; i <= limit; i++) {
+            insertSignatureLabel(channels.get(i), status);
         }
     }
 
