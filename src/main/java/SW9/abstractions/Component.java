@@ -25,7 +25,7 @@ public class Component extends HighLevelModelObject implements Boxed {
     static final String COMPONENT = "Component";
     private static final String LOCATIONS = "locations";
     private static final String EDGES = "edges";
-    private static final String INCLUDE_IN_PERIODIC_CHECK = "include_in_periodic_check";
+    private static final String INCLUDE_IN_PERIODIC_CHECK = "includeInPeriodicCheck";
 
     // Verification properties
     private final ObservableList<Location> locations = FXCollections.observableArrayList();
