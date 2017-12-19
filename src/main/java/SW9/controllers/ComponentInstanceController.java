@@ -90,6 +90,11 @@ public class ComponentInstanceController implements Initializable {
         // if primary clicked and there is an unfinished edge, finish it with the component instance as target
         if (unfinishedEdge != null && event.getButton().equals(MouseButton.PRIMARY)) {
             unfinishedEdge.setTarget(getInstance());
+            hasEdge.set(true);
+
+            // If source become the component instance no longer, update state,
+            // so the user can create another edge
+            unfinishedEdge.getTargetProperty().addListener(((observable, oldValue, newValue) -> hasEdge.set(instance.equals(newValue))));
             return;
         }
 

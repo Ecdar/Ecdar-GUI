@@ -60,6 +60,10 @@ public class SystemRootController implements Initializable {
         this.system.set(system);
     }
 
+    private void setEdgeAsSource(final EcdarSystemEdge edge) {
+
+    }
+
 
     // Initialization
 
@@ -81,7 +85,7 @@ public class SystemRootController implements Initializable {
 
                     // If source become the component instance no longer, update state,
                     // so the user can create another edge
-                    edge.getSourceProperty().addListener(((observable, oldValue, newValue) -> hasEdge.set(newValue.equals(systemRoot))));
+                    edge.getSourceProperty().addListener(((observable, oldValue, newValue) -> hasEdge.set(systemRoot.equals(newValue))));
 
                     contextMenu.close();
                 })
@@ -97,6 +101,12 @@ public class SystemRootController implements Initializable {
         // if primary clicked and there is an unfinished edge, finish it with the system root as target
         if (unfinishedEdge != null && event.getButton().equals(MouseButton.PRIMARY)) {
             unfinishedEdge.setTarget(systemRoot);
+            hasEdge.set(true);
+
+            // Update state, if target changes,
+            // so another edge can be created, if this component instance is no longer an edge target
+            unfinishedEdge.getTargetProperty().addListener(((observable, oldValue, newValue) -> hasEdge.set(systemRoot.equals(newValue))));
+
             return;
         }
 
