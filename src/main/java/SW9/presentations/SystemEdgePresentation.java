@@ -53,12 +53,12 @@ public class SystemEdgePresentation extends Group implements SelectHelper.ItemSe
 
         // If edge source and target changes, bind
         edge.getChildProperty().addListener(((observable, oldValue, newValue) -> {
-            if (newValue != null) {
+            if (newValue != null && edge.getParent() != null) {
                 bindFinishedEdge(edge);
             }
         }));
         edge.getParentProperty().addListener(((observable, oldValue, newValue) -> {
-            if (newValue != null) {
+            if (newValue != null && edge.getChild() != null) {
                 bindFinishedEdge(edge);
             }
         }));
