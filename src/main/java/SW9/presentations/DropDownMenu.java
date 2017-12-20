@@ -341,7 +341,7 @@ public class DropDownMenu extends JFXPopup {
      */
     public void addSubMenu(final String s, final DropDownMenu subMenu, final int offsetY, final int offsetX) {
         final Label label = new Label(s);
-        final ObjectProperty<Boolean> isHoveringLabel = new SimpleObjectProperty<>(false);
+        final SimpleBooleanProperty isHoveringLabel = new SimpleBooleanProperty(false);
         final SimpleBooleanProperty isHoveringSubMenu = new SimpleBooleanProperty(false);
 
         label.setStyle("-fx-padding: 8 16 8 16;");
