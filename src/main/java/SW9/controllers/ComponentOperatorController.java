@@ -102,6 +102,15 @@ public class ComponentOperatorController implements Initializable {
         contextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, 0, 0);
     }
 
+    /**
+     * Listens to an edge to update whether the operator has a parent edge.
+     * @param parentEdge the edge to update with
+     */
+    private void updateHasParent(final EcdarSystemEdge parentEdge) {
+        // The operator has a parent is the supposed parent is has the operator as a child
+        parentEdge.getChildProperty().addListener(((observable, oldValue, newValue) -> hasParent.set(getOperator().equals(newValue))));
+    }
+
     @FXML
     private void onMouseClicked(final MouseEvent event) {
         event.consume();
@@ -110,12 +119,15 @@ public class ComponentOperatorController implements Initializable {
 
         // if primary clicked and there is an unfinished edge, finish it with the system root as target
         if (unfinishedEdge != null && event.getButton().equals(MouseButton.PRIMARY)) {
-            // If edge source is higher than operator
-            if (unfinishedEdge.getSource().getEdgeY().getValue().intValue() < operator.getEdgeY().getValue().intValue()) {
-                finishParentEdge(unfinishedEdge);
-            } else {
-                finishChildEdge(unfinishedEdge);
+            final boolean succeeded = unfinishedEdge.tryFinishWithOperator(getOperator());
+
+            // If succeeded and the operator became a child, update parent property
+            // (since operators are only allowed to have one parent)
+            if (succeeded && unfinishedEdge.getChild().equals(getOperator())) {
+                hasParent.set(true);
+                updateHasParent(unfinishedEdge);
             }
+
             return;
         }
 
@@ -123,27 +135,5 @@ public class ComponentOperatorController implements Initializable {
         if (event.getButton().equals(MouseButton.SECONDARY)) {
             showContextMenu(event);
         }
-    }
-
-    private void finishChildEdge(final EcdarSystemEdge unfinishedEdge) {
-        unfinishedEdge.setTarget(operator);
-    }
-
-    /**
-     * Finishes an unfinished edge and define the edge as the parent edge of the operator.
-     * @param unfinishedEdge the edge
-     */
-    private void finishParentEdge(final EcdarSystemEdge unfinishedEdge) {
-        // If already has edge, give error
-        if (hasParent.get()) {
-            Ecdar.showToast("This component operator already has a parent.");
-            return;
-        }
-
-        unfinishedEdge.setTarget(operator);
-        hasParent.set(true);
-
-        // Update state, if edge changes state
-        unfinishedEdge.getTargetProperty().addListener(((observable, oldValue, newValue) -> hasParent.set(operator.equals(newValue))));
     }
 }

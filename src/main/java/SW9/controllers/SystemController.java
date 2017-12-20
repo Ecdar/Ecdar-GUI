@@ -294,9 +294,9 @@ public class SystemController extends ModelController implements Initializable {
         edgeContainer.getChildren().remove(edgePresentationMap.get(edge));
         edgePresentationMap.remove(edge);
 
-        // Set source and target to null in order to notify potential listeners
-        edge.setSource(null);
-        edge.setTarget(null);
+        // Set child and parent to null in order to notify potential listeners
+        edge.setChild(null);
+        edge.setParent(null);
     }
 
     /**

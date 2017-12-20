@@ -13,9 +13,17 @@ public interface SystemElement {
      */
     ObservableValue<? extends Number> getEdgeX();
 
+    default int getEdgeXInt() {
+        return getEdgeX().getValue().intValue();
+    }
+
     /**
      * Observable value for y coordinate of where you want the edge to start from.
      * @return the observable value
      */
     ObservableValue<? extends Number> getEdgeY();
+
+    default int getEdgeYInt() {
+        return getEdgeY().getValue().intValue();
+    }
 }

@@ -78,6 +78,15 @@ public class SystemRootController implements Initializable {
                 .setDisableable(hasEdge));
     }
 
+    /**
+     * Listens to an edge to update whether the component instance has an edge.
+     * @param edge the edge to update with
+     */
+    private void updateHasEdge(final EcdarSystemEdge edge) {
+        edge.getChildProperty().addListener(((observable, oldValue, newValue) -> hasEdge.set(edge.isInEdge(getSystemRoot()))));
+        edge.getParentProperty().addListener(((observable, oldValue, newValue) -> hasEdge.set(edge.isInEdge(getSystemRoot()))));
+    }
+
     @FXML
     private void onMouseClicked(final MouseEvent event) {
         event.consume();
@@ -102,13 +111,11 @@ public class SystemRootController implements Initializable {
                 return;
             }
 
-            unfinishedEdge.setTarget(systemRoot);
-            hasEdge.set(true);
-
-            // Update state, if target changes,
-            // so another edge can be created, if this component instance is no longer an edge target
-            unfinishedEdge.getTargetProperty().addListener(((observable, oldValue, newValue) -> hasEdge.set(systemRoot.equals(newValue))));
-
+            final boolean succeeded = unfinishedEdge.tryFinishWithRoot(getSystemRoot());
+            if (succeeded) {
+                hasEdge.set(true);
+                updateHasEdge(unfinishedEdge);
+            }
             return;
         }
 
@@ -124,11 +131,10 @@ public class SystemRootController implements Initializable {
      */
     private EcdarSystemEdge createNewSystemEdge() {
         final EcdarSystemEdge edge = new EcdarSystemEdge(systemRoot);
-        system.get().addEdge(edge);
+        system.addEdge(edge);
         hasEdge.set(true);
-
-        // If edge is removed or changes source, this instance updates it's hasEdge property so it can get a new edge
-        edge.getSourceProperty().addListener(((observable, oldValue, newValue) -> hasEdge.set(systemRoot.equals(newValue))));
+        updateHasEdge(edge);
+        
         return edge;
     }
 }
