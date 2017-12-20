@@ -348,14 +348,6 @@ public class DropDownMenu extends JFXPopup {
         label.getStyleClass().add("body2");
         label.setMinWidth(dropDownMenuWidth.get());
 
-        final StackPane subMenuContent = subMenu.content;
-        subMenuContent.setStyle("-fx-padding: 0 0 0 2;");
-        subMenuContent.setMinWidth(subMenuContent.getMinWidth() + 1);
-        subMenuContent.setMaxWidth(subMenuContent.getMinWidth() + 1);
-        subMenuContent.setTranslateX(dropDownMenuWidth.get() + offsetX);
-        subMenuContent.setTranslateY(offsetY);
-        subMenuContent.setOpacity(0);
-
         final Runnable show = () -> {
             // Set the background to a light grey
             label.setBackground(new Background(new BackgroundFill(
@@ -363,8 +355,7 @@ public class DropDownMenu extends JFXPopup {
                     CornerRadii.EMPTY,
                     Insets.EMPTY
             )));
-
-            subMenuContent.setOpacity(1);
+            subMenu.show(PopupVPosition.TOP, PopupHPosition.LEFT, offsetX, offsetY);
         };
 
         final Runnable hide = () -> {
@@ -374,27 +365,22 @@ public class DropDownMenu extends JFXPopup {
                     CornerRadii.EMPTY,
                     Insets.EMPTY
             )));
-
-            subMenuContent.setOpacity(0);
-        };
+            subMenu.hide();
+    };
 
         // Set properties in order to prevent closing when hovering sub menu
-        subMenuContent.setOnMouseEntered(event -> {
+        label.setOnMouseEntered(event -> {
             isHoveringSubMenu.set(true);
             isHoveringASubMenu.set(true);
-            show.run();
         });
 
-        subMenuContent.setOnMouseExited(event -> {
-            isHoveringSubMenu.set(false);
-            isHoveringASubMenu.set(false);
-
-            if (!isHoveringLabel.get()) {
+        label.setOnMouseExited(event -> {
+            if (!isHoveringLabel.get() && !isHoveringSubMenu.get()) {
                 hide.run();
             }
         });
 
-        this.content.getChildren().add(subMenuContent);
+        this.content.getChildren().add(label);
 
         final ReleaseRippler rippler = new ReleaseRippler(label);
         rippler.setRipplerFill(Color.GREY_BLUE.getColor(Color.Intensity.I300));
@@ -406,12 +392,9 @@ public class DropDownMenu extends JFXPopup {
         });
 
         rippler.setOnMouseExited(event -> {
-            isHoveringLabel.set(false);
+            if (rippler.isPressed()) rippler.release();
 
-            if (!isHoveringSubMenu.get()) {
-                hide.run();
-            }
-            rippler.release();
+            isHoveringLabel.set(false);
         });
 
         final FontIcon icon = new FontIcon();
