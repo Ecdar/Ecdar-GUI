@@ -1,6 +1,7 @@
 package SW9.abstractions;
 
 import SW9.Ecdar;
+import SW9.controllers.SystemRootController;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -75,7 +76,7 @@ public class EcdarSystemEdge {
     /**
      * If allowed, finishes edge with the temporary node and a given instance.
      * @param instance the instance to finish with
-     * @return true iff allowed to finish
+     * @return true iff succeeded
      */
     public boolean tryFinishWithComponentInstance(final ComponentInstance instance) {
         // other node must be operator or root
@@ -97,14 +98,25 @@ public class EcdarSystemEdge {
         return true;
     }
 
-    public boolean tryFinishWithRoot(final SystemRoot systemRoot) {
-        // TODO implement
-        return false;
+    /**
+     * If allowed, finishes edge with the temporary node and a given system root.
+     * @param controller controller for the given system root
+     * @return true iff succeeded
+     */
+    public static boolean tryFinishWithRoot(final SystemRootController controller) {
+        // If already has edge, give error
+        if (controller.hasEdge()) {
+            Ecdar.showToast("This system root already has an edge.");
+            return false;
+        }
+
+        return true;
     }
 
     public boolean tryFinishWithOperator(final ComponentOperator operator) {
-        // TODO implement
+        // TODO implement method
         /*
+        MAYBE you can use this: (if operator is above (lower Y) the temp node)
         // If already has edge, give error
         if (hasParent.get()) {
             Ecdar.showToast("This component operator already has a parent.");
