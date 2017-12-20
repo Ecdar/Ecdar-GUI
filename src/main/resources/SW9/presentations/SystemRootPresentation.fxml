@@ -8,7 +8,7 @@
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="StackPane"
          fx:id="presentationRoot"
-         onMouseClicked="#onMouseClicked"
+         onMousePressed="#onMousePressed"
          fx:controller="SW9.controllers.SystemRootController"
          alignment="TOP_LEFT">
 
