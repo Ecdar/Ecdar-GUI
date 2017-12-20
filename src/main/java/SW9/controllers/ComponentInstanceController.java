@@ -15,6 +15,7 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.control.Label;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Circle;
 import javafx.scene.input.MouseEvent;
@@ -92,21 +93,22 @@ public class ComponentInstanceController implements Initializable {
     }
 
     @FXML
-    private void onMousePressed(final MouseEvent event) {
+    private void onMouseClicked(final MouseEvent event) {
         event.consume();
 
         final EcdarSystemEdge unfinishedEdge = getSystem().getUnfinishedEdge();
 
-        if ((event.isShiftDown() && event.isPrimaryButtonDown()) || event.isMiddleButtonDown()) {
+        if ((event.isShiftDown() && event.getButton().equals(MouseButton.PRIMARY)) || event.getButton().equals(MouseButton.MIDDLE)) {
             // If shift click or middle click a component instance, create a new edge
 
             // Component instance must not already have an edge and there cannot be any other unfinished edges in the system
             if(!hasEdge.get() && unfinishedEdge == null) {
                 createNewSystemEdge();
             }
-        } else if (unfinishedEdge != null && event.isPrimaryButtonDown()) {
-            // if primary clicked and there is an unfinished edge, finish it with the component instance as target
+        }
 
+        // if primary clicked and there is an unfinished edge, finish it with the component instance as target
+        if (unfinishedEdge != null && event.getButton().equals(MouseButton.PRIMARY)) {
             // If already has edge, give error
             if (hasEdge.get()) {
                 Ecdar.showToast("This component instance already has an edge.");
@@ -122,7 +124,7 @@ public class ComponentInstanceController implements Initializable {
             return;
         }
 
-        if (event.isSecondaryButtonDown()) {
+        if (event.getButton().equals(MouseButton.SECONDARY)) {
             dropDownMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, 20, 20);
         }
     }

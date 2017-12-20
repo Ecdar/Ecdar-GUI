@@ -14,6 +14,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Group;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Polygon;
@@ -78,20 +79,22 @@ public class SystemRootController implements Initializable {
     }
 
     @FXML
-    private void onMousePressed(final MouseEvent event) {
+    private void onMouseClicked(final MouseEvent event) {
         event.consume();
 
         final EcdarSystemEdge unfinishedEdge = getSystem().getUnfinishedEdge();
 
-        if ((event.isShiftDown() && event.isPrimaryButtonDown()) || event.isMiddleButtonDown()) {
+        if ((event.isShiftDown() && event.getButton().equals(MouseButton.PRIMARY)) || event.getButton().equals(MouseButton.MIDDLE)) {
             // If shift click or middle click a component instance, create a new edge
 
             // Component instance must not already have an edge and there cannot be any other unfinished edges in the system
             if (!hasEdge.get() && unfinishedEdge == null) {
                 createNewSystemEdge();
             }
-        } else if (unfinishedEdge != null && event.isPrimaryButtonDown()) {
-            // if primary clicked and there is an unfinished edge, finish it with the system root as target
+        }
+
+        // if primary clicked and there is an unfinished edge, finish it with the system root as target
+        if (unfinishedEdge != null && event.getButton().equals(MouseButton.PRIMARY)) {
 
             // If already has edge, give error
             if (hasEdge.get()) {
@@ -110,7 +113,7 @@ public class SystemRootController implements Initializable {
         }
 
         // If secondary clicked, show context menu
-        if (event.isSecondaryButtonDown()) {
+        if (event.getButton().equals(MouseButton.SECONDARY)) {
             contextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, 0, 0);
         }
     }
