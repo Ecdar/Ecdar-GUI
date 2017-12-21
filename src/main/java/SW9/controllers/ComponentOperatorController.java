@@ -94,7 +94,7 @@ public class ComponentOperatorController implements Initializable {
 
         contextMenu.addMenuElement(new MenuElement("Delete")
                 .setClickable(() -> {
-                    // TODO
+                    getSystem().removeComponentOperator(getOperator());
                     contextMenu.close();
                 }));
 

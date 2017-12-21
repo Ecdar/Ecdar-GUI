@@ -87,7 +87,7 @@ public class ComponentInstanceController implements Initializable {
         dropDownMenu.addSpacerElement();
 
         dropDownMenu.addClickableListElement("Delete", event -> {
-            // TODO delete the instance
+            getSystem().removeComponentInstance(getInstance());
             dropDownMenu.close();
         });
     }
