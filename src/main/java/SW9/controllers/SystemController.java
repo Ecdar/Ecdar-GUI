@@ -136,8 +136,6 @@ public class SystemController extends ModelController implements Initializable {
         operatorSubMenu.addMenuElement(new MenuElement("Add Conjunction").setClickable(() -> {
             final Conjunction operator = new Conjunction();
 
-            operator.getColorProperty().set(system.getColor());
-            operator.getColorIntensityProperty().set(system.getColorIntensity());
             operator.getBox().setX(DropDownMenu.x);
             operator.getBox().setY(DropDownMenu.y);
 
@@ -154,8 +152,6 @@ public class SystemController extends ModelController implements Initializable {
         operatorSubMenu.addMenuElement(new MenuElement("Add Composition").setClickable(() -> {
             final Composition operator = new Composition();
 
-            operator.getColorProperty().set(system.getColor());
-            operator.getColorIntensityProperty().set(system.getColorIntensity());
             operator.getBox().setX(DropDownMenu.x);
             operator.getBox().setY(DropDownMenu.y);
 
@@ -172,8 +168,6 @@ public class SystemController extends ModelController implements Initializable {
         operatorSubMenu.addMenuElement(new MenuElement("Add Quotient").setClickable(() -> {
             final Quotient operator = new Quotient();
 
-            operator.getColorProperty().set(system.getColor());
-            operator.getColorIntensityProperty().set(system.getColorIntensity());
             operator.getBox().setX(DropDownMenu.x);
             operator.getBox().setY(DropDownMenu.y);
 
