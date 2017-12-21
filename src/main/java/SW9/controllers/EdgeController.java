@@ -125,7 +125,9 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
         return (obsComponent, oldComponent, newComponent) -> {
             // Draw new edge from a location
             if (newEdge.getNails().isEmpty() && newEdge.getTargetCircular() == null) {
-                final Link link = new Link(newEdge.getStatus());
+                final Link link = new Link();
+                // Make dashed line, if output edge
+                if (newEdge.getStatus() == EdgeStatus.OUTPUT) link.makeDashed();
                 links.add(link);
 
                 // Add the link and its arrowhead to the view
@@ -140,7 +142,8 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                 final Circular[] previous = {newEdge.getSourceCircular()};
 
                 newEdge.getNails().forEach(nail -> {
-                    final Link link = new Link(newEdge.getStatus());
+                    final Link link = new Link();
+                    if (newEdge.getStatus() == EdgeStatus.OUTPUT) link.makeDashed();
                     links.add(link);
 
                     final NailPresentation nailPresentation = new NailPresentation(nail, newEdge, getComponent(), this);
@@ -152,7 +155,8 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                     previous[0] = nail;
                 });
 
-                final Link link = new Link(newEdge.getStatus());
+                final Link link = new Link();
+                if (newEdge.getStatus() == EdgeStatus.OUTPUT) link.makeDashed();
                 links.add(link);
 
                 edgeRoot.getChildren().add(link);
@@ -179,7 +183,8 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                     if (newEdge.getTargetCircular() != null) {
                         final int indexOfNewNail = edge.get().getNails().indexOf(newNail);
 
-                        final Link newLink = new Link(edge.get().getStatus());
+                        final Link newLink = new Link();
+                        if (newEdge.getStatus() == EdgeStatus.OUTPUT) newLink.makeDashed();
                         final Link pressedLink = links.get(indexOfNewNail);
                         links.add(indexOfNewNail, newLink);
 
@@ -223,7 +228,8 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                         }
 
                         // Create a new link that will bind from the new nail to the mouse
-                        final Link newLink = new Link(edge.get().getStatus());
+                        final Link newLink = new Link();
+                        if (newEdge.getStatus() == EdgeStatus.OUTPUT) newLink.makeDashed();
                         links.add(newLink);
                         BindingHelper.bind(newLink, simpleArrowHead, newNail, newComponent.getBox().getXProperty(), newComponent.getBox().getYProperty());
                         edgeRoot.getChildren().add(newLink);
@@ -445,8 +451,12 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
 
     private void switchEdgeStatus() {
         getEdge().switchStatus();
-        for (final Link link : links) {
-            link.updateStatus(getEdge().getStatus());
+
+        // Update link
+        if (getEdge().getStatus() == EdgeStatus.INPUT) {
+            links.forEach(Link::makeSolid);
+        } else {
+            links.forEach(Link::makeDashed);
         }
     }
 

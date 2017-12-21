@@ -147,7 +147,7 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
             )));
         };
 
-        updateColorDelegates.add(updateColor); // TODO maybe move to ModelPresentation
+        updateColorDelegates.add(updateColor);
 
         component.colorProperty().addListener(observable -> {
             updateColor.accept(component.getColor(), component.getColorIntensity());
@@ -168,7 +168,7 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
             controller.background.setFill(newColor.getColor(newIntensity.next(-10).next(2)));
         };
 
-        updateColorDelegates.add(updateColor);  // TODO maybe move to ModelPresentation
+        updateColorDelegates.add(updateColor);
 
         component.colorProperty().addListener(observable -> {
             updateColor.accept(component.getColor(), component.getColorIntensity());
