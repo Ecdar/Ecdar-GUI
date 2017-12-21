@@ -126,14 +126,24 @@ public class EcdarSystemEdge {
     }
 
     public boolean tryFinishWithOperator(final ComponentOperator operator) {
-        // TODO implement method
-        /*
-        MAYBE you can use this: (if operator is above (lower Y) the temp node)
-        // If already has edge, give error
-        if (hasParent.get()) {
-            Ecdar.showToast("This component operator already has a parent.");
-            return;
-        }*/
-        return false;
+        if (getTempNode().getEdgeY() == operator.getEdgeY()) {
+            Ecdar.showToast("This operator is at same level as the source component");
+            return false;
+        } else if (getTempNode().getEdgeY().getValue().doubleValue() < operator.getEdgeY().getValue().doubleValue()) {
+            if (getTempNode() instanceof ComponentInstance) {
+                Ecdar.showToast("Operators must be higher than component instances");
+                return false;
+            } else {
+                setChild(operator);
+                setParent(getTempNode());
+                setTempNode(null);
+                return true;
+            }
+        } else {
+            setChild(getTempNode());
+            setParent(operator);
+            setTempNode(null);
+            return true;
+        }
     }
 }
