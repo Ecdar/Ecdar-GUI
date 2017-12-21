@@ -107,7 +107,7 @@ public class SystemRootController implements Initializable {
 
         // if primary clicked and there is an unfinished edge, finish it with the system root as target
         if (unfinishedEdge != null && event.getButton().equals(MouseButton.PRIMARY)) {
-            final boolean succeeded = EcdarSystemEdge.tryFinishWithRoot(this);
+            final boolean succeeded = unfinishedEdge.tryFinishWithRoot(this);
             if (succeeded) {
                 hasEdge.set(true);
                 updateHasEdge(unfinishedEdge);

@@ -103,13 +103,17 @@ public class EcdarSystemEdge {
      * @param controller controller for the given system root
      * @return true iff succeeded
      */
-    public static boolean tryFinishWithRoot(final SystemRootController controller) {
+    public boolean tryFinishWithRoot(final SystemRootController controller) {
         // If already has edge, give error
         if (controller.hasEdge()) {
             Ecdar.showToast("This system root already has an edge.");
             return false;
         }
 
+        // Set root as parent node
+        setChild(tempNode);
+        setParent(controller.getSystemRoot());
+        tempNode = null;
         return true;
     }
 
