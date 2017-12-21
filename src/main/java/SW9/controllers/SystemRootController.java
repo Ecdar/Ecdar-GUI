@@ -82,12 +82,21 @@ public class SystemRootController implements Initializable {
     }
 
     /**
-     * Listens to an edge to update whether the component instance has an edge.
+     * Listens to an edge to update whether the root has an edge.
      * @param edge the edge to update with
      */
+    private void HandleHasEdge(final EcdarSystemEdge edge) {
+        edge.getTempNodeProperty().addListener(((observable, oldValue, newValue) -> updateHasEdge(edge)));
+        edge.getChildProperty().addListener(((observable, oldValue, newValue) -> updateHasEdge(edge)));
+        edge.getParentProperty().addListener(((observable, oldValue, newValue) -> updateHasEdge(edge)));
+    }
+
+    /**
+     * Update has edge property to whether the root is in a given edge.
+     * @param edge the given edge
+     */
     private void updateHasEdge(final EcdarSystemEdge edge) {
-        edge.getChildProperty().addListener(((observable, oldValue, newValue) -> hasEdge.set(edge.isInEdge(getSystemRoot()))));
-        edge.getParentProperty().addListener(((observable, oldValue, newValue) -> hasEdge.set(edge.isInEdge(getSystemRoot()))));
+        hasEdge.set(edge.isInEdge(getSystemRoot()));
     }
 
     @FXML
@@ -110,7 +119,7 @@ public class SystemRootController implements Initializable {
             final boolean succeeded = unfinishedEdge.tryFinishWithRoot(this);
             if (succeeded) {
                 hasEdge.set(true);
-                updateHasEdge(unfinishedEdge);
+                HandleHasEdge(unfinishedEdge);
             }
             return;
         }
@@ -129,7 +138,7 @@ public class SystemRootController implements Initializable {
         final EcdarSystemEdge edge = new EcdarSystemEdge(systemRoot);
         getSystem().addEdge(edge);
         hasEdge.set(true);
-        updateHasEdge(edge);
+        HandleHasEdge(edge);
         
         return edge;
     }
