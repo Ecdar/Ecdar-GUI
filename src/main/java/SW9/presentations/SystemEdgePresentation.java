@@ -28,6 +28,7 @@ public class SystemEdgePresentation extends Group implements SelectHelper.ItemSe
         controller = new EcdarFXMLLoader().loadAndGetController("SystemEdgePresentation.fxml", this);
         controller.setEdge(edge);
         controller.setSystem(system);
+        controller.setSelectable(this);
 
         initializeBinding(edge);
     }
