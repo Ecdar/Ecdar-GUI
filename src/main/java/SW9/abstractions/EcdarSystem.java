@@ -148,7 +148,7 @@ public class EcdarSystem extends EcdarModel implements Boxed {
         result.add(INSTANCES, instances);
 
         final JsonArray operators = new JsonArray();
-        getComponentOperators().forEach(operator -> instances.add(operator.serialize()));
+        getComponentOperators().forEach(operator -> operators.add(operator.serialize()));
         result.add(OPERATORS, operators);
 
         final JsonArray edges = new JsonArray();

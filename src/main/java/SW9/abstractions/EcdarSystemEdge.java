@@ -154,7 +154,7 @@ public class EcdarSystemEdge {
         final JsonObject result = new JsonObject();
 
         result.addProperty(CHILD, getChild().getHiddenId());
-        result.addProperty(PARENT, getChild().getHiddenId());
+        result.addProperty(PARENT, getParent().getHiddenId());
 
         return result;
     }

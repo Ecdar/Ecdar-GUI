@@ -21,7 +21,7 @@ public class ComponentInstance implements SystemElement {
     private final ObjectProperty<Color> color = new SimpleObjectProperty<>(); // TODO remove color and intensity from here
     private final ObjectProperty<Color.Intensity> colorIntensity = new SimpleObjectProperty<>();
     private final Box box = new Box();
-    private ObjectProperty<String> instanceIdProperty;
+    private StringProperty instanceIdProperty = new SimpleStringProperty(""); ;
 
     private final int hiddenId;
 
@@ -91,7 +91,7 @@ public class ComponentInstance implements SystemElement {
         return result;
     }
 
-    public ObjectProperty<String> getInstanceIdProperty() {
+    public StringProperty getInstanceIdProperty() {
         return instanceIdProperty;
     }
 }
