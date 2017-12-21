@@ -86,9 +86,9 @@ public class SystemRootController implements Initializable {
      * @param edge the edge to update with
      */
     private void handleHasEdge(final EcdarSystemEdge edge) {
-        edge.getTempNodeProperty().addListener(((observable, oldValue, newValue) -> updateHasEdge(edge)));
-        edge.getChildProperty().addListener(((observable, oldValue, newValue) -> updateHasEdge(edge)));
-        edge.getParentProperty().addListener(((observable, oldValue, newValue) -> updateHasEdge(edge)));
+        edge.getTempNodeProperty().addListener((observable -> updateHasEdge(edge)));
+        edge.getChildProperty().addListener((observable -> updateHasEdge(edge)));
+        edge.getParentProperty().addListener((observable -> updateHasEdge(edge)));
     }
 
     /**
