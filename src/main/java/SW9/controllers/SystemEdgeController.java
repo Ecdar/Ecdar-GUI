@@ -3,6 +3,7 @@ package SW9.controllers;
 import SW9.abstractions.EcdarSystem;
 import SW9.abstractions.EcdarSystemEdge;
 import SW9.presentations.DropDownMenu;
+import SW9.utility.helpers.SelectHelper;
 import SW9.utility.keyboard.Keybind;
 import SW9.utility.keyboard.KeyboardTracker;
 import com.jfoenix.controls.JFXPopup;
@@ -29,6 +30,7 @@ public class SystemEdgeController implements Initializable {
 
     private EcdarSystemEdge edge;
     private final ObjectProperty<EcdarSystem> system = new SimpleObjectProperty<>();
+    private SelectHelper.ItemSelectable selectable;
 
     private Circle dropDownMenuHelperCircle;
 
@@ -101,6 +103,20 @@ public class SystemEdgeController implements Initializable {
             dropDownMenuHelperCircle.setLayoutY(event.getY());
 
             showContextMenu();
+            return;
         }
+
+        // If primary clicked, select
+        if (event.getButton().equals(MouseButton.PRIMARY)) {
+            if (event.isShortcutDown()) {
+                SelectHelper.addToSelection(selectable);
+            } else {
+                SelectHelper.select(selectable);
+            }
+        }
+    }
+
+    public void setSelectable(final SelectHelper.ItemSelectable selectable) {
+        this.selectable = selectable;
     }
 }
