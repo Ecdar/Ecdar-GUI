@@ -103,7 +103,7 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
             controller.toggleDeclarationButton.setBackground(Background.EMPTY);
         };
 
-        updateColorDelegates.add(updateColor); // TODO maybe move to ModelPresentation
+        updateColorDelegates.add(updateColor);
 
         controller.getComponent().colorProperty().addListener(observable -> updateColor.accept(component.getColor(), component.getColorIntensity()));
 

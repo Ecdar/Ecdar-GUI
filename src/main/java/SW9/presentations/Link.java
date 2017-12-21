@@ -71,11 +71,17 @@ public class Link extends Group implements SelectHelper.Selectable, Highlightabl
         shownLine.endYProperty().bind(this.endY);
     }
 
+    /**
+     * makes the link dashed.
+     */
     public void makeDashed() {
         shownLine.getStrokeDashArray().addAll(6d);
     }
 
-    // TODO test
+
+    /**
+     * Make. the link solid.
+     */
     public void makeSolid() {
         shownLine.getStrokeDashArray().clear();
     }
