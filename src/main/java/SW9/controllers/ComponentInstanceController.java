@@ -79,8 +79,7 @@ public class ComponentInstanceController implements Initializable {
 
         dropDownMenu.addMenuElement(new MenuElement("Draw Edge")
                 .setClickable(() -> {
-                    createNewSystemEdge();
-                    system.addEdge(edge);
+                    system.addEdge(createNewSystemEdge());
                     dropDownMenu.close();
                 })
                 .setDisableable(hasEdge));
@@ -144,7 +143,7 @@ public class ComponentInstanceController implements Initializable {
      */
     private EcdarSystemEdge createNewSystemEdge() {
         final EcdarSystemEdge edge = new EcdarSystemEdge(getInstance());
-        system.addEdge(edge);
+        getSystem().addEdge(edge);
         hasEdge.set(true);
   
         // Update state when edge child and parent changes

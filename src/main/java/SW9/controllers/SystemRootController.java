@@ -127,7 +127,7 @@ public class SystemRootController implements Initializable {
      */
     private EcdarSystemEdge createNewSystemEdge() {
         final EcdarSystemEdge edge = new EcdarSystemEdge(systemRoot);
-        system.addEdge(edge);
+        getSystem().addEdge(edge);
         hasEdge.set(true);
         updateHasEdge(edge);
         
