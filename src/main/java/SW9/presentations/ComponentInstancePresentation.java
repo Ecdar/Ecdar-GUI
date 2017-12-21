@@ -146,8 +146,8 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
         instance.getBox().getHeightProperty().bind(heightProperty());
 
         // Bind x and y
-        setLayoutX(instance.getBox().getX());
-        setLayoutY(instance.getBox().getY());
+        setLayoutX(Grid.snap(instance.getBox().getX()));
+        setLayoutY(Grid.snap(instance.getBox().getY()));
         instance.getBox().getXProperty().bind(layoutXProperty());
         instance.getBox().getYProperty().bind(layoutYProperty());
     }
