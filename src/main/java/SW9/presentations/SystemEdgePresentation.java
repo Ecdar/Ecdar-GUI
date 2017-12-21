@@ -64,6 +64,12 @@ public class SystemEdgePresentation extends Group implements SelectHelper.ItemSe
         }));
     }
 
+    /**
+     * Use this for binding edge, when it is finished.
+     * Binds the start of the first link to the child of the edge.
+     * Binds the end of the last link to the parent of the edge.
+     * @param edge edge to bind with
+     */
     private void bindFinishedEdge(final EcdarSystemEdge edge) {
         final Link firstLink = links.get(0);
         final Link lastLink = links.get(links.size() - 1);

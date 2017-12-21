@@ -111,6 +111,10 @@ public class ComponentOperatorController implements Initializable {
         parentEdge.getChildProperty().addListener(((observable, oldValue, newValue) -> hasParent.set(getOperator().equals(newValue))));
     }
 
+    /**
+     * Handles mouse clicked event on the view of the operator.
+     * @param event the mouse event
+     */
     @FXML
     private void onMouseClicked(final MouseEvent event) {
         event.consume();
