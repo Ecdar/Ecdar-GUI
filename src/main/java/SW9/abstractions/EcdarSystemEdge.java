@@ -126,12 +126,11 @@ public class EcdarSystemEdge {
     }
 
     public boolean tryFinishWithOperator(final ComponentOperator operator) {
-        if(getTempNode().getEdgeY() == operator.getEdgeY()){
+        if (getTempNode().getEdgeY() == operator.getEdgeY()) {
             Ecdar.showToast("This operator is at same level as the source component");
             return false;
-        }
-        if(getTempNode().getEdgeY().getValue().doubleValue() < operator.getEdgeY().getValue().doubleValue()){
-            if(getTempNode() instanceof ComponentInstance){
+        } else if (getTempNode().getEdgeY().getValue().doubleValue() < operator.getEdgeY().getValue().doubleValue()) {
+            if (getTempNode() instanceof ComponentInstance) {
                 Ecdar.showToast("Operators must be higher than component instances");
                 return false;
             } else {
@@ -141,10 +140,6 @@ public class EcdarSystemEdge {
                 return true;
             }
         } else {
-            if(getTempNode() instanceof SystemRoot){
-                Ecdar.showToast("Operators must be lower than the system root");
-                return false;
-            }
             setChild(getTempNode());
             setParent(operator);
             setTempNode(null);
