@@ -69,10 +69,10 @@ public class ComponentOperatorPresentation extends StackPane implements SelectHe
     private void initializeDimensions() {
         final ComponentOperator instance = controller.getOperator();
 
-        setMinWidth(4 * GRID_SIZE);
-        setMaxWidth(4 * GRID_SIZE);
-        setMinHeight(2 * GRID_SIZE);
-        setMaxHeight(2 * GRID_SIZE);
+        setMinWidth(ComponentOperator.WIDTH);
+        setMaxWidth(ComponentOperator.WIDTH);
+        setMinHeight(ComponentOperator.HEIGHT);
+        setMaxHeight(ComponentOperator.HEIGHT);
 
         instance.getBox().getWidthProperty().bind(widthProperty());
         instance.getBox().getHeightProperty().bind(heightProperty());

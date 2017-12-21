@@ -175,7 +175,7 @@ public class SystemModel extends EcdarModel implements Boxed { // TODO name Ecda
      */
     public EcdarSystemEdge getUnfinishedEdge() {
         for (final EcdarSystemEdge edge : edges) {
-            if (edge.getTarget() == null) return edge;
+            if (!edge.isFinished()) return edge;
         }
         return null;
     }

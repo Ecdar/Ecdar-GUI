@@ -29,35 +29,56 @@ public class SystemEdgePresentation extends Group implements SelectHelper.ItemSe
         controller.setEdge(edge);
         controller.setSystem(system);
 
-        if (edge.getNails().isEmpty()) {
-            final Link link = new Link();
-            links.add(link);
+        initializeBinding(edge);
+    }
 
-            // Add the link to the view
-            controller.root.getChildren().add(link);
+    private void initializeBinding(final EcdarSystemEdge edge) {
+        final Link link = new Link();
+        links.add(link);
 
+        // Add the link to the view
+        controller.root.getChildren().add(link);
+
+        if (edge.isFinished()) {
+            bindFinishedEdge(edge);
+        } else {
             // Bind the link to the the edge source and the mouse position (snapped to the grid)
-            link.startXProperty().bind(edge.getSource().getEdgeX());
-            link.startYProperty().bind(edge.getSource().getEdgeY());
+            link.startXProperty().bind(edge.getTempNode().getEdgeX());
+            link.startYProperty().bind(edge.getTempNode().getEdgeY());
 
-            // If target exists, bind to it
-            // Else, bind to mouse position (snapped to the grid)
-            if (edge.getTarget() != null) {
-                link.endXProperty().bind(edge.getTarget().getEdgeX());
-                link.endYProperty().bind(edge.getTarget().getEdgeY());
-            } else {
-                link.endXProperty().bind(CanvasPresentation.mouseTracker.gridXProperty());
-                link.endYProperty().bind(CanvasPresentation.mouseTracker.gridYProperty());
-            }
+            // Bind to mouse position (snapped to the grid)
+            link.endXProperty().bind(CanvasPresentation.mouseTracker.gridXProperty());
+            link.endYProperty().bind(CanvasPresentation.mouseTracker.gridYProperty());
         }
 
-        // When edge target changes, bind the last link to the new target
-        edge.getTargetProperty().addListener(((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                links.get(links.size() - 1).endXProperty().bind(newValue.getEdgeX());
-                links.get(links.size() - 1).endYProperty().bind(newValue.getEdgeY());
+        // If edge source and target changes, bind
+        edge.getChildProperty().addListener(((observable, oldValue, newValue) -> {
+            if (newValue != null && edge.getParent() != null) {
+                bindFinishedEdge(edge);
             }
         }));
+        edge.getParentProperty().addListener(((observable, oldValue, newValue) -> {
+            if (newValue != null && edge.getChild() != null) {
+                bindFinishedEdge(edge);
+            }
+        }));
+    }
+
+    /**
+     * Use this for binding edge, when it is finished.
+     * Binds the start of the first link to the child of the edge.
+     * Binds the end of the last link to the parent of the edge.
+     * @param edge edge to bind with
+     */
+    private void bindFinishedEdge(final EcdarSystemEdge edge) {
+        final Link firstLink = links.get(0);
+        final Link lastLink = links.get(links.size() - 1);
+
+        firstLink.startXProperty().bind(edge.getChild().getEdgeX());
+        firstLink.startYProperty().bind(edge.getChild().getEdgeY());
+
+        lastLink.endXProperty().bind(edge.getParent().getEdgeX());
+        lastLink.endYProperty().bind(edge.getParent().getEdgeY());
     }
 
     /**

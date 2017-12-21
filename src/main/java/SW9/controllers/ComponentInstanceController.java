@@ -92,6 +92,24 @@ public class ComponentInstanceController implements Initializable {
         });
     }
 
+    /**
+     * Listens to an edge to update whether the root has an edge.
+     * @param edge the edge to update with
+     */
+    private void handleHasEdge(final EcdarSystemEdge edge) {
+        edge.getTempNodeProperty().addListener((observable -> updateHasEdge(edge)));
+        edge.getChildProperty().addListener((observable -> updateHasEdge(edge)));
+        edge.getParentProperty().addListener((observable -> updateHasEdge(edge)));
+    }
+
+    /**
+     * Update has edge property to whether the instance is in a given edge.
+     * @param edge the given edge
+     */
+    private void updateHasEdge(final EcdarSystemEdge edge) {
+        hasEdge.set(edge.isInEdge(getInstance()));
+    }
+
     @FXML
     private void onMouseClicked(final MouseEvent event) {
         event.consume();
@@ -115,12 +133,11 @@ public class ComponentInstanceController implements Initializable {
                 return;
             }
 
-            unfinishedEdge.setTarget(getInstance());
-            hasEdge.set(true);
-
-            // If source become the component instance no longer, update state,
-            // so the user can create another edge
-            unfinishedEdge.getTargetProperty().addListener(((observable, oldValue, newValue) -> hasEdge.set(instance.equals(newValue))));
+            final boolean succeeded = unfinishedEdge.tryFinishWithComponentInstance(getInstance());
+            if (succeeded) {
+                hasEdge.set(true);
+                handleHasEdge(unfinishedEdge);
+            }
             return;
         }
 
@@ -134,12 +151,12 @@ public class ComponentInstanceController implements Initializable {
      * @return The newly created EcdarSystemEdge
      */
     private EcdarSystemEdge createNewSystemEdge() {
-        final EcdarSystemEdge edge = new EcdarSystemEdge(instance.get());
-        system.get().addEdge(edge);
+        final EcdarSystemEdge edge = new EcdarSystemEdge(getInstance());
+        getSystem().addEdge(edge);
         hasEdge.set(true);
-
-        // If edge is removed or changes source, this instance updates it's hasEdge property so it can get a new edge
-        edge.getSourceProperty().addListener(((observable, oldValue, newValue) -> hasEdge.set(instance.equals(newValue))));
+  
+        // Update state when edge child and parent changes
+        handleHasEdge(edge);
         return edge;
     }
 

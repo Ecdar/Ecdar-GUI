@@ -1,6 +1,5 @@
 package SW9.controllers;
 
-import SW9.Ecdar;
 import SW9.abstractions.EcdarSystemEdge;
 import SW9.abstractions.SystemModel;
 import SW9.abstractions.SystemRoot;
@@ -57,6 +56,10 @@ public class SystemRootController implements Initializable {
     }
 
 
+    public boolean hasEdge() {
+        return hasEdge.get();
+    }
+
     // Initialization
 
     @Override
@@ -78,6 +81,24 @@ public class SystemRootController implements Initializable {
                 .setDisableable(hasEdge));
     }
 
+    /**
+     * Listens to an edge to update whether the root has an edge.
+     * @param edge the edge to update with
+     */
+    private void handleHasEdge(final EcdarSystemEdge edge) {
+        edge.getTempNodeProperty().addListener((observable -> updateHasEdge(edge)));
+        edge.getChildProperty().addListener((observable -> updateHasEdge(edge)));
+        edge.getParentProperty().addListener((observable -> updateHasEdge(edge)));
+    }
+
+    /**
+     * Update has edge property to whether the root is in a given edge.
+     * @param edge the given edge
+     */
+    private void updateHasEdge(final EcdarSystemEdge edge) {
+        hasEdge.set(edge.isInEdge(getSystemRoot()));
+    }
+
     @FXML
     private void onMouseClicked(final MouseEvent event) {
         event.consume();
@@ -95,20 +116,11 @@ public class SystemRootController implements Initializable {
 
         // if primary clicked and there is an unfinished edge, finish it with the system root as target
         if (unfinishedEdge != null && event.getButton().equals(MouseButton.PRIMARY)) {
-
-            // If already has edge, give error
-            if (hasEdge.get()) {
-                Ecdar.showToast("This system root already has an edge.");
-                return;
+            final boolean succeeded = unfinishedEdge.tryFinishWithRoot(this);
+            if (succeeded) {
+                hasEdge.set(true);
+                handleHasEdge(unfinishedEdge);
             }
-
-            unfinishedEdge.setTarget(systemRoot);
-            hasEdge.set(true);
-
-            // Update state, if target changes,
-            // so another edge can be created, if this component instance is no longer an edge target
-            unfinishedEdge.getTargetProperty().addListener(((observable, oldValue, newValue) -> hasEdge.set(systemRoot.equals(newValue))));
-
             return;
         }
 
@@ -124,11 +136,10 @@ public class SystemRootController implements Initializable {
      */
     private EcdarSystemEdge createNewSystemEdge() {
         final EcdarSystemEdge edge = new EcdarSystemEdge(systemRoot);
-        system.get().addEdge(edge);
+        getSystem().addEdge(edge);
         hasEdge.set(true);
-
-        // If edge is removed or changes source, this instance updates it's hasEdge property so it can get a new edge
-        edge.getSourceProperty().addListener(((observable, oldValue, newValue) -> hasEdge.set(systemRoot.equals(newValue))));
+        handleHasEdge(edge);
+        
         return edge;
     }
 }
