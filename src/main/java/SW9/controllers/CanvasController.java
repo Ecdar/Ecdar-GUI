@@ -3,7 +3,7 @@ package SW9.controllers;
 import SW9.abstractions.Component;
 import SW9.abstractions.Declarations;
 import SW9.abstractions.HighLevelModelObject;
-import SW9.abstractions.SystemModel;
+import SW9.abstractions.EcdarSystem;
 import SW9.presentations.*;
 import SW9.utility.helpers.SelectHelper;
 import javafx.application.Platform;
@@ -116,7 +116,7 @@ public class CanvasController implements Initializable {
      */
     private void onActiveModelChanged(final HighLevelModelObject oldObject, final HighLevelModelObject newObject) {
         // If old object is a component or system, add to map in order to remember coordinate
-        if (oldObject != null && (oldObject instanceof Component || oldObject instanceof SystemModel)) {
+        if (oldObject != null && (oldObject instanceof Component || oldObject instanceof EcdarSystem)) {
             ModelObjectTranslateMap.put(oldObject, new Pair<>(root.getTranslateX(), root.getTranslateY()));
         }
 
@@ -136,10 +136,10 @@ public class CanvasController implements Initializable {
 
             activeComponentPresentation = null;
             root.getChildren().add(new DeclarationPresentation((Declarations) newObject));
-        } else if (newObject instanceof SystemModel) {
+        } else if (newObject instanceof EcdarSystem) {
             setTranslateOfBox(newObject);
             activeComponentPresentation = null;
-            root.getChildren().add(new SystemPresentation((SystemModel) newObject));
+            root.getChildren().add(new SystemPresentation((EcdarSystem) newObject));
         } else {
             throw new IllegalStateException("Type of object is not supported.");
         }

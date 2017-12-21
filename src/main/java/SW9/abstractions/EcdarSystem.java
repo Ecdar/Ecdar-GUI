@@ -15,9 +15,9 @@ import javafx.collections.ObservableList;
 
 /**
  * A model of a system.
- * The class is called SystemModel, since Java already has a System class.
+ * The class is called EcdarSystem, since Java already has a System class.
  */
-public class SystemModel extends EcdarModel implements Boxed { // TODO name EcdarSystem
+public class EcdarSystem extends EcdarModel implements Boxed { // TODO name EcdarSystem
     private static final String SYSTEM = "System";
     private static final String SYSTEM_ROOT_X = "systemRootX";
 
@@ -31,7 +31,7 @@ public class SystemModel extends EcdarModel implements Boxed { // TODO name Ecda
     // Styling properties
     private final Box box = new Box();
 
-    public SystemModel() {
+    public EcdarSystem() {
         setSystemName();
         setRandomColor();
 
@@ -39,7 +39,7 @@ public class SystemModel extends EcdarModel implements Boxed { // TODO name Ecda
         systemRoot.setX(Grid.snap((getBox().getWidth() - SystemRoot.WIDTH) / 2));
     }
 
-    SystemModel(final JsonObject json) {
+    EcdarSystem(final JsonObject json) {
         deserialize(json);
     }
 

@@ -29,7 +29,7 @@ public class Project {
 
     private final ObservableList<Query> queries;
     private final ObservableList<Component> components;
-    private final ObservableList<SystemModel> systems;
+    private final ObservableList<EcdarSystem> systems;
     private final ObjectProperty<Declarations> globalDeclarations;
     private final ObjectProperty<Declarations> systemDeclarations;
 
@@ -49,7 +49,7 @@ public class Project {
         return components;
     }
 
-    public ObservableList<SystemModel> getSystemsProperty() {
+    public ObservableList<EcdarSystem> getSystemsProperty() {
         return systems;
     }
 
@@ -103,7 +103,7 @@ public class Project {
         }
 
         // Save systems
-        for (final SystemModel system : getSystemsProperty()) {
+        for (final EcdarSystem system : getSystemsProperty()) {
             final Writer writer = getSaveFileWriter(system.getName(), FOLDER_NAME_SYSTEMS);
             getNewGson().toJson(system.serialize(), writer);
             writer.close();
@@ -273,7 +273,7 @@ public class Project {
         Collections.reverse(orderedJsonSystems);
 
         // Add the systems to the list
-        orderedJsonSystems.forEach(json -> getSystemsProperty().add(new SystemModel(json)));
+        orderedJsonSystems.forEach(json -> getSystemsProperty().add(new EcdarSystem(json)));
     }
 
     /**
@@ -322,7 +322,7 @@ public class Project {
     HashSet<String> getSystemNames(){
         final HashSet<String> names = new HashSet<>();
 
-        for(final SystemModel system : getSystemsProperty()){
+        for(final EcdarSystem system : getSystemsProperty()){
             names.add(system.getName());
         }
 

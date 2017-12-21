@@ -1,6 +1,6 @@
 package SW9.presentations;
 import SW9.abstractions.ComponentOperator;
-import SW9.abstractions.SystemModel;
+import SW9.abstractions.EcdarSystem;
 import SW9.controllers.ComponentOperatorController;
 import SW9.utility.colors.Color;
 import SW9.utility.helpers.ItemDragHelper;
@@ -29,7 +29,7 @@ public class ComponentOperatorPresentation extends StackPane implements SelectHe
      * @param operator the ComponentOperator that we want to present
      * @param system the system we want to present the operator within
      */
-    public ComponentOperatorPresentation(final ComponentOperator operator, final SystemModel system){
+    public ComponentOperatorPresentation(final ComponentOperator operator, final EcdarSystem system){
         controller = new EcdarFXMLLoader().loadAndGetController("ComponentOperatorPresentation.fxml", this);
 
         controller.setOperator(operator);
@@ -45,7 +45,7 @@ public class ComponentOperatorPresentation extends StackPane implements SelectHe
      * Initializes the label
      */
     private void initializeIdLabel() {
-        final SystemModel system = controller.getSystem();
+        final EcdarSystem system = controller.getSystem();
         final ComponentOperator operator = controller.getOperator();
         final Label idLabel = controller.label;
 
@@ -88,7 +88,7 @@ public class ComponentOperatorPresentation extends StackPane implements SelectHe
      * Initializes the frame.
      */
     private void initializeFrame() {
-        final SystemModel system = controller.getSystem();
+        final EcdarSystem system = controller.getSystem();
 
         controller.frame.getPoints().addAll(1d * Grid.GRID_SIZE, - 1d * Grid.GRID_SIZE);
         controller.frame.getPoints().addAll(- 1d * Grid.GRID_SIZE, - 1d * Grid.GRID_SIZE);
@@ -189,7 +189,7 @@ public class ComponentOperatorPresentation extends StackPane implements SelectHe
     @Override
     public void deselect() {
         updateColorDelegates.forEach(colorConsumer -> {
-            final SystemModel system = controller.getSystem();
+            final EcdarSystem system = controller.getSystem();
 
             colorConsumer.accept(system.getColor(), system.getColorIntensity());
         });

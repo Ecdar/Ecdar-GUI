@@ -1,8 +1,7 @@
 package SW9.controllers;
-import SW9.Ecdar;
 import SW9.abstractions.ComponentOperator;
+import SW9.abstractions.EcdarSystem;
 import SW9.abstractions.EcdarSystemEdge;
-import SW9.abstractions.SystemModel;
 import SW9.presentations.DropDownMenu;
 import SW9.presentations.MenuElement;
 import com.jfoenix.controls.JFXPopup;
@@ -31,7 +30,7 @@ public class ComponentOperatorController implements Initializable {
     public StackPane root;
     public Label label;
 
-    private final ObjectProperty<SystemModel> system = new SimpleObjectProperty<>();
+    private final ObjectProperty<EcdarSystem> system = new SimpleObjectProperty<>();
     private ComponentOperator operator;
     private final BooleanProperty hasParent = new SimpleBooleanProperty(false);
     private Circle dropDownMenuHelperCircle;
@@ -45,11 +44,11 @@ public class ComponentOperatorController implements Initializable {
         this.operator = operator;
     }
 
-    public void setSystem(final SystemModel system) {
+    public void setSystem(final EcdarSystem system) {
         this.system.set(system);
     }
 
-    public SystemModel getSystem() {
+    public EcdarSystem getSystem() {
         return system.get();
     }
 

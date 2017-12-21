@@ -33,7 +33,7 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
     private final ComponentInstanceController controller;
     private final List<BiConsumer<Color, Color.Intensity>> updateColorDelegates = new ArrayList<>();
 
-    public ComponentInstancePresentation(final ComponentInstance instance, final SystemModel system) {
+    public ComponentInstancePresentation(final ComponentInstance instance, final EcdarSystem system) {
         controller = new EcdarFXMLLoader().loadAndGetController("ComponentInstancePresentation.fxml", this);
 
         controller.setInstance(instance);

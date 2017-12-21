@@ -1,6 +1,6 @@
 package SW9.presentations;
 
-import SW9.abstractions.SystemModel;
+import SW9.abstractions.EcdarSystem;
 import SW9.abstractions.SystemRoot;
 import SW9.controllers.SystemRootController;
 import SW9.utility.Highlightable;
@@ -13,7 +13,6 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ObservableDoubleValue;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
-import javafx.scene.shape.Polygon;
 
 /**
  * Presentation for a system root
@@ -21,7 +20,7 @@ import javafx.scene.shape.Polygon;
 public class SystemRootPresentation extends StackPane implements Highlightable {
     private final SystemRootController controller;
 
-    public SystemRootPresentation(final SystemModel system) {
+    public SystemRootPresentation(final EcdarSystem system) {
         controller = new EcdarFXMLLoader().loadAndGetController("SystemRootPresentation.fxml", this);
         controller.setSystemRoot(system.getSystemRoot());
         controller.setSystem(system);

@@ -36,16 +36,16 @@ public class SystemController extends ModelController implements Initializable {
     private final Map<ComponentOperator, ComponentOperatorPresentation> componentOperatorPresentationMap = new HashMap<>();
     private final Map<EcdarSystemEdge, SystemEdgePresentation> edgePresentationMap = new HashMap<>();
 
-    private final ObjectProperty<SystemModel> system = new SimpleObjectProperty<>();
+    private final ObjectProperty<EcdarSystem> system = new SimpleObjectProperty<>();
 
     private Circle dropDownMenuHelperCircle;
     private DropDownMenu contextMenu;
 
-    public SystemModel getSystem() {
+    public EcdarSystem getSystem() {
         return system.get();
     }
 
-    public void setSystem(final SystemModel system) {
+    public void setSystem(final EcdarSystem system) {
         this.system.setValue(system);
     }
 
@@ -63,7 +63,7 @@ public class SystemController extends ModelController implements Initializable {
         });
     }
 
-    private void initializeSystemRoot(final SystemModel system) {
+    private void initializeSystemRoot(final EcdarSystem system) {
         systemRootContainer.getChildren().add(new SystemRootPresentation(system));
     }
 
@@ -96,7 +96,7 @@ public class SystemController extends ModelController implements Initializable {
      * Initializes the context menu.
      * @param system system model of this controller
      */
-    private void initializeContextMenu(final SystemModel system) {
+    private void initializeContextMenu(final EcdarSystem system) {
         dropDownMenuHelperCircle = new Circle(5);
         dropDownMenuHelperCircle.setOpacity(0);
         dropDownMenuHelperCircle.setMouseTransparent(true);
@@ -192,7 +192,7 @@ public class SystemController extends ModelController implements Initializable {
      * Initializes handling of added and removed component instances.
      * @param system system model of this controller
      */
-    private void initializeComponentInstanceHandling(final SystemModel system) {
+    private void initializeComponentInstanceHandling(final EcdarSystem system) {
         system.getComponentInstances().forEach(this::handleAddedComponentInstance);
         system.getComponentInstances().addListener((ListChangeListener<ComponentInstance>) change -> {
             if (change.next()) {
@@ -226,7 +226,7 @@ public class SystemController extends ModelController implements Initializable {
      * Initializes handling of added and removed component operators.
      * @param system system model of this controller
      */
-    private void initializeOperatorHandling(final SystemModel system) {
+    private void initializeOperatorHandling(final EcdarSystem system) {
         system.getComponentOperators().forEach(this::handleAddedComponentOperator);
         system.getComponentOperators().addListener((ListChangeListener<ComponentOperator>) change -> {
             if (change.next()) {
@@ -260,7 +260,7 @@ public class SystemController extends ModelController implements Initializable {
      * Initializes handling of added and removed edges.
      * @param system system model of this controller
      */
-    private void initializeEdgeHandling(final SystemModel system) {
+    private void initializeEdgeHandling(final EcdarSystem system) {
         system.getEdges().forEach(this::handleAddedEdge);
         system.getEdges().addListener((ListChangeListener<EcdarSystemEdge>) change -> {
             if (change.next()) {

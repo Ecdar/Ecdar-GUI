@@ -2,8 +2,8 @@ package SW9.controllers;
 
 import SW9.Ecdar;
 import SW9.abstractions.Component;
+import SW9.abstractions.EcdarSystem;
 import SW9.abstractions.HighLevelModelObject;
-import SW9.abstractions.SystemModel;
 import SW9.presentations.DropDownMenu;
 import SW9.presentations.FilePresentation;
 import SW9.utility.UndoRedoStack;
@@ -86,7 +86,7 @@ public class ProjectPaneController implements Initializable {
         Ecdar.getProject().getComponents().forEach(this::handleAddedModel);
 
         // Listen to added and removed systems
-        Ecdar.getProject().getSystemsProperty().addListener((ListChangeListener<SystemModel>) change -> {
+        Ecdar.getProject().getSystemsProperty().addListener((ListChangeListener<EcdarSystem>) change -> {
             while (change.next()) {
                 change.getAddedSubList().forEach(this::handleAddedModel);
                 change.getRemoved().forEach(this::handleRemovedModel);
@@ -137,8 +137,8 @@ public class ProjectPaneController implements Initializable {
 
         if (model instanceof Component) {
             ((Component) model).descriptionProperty().bindBidirectional(textArea.textProperty());
-        } else if (model instanceof SystemModel) {
-            ((SystemModel) model).getDescriptionProperty().bindBidirectional(textArea.textProperty());
+        } else if (model instanceof EcdarSystem) {
+            ((EcdarSystem) model).getDescriptionProperty().bindBidirectional(textArea.textProperty());
         }
 
         textArea.textProperty().addListener((obs, oldText, newText) -> {
@@ -162,10 +162,10 @@ public class ProjectPaneController implements Initializable {
                     filePresentation.getModel(),
                     ((Component) filePresentation.getModel())::dye
             );
-        } else if (model instanceof SystemModel) {
+        } else if (model instanceof EcdarSystem) {
             moreInformationDropDown.addColorPicker(
                     filePresentation.getModel(),
-                    ((SystemModel) filePresentation.getModel())::dye
+                    ((EcdarSystem) filePresentation.getModel())::dye
             );
         }
         moreInformationDropDown.addSpacerElement();
@@ -184,12 +184,12 @@ public class ProjectPaneController implements Initializable {
         }
 
         // Delete button for systems
-        if (model instanceof SystemModel) {
+        if (model instanceof EcdarSystem) {
             moreInformationDropDown.addClickableListElement("Delete", event -> {
                 UndoRedoStack.pushAndPerform(() -> { // Perform
                     Ecdar.getProject().getSystemsProperty().remove(model);
                 }, () -> { // Undo
-                    Ecdar.getProject().getSystemsProperty().add((SystemModel) model);
+                    Ecdar.getProject().getSystemsProperty().add((EcdarSystem) model);
                 }, "Deleted system " + model.getName(), "delete");
 
                 moreInformationDropDown.close();
@@ -256,7 +256,7 @@ public class ProjectPaneController implements Initializable {
      */
     @FXML
     private void createSystemClicked() {
-        final SystemModel newSystem = new SystemModel();
+        final EcdarSystem newSystem = new EcdarSystem();
 
         UndoRedoStack.pushAndPerform(() -> { // Perform
             Ecdar.getProject().getSystemsProperty().add(newSystem);
