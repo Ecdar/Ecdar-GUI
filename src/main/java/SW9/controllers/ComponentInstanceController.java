@@ -15,9 +15,9 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.control.Label;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Circle;
-import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -79,14 +79,7 @@ public class ComponentInstanceController implements Initializable {
 
         dropDownMenu.addMenuElement(new MenuElement("Draw Edge")
                 .setClickable(() -> {
-                    final EcdarSystemEdge edge = new EcdarSystemEdge(instance.get());
-                    system.addEdge(edge);
-                    hasEdge.set(true);
-
-                    // If source become the component instance no longer, update state,
-                    // so the user can create another edge
-                    edge.getSourceProperty().addListener(((observable, oldValue, newValue) -> hasEdge.set(instance.equals(newValue))));
-
+                    createNewSystemEdge();
                     dropDownMenu.close();
                 })
                 .setDisableable(hasEdge));
@@ -100,10 +93,19 @@ public class ComponentInstanceController implements Initializable {
     }
 
     @FXML
-    private void onMousePressed(final MouseEvent event) {
+    private void onMouseClicked(final MouseEvent event) {
         event.consume();
 
         final EcdarSystemEdge unfinishedEdge = getSystem().getUnfinishedEdge();
+
+        if ((event.isShiftDown() && event.getButton().equals(MouseButton.PRIMARY)) || event.getButton().equals(MouseButton.MIDDLE)) {
+            // If shift click or middle click a component instance, create a new edge
+
+            // Component instance must not already have an edge and there cannot be any other unfinished edges in the system
+            if(!hasEdge.get() && unfinishedEdge == null) {
+                createNewSystemEdge();
+            }
+        }
 
         // if primary clicked and there is an unfinished edge, finish it with the component instance as target
         if (unfinishedEdge != null && event.getButton().equals(MouseButton.PRIMARY)) {
@@ -126,6 +128,21 @@ public class ComponentInstanceController implements Initializable {
             dropDownMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, 20, 20);
         }
     }
+
+    /***
+     * Helper method to create a new EcdarSystemEdge and add it to the current system and component instance
+     * @return The newly created EcdarSystemEdge
+     */
+    private EcdarSystemEdge createNewSystemEdge() {
+        final EcdarSystemEdge edge = new EcdarSystemEdge(instance.get());
+        system.get().addEdge(edge);
+        hasEdge.set(true);
+
+        // If edge is removed or changes source, this instance updates it's hasEdge property so it can get a new edge
+        edge.getSourceProperty().addListener(((observable, oldValue, newValue) -> hasEdge.set(instance.equals(newValue))));
+        return edge;
+    }
+
     /***
      * Inserts the signature labels for input and output
      * @param newComponent The component that should be presented with its signature

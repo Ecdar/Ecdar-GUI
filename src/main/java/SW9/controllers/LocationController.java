@@ -342,7 +342,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
     private void initializeMouseControls() {
 
-        final Consumer<MouseEvent> mousePressed = (event) -> {
+        final Consumer<MouseEvent> mouseClicked = (event) -> {
             event.consume();
 
             final Component component = getComponent();
@@ -430,7 +430,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
         locationProperty().addListener((obs, oldLocation, newLocation) -> {
             if(newLocation == null) return;
 
-            root.addEventHandler(MouseEvent.MOUSE_PRESSED, mousePressed::accept);
+            root.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseClicked::accept);
 
             ItemDragHelper.makeDraggable(root, this::getDragBounds);
         });
@@ -497,7 +497,8 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
      * true if the correct buttons are down
      */
     private boolean canCreateEdgeShortcut(MouseEvent event){
-        return (!getLocation().getIsLocked().get() && ((event.isShiftDown() && event.isPrimaryButtonDown()) || event.isMiddleButtonDown()));
+        return (!getLocation().getIsLocked().get() &&
+                ((event.isShiftDown() && event.getButton().equals(MouseButton.PRIMARY)) || event.getButton().equals(MouseButton.MIDDLE)));
     }
 
     @Override

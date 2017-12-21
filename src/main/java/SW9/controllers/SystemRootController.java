@@ -4,9 +4,7 @@ import SW9.Ecdar;
 import SW9.abstractions.EcdarSystemEdge;
 import SW9.abstractions.SystemModel;
 import SW9.abstractions.SystemRoot;
-import SW9.presentations.ComponentPresentation;
 import SW9.presentations.DropDownMenu;
-import SW9.presentations.Grid;
 import SW9.presentations.MenuElement;
 import com.jfoenix.controls.JFXPopup;
 import javafx.beans.property.BooleanProperty;
@@ -16,11 +14,8 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Polygon;
 
@@ -76,13 +71,7 @@ public class SystemRootController implements Initializable {
 
         contextMenu.addMenuElement(new MenuElement("Draw Edge")
                 .setClickable(() -> {
-                    final EcdarSystemEdge edge = new EcdarSystemEdge(systemRoot);
-                    system.addEdge(edge);
-                    hasEdge.set(true);
-
-                    // If source become the component instance no longer, update state,
-                    // so the user can create another edge
-                    edge.getSourceProperty().addListener(((observable, oldValue, newValue) -> hasEdge.set(systemRoot.equals(newValue))));
+                    createNewSystemEdge();
 
                     contextMenu.close();
                 })
@@ -95,8 +84,18 @@ public class SystemRootController implements Initializable {
 
         final EcdarSystemEdge unfinishedEdge = getSystem().getUnfinishedEdge();
 
+        if ((event.isShiftDown() && event.getButton().equals(MouseButton.PRIMARY)) || event.getButton().equals(MouseButton.MIDDLE)) {
+            // If shift click or middle click a component instance, create a new edge
+
+            // Component instance must not already have an edge and there cannot be any other unfinished edges in the system
+            if (!hasEdge.get() && unfinishedEdge == null) {
+                createNewSystemEdge();
+            }
+        }
+
         // if primary clicked and there is an unfinished edge, finish it with the system root as target
         if (unfinishedEdge != null && event.getButton().equals(MouseButton.PRIMARY)) {
+
             // If already has edge, give error
             if (hasEdge.get()) {
                 Ecdar.showToast("This system root already has an edge.");
@@ -117,5 +116,19 @@ public class SystemRootController implements Initializable {
         if (event.getButton().equals(MouseButton.SECONDARY)) {
             contextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, 0, 0);
         }
+    }
+
+    /***
+     * Helper method to create a new EcdarSystemEdge and add it to the current system and system root
+     * @return The newly created EcdarSystemEdge
+     */
+    private EcdarSystemEdge createNewSystemEdge() {
+        final EcdarSystemEdge edge = new EcdarSystemEdge(systemRoot);
+        system.get().addEdge(edge);
+        hasEdge.set(true);
+
+        // If edge is removed or changes source, this instance updates it's hasEdge property so it can get a new edge
+        edge.getSourceProperty().addListener(((observable, oldValue, newValue) -> hasEdge.set(systemRoot.equals(newValue))));
+        return edge;
     }
 }
