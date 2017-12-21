@@ -403,7 +403,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                 // Allowed x and y coordinates
                 final double minX = GRID_SIZE * 2;
                 final double maxX = getComponent().getBox().getWidth() - GRID_SIZE * 2;
-                final double minY = ComponentPresentation.TOOL_BAR_HEIGHT + GRID_SIZE * 2;
+                final double minY = Grid.TOOL_BAR_HEIGHT + GRID_SIZE * 2;
                 final double maxY = getComponent().getBox().getHeight() - GRID_SIZE * 2;
 
                 if(root.getLayoutX() >= minX && root.getLayoutX() <= maxX && root.getLayoutY() >= minY && root.getLayoutY() <= maxY) {
@@ -461,7 +461,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
     public ItemDragHelper.DragBounds getDragBounds() {
         final ObservableDoubleValue minX = new SimpleDoubleProperty(GRID_SIZE * 2);
         final ObservableDoubleValue maxX = getComponent().getBox().getWidthProperty().subtract(GRID_SIZE * 2);
-        final ObservableDoubleValue minY = new SimpleDoubleProperty(ComponentPresentation.TOOL_BAR_HEIGHT + GRID_SIZE * 2);
+        final ObservableDoubleValue minY = new SimpleDoubleProperty(Grid.TOOL_BAR_HEIGHT + GRID_SIZE * 2);
         final ObservableDoubleValue maxY = getComponent().getBox().getHeightProperty().subtract(GRID_SIZE * 2);
         return new ItemDragHelper.DragBounds(minX, maxX, minY, maxY);
     }

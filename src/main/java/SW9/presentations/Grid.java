@@ -8,6 +8,9 @@ import java.util.ArrayList;
 
 public class Grid extends Parent {
     public static final int GRID_SIZE = 10;
+    static final int CORNER_SIZE = 4 * Grid.GRID_SIZE;
+    public static final double TOOL_BAR_HEIGHT = CORNER_SIZE / 2;
+
     private final ArrayList<Line> horizontalLines = new ArrayList<>();
     private final ArrayList<Line> verticalLines = new ArrayList<>();
 

@@ -21,13 +21,10 @@ import static SW9.presentations.Grid.GRID_SIZE;
  * Presentation for high level graphical models such as systems and components
  */
 public abstract class ModelPresentation extends HighLevelModelPresentation {
-    static final int CORNER_SIZE = 4 * Grid.GRID_SIZE;
-    public static final double TOOL_BAR_HEIGHT = CORNER_SIZE / 2;
-
     static final Polygon TOP_LEFT_CORNER = new Polygon(
             0, 0,
-            CORNER_SIZE + 2, 0,
-            0, CORNER_SIZE + 2
+            Grid.CORNER_SIZE + 2, 0,
+            0, Grid.CORNER_SIZE + 2
     );
 
     abstract ModelController getModelController();
@@ -82,7 +79,7 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
         updateColor.run();
 
         // Center the text vertically and aff a left padding of CORNER_SIZE
-        controller.name.setPadding(new Insets(2, 0, 0, CORNER_SIZE));
+        controller.name.setPadding(new Insets(2, 0, 0, Grid.CORNER_SIZE));
         controller.name.setOnKeyPressed(CanvasController.getLeaveTextAreaKeyHandler());
     }
 

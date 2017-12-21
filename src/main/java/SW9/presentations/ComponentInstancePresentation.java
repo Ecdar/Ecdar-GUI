@@ -124,7 +124,7 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
         instance.getComponent().colorProperty().addListener(observable -> updateColor.run());
 
         // Center the text vertically and aff a left padding of CORNER_SIZE
-        controller.identifier.setPadding(new Insets(2, 0, 0, ModelPresentation.CORNER_SIZE)); // TODO maybe move constant
+        controller.identifier.setPadding(new Insets(2, 0, 0, Grid.CORNER_SIZE));
         controller.identifier.setOnKeyPressed(CanvasController.getLeaveTextAreaKeyHandler());
 
         controller.originalComponentLabel.setPadding(new Insets(0, 5, 0, 15));
@@ -167,7 +167,7 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
                     Insets.EMPTY
             )));
 
-            controller.toolbar.setPrefHeight(ModelPresentation.TOOL_BAR_HEIGHT); // TODO maybe move constant
+            controller.toolbar.setPrefHeight(Grid.TOOL_BAR_HEIGHT);
         };
 
         // Update color now, whenever color of component changes, and when someone uses the color delegates
@@ -219,8 +219,8 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
         // Generate first corner (to subtract)
         final Polygon corner1 = new Polygon(
                 0, 0,
-                ModelPresentation.CORNER_SIZE + 2, 0,
-                0, ModelPresentation.CORNER_SIZE + 2
+                Grid.CORNER_SIZE + 2, 0,
+                0, Grid.CORNER_SIZE + 2
         );
 
         final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
@@ -230,10 +230,10 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
             controller.background.setClip(Path.union(mask[0], mask[0]));
 
             // Bind the missing lines that we cropped away
-            controller.line1.setStartX(ModelPresentation.CORNER_SIZE);
+            controller.line1.setStartX(Grid.CORNER_SIZE);
             controller.line1.setStartY(0);
             controller.line1.setEndX(0);
-            controller.line1.setEndY(ModelPresentation.CORNER_SIZE);
+            controller.line1.setEndY(Grid.CORNER_SIZE);
             controller.line1.setStroke(newColor.getColor(newIntensity.next(2)));
             controller.line1.setStrokeWidth(1.25);
             StackPane.setAlignment(controller.line1, Pos.TOP_LEFT);
@@ -344,7 +344,7 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
         final ObservableDoubleValue maxX = controller.getSystem().getBox().getWidthProperty()
                 .subtract(GRID_SIZE)
                 .subtract(controller.getInstance().getBox().getWidth());
-        final ObservableDoubleValue minY = new SimpleDoubleProperty(ComponentPresentation.TOOL_BAR_HEIGHT + GRID_SIZE);
+        final ObservableDoubleValue minY = new SimpleDoubleProperty(Grid.TOOL_BAR_HEIGHT + GRID_SIZE);
         final ObservableDoubleValue maxY = controller.getSystem().getBox().getHeightProperty()
                 .subtract(GRID_SIZE)
                 .subtract(controller.getInstance().getBox().getHeight());

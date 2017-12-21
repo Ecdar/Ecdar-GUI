@@ -148,7 +148,7 @@ public class ComponentOperatorPresentation extends StackPane implements SelectHe
         final ObservableDoubleValue maxX = controller.getSystem().getBox().getWidthProperty()
                 .subtract(GRID_SIZE * 2)
                 .subtract(controller.getOperator().getBox().getWidth());
-        final ObservableDoubleValue minY = new SimpleDoubleProperty(ComponentPresentation.TOOL_BAR_HEIGHT + GRID_SIZE * 2);
+        final ObservableDoubleValue minY = new SimpleDoubleProperty(Grid.TOOL_BAR_HEIGHT + GRID_SIZE * 2);
         final ObservableDoubleValue maxY = controller.getSystem().getBox().getHeightProperty()
                 .subtract(GRID_SIZE * 2)
                 .subtract(controller.getOperator().getBox().getHeight());

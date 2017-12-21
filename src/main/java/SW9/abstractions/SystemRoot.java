@@ -1,6 +1,5 @@
 package SW9.abstractions;
 
-import SW9.presentations.ComponentPresentation;
 import SW9.presentations.Grid;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -36,6 +35,6 @@ public class SystemRoot implements SystemElement {
 
     @Override
     public ObservableValue<? extends Number> getEdgeY() {
-        return new SimpleDoubleProperty(ComponentPresentation.TOOL_BAR_HEIGHT + 2 * Grid.GRID_SIZE);
+        return new SimpleDoubleProperty(Grid.TOOL_BAR_HEIGHT + 2 * Grid.GRID_SIZE);
     }
 }
