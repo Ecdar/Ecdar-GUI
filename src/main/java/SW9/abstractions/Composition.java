@@ -8,9 +8,4 @@ public class Composition extends ComponentOperator {
         super(system);
         label.setValue("&&");
     }
-
-    @Override
-    public String getJsonType() {
-        return "composition";
-    }
 }

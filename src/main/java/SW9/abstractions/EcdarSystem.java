@@ -173,6 +173,19 @@ public class EcdarSystem extends EcdarModel implements Boxed {
         }
 
         systemRoot.setX(json.getAsJsonPrimitive(SYSTEM_ROOT_X).getAsDouble());
+
+        json.getAsJsonArray(INSTANCES).forEach(jsonElement ->
+                getComponentInstances().add(new ComponentInstance((JsonObject) jsonElement)));
+
+        json.getAsJsonArray(OPERATORS).forEach(jsonElement -> {
+            if (
+            getComponentInstances().add(new ComponentOperator((JsonObject) jsonElement)));
+        });
+
+        json.getAsJsonArray(INSTANCES).forEach(jsonElement -> {
+            final ComponentInstance instance = new ComponentInstance((JsonObject) jsonElement);
+            getComponentInstances().add(instance);
+        });
     }
 
     /**

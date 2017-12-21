@@ -36,8 +36,6 @@ public abstract class ComponentOperator implements SystemElement {
     public String getLabel() { return label.get();
     }
 
-    public abstract String getJsonType();
-
     @Override
     public ObservableValue<? extends Number> getEdgeX() {
         return box.getXProperty().add(WIDTH / 2);
