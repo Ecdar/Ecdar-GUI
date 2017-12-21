@@ -15,7 +15,7 @@ public class EcdarSystemEdge {
     // Verification properties
     private final ObjectProperty<SystemElement> child = new SimpleObjectProperty<>();
     private final ObjectProperty<SystemElement> parent = new SimpleObjectProperty<>();
-    private SystemElement tempNode;
+    private final ObjectProperty<SystemElement> tempNode = new SimpleObjectProperty<>();
     private final ObservableList<SystemNail> nails = FXCollections.observableArrayList();
 
 
@@ -24,7 +24,7 @@ public class EcdarSystemEdge {
      * @param node A node of this edge. This can either be a child or a parent
      */
     public EcdarSystemEdge(final SystemElement node) {
-        tempNode = node;
+        tempNode.set(node);
     }
 
     public ObservableList<SystemNail> getNails() {
@@ -48,6 +48,14 @@ public class EcdarSystemEdge {
     }
 
     public SystemElement getTempNode() {
+        return tempNode.get();
+    }
+
+    public void setTempNode(final SystemElement node) {
+        tempNode.set(node);
+    }
+
+    public ObjectProperty<SystemElement> getTempNodeProperty() {
         return tempNode;
     }
 
@@ -93,8 +101,8 @@ public class EcdarSystemEdge {
 
         // Set instance as child node
         setChild(instance);
-        setParent(tempNode);
-        tempNode = null;
+        setParent(getTempNode());
+        setTempNode(null);
         return true;
     }
 
@@ -111,9 +119,9 @@ public class EcdarSystemEdge {
         }
 
         // Set root as parent node
-        setChild(tempNode);
+        setChild(getTempNode());
         setParent(controller.getSystemRoot());
-        tempNode = null;
+        setTempNode(null);
         return true;
     }
 

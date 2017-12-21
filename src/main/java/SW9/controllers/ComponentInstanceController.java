@@ -79,7 +79,7 @@ public class ComponentInstanceController implements Initializable {
 
         dropDownMenu.addMenuElement(new MenuElement("Draw Edge")
                 .setClickable(() -> {
-                    system.addEdge(createNewSystemEdge());
+                    createNewSystemEdge();
                     dropDownMenu.close();
                 })
                 .setDisableable(hasEdge));
