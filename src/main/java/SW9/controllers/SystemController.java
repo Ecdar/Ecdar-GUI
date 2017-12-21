@@ -111,7 +111,7 @@ public class SystemController extends ModelController implements Initializable {
         // Add sub menu element for each component
         Ecdar.getProject().getComponents().forEach(component -> {
             componentInstanceSubMenu.addMenuElement(new MenuElement(component.getName()).setClickable(() -> {
-                final ComponentInstance instance = new ComponentInstance();
+                final ComponentInstance instance = new ComponentInstance(getSystem());
 
                 instance.setComponent(component);
                 instance.getColorProperty().set(system.getColor());
@@ -134,7 +134,7 @@ public class SystemController extends ModelController implements Initializable {
 
 
         operatorSubMenu.addMenuElement(new MenuElement("Add Conjunction").setClickable(() -> {
-            final Conjunction operator = new Conjunction();
+            final Conjunction operator = new Conjunction(getSystem());
 
             operator.getBox().setX(DropDownMenu.x);
             operator.getBox().setY(DropDownMenu.y);
@@ -150,7 +150,7 @@ public class SystemController extends ModelController implements Initializable {
         }));
 
         operatorSubMenu.addMenuElement(new MenuElement("Add Composition").setClickable(() -> {
-            final Composition operator = new Composition();
+            final Composition operator = new Composition(getSystem());
 
             operator.getBox().setX(DropDownMenu.x);
             operator.getBox().setY(DropDownMenu.y);
@@ -166,7 +166,7 @@ public class SystemController extends ModelController implements Initializable {
         }));
 
         operatorSubMenu.addMenuElement(new MenuElement("Add Quotient").setClickable(() -> {
-            final Quotient operator = new Quotient();
+            final Quotient operator = new Quotient(getSystem());
 
             operator.getBox().setX(DropDownMenu.x);
             operator.getBox().setY(DropDownMenu.y);

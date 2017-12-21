@@ -6,12 +6,16 @@ import SW9.utility.UndoRedoStack;
 import SW9.utility.colors.Color;
 import SW9.utility.colors.EnabledColor;
 import SW9.utility.helpers.Boxed;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.uppaal.model.system.SystemEdge;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A model of a system.
@@ -20,6 +24,9 @@ import javafx.collections.ObservableList;
 public class EcdarSystem extends EcdarModel implements Boxed {
     private static final String SYSTEM = "System";
     private static final String SYSTEM_ROOT_X = "systemRootX";
+    private static final String INSTANCES = "componentInstances";
+    private static final String OPERATORS = "operators";
+    private static final String EDGES = "edges";
 
     // Verification properties
     private final StringProperty description = new SimpleStringProperty("");
@@ -136,6 +143,18 @@ public class EcdarSystem extends EcdarModel implements Boxed {
 
         result.addProperty(SYSTEM_ROOT_X, systemRoot.getX());
 
+        final JsonArray instances = new JsonArray();
+        getComponentInstances().forEach(instance -> instances.add(instance.serialize()));
+        result.add(INSTANCES, instances);
+
+        final JsonArray operators = new JsonArray();
+        getComponentOperators().forEach(operator -> instances.add(operator.serialize()));
+        result.add(OPERATORS, operators);
+
+        final JsonArray edges = new JsonArray();
+        getEdges().forEach(edge -> edges.add(edge.serialize()));
+        result.add(EDGES, edges);
+
         return result;
     }
 
@@ -178,5 +197,25 @@ public class EcdarSystem extends EcdarModel implements Boxed {
             if (!edge.isFinished()) return edge;
         }
         return null;
+    }
+
+    public int generateId() {
+        final Set<Integer> ids = new HashSet<>();
+
+        ids.add(getSystemRoot().getHiddenId());
+
+        for (final ComponentInstance instance : getComponentInstances()) {
+            ids.add(instance.getHiddenId());
+        }
+
+        for (final ComponentOperator operator : getComponentOperators()) {
+            ids.add(operator.getHiddenId());
+        }
+
+        for (int counter = 0; ; counter++) {
+            if(!ids.contains(counter)){
+                return counter;
+            }
+        }
     }
 }

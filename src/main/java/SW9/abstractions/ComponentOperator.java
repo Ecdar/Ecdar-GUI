@@ -1,9 +1,7 @@
 package SW9.abstractions;
 
 import SW9.presentations.Grid;
-import SW9.utility.colors.Color;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import com.google.gson.JsonObject;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
@@ -14,15 +12,21 @@ import javafx.beans.value.ObservableValue;
 public abstract class ComponentOperator implements SystemElement {
     public final static int WIDTH = 4 * Grid.GRID_SIZE;
     public final static int HEIGHT = 2 * Grid.GRID_SIZE;
+    private static final String ID = "id";
+    private static final String TYPE = "type";
+    private static final String X = "x";
+    private static final String Y = "y";
 
     private final Box box = new Box();
     final StringProperty label = new SimpleStringProperty("");
 
+    private final int hiddenId;
+
     /**
      * Constructor, does nothing
      */
-    ComponentOperator() {
-
+    ComponentOperator(final EcdarSystem system) {
+        hiddenId = system.generateId();
     }
 
     public Box getBox() {
@@ -32,6 +36,8 @@ public abstract class ComponentOperator implements SystemElement {
     public String getLabel() { return label.get();
     }
 
+    public abstract String getJsonType();
+
     @Override
     public ObservableValue<? extends Number> getEdgeX() {
         return box.getXProperty().add(WIDTH / 2);
@@ -40,5 +46,21 @@ public abstract class ComponentOperator implements SystemElement {
     @Override
     public ObservableValue<? extends Number> getEdgeY() {
         return box.getYProperty().add(HEIGHT / 2);
+    }
+
+    public JsonObject serialize() {
+        final JsonObject result = new JsonObject();
+
+        result.addProperty(ID, getHiddenId());
+        result.addProperty(TYPE, getJsonType());
+        result.addProperty(X, getBox().getX());
+        result.addProperty(Y, getBox().getY());
+
+        return result;
+    }
+
+    @Override
+    public int getHiddenId() {
+        return hiddenId;
     }
 }

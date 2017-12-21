@@ -34,4 +34,11 @@ public interface SystemElement {
     default int getEdgeYInt() {
         return getEdgeY().getValue().intValue();
     }
+
+    /**
+     * Gets an id that is unique within its systems.
+     * This is used to write and read to and from JSON.
+     * @return the id
+     */
+    int getHiddenId();
 }

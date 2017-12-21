@@ -105,7 +105,7 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
         });
 
         // Bind the model to the text field
-        controller.identifier.textProperty().bindBidirectional(instance.getIdProperty());
+        controller.identifier.textProperty().bindBidirectional(instance.getInstanceIdProperty());
 
         final Runnable updateColor = () -> {
             final Color color = instance.getComponent().getColor();

@@ -2,6 +2,7 @@ package SW9.abstractions;
 
 import SW9.Ecdar;
 import SW9.controllers.SystemRootController;
+import com.google.gson.JsonObject;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -12,6 +13,8 @@ import javafx.collections.ObservableList;
  * The class is called EcdarSystemEdge, since there is already an SystemEdge in com.uppaal.model.system.
  */
 public class EcdarSystemEdge {
+    private static final String CHILD = "child";
+    private static final String PARENT = "parent";
     // Verification properties
     private final ObjectProperty<SystemElement> child = new SimpleObjectProperty<>();
     private final ObjectProperty<SystemElement> parent = new SimpleObjectProperty<>();
@@ -145,5 +148,14 @@ public class EcdarSystemEdge {
             setTempNode(null);
             return true;
         }
+    }
+
+    public JsonObject serialize() {
+        final JsonObject result = new JsonObject();
+
+        result.addProperty(CHILD, getChild().getHiddenId());
+        result.addProperty(PARENT, getChild().getHiddenId());
+
+        return result;
     }
 }
