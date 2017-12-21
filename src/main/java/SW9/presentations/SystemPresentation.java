@@ -1,6 +1,6 @@
 package SW9.presentations;
 
-import SW9.abstractions.EcdarSystem;
+import SW9.abstractions.*;
 import SW9.controllers.ModelController;
 import SW9.controllers.SystemController;
 import SW9.utility.colors.Color;
@@ -13,6 +13,8 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 
 import java.util.function.BiConsumer;
+
+import static SW9.presentations.Grid.GRID_SIZE;
 
 /**
  * Presentation for a system.
@@ -146,15 +148,45 @@ public class SystemPresentation extends ModelPresentation {
         return controller;
     }
 
-    // TODO
+    /**
+     * Gets the minimum allowed width when dragging the anchor.
+     * It is determined by the position and size of the system nodes.
+     * @return the minimum allowed width
+     */
     @Override
     double getDragAnchorMinWidth() {
-        return 0;
+        final EcdarSystem system = controller.getSystem();
+        double minWidth = system.getSystemRoot().getX() + SystemRoot.WIDTH + 2 * Grid.GRID_SIZE;
+
+        for (final ComponentInstance instance : system.getComponentInstances()) {
+            minWidth = Math.max(minWidth, instance.getBox().getX() + instance.getBox().getWidth() + Grid.GRID_SIZE);
+        }
+
+        for (final ComponentOperator operator : system.getComponentOperators()) {
+            minWidth = Math.max(minWidth, operator.getBox().getX() + operator.getBox().getWidth() + Grid.GRID_SIZE);
+        }
+
+        return minWidth;
     }
 
-    // TODO
+    /**
+     * Gets the minimum allowed height when dragging the anchor.
+     * It is determined by the position and size of the system nodes.
+     * @return the minimum allowed height
+     */
     @Override
     double getDragAnchorMinHeight() {
-        return 0;
+        final EcdarSystem system = controller.getSystem();
+        double minHeight = 10 * GRID_SIZE;
+
+        for (final ComponentInstance instance : system.getComponentInstances()) {
+            minHeight = Math.max(minHeight, instance.getBox().getY() + instance.getBox().getHeight() + Grid.GRID_SIZE);
+        }
+
+        for (final ComponentOperator operator : system.getComponentOperators()) {
+            minHeight = Math.max(minHeight, operator.getBox().getY() + operator.getBox().getHeight() + Grid.GRID_SIZE);
+        }
+
+        return minHeight;
     }
 }
