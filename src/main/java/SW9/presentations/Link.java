@@ -10,7 +10,6 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.Group;
 import javafx.scene.shape.Line;
 
-// TODO refactor so Link does not use EdgeStatus, maybe make a makeDashed method
 public class Link extends Group implements SelectHelper.Selectable, Highlightable {
 
     private final static double HOVER_LINE_STROKE_WIDTH = 10d;
@@ -24,21 +23,17 @@ public class Link extends Group implements SelectHelper.Selectable, Highlightabl
      * Creates a link with a solid line.
      */
     public Link() {
-        this(EdgeStatus.INPUT);
+        this(0,0,0,0);
     }
 
-    public Link(final EdgeStatus status) {
-        this(0,0,0,0, status);
-    }
-
-    public Link(final double startX, final double endX, final double startY, final double endY, final EdgeStatus status) {
+    public Link(final double startX, final double endX, final double startY, final double endY) {
         // Set the initial values
         this.startX = new SimpleDoubleProperty(startX);
         this.endX = new SimpleDoubleProperty(endX);
         this.startY = new SimpleDoubleProperty(startY);
         this.endY = new SimpleDoubleProperty(endY);
 
-        setUpLine(status);
+        setUpLine();
 
         final Line hiddenHoverLine = new Line();
 
@@ -59,22 +54,12 @@ public class Link extends Group implements SelectHelper.Selectable, Highlightabl
         hiddenHoverLine.opacityProperty().bind(Debug.hoverableAreaOpacity);
     }
 
-    public void updateStatus(final EdgeStatus status) {
-        getChildren().remove(shownLine);
-        setUpLine(status);
-    }
-
     /**
      * Creates the line to show.
      */
-    private void setUpLine(final EdgeStatus status) {
+    private void setUpLine() {
         // Create the two lines
         shownLine = new Line();
-
-        // Make dashed line, if output edge
-        if (status == EdgeStatus.OUTPUT) {
-            shownLine.getStrokeDashArray().addAll(6d);
-        }
 
         // Add them
         getChildren().add(shownLine);
@@ -86,8 +71,19 @@ public class Link extends Group implements SelectHelper.Selectable, Highlightabl
         shownLine.endYProperty().bind(this.endY);
     }
 
-    private void remove() {
+    /**
+     * makes the link dashed.
+     */
+    public void makeDashed() {
+        shownLine.getStrokeDashArray().addAll(6d);
+    }
 
+
+    /**
+     * Make. the link solid.
+     */
+    public void makeSolid() {
+        shownLine.getStrokeDashArray().clear();
     }
 
     public double getStartX() {

@@ -18,23 +18,11 @@ public abstract class ComponentOperator implements SystemElement {
     private final Box box = new Box();
     final StringProperty label = new SimpleStringProperty("");
 
-    //Styling properties
-    private final ObjectProperty<Color> color = new SimpleObjectProperty<>(); // TODO should not have color or intensity
-    private final ObjectProperty<Color.Intensity> colorIntensity = new SimpleObjectProperty<>();
-
     /**
      * Constructor, does nothing
      */
     ComponentOperator() {
 
-    }
-
-    public ObjectProperty<Color> getColorProperty() {
-        return color;
-    }
-
-    public ObjectProperty<Color.Intensity> getColorIntensityProperty() {
-        return colorIntensity;
     }
 
     public Box getBox() {

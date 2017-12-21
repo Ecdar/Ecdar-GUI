@@ -59,7 +59,7 @@ public class ComponentInstanceController implements Initializable {
     public Group outputNailGroup;
 
     private final ObjectProperty<ComponentInstance> instance = new SimpleObjectProperty<>(null);
-    private final ObjectProperty<SystemModel> system = new SimpleObjectProperty<>(null);
+    private final ObjectProperty<EcdarSystem> system = new SimpleObjectProperty<>(null);
 
     private final BooleanProperty hasEdge = new SimpleBooleanProperty(false);
     private DropDownMenu dropDownMenu;
@@ -74,7 +74,7 @@ public class ComponentInstanceController implements Initializable {
                 ((observable, oldInstance, newInstance) -> initializeSignature(newInstance.getComponent())));
     }
 
-    private void initializeDropDownMenu(final SystemModel system) {
+    private void initializeDropDownMenu(final EcdarSystem system) {
         dropDownMenu = new DropDownMenu(root, frame, 230, true);
 
         dropDownMenu.addMenuElement(new MenuElement("Draw Edge")
@@ -226,7 +226,7 @@ public class ComponentInstanceController implements Initializable {
 
     public void setInstance(final ComponentInstance instance) { this.instance.setValue(instance); }
 
-    public void setSystem(final SystemModel system) { this.system.set(system); }
+    public void setSystem(final EcdarSystem system) { this.system.set(system); }
 
-    public SystemModel getSystem() { return system.get(); }
+    public EcdarSystem getSystem() { return system.get(); }
 }

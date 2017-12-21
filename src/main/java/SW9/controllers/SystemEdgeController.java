@@ -1,7 +1,7 @@
 package SW9.controllers;
 
+import SW9.abstractions.EcdarSystem;
 import SW9.abstractions.EcdarSystemEdge;
-import SW9.abstractions.SystemModel;
 import SW9.presentations.DropDownMenu;
 import SW9.utility.keyboard.Keybind;
 import SW9.utility.keyboard.KeyboardTracker;
@@ -28,7 +28,7 @@ public class SystemEdgeController implements Initializable {
     public Group root;
 
     private EcdarSystemEdge edge;
-    private final ObjectProperty<SystemModel> system = new SimpleObjectProperty<>();
+    private final ObjectProperty<EcdarSystem> system = new SimpleObjectProperty<>();
 
     private Circle dropDownMenuHelperCircle;
 
@@ -58,15 +58,15 @@ public class SystemEdgeController implements Initializable {
 
     // System
 
-    public SystemModel getSystem() {
+    public EcdarSystem getSystem() {
         return system.get();
     }
 
-    public void setSystem(final SystemModel system) {
+    public void setSystem(final EcdarSystem system) {
         this.system.set(system);
     }
 
-    private void initializeDropDownMenu(final SystemModel system) {
+    private void initializeDropDownMenu(final EcdarSystem system) {
         dropDownMenuHelperCircle = new Circle(5);
         dropDownMenuHelperCircle.setOpacity(0);
         dropDownMenuHelperCircle.setMouseTransparent(true);

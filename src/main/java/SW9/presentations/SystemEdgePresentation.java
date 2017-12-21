@@ -1,7 +1,7 @@
 package SW9.presentations;
 
 import SW9.abstractions.EcdarSystemEdge;
-import SW9.abstractions.SystemModel;
+import SW9.abstractions.EcdarSystem;
 import SW9.controllers.SystemEdgeController;
 import SW9.utility.colors.Color;
 import SW9.utility.helpers.ItemDragHelper;
@@ -24,7 +24,7 @@ public class SystemEdgePresentation extends Group implements SelectHelper.ItemSe
      * @param edge system edge to present
      * @param system system of the system edge
      */
-    public SystemEdgePresentation(final EcdarSystemEdge edge, final SystemModel system) {
+    public SystemEdgePresentation(final EcdarSystemEdge edge, final EcdarSystem system) {
         controller = new EcdarFXMLLoader().loadAndGetController("SystemEdgePresentation.fxml", this);
         controller.setEdge(edge);
         controller.setSystem(system);

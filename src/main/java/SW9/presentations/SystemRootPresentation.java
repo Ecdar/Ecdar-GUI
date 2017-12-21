@@ -1,6 +1,6 @@
 package SW9.presentations;
 
-import SW9.abstractions.SystemModel;
+import SW9.abstractions.EcdarSystem;
 import SW9.abstractions.SystemRoot;
 import SW9.controllers.SystemRootController;
 import SW9.utility.Highlightable;
@@ -13,7 +13,6 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ObservableDoubleValue;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
-import javafx.scene.shape.Polygon;
 
 /**
  * Presentation for a system root
@@ -21,7 +20,7 @@ import javafx.scene.shape.Polygon;
 public class SystemRootPresentation extends StackPane implements Highlightable {
     private final SystemRootController controller;
 
-    public SystemRootPresentation(final SystemModel system) {
+    public SystemRootPresentation(final EcdarSystem system) {
         controller = new EcdarFXMLLoader().loadAndGetController("SystemRootPresentation.fxml", this);
         controller.setSystemRoot(system.getSystemRoot());
         controller.setSystem(system);
@@ -41,7 +40,7 @@ public class SystemRootPresentation extends StackPane implements Highlightable {
         setLayoutX(root.getX());
         root.getXProperty().bind(layoutXProperty());
 
-        setLayoutY(ComponentPresentation.TOOL_BAR_HEIGHT); // TODO move const
+        setLayoutY(Grid.TOOL_BAR_HEIGHT);
 
         controller.shape.getPoints().addAll(0d, 0d);
         controller.shape.getPoints().addAll(2d * Grid.GRID_SIZE, 1.5 * Grid.GRID_SIZE);
@@ -127,7 +126,7 @@ public class SystemRootPresentation extends StackPane implements Highlightable {
         final ObservableDoubleValue minX = new SimpleDoubleProperty(2d * Grid.GRID_SIZE);
         final ObservableDoubleValue maxX = controller.getSystem().getBox().getWidthProperty()
                 .subtract(8d * Grid.GRID_SIZE);
-        final ObservableDoubleValue y = new SimpleDoubleProperty(ComponentPresentation.TOOL_BAR_HEIGHT);
+        final ObservableDoubleValue y = new SimpleDoubleProperty(Grid.TOOL_BAR_HEIGHT);
 
         return new ItemDragHelper.DragBounds(minX, maxX, y, y);
     }

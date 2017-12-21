@@ -99,11 +99,11 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
             // Set the icon color and rippler color of the toggleDeclarationButton
             controller.toggleDeclarationButton.setRipplerFill(newColor.getTextColor(newIntensity));
 
-            controller.toolbar.setPrefHeight(TOOL_BAR_HEIGHT);
+            controller.toolbar.setPrefHeight(Grid.TOOL_BAR_HEIGHT);
             controller.toggleDeclarationButton.setBackground(Background.EMPTY);
         };
 
-        updateColorDelegates.add(updateColor); // TODO maybe move to ModelPresentation
+        updateColorDelegates.add(updateColor);
 
         controller.getComponent().colorProperty().addListener(observable -> updateColor.accept(component.getColor(), component.getColorIntensity()));
 
@@ -129,10 +129,10 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
             controller.background.setOpacity(0.5);
 
             // Bind the missing lines that we cropped away
-            controller.topLeftLine.setStartX(CORNER_SIZE);
+            controller.topLeftLine.setStartX(Grid.CORNER_SIZE);
             controller.topLeftLine.setStartY(0);
             controller.topLeftLine.setEndX(0);
-            controller.topLeftLine.setEndY(CORNER_SIZE);
+            controller.topLeftLine.setEndY(Grid.CORNER_SIZE);
             controller.topLeftLine.setStroke(newColor.getColor(newIntensity.next(2)));
             controller.topLeftLine.setStrokeWidth(1.25);
             StackPane.setAlignment(controller.topLeftLine, Pos.TOP_LEFT);
@@ -147,7 +147,7 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
             )));
         };
 
-        updateColorDelegates.add(updateColor); // TODO maybe move to ModelPresentation
+        updateColorDelegates.add(updateColor);
 
         component.colorProperty().addListener(observable -> {
             updateColor.accept(component.getColor(), component.getColorIntensity());
@@ -168,7 +168,7 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
             controller.background.setFill(newColor.getColor(newIntensity.next(-10).next(2)));
         };
 
-        updateColorDelegates.add(updateColor);  // TODO maybe move to ModelPresentation
+        updateColorDelegates.add(updateColor);
 
         component.colorProperty().addListener(observable -> {
             updateColor.accept(component.getColor(), component.getColorIntensity());

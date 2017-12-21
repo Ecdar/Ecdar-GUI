@@ -2,7 +2,7 @@ package SW9.presentations;
 
 import SW9.Ecdar;
 import SW9.abstractions.Component;
-import SW9.abstractions.SystemModel;
+import SW9.abstractions.EcdarSystem;
 import SW9.abstractions.HighLevelModelObject;
 import SW9.controllers.CanvasController;
 import SW9.controllers.FileController;
@@ -38,7 +38,7 @@ public class FilePresentation extends AnchorPane {
     }
 
     private void initializeMoreInformationButton() {
-        if (getModel() instanceof Component || getModel() instanceof SystemModel) {
+        if (getModel() instanceof Component || getModel() instanceof EcdarSystem) {
             controller.moreInformation.setVisible(true);
             controller.moreInformation.setMaskType(JFXRippler.RipplerMask.CIRCLE);
             controller.moreInformation.setPosition(JFXRippler.RipplerPos.BACK);
@@ -137,7 +137,7 @@ public class FilePresentation extends AnchorPane {
     private void initializeFileIcons() {
         if(model.get() instanceof Component){
             controller.fileImage.setImage(new Image(Ecdar.class.getResource("component_frame.png").toExternalForm()));
-        } else if(model.get() instanceof SystemModel){
+        } else if(model.get() instanceof EcdarSystem){
             controller.fileImage.setImage(new Image(Ecdar.class.getResource("system_frame.png").toExternalForm()));
         } else {
             controller.fileImage.setImage(new Image(Ecdar.class.getResource("description_frame.png").toExternalForm()));

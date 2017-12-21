@@ -1,6 +1,6 @@
 package SW9.presentations;
 
-import SW9.abstractions.SystemModel;
+import SW9.abstractions.EcdarSystem;
 import SW9.controllers.ModelController;
 import SW9.controllers.SystemController;
 import SW9.utility.colors.Color;
@@ -20,7 +20,7 @@ import java.util.function.BiConsumer;
 public class SystemPresentation extends ModelPresentation {
     private final SystemController controller;
 
-    public SystemPresentation(final SystemModel system) {
+    public SystemPresentation(final EcdarSystem system) {
         controller = new EcdarFXMLLoader().loadAndGetController("SystemPresentation.fxml", this);
 
         controller.setSystem(system);
@@ -47,7 +47,7 @@ public class SystemPresentation extends ModelPresentation {
      * Initializes the toolbar.
      */
     private void initializeToolbar() {
-        final SystemModel system = controller.getSystem();
+        final EcdarSystem system = controller.getSystem();
 
         final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
             // Set the background of the toolbar
@@ -57,7 +57,7 @@ public class SystemPresentation extends ModelPresentation {
                     Insets.EMPTY
             )));
 
-            controller.toolbar.setPrefHeight(TOOL_BAR_HEIGHT);
+            controller.toolbar.setPrefHeight(Grid.TOOL_BAR_HEIGHT);
         };
 
         system.colorProperty().addListener(observable -> updateColor.accept(system.getColor(), system.getColorIntensity()));
@@ -70,7 +70,7 @@ public class SystemPresentation extends ModelPresentation {
      * The frame is a rectangle minus two cutouts.
      */
     private void initializeFrame() {
-        final SystemModel system = controller.getSystem();
+        final EcdarSystem system = controller.getSystem();
 
         final Shape[] mask = new Shape[1];
         final Rectangle rectangle = new Rectangle(system.getBox().getWidth(), system.getBox().getHeight());
@@ -78,8 +78,8 @@ public class SystemPresentation extends ModelPresentation {
         // Generate top right corner (to subtract)
         final Polygon topRightCorner = new Polygon(
                 system.getBox().getWidth(), 0,
-                system.getBox().getWidth() - CORNER_SIZE - 2, 0,
-                system.getBox().getWidth(), CORNER_SIZE + 2
+                system.getBox().getWidth() - Grid.CORNER_SIZE - 2, 0,
+                system.getBox().getWidth(), Grid.CORNER_SIZE + 2
         );
 
         final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
@@ -91,18 +91,18 @@ public class SystemPresentation extends ModelPresentation {
             controller.background.setOpacity(0.5);
 
             // Bind the missing lines that we cropped away
-            controller.topLeftLine.setStartX(CORNER_SIZE);
+            controller.topLeftLine.setStartX(Grid.CORNER_SIZE);
             controller.topLeftLine.setStartY(0);
             controller.topLeftLine.setEndX(0);
-            controller.topLeftLine.setEndY(CORNER_SIZE);
+            controller.topLeftLine.setEndY(Grid.CORNER_SIZE);
             controller.topLeftLine.setStroke(newColor.getColor(newIntensity.next(2)));
             controller.topLeftLine.setStrokeWidth(1.25);
             StackPane.setAlignment(controller.topLeftLine, Pos.TOP_LEFT);
 
             controller.topRightLine.setStartX(0);
             controller.topRightLine.setStartY(0);
-            controller.topRightLine.setEndX(CORNER_SIZE);
-            controller.topRightLine.setEndY(CORNER_SIZE);
+            controller.topRightLine.setEndX(Grid.CORNER_SIZE);
+            controller.topRightLine.setEndY(Grid.CORNER_SIZE);
             controller.topRightLine.setStroke(newColor.getColor(newIntensity.next(2)));
             controller.topRightLine.setStrokeWidth(1.25);
             StackPane.setAlignment(controller.topRightLine, Pos.TOP_RIGHT);
@@ -126,7 +126,7 @@ public class SystemPresentation extends ModelPresentation {
      * Initializes the background
      */
     private void initializeBackground() {
-        final SystemModel system = controller.getSystem();
+        final EcdarSystem system = controller.getSystem();
 
         // Bind the background width and height to the values in the model
         controller.background.widthProperty().bindBidirectional(system.getBox().getWidthProperty());
