@@ -17,7 +17,7 @@ import javafx.collections.ObservableList;
  * A model of a system.
  * The class is called EcdarSystem, since Java already has a System class.
  */
-public class EcdarSystem extends EcdarModel implements Boxed { // TODO name EcdarSystem
+public class EcdarSystem extends EcdarModel implements Boxed {
     private static final String SYSTEM = "System";
     private static final String SYSTEM_ROOT_X = "systemRootX";
 
