@@ -47,8 +47,8 @@ public class SystemEdgePresentation extends Group implements SelectHelper.ItemSe
             link.startYProperty().bind(edge.getTempNode().getEdgeY());
 
             // Bind to mouse position (snapped to the grid)
-            link.endXProperty().bind(CanvasPresentation.mouseTracker.gridXProperty());
-            link.endYProperty().bind(CanvasPresentation.mouseTracker.gridYProperty());
+            link.endXProperty().bind(CanvasPresentation.mouseTracker.gridXProperty().subtract(Grid.GRID_SIZE / 2));
+            link.endYProperty().bind(CanvasPresentation.mouseTracker.gridYProperty().subtract(Grid.GRID_SIZE / 2));
         }
 
         // If edge source and target changes, bind
