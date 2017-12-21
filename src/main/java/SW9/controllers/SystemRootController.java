@@ -85,7 +85,7 @@ public class SystemRootController implements Initializable {
      * Listens to an edge to update whether the root has an edge.
      * @param edge the edge to update with
      */
-    private void HandleHasEdge(final EcdarSystemEdge edge) {
+    private void handleHasEdge(final EcdarSystemEdge edge) {
         edge.getTempNodeProperty().addListener(((observable, oldValue, newValue) -> updateHasEdge(edge)));
         edge.getChildProperty().addListener(((observable, oldValue, newValue) -> updateHasEdge(edge)));
         edge.getParentProperty().addListener(((observable, oldValue, newValue) -> updateHasEdge(edge)));
@@ -119,7 +119,7 @@ public class SystemRootController implements Initializable {
             final boolean succeeded = unfinishedEdge.tryFinishWithRoot(this);
             if (succeeded) {
                 hasEdge.set(true);
-                HandleHasEdge(unfinishedEdge);
+                handleHasEdge(unfinishedEdge);
             }
             return;
         }
@@ -138,7 +138,7 @@ public class SystemRootController implements Initializable {
         final EcdarSystemEdge edge = new EcdarSystemEdge(systemRoot);
         getSystem().addEdge(edge);
         hasEdge.set(true);
-        HandleHasEdge(edge);
+        handleHasEdge(edge);
         
         return edge;
     }

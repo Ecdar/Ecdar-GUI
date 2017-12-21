@@ -96,7 +96,7 @@ public class ComponentInstanceController implements Initializable {
      * Listens to an edge to update whether the root has an edge.
      * @param edge the edge to update with
      */
-    private void HandleHasEdge(final EcdarSystemEdge edge) {
+    private void handleHasEdge(final EcdarSystemEdge edge) {
         edge.getTempNodeProperty().addListener(((observable, oldValue, newValue) -> updateHasEdge(edge)));
         edge.getChildProperty().addListener(((observable, oldValue, newValue) -> updateHasEdge(edge)));
         edge.getParentProperty().addListener(((observable, oldValue, newValue) -> updateHasEdge(edge)));
@@ -136,7 +136,7 @@ public class ComponentInstanceController implements Initializable {
             final boolean succeeded = unfinishedEdge.tryFinishWithComponentInstance(getInstance());
             if (succeeded) {
                 hasEdge.set(true);
-                HandleHasEdge(unfinishedEdge);
+                handleHasEdge(unfinishedEdge);
             }
             return;
         }
@@ -156,7 +156,7 @@ public class ComponentInstanceController implements Initializable {
         hasEdge.set(true);
   
         // Update state when edge child and parent changes
-        HandleHasEdge(edge);
+        handleHasEdge(edge);
         return edge;
     }
 

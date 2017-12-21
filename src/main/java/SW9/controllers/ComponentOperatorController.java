@@ -107,7 +107,7 @@ public class ComponentOperatorController implements Initializable {
      * @param parentEdge the edge to update with
      */
     private void updateHasParent(final EcdarSystemEdge parentEdge) {
-        // The operator has a parent is the supposed parent is has the operator as a child
+        // The operator has a parent iff the supposed parent edge has the operator as a child
         parentEdge.getChildProperty().addListener(((observable, oldValue, newValue) -> hasParent.set(getOperator().equals(newValue))));
     }
 
