@@ -114,8 +114,6 @@ public class SystemController extends ModelController implements Initializable {
                 final ComponentInstance instance = new ComponentInstance(getSystem());
 
                 instance.setComponent(component);
-                instance.getColorProperty().set(system.getColor());
-                instance.getColorIntensityProperty().set(system.getColorIntensity());
                 instance.getBox().setX(DropDownMenu.x);
                 instance.getBox().setY(DropDownMenu.y);
 

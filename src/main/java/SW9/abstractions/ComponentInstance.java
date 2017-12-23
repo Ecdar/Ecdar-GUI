@@ -19,11 +19,13 @@ public class ComponentInstance implements SystemElement {
     private static final String COMPONENT_NAME = "componentName";
 
     private final ObjectProperty<Component> component = new SimpleObjectProperty<>();
-    private final ObjectProperty<Color> color = new SimpleObjectProperty<>(); // TODO remove color and intensity from here
-    private final ObjectProperty<Color.Intensity> colorIntensity = new SimpleObjectProperty<>();
     private final Box box = new Box();
-    private StringProperty instanceIdProperty = new SimpleStringProperty(""); ;
 
+    // Id of the instance used in the system declarations when verifying
+    private final StringProperty instanceIdProperty = new SimpleStringProperty("");
+
+    // Id of the instance used when writing to and reading from JSON
+    // This id is unique withing its system
     private int hiddenId;
 
     public ComponentInstance(final EcdarSystem system) {
@@ -40,30 +42,6 @@ public class ComponentInstance implements SystemElement {
 
     public void setComponent(final Component component) {
         this.component.set(component);
-    }
-
-    public Color getColor() {
-        return color.get();
-    }
-
-    public void setColor(final Color color) {
-        this.color.set(color);
-    }
-
-    public ObjectProperty<Color> getColorProperty() {
-        return color;
-    }
-
-    public Color.Intensity getColorIntensity() {
-        return colorIntensity.get();
-    }
-
-    public void setColorIntensity(final Color.Intensity intensity) {
-        this.colorIntensity.set(intensity);
-    }
-
-    public ObjectProperty<Color.Intensity> getColorIntensityProperty() {
-        return colorIntensity;
     }
 
     public Box getBox() {
