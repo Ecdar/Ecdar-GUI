@@ -8,7 +8,6 @@ import SW9.utility.colors.EnabledColor;
 import SW9.utility.helpers.Boxed;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.uppaal.model.system.SystemEdge;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -181,7 +180,7 @@ public class EcdarSystem extends EcdarModel implements Boxed {
 
         json.getAsJsonArray(OPERATORS).forEach(jsonOperator -> {
             final String type = ((JsonObject) jsonOperator).getAsJsonPrimitive(ComponentOperator.TYPE).getAsString();
-            final ComponentOperator operator = ComponentOperatorJsonFactory.create(type, this);
+            final ComponentOperator operator = ComponentOperatorFactory.create(type, this);
             operator.deserialize((JsonObject) jsonOperator);
             getComponentOperators().add(operator);
         });

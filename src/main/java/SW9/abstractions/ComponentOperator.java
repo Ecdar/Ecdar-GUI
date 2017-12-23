@@ -1,6 +1,5 @@
 package SW9.abstractions;
 
-import SW9.Ecdar;
 import SW9.presentations.Grid;
 import com.google.gson.JsonObject;
 import javafx.beans.property.SimpleStringProperty;
@@ -53,7 +52,7 @@ public abstract class ComponentOperator implements SystemElement {
         final JsonObject result = new JsonObject();
 
         result.addProperty(HIDDEN_ID, getHiddenId());
-        result.addProperty(TYPE, ComponentOperatorJsonFactory.getJsonType(this));
+        result.addProperty(TYPE, ComponentOperatorFactory.getTypeAsString(this));
         result.addProperty(X, getBox().getX());
         result.addProperty(Y, getBox().getY());
 

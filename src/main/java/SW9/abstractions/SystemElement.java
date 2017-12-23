@@ -6,7 +6,7 @@ import javafx.beans.value.ObservableValue;
  * An element in a system that can be connected to an edge.
  * An observable value can be a property or a binding.
  */
-public interface SystemElement {
+public interface SystemElement { // TODO rename to SystemNode
     /**
      * Observable value for x coordinate of where you want the edge to start from.
      * @return observable value
