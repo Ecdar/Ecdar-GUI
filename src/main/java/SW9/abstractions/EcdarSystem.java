@@ -213,6 +213,11 @@ public class EcdarSystem extends EcdarModel implements Boxed {
         return null;
     }
 
+    /**
+     * Generator a hidden id for a system node.
+     * The id is unique among the system nodes of this system.
+     * @return the id
+     */
     public int generateId() {
         final Set<Integer> ids = new HashSet<>();
 

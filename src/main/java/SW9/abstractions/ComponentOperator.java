@@ -38,6 +38,9 @@ public abstract class ComponentOperator implements SystemElement {
     public String getLabel() { return label.get();
     }
 
+
+    // Edge coordinates
+
     @Override
     public ObservableValue<? extends Number> getEdgeX() {
         return box.getXProperty().add(WIDTH / 2);
@@ -48,6 +51,19 @@ public abstract class ComponentOperator implements SystemElement {
         return box.getYProperty().add(HEIGHT / 2);
     }
 
+
+    // Hidden id
+
+    @Override
+    public int getHiddenId() {
+        return hiddenId;
+    }
+
+    private void setHiddenId(final int id) {
+        hiddenId = id;
+    }
+
+
     public JsonObject serialize() {
         final JsonObject result = new JsonObject();
 
@@ -57,15 +73,6 @@ public abstract class ComponentOperator implements SystemElement {
         result.addProperty(Y, getBox().getY());
 
         return result;
-    }
-
-    @Override
-    public int getHiddenId() {
-        return hiddenId;
-    }
-
-    private void setHiddenId(final int id) {
-        hiddenId = id;
     }
 
     public void deserialize(final JsonObject json) {
