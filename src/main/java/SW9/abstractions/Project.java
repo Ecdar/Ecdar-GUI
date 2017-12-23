@@ -355,4 +355,17 @@ public class Project {
 
         return names;
     }
+
+    /**
+     * Find a component by its name.
+     * @param name the name of the component looking for
+     * @return the component, or null if none is found
+     */
+    Component findComponent(final String name) {
+        for (final Component component : getComponents()) {
+            if (component.getName().equals(name)) return component;
+        }
+
+        return null;
+    }
 }

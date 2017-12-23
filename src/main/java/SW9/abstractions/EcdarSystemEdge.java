@@ -2,6 +2,7 @@ package SW9.abstractions;
 
 import SW9.Ecdar;
 import SW9.controllers.SystemRootController;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -28,6 +29,10 @@ public class EcdarSystemEdge {
      */
     public EcdarSystemEdge(final SystemElement node) {
         tempNode.set(node);
+    }
+
+    public EcdarSystemEdge(final JsonObject json, final EcdarSystem system) {
+        deserialize(json, system);
     }
 
     public ObservableList<SystemNail> getNails() {
@@ -157,5 +162,10 @@ public class EcdarSystemEdge {
         result.addProperty(PARENT, getParent().getHiddenId());
 
         return result;
+    }
+
+    private void deserialize(final JsonObject json, final EcdarSystem system) {
+        setChild(system.findSystemElement(json.getAsJsonPrimitive(CHILD).getAsInt()));
+        setParent(system.findSystemElement(json.getAsJsonPrimitive(PARENT).getAsInt()));
     }
 }

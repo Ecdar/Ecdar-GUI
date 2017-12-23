@@ -1,5 +1,6 @@
 package SW9.abstractions;
 
+import SW9.Ecdar;
 import SW9.presentations.Grid;
 import com.google.gson.JsonObject;
 import javafx.beans.property.SimpleStringProperty;
@@ -12,15 +13,17 @@ import javafx.beans.value.ObservableValue;
 public abstract class ComponentOperator implements SystemElement {
     public final static int WIDTH = 4 * Grid.GRID_SIZE;
     public final static int HEIGHT = 2 * Grid.GRID_SIZE;
-    private static final String ID = "id";
-    private static final String TYPE = "type";
+
+    public static final String TYPE = "type";
+
+    private static final String HIDDEN_ID = "id";
     private static final String X = "x";
     private static final String Y = "y";
 
     private final Box box = new Box();
     final StringProperty label = new SimpleStringProperty("");
 
-    private final int hiddenId;
+    private int hiddenId;
 
     /**
      * Constructor, does nothing
@@ -49,8 +52,8 @@ public abstract class ComponentOperator implements SystemElement {
     public JsonObject serialize() {
         final JsonObject result = new JsonObject();
 
-        result.addProperty(ID, getHiddenId());
-        result.addProperty(TYPE, getJsonType());
+        result.addProperty(HIDDEN_ID, getHiddenId());
+        result.addProperty(TYPE, ComponentOperatorJsonFactory.getJsonType(this));
         result.addProperty(X, getBox().getX());
         result.addProperty(Y, getBox().getY());
 
@@ -60,5 +63,15 @@ public abstract class ComponentOperator implements SystemElement {
     @Override
     public int getHiddenId() {
         return hiddenId;
+    }
+
+    private void setHiddenId(final int id) {
+        hiddenId = id;
+    }
+
+    public void deserialize(final JsonObject json) {
+        setHiddenId(json.getAsJsonPrimitive(HIDDEN_ID).getAsInt());
+        getBox().setX(json.getAsJsonPrimitive(X).getAsDouble());
+        getBox().setY(json.getAsJsonPrimitive(Y).getAsDouble());
     }
 }

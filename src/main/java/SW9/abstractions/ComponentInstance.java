@@ -1,5 +1,6 @@
 package SW9.abstractions;
 
+import SW9.Ecdar;
 import SW9.presentations.Grid;
 import SW9.utility.colors.Color;
 import com.google.gson.JsonObject;
@@ -12,7 +13,7 @@ import javafx.beans.value.ObservableValue;
 public class ComponentInstance implements SystemElement {
     public final static int WIDTH = Grid.GRID_SIZE * 22;
     public final static int HEIGHT = Grid.GRID_SIZE * 12;
-    private static final String ID = "id";
+    private static final String HIDDEN_ID = "id";
     private static final String X = "x";
     private static final String Y = "y";
     private static final String COMPONENT_NAME = "componentName";
@@ -23,10 +24,14 @@ public class ComponentInstance implements SystemElement {
     private final Box box = new Box();
     private StringProperty instanceIdProperty = new SimpleStringProperty(""); ;
 
-    private final int hiddenId;
+    private int hiddenId;
 
     public ComponentInstance(final EcdarSystem system) {
         hiddenId =  system.generateId();
+    }
+
+    public ComponentInstance(final JsonObject json) {
+        deserialize(json);
     }
 
     public Component getComponent() {
@@ -83,7 +88,7 @@ public class ComponentInstance implements SystemElement {
     public JsonObject serialize() {
         final JsonObject result = new JsonObject();
 
-        result.addProperty(ID, getHiddenId());
+        result.addProperty(HIDDEN_ID, getHiddenId());
         result.addProperty(COMPONENT_NAME, getComponent().getName());
         result.addProperty(X, getBox().getX());
         result.addProperty(Y, getBox().getY());
@@ -91,7 +96,18 @@ public class ComponentInstance implements SystemElement {
         return result;
     }
 
+    private void deserialize(final JsonObject json) {
+        setHiddenId(json.getAsJsonPrimitive(HIDDEN_ID).getAsInt());
+        setComponent(Ecdar.getProject().findComponent(json.getAsJsonPrimitive(COMPONENT_NAME).getAsString()));
+        getBox().setX(json.getAsJsonPrimitive(X).getAsDouble());
+        getBox().setY(json.getAsJsonPrimitive(Y).getAsDouble());
+    }
+
     public StringProperty getInstanceIdProperty() {
         return instanceIdProperty;
+    }
+
+    private void setHiddenId(final int hiddenId) {
+        this.hiddenId = hiddenId;
     }
 }

@@ -14,7 +14,9 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -174,18 +176,18 @@ public class EcdarSystem extends EcdarModel implements Boxed {
 
         systemRoot.setX(json.getAsJsonPrimitive(SYSTEM_ROOT_X).getAsDouble());
 
-        json.getAsJsonArray(INSTANCES).forEach(jsonElement ->
-                getComponentInstances().add(new ComponentInstance((JsonObject) jsonElement)));
+        json.getAsJsonArray(INSTANCES).forEach(jsonInstance ->
+                getComponentInstances().add(new ComponentInstance((JsonObject) jsonInstance)));
 
-        json.getAsJsonArray(OPERATORS).forEach(jsonElement -> {
-            if (
-            getComponentInstances().add(new ComponentOperator((JsonObject) jsonElement)));
+        json.getAsJsonArray(OPERATORS).forEach(jsonOperator -> {
+            final String type = ((JsonObject) jsonOperator).getAsJsonPrimitive(ComponentOperator.TYPE).getAsString();
+            final ComponentOperator operator = ComponentOperatorJsonFactory.create(type, this);
+            operator.deserialize((JsonObject) jsonOperator);
+            getComponentOperators().add(operator);
         });
 
-        json.getAsJsonArray(INSTANCES).forEach(jsonElement -> {
-            final ComponentInstance instance = new ComponentInstance((JsonObject) jsonElement);
-            getComponentInstances().add(instance);
-        });
+        json.getAsJsonArray(EDGES).forEach(jsonEdge ->
+                getEdges().add(new EcdarSystemEdge((JsonObject) jsonEdge, this)));
     }
 
     /**
@@ -230,5 +232,24 @@ public class EcdarSystem extends EcdarModel implements Boxed {
                 return counter;
             }
         }
+    }
+
+    /**
+     * Find a system node by its hidden id.
+     * @param hiddenId the hidden id
+     * @return the system node, or null if none was found
+     */
+    public SystemElement findSystemElement(final int hiddenId) {
+        final List<SystemElement> nodes = new ArrayList<>();
+
+        nodes.add(getSystemRoot());
+        nodes.addAll(getComponentInstances());
+        nodes.addAll(getComponentOperators());
+
+        for (final SystemElement node : nodes) {
+            if (node.getHiddenId() == hiddenId) return node;
+        }
+
+        return null;
     }
 }

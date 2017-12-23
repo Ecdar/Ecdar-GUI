@@ -8,9 +8,4 @@ public class Conjunction extends ComponentOperator {
         super(system);
         label.setValue("||");
     }
-
-    @Override
-    public String getJsonType() {
-        return "conjunction";
-    }
 }

@@ -8,9 +8,4 @@ public class Quotient extends ComponentOperator {
         super(system);
         label.setValue("A//B");
     }
-
-    @Override
-    public String getJsonType() {
-        return "quotient";
-    }
 }
