@@ -106,7 +106,7 @@ public class SystemController extends ModelController implements Initializable {
         contextMenu = new DropDownMenu(dropDownMenuHelperCircle);
 
         // Component instance sub menu
-        final DropDownMenu componentInstanceSubMenu = new DropDownMenu(dropDownMenuHelperCircle, 150);
+        final DropDownMenu componentInstanceSubMenu = new DropDownMenu(contextMenu.getPopupContent(), 150);
 
         // Add sub menu element for each component
         Ecdar.getProject().getComponents().forEach(component -> {
@@ -129,9 +129,9 @@ public class SystemController extends ModelController implements Initializable {
         });
         // the space between elements in the dropdownmenu is 38
         // The submenu is looking best with the -38 offset
-        contextMenu.addSubMenu("Add Component Instance", componentInstanceSubMenu, 0*38, 0);
+        contextMenu.addSubMenu("Add Component Instance", componentInstanceSubMenu, 0*38, (int) contextMenu.widthProperty().get());
 
-        final DropDownMenu operatorSubMenu = new DropDownMenu(dropDownMenuHelperCircle, 150);
+        final DropDownMenu operatorSubMenu = new DropDownMenu(contextMenu.getPopupContent(), 150);
 
 
         operatorSubMenu.addMenuElement(new MenuElement("Add Conjunction").setClickable(() -> {
@@ -146,7 +146,7 @@ public class SystemController extends ModelController implements Initializable {
                     "Added operator to system '" + system.getName() + "'",
                     "add-circle"
             );
-
+            operatorSubMenu.hide();
             contextMenu.hide();
         }));
 
@@ -162,7 +162,7 @@ public class SystemController extends ModelController implements Initializable {
                     "Added operator to system '" + system.getName() + "'",
                     "add-circle"
             );
-
+            operatorSubMenu.hide();
             contextMenu.hide();
         }));
 
@@ -178,7 +178,7 @@ public class SystemController extends ModelController implements Initializable {
                     "Added operator to system '" + system.getName() + "'",
                     "add-circle"
             );
-
+            operatorSubMenu.hide();
             contextMenu.hide();
         }));
         contextMenu.addSubMenu("Add Operator", operatorSubMenu, 1 * 38,0);
