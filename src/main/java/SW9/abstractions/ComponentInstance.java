@@ -28,10 +28,18 @@ public class ComponentInstance implements SystemElement {
     // This id is unique withing its system
     private int hiddenId;
 
+    /**
+     * Constructor.
+     * @param system system containing the component instance
+     */
     public ComponentInstance(final EcdarSystem system) {
         hiddenId =  system.generateId();
     }
 
+    /**
+     * Constructs from a JSON object.
+     * @param json the JSON object
+     */
     public ComponentInstance(final JsonObject json) {
         deserialize(json);
     }

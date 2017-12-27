@@ -25,7 +25,8 @@ public abstract class ComponentOperator implements SystemElement {
     private int hiddenId;
 
     /**
-     * Constructor, does nothing
+     * Constructor.
+     * @param system system containing the operator
      */
     ComponentOperator(final EcdarSystem system) {
         hiddenId = system.generateId();
@@ -64,6 +65,10 @@ public abstract class ComponentOperator implements SystemElement {
     }
 
 
+    /**
+     * Serializes to a JSON object.
+     * @return the result
+     */
     public JsonObject serialize() {
         final JsonObject result = new JsonObject();
 
@@ -75,6 +80,10 @@ public abstract class ComponentOperator implements SystemElement {
         return result;
     }
 
+    /**
+     * Deserializes from a JSON object.
+     * @param json the JSON object
+     */
     public void deserialize(final JsonObject json) {
         setHiddenId(json.getAsJsonPrimitive(HIDDEN_ID).getAsInt());
         getBox().setX(json.getAsJsonPrimitive(X).getAsDouble());

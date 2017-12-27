@@ -31,6 +31,11 @@ public class EcdarSystemEdge {
         tempNode.set(node);
     }
 
+    /**
+     * Constructs from a JSON object.
+     * @param json the JSON object
+     * @param system system containing the edge
+     */
     public EcdarSystemEdge(final JsonObject json, final EcdarSystem system) {
         deserialize(json, system);
     }
@@ -155,6 +160,10 @@ public class EcdarSystemEdge {
         }
     }
 
+    /**
+     * Serializes to a JSON object.
+     * @return the result
+     */
     public JsonObject serialize() {
         final JsonObject result = new JsonObject();
 
@@ -164,6 +173,11 @@ public class EcdarSystemEdge {
         return result;
     }
 
+    /**
+     * Deserializes from a JSON object.
+     * @param json the JSON object
+     * @param system the system containing the edge
+     */
     private void deserialize(final JsonObject json, final EcdarSystem system) {
         setChild(system.findSystemElement(json.getAsJsonPrimitive(CHILD).getAsInt()));
         setParent(system.findSystemElement(json.getAsJsonPrimitive(PARENT).getAsInt()));
