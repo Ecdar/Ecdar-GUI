@@ -389,14 +389,10 @@ public class DropDownMenu extends JFXPopup {
         closingTimer.setRepeats(false);
 
         final ReleaseRippler rippler = new ReleaseRippler(label);
-        rippler.setRipplerFill(Color.GREY_BLUE.getColor(Color.Intensity.I300));
+        rippler.setRipplerFill(MenuElement.SELECTED_COLOR);
 
         rippler.setOnMouseEntered(event -> {
-            rippler.setBackground(new Background(new BackgroundFill(
-                    Color.GREY.getColor(Color.Intensity.I200),
-                    CornerRadii.EMPTY,
-                    Insets.EMPTY
-            )));
+            setRipplerColorAsSelected(rippler);
 
             Platform.runLater(showSubMenu);
             canSubMenuBeClosed.set(false);
@@ -410,11 +406,7 @@ public class DropDownMenu extends JFXPopup {
             if (canSubMenuBeClosed.get() && shouldSubMenuBeHidden.get()) {
                 Platform.runLater(hideSubMenu);
                 isShowingASubMenu.set(false);
-                rippler.setBackground(new Background(new BackgroundFill(
-                        TRANSPARENT,
-                        CornerRadii.EMPTY,
-                        Insets.EMPTY
-                )));
+                setRipplerColorAsDeselected(rippler);
             }
             if (rippler.isPressed()) {
                 rippler.release();
@@ -445,12 +437,24 @@ public class DropDownMenu extends JFXPopup {
         this.isHidden.addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 subMenu.hide();
-                rippler.setBackground(new Background(new BackgroundFill(
-                        TRANSPARENT,
-                        CornerRadii.EMPTY,
-                        Insets.EMPTY)));
+                setRipplerColorAsDeselected(rippler);
             }
         });
+    }
+
+    private void setRipplerColor(final ReleaseRippler rippler, final javafx.scene.paint.Color color) {
+        rippler.setBackground(new Background(new BackgroundFill(
+                color,
+                CornerRadii.EMPTY,
+                Insets.EMPTY
+        )));
+    }
+
+    private void setRipplerColorAsDeselected(final ReleaseRippler rippler) {
+        setRipplerColor(rippler, MenuElement.DESELECTED_COLOR);
+    }
+    private void setRipplerColorAsSelected(final ReleaseRippler rippler) {
+        setRipplerColor(rippler, MenuElement.SELECTED_COLOR);
     }
 
     public interface HasColor {

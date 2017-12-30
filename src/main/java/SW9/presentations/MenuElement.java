@@ -20,6 +20,10 @@ import static javafx.scene.paint.Color.WHITE;
  * Represents an element of the dropdown menu, excluding spacer and the colour palette element.
  */
 public class MenuElement {
+    public static final javafx.scene.paint.Color DISABLED_COLOR = Color.GREY_BLUE.getColor(Color.Intensity.I300);
+    public static final javafx.scene.paint.Color DESELECTED_COLOR = TRANSPARENT;
+    public static final javafx.scene.paint.Color SELECTED_COLOR = Color.GREY.getColor(Color.Intensity.I200);
+
     private StackPane clickListenerFix;
     private Node item;
     private Label label;
@@ -108,7 +112,7 @@ public class MenuElement {
 
             // Set the background to a light grey
             clickListenerFix.setBackground(new Background(new BackgroundFill(
-                    Color.GREY.getColor(Color.Intensity.I200),
+                    SELECTED_COLOR,
                     CornerRadii.EMPTY,
                     Insets.EMPTY
             )));
@@ -198,7 +202,7 @@ public class MenuElement {
                 clickListenerFix.setOpacity(0.5);
             } else {
                 rippler.setOpacity(1);
-                rippler.setRipplerFill(Color.GREY_BLUE.getColor(Color.Intensity.I300));
+                rippler.setRipplerFill(DISABLED_COLOR);
                 clickListenerFix.setOpacity(1);
             }
         };
@@ -227,7 +231,7 @@ public class MenuElement {
         if (clickListenerFix == null) return;
 
         clickListenerFix.setBackground(new Background(new BackgroundFill(
-                TRANSPARENT,
+                DESELECTED_COLOR,
                 CornerRadii.EMPTY,
                 Insets.EMPTY)));
     }
