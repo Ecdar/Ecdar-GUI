@@ -129,6 +129,7 @@ public class SystemController extends ModelController implements Initializable {
         });
         // the space between elements in the dropdownmenu is 38
         contextMenu.addSubMenu("Add Component Instance", componentInstanceSubMenu, 0*38, (int) contextMenu.widthProperty().get());
+        contextMenu.addSmallSpacerElement();
 
         final DropDownMenu operatorSubMenu = new DropDownMenu(contextMenu.getPopupContent(), 150);
 
@@ -180,7 +181,7 @@ public class SystemController extends ModelController implements Initializable {
             operatorSubMenu.hide();
             contextMenu.hide();
         }));
-        contextMenu.addSubMenu("Add Operator", operatorSubMenu, 1 * 38,0);
+        contextMenu.addSubMenu("Add Operator", operatorSubMenu, 42,0);
 
         contextMenu.addColorPicker(system, system::dye);
     }
