@@ -323,10 +323,6 @@ public class DropDownMenu extends JFXPopup {
      * @param element The element to add to the {@link DropDownMenu}.
      */
     public void addCustomElement(final Node element) {
-        final EventHandler<? super MouseEvent> onMouseEntered = element.getOnMouseEntered();
-        element.setOnMouseEntered(event -> {
-            shouldSubMenuBeHidden.set(true);
-        });
         list.getChildren().add(element);
     }
 
