@@ -76,7 +76,7 @@ public class DropDownMenu extends JFXPopup {
     /**
      * Constructor for the {@link DropDownMenu}.
      * The {@link DropDownMenu} is places on top of all the views, and does even go outside of the window/screen for now.
-     * The width is, when using this constructor, set to be 230.
+     * The width is, when using this constructor, is set to be 230.
      * @param src The view where the {@link DropDownMenu} should be shown
      * @see DropDownMenu#DropDownMenu(Node, int)
      */
