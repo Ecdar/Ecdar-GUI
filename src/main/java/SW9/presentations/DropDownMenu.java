@@ -217,10 +217,6 @@ public class DropDownMenu extends JFXPopup {
      */
     public void addMenuElement(final MenuElement element) {
         addHideListener(element);
-        /*element.getItem().setOnMouseEntered(event -> {
-            element.getItem().getOnMouseEntered();
-            shouldSubMenuBeHidden.set(true);
-        })*/;
         list.getChildren().add(element.getItem());
     }
 
@@ -312,10 +308,6 @@ public class DropDownMenu extends JFXPopup {
     private void addHideListener(MenuElement element) {
         final Consumer<Boolean> updateHide = (hidden) -> { if(hidden) element.hide(); };
         this.isHidden.addListener((obs, oldValue, newValue) -> updateHide.accept(newValue));
-        /*element.getItem().setOnMouseEntered(event -> {
-            element.getItem().getOnMouseEntered();
-            shouldSubMenuBeHidden.set(true);
-        });*/
         updateHide.accept(this.isHidden.get());
     }
 
