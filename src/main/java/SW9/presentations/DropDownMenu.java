@@ -224,20 +224,14 @@ public class DropDownMenu extends JFXPopup {
      * Adds a spacing element to the {@link DropDownMenu}
      */
     public void addSpacerElement() {
-        final Region space1 = new Region();
-        space1.setMinHeight(8);
-        list.getChildren().add(space1);
+        makeSpacerElement(8);
+    }
 
-        final Line sep = new Line(0, 0, dropDownMenuWidth.get() - 1, 0);
-        sep.setStroke(Color.GREY.getColor(Color.Intensity.I300));
-        list.getChildren().add(sep);
-
-        final Region space2 = new Region();
-        space2.setMinHeight(8);
-        list.getChildren().add(space2);
-
-        space1.setOnMouseEntered(event -> shouldSubMenuBeHidden.set(true));
-        space2.setOnMouseEntered(event -> shouldSubMenuBeHidden.set(true));
+    /**
+     * Adds a smaller spacing element to the {@link DropDownMenu}
+     */
+    public void addSmallSpacerElement() {
+        makeSpacerElement(2);
     }
 
     /**
@@ -447,6 +441,29 @@ public class DropDownMenu extends JFXPopup {
     }
     private void setRipplerColorAsSelected(final ReleaseRippler rippler) {
         setRipplerColor(rippler, MenuElement.SELECTED_COLOR);
+    }
+
+
+    /**
+     * A method to handle the creation and addition of the spacing element to the {@link DropDownMenu}.
+     * @param height The height of the spacing element
+     */
+    private void makeSpacerElement(final int height) {
+        final Region space1 = new Region();
+        space1.setMinHeight(height);
+        list.getChildren().add(space1);
+
+        final Line sep = new Line(0, 0, dropDownMenuWidth.get() - 1, 0);
+        sep.setStroke(Color.GREY.getColor(Color.Intensity.I300));
+        list.getChildren().add(sep);
+
+        final Region space2 = new Region();
+        space2.setMinHeight(height);
+        list.getChildren().add(space2);
+
+        sep.setOnMouseEntered(event -> shouldSubMenuBeHidden.set(true));
+        space1.setOnMouseEntered(event -> shouldSubMenuBeHidden.set(true));
+        space2.setOnMouseEntered(event -> shouldSubMenuBeHidden.set(true));
     }
 
     public interface HasColor {
