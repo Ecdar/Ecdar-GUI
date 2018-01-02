@@ -128,7 +128,6 @@ public class SystemController extends ModelController implements Initializable {
             }));
         });
         // the space between elements in the dropdownmenu is 38
-        // The submenu is looking best with the -38 offset
         contextMenu.addSubMenu("Add Component Instance", componentInstanceSubMenu, 0*38, (int) contextMenu.widthProperty().get());
 
         final DropDownMenu operatorSubMenu = new DropDownMenu(contextMenu.getPopupContent(), 150);
