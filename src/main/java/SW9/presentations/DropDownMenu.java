@@ -3,7 +3,6 @@ package SW9.presentations;
 import SW9.utility.colors.Color;
 import SW9.utility.colors.EnabledColor;
 import com.jfoenix.controls.JFXPopup;
-import com.sun.javafx.event.EventHandlerManager;
 import javafx.animation.ScaleTransition;
 import javafx.application.Platform;
 import javafx.beans.binding.When;
@@ -11,11 +10,9 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ObservableBooleanValue;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
@@ -29,7 +26,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import static SW9.utility.colors.EnabledColor.enabledColors;
-import static javafx.scene.paint.Color.TRANSPARENT;
 
 /**
  * DropDownMenu is a {@link JFXPopup} which is used as the right-click menu and options menu on for instance
@@ -152,6 +148,7 @@ public class DropDownMenu extends JFXPopup {
     public void addListElement(final String s) {
         final MenuElement element = new MenuElement(s);
         addHideListener(element);
+        element.getItem().setOnMouseEntered(event -> shouldSubMenuBeHidden.set(true));
         list.getChildren().add(element.getItem());
     }
 
@@ -335,34 +332,37 @@ public class DropDownMenu extends JFXPopup {
      */
     public void addSubMenu(final String s, final DropDownMenu subMenu, final int offsetY, final int offsetX) {
         final Label label = new Label(s);
-        final SimpleBooleanProperty isHoveringLabel = new SimpleBooleanProperty(false);
         final SimpleBooleanProperty isHoveringSubMenu = new SimpleBooleanProperty(false);
         final SimpleBooleanProperty canSubMenuBeClosed = new SimpleBooleanProperty(true);
 
         label.setStyle("-fx-padding: 8 16 8 16;");
         label.getStyleClass().add("body2");
         label.setMinWidth(dropDownMenuWidth.get());
-        label.hoverProperty().addListener((observable, oldValue, newValue) -> isHoveringLabel.set(newValue));
+        final ReleaseRippler rippler = new ReleaseRippler(label);
 
         final Runnable showSubMenu = () -> {
             if(subMenu.isHidden.get()) {
-                subMenu.show(PopupVPosition.TOP, PopupHPosition.LEFT, dropDownMenuWidth.get()+ offsetX, offsetY);
+                subMenu.show(PopupVPosition.TOP, PopupHPosition.LEFT, dropDownMenuWidth.get() + offsetX, offsetY);
             }
         };
 
         final Runnable hideSubMenu = () -> {
             if (!subMenu.isHidden.get()) {
-                Platform.runLater(subMenu::hide);
-                this.requestFocus();
+                subMenu.hide();
             }
         };
 
-        subMenu.isHoveringMenu.addListener((observable, oldValue, newValue) -> {
-            isHoveringSubMenu.set(newValue);
-            isHoveringMenu.set(newValue);
+        subMenu.isHoveringMenu.addListener((observable, oldValue, newValue) -> isHoveringSubMenu.set(newValue));
+        subMenu.isHidden.addListener((observable, oldValue, newValue) -> {
+            if (!newValue){
+                shouldSubMenuBeHidden.set(false);
+            } else {
+                setRipplerColorAsDeselected(rippler);
+            }
         });
 
-        final Timer closingTimer = new Timer(20, event -> {
+        //Prevents flickering effect when opening the submenu
+        final Timer closingTimer = new Timer(100, event -> {
             if (shouldSubMenuBeHidden.get()) {
                 Platform.runLater(hideSubMenu);
             }
@@ -370,21 +370,20 @@ public class DropDownMenu extends JFXPopup {
         });
         closingTimer.setRepeats(false);
 
-        final ReleaseRippler rippler = new ReleaseRippler(label);
+
         rippler.setRipplerFill(MenuElement.SELECTED_COLOR);
 
         rippler.setOnMouseEntered(event -> {
             setRipplerColorAsSelected(rippler);
 
-            Platform.runLater(showSubMenu);
             canSubMenuBeClosed.set(false);
             closingTimer.start();
+            Platform.runLater(showSubMenu);
             isShowingASubMenu.set(true);
             shouldSubMenuBeHidden.set(false);
         });
 
         rippler.setOnMouseExited(event -> {
-
             if (canSubMenuBeClosed.get() && shouldSubMenuBeHidden.get()) {
                 Platform.runLater(hideSubMenu);
                 isShowingASubMenu.set(false);
@@ -395,11 +394,14 @@ public class DropDownMenu extends JFXPopup {
             }
         });
 
-        rippler.setOnMouseReleased(event ->{
-           if(!subMenu.isShowing()){
-               Platform.runLater(showSubMenu);
-           }
-        });
+        rippler.setOnMouseReleased(event -> Platform.runLater(showSubMenu));
+
+        // To close the menu when we are entering other elements on the DropDownMenu
+        shouldSubMenuBeHidden.addListener(((observable, oldValue, newValue) -> {
+            if(newValue){
+                Platform.runLater(hideSubMenu);
+            }
+        }));
 
         final FontIcon icon = new FontIcon();
         icon.setIconLiteral("gmi-chevron-right");
@@ -416,9 +418,11 @@ public class DropDownMenu extends JFXPopup {
         StackPane.setAlignment(iconContainer, Pos.CENTER_RIGHT);
 
         list.getChildren().add(rippler);
+
+        // To hide the submenu if the parent menu is hidden
         this.isHidden.addListener((observable, oldValue, newValue) -> {
             if (newValue) {
-                subMenu.hide();
+                hideSubMenu.run();
                 setRipplerColorAsDeselected(rippler);
             }
         });
