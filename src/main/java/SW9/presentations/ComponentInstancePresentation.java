@@ -321,6 +321,7 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
      * @param intensity not used
      */
     @Override
+    @Deprecated
     public void color(final Color color, final Color.Intensity intensity) { }
 
     /**
