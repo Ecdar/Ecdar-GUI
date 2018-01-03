@@ -52,7 +52,9 @@
                                        styleClass="button" style="-fx-padding: 2 4 2 4"/>
                             <JFXToggleButton fx:id="switchEdgeStatusButton"
                                              onMouseClicked="#switchEdgeStatusClicked"
-                                             style="-fx-toggle-color:darkslategray;-fx-untoggle-color:darkslategray;-fx-padding: 0 0 0 0"/>
+                                             style="-jfx-toggle-color:#dddddd;-jfx-untoggle-color:#dddddd;
+                                             -jfx-toggle-line-color:#7C8B92;-jfx-untoggle-line-color:#7C8B92;
+                                             -fx-padding: 0 0 0 0"/>
                             <JFXButton fx:id="switchToOutputButton" text="Output" textFill="grey"
                                        onMouseClicked="#switchToOutputClicked"
                                        styleClass="button" style="-fx-padding: 2 4 2 4"/>
