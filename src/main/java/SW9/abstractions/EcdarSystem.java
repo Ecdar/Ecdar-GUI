@@ -43,6 +43,8 @@ public class EcdarSystem extends EcdarModel implements Boxed {
         setSystemName();
         setRandomColor();
 
+        getBox().setWidth(600d);
+
         // Create system root in the middle, horizontally
         systemRoot.setX(Grid.snap((getBox().getWidth() - SystemRoot.WIDTH) / 2));
     }

@@ -10,6 +10,6 @@ public class Quotient extends ComponentOperator {
      */
     public Quotient(final EcdarSystem system) {
         super(system);
-        label.setValue("A//B");
+        label.setValue("A\\\\B");
     }
 }

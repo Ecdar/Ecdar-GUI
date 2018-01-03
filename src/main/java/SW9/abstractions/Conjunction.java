@@ -10,6 +10,6 @@ public class Conjunction extends ComponentOperator {
      */
     public Conjunction(final EcdarSystem system) {
         super(system);
-        label.setValue("||");
+        label.setValue("&&");
     }
 }
