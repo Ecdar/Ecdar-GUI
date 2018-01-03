@@ -33,7 +33,7 @@
         <Pane fx:id="edgeContainer" pickOnBounds="false"/>
         <Pane fx:id="componentInstanceContainer" pickOnBounds="false"/>
         <Pane fx:id="componentOperatorContainer" pickOnBounds="false"/>
-        <Pane fx:id="systemRootContainer" pickOnBounds="false"/>
+        <Pane fx:id="systemRootContainer" translateY="1" pickOnBounds="false"/>
     </StackPane>
 
     <Rectangle opacity="0" fx:id="bottomAnchor" StackPane.alignment="BOTTOM_LEFT"/>

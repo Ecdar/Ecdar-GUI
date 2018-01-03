@@ -38,7 +38,7 @@ public class SystemRoot implements SystemElement {
 
     @Override
     public ObservableValue<? extends Number> getEdgeY() {
-        return new SimpleDoubleProperty(Grid.TOOL_BAR_HEIGHT + 2 * Grid.GRID_SIZE);
+        return new SimpleDoubleProperty(Grid.TOOL_BAR_HEIGHT + 2 * Grid.GRID_SIZE - 4d);
     }
 
     @Override
