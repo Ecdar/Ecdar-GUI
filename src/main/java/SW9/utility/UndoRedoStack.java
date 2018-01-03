@@ -23,11 +23,11 @@ public class UndoRedoStack {
 
     /**
      * Pushes to the stack and performs the redo action once.
-     * @param perform the redo action
-     * @param undo the undo action
-     * @param description a description of the actions
-     * @param icon not used?
-     * @return the command created
+     * @param perform The redo action
+     * @param undo The undo action
+     * @param description A description of the actions
+     * @param icon Of the redo-undo command
+     * @return The command created
      */
     public static Command pushAndPerform(final Runnable perform, final Runnable undo, final String description, final String icon) {
         final Command item = new Command(perform, undo, description, icon);
@@ -46,13 +46,13 @@ public class UndoRedoStack {
     }
 
     /**
-     * pushes changes to the undoredo stack without performing them,
-     * useful when there must be a change between the first perform and the redo and undo
-     * @param redo the code to be run when redoing
-     * @param undo the code to be run when undoing
-     * @param description the description of this set of redo/undo commands
-     * @param icon icon of the redo-undo command
-     * @return a command with information for code to run when redoing, undoing, description and icon
+     * Pushes changes to the undoredo stack without performing them,
+     * Useful when there must be a change between the first perform and the redo and undo
+     * @param redo The code to be run when redoing
+     * @param undo The code to be run when undoing
+     * @param description The description of this set of redo/undo commands
+     * @param icon Icon of the redo-undo command
+     * @return A command with information for code to run when redoing, undoing, description and icon
      */
     public static Command push(final Runnable redo, final Runnable undo, final String description, final String icon) {
         final Command item = new Command(redo, undo, description, icon);
