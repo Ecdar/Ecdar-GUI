@@ -51,7 +51,7 @@
       "type": "NORMAL",
       "urgency": "NORMAL",
       "x": 130.0,
-      "y": 310.0,
+      "y": 300.0,
       "color": "5",
       "nicknameX": 30.0,
       "nicknameY": -10.0,
@@ -157,14 +157,14 @@
       "nails": [
         {
           "x": 340.0,
-          "y": 40.0,
+          "y": 50.0,
           "propertyType": "SYNCHRONIZATION",
           "propertyX": 10.0,
-          "propertyY": -10.0
+          "propertyY": -20.0
         },
         {
           "x": 290.0,
-          "y": 40.0,
+          "y": 50.0,
           "propertyType": "NONE",
           "propertyX": 0.0,
           "propertyY": 0.0
@@ -181,14 +181,14 @@
       "sync": "pub",
       "nails": [
         {
-          "x": 390.0,
+          "x": 360.0,
           "y": 100.0,
           "propertyType": "SYNCHRONIZATION",
           "propertyX": 10.0,
           "propertyY": -10.0
         },
         {
-          "x": 390.0,
+          "x": 360.0,
           "y": 140.0,
           "propertyType": "NONE",
           "propertyX": 0.0,
@@ -209,7 +209,7 @@
           "x": 360.0,
           "y": 300.0,
           "propertyType": "SYNCHRONIZATION",
-          "propertyX": -10.0,
+          "propertyX": -20.0,
           "propertyY": -40.0
         },
         {
@@ -231,15 +231,15 @@
       "sync": "grant",
       "nails": [
         {
-          "x": 110.0,
-          "y": 360.0,
+          "x": 120.0,
+          "y": 350.0,
           "propertyType": "SYNCHRONIZATION",
-          "propertyX": -30.0,
+          "propertyX": -20.0,
           "propertyY": 10.0
         },
         {
-          "x": 90.0,
-          "y": 350.0,
+          "x": 100.0,
+          "y": 340.0,
           "propertyType": "NONE",
           "propertyX": 0.0,
           "propertyY": 0.0
@@ -303,5 +303,5 @@
   "width": 450.0,
   "height": 400.0,
   "color": "5",
-  "includeInPeriodicCheck": true
+  "includeInPeriodicCheck": false
 }

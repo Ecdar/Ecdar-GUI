@@ -119,11 +119,11 @@
       ]
     }
   ],
-  "description": "Refines the other Machine \ncomponent",
+  "description": "",
   "x": 5.0,
   "y": 5.0,
   "width": 270.0,
   "height": 270.0,
   "color": "3",
-  "includeInPeriodicCheck": true
+  "includeInPeriodicCheck": false
 }
