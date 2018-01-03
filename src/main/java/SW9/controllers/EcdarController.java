@@ -609,17 +609,24 @@ public class EcdarController implements Initializable {
     private void initializeFileExportAsPng() {
         menuBarFileExportAsPng.setAccelerator(new KeyCodeCombination(KeyCode.L, KeyCombination.SHORTCUT_DOWN));
         menuBarFileExportAsPng.setOnAction(event -> {
-            final ComponentPresentation presentation = canvas.getController().getActiveComponentPresentation();
-
-            //If there is no active component
-            if (presentation == null){
-                Ecdar.showToast("No component to export.");
+            // If there is no active component or system
+            if (!(CanvasController.getActiveModel() instanceof Component || CanvasController.getActiveModel() instanceof EcdarSystem)) {
+                Ecdar.showToast("No component or system to export.");
                 return;
             }
 
-            presentation.getController().toggleDeclarationButton.setVisible(false);
+            // If there was an active component, hide button for toggling declarations
+            final ComponentPresentation presentation = canvas.getController().getActiveComponentPresentation();
+            if (presentation != null) {
+                presentation.getController().toggleDeclarationButton.setVisible(false);
+            }
+
             final WritableImage image = takeSnapshot();
-            presentation.getController().toggleDeclarationButton.setVisible(true);
+
+            // If there was an active component, show the button again
+            if (presentation != null) {
+                presentation.getController().toggleDeclarationButton.setVisible(true);
+            }
 
             CropAndExportImage(image);
         });
