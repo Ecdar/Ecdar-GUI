@@ -26,7 +26,7 @@ public class UndoRedoStack {
      * @param perform The redo action
      * @param undo The undo action
      * @param description A description of the actions
-     * @param icon Of the redo-undo command
+     * @param icon Icon of the redo-undo command
      * @return The command created
      */
     public static Command pushAndPerform(final Runnable perform, final Runnable undo, final String description, final String icon) {
