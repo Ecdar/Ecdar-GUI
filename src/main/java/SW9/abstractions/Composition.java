@@ -10,6 +10,6 @@ public class Composition extends ComponentOperator {
      */
     public Composition(final EcdarSystem system) {
         super(system);
-        label.setValue("&&");
+        label.setValue("||");
     }
 }
