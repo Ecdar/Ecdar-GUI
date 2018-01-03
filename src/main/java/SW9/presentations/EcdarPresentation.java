@@ -18,7 +18,6 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.ListChangeListener;
-import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.control.Label;
@@ -50,7 +49,6 @@ public class EcdarPresentation extends StackPane {
 
     public EcdarPresentation() {
         controller = new EcdarFXMLLoader().loadAndGetController("EcdarPresentation.fxml", this);
-
         initializeTopBar();
         initializeToolbar();
         initializeQueryDetailsDialog();
@@ -69,9 +67,7 @@ public class EcdarPresentation extends StackPane {
         initializeToolbarButton(controller.undo);
         initializeToolbarButton(controller.redo);
         initializeUndoRedoButtons();
-
         initializeMessageContainer();
-
         initializeSnackbar();
 
         // Open the file and query panel initially
@@ -81,14 +77,12 @@ public class EcdarPresentation extends StackPane {
             toggleFilePane();
             ranInitialToggle.set(true);
         });
-
         initializeHelpImages();
     }
 
     private void initializeSnackbar() {
-        controller.snackbar.registerSnackbarContainer(controller.root);
+        controller.snackbar = new JFXSnackbar(this);
         controller.snackbar.setPrefWidth(568);
-        controller.snackbar.autosize();
 
         final StackPane parentFix = (StackPane) controller.root.lookup(".jfx-snackbar-toast").getParent();
         parentFix.setPadding(new Insets(14, 24, 14, 24));
@@ -279,17 +273,9 @@ public class EcdarPresentation extends StackPane {
                     previousColor.add(new Pair<>(selectable, new EnabledColor(selectable.getColor(), selectable.getColorIntensity())));
                 });
 
-                UndoRedoStack.pushAndPerform(() -> { // Perform
-                    SelectHelper.getSelectedElements().forEach(selectable -> {
-                        selectable.color(color.color, color.intensity);
-                    });
-                }, () -> { // Undo
-                    previousColor.forEach(selectableEnabledColorPair -> {
-                        selectableEnabledColorPair.getKey().color(selectableEnabledColorPair.getValue().color, selectableEnabledColorPair.getValue().intensity);
-                    });
-                }, String.format("Changed the color of %d elements to %s", previousColor.size(), color.color.name()), "color-lens");
+                controller.changeColorOnSelectedElements(color, previousColor);
 
-                popup.close();
+                popup.hide();
                 SelectHelper.clearSelectedElements();
             });
 
@@ -299,26 +285,12 @@ public class EcdarPresentation extends StackPane {
         list.setMaxWidth(listWidth);
         list.setStyle("-fx-background-color: white; -fx-padding: 8;");
 
-        popup.setContent(list);
-        popup.setPopupContainer(controller.root);
-        popup.setSource(controller.toolbar);
+        popup.setPopupContent(list);
 
         controller.colorSelected.setOnMouseClicked((e) -> {
+            // If nothing is selected
             if (SelectHelper.getSelectedElements().size() == 0) return;
-
-            final Bounds boundsInScreenButton = controller.colorSelected.localToScreen(controller.colorSelected.getBoundsInLocal());
-            final Bounds boundsInScreenRoot = controller.root.localToScreen(controller.root.getBoundsInLocal());
-
-            double fromLeft = 0;
-            fromLeft = boundsInScreenButton.getMinX() - boundsInScreenRoot.getMinX();
-            fromLeft -= listWidth;
-            fromLeft += boundsInScreenButton.getWidth();
-            if (!filePaneOpen.get()) {
-                fromLeft -= controller.filePane.getWidth();
-                System.out.println(controller.filePane.getWidth());
-            }
-
-            popup.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, fromLeft, boundsInScreenButton.getMinY() - boundsInScreenRoot.getMinY());
+            popup.show(controller.colorSelected, JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.RIGHT, -10, 15);
         });
     }
 
@@ -588,9 +560,7 @@ public class EcdarPresentation extends StackPane {
     }
 
     public void showSnackbarMessage(final String message) {
-        controller.snackbar.enqueue(new JFXSnackbar.SnackbarEvent(message, "", 3000, event -> {
-
-        }));
+        controller.snackbar.enqueue(new JFXSnackbar.SnackbarEvent(message));
     }
 
     public void showHelp() {

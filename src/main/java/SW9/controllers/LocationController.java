@@ -27,7 +27,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Path;
@@ -109,19 +108,17 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
         if (dropDownMenuInitialized) return;
         dropDownMenuInitialized = true;
 
-        dropDownMenu = new DropDownMenu(((Pane) root.getParent().getParent().getParent()), root, 230, true);
+        dropDownMenu = new DropDownMenu(root);
 
-        dropDownMenu.addClickableAndDisableableListElement("Draw edge", getLocation().getIsLocked(),
+        dropDownMenu.addClickableAndDisableableListElement("Draw Edge", getLocation().getIsLocked(),
                 (event) -> {
                         final Edge newEdge = new Edge(getLocation(), EcdarController.getGlobalEdgeStatus());
 
                         KeyboardTracker.registerKeybind(KeyboardTracker.ABANDON_EDGE, new Keybind(new KeyCodeCombination(KeyCode.ESCAPE), () -> {
                             getComponent().removeEdge(newEdge);
                         }));
-
                         getComponent().addEdge(newEdge);
-
-                        dropDownMenu.close();
+                        dropDownMenu.hide();
                     }
                 );
 
@@ -131,7 +128,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                     nicknameTag.setOpacity(1);
                     nicknameTag.requestTextFieldFocus();
                     nicknameTag.requestTextFieldFocus(); // Requesting it twice is needed for some reason
-                    dropDownMenu.close();
+                    dropDownMenu.hide();
                 }
         );
 
@@ -141,12 +138,12 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                     invariantTag.setOpacity(1);
                     invariantTag.requestTextFieldFocus();
                     invariantTag.requestTextFieldFocus(); // Requesting it twice is needed for some reason
-                    dropDownMenu.close();
+                    dropDownMenu.hide();
                 }
         );
 
         // For when non-initial
-        dropDownMenu.addClickableAndDisableableListElement("Make initial",
+        dropDownMenu.addClickableAndDisableableListElement("Make Initial",
                 getLocation().typeProperty().isEqualTo(Location.Type.INITIAL), // disable if already initial
                 event -> {
                     final Location previousInitLoc = getComponent().getInitialLocation();
@@ -156,24 +153,25 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                     }, () -> { // Undo
                         getComponent().setInitialLocation(previousInitLoc);
                     }, String.format("Made %s initial", location), "initial");
-
-                    dropDownMenu.close();
+                    dropDownMenu.hide();
                 }
         );
         dropDownMenu.addSpacerElement();
         final BooleanProperty isUrgent = new SimpleBooleanProperty(false);
         isUrgent.bind(getLocation().urgencyProperty().isEqualTo(Location.Urgency.URGENT));
-        dropDownMenu.addTogglableAndDisableableListElement("Urgent", isUrgent, getLocation().getIsLocked(), event -> {
+        dropDownMenu.addToggleableAndDisableableListElement("Urgent", isUrgent, getLocation().getIsLocked(), event -> {
             if (isUrgent.get()) {
                 getLocation().setUrgency(Location.Urgency.NORMAL);
             } else {
                 getLocation().setUrgency(Location.Urgency.URGENT);
             }
+            dropDownMenu.hide();
         });
 
         dropDownMenu.addSpacerElement();
 
         dropDownMenu.addClickableListElement("Is " + getLocation().getId() + " reachable?", event -> {
+            dropDownMenu.hide();
             // Generate the query from the backend
             final String reachabilityQuery = UPPAALDriver.getLocationReachableQuery(getLocation(), getComponent());
 
@@ -184,8 +182,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
             final Query query = new Query(reachabilityQuery, reachabilityComment, QueryState.UNKNOWN);
             Ecdar.getProject().getQueries().add(query);
             query.run();
-
-            dropDownMenu.close();
+            dropDownMenu.hide();
         });
 
         dropDownMenu.addSpacerElement();
@@ -199,7 +196,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
         dropDownMenu.addClickableListElement("Delete", event -> {
             tryDelete();
-            dropDownMenu.close();
+            dropDownMenu.hide();
         });
     }
 
@@ -353,7 +350,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
                 if (unfinishedEdge == null && event.getButton().equals(MouseButton.SECONDARY)) {
                     initializeDropDownMenu();
-                    dropDownMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, 20, 20);
+                    dropDownMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, 0, 0);
                 } else if (unfinishedEdge != null) {
                     unfinishedEdge.setTargetLocation(getLocation());
 

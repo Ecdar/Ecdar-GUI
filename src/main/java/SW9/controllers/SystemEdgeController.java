@@ -82,12 +82,12 @@ public class SystemEdgeController implements Initializable {
      * since the parent of the root is not yet defined when initializing.
      */
     private void showContextMenu() {
-        final DropDownMenu contextMenu = new DropDownMenu((Pane) root.getParent().getParent(), dropDownMenuHelperCircle, 230, true);
+        final DropDownMenu contextMenu = new DropDownMenu(dropDownMenuHelperCircle);
 
         contextMenu.addClickableListElement("Delete", event -> {
             getSystem().removeEdge(getEdge());
 
-            contextMenu.close();
+            contextMenu.hide();
         });
 
         contextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, 0, 0);

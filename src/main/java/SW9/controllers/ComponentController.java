@@ -287,11 +287,10 @@ public class ComponentController extends ModelController implements Initializabl
                 return;
             }
 
-            contextMenu = new DropDownMenu(root, dropDownMenuHelperCircle, 230, true);
+            contextMenu = new DropDownMenu(dropDownMenuHelperCircle);
 
             contextMenu.addClickableListElement("Add Location", event -> {
-                contextMenu.close();
-
+                contextMenu.hide();
                 final Location newLocation = new Location();
 
                 double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
@@ -315,8 +314,7 @@ public class ComponentController extends ModelController implements Initializabl
 
             // Adds the add universal location element to the drop down menu, this element adds an universal location and its required edges
             contextMenu.addClickableListElement("Add Universal Location", event -> {
-                contextMenu.close();
-
+                contextMenu.hide();
                 double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
                 double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
 
@@ -342,8 +340,7 @@ public class ComponentController extends ModelController implements Initializabl
 
             // Adds the add inconsistent location element to the drop down menu, this element adds an inconsistent location
             contextMenu.addClickableListElement("Add Inconsistent Location", event -> {
-                contextMenu.close();
-
+                contextMenu.hide();
                 double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
                 double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
 
@@ -360,7 +357,6 @@ public class ComponentController extends ModelController implements Initializabl
             contextMenu.addSpacerElement();
 
             contextMenu.addClickableListElement("Contains deadlock?", event -> {
-                contextMenu.close();
 
                 // Generate the query
                 final String deadlockQuery = UPPAALDriver.getExistDeadlockQuery(getComponent());
@@ -372,8 +368,7 @@ public class ComponentController extends ModelController implements Initializabl
                 final Query query = new Query(deadlockQuery, deadlockComment, QueryState.UNKNOWN);
                 Ecdar.getProject().getQueries().add(query);
                 query.run();
-
-                contextMenu.close();
+                contextMenu.hide();
             });
 
             contextMenu.addSpacerElement();
@@ -411,12 +406,11 @@ public class ComponentController extends ModelController implements Initializabl
                 locationAware.yProperty().set(y);
             };
 
-            finishEdgeContextMenu = new DropDownMenu(root, dropDownMenuHelperCircle, 230, true);
+            finishEdgeContextMenu = new DropDownMenu(dropDownMenuHelperCircle);
             finishEdgeContextMenu.addListElement("Finish edge in a:");
 
             finishEdgeContextMenu.addClickableListElement("Location", event -> {
-                finishEdgeContextMenu.close();
-
+                finishEdgeContextMenu.hide();
                 final Location location = new Location();
 
                 location.setColorIntensity(getComponent().getColorIntensity());
@@ -443,8 +437,7 @@ public class ComponentController extends ModelController implements Initializabl
 
 
             finishEdgeContextMenu.addClickableListElement("Universal Location", event -> {
-                finishEdgeContextMenu.close();
-
+                finishEdgeContextMenu.hide();
                 double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
                 double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
 
@@ -482,8 +475,7 @@ public class ComponentController extends ModelController implements Initializabl
             });
 
             finishEdgeContextMenu.addClickableListElement("Inconsistent Location", event -> {
-                finishEdgeContextMenu.close();
-
+                finishEdgeContextMenu.hide();
                 double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
                 double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
 

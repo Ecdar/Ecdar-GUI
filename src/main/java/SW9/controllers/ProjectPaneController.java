@@ -118,7 +118,7 @@ public class ProjectPaneController implements Initializable {
 
     private void initializeMoreInformationDropDown(final FilePresentation filePresentation) {
         final JFXRippler moreInformation = (JFXRippler) filePresentation.lookup("#moreInformation");
-        final DropDownMenu moreInformationDropDown = new DropDownMenu(root, moreInformation, 230, true);
+        final DropDownMenu moreInformationDropDown = new DropDownMenu(moreInformation);
         final HighLevelModelObject model = filePresentation.getModel();
 
         // If component, added toggle for periodic check
@@ -152,7 +152,7 @@ public class ProjectPaneController implements Initializable {
             textArea.setMinHeight(i * 17 + 30);
         });
 
-        moreInformationDropDown.addCustomChild(textArea);
+        moreInformationDropDown.addCustomElement(textArea);
 
         moreInformationDropDown.addSpacerElement();
 
@@ -178,8 +178,7 @@ public class ProjectPaneController implements Initializable {
                 }, () -> { // Undo
                     Ecdar.getProject().getComponents().add((Component) model);
                 }, "Deleted component " + model.getName(), "delete");
-
-                moreInformationDropDown.close();
+                moreInformationDropDown.hide();
             });
         }
 
@@ -191,8 +190,7 @@ public class ProjectPaneController implements Initializable {
                 }, () -> { // Undo
                     Ecdar.getProject().getSystemsProperty().add((EcdarSystem) model);
                 }, "Deleted system " + model.getName(), "delete");
-
-                moreInformationDropDown.close();
+                moreInformationDropDown.hide();
             });
         }
 
@@ -203,7 +201,7 @@ public class ProjectPaneController implements Initializable {
     }
 
     private void initializeTogglePeriodicCheck(DropDownMenu moreInformationDropDown, final Component component) {
-        moreInformationDropDown.addTogglableListElement("Include in periodic check", component.includeInPeriodicCheckProperty(), event -> {
+        moreInformationDropDown.addToggleableListElement("Include in periodic check", component.includeInPeriodicCheckProperty(), event -> {
             final boolean didIncludeInPeriodicCheck = component.includeInPeriodicCheckProperty().get();
 
             UndoRedoStack.pushAndPerform(() -> { // Perform
@@ -211,6 +209,7 @@ public class ProjectPaneController implements Initializable {
             }, () -> { // Undo
                 component.includeInPeriodicCheckProperty().set(didIncludeInPeriodicCheck);
             }, "Component " + component.getName() + " is included in periodic check: " + !didIncludeInPeriodicCheck, "search");
+            moreInformationDropDown.hide();
         });
     }
 

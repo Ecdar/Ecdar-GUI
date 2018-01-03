@@ -74,20 +74,20 @@ public class ComponentOperatorController implements Initializable {
      * This method creates the menu object itself
      * (rather than having it be created in an initialize method),
      * since the parent of the root is not yet defined when initializing.
-     * @param mouseEvent
+     * @param mouseEvent TODO write this
      */
     private void showContextMenu(MouseEvent mouseEvent) {
         dropDownMenuHelperCircle.setLayoutX(mouseEvent.getX());
         dropDownMenuHelperCircle.setLayoutY(mouseEvent.getY());
 
-        final DropDownMenu contextMenu = new DropDownMenu((Pane) root.getParent().getParent(), dropDownMenuHelperCircle, 230, true);
+        final DropDownMenu contextMenu = new DropDownMenu(dropDownMenuHelperCircle);
 
         contextMenu.addMenuElement(new MenuElement("Draw Edge")
                 .setClickable(() -> {
                     final EcdarSystemEdge edge = new EcdarSystemEdge(operator);
                     getSystem().addEdge(edge);
 
-                    contextMenu.close();
+                    contextMenu.hide();
                 }));
 
         contextMenu.addSpacerElement();
@@ -95,7 +95,7 @@ public class ComponentOperatorController implements Initializable {
         contextMenu.addMenuElement(new MenuElement("Delete")
                 .setClickable(() -> {
                     getSystem().removeComponentOperator(getOperator());
-                    contextMenu.close();
+                    contextMenu.hide();
                 }));
 
         contextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, 0, 0);

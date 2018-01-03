@@ -187,6 +187,23 @@ public class EcdarController implements Initializable {
 
         initializeEdgeStatusHandling();
 
+        initializeKeybindings();
+        initializeTabPane();
+        initializeStatusBar();
+        initializeMessages();
+        initializeMenuBar();
+        initializeReachabilityAnalysisThread();
+    }
+
+    /**
+     * Initializes the keybinding for:
+     *  - New component
+     *  - Nudging with arrow keys
+     *  - Nudging with WASD
+     *  - Deletion
+     *  - Colors
+     */
+    private void initializeKeybindings() {
         //Press ctrl+N or cmd+N to create a new component. The canvas changes to this new component
         KeyCodeCombination combination = new KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN);
         Keybind binding = new Keybind(combination, (event) -> {
@@ -237,32 +254,32 @@ public class EcdarController implements Initializable {
         // Keybinds for coloring the selected elements
         EnabledColor.enabledColors.forEach(enabledColor -> {
             KeyboardTracker.registerKeybind(KeyboardTracker.COLOR_SELECTED + "_" + enabledColor.keyCode.getName(), new Keybind(new KeyCodeCombination(enabledColor.keyCode), () -> {
+
                 final List<Pair<SelectHelper.ItemSelectable, EnabledColor>> previousColor = new ArrayList<>();
 
                 SelectHelper.getSelectedElements().forEach(selectable -> {
                     previousColor.add(new Pair<>(selectable, new EnabledColor(selectable.getColor(), selectable.getColorIntensity())));
                 });
-
-                UndoRedoStack.pushAndPerform(() -> { // Perform
-                    SelectHelper.getSelectedElements().forEach(selectable -> {
-                        selectable.color(enabledColor.color, enabledColor.intensity);
-                    });
-                }, () -> { // Undo
-                    previousColor.forEach(selectableEnabledColorPair -> {
-                        selectableEnabledColorPair.getKey().color(selectableEnabledColorPair.getValue().color, selectableEnabledColorPair.getValue().intensity);
-                    });
-                }, String.format("Changed the color of %d elements to %s", previousColor.size(), enabledColor.color.name()), "color-lens");
-
+                changeColorOnSelectedElements(enabledColor, previousColor);
                 SelectHelper.clearSelectedElements();
             }));
         });
+    }
 
-        initializeTabPane();
-        initializeStatusBar();
-        initializeMessages();
-        initializeMenuBar();
-        initializeReachabilityAnalysisThread();
-
+    /**
+     * Handles the change of color on selected objects
+     * @param enabledColor The new color for the selected objects
+     * @param previousColor The color old color of the selected objects
+     */
+    public void changeColorOnSelectedElements(final EnabledColor enabledColor,
+                                              final List<Pair<SelectHelper.ItemSelectable, EnabledColor>> previousColor)
+    {
+        UndoRedoStack.pushAndPerform(() -> { // Perform
+            SelectHelper.getSelectedElements()
+                    .forEach(selectable -> selectable.color(enabledColor.color, enabledColor.intensity));
+        }, () -> { // Undo
+            previousColor.forEach(selectableEnabledColorPair -> selectableEnabledColorPair.getKey().color(selectableEnabledColorPair.getValue().color, selectableEnabledColorPair.getValue().intensity));
+        }, String.format("Changed the color of %d elements to %s", previousColor.size(), enabledColor.color.name()), "color-lens");
     }
 
     /**

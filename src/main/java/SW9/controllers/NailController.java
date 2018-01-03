@@ -22,7 +22,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.Group;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 
@@ -81,7 +80,7 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
     }
 
     private void showContextMenu() {
-        final DropDownMenu contextMenu = new DropDownMenu(((Pane) root.getParent().getParent().getParent().getParent()), root, 230, true);
+        final DropDownMenu contextMenu = new DropDownMenu(root);
 
         if (getNail().getPropertyType().equals(Edge.PropertyType.SYNCHRONIZATION)) {
             contextMenu.addMenuElement(edgeController.getChangeStatusMenuElement(contextMenu));
@@ -122,7 +121,7 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
                         message,
                         "delete"
                 );
-                contextMenu.close();
+                contextMenu.hide();
             }));
         }
 

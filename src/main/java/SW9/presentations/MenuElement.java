@@ -1,7 +1,6 @@
 package SW9.presentations;
 
 import SW9.utility.colors.Color;
-import com.jfoenix.controls.JFXRippler;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableBooleanValue;
 import javafx.geometry.Insets;
@@ -21,18 +20,24 @@ import static javafx.scene.paint.Color.WHITE;
  * Represents an element of the dropdown menu, excluding spacer and the colour palette element.
  */
 public class MenuElement {
+    public static final javafx.scene.paint.Color DISABLED_COLOR = Color.GREY_BLUE.getColor(Color.Intensity.I300);
+    public static final javafx.scene.paint.Color DESELECTED_COLOR = TRANSPARENT;
+    public static final javafx.scene.paint.Color SELECTED_COLOR = Color.GREY.getColor(Color.Intensity.I200);
+
     private StackPane clickListenerFix;
     private Node item;
     private Label label;
-    private JFXRippler rippler;
+    private ReleaseRippler rippler;
     private Region spacer;
     private HBox container;
     private FontIcon icon;
+    private boolean hasExited = false;
+
     private ObservableBooleanValue isDisabled = new SimpleBooleanProperty(false);
 
     /**
-     * Constructor creates an element that has no mouse event
-     * @param s string to be shown in the menu
+     * Constructor creates an element that has no {@link MouseEvent}
+     * @param s Label to be shown in the menu
      */
     public MenuElement(final String s){
         createLabel(s);
@@ -41,9 +46,9 @@ public class MenuElement {
     }
 
     /**
-     * Creates an element that has a label and a mouse event
-     * @param s string to be shown in the menu
-     * @param mouseEventConsumer event to be triggered if clicked
+     * Creates an element that has a label and a {@link MouseEvent}
+     * @param s Label to be shown in the menu
+     * @param mouseEventConsumer Event to be triggered if clicked
      */
     public MenuElement(final String s, final Consumer<MouseEvent> mouseEventConsumer) {
         createLabel(s);
@@ -56,8 +61,8 @@ public class MenuElement {
 
     /**
      * Set this element to be clickable.
-     * @param mouseEvent event to be run when clicked
-     * @return this element
+     * @param mouseEvent Event to be run when clicked
+     * @return This element
      */
     public MenuElement setClickable(final Runnable mouseEvent) {
         setClickable(event -> mouseEvent.run());
@@ -66,21 +71,20 @@ public class MenuElement {
 
     /**
      * Set this elements to be clickable.
-     * @param mouseEventConsumer event to be run when clicked
+     * @param mouseEventConsumer Event to be run when clicked
      */
     private void setClickable(final Consumer<MouseEvent> mouseEventConsumer) {
         clickListenerFix = new StackPane(container);
 
         createRippler(mouseEventConsumer);
-
         item = rippler;
     }
 
     /**
      * Creates an element that has a label, icon and mouse event
-     * @param s string to be shown in the menu
-     * @param iconString string that represents the icon to be used
-     * @param mouseEventConsumer event to be triggered if clicked
+     * @param s Label to be shown in the menu
+     * @param iconString String that represents the icon to be used
+     * @param mouseEventConsumer Event to be triggered if clicked
      */
     public MenuElement(final String s, final String iconString, final Consumer<MouseEvent> mouseEventConsumer){
         createLabel(s);
@@ -96,51 +100,62 @@ public class MenuElement {
     }
 
     /**
-     * Creates a rippler that triggers when the element is clicked
-     * @param mouseEventConsumer the event to be triggered along the ripple effect
+     * Creates a {@link ReleaseRippler} that triggers when the {@link MenuElement} is clicked
+     * @param mouseEventConsumer The event to be triggered along the ripple effect
      */
     private void createRippler(final Consumer<MouseEvent> mouseEventConsumer){
-        rippler = new JFXRippler(clickListenerFix);
+        rippler = new ReleaseRippler(clickListenerFix);
+        rippler.setRipplerFill(javafx.scene.paint.Color.TRANSPARENT);
 
         rippler.setOnMouseEntered(event -> {
             if (isDisabled.get()) return;
 
             // Set the background to a light grey
             clickListenerFix.setBackground(new Background(new BackgroundFill(
-                    Color.GREY.getColor(Color.Intensity.I200),
+                    SELECTED_COLOR,
                     CornerRadii.EMPTY,
                     Insets.EMPTY
             )));
+            hasExited = false;
         });
 
         rippler.setOnMouseExited(event -> {
             if (isDisabled.get()) return;
 
+            if (rippler.isPressed()) {
+                rippler.release();
+            }
+            hasExited = true;
+
             // Set the background to be transparent
-            clickListenerFix.setBackground(new Background(new BackgroundFill(
-                    TRANSPARENT,
-                    CornerRadii.EMPTY,
-                    Insets.EMPTY
-            )));
+            setHideColor();
         });
 
         // When the rippler is pressed, run the provided consumer.
         rippler.setOnMousePressed(event -> {
             if (isDisabled.get()) {
                 event.consume();
+            }
+        });
+
+        rippler.setOnMouseReleased(event -> {
+            if (isDisabled.get()) {
+                event.consume();
                 return;
             }
-            // If we do not do this, the method below will be called twice
-            if (!(event.getTarget() instanceof StackPane)) return;
-            if (!(((StackPane)(event.getTarget())).getChildren().get(0) instanceof HBox)) return;
 
-            mouseEventConsumer.accept(event);
+            // Only execute the mouseEventConsumer, if the mouse is still inside of the rippler when released
+            // otherwise nothing should happen (the rippler is deselected)
+            if (rippler.isPressed() || !hasExited) {
+                mouseEventConsumer.accept(event);
+            }
+            hasExited = false;
         });
     }
 
     /**
      * Creates a label with the text from the given string
-     * @param s string to be shown in the label
+     * @param s String to be shown in the label
      */
     private void createLabel(String s){
         label = new Label(s);
@@ -155,7 +170,7 @@ public class MenuElement {
 
     /**
      * Adds an icon to the element
-     * @param icon_string string to retrieve the icon
+     * @param icon_string String to retrieve the icon
      */
     private void addIcon(String icon_string){
         icon = new FontIcon();
@@ -166,15 +181,16 @@ public class MenuElement {
 
     /**
      * Gets the elements item
-     * @return the elements item
+     * @return The elements item
      */
     public Node getItem() {
         return item;
     }
 
     /**
-     * allows the element to be disabled
-     * @param isDisabled boolean value that determines wheter it is currently disabled or enabled, true means disabled, false means enabled
+     * Allows the element to be disabled
+     * @param isDisabled Boolean value that determines whether it is currently disabled or enabled.
+     *                   True means disabled, false means enabled
      * @return Returns the element itself
      */
     public MenuElement setDisableable(ObservableBooleanValue isDisabled) { // TODO should also create the rippler if not alraedy created (e.g. when calling this method before setClickable)
@@ -186,7 +202,7 @@ public class MenuElement {
                 clickListenerFix.setOpacity(0.5);
             } else {
                 rippler.setOpacity(1);
-                rippler.setRipplerFill(Color.GREY_BLUE.getColor(Color.Intensity.I300));
+                rippler.setRipplerFill(DISABLED_COLOR);
                 clickListenerFix.setOpacity(1);
             }
         };
@@ -198,12 +214,35 @@ public class MenuElement {
     }
 
     /**
-     * allows the element to be a toggled element, the icon is visible when on and invisible when off
-     * @param isToggled boolean value that determines whether it is currently disabled or enabled, true means toggle on, false means toggled off
+     * Allows the element to be a toggled element, the icon is visible when on and invisible when off
+     * @param isToggled Boolean value that determines whether it is currently disabled or enabled.
+     *                 True means toggle on, false means toggled off
      * @return Returns the element itself
      */
     public MenuElement setToggleable(ObservableBooleanValue isToggled){
         icon.visibleProperty().bind(isToggled);
         return this;
+    }
+
+    /***
+     * Sets the color of the {@link MenuElement} to transparent, so it does not stay marked
+     */
+    public void setHideColor() {
+        if (clickListenerFix == null) return;
+
+        clickListenerFix.setBackground(new Background(new BackgroundFill(
+                DESELECTED_COLOR,
+                CornerRadii.EMPTY,
+                Insets.EMPTY)));
+    }
+
+    /***
+     * Should be called when a menu containing this item is closed/hidden
+     * Sets the background color and releases the button so it is not marked/pressed
+     */
+    public void hide() {
+        setHideColor();
+        if (rippler == null) return;
+        rippler.release();
     }
 }

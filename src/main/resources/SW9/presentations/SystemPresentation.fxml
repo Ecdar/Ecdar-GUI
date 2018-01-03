@@ -30,13 +30,10 @@
 
     <StackPane>
         <Pane onMousePressed="#modelContainerPressed"/>
-
         <Pane fx:id="edgeContainer" pickOnBounds="false"/>
         <Pane fx:id="componentInstanceContainer" pickOnBounds="false"/>
         <Pane fx:id="componentOperatorContainer" pickOnBounds="false"/>
-
-        <!-- translate y is 5 in order to push the root right below the toolbar -->
-        <Pane fx:id="systemRootContainer" translateY="5" pickOnBounds="false"/>
+        <Pane fx:id="systemRootContainer" translateY="1" pickOnBounds="false"/>
     </StackPane>
 
     <Rectangle opacity="0" fx:id="bottomAnchor" StackPane.alignment="BOTTOM_LEFT"/>

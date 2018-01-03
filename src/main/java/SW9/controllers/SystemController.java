@@ -103,10 +103,10 @@ public class SystemController extends ModelController implements Initializable {
 
         root.getChildren().add(dropDownMenuHelperCircle);
 
-        contextMenu = new DropDownMenu(root, dropDownMenuHelperCircle, 230, true);
+        contextMenu = new DropDownMenu(dropDownMenuHelperCircle);
 
         // Component instance sub menu
-        final DropDownMenu componentInstanceSubMenu = new DropDownMenu(root, dropDownMenuHelperCircle, 150, false);
+        final DropDownMenu componentInstanceSubMenu = new DropDownMenu(contextMenu.getPopupContent(), 150);
 
         // Add sub menu element for each component
         Ecdar.getProject().getComponents().forEach(component -> {
@@ -123,12 +123,15 @@ public class SystemController extends ModelController implements Initializable {
                         "Added component instance '" + instance.toString() + "' to system '" + system.getName() + "'",
                         "add-circle"
                 );
-
-                contextMenu.close();
+                componentInstanceSubMenu.hide();
+                contextMenu.hide();
             }));
         });
+        // the space between elements in the dropdownmenu is 38
+        contextMenu.addSubMenu("Add Component Instance", componentInstanceSubMenu, 0*38, (int) contextMenu.widthProperty().get());
+        contextMenu.addSmallSpacerElement();
 
-        final DropDownMenu operatorSubMenu = new DropDownMenu(root, dropDownMenuHelperCircle, 150, false);
+        final DropDownMenu operatorSubMenu = new DropDownMenu(contextMenu.getPopupContent(), 150);
 
 
         operatorSubMenu.addMenuElement(new MenuElement("Add Conjunction").setClickable(() -> {
@@ -143,8 +146,8 @@ public class SystemController extends ModelController implements Initializable {
                     "Added operator to system '" + system.getName() + "'",
                     "add-circle"
             );
-
-            contextMenu.close();
+            operatorSubMenu.hide();
+            contextMenu.hide();
         }));
 
         operatorSubMenu.addMenuElement(new MenuElement("Add Composition").setClickable(() -> {
@@ -159,8 +162,8 @@ public class SystemController extends ModelController implements Initializable {
                     "Added operator to system '" + system.getName() + "'",
                     "add-circle"
             );
-
-            contextMenu.close();
+            operatorSubMenu.hide();
+            contextMenu.hide();
         }));
 
         operatorSubMenu.addMenuElement(new MenuElement("Add Quotient").setClickable(() -> {
@@ -175,12 +178,10 @@ public class SystemController extends ModelController implements Initializable {
                     "Added operator to system '" + system.getName() + "'",
                     "add-circle"
             );
-
-            contextMenu.close();
+            operatorSubMenu.hide();
+            contextMenu.hide();
         }));
-
-        contextMenu.addSubMenu("Add Component Instance", componentInstanceSubMenu, 0 * 35);
-        contextMenu.addSubMenu("Add Operator", operatorSubMenu, 1 * 35);
+        contextMenu.addSubMenu("Add Operator", operatorSubMenu, 42,0);
 
         contextMenu.addColorPicker(system, system::dye);
     }
