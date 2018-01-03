@@ -105,7 +105,7 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
         });
 
         // Bind the model to the text field
-        controller.identifier.textProperty().bindBidirectional(instance.getIdProperty());
+        controller.identifier.textProperty().bindBidirectional(instance.getInstanceIdProperty());
 
         final Runnable updateColor = () -> {
             final Color color = instance.getComponent().getColor();
@@ -314,24 +314,32 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
     }
 
     /**
-     * Dyes the component instance model.
-     * @param color color to dye with
-     * @param intensity color intensity to dye with
+     * This method is meant for dyeing with a custom color.
+     * But since, component instances use the color of the corresponding component,
+     * this method does nothing.
+     * @param color not used
+     * @param intensity not used
      */
     @Override
-    public void color(final Color color, final Color.Intensity intensity) {
-        controller.getInstance().setColor(color);
-        controller.getInstance().setColorIntensity(intensity);
-    }
+    @Deprecated
+    public void color(final Color color, final Color.Intensity intensity) { }
 
+    /**
+     * Gets the color of the corresponding component.
+     * @return the color of the component.
+     */
     @Override
     public Color getColor() {
-        return controller.getInstance().getColor();
+        return controller.getInstance().getComponent().getColor();
     }
 
+    /**
+     * Gets the color intensity of the corresponding component.
+     * @return the color of the component
+     */
     @Override
     public Color.Intensity getColorIntensity() {
-        return controller.getInstance().getColorIntensity();
+        return controller.getInstance().getComponent().getColorIntensity();
     }
 
     /**

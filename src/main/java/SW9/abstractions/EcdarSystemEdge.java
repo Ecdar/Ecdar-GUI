@@ -2,6 +2,8 @@ package SW9.abstractions;
 
 import SW9.Ecdar;
 import SW9.controllers.SystemRootController;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -12,6 +14,8 @@ import javafx.collections.ObservableList;
  * The class is called EcdarSystemEdge, since there is already an SystemEdge in com.uppaal.model.system.
  */
 public class EcdarSystemEdge {
+    private static final String CHILD = "child";
+    private static final String PARENT = "parent";
     // Verification properties
     private final ObjectProperty<SystemElement> child = new SimpleObjectProperty<>();
     private final ObjectProperty<SystemElement> parent = new SimpleObjectProperty<>();
@@ -25,6 +29,15 @@ public class EcdarSystemEdge {
      */
     public EcdarSystemEdge(final SystemElement node) {
         tempNode.set(node);
+    }
+
+    /**
+     * Constructs from a JSON object.
+     * @param json the JSON object
+     * @param system system containing the edge
+     */
+    public EcdarSystemEdge(final JsonObject json, final EcdarSystem system) {
+        deserialize(json, system);
     }
 
     public ObservableList<SystemNail> getNails() {
@@ -145,5 +158,28 @@ public class EcdarSystemEdge {
             setTempNode(null);
             return true;
         }
+    }
+
+    /**
+     * Serializes to a JSON object.
+     * @return the result
+     */
+    public JsonObject serialize() {
+        final JsonObject result = new JsonObject();
+
+        result.addProperty(CHILD, getChild().getHiddenId());
+        result.addProperty(PARENT, getParent().getHiddenId());
+
+        return result;
+    }
+
+    /**
+     * Deserializes from a JSON object.
+     * @param json the JSON object
+     * @param system the system containing the edge
+     */
+    private void deserialize(final JsonObject json, final EcdarSystem system) {
+        setChild(system.findSystemElement(json.getAsJsonPrimitive(CHILD).getAsInt()));
+        setParent(system.findSystemElement(json.getAsJsonPrimitive(PARENT).getAsInt()));
     }
 }

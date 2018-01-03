@@ -1,8 +1,9 @@
 package SW9.abstractions;
 
+import SW9.Ecdar;
 import SW9.presentations.Grid;
 import SW9.utility.colors.Color;
-import javafx.beans.binding.DoubleBinding;
+import com.google.gson.JsonObject;
 import javafx.beans.property.*;
 import javafx.beans.value.ObservableValue;
 
@@ -12,15 +13,35 @@ import javafx.beans.value.ObservableValue;
 public class ComponentInstance implements SystemElement {
     public final static int WIDTH = Grid.GRID_SIZE * 22;
     public final static int HEIGHT = Grid.GRID_SIZE * 12;
+    private static final String HIDDEN_ID = "id";
+    private static final String X = "x";
+    private static final String Y = "y";
+    private static final String COMPONENT_NAME = "componentName";
 
     private final ObjectProperty<Component> component = new SimpleObjectProperty<>();
-    private final ObjectProperty<Color> color = new SimpleObjectProperty<>();
-    private final ObjectProperty<Color.Intensity> colorIntensity = new SimpleObjectProperty<>();
     private final Box box = new Box();
-    private final StringProperty id = new SimpleStringProperty("");
 
-    public ComponentInstance() {
+    // Id of the instance used in the system declarations when verifying
+    private final StringProperty instanceIdProperty = new SimpleStringProperty("");
 
+    // Id of the instance used when writing to and reading from JSON
+    // This id is unique withing its system
+    private int hiddenId;
+
+    /**
+     * Constructor.
+     * @param system system containing the component instance
+     */
+    public ComponentInstance(final EcdarSystem system) {
+        hiddenId =  system.generateId();
+    }
+
+    /**
+     * Constructs from a JSON object.
+     * @param json the JSON object
+     */
+    public ComponentInstance(final JsonObject json) {
+        deserialize(json);
     }
 
     public Component getComponent() {
@@ -31,40 +52,13 @@ public class ComponentInstance implements SystemElement {
         this.component.set(component);
     }
 
-    public Color getColor() {
-        return color.get();
-    }
-
-    public void setColor(final Color color) {
-        this.color.set(color);
-    }
-
-    public ObjectProperty<Color> getColorProperty() {
-        return color;
-    }
-
-    public Color.Intensity getColorIntensity() {
-        return colorIntensity.get();
-    }
-
-    public void setColorIntensity(final Color.Intensity intensity) {
-        this.colorIntensity.set(intensity);
-    }
-
-    public ObjectProperty<Color.Intensity> getColorIntensityProperty() {
-        return colorIntensity;
-    }
-
     public Box getBox() {
         return box;
     }
 
-    public String getId() {
-        return id.get();
-    }
-
-    public StringProperty getIdProperty() {
-        return id;
+    @Override
+    public int getHiddenId() {
+        return hiddenId;
     }
 
     @Override
@@ -75,5 +69,31 @@ public class ComponentInstance implements SystemElement {
     @Override
     public ObservableValue<? extends Number> getEdgeY() {
         return box.getYProperty().add(HEIGHT / 2);
+    }
+
+    public JsonObject serialize() {
+        final JsonObject result = new JsonObject();
+
+        result.addProperty(HIDDEN_ID, getHiddenId());
+        result.addProperty(COMPONENT_NAME, getComponent().getName());
+        result.addProperty(X, getBox().getX());
+        result.addProperty(Y, getBox().getY());
+
+        return result;
+    }
+
+    private void deserialize(final JsonObject json) {
+        setHiddenId(json.getAsJsonPrimitive(HIDDEN_ID).getAsInt());
+        setComponent(Ecdar.getProject().findComponent(json.getAsJsonPrimitive(COMPONENT_NAME).getAsString()));
+        getBox().setX(json.getAsJsonPrimitive(X).getAsDouble());
+        getBox().setY(json.getAsJsonPrimitive(Y).getAsDouble());
+    }
+
+    public StringProperty getInstanceIdProperty() {
+        return instanceIdProperty;
+    }
+
+    private void setHiddenId(final int hiddenId) {
+        this.hiddenId = hiddenId;
     }
 }
