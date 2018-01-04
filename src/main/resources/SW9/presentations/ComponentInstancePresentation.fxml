@@ -27,12 +27,12 @@
                                styleClass="sub-caption" translateY="-1"/>
                     </VBox>
                 </HBox>
-                <Group fx:id="inputNailGroup" translateY="16">
+                <Group fx:id="inputNailGroup" translateY="14">
                     <Circle fx:id="inputNailCircle" radius="8"/>
                     <Label fx:id="inputNailLabel" text="?" translateX="-3" translateY="-8"
                            styleClass="sub-caption-mono" textFill="white"/>
                 </Group>
-                <Group fx:id="outputNailGroup" translateY="16">
+                <Group fx:id="outputNailGroup" translateY="14">
                     <Circle fx:id="outputNailCircle" radius="8"/>
                     <Label fx:id="outputNailLabel" text="!" translateX="-3" translateY="-8"
                            styleClass="sub-caption-mono" textFill="white"/>
