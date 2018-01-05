@@ -127,7 +127,7 @@ public class Ecdar extends Application {
 
         // Set the title for the application
         final String [] names = {"Ecdar", "UPPAAL I/O", "Ecdar I/O", "UPPAAL Ulrik", "Edgar", "Ecdar 2.0",
-                "Ecdar 0.11", "Ec/dar", "Æcdar"};
+                "Ecdar 0.11", "Ec/dar", "Æcdar", "Supreme Ecdar"};
         stage.setTitle(names[new Random().nextInt((names.length))]);
 
         // Load the fonts required for the project
