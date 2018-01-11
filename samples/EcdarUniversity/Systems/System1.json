@@ -1,0 +1,76 @@
+{
+  "name": "System1",
+  "description": "",
+  "x": 5.0,
+  "y": 5.0,
+  "width": 540.0,
+  "height": 390.0,
+  "color": "5",
+  "systemRootX": 240.0,
+  "componentInstances": [
+    {
+      "id": 2,
+      "componentName": "Machine",
+      "x": 10.0,
+      "y": 100.0
+    },
+    {
+      "id": 3,
+      "componentName": "Researcher",
+      "x": 310.0,
+      "y": 100.0
+    },
+    {
+      "id": 5,
+      "componentName": "HalfUni1",
+      "x": 10.0,
+      "y": 260.0
+    },
+    {
+      "id": 6,
+      "componentName": "HalfUni2",
+      "x": 300.0,
+      "y": 260.0
+    }
+  ],
+  "operators": [
+    {
+      "id": 1,
+      "type": "composition",
+      "x": 250.0,
+      "y": 60.0
+    },
+    {
+      "id": 4,
+      "type": "conjunction",
+      "x": 250.0,
+      "y": 220.0
+    }
+  ],
+  "edges": [
+    {
+      "child": 1,
+      "parent": 0
+    },
+    {
+      "child": 2,
+      "parent": 1
+    },
+    {
+      "child": 3,
+      "parent": 1
+    },
+    {
+      "child": 4,
+      "parent": 1
+    },
+    {
+      "child": 5,
+      "parent": 4
+    },
+    {
+      "child": 6,
+      "parent": 4
+    }
+  ]
+}
