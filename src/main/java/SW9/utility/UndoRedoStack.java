@@ -47,7 +47,7 @@ public class UndoRedoStack {
 
     /**
      * Pushes changes to the undoredo stack without performing them,
-     * Useful when there must be a change between the first perform and the redo and undo
+     * useful when there must be a change between the first perform and the redo and undo
      * @param redo the code to be run when redoing
      * @param undo the code to be run when undoing
      * @param description the description of this set of redo/undo commands
