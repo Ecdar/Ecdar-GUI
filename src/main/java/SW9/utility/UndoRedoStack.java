@@ -26,7 +26,7 @@ public class UndoRedoStack {
      * @param perform the redo action
      * @param undo the undo action
      * @param description a description of the actions
-     * @param icon not used?
+     * @param icon icon of the redo-undo command
      * @return the command created
      */
     public static Command pushAndPerform(final Runnable perform, final Runnable undo, final String description, final String icon) {
@@ -46,7 +46,7 @@ public class UndoRedoStack {
     }
 
     /**
-     * pushes changes to the undoredo stack without performing them,
+     * Pushes changes to the undoredo stack without performing them,
      * useful when there must be a change between the first perform and the redo and undo
      * @param redo the code to be run when redoing
      * @param undo the code to be run when undoing
