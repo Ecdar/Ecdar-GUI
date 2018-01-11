@@ -15,9 +15,9 @@ Ovesen, Christian
 Installation
 ----
 1. Backend:
-- a. If Windows: Add the `server.exe` file from the Ecdar 0.10 Windows distribution to the `\out\production\servers\bin-Win32\` folder.
-- b. If MacOS: Add the `server` file from the Ecdar 0.10 MacOS distribution to the `/out/production/servers/bin-MacOS/` folder.
-- c. If Linux: Add the `server` file from the Ecdar 0.10 Linux distribution to the `/out/production/servers/bin-Linux/` folder.
+  * If Windows: Add the `server.exe` file from the Ecdar 0.10 Windows distribution to the `\out\production\servers\bin-Win32` folder. 
+  * If MacOS: Add the `server` file from the Ecdar 0.10 MacOS distribution to the `/out/production/servers/bin-MacOS` folder. 
+  * If Linux: Add the `server` file from the Ecdar 0.10 Linux distribution to the `/out/production/servers/bin-Linux` folder. 
 
 How to Run
 ----
