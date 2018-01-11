@@ -102,7 +102,7 @@ public class EcdarSystemEdge {
     public boolean tryFinishWithComponentInstance(final ComponentInstance instance) {
         // other node must be operator or root
         if (!(getTempNode() instanceof ComponentOperator || getTempNode() instanceof SystemRoot)) {
-            Ecdar.showToast("A component instance can only be connected to operators or the system root.");
+            Ecdar.showToast("A component instance can only be connected to operators or system roots.");
             return false;
         }
 
