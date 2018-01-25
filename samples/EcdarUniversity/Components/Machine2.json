@@ -42,7 +42,7 @@
       "sync": "coin",
       "nails": [
         {
-          "x": 120.0,
+          "x": 140.0,
           "y": 120.0,
           "propertyType": "SYNCHRONIZATION",
           "propertyX": 10.0,
@@ -60,15 +60,15 @@
       "sync": "coin",
       "nails": [
         {
-          "x": 90.0,
-          "y": 230.0,
+          "x": 100.0,
+          "y": 210.0,
           "propertyType": "SYNCHRONIZATION",
-          "propertyX": -20.0,
-          "propertyY": 10.0
+          "propertyX": -50.0,
+          "propertyY": -10.0
         },
         {
-          "x": 150.0,
-          "y": 230.0,
+          "x": 120.0,
+          "y": 210.0,
           "propertyType": "NONE",
           "propertyX": 0.0,
           "propertyY": 0.0
@@ -85,15 +85,15 @@
       "sync": "tea",
       "nails": [
         {
-          "x": 200.0,
-          "y": 50.0,
+          "x": 120.0,
+          "y": 40.0,
           "propertyType": "SYNCHRONIZATION",
           "propertyX": 10.0,
           "propertyY": -10.0
         },
         {
-          "x": 200.0,
-          "y": 100.0,
+          "x": 100.0,
+          "y": 40.0,
           "propertyType": "NONE",
           "propertyX": 0.0,
           "propertyY": 0.0
@@ -110,8 +110,8 @@
       "sync": "cof",
       "nails": [
         {
-          "x": 70.0,
-          "y": 130.0,
+          "x": 100.0,
+          "y": 120.0,
           "propertyType": "SYNCHRONIZATION",
           "propertyX": -50.0,
           "propertyY": -10.0
@@ -122,8 +122,8 @@
   "description": "",
   "x": 5.0,
   "y": 5.0,
-  "width": 270.0,
-  "height": 270.0,
+  "width": 230.0,
+  "height": 240.0,
   "color": "3",
   "includeInPeriodicCheck": false
 }
