@@ -84,6 +84,7 @@ public class Component extends HighLevelModelObject implements Boxed {
 
     /**
      * Creates a clone of another component.
+     * Clones locations, edges and the declarations.
      * It locations are cloned from the original component. Their ids are the same.
      * The IO listeners is not initialized.
      * Reachability analysis binding is not initialized.
@@ -97,6 +98,8 @@ public class Component extends HighLevelModelObject implements Boxed {
         for (final Edge originalEdge : original.getEdges()) {
             addEdge(new Edge(originalEdge, this));
         }
+
+        setDeclarationsText(original.getDeclarationsText());
     }
 
     /**

@@ -224,6 +224,15 @@ public class Ecdar extends Application {
         });
     }
 
+    /**
+     * Initializes and resets the project.
+     * This can be used as a test setup.
+     */
+    public static void setUpForTest() {
+        project = new Project();
+        project.reset();
+    }
+
     public static void initializeProjectFolder() throws IOException {
         // Make sure that the project directory exists
         final File directory = new File(projectDirectory.get());
