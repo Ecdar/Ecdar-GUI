@@ -196,13 +196,12 @@ public class Component extends HighLevelModelObject implements Boxed {
      * @return all but the initial location
      */
     public List<Location> getAllButInitialLocations() {
-        final List<Location> locations = new ArrayList<>();
-        locations.addAll(getLocations());
+        final List<Location> locations = new ArrayList<>(getLocations());
 
         // Remove initial location
         final Location initLoc = getInitialLocation();
         if (initLoc != null) {
-            locations.remove(getInitialLocation());
+            locations.remove(initLoc);
         }
 
         return locations;
