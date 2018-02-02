@@ -87,6 +87,19 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
         bindReachabilityAnalysis();
     }
 
+    /**
+     * Creates a clone of another location.
+     * The id of the original is used for this one.
+     * Reachability analysis initialized.
+     * @param original the location to clone
+     */
+    public Location(final Location original) {
+        setId(original.getId());
+        setType(original.getType());
+        setUrgency(original.getUrgency());
+        setInvariant(original.getInvariant());
+    }
+
     public String getNickname() {
         return nickname.get();
     }

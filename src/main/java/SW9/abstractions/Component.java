@@ -33,7 +33,7 @@ public class Component extends HighLevelModelObject implements Boxed {
     private final ObservableList<String> inputStrings = FXCollections.observableArrayList();
     private final ObservableList<String> outputStrings = FXCollections.observableArrayList();
     private final StringProperty description = new SimpleStringProperty("");
-    private final StringProperty declarationsText;
+    private final StringProperty declarationsText = new SimpleStringProperty("");;
 
     // Background check
     private final BooleanProperty includeInPeriodicCheck = new SimpleBooleanProperty(true);
@@ -53,8 +53,6 @@ public class Component extends HighLevelModelObject implements Boxed {
         if(doRandomColor) {
             setRandomColor();
         }
-
-        declarationsText = new SimpleStringProperty("");
 
         // Make initial location
         final Location initialLocation = new Location();
@@ -76,14 +74,29 @@ public class Component extends HighLevelModelObject implements Boxed {
     public Component(final JsonObject json) {
         setFirsTimeShown(true);
 
-        declarationsText = new SimpleStringProperty("");
-
         deserialize(json);
 
         initializeIOListeners();
         updateIOList();
 
         bindReachabilityAnalysis();
+    }
+
+    /**
+     * Creates a clone of another component.
+     * It locations are cloned from the original component. Their ids are the same.
+     * The IO listeners is not initialized.
+     * Reachability analysis binding is not initialized.
+     * @param original The component to clone
+     */
+    public Component(final Component original) {
+        for (final Location originalLoc : original.getLocations()) {
+            addLocation(new Location(originalLoc));
+        }
+
+        for (final Edge originalEdge : original.getEdges()) {
+            addEdge(new Edge(originalEdge, this));
+        }
     }
 
     /**
@@ -174,6 +187,19 @@ public class Component extends HighLevelModelObject implements Boxed {
 
     public ObservableList<Location> getLocations() {
         return locations;
+    }
+
+    /**
+     * Finds a location in this component based on its id.
+     * @param id id of location to find
+     * @return the found location, or null if non was found
+     */
+    Location findLocation(final String id) {
+        for (final Location loc : getLocations()) {
+            if (loc.getId().equals(id)) return loc;
+        }
+
+        return null;
     }
 
     public boolean addLocation(final Location location) {
