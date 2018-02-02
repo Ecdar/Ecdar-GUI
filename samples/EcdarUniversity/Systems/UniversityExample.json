@@ -22,13 +22,13 @@
     },
     {
       "id": 5,
-      "componentName": "HalfUni1",
+      "componentName": "HalfAdm1",
       "x": 10.0,
       "y": 280.0
     },
     {
       "id": 6,
-      "componentName": "HalfUni2",
+      "componentName": "HalfAdm2",
       "x": 310.0,
       "y": 280.0
     }

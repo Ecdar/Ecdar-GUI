@@ -10,7 +10,7 @@
       "urgency": "NORMAL",
       "x": 140.0,
       "y": 300.0,
-      "color": "9",
+      "color": "7",
       "nicknameX": 30.0,
       "nicknameY": -10.0,
       "invariantX": 30.0,
@@ -24,7 +24,7 @@
       "urgency": "NORMAL",
       "x": 140.0,
       "y": 100.0,
-      "color": "9",
+      "color": "7",
       "nicknameX": 30.0,
       "nicknameY": -10.0,
       "invariantX": 30.0,
@@ -42,15 +42,15 @@
       "sync": "cof",
       "nails": [
         {
-          "x": 90.0,
-          "y": 240.0,
+          "x": 100.0,
+          "y": 230.0,
           "propertyType": "GUARD",
           "propertyX": -70.0,
           "propertyY": -10.0
         },
         {
-          "x": 90.0,
-          "y": 200.0,
+          "x": 100.0,
+          "y": 180.0,
           "propertyType": "SYNCHRONIZATION",
           "propertyX": -70.0,
           "propertyY": -10.0
@@ -68,7 +68,7 @@
       "nails": [
         {
           "x": 210.0,
-          "y": 220.0,
+          "y": 200.0,
           "propertyType": "SYNCHRONIZATION",
           "propertyX": 20.0,
           "propertyY": -10.0
@@ -81,7 +81,7 @@
       "status": "INPUT",
       "select": "",
       "guard": "",
-      "update": "",
+      "update": "y\u003d0",
       "sync": "coin",
       "nails": [
         {
@@ -89,6 +89,13 @@
           "y": 220.0,
           "propertyType": "SYNCHRONIZATION",
           "propertyX": 20.0,
+          "propertyY": -10.0
+        },
+        {
+          "x": 140.0,
+          "y": 190.0,
+          "propertyType": "UPDATE",
+          "propertyX": 10.0,
           "propertyY": -10.0
         }
       ]
@@ -128,14 +135,14 @@
       "sync": "tea",
       "nails": [
         {
-          "x": 190.0,
-          "y": 80.0,
+          "x": 170.0,
+          "y": 60.0,
           "propertyType": "GUARD",
           "propertyX": 10.0,
           "propertyY": -20.0
         },
         {
-          "x": 170.0,
+          "x": 140.0,
           "y": 60.0,
           "propertyType": "SYNCHRONIZATION",
           "propertyX": -20.0,
@@ -149,6 +156,6 @@
   "y": 5.0,
   "width": 300.0,
   "height": 390.0,
-  "color": "9",
+  "color": "7",
   "includeInPeriodicCheck": false
 }

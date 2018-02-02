@@ -1,6 +1,6 @@
 {
-  "name": "HalfUni1",
-  "declarations": "",
+  "name": "HalfAdm1",
+  "declarations": "clock x;",
   "locations": [
     {
       "id": "L12",
@@ -8,7 +8,7 @@
       "invariant": "",
       "type": "INITIAL",
       "urgency": "NORMAL",
-      "x": 110.0,
+      "x": 130.0,
       "y": 90.0,
       "color": "2",
       "nicknameX": 30.0,
@@ -22,41 +22,13 @@
       "invariant": "x\u003c\u003d2",
       "type": "NORMAL",
       "urgency": "NORMAL",
-      "x": 110.0,
-      "y": 170.0,
+      "x": 130.0,
+      "y": 200.0,
       "color": "2",
       "nicknameX": 30.0,
       "nicknameY": -10.0,
       "invariantX": 30.0,
-      "invariantY": -20.0
-    },
-    {
-      "id": "U0",
-      "nickname": "",
-      "invariant": "",
-      "type": "UNIVERSAL",
-      "urgency": "NORMAL",
-      "x": 290.0,
-      "y": 100.0,
-      "color": "2",
-      "nicknameX": 30.0,
-      "nicknameY": -10.0,
-      "invariantX": 30.0,
-      "invariantY": 10.0
-    },
-    {
-      "id": "I0",
-      "nickname": "",
-      "invariant": "",
-      "type": "INCONSISTENT",
-      "urgency": "URGENT",
-      "x": 280.0,
-      "y": 170.0,
-      "color": "2",
-      "nicknameX": 30.0,
-      "nicknameY": -10.0,
-      "invariantX": 30.0,
-      "invariantY": 10.0
+      "invariantY": -30.0
     }
   ],
   "edges": [
@@ -70,15 +42,15 @@
       "sync": "grant",
       "nails": [
         {
-          "x": 140.0,
-          "y": 120.0,
+          "x": 150.0,
+          "y": 130.0,
           "propertyType": "SYNCHRONIZATION",
           "propertyX": 10.0,
           "propertyY": -10.0
         },
         {
-          "x": 140.0,
-          "y": 140.0,
+          "x": 150.0,
+          "y": 150.0,
           "propertyType": "UPDATE",
           "propertyX": 10.0,
           "propertyY": -10.0
@@ -95,10 +67,10 @@
       "sync": "coin",
       "nails": [
         {
-          "x": 60.0,
-          "y": 130.0,
+          "x": 110.0,
+          "y": 140.0,
           "propertyType": "SYNCHRONIZATION",
-          "propertyX": 10.0,
+          "propertyX": -60.0,
           "propertyY": -10.0
         }
       ]
@@ -113,15 +85,15 @@
       "sync": "patent",
       "nails": [
         {
-          "x": 60.0,
-          "y": 160.0,
+          "x": 80.0,
+          "y": 200.0,
           "propertyType": "SYNCHRONIZATION",
           "propertyX": -50.0,
           "propertyY": -10.0
         },
         {
-          "x": 60.0,
-          "y": 190.0,
+          "x": 80.0,
+          "y": 220.0,
           "propertyType": "NONE",
           "propertyX": 0.0,
           "propertyY": 0.0
@@ -138,15 +110,15 @@
       "sync": "pub",
       "nails": [
         {
-          "x": 90.0,
-          "y": 220.0,
+          "x": 120.0,
+          "y": 240.0,
           "propertyType": "SYNCHRONIZATION",
-          "propertyX": 20.0,
-          "propertyY": 10.0
+          "propertyX": -20.0,
+          "propertyY": 20.0
         },
         {
-          "x": 120.0,
-          "y": 220.0,
+          "x": 140.0,
+          "y": 240.0,
           "propertyType": "NONE",
           "propertyX": 0.0,
           "propertyY": 0.0
@@ -163,15 +135,15 @@
       "sync": "grant",
       "nails": [
         {
-          "x": 160.0,
-          "y": 210.0,
+          "x": 170.0,
+          "y": 230.0,
           "propertyType": "SYNCHRONIZATION",
           "propertyX": 10.0,
           "propertyY": -10.0
         },
         {
-          "x": 160.0,
-          "y": 180.0,
+          "x": 170.0,
+          "y": 210.0,
           "propertyType": "NONE",
           "propertyX": 0.0,
           "propertyY": 0.0
@@ -188,15 +160,15 @@
       "sync": "pub",
       "nails": [
         {
-          "x": 60.0,
-          "y": 50.0,
+          "x": 90.0,
+          "y": 80.0,
           "propertyType": "SYNCHRONIZATION",
-          "propertyX": 10.0,
+          "propertyX": -60.0,
           "propertyY": -10.0
         },
         {
-          "x": 110.0,
-          "y": 50.0,
+          "x": 100.0,
+          "y": 60.0,
           "propertyType": "NONE",
           "propertyX": 0.0,
           "propertyY": 0.0
@@ -213,79 +185,15 @@
       "sync": "patent",
       "nails": [
         {
-          "x": 150.0,
-          "y": 60.0,
+          "x": 170.0,
+          "y": 70.0,
           "propertyType": "SYNCHRONIZATION",
           "propertyX": 10.0,
           "propertyY": -10.0
         },
         {
-          "x": 140.0,
+          "x": 170.0,
           "y": 90.0,
-          "propertyType": "NONE",
-          "propertyX": 0.0,
-          "propertyY": 0.0
-        }
-      ]
-    },
-    {
-      "sourceLocation": "U0",
-      "targetLocation": "U0",
-      "status": "INPUT",
-      "select": "",
-      "guard": "",
-      "update": "",
-      "sync": "*",
-      "nails": [
-        {
-          "x": 250.0,
-          "y": 90.0,
-          "propertyType": "NONE",
-          "propertyX": 0.0,
-          "propertyY": 0.0
-        },
-        {
-          "x": 230.0,
-          "y": 100.0,
-          "propertyType": "SYNCHRONIZATION",
-          "propertyX": 10.0,
-          "propertyY": -10.0
-        },
-        {
-          "x": 250.0,
-          "y": 110.0,
-          "propertyType": "NONE",
-          "propertyX": 0.0,
-          "propertyY": 0.0
-        }
-      ]
-    },
-    {
-      "sourceLocation": "U0",
-      "targetLocation": "U0",
-      "status": "OUTPUT",
-      "select": "",
-      "guard": "",
-      "update": "",
-      "sync": "*",
-      "nails": [
-        {
-          "x": 330.0,
-          "y": 90.0,
-          "propertyType": "NONE",
-          "propertyX": 0.0,
-          "propertyY": 0.0
-        },
-        {
-          "x": 350.0,
-          "y": 100.0,
-          "propertyType": "SYNCHRONIZATION",
-          "propertyX": 10.0,
-          "propertyY": -10.0
-        },
-        {
-          "x": 330.0,
-          "y": 110.0,
           "propertyType": "NONE",
           "propertyX": 0.0,
           "propertyY": 0.0
@@ -296,8 +204,8 @@
   "description": "",
   "x": 5.0,
   "y": 5.0,
-  "width": 450.0,
-  "height": 600.0,
+  "width": 260.0,
+  "height": 310.0,
   "color": "2",
-  "includeInPeriodicCheck": true
+  "includeInPeriodicCheck": false
 }
