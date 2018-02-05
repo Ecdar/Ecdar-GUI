@@ -197,7 +197,7 @@ public class Component extends HighLevelModelObject implements Boxed {
      * @param id id of location to find
      * @return the found location, or null if non was found
      */
-    Location findLocation(final String id) {
+    public Location findLocation(final String id) {
         for (final Location loc : getLocations()) {
             if (loc.getId().equals(id)) return loc;
         }
