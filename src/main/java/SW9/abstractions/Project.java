@@ -1,6 +1,7 @@
 package SW9.abstractions;
 
 import SW9.Ecdar;
+import SW9.mutation.MutationTestPlan;
 import com.google.common.io.Files;
 import com.google.gson.*;
 import javafx.beans.property.ObjectProperty;
@@ -30,6 +31,7 @@ public class Project {
     private final ObservableList<Query> queries;
     private final ObservableList<Component> components;
     private final ObservableList<EcdarSystem> systems;
+    private final ObservableList<MutationTestPlan> testPlans;
     private final ObjectProperty<Declarations> globalDeclarations;
     private final ObjectProperty<Declarations> systemDeclarations;
 
@@ -37,6 +39,7 @@ public class Project {
         queries = FXCollections.observableArrayList();
         components = FXCollections.observableArrayList();
         systems = FXCollections.observableArrayList();
+        testPlans = FXCollections.observableArrayList();
         globalDeclarations = new SimpleObjectProperty<>(new Declarations("Global Declarations"));
         systemDeclarations = new SimpleObjectProperty<>(new Declarations("System Declarations"));
     }
@@ -51,6 +54,10 @@ public class Project {
 
     public ObservableList<EcdarSystem> getSystemsProperty() {
         return systems;
+    }
+
+    public ObservableList<MutationTestPlan> getTestPlans() {
+        return testPlans;
     }
 
     public Declarations getGlobalDeclarations() {

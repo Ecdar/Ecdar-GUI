@@ -6,6 +6,7 @@ import SW9.abstractions.*;
 import SW9.backend.BackendException;
 import SW9.backend.UPPAALDriver;
 import SW9.code_analysis.CodeAnalysis;
+import SW9.mutation.MutationTestPlan;
 import SW9.presentations.*;
 import SW9.utility.UndoRedoStack;
 import SW9.utility.colors.Color;
@@ -127,10 +128,11 @@ public class EcdarController implements Initializable {
     public MenuItem menuBarViewFilePanel;
     public MenuItem menuBarViewQueryPanel;
     public MenuItem menuBarViewGrid;
-    public MenuItem menuBarFileSave;
-    public MenuItem menuBarFileSaveAs;
     public MenuItem menuBarFileCreateNewProject;
     public MenuItem menuBarFileOpenProject;
+    public MenuItem menuBarFileSave;
+    public MenuItem menuBarFileSaveAs;
+    public MenuItem menuBarFileNewMutationTestObject;
     public MenuItem menuBarFileExportAsPng;
     public MenuItem menuBarFileExportAsPngNoBorder;
     public MenuItem menuBarOptionsCache;
@@ -434,6 +436,8 @@ public class EcdarController implements Initializable {
         menuBarFileSaveAs.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN));
         menuBarFileSaveAs.setOnAction(event -> saveAs());
 
+        initializeNewMutationTestObjectMenuItem();
+
         initializeFileExportAsPng();
 
         initializeViewMenu();
@@ -586,6 +590,23 @@ public class EcdarController implements Initializable {
     }
 
     /**
+     * Initializes menu item for creating a new mutation test object.
+     */
+    private void initializeNewMutationTestObjectMenuItem() {
+        menuBarFileNewMutationTestObject.setAccelerator(new KeyCodeCombination(KeyCode.T, KeyCombination.SHORTCUT_DOWN));
+        menuBarFileNewMutationTestObject.setOnAction(event -> {
+            final MutationTestPlan newPlan = new MutationTestPlan();
+
+            UndoRedoStack.pushAndPerform(() -> { // Perform
+                Ecdar.getProject().getTestPlans().add(newPlan);
+                CanvasController.setActiveModel(newPlan);
+            }, () -> { // Undo
+                Ecdar.getProject().getTestPlans().remove(newPlan);
+            }, "Created new mutation test plan", "");
+        });
+    }
+
+    /**
      * Creates a new project.
      */
     private static void createNewProject() {
@@ -655,13 +676,11 @@ public class EcdarController implements Initializable {
      */
     private WritableImage takeSnapshot() {
         final WritableImage image;
-        if (canvas.isGridOn()) {
-            canvas.toggleGrid();
-            image = scaleAndTakeSnapshot();
-            canvas.toggleGrid();
-        } else {
-            image = scaleAndTakeSnapshot();
-        }
+
+        canvas.getController().disallowGrid();
+        image = scaleAndTakeSnapshot();
+        canvas.getController().allowGrid();
+
         return image;
     }
 

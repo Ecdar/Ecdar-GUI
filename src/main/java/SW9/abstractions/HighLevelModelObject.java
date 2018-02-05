@@ -30,7 +30,7 @@ public abstract class HighLevelModelObject implements Serializable, DropDownMenu
     private final ObjectProperty<Color> color;
     private final ObjectProperty<Color.Intensity> colorIntensity;
 
-    HighLevelModelObject() {
+    public HighLevelModelObject() {
         name = new SimpleStringProperty("");
         color = new SimpleObjectProperty<>(Color.GREY_BLUE);
         colorIntensity = new SimpleObjectProperty<>(Color.Intensity.I700);

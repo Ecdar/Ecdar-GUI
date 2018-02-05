@@ -11,6 +11,8 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
@@ -22,7 +24,13 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
 
     private final DoubleProperty x = new SimpleDoubleProperty(0);
     private final DoubleProperty y = new SimpleDoubleProperty(0);
-    private final BooleanProperty gridOn = new SimpleBooleanProperty(false);
+
+    // This is the value of the user option for grid on/off.
+    // This is not whether the grid is actual visible or not.
+    // E.g. the grid is hidden while taking snapshots.
+    // But that does not affect the gridUiOn field.
+    private final BooleanProperty gridUiOn = new SimpleBooleanProperty(false);
+
     private final Grid grid = new Grid(Grid.GRID_SIZE);
     private final CanvasController controller;
 
@@ -42,22 +50,42 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
     private void initializeGrid() {
         getChildren().add(grid);
         grid.toBack();
-        gridOn.setValue(true);
+        gridUiOn.setValue(true);
+
+        controller.allowGridProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue && gridUiOn.get()) showGrid();
+            else hideGrid();
+        });
     }
 
     /**
-     * Toggles the grid on if the grid is off and vice versa
+     * Toggles the user option for whether or not to show the grid on components and system views.
      * @return a Boolean property that is true if the grid has been turned on and false if the grid has been turned off
      */
-    public BooleanProperty toggleGrid() {
-        if (gridOn.get()) {
-            grid.setOpacity(0);
-            gridOn.setValue(false);
+    public BooleanProperty toggleGridUi() {
+        if (gridUiOn.get()) {
+            if (controller.isGridAllowed()) hideGrid();
+
+            gridUiOn.setValue(false);
         } else {
-            grid.setOpacity(1);
-            gridOn.setValue(true);
+            showGrid();
+            gridUiOn.setValue(true);
         }
-        return gridOn;
+        return gridUiOn;
+    }
+
+    /**
+     * Shows the grid.
+     */
+    private void showGrid() {
+        grid.setOpacity(1);
+    }
+
+    /**
+     * Hides the grid.
+     */
+    private void hideGrid() {
+        grid.setOpacity(0);
     }
 
 
@@ -92,10 +120,6 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
     @Override
     public MouseTracker getMouseTracker() {
         return mouseTracker;
-    }
-
-    public boolean isGridOn() {
-        return gridOn.get();
     }
 
     public CanvasController getController() {

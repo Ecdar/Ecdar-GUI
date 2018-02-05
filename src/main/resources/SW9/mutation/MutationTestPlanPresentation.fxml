@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import org.fxmisc.richtext.StyleClassedTextArea?>
+<?import com.jfoenix.controls.JFXComboBox?>
+<fx:root xmlns:fx="http://javafx.com/fxml/1"
+         xmlns="http://javafx.com/javafx/8.0.76-ea"
+         type="StackPane"
+         fx:id="root"
+         style="-fx-background-color: #ff0000;"
+         fx:controller="SW9.mutation.MutationTestPlanController">
+    <BorderPane fx:id="frame" pickOnBounds="false" >
+        <JFXComboBox id="jfxComboBox" prefWidth="200"
+                     promptText="Select Test Model">
+
+        </JFXComboBox>
+    </BorderPane>
+
+</fx:root>

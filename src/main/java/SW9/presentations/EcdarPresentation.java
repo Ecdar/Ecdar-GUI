@@ -556,7 +556,7 @@ public class EcdarPresentation extends StackPane {
      * @return A Boolean Property that is true if the grid has been turned on and false if it is off
      */
     public BooleanProperty toggleGrid(){
-        return controller.canvas.toggleGrid();
+        return controller.canvas.toggleGridUi();
     }
 
     public void showSnackbarMessage(final String message) {
