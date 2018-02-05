@@ -9,17 +9,17 @@ import java.util.List;
 
 /**
  * Generates mutants from a component.
- * Each mutant has a changed target location on an edge.
+ * Each mutant has a changed source location on an edge.
  * Generates # of edges * (# of locations - 1) mutants.
  */
-public class ChangeTargetOperator {
+public class ChangeSourceOperator {
     private final Component original;
 
     /**
      * Constructor.
      * @param original component to mutate
      */
-    public ChangeTargetOperator(final Component original) {
+    public ChangeSourceOperator(final Component original) {
         this.original = original;
     }
 
@@ -35,15 +35,15 @@ public class ChangeTargetOperator {
             final Edge originalEdge = original.getEdges().get(edgeIndex);
 
             for (final Location originalLocation : original.getLocations()) {
-                // Ignore if location is target in original edge
-                if (originalEdge.getTargetLocation() == originalLocation) continue;
+                // Ignore if location is source in original edge
+                if (originalEdge.getSourceLocation() == originalLocation) continue;
 
                 final Component mutant = new Component(original);
 
                 // Mutate
                 final Edge mutantEdge = mutant.getEdges().get(edgeIndex);
                 final String newLocId = originalLocation.getId();
-                mutantEdge.setTargetLocation(mutant.findLocation(newLocId));
+                mutantEdge.setSourceLocation(mutant.findLocation(newLocId));
 
                 mutants.add(mutant);
             }

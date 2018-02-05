@@ -80,7 +80,7 @@ public class Edge implements Serializable, Nearable {
         return sourceLocation.get();
     }
 
-    private void setSourceLocation(final Location sourceLocation) {
+    public void setSourceLocation(final Location sourceLocation) {
         this.sourceLocation.set(sourceLocation);
         updateSourceCircular();
     }
