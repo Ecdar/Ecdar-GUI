@@ -3,6 +3,7 @@ package SW9.backend;
 import SW9.Ecdar;
 import SW9.abstractions.Component;
 import SW9.abstractions.Location;
+import SW9.abstractions.Project;
 import SW9.code_analysis.CodeAnalysis;
 import com.uppaal.engine.Engine;
 import com.uppaal.engine.EngineException;
@@ -13,6 +14,7 @@ import javafx.application.Platform;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -50,6 +52,17 @@ public class UPPAALDriver {
         // Generate and store the debug document
         buildEcdarDocument();
         storeUppaalFile(ecdarDocument.toXmlDocument(), Ecdar.debugDirectory + File.separator + "debug.xml");
+    }
+
+    /**
+     * Stores a project as a backend XML file "model.xml" in the "temporary" directory.
+     * @param project project to store
+     * @throws BackendException if an error occurs during generation of backend XML
+     * @throws IOException if an error occurs during storing of the file
+     * @throws URISyntaxException if an error occurs when getting the URL of the root directory
+     */
+    public static void storeBackendModel(final Project project) throws BackendException, IOException, URISyntaxException {
+        storeUppaalFile(new EcdarDocument(project).toXmlDocument(), Ecdar.getRootDirectory() + "temporary" + File.separator + "model.xml");
     }
 
     public static void buildEcdarDocument() throws BackendException {
