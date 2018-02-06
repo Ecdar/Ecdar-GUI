@@ -12,7 +12,7 @@ import java.util.List;
  * Each mutant has a changed source location on an edge.
  * Generates # of edges * (# of locations - 1) mutants.
  */
-public class ChangeSourceOperator {
+class ChangeSourceOperator {
     private final Component original;
 
     /**

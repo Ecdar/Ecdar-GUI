@@ -12,7 +12,6 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Label;
-import javafx.scene.input.MouseEvent;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -50,9 +49,8 @@ public class MutationTestPlanController {
     /**
      * Triggered when pressed the test button.
      * Conducts the test.
-     * @param event not used
      */
-    public void onTestButtonPressed(final MouseEvent event) {
+    public void onTestButtonPressed() {
         testButton.setDisable(true);
 
         // Find test model from test model picker

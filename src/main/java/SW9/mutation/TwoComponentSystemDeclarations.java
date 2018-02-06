@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Systems declarations for two components.
  */
-public class TwoComponentSystemDeclarations extends Declarations {
+class TwoComponentSystemDeclarations extends Declarations {
     public TwoComponentSystemDeclarations(final Component component1, final Component component2) {
         super("TwoComponentSystemDeclarations");
 
