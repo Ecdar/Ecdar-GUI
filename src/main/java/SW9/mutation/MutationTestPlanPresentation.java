@@ -37,6 +37,8 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
                     controller.testButton.setDisable(false)));
         }
 
-
+        // Bind test plan to test model picker
+        controller.testModelPicker.valueProperty().addListener(((observable, oldValue, newValue) ->
+                    controller.getPlan().setTestModelId(newValue.getText())));
     }
 }

@@ -72,12 +72,35 @@ public class Edge implements Serializable, Nearable {
      */
     Edge cloneForVerification(final Component component) {
         final Edge clone = new Edge(component.findLocation(getSourceLocation().getId()), getStatus());
+
+        // Clone target location
         clone.setTargetLocation(component.findLocation(getTargetLocation().getId()));
 
-        clone.setSelect(getSelect());
-        clone.setGuard(getGuard());
-        clone.setUpdate(getUpdate());
-        clone.setSync(getSync());
+        // Clone properties if they are non-empty
+        if (!getSelect().isEmpty()) {
+            clone.setSelect(getSelect());
+            final Nail nail = new Nail(0, 0);
+            nail.setPropertyType(PropertyType.SELECTION);
+            clone.addNail(nail);
+        }
+        if (!getGuard().isEmpty()) {
+            clone.setGuard(getGuard());
+            final Nail nail = new Nail(0, 0);
+            nail.setPropertyType(PropertyType.GUARD);
+            clone.addNail(nail);
+        }
+        if (!getUpdate().isEmpty()) {
+            clone.setUpdate(getUpdate());
+            final Nail nail = new Nail(0, 0);
+            nail.setPropertyType(PropertyType.UPDATE);
+            clone.addNail(nail);
+        }
+        if (!getSync().isEmpty()) {
+            clone.setSync(getSync());
+            final Nail nail = new Nail(0, 0);
+            nail.setPropertyType(PropertyType.SYNCHRONIZATION);
+            clone.addNail(nail);
+        }
 
         return clone;
     }

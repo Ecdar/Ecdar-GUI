@@ -32,10 +32,12 @@ public class ComponentTest {
         Ecdar.getProject().getComponents().add(original);
 
         final Location loc1 = new Location();
+        loc1.initialize();
         original.addLocation(loc1);
         final String id1 = loc1.getId();
 
         final Location loc2 = new Location();
+        loc2.initialize();
         original.addLocation(loc2);
         final String id2 = loc2.getId();
 
@@ -65,10 +67,12 @@ public class ComponentTest {
         Ecdar.getProject().getComponents().add(original);
 
         final Location loc1 = new Location();
+        loc1.initialize();
         original.addLocation(loc1);
         final String id1 = loc1.getId();
 
         final Location loc2 = new Location();
+        loc2.initialize();
         original.addLocation(loc2);
         final String id2 = loc2.getId();
 

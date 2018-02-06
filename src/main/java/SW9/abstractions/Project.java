@@ -27,6 +27,7 @@ public class Project {
     private final static String JSON_FILENAME_EXTENSION = ".json";
     private static final String FOLDER_NAME_COMPONENTS = "Components";
     private static final String FOLDER_NAME_SYSTEMS = "Systems";
+    private static final String FOLDER_NAME_TESTS = "Tests";
 
     private final ObservableList<Query> queries;
     private final ObservableList<Component> components;
@@ -85,8 +86,9 @@ public class Project {
         // Clear the project folder
         FileUtils.forceMkdir(directory);
         FileUtils.cleanDirectory(directory);
-        FileUtils.forceMkdir(new File(getComponentsFolderName()));
-        FileUtils.forceMkdir(new File(getSystemsFolderName()));
+        FileUtils.forceMkdir(new File(Ecdar.projectDirectory.getValue() + File.separator + FOLDER_NAME_COMPONENTS));
+        FileUtils.forceMkdir(new File(Ecdar.projectDirectory.getValue() + File.separator + FOLDER_NAME_SYSTEMS));
+        FileUtils.forceMkdir(new File(Ecdar.projectDirectory.getValue() + File.separator + FOLDER_NAME_TESTS));
 
         {
             // Save global declarations
@@ -113,6 +115,13 @@ public class Project {
         for (final EcdarSystem system : getSystemsProperty()) {
             final Writer writer = getSaveFileWriter(system.getName(), FOLDER_NAME_SYSTEMS);
             getNewGson().toJson(system.serialize(), writer);
+            writer.close();
+        }
+
+        // Test objects
+        for (final MutationTestPlan plan : getTestPlans()) {
+            final Writer writer = getSaveFileWriter(plan.getName(), FOLDER_NAME_TESTS);
+            getNewGson().toJson(plan.serialize(), writer);
             writer.close();
         }
 
@@ -149,14 +158,6 @@ public class Project {
         return new FileWriter(Ecdar.projectDirectory.getValue() + File.separator + folderName + File.separator + filename + ".json");
     }
 
-    private static String getComponentsFolderName() {
-        return Ecdar.projectDirectory.getValue() + File.separator + FOLDER_NAME_COMPONENTS;
-    }
-
-    private static String getSystemsFolderName() {
-        return Ecdar.projectDirectory.getValue() + File.separator + FOLDER_NAME_SYSTEMS;
-    }
-
     /**
      * Reads files in a folder and serializes this based on the files.
      * @param projectFolder the folder to read files from
@@ -174,6 +175,8 @@ public class Project {
                     deserializeComponents(file);
                 } else if (file.getName().equals(FOLDER_NAME_SYSTEMS)) {
                     deserializeSystems(file);
+                } else if (file.getName().equals(FOLDER_NAME_TESTS)) {
+                    deserializeTestObjects(file);
                 }
                 continue;
             }
@@ -281,6 +284,45 @@ public class Project {
 
         // Add the systems to the list
         orderedJsonSystems.forEach(json -> getSystemsProperty().add(new EcdarSystem(json)));
+    }
+
+    /**
+     * Deserializes objects for mutation testing.
+     * @param directory directory of the JSON files for mutation testing
+     */
+    private void deserializeTestObjects(final File directory) throws IOException {
+        // If there are no files do not try to deserialize
+        final File[] files = directory.listFiles();
+        if (files == null || files.length == 0) return;
+
+        // Create map for deserialization
+        final Map<String, JsonObject> nameJsonMap = new HashMap<>();
+
+        for (final File file : files) {
+            // If JSON file
+            if (file.getName().endsWith(JSON_FILENAME_EXTENSION)) {
+                final String fileContent = Files.toString(file, Charset.defaultCharset());
+                final JsonObject json = new JsonParser().parse(fileContent).getAsJsonObject();
+                final String name = json.get("name").getAsString();
+                nameJsonMap.put(name, json);
+            }
+        }
+
+        final List<Map.Entry<String, JsonObject>> list = new LinkedList<>(nameJsonMap.entrySet());
+
+        list.sort(Comparator.comparing(Map.Entry::getKey));
+
+        final List<JsonObject> orderedJsonSystems = new ArrayList<>();
+
+        for (final Map.Entry<String, JsonObject> mapEntry : list) {
+            orderedJsonSystems.add(mapEntry.getValue());
+        }
+
+        // Reverse the list such that the greatest depth is first in the list
+        Collections.reverse(orderedJsonSystems);
+
+        // Add the test objects to the list
+        orderedJsonSystems.forEach(json -> getTestPlans().add(new MutationTestPlan(json)));
     }
 
     /**

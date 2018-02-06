@@ -38,6 +38,9 @@ public class MutationTestPlanController {
             final Project project = new Project();
             mutants.get(0).setName(MUTANT_NAME);
             project.getComponents().addAll(testModel, mutants.get(0));
+            project.setGlobalDeclarations(Ecdar.getProject().getGlobalDeclarations());
+            project.setSystemDeclarations(Ecdar.getProject().getSystemDeclarations());
+
 
             try {
                 UPPAALDriver.storeBackendModel(project);
