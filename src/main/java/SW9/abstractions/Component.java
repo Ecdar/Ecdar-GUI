@@ -95,7 +95,7 @@ public class Component extends HighLevelModelObject implements Boxed {
      * Copies objects used for verification (e.g. locations, edges and the declarations).
      * Does not copy UI elements (sizes and positions).
      * It locations are cloned from the original component. Their ids are the same.
-     * The IO listeners is not initialized.
+     * Does not initialize io listeners.
      * Reachability analysis binding is not initialized.
      * @return the clone
      */
@@ -154,7 +154,7 @@ public class Component extends HighLevelModelObject implements Boxed {
      * @param listener the listener
      * @param edge the edge
      */
-    public static void addSyncListener(final ChangeListener<Object> listener, final Edge edge) {
+    private static void addSyncListener(final ChangeListener<Object> listener, final Edge edge) {
         edge.syncProperty().addListener(listener);
         edge.ioStatus.addListener(listener);
     }
@@ -163,7 +163,7 @@ public class Component extends HighLevelModelObject implements Boxed {
      * Method used for updating the inputstrings and outputstrings list
      * Sorts the list alphabetically, ignoring case
      */
-    private void updateIOList() {
+    public void updateIOList() {
         final List<String> localInputStrings = new ArrayList<>();
         final List<String> localOutputStrings = new ArrayList<>();
 

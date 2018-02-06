@@ -14,8 +14,8 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 public class MutationTestPlanController {
-    private final static String TEST_MODEL_NAME = "S";
-    private final static String MUTANT_NAME = "M";
+    public final static String TEST_MODEL_NAME = "S";
+    public final static String MUTANT_NAME = "M";
 
     public JFXComboBox<Label> testModelPicker;
     public JFXButton testButton;
@@ -39,7 +39,8 @@ public class MutationTestPlanController {
             mutants.get(0).setName(MUTANT_NAME);
             project.getComponents().addAll(testModel, mutants.get(0));
             project.setGlobalDeclarations(Ecdar.getProject().getGlobalDeclarations());
-            project.setSystemDeclarations(Ecdar.getProject().getSystemDeclarations());
+            mutants.get(0).updateIOList(); // Update io in order to get the right system declarations for the mutant
+            project.setSystemDeclarations(new TwoComponentSystemDeclarations(testModel, mutants.get(0)));
 
 
             try {
