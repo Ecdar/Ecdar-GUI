@@ -292,6 +292,7 @@ public class ComponentController extends ModelController implements Initializabl
             contextMenu.addClickableListElement("Add Location", event -> {
                 contextMenu.hide();
                 final Location newLocation = new Location();
+                newLocation.initialize();
 
                 double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
                 x = Grid.snap(x);
@@ -412,6 +413,7 @@ public class ComponentController extends ModelController implements Initializabl
             finishEdgeContextMenu.addClickableListElement("Location", event -> {
                 finishEdgeContextMenu.hide();
                 final Location location = new Location();
+                location.initialize();
 
                 location.setColorIntensity(getComponent().getColorIntensity());
                 location.setColor(getComponent().getColor());
@@ -649,6 +651,7 @@ public class ComponentController extends ModelController implements Initializabl
 
         if ((event.isShiftDown() && event.isPrimaryButtonDown()) || event.isMiddleButtonDown()) {
             final Location location = new Location();
+            location.initialize();
 
             location.setX(Grid.snap(event.getX()));
             location.setY(Grid.snap(event.getY()));

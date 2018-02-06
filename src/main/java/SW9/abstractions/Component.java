@@ -33,7 +33,7 @@ public class Component extends HighLevelModelObject implements Boxed {
     private final ObservableList<String> inputStrings = FXCollections.observableArrayList();
     private final ObservableList<String> outputStrings = FXCollections.observableArrayList();
     private final StringProperty description = new SimpleStringProperty("");
-    private final StringProperty declarationsText;
+    private final StringProperty declarationsText = new SimpleStringProperty("");;
 
     // Background check
     private final BooleanProperty includeInPeriodicCheck = new SimpleBooleanProperty(true);
@@ -42,6 +42,13 @@ public class Component extends HighLevelModelObject implements Boxed {
     private final Box box = new Box();
     private final BooleanProperty declarationOpen = new SimpleBooleanProperty(false);
     private final BooleanProperty firsTimeShown = new SimpleBooleanProperty(false);
+
+    /**
+     * Constructs an empty component
+     */
+    private Component() {
+
+    }
 
     /**
      * Creates a component with a specific name and a boolean value that chooses whether the colour for this component is chosen at random
@@ -54,10 +61,9 @@ public class Component extends HighLevelModelObject implements Boxed {
             setRandomColor();
         }
 
-        declarationsText = new SimpleStringProperty("");
-
         // Make initial location
         final Location initialLocation = new Location();
+        initialLocation.initialize();
         initialLocation.setType(Location.Type.INITIAL);
         initialLocation.setColorIntensity(getColorIntensity());
         initialLocation.setColor(getColor());
@@ -76,14 +82,44 @@ public class Component extends HighLevelModelObject implements Boxed {
     public Component(final JsonObject json) {
         setFirsTimeShown(true);
 
-        declarationsText = new SimpleStringProperty("");
-
         deserialize(json);
 
         initializeIOListeners();
         updateIOList();
 
         bindReachabilityAnalysis();
+    }
+
+    /**
+     * Creates a clone of another component.
+     * Copies objects used for verification (e.g. locations, edges and the declarations).
+     * Does not copy UI elements (sizes and positions).
+     * It locations are cloned from the original component. Their ids are the same.
+     * Does not initialize io listeners.
+     * Reachability analysis binding is not initialized.
+     * @return the clone
+     */
+    public Component cloneForVerification() {
+        final Component clone = new Component();
+        clone.addVerificationObjects(this);
+
+        return clone;
+    }
+
+    /**
+     * Adds objects used for verifications to this component.
+     * @param original the component to add from
+     */
+    private void addVerificationObjects(final Component original) {
+        for (final Location originalLoc : original.getLocations()) {
+            addLocation(originalLoc.cloneForVerification());
+        }
+
+        for (final Edge originalEdge : original.getEdges()) {
+            addEdge(originalEdge.cloneForVerification(this));
+        }
+
+        setDeclarationsText(original.getDeclarationsText());
     }
 
     /**
@@ -118,7 +154,7 @@ public class Component extends HighLevelModelObject implements Boxed {
      * @param listener the listener
      * @param edge the edge
      */
-    public static void addSyncListener(final ChangeListener<Object> listener, final Edge edge) {
+    private static void addSyncListener(final ChangeListener<Object> listener, final Edge edge) {
         edge.syncProperty().addListener(listener);
         edge.ioStatus.addListener(listener);
     }
@@ -127,7 +163,7 @@ public class Component extends HighLevelModelObject implements Boxed {
      * Method used for updating the inputstrings and outputstrings list
      * Sorts the list alphabetically, ignoring case
      */
-    private void updateIOList() {
+    public void updateIOList() {
         final List<String> localInputStrings = new ArrayList<>();
         final List<String> localOutputStrings = new ArrayList<>();
 
@@ -160,13 +196,12 @@ public class Component extends HighLevelModelObject implements Boxed {
      * @return all but the initial location
      */
     public List<Location> getAllButInitialLocations() {
-        final List<Location> locations = new ArrayList<>();
-        locations.addAll(getLocations());
+        final List<Location> locations = new ArrayList<>(getLocations());
 
         // Remove initial location
         final Location initLoc = getInitialLocation();
         if (initLoc != null) {
-            locations.remove(getInitialLocation());
+            locations.remove(initLoc);
         }
 
         return locations;
@@ -174,6 +209,19 @@ public class Component extends HighLevelModelObject implements Boxed {
 
     public ObservableList<Location> getLocations() {
         return locations;
+    }
+
+    /**
+     * Finds a location in this component based on its id.
+     * @param id id of location to find
+     * @return the found location, or null if non was found
+     */
+    public Location findLocation(final String id) {
+        for (final Location loc : getLocations()) {
+            if (loc.getId().equals(id)) return loc;
+        }
+
+        return null;
     }
 
     public boolean addLocation(final Location location) {

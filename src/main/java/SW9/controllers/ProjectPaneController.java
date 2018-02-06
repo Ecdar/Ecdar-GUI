@@ -4,6 +4,7 @@ import SW9.Ecdar;
 import SW9.abstractions.Component;
 import SW9.abstractions.EcdarSystem;
 import SW9.abstractions.HighLevelModelObject;
+import SW9.mutation.MutationTestPlan;
 import SW9.presentations.DropDownMenu;
 import SW9.presentations.FilePresentation;
 import SW9.utility.UndoRedoStack;
@@ -66,17 +67,6 @@ public class ProjectPaneController implements Initializable {
                     c.getAddedSubList().forEach(o -> handleAddedModel(o));
                     c.getRemoved().forEach(o -> handleRemovedModel(o));
 
-                    // We should make a new component active
-                    if (c.getRemoved().size() > 0) {
-                        if (Ecdar.getProject().getComponents().size() > 0) {
-                            // Find the first available component and show it instead of the removed one
-                            final Component component = Ecdar.getProject().getComponents().get(0);
-                            CanvasController.setActiveModel(component);
-                        } else {
-                            // Show no components (since there are none in the project)
-                            CanvasController.setActiveModel(null);
-                        }
-                    }
                     // Sort the children alphabetically
                     sortPresentations();
                 }
@@ -91,22 +81,25 @@ public class ProjectPaneController implements Initializable {
                 change.getAddedSubList().forEach(this::handleAddedModel);
                 change.getRemoved().forEach(this::handleRemovedModel);
 
-                // We should make a new component active
-                if (change.getRemoved().size() > 0) {
-                    if (Ecdar.getProject().getComponents().size() > 0) {
-                        // Find the first available component and show it instead of the removed one
-                        final Component component = Ecdar.getProject().getComponents().get(0);
-                        CanvasController.setActiveModel(component);
-                    } else {
-                        // Show no components (since there are none in the project)
-                        CanvasController.setActiveModel(null);
-                    }
-                }
                 // Sort the children alphabetically
                 sortPresentations();
             }
         });
 
+
+        initializeMutationTestPlanHandling();
+    }
+
+    private void initializeMutationTestPlanHandling() {
+        Ecdar.getProject().getTestPlans().addListener((ListChangeListener<MutationTestPlan>) change -> {
+            while (change.next()) {
+                change.getAddedSubList().forEach(this::handleAddedModel);
+                change.getRemoved().forEach(this::handleRemovedModel);
+
+                // Sort the children alphabetically
+                sortPresentations();
+            }
+        });
     }
 
     private void sortPresentations() {
@@ -232,6 +225,19 @@ public class ProjectPaneController implements Initializable {
     private void handleRemovedModel(final HighLevelModelObject model) {
         filesList.getChildren().remove(modelPresentationMap.get(model));
         modelPresentationMap.remove(model);
+
+
+        // If we remove the model active on the canvas
+        if (CanvasController.getActiveModel() == model) {
+            if (Ecdar.getProject().getComponents().size() > 0) {
+                // Find the first available component and show it instead of the removed one
+                final Component component = Ecdar.getProject().getComponents().get(0);
+                CanvasController.setActiveModel(component);
+            } else {
+                // Show no components (since there are none in the project)
+                CanvasController.setActiveModel(null);
+            }
+        }
     }
 
     /**

@@ -50,11 +50,9 @@ public class Ecdar extends Application {
 
     {
         try {
-            final CodeSource codeSource = Ecdar.class.getProtectionDomain().getCodeSource();
-            final File jarFile = new File(codeSource.getLocation().toURI().getPath());
-            final String rootDirectory = jarFile.getParentFile().getPath() + File.separator;
-            serverDirectory = rootDirectory + "servers";
-            debugDirectory = rootDirectory + "uppaal-debug";
+            final String rootDirectory = getRootDirectory();
+            serverDirectory = rootDirectory + File.separator + "servers";
+            debugDirectory = rootDirectory + File.separator + "uppaal-debug";
             forceCreateFolder(serverDirectory);
             forceCreateFolder(debugDirectory);
         } catch (final URISyntaxException e) {
@@ -65,7 +63,18 @@ public class Ecdar extends Application {
             System.exit(2);
         }
     }
-    
+
+    /**
+     * Gets the path to the root directory.
+     * @return the path to the root directory
+     * @throws URISyntaxException if the source code location could not be converted to an URI
+     */
+    public static String getRootDirectory() throws URISyntaxException {
+        final CodeSource codeSource = Ecdar.class.getProtectionDomain().getCodeSource();
+        final File jarFile = new File(codeSource.getLocation().toURI().getPath());
+        return jarFile.getParentFile().getPath();
+    }
+
     public static void main(final String[] args) {
         launch(Ecdar.class, args);
     }
@@ -222,6 +231,15 @@ public class Ecdar extends Application {
             Platform.exit();
             System.exit(0);
         });
+    }
+
+    /**
+     * Initializes and resets the project.
+     * This can be used as a test setup.
+     */
+    public static void setUpForTest() {
+        project = new Project();
+        project.reset();
     }
 
     public static void initializeProjectFolder() throws IOException {

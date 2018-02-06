@@ -36,26 +36,39 @@ class EcdarDocument {
     Location universalLocation;
     Location inconsistentLocation;
 
+    /**
+     * Constructs a document based on the opened Ecdar project.
+     * @throws BackendException if an error occurs during generation of backend XML
+     */
     EcdarDocument() throws BackendException {
-        generateXmlDocument();
+        this(Ecdar.getProject());
     }
 
     /**
-     * Generate a xml document based on the models.
+     * Constructs a document based on a given project.
+     * @param project the given project
+     * @throws BackendException if an error occurs during generation of backend XML
+     */
+    EcdarDocument(final Project project) throws BackendException {
+        generateXmlDocument(project);
+    }
+
+    /**
+     * Generate an xml document based on the a given project.
+     * @param project Project to generator based on
      * @throws BackendException if an error occurs during generation
      */
-    private void generateXmlDocument() throws BackendException {
+    private void generateXmlDocument(final Project project) throws BackendException {
         // Create a template for each model
-        for (final Component component : Ecdar.getProject().getComponents()) {
+        for (final Component component : project.getComponents()) {
             generateAndAddTemplate(component);
         }
 
         // Set global declarations
-        xmlDocument.setProperty(DECLARATION_PROPERTY_TAG, Ecdar.getProject().getGlobalDeclarations().getDeclarationsText());
+        xmlDocument.setProperty(DECLARATION_PROPERTY_TAG, project.getGlobalDeclarations().getDeclarationsText());
 
         // Set the system declaration
-        xmlDocument.setProperty(SYSTEM_DCL_TAG, Ecdar.getProject().getSystemDeclarations().getDeclarationsText());
-
+        xmlDocument.setProperty(SYSTEM_DCL_TAG, project.getSystemDeclarations().getDeclarationsText());
     }
 
     /**

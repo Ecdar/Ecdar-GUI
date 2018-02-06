@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<fx:root xmlns:fx="http://javafx.com/fxml/1"
+         xmlns="http://javafx.com/javafx/8.0.76-ea"
+         type="StackPane"
+         fx:controller="SW9.mutation.MutationTestPlanController">
+
+    <VBox spacing="16">
+        <JFXComboBox fx:id="testModelPicker"
+                     promptText="Select Test Model"/>
+
+        <JFXButton fx:id="testButton" prefWidth="100" prefHeight="40" buttonType="RAISED" text="Test"
+                   style="-fx-text-fill:WHITE;-fx-background-color:#52AE64;-fx-font-size:14px;"
+                   onMousePressed="#onTestButtonPressed"/>
+
+        <Label fx:id="progressText"/>
+        <Label fx:id="mutantsText"/>
+        <Label fx:id="testCasesText"/>
+    </VBox>
+
+</fx:root>

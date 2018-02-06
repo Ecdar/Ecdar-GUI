@@ -4,6 +4,8 @@ import SW9.abstractions.Component;
 import SW9.abstractions.Declarations;
 import SW9.abstractions.HighLevelModelObject;
 import SW9.abstractions.EcdarSystem;
+import SW9.mutation.MutationTestPlan;
+import SW9.mutation.MutationTestPlanPresentation;
 import SW9.presentations.*;
 import SW9.utility.helpers.SelectHelper;
 import javafx.application.Platform;
@@ -33,6 +35,10 @@ public class CanvasController implements Initializable {
     private static DoubleProperty width, height;
     private static BooleanProperty insetShouldShow;
     private ComponentPresentation activeComponentPresentation;
+
+    // This is whether to allow the user to turn on/off the grid.
+    // While this is false, the grid is always hidden, no matter the user option.
+    private BooleanProperty allowGrid = new SimpleBooleanProperty(true);
 
     public static DoubleProperty getWidthProperty() {
         return width;
@@ -120,6 +126,9 @@ public class CanvasController implements Initializable {
             ModelObjectTranslateMap.put(oldObject, new Pair<>(root.getTranslateX(), root.getTranslateY()));
         }
 
+        // if old object is a mutation test plan, and new object is not, allow grid to show
+        if (oldObject instanceof MutationTestPlan && !(newObject instanceof  MutationTestPlan)) allowGrid();
+
         // We should not add the new object if it is null (e.g. when clearing the view)
         if (newObject == null) return;
 
@@ -140,6 +149,14 @@ public class CanvasController implements Initializable {
             setTranslateOfBox(newObject);
             activeComponentPresentation = null;
             root.getChildren().add(new SystemPresentation((EcdarSystem) newObject));
+        } else if (newObject instanceof MutationTestPlan) {
+            root.setTranslateX(50);
+            root.setTranslateY(100);
+
+            disallowGrid();
+
+            activeComponentPresentation = null;
+            root.getChildren().add(new MutationTestPlanPresentation((MutationTestPlan) newObject));
         } else {
             throw new IllegalStateException("Type of object is not supported.");
         }
@@ -174,5 +191,31 @@ public class CanvasController implements Initializable {
      */
     ComponentPresentation getActiveComponentPresentation() {
         return activeComponentPresentation;
+    }
+
+
+
+    /**
+     * Allows the user to turn the grid on/off.
+     * If the user has currently chosen on, then this method also shows the grid.
+     */
+    public void allowGrid() {
+        allowGrid.set(true);
+    }
+
+    /**
+     * Disallows the user to turn the grid on/off.
+     * Also hides the grid.
+     */
+    public void disallowGrid() {
+        allowGrid.set(false);
+    }
+
+    public BooleanProperty allowGridProperty() {
+        return allowGrid;
+    }
+
+    public boolean isGridAllowed() {
+        return allowGrid.get();
     }
 }

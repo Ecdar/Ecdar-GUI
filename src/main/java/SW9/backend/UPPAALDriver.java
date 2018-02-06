@@ -3,6 +3,7 @@ package SW9.backend;
 import SW9.Ecdar;
 import SW9.abstractions.Component;
 import SW9.abstractions.Location;
+import SW9.abstractions.Project;
 import SW9.code_analysis.CodeAnalysis;
 import com.uppaal.engine.Engine;
 import com.uppaal.engine.EngineException;
@@ -10,9 +11,14 @@ import com.uppaal.engine.Problem;
 import com.uppaal.model.core2.Document;
 import com.uppaal.model.system.UppaalSystem;
 import javafx.application.Platform;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -21,6 +27,7 @@ public class UPPAALDriver {
     public static final int MAX_ENGINES = 10;
     public static final Object engineLock = false; // Used to lock concurrent engine reference access
     private static final String SERVER_NAME = "server";
+    private static final String VERIFYTGA_NAME = "verifytga";
 
     private static final String ECDAR_DEFAULT_OPTIONS = "order 0\n" +
             "order2 1\n" +
@@ -33,12 +40,57 @@ public class UPPAALDriver {
             "reuse 0\n" +
             "tigaWarnIO 0";
 
+    private static final String TEMP_FILE_NAME_WITHOUT_EXTENSION = "model";
+    private static final String TEMP_DIRECTORY = "temporary";
+    public static final String SERVERS_DIRECOTRY = "servers";
+
     private static EcdarDocument ecdarDocument;
 
     public static void generateDebugUPPAALModel() throws BackendException, IOException {
         // Generate and store the debug document
         buildEcdarDocument();
         storeUppaalFile(ecdarDocument.toXmlDocument(), Ecdar.debugDirectory + File.separator + "debug.xml");
+    }
+
+    /**
+     * Stores a project as a backend XML file "model.xml" in the "temporary" directory.
+     * @param project project to store
+     * @return the absolute path of the file
+     * @throws BackendException if an error occurs during generation of backend XML
+     * @throws IOException if an error occurs during storing of the file
+     * @throws URISyntaxException if an error occurs when getting the URL of the root directory
+     */
+    public static String storeBackendModel(final Project project) throws BackendException, IOException, URISyntaxException {
+        FileUtils.forceMkdir(new File(getTempDirectoryAbsolutePath()));
+
+        final String path = getTempDirectoryAbsolutePath() + File.separator + TEMP_FILE_NAME_WITHOUT_EXTENSION + ".xml";
+        storeUppaalFile(new EcdarDocument(project).toXmlDocument(),  path);
+
+        return path;
+    }
+
+    /**
+     * Stores a query as a backend XML query file in the "temporary" directory.
+     * @param query the query to store.
+     * @throws URISyntaxException if an error occurs when getting the URL of the root directory
+     * @throws IOException if an error occurs during storing of the file
+     */
+    public static void storeQuery(final String query) throws URISyntaxException, IOException {
+        FileUtils.forceMkdir(new File(getTempDirectoryAbsolutePath()));
+        Files.write(
+                Paths.get(getTempDirectoryAbsolutePath() + File.separator + TEMP_FILE_NAME_WITHOUT_EXTENSION + ".q"),
+                Collections.singletonList(query),
+                Charset.forName("UTF-8")
+        );
+    }
+
+    /**
+     * Gets the directory path for storing temporary files.
+     * @return the path
+     * @throws URISyntaxException if an error occurs when getting the URL of the root directory
+     */
+    private static String getTempDirectoryAbsolutePath() throws URISyntaxException {
+        return Ecdar.getRootDirectory() + File.separator + TEMP_DIRECTORY;
     }
 
     public static void buildEcdarDocument() throws BackendException {
@@ -172,6 +224,40 @@ public class UPPAALDriver {
         }
 
         return file;
+    }
+
+    /**
+     * Finds the right verifytga file path, based on the system os.
+     * The path is relative to the Ecdar program path.
+     * @return the verifytga relative path
+     */
+    public static String findVerifytgaRelativePath() {
+        final String os = System.getProperty("os.name");
+
+        if (os.contains("Mac")) {
+            return SERVERS_DIRECOTRY + File.separator + "bin-MacOS" + File.separator + VERIFYTGA_NAME;
+        } else if (os.contains("Linux")) {
+            return SERVERS_DIRECOTRY + File.separator + "bin-Linux" + File.separator + VERIFYTGA_NAME;
+        } else {
+            return SERVERS_DIRECOTRY + File.separator + "bin-Win32" + File.separator + VERIFYTGA_NAME + ".exe";
+        }
+    }
+
+    /**
+     * Finds the right verifytga file path, based on the system os.
+     * The path is absolute.
+     * @return the verifytga relative path
+     */
+    public static String findVerifytgaAbsolutePath() {
+        final String os = System.getProperty("os.name");
+
+        if (os.contains("Mac")) {
+            return Ecdar.serverDirectory + File.separator + "bin-MacOS" + File.separator + VERIFYTGA_NAME;
+        } else if (os.contains("Linux")) {
+            return Ecdar.serverDirectory + File.separator + "bin-Linux" + File.separator + VERIFYTGA_NAME;
+        } else {
+            return Ecdar.serverDirectory + File.separator + "bin-Win32" + File.separator + VERIFYTGA_NAME + ".exe";
+        }
     }
 
     private static Engine getAvailableEngineOrCreateNew() {

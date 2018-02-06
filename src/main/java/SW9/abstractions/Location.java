@@ -57,8 +57,6 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     private final SimpleBooleanProperty isLocked = new SimpleBooleanProperty(false);
 
     public Location() {
-        setId();
-        bindReachabilityAnalysis();
     }
 
     public Location(final String id) {
@@ -85,6 +83,31 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     public Location(final JsonObject jsonObject) {
         deserialize(jsonObject);
         bindReachabilityAnalysis();
+    }
+
+    /**
+     * Generates an id for this, and binds reachability analysis.
+     */
+    public void initialize() {
+        setId();
+        bindReachabilityAnalysis();
+    }
+
+    /**
+     * Creates a clone of another location.
+     * Copies objects used for verification.
+     * The id of the original is used for this one.
+     * Reachability analysis initialized.
+     */
+    Location cloneForVerification() {
+        final Location location = new Location();
+
+        location.setId(getId());
+        location.setType(getType());
+        location.setUrgency(getUrgency());
+        location.setInvariant(getInvariant());
+
+        return location;
     }
 
     public String getNickname() {

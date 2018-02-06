@@ -12,6 +12,8 @@ import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+import java.util.List;
+
 public class Edge implements Serializable, Nearable {
 
     private static final String SOURCE_LOCATION = "sourceLocation";
@@ -61,11 +63,53 @@ public class Edge implements Serializable, Nearable {
         bindReachabilityAnalysis();
     }
 
+    /**
+     * Creates a clone of an edge.
+     * Clones objects used for verification.
+     * Uses the ids of the source and target to find new source and target objects among the locations of a given component.
+     * Be sure that the given component has locations with these ids.
+     * @param component component to select a source and a target location within
+     */
+    Edge cloneForVerification(final Component component) {
+        final Edge clone = new Edge(component.findLocation(getSourceLocation().getId()), getStatus());
+
+        // Clone target location
+        clone.setTargetLocation(component.findLocation(getTargetLocation().getId()));
+
+        // Clone properties if they are non-empty
+        if (!getSelect().isEmpty()) {
+            clone.setSelect(getSelect());
+            final Nail nail = new Nail(0, 0);
+            nail.setPropertyType(PropertyType.SELECTION);
+            clone.addNail(nail);
+        }
+        if (!getGuard().isEmpty()) {
+            clone.setGuard(getGuard());
+            final Nail nail = new Nail(0, 0);
+            nail.setPropertyType(PropertyType.GUARD);
+            clone.addNail(nail);
+        }
+        if (!getUpdate().isEmpty()) {
+            clone.setUpdate(getUpdate());
+            final Nail nail = new Nail(0, 0);
+            nail.setPropertyType(PropertyType.UPDATE);
+            clone.addNail(nail);
+        }
+        if (!getSync().isEmpty()) {
+            clone.setSync(getSync());
+            final Nail nail = new Nail(0, 0);
+            nail.setPropertyType(PropertyType.SYNCHRONIZATION);
+            clone.addNail(nail);
+        }
+
+        return clone;
+    }
+
     public Location getSourceLocation() {
         return sourceLocation.get();
     }
 
-    private void setSourceLocation(final Location sourceLocation) {
+    public void setSourceLocation(final Location sourceLocation) {
         this.sourceLocation.set(sourceLocation);
         updateSourceCircular();
     }

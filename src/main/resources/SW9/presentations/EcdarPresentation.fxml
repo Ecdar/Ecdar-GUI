@@ -136,7 +136,9 @@
                             <FontIcon iconLiteral="gmi-folder-open" iconSize="24" fill="black"/>
                         </graphic>
                     </MenuItem>
+
                     <SeparatorMenuItem/>
+
                     <MenuItem fx:id="menuBarFileSave" text="Save Project">
                         <graphic>
                             <FontIcon iconLiteral="gmi-save" iconSize="24" fill="black"/>
@@ -147,7 +149,17 @@
                             <FontIcon iconLiteral="gmi-save" iconSize="24" fill="black"/>
                         </graphic>
                     </MenuItem>
+
                     <SeparatorMenuItem/>
+
+                    <MenuItem fx:id="menuBarFileNewMutationTestObject" text="New Test Plan">
+                        <graphic>
+                            <FontIcon iconLiteral="gmi-create-new-folder" iconSize="24" fill="black"/>
+                        </graphic>
+                    </MenuItem>
+
+                    <SeparatorMenuItem/>
+
                     <MenuItem fx:id="menuBarFileExportAsPng" text="Export as Png">
                         <graphic>
                             <FontIcon iconLiteral="gmi-image" iconSize="24" fill="black"/>
