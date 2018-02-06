@@ -19,10 +19,12 @@ public class MutationTestPlan extends HighLevelModelObject {
     private static final String TEST_CASES_TEXT = "testCasesText";
 
     private final StringProperty testModelId = new SimpleStringProperty();
-    private final StringProperty systemUnderTestPath = new SimpleStringProperty();
 
     private final StringProperty mutantsString = new SimpleStringProperty();
     private final StringProperty testCasesString = new SimpleStringProperty();
+
+
+    /* Constructors */
 
     public MutationTestPlan() {
         generateName();
@@ -32,44 +34,8 @@ public class MutationTestPlan extends HighLevelModelObject {
         deserialize(json);
     }
 
-    @Override
-    public JsonObject serialize() {
-        final JsonObject result = super.serialize();
 
-        result.addProperty(TEST_MODEL_ID, getTestModelId());
-        result.addProperty(MUTANTS_TEXT, getMutantsString());
-        result.addProperty(TEST_CASES_TEXT, getTestCasesString());
-
-        return result;
-    }
-
-    @Override
-    public void deserialize(final JsonObject json) {
-        super.deserialize(json);
-
-        setTestModelId(json.getAsJsonPrimitive(TEST_MODEL_ID).getAsString());
-        setTestModelId(json.getAsJsonPrimitive(MUTANTS_TEXT).getAsString());
-        setTestModelId(json.getAsJsonPrimitive(TEST_CASES_TEXT).getAsString());
-    }
-
-
-    /**
-     * Generate and sets a unique id for this system
-     */
-    private void generateName() {
-        final HashSet<String> names = new HashSet<>();
-
-        for (final MutationTestPlan plan : Ecdar.getProject().getTestPlans()){
-            names.add(plan.getName());
-        }
-
-        for (int counter = 1; ; counter++) {
-            if (!names.contains(PLAN_NAME_PREFIX + counter)){
-                setName((PLAN_NAME_PREFIX + counter));
-                return;
-            }
-        }
-    }
+    /* Properties */
 
     public String getTestModelId() {
         return testModelId.get();
@@ -105,5 +71,47 @@ public class MutationTestPlan extends HighLevelModelObject {
 
     public void setTestCasesText(final String value) {
         testCasesString.set(value);
+    }
+
+
+    /* Other methods */
+
+    @Override
+    public JsonObject serialize() {
+        final JsonObject result = super.serialize();
+
+        result.addProperty(TEST_MODEL_ID, getTestModelId());
+        result.addProperty(MUTANTS_TEXT, getMutantsString());
+        result.addProperty(TEST_CASES_TEXT, getTestCasesString());
+
+        return result;
+    }
+
+    @Override
+    public void deserialize(final JsonObject json) {
+        super.deserialize(json);
+
+        setTestModelId(json.getAsJsonPrimitive(TEST_MODEL_ID).getAsString());
+        setMutantsText(json.getAsJsonPrimitive(MUTANTS_TEXT).getAsString());
+        setTestCasesText(json.getAsJsonPrimitive(TEST_CASES_TEXT).getAsString());
+    }
+
+
+    /**
+     * Generate and sets a unique id for this system
+     */
+    private void generateName() {
+        final HashSet<String> names = new HashSet<>();
+
+        for (final MutationTestPlan plan : Ecdar.getProject().getTestPlans()){
+            names.add(plan.getName());
+        }
+
+        for (int counter = 1; ; counter++) {
+            if (!names.contains(PLAN_NAME_PREFIX + counter)){
+                setName((PLAN_NAME_PREFIX + counter));
+                return;
+            }
+        }
     }
 }

@@ -1,16 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.StackPane?>
-<?import org.fxmisc.richtext.StyleClassedTextArea?>
-<?import com.jfoenix.controls.JFXComboBox?>
-<?import javafx.collections.FXCollections?>
 <?import com.jfoenix.controls.JFXButton?>
-<?import javafx.scene.layout.VBox?>
+<?import com.jfoenix.controls.JFXComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="StackPane"
-         fx:id="root"
          fx:controller="SW9.mutation.MutationTestPlanController">
 
     <VBox spacing="16">
