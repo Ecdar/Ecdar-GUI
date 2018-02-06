@@ -1,3 +1,4 @@
+Upstream [![Build Status](https://travis-ci.com/tgunde13/Ecdar.svg?token=deyCDsqkwkcxRvqzTGxE&branch=master)](https://travis-ci.com/tgunde13/Ecdar)
 
 [![Build Status](https://travis-ci.com/tgunde13/Ecdar.svg?token=FznbqXU3Q5KCswHurpPf&branch=master)](https://travis-ci.com/tgunde13/Ecdar)
 # Ecdar
