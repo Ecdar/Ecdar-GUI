@@ -2,8 +2,6 @@ package SW9.mutation;
 
 import SW9.Ecdar;
 import SW9.abstractions.HighLevelModelObject;
-import SW9.utility.colors.EnabledColor;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -19,6 +17,9 @@ public class MutationTestPlan extends HighLevelModelObject {
 
     private final StringProperty testModelId = new SimpleStringProperty();
     private final StringProperty systemUnderTestPath = new SimpleStringProperty();
+
+    private final StringProperty mutantsString = new SimpleStringProperty();
+    private final StringProperty testCasesString = new SimpleStringProperty();
 
     public MutationTestPlan() {
         generateName();
@@ -73,5 +74,21 @@ public class MutationTestPlan extends HighLevelModelObject {
 
     public void setTestModelId(final String testModelId) {
         this.testModelId.setValue(testModelId);
+    }
+
+    public String getMutantsString() {
+        return mutantsString.get();
+    }
+
+    public StringProperty mutantsTextProperty() {
+        return mutantsString;
+    }
+
+    public String getTestCasesString() {
+        return testCasesString.get();
+    }
+
+    public StringProperty testCasesTextProperty() {
+        return testCasesString;
     }
 }

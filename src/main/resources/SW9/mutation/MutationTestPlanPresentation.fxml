@@ -6,6 +6,7 @@
 <?import javafx.collections.FXCollections?>
 <?import com.jfoenix.controls.JFXButton?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Label?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="StackPane"
@@ -18,6 +19,10 @@
 
         <JFXButton fx:id="testButton" prefWidth="100" prefHeight="40" buttonType="RAISED" text="Test"
                    style="-fx-text-fill:WHITE;-fx-background-color:#52AE64;-fx-font-size:14px;"/>
+
+        <Label fx:id="progressText"/>
+        <Label fx:id="mutantsText"/>
+        <Label fx:id="testCasesText"/>
     </VBox>
 
 </fx:root>

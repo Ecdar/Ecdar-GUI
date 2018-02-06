@@ -40,5 +40,8 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         // Bind test plan to test model picker
         controller.testModelPicker.valueProperty().addListener(((observable, oldValue, newValue) ->
                     controller.getPlan().setTestModelId(newValue.getText())));
+
+        controller.mutantsText.textProperty().bind(controller.getPlan().mutantsTextProperty());
+        controller.testCasesText.textProperty().bind(controller.getPlan().testCasesTextProperty());
     }
 }
