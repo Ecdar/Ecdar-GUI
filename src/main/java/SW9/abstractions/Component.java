@@ -44,6 +44,13 @@ public class Component extends HighLevelModelObject implements Boxed {
     private final BooleanProperty firsTimeShown = new SimpleBooleanProperty(false);
 
     /**
+     * Constructs an empty component
+     */
+    private Component() {
+
+    }
+
+    /**
      * Creates a component with a specific name and a boolean value that chooses whether the colour for this component is chosen at random
      * @param doRandomColor boolean that is true if the component should choose a colour at random and false if not
      */
@@ -56,6 +63,7 @@ public class Component extends HighLevelModelObject implements Boxed {
 
         // Make initial location
         final Location initialLocation = new Location();
+        initialLocation.initialize();
         initialLocation.setType(Location.Type.INITIAL);
         initialLocation.setColorIntensity(getColorIntensity());
         initialLocation.setColor(getColor());
@@ -84,19 +92,31 @@ public class Component extends HighLevelModelObject implements Boxed {
 
     /**
      * Creates a clone of another component.
-     * Clones locations, edges and the declarations.
+     * Copies objects used for verification (e.g. locations, edges and the declarations).
+     * Does not copy UI elements (sizes and positions).
      * It locations are cloned from the original component. Their ids are the same.
      * The IO listeners is not initialized.
      * Reachability analysis binding is not initialized.
-     * @param original The component to clone
+     * @return the clone
      */
-    public Component(final Component original) {
+    public Component cloneForVerification() {
+        final Component clone = new Component();
+        clone.addVerificationObjects(this);
+
+        return clone;
+    }
+
+    /**
+     * Adds objects used for verifications to this component.
+     * @param original the component to add from
+     */
+    private void addVerificationObjects(final Component original) {
         for (final Location originalLoc : original.getLocations()) {
-            addLocation(new Location(originalLoc));
+            addLocation(originalLoc.cloneForVerification());
         }
 
         for (final Edge originalEdge : original.getEdges()) {
-            addEdge(new Edge(originalEdge, this));
+            addEdge(originalEdge.cloneForVerification(this));
         }
 
         setDeclarationsText(original.getDeclarationsText());

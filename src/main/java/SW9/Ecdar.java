@@ -51,8 +51,8 @@ public class Ecdar extends Application {
     {
         try {
             final String rootDirectory = getRootDirectory();
-            serverDirectory = rootDirectory + "servers";
-            debugDirectory = rootDirectory + "uppaal-debug";
+            serverDirectory = rootDirectory + File.separator + "servers";
+            debugDirectory = rootDirectory + File.separator + "uppaal-debug";
             forceCreateFolder(serverDirectory);
             forceCreateFolder(debugDirectory);
         } catch (final URISyntaxException e) {
@@ -66,14 +66,13 @@ public class Ecdar extends Application {
 
     /**
      * Gets the path to the root directory.
-     * The returned string as the file separator at the end
      * @return the path to the root directory
      * @throws URISyntaxException if the source code location could not be converted to an URI
      */
     public static String getRootDirectory() throws URISyntaxException {
         final CodeSource codeSource = Ecdar.class.getProtectionDomain().getCodeSource();
         final File jarFile = new File(codeSource.getLocation().toURI().getPath());
-        return jarFile.getParentFile().getPath() + File.separator;
+        return jarFile.getParentFile().getPath();
     }
 
     public static void main(final String[] args) {

@@ -38,7 +38,7 @@ public class ChangeTargetOperator {
                 // Ignore if location is target in original edge
                 if (originalEdge.getTargetLocation() == originalLocation) continue;
 
-                final Component mutant = new Component(original);
+                final Component mutant = original.cloneForVerification();
 
                 // Mutate
                 final Edge mutantEdge = mutant.getEdges().get(edgeIndex);

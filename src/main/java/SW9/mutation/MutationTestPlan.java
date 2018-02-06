@@ -3,6 +3,9 @@ package SW9.mutation;
 import SW9.Ecdar;
 import SW9.abstractions.Component;
 import SW9.abstractions.HighLevelModelObject;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.beans.value.ObservableStringValue;
 
 import java.util.HashSet;
 
@@ -11,6 +14,9 @@ import java.util.HashSet;
  */
 public class MutationTestPlan extends HighLevelModelObject {
     private static final String TEST = "Test";
+
+    private final StringProperty testModelId = new SimpleStringProperty();
+    private final StringProperty systemUnderTestPath = new SimpleStringProperty();
 
     public MutationTestPlan() {
         generateName();
@@ -33,5 +39,13 @@ public class MutationTestPlan extends HighLevelModelObject {
                 return;
             }
         }
+    }
+
+    public String getTestModelId() {
+        return testModelId.get();
+    }
+
+    public StringProperty testModelIdProperty() {
+        return testModelId;
     }
 }

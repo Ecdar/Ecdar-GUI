@@ -3,17 +3,21 @@
 <?import javafx.scene.layout.StackPane?>
 <?import org.fxmisc.richtext.StyleClassedTextArea?>
 <?import com.jfoenix.controls.JFXComboBox?>
+<?import javafx.collections.FXCollections?>
+<?import com.jfoenix.controls.JFXButton?>
+<?import javafx.scene.layout.VBox?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="StackPane"
          fx:id="root"
-         style="-fx-background-color: #ff0000;"
          fx:controller="SW9.mutation.MutationTestPlanController">
-    <BorderPane fx:id="frame" pickOnBounds="false" >
-        <JFXComboBox id="jfxComboBox" prefWidth="200"
-                     promptText="Select Test Model">
 
-        </JFXComboBox>
-    </BorderPane>
+    <VBox spacing="16">
+        <JFXComboBox fx:id="testModelPicker"
+                     promptText="Select Test Model"/>
+
+        <JFXButton fx:id="testButton" prefWidth="100" prefHeight="40" buttonType="RAISED" text="Test"
+                   style="-fx-text-fill:WHITE;-fx-background-color:#52AE64;-fx-font-size:14px;"/>
+    </VBox>
 
 </fx:root>

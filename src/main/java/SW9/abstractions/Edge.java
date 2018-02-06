@@ -65,15 +65,21 @@ public class Edge implements Serializable, Nearable {
 
     /**
      * Creates a clone of an edge.
+     * Clones objects used for verification.
      * Uses the ids of the source and target to find new source and target objects among the locations of a given component.
      * Be sure that the given component has locations with these ids.
-     * @param original The edge to clone
      * @param component component to select a source and a target location within
      */
-    Edge(final Edge original, final Component component) {
-        setSourceLocation(component.findLocation(original.getSourceLocation().getId()));
-        setTargetLocation(component.findLocation(original.getTargetLocation().getId()));
-        ioStatus = new SimpleObjectProperty<>(original.getStatus());
+    Edge cloneForVerification(final Component component) {
+        final Edge clone = new Edge(component.findLocation(getSourceLocation().getId()), getStatus());
+        clone.setTargetLocation(component.findLocation(getTargetLocation().getId()));
+
+        clone.setSelect(getSelect());
+        clone.setGuard(getGuard());
+        clone.setUpdate(getUpdate());
+        clone.setSync(getSync());
+
+        return clone;
     }
 
     public Location getSourceLocation() {

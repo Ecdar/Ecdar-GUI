@@ -11,6 +11,7 @@ import com.uppaal.engine.Problem;
 import com.uppaal.model.core2.Document;
 import com.uppaal.model.system.UppaalSystem;
 import javafx.application.Platform;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -62,7 +63,9 @@ public class UPPAALDriver {
      * @throws URISyntaxException if an error occurs when getting the URL of the root directory
      */
     public static void storeBackendModel(final Project project) throws BackendException, IOException, URISyntaxException {
-        storeUppaalFile(new EcdarDocument(project).toXmlDocument(), Ecdar.getRootDirectory() + "temporary" + File.separator + "model.xml");
+        final String directoryPath = Ecdar.getRootDirectory() + File.separator + "temporary";
+        FileUtils.forceMkdir(new File(directoryPath));
+        storeUppaalFile(new EcdarDocument(project).toXmlDocument(),  directoryPath + File.separator + "model.xml");
     }
 
     public static void buildEcdarDocument() throws BackendException {

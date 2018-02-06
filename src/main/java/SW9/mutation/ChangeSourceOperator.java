@@ -38,7 +38,7 @@ public class ChangeSourceOperator {
                 // Ignore if location is source in original edge
                 if (originalEdge.getSourceLocation() == originalLocation) continue;
 
-                final Component mutant = new Component(original);
+                final Component mutant = original.cloneForVerification();
 
                 // Mutate
                 final Edge mutantEdge = mutant.getEdges().get(edgeIndex);
