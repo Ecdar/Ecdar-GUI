@@ -7,7 +7,6 @@ import SW9.backend.BackendException;
 import SW9.backend.UPPAALDriver;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
-import com.sun.deploy.util.StringUtils;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -134,14 +133,14 @@ public class MutationTestPlanController {
                 // Verifytga should output that the property is not satisfied
                 // If it does not, then this is an error
                 if (lines.stream().noneMatch(line -> line.endsWith(" -- Property is NOT satisfied."))) {
-                    throw new RuntimeException("Output from verifytga not understood:\n" + StringUtils.join(lines, "\n"));
+                    throw new RuntimeException("Output from verifytga not understood:\n" + String.join("\n", lines));
                 }
 
                 int strategyIndex = lines.indexOf("Strategy for the attacker:");
 
                 // If no such index, error
                 if (strategyIndex < 0) {
-                    throw new RuntimeException("Output from verifytga not understood:\n" + StringUtils.join(lines, "\n"));
+                    throw new RuntimeException("Output from verifytga not understood:\n" + String.join("\n", lines));
                 }
 
                 List<String> strategy = lines.subList(strategyIndex + 2, lines.size());
