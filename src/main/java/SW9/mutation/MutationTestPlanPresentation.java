@@ -6,9 +6,16 @@ import SW9.presentations.EcdarFXMLLoader;
 import SW9.presentations.HighLevelModelPresentation;
 import javafx.scene.control.Label;
 
+/**
+ * Presentation for a test plan with model-based mutation testing.
+ */
 public class MutationTestPlanPresentation extends HighLevelModelPresentation {
     private final MutationTestPlanController controller;
 
+    /**
+     * Constructs the presentation and initializes it.
+     * @param testPlan the test plan to present
+     */
     public MutationTestPlanPresentation(final MutationTestPlan testPlan) {
         controller = new EcdarFXMLLoader().loadAndGetController("MutationTestPlanPresentation.fxml", this);
         controller.setPlan(testPlan);
@@ -16,6 +23,9 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         initialize();
     }
 
+    /**
+     * Initializes this.
+     */
     private void initialize() {
         // Fill test model picker with components
         for (final Component component : Ecdar.getProject().getComponents()) {

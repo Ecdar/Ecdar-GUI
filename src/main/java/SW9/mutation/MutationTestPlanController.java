@@ -12,6 +12,7 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Label;
+import javafx.scene.input.MouseEvent;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,6 +23,9 @@ import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Controller for a test plan with model-based mutation testing.
+ */
 public class MutationTestPlanController {
     private final static String TEST_MODEL_NAME = "S";
     private final static String MUTANT_NAME = "M";
@@ -35,60 +39,73 @@ public class MutationTestPlanController {
     private MutationTestPlan plan;
     private ObservableList<MutationTestCase> testCases;
 
+    public MutationTestPlan getPlan() {
+        return plan;
+    }
+
     public void setPlan(final MutationTestPlan plan) {
         this.plan = plan;
-
-        initialize();
     }
 
-    private void initialize() {
+    /**
+     * Triggered when pressed the test button.
+     * Conducts the test.
+     * @param event not used
+     */
+    public void onTestButtonPressed(final MouseEvent event) {
+        testButton.setDisable(true);
 
+        // Find test model from test model picker
+        // Clone it, because we want to change its name
+        final Component testModel = Ecdar.getProject().findComponent(testModelPicker.getValue().getText()).cloneForVerification();
+        testModel.setName(TEST_MODEL_NAME);
+        testModel.updateIOList();
 
-        testButton.setOnAction(event -> {
-            testButton.setDisable(true);
+        // Mutate
+        final Instant start = Instant.now();
+        final List<Component> mutants = new ChangeSourceOperator(testModel).computeMutants();
+        mutants.addAll(new ChangeTargetOperator(testModel).computeMutants());
+        plan.setMutantsText("Mutants: " + mutants.size() + " - Execution time: " + humanReadableFormat(Duration.between(start, Instant.now())));
 
-            // Find test model from test model picker
-            // Clone it, because we want to change its name
-            final Component testModel = Ecdar.getProject().findComponent(testModelPicker.getValue().getText()).cloneForVerification();
-            testModel.setName(TEST_MODEL_NAME);
-            testModel.updateIOList();
+        // Create test cases
+        // This takes a lot of time, so do it in another thread
+        progressText.setText("Generating test-cases (0/" + mutants.size() + ")");
+        new Thread(() -> {
+            final Instant generationStart = Instant.now();
+            testCases = FXCollections.observableArrayList();
+            for (int i = 0; i < mutants.size(); i++) {
+                generateTestCase(testModel, mutants.get(i));
 
-            // Mutate
-            final Instant start = Instant.now();
-            final List<Component> mutants = new ChangeSourceOperator(testModel).computeMutants();
-            mutants.addAll(new ChangeTargetOperator(testModel).computeMutants());
-            plan.mutantsTextProperty().set("Mutants: " + mutants.size() + " - Execution time: " + humanReadableFormat(Duration.between(start, Instant.now())));
+                // FXJava cannot be updated in another thread, so make it run at some point
+                int finalI = i;
+                Platform.runLater(() -> {
+                    progressText.setText("Generating test-cases (" + finalI + "/" + mutants.size() + ")");
+                    plan.setTestCasesText("Test-cases: " + testCases.size() + " - Generation time: " + humanReadableFormat(Duration.between(generationStart, Instant.now())));
+                });
+            }
 
-            // Create test cases
-            // This takes a lot of time, so do it in another thread
-            progressText.setText("Generating test-cases (0/" + mutants.size() + ")");
-            new Thread(() -> {
-                final Instant generationStart = Instant.now();
-                testCases = FXCollections.observableArrayList();
-                for (int i = 0; i < mutants.size(); i++) {
-                    generateTestCase(testModel, mutants.get(i));
-
-                    // FXJava cannot be updated in another thread, so make it run at some point
-                    int finalI = i;
-                    Platform.runLater(() -> {
-                        progressText.setText("Generating test-cases (" + finalI + "/" + mutants.size() + ")");
-                        plan.testCasesTextProperty().set("Test-cases: " + testCases.size() + " - Generation time: " + humanReadableFormat(Duration.between(generationStart, Instant.now())));
-                    });
-                }
-
-                Platform.runLater(() -> progressText.setText("Done"));
-                testButton.setDisable(false);
-            }).start();
-        });
+            Platform.runLater(() -> progressText.setText("Done"));
+            testButton.setDisable(false);
+        }).start();
     }
 
-    public static String humanReadableFormat(final Duration duration) {
+    /**
+     * Converts a duration to a human readable format, e.g. 0.293s.
+     * @param duration the duration
+     * @return a string in a human readable format
+     */
+    private static String humanReadableFormat(final Duration duration) {
         return duration.toString()
                 .substring(2)
                 .replaceAll("(\\d[HMS])(?!$)", "$1 ")
                 .toLowerCase();
     }
 
+    /**
+     * Generates a test-case.
+     * @param testModel test model
+     * @param mutant mutant of the test model
+     */
     private void generateTestCase(final Component testModel, final Component mutant) {
         // make a project with the test model and the mutant
         final Project project = new Project();
@@ -145,9 +162,5 @@ public class MutationTestPlanController {
             e.printStackTrace();
             Ecdar.showToast("Error: " + e.getMessage());
         }
-    }
-
-    public MutationTestPlan getPlan() {
-        return plan;
     }
 }

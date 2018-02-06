@@ -18,7 +18,8 @@
                      promptText="Select Test Model"/>
 
         <JFXButton fx:id="testButton" prefWidth="100" prefHeight="40" buttonType="RAISED" text="Test"
-                   style="-fx-text-fill:WHITE;-fx-background-color:#52AE64;-fx-font-size:14px;"/>
+                   style="-fx-text-fill:WHITE;-fx-background-color:#52AE64;-fx-font-size:14px;"
+                   onMousePressed="#onTestButtonPressed"/>
 
         <Label fx:id="progressText"/>
         <Label fx:id="mutantsText"/>

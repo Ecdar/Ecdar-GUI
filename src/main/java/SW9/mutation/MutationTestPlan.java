@@ -13,7 +13,10 @@ import java.util.HashSet;
  */
 public class MutationTestPlan extends HighLevelModelObject {
     private static final String PLAN_NAME_PREFIX = "Test";
+
     private static final String TEST_MODEL_ID = "testModelId";
+    private static final String MUTANTS_TEXT = "mutantsText";
+    private static final String TEST_CASES_TEXT = "testCasesText";
 
     private final StringProperty testModelId = new SimpleStringProperty();
     private final StringProperty systemUnderTestPath = new SimpleStringProperty();
@@ -34,6 +37,8 @@ public class MutationTestPlan extends HighLevelModelObject {
         final JsonObject result = super.serialize();
 
         result.addProperty(TEST_MODEL_ID, getTestModelId());
+        result.addProperty(MUTANTS_TEXT, getMutantsString());
+        result.addProperty(TEST_CASES_TEXT, getTestCasesString());
 
         return result;
     }
@@ -43,6 +48,8 @@ public class MutationTestPlan extends HighLevelModelObject {
         super.deserialize(json);
 
         setTestModelId(json.getAsJsonPrimitive(TEST_MODEL_ID).getAsString());
+        setTestModelId(json.getAsJsonPrimitive(MUTANTS_TEXT).getAsString());
+        setTestModelId(json.getAsJsonPrimitive(TEST_CASES_TEXT).getAsString());
     }
 
 
@@ -84,11 +91,19 @@ public class MutationTestPlan extends HighLevelModelObject {
         return mutantsString;
     }
 
+    public void setMutantsText(final String value) {
+        mutantsString.set(value);
+    }
+
     public String getTestCasesString() {
         return testCasesString.get();
     }
 
     public StringProperty testCasesTextProperty() {
         return testCasesString;
+    }
+
+    public void setTestCasesText(final String value) {
+        testCasesString.set(value);
     }
 }
