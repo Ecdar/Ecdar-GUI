@@ -16,6 +16,9 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -36,16 +39,8 @@ public class UPPAALDriver {
             "reuse 0\n" +
             "tigaWarnIO 0";
 
-    private static final String ECDAR_TRACE_OPTIONS = "order 0\n" +
-            "order2 1\n" +
-            "tigaOrder 0\n" +
-            "reduction 1\n" +
-            "representation 0\n" +
-            "trace 1\n" +
-            "extrapolation 0\n" +
-            "hashsize 27\n" +
-            "reuse 0\n" +
-            "tigaWarnIO 0";
+    private static final String TEMP_FILE_NAME_WITHOUT_EXTENSION = "model";
+    private static final String TEMP_DIRECTORY = "temporary";
 
     private static EcdarDocument ecdarDocument;
 
@@ -63,9 +58,32 @@ public class UPPAALDriver {
      * @throws URISyntaxException if an error occurs when getting the URL of the root directory
      */
     public static void storeBackendModel(final Project project) throws BackendException, IOException, URISyntaxException {
-        final String directoryPath = Ecdar.getRootDirectory() + File.separator + "temporary";
-        FileUtils.forceMkdir(new File(directoryPath));
-        storeUppaalFile(new EcdarDocument(project).toXmlDocument(),  directoryPath + File.separator + "model.xml");
+        FileUtils.forceMkdir(new File(getTempDirectoryAbsolutePath()));
+        storeUppaalFile(new EcdarDocument(project).toXmlDocument(),  getTempDirectoryAbsolutePath() + File.separator + TEMP_FILE_NAME_WITHOUT_EXTENSION + ".xml");
+    }
+
+    /**
+     * Stores a query as a backend XML query file in the "temporary" directory.
+     * @param query the query to store.
+     * @throws URISyntaxException if an error occurs when getting the URL of the root directory
+     * @throws IOException if an error occurs during storing of the file
+     */
+    public static void storeQuery(final String query) throws URISyntaxException, IOException {
+        FileUtils.forceMkdir(new File(getTempDirectoryAbsolutePath()));
+        Files.write(
+                Paths.get(TEMP_DIRECTORY + File.separator + TEMP_FILE_NAME_WITHOUT_EXTENSION + ".q"),
+                Collections.singletonList(query),
+                Charset.forName("UTF-8")
+        );
+    }
+
+    /**
+     * Gets the directory path for storing temporary files.
+     * @return the path
+     * @throws URISyntaxException if an error occurs when getting the URL of the root directory
+     */
+    private static String getTempDirectoryAbsolutePath() throws URISyntaxException {
+        return Ecdar.getRootDirectory() + File.separator + TEMP_DIRECTORY;
     }
 
     public static void buildEcdarDocument() throws BackendException {
@@ -152,7 +170,7 @@ public class UPPAALDriver {
                         }
                     });
 
-                    final char result = engine.query(system, ECDAR_TRACE_OPTIONS, query, queryListener);
+                    final char result = engine.query(system, ECDAR_DEFAULT_OPTIONS, query, queryListener);
 
                     // Process the query result
                     if (result == 'T') {
