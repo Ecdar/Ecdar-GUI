@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import org.fxmisc.richtext.StyleClassedTextArea?>
+<fx:root xmlns:fx="http://javafx.com/fxml/1"
+         xmlns="http://javafx.com/javafx/8.0.76-ea"
+         type="StackPane"
+         fx:id="root"
+         style="-fx-background-color: #ff0000;"
+         fx:controller="ecdar.controllers.DeclarationsController">
+    <BorderPane fx:id="frame" pickOnBounds="false" >
+        <center>
+            <StyleClassedTextArea fx:id="textArea"
+                                  styleClass="body2-mono"
+                                  style="-fx-faint-focus-color: transparent; -fx-focus-color: transparent;"/>
+        </center>
+    </BorderPane>
+
+</fx:root>
