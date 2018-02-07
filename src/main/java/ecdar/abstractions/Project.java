@@ -348,6 +348,8 @@ public class Project {
         components.clear();
 
         systems.clear();
+
+        testPlans.clear();
     }
 
     /**

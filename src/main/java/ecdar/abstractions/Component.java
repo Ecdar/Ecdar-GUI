@@ -17,6 +17,7 @@ import javafx.collections.ObservableList;
 import javafx.util.Pair;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A component that models an I/O automata.
@@ -120,6 +121,20 @@ public class Component extends HighLevelModelObject implements Boxed {
         }
 
         setDeclarationsText(original.getDeclarationsText());
+    }
+
+    /**
+     *
+     */
+    public void applyAngelicCompletion() {
+        for (final Location location : getLocations()) {
+            for (final String input : getInputStrings()) {
+                //
+                final List<Edge> outGoingEdges = getOutgoingEdges(location).stream().filter(edge -> edge.getSync().equals(input)).collect(Collectors.toList());
+
+
+            }
+        }
     }
 
     /**
@@ -254,6 +269,15 @@ public class Component extends HighLevelModelObject implements Boxed {
         });
 
         return relatedEdges;
+    }
+
+    /**
+     * Get edges that has a specified location as its source.
+     * @param location the specified location
+     * @return the filtered edges
+     */
+    public List<Edge> getOutgoingEdges(final Location location) {
+        return getEdges().filtered(edge -> location == edge.getSourceLocation());
     }
 
     public boolean isDeclarationOpen() {

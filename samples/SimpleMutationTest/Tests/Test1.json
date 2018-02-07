@@ -1,4 +1,6 @@
 {
   "name": "Test1",
-  "testModelId": "Component1"
+  "testModelId": "Component1",
+  "mutantsText": "",
+  "testCasesText": "dsff"
 }
