@@ -181,28 +181,8 @@ public class Project {
                         testDir = file;
                         break;
                 }
-                continue;
-            }
-
-            final String fileContent = Files.toString(file, Charset.defaultCharset());
-
-            switch (file.getName()) {
-                case GLOBAL_DCL_FILENAME + JSON_FILENAME_EXTENSION: {
-                    final JsonObject jsonObject = new JsonParser().parse(fileContent).getAsJsonObject();
-                    setGlobalDeclarations(new Declarations(jsonObject));
-                    continue;
-                }
-                case SYSTEM_DCL_FILENAME + JSON_FILENAME_EXTENSION: {
-                    final JsonObject jsonObject = new JsonParser().parse(fileContent).getAsJsonObject();
-                    setSystemDeclarations(new Declarations(jsonObject));
-                    continue;
-                }
-                case QUERIES_FILENAME + JSON_FILENAME_EXTENSION:
-                    new JsonParser().parse(fileContent).getAsJsonArray().forEach(jsonElement -> {
-                        final Query newQuery = new Query((JsonObject) jsonElement);
-                        getQueries().add(newQuery);
-                    });
-                    break;
+            } else {
+                deserializeFileHelper(file);
             }
         }
         // Now we have gone though all the files in the directory we can now deserialize folders
@@ -214,6 +194,32 @@ public class Project {
             return;
         }
         if (testDir != null) deserializeTestObjects(testDir);
+    }
+
+    /**
+     * A helper method for the {@link Project#deserialize(File)} method which handles deserialization of files
+     * @param file the file with information about a project that should be deserialized
+     * @throws IOException if problems occurs when reading a file
+     */
+    private void deserializeFileHelper(final File file) throws IOException {
+        final String fileContent = Files.toString(file, Charset.defaultCharset());
+
+        switch (file.getName()) {
+            case GLOBAL_DCL_FILENAME + JSON_FILENAME_EXTENSION:
+                final JsonObject globalJsonObj = new JsonParser().parse(fileContent).getAsJsonObject();
+                setGlobalDeclarations(new Declarations(globalJsonObj));
+                break;
+            case SYSTEM_DCL_FILENAME + JSON_FILENAME_EXTENSION:
+                final JsonObject sysJsonObj = new JsonParser().parse(fileContent).getAsJsonObject();
+                setSystemDeclarations(new Declarations(sysJsonObj));
+                break;
+            case QUERIES_FILENAME + JSON_FILENAME_EXTENSION:
+                new JsonParser().parse(fileContent).getAsJsonArray().forEach(jsonElement -> {
+                    final Query newQuery = new Query((JsonObject) jsonElement);
+                    getQueries().add(newQuery);
+                });
+                break;
+        }
     }
 
     /**
