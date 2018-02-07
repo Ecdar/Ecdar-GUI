@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Rectangle?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import javafx.scene.shape.Line?>
+<?import javafx.scene.shape.Circle?>
+<fx:root xmlns:fx="http://javafx.com/fxml/1"
+         xmlns="http://javafx.com/javafx/8.0.76-ea"
+         type="StackPane"
+         fx:id="root"
+         layoutX="80"
+         layoutY="80"
+         fx:controller="ecdar.controllers.ComponentInstanceController"
+         onMouseClicked="#onMouseClicked">
+
+    <Rectangle fx:id="background" fill="#ffffff"/>
+    <BorderPane fx:id="frame">
+        <top>
+            <StackPane>
+                <HBox fx:id="toolbar">
+                    <JFXTextField fx:id="identifier" styleClass="sub-caption" translateY="1"/>
+                    <VBox alignment="CENTER_RIGHT" prefWidth="200.0">
+                        <Label HBox.hgrow="ALWAYS" textAlignment="RIGHT" fx:id="originalComponentLabel"
+                               styleClass="sub-caption" translateY="-1"/>
+                    </VBox>
+                </HBox>
+                <Group fx:id="inputNailGroup" translateY="14">
+                    <Circle fx:id="inputNailCircle" radius="8"/>
+                    <Label fx:id="inputNailLabel" text="?" translateX="-3" translateY="-8"
+                           styleClass="sub-caption-mono" textFill="white"/>
+                </Group>
+                <Group fx:id="outputNailGroup" translateY="14">
+                    <Circle fx:id="outputNailCircle" radius="8"/>
+                    <Label fx:id="outputNailLabel" text="!" translateX="-3" translateY="-8"
+                           styleClass="sub-caption-mono" textFill="white"/>
+                </Group>
+            </StackPane>
+        </top>
+
+        <left>
+            <VBox fx:id="inputContainer" minHeight="80" prefHeight="80" maxHeight="80"
+                  style="-fx-padding: 12 5 5 5;" spacing="6">
+                <VBox fx:id="inputSignature" minHeight="60" prefHeight="60" maxHeight="60"/>
+                <Label fx:id="inputOverflowLabel" alignment="CENTER" opacity="0" maxWidth="90"
+                       styleClass="caption" style="-fx-text-fill: -grey-500;"/>
+            </VBox>
+        </left>
+
+        <right>
+            <VBox fx:id="outputContainer" minHeight="80" prefHeight="80" maxHeight="80"
+                  style="-fx-padding: 12 5 5 5;" spacing="6">
+                <VBox fx:id="outputSignature" minHeight="60" prefHeight="60" maxHeight="60"/>
+                <Label fx:id="outputOverflowLabel" alignment="CENTER" opacity="0" maxWidth="90"
+                       styleClass="caption" style="-fx-text-fill: -grey-500;"/>
+            </VBox>
+        </right>
+
+    </BorderPane>
+
+    <Line fx:id="line1"/>
+    <Line fx:id="separatorLine"/>
+</fx:root>
