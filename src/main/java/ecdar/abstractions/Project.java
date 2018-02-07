@@ -182,6 +182,7 @@ public class Project {
                         break;
                 }
             } else {
+                // if file is not a directory (i.e. it is a JSON file), use helper method to deserialize the file
                 deserializeFileHelper(file);
             }
         }
