@@ -159,9 +159,9 @@ public class Project {
     }
 
     /**
-     * Reads files in a folder and serializes this based on the files.
-     * @param projectFolder the folder to read files from
-     * @throws IOException throws iff an IO error occurs
+     * Reads files in a folder and deserialize this based on the files and folders.
+     * @param projectFolder the folder where an Ecdar project are supposed to be
+     * @throws IOException if problems occurs when reading a file
      */
     public void deserialize(final File projectFolder) throws IOException {
         final File[] projectFiles = projectFolder.listFiles();
