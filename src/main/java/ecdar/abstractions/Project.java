@@ -165,41 +165,55 @@ public class Project {
      */
     public void deserialize(final File projectFolder) throws IOException {
         final File[] projectFiles = projectFolder.listFiles();
+        File componentDir = null; File systemDir = null; File testDir = null;
         if (projectFiles == null || projectFiles.length == 0) return;
 
         for (final File file : projectFiles) {
             if (file.isDirectory()) {
-                if (file.getName().equals(FOLDER_NAME_COMPONENTS)) {
-                    deserializeComponents(file);
-                } else if (file.getName().equals(FOLDER_NAME_SYSTEMS)) {
-                    deserializeSystems(file);
-                } else if (file.getName().equals(FOLDER_NAME_TESTS)) {
-                    deserializeTestObjects(file);
+                switch (file.getName()) {
+                    case FOLDER_NAME_COMPONENTS:
+                        componentDir = file;
+                        break;
+                    case FOLDER_NAME_SYSTEMS:
+                        systemDir = file;
+                        break;
+                    case FOLDER_NAME_TESTS:
+                        testDir = file;
+                        break;
                 }
                 continue;
             }
 
             final String fileContent = Files.toString(file, Charset.defaultCharset());
 
-            if (file.getName().equals(GLOBAL_DCL_FILENAME + JSON_FILENAME_EXTENSION)) {
-                final JsonObject jsonObject = new JsonParser().parse(fileContent).getAsJsonObject();
-                setGlobalDeclarations(new Declarations(jsonObject));
-                continue;
-            }
-
-            if (file.getName().equals(SYSTEM_DCL_FILENAME + JSON_FILENAME_EXTENSION)) {
-                final JsonObject jsonObject = new JsonParser().parse(fileContent).getAsJsonObject();
-                setSystemDeclarations(new Declarations(jsonObject));
-                continue;
-            }
-
-            if (file.getName().equals(QUERIES_FILENAME + JSON_FILENAME_EXTENSION)) {
-                new JsonParser().parse(fileContent).getAsJsonArray().forEach(jsonElement -> {
-                    final Query newQuery = new Query((JsonObject) jsonElement);
-                    getQueries().add(newQuery);
-                });
+            switch (file.getName()) {
+                case GLOBAL_DCL_FILENAME + JSON_FILENAME_EXTENSION: {
+                    final JsonObject jsonObject = new JsonParser().parse(fileContent).getAsJsonObject();
+                    setGlobalDeclarations(new Declarations(jsonObject));
+                    continue;
+                }
+                case SYSTEM_DCL_FILENAME + JSON_FILENAME_EXTENSION: {
+                    final JsonObject jsonObject = new JsonParser().parse(fileContent).getAsJsonObject();
+                    setSystemDeclarations(new Declarations(jsonObject));
+                    continue;
+                }
+                case QUERIES_FILENAME + JSON_FILENAME_EXTENSION:
+                    new JsonParser().parse(fileContent).getAsJsonArray().forEach(jsonElement -> {
+                        final Query newQuery = new Query((JsonObject) jsonElement);
+                        getQueries().add(newQuery);
+                    });
+                    break;
             }
         }
+        // Now we have gone though all the files in the directory we can now deserialize folders
+        if(componentDir != null || systemDir != null) {
+            deserializeComponents(componentDir);
+            deserializeSystems(systemDir);
+        } else {
+            Ecdar.showToast("Error while loading project");
+            return;
+        }
+        if (testDir != null) deserializeTestObjects(testDir);
     }
 
     /**
