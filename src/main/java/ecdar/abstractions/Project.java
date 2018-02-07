@@ -164,13 +164,11 @@ public class Project {
      * @throws IOException throws iff an IO error occurs
      */
     public void deserialize(final File projectFolder) throws IOException {
-        // If there are no files do not try to deserialize
         final File[] projectFiles = projectFolder.listFiles();
         if (projectFiles == null || projectFiles.length == 0) return;
 
         for (final File file : projectFiles) {
             if (file.isDirectory()) {
-                // If components folder
                 if (file.getName().equals(FOLDER_NAME_COMPONENTS)) {
                     deserializeComponents(file);
                 } else if (file.getName().equals(FOLDER_NAME_SYSTEMS)) {
@@ -195,7 +193,6 @@ public class Project {
                 continue;
             }
 
-            // If the file represents the queries
             if (file.getName().equals(QUERIES_FILENAME + JSON_FILENAME_EXTENSION)) {
                 new JsonParser().parse(fileContent).getAsJsonArray().forEach(jsonElement -> {
                     final Query newQuery = new Query((JsonObject) jsonElement);
