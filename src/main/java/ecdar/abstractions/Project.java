@@ -165,36 +165,36 @@ public class Project {
      */
     public void deserialize(final File projectFolder) throws IOException {
         final File[] projectFiles = projectFolder.listFiles();
-        File componentDir = null; File systemDir = null; File testDir = null;
+        File componentFolder = null; File systemFolder = null; File testFolder = null;
         if (projectFiles == null || projectFiles.length == 0) return;
 
         for (final File file : projectFiles) {
             if (file.isDirectory()) {
                 switch (file.getName()) {
                     case FOLDER_NAME_COMPONENTS:
-                        componentDir = file;
+                        componentFolder = file;
                         break;
                     case FOLDER_NAME_SYSTEMS:
-                        systemDir = file;
+                        systemFolder = file;
                         break;
                     case FOLDER_NAME_TESTS:
-                        testDir = file;
+                        testFolder = file;
                         break;
                 }
             } else {
-                // if file is not a directory (i.e. it is a JSON file), use helper method to deserialize the file
+                // if file is not a folder (i.e. it is a JSON file), use helper method to deserialize the file
                 deserializeFileHelper(file);
             }
         }
         // Now we have gone though all the files in the directory we can now deserialize folders
-        if(componentDir != null || systemDir != null) {
-            deserializeComponents(componentDir);
-            deserializeSystems(systemDir);
+        if(componentFolder != null || systemFolder != null) {
+            deserializeComponents(componentFolder);
+            deserializeSystems(systemFolder);
         } else {
             Ecdar.showToast("Error while loading project");
             return;
         }
-        if (testDir != null) deserializeTestObjects(testDir);
+        if (testFolder != null) deserializeTestObjects(testFolder);
     }
 
     /**
