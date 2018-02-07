@@ -159,9 +159,9 @@ public class Ecdar extends Application {
         stage.setScene(scene);
 
         // Load all .css files used todo: these should be loaded in the view classes (?)
-        scene.getStylesheets().add("SW9/main.css");
-        scene.getStylesheets().add("SW9/colors.css");
-        scene.getStylesheets().add("SW9/model_canvas.css");
+        scene.getStylesheets().add("ecdar/main.css");
+        scene.getStylesheets().add("ecdar/colors.css");
+        scene.getStylesheets().add("ecdar/model_canvas.css");
 
         // Handle a mouse click as a deselection of all elements
         scene.setOnMousePressed(event -> {
@@ -215,8 +215,8 @@ public class Ecdar extends Application {
             debugStage = new Stage();
             debugStage.setScene(new Scene(root));
 
-            debugStage.getScene().getStylesheets().add("SW9/main.css");
-            debugStage.getScene().getStylesheets().add("SW9/colors.css");
+            debugStage.getScene().getStylesheets().add("ecdar/main.css");
+            debugStage.getScene().getStylesheets().add("ecdar/colors.css");
 
             debugStage.setWidth(screen.getVisualBounds().getWidth() * 0.2);
             debugStage.setHeight(screen.getVisualBounds().getWidth() * 0.3);
