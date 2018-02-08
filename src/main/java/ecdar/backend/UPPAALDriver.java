@@ -56,18 +56,18 @@ public class UPPAALDriver {
      * Stores a project as a backend XML file in the "temporary" directory.
      * @param project project to store
      * @param fileName file name (without extension) of the file to store
-     * @return the path of the file
+     * @return the absolute path of the file
      * @throws BackendException if an error occurs during generation of backend XML
      * @throws IOException if an error occurs during storing of the file
      * @throws URISyntaxException if an error occurs when getting the URL of the root directory
      */
-    public static Path storeBackendModel(final Project project, final String fileName) throws BackendException, IOException, URISyntaxException {
+    public static String storeBackendModel(final Project project, final String fileName) throws BackendException, IOException, URISyntaxException {
         FileUtils.forceMkdir(new File(getTempDirectoryAbsolutePath()));
 
         final String path = getTempDirectoryAbsolutePath() + File.separator + fileName + ".xml";
         storeUppaalFile(new EcdarDocument(project).toXmlDocument(),  path);
 
-        return Paths.get(path);
+        return path;
     }
 
     /**
@@ -78,12 +78,12 @@ public class UPPAALDriver {
      * @throws URISyntaxException if an error occurs when getting the URL of the root directory
      * @throws IOException if an error occurs during storing of the file
      */
-    public static Path storeQuery(final String query, final String fileName) throws URISyntaxException, IOException {
+    public static String storeQuery(final String query, final String fileName) throws URISyntaxException, IOException {
         FileUtils.forceMkdir(new File(getTempDirectoryAbsolutePath()));
 
-        final Path path = Paths.get(getTempDirectoryAbsolutePath() + File.separator + fileName + ".q");
+        final String path = getTempDirectoryAbsolutePath() + File.separator + fileName + ".q";
         Files.write(
-                path,
+                Paths.get(path),
                 Collections.singletonList(query),
                 Charset.forName("UTF-8")
         );

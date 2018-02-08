@@ -34,6 +34,9 @@ public class ChangeTargetOperator {
         for (int edgeIndex = 0; edgeIndex < original.getEdges().size(); edgeIndex++) {
             final Edge originalEdge = original.getEdges().get(edgeIndex);
 
+            // Ignore if locked (e.g. if edge on the Inconsistent or Universal locations)
+            if (originalEdge.getIsLocked().get()) continue;
+
             for (final Location originalLocation : original.getLocations()) {
                 // Ignore if location is target in original edge
                 if (originalEdge.getTargetLocation() == originalLocation) continue;

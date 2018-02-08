@@ -1,5 +1,6 @@
 package ecdar.abstractions;
 
+import com.google.gson.JsonPrimitive;
 import ecdar.code_analysis.Nearable;
 import ecdar.controllers.EcdarController;
 import ecdar.presentations.Grid;
@@ -24,6 +25,7 @@ public class Edge implements Serializable, Nearable {
     private static final String SYNC = "sync";
     private static final String NAILS = "nails";
     private static final String STATUS = "status";
+    private static final String IS_LOCKED = "isLocked";
 
     // Defines if this is an input or an output edge
     public ObjectProperty<EdgeStatus> ioStatus;
@@ -101,6 +103,9 @@ public class Edge implements Serializable, Nearable {
             nail.setPropertyType(PropertyType.SYNCHRONIZATION);
             clone.addNail(nail);
         }
+
+        // Clone if edge is locked (e.g. the Inconsistent and Universal locations have locked edges)
+        clone.setIsLocked(getIsLocked().get());
 
         return clone;
     }
@@ -334,6 +339,8 @@ public class Edge implements Serializable, Nearable {
         result.addProperty(UPDATE, getUpdate());
         result.addProperty(SYNC, getSync());
 
+        result.addProperty(IS_LOCKED, isLocked.get());
+
         final JsonArray nails = new JsonArray();
         getNails().forEach(nail -> nails.add(nail.serialize()));
         result.add(NAILS, nails);
@@ -364,6 +371,11 @@ public class Edge implements Serializable, Nearable {
         setGuard(json.getAsJsonPrimitive(GUARD).getAsString());
         setUpdate(json.getAsJsonPrimitive(UPDATE).getAsString());
         setSync(json.getAsJsonPrimitive(SYNC).getAsString());
+
+        // We need to check for null here in order to be backwards compatible (older models do not specify is locked)
+        final JsonPrimitive isLockedJson = json.getAsJsonPrimitive(IS_LOCKED);
+        if (isLockedJson != null) setIsLocked(isLockedJson.getAsBoolean());
+        else setIsLocked(getSync().equals("*"));
 
         json.getAsJsonArray(NAILS).forEach(jsonElement -> {
             final Nail newNail = new Nail((JsonObject) jsonElement);

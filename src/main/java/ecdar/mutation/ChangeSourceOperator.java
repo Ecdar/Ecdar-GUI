@@ -34,15 +34,25 @@ class ChangeSourceOperator {
         for (int edgeIndex = 0; edgeIndex < original.getEdges().size(); edgeIndex++) {
             final Edge originalEdge = original.getEdges().get(edgeIndex);
 
-            for (final Location originalLocation : original.getLocations()) {
+            // Ignore if locked (e.g. if edge on the Inconsistent or Universal locations)
+            if (originalEdge.getIsLocked().get()) continue;
+
+            // Change the source of that edge to (almost) each of the locations
+            for (final Location location : original.getLocations()) {
                 // Ignore if location is source in original edge
-                if (originalEdge.getSourceLocation() == originalLocation) continue;
+                if (originalEdge.getSourceLocation() == location) continue;
+
+                // Ignore if location is the Inconsistent or the Universal locations
+                // We do not want to have those as a source location,
+                // since it would break their behaviour
+                if (location.getType().equals(Location.Type.INCONSISTENT) || location.getType().equals(Location.Type.UNIVERSAL))
+                    continue;
 
                 final Component mutant = original.cloneForVerification();
 
                 // Mutate
                 final Edge mutantEdge = mutant.getEdges().get(edgeIndex);
-                final String newLocId = originalLocation.getId();
+                final String newLocId = location.getId();
                 mutantEdge.setSourceLocation(mutant.findLocation(newLocId));
 
                 mutants.add(mutant);

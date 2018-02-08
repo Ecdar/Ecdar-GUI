@@ -48,6 +48,7 @@ public class MutationTestPlanController {
     // Progress fields
     private int testCaseGenerationProgress;
     private Instant generationStart;
+    private String queryFilePath;
 
     public MutationTestPlan getPlan() {
         return plan;
@@ -82,6 +83,15 @@ public class MutationTestPlanController {
         progressText.setText("Generating test-cases (0/" + mutants.size() + " mutants processed)");
         generationStart = Instant.now();
         testCases = FXCollections.observableArrayList();
+
+        try {
+            queryFilePath = UPPAALDriver.storeQuery("refinement: " + MUTANT_NAME + "<=" + TEST_MODEL_NAME, "query");
+        } catch (URISyntaxException | IOException e) {
+            e.printStackTrace();
+            Ecdar.showToast("Error: " + e.getMessage());
+            return;
+        }
+
         for (int i = 0; i < mutants.size(); i++) {
             generateTestCase(testModel, mutants.get(i), i);
         }
@@ -96,7 +106,7 @@ public class MutationTestPlanController {
             progressText.setText("Generating test-cases... (" + testCaseGenerationProgress + "/" + mutants.size() + " mutants processed)");
         } else {
             try {
-                FileUtils.deleteDirectory(new File(UPPAALDriver.getTempDirectoryAbsolutePath()));
+                FileUtils.cleanDirectory(new File(UPPAALDriver.getTempDirectoryAbsolutePath()));
             } catch (IOException | URISyntaxException e) {
                 e.printStackTrace();
                 Ecdar.showToast("Error: " + e.getMessage());
@@ -137,15 +147,13 @@ public class MutationTestPlanController {
 
         new Thread(() -> {
             final Process process;
-            final Path modelPath, queryPath;
 
             try {
                 // Store the project and the refinement query as backend XML
-                modelPath = UPPAALDriver.storeBackendModel(project, "model" + mutationIndex);
-                queryPath = UPPAALDriver.storeQuery("refinement: " + MUTANT_NAME + "<=" + TEST_MODEL_NAME, "model" + mutationIndex);
+                final String modelPath = UPPAALDriver.storeBackendModel(project, "model" + mutationIndex);
 
                 // Run verifytga to check refinement and to fetch strategy if non-refinement
-                process = Runtime.getRuntime().exec(UPPAALDriver.findVerifytgaAbsolutePath() + " -t0 " + modelPath);
+                process = Runtime.getRuntime().exec(UPPAALDriver.findVerifytgaAbsolutePath() + " -t0 " + modelPath + " " + queryFilePath);
 
             } catch (BackendException | IOException | URISyntaxException e) {
                 e.printStackTrace();
@@ -168,14 +176,16 @@ public class MutationTestPlanController {
             // Verifytga should output that the property is not satisfied
             // If it does not, then this is an error
             if (lines.stream().noneMatch(line -> line.endsWith(" -- Property is NOT satisfied."))) {
-                throw new RuntimeException("Output from verifytga not understood:\n" + String.join("\n", lines));
+                throw new RuntimeException("Output from verifytga not understood:\n" + String.join("\n", lines) + "\n" +
+                        "Mutation index: " + mutationIndex);
             }
 
             int strategyIndex = lines.indexOf("Strategy for the attacker:");
 
             // If no such index, error
             if (strategyIndex < 0) {
-                throw new RuntimeException("Output from verifytga not understood:\n" + String.join("\n", lines));
+                throw new RuntimeException("Output from verifytga not understood:\n" + String.join("\n", lines) + "\n" +
+                        "Mutation index: " + mutationIndex);
             }
 
             List<String> strategy = lines.subList(strategyIndex + 2, lines.size());
