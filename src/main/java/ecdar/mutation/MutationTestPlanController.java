@@ -97,6 +97,14 @@ public class MutationTestPlanController {
         }
     }
 
+    /**
+     * Is triggered when a test-case generation attempt is done.
+     * It updates UI labels to tell user about the progress.
+     * Once all test-case generation attempts are done,
+     * this method executes the test-cases (not done)
+     *
+     * This method should be called in a JavaFX thread, since it updates JavaFX elements.
+     */
     private synchronized void onSingleTestCaseGenerationDone() {
         testCaseGenerationProgress++;
 
