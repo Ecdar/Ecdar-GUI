@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "query": "consistency: Alarm",
+    "comment": "",
+    "isPeriodic": false
+  },
+  {
+    "query": "specification: Alarm",
+    "comment": "",
+    "isPeriodic": false
+  }
+]

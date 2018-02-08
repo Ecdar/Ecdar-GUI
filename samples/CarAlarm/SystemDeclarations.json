@@ -1,4 +1,4 @@
 {
   "name": "System Declarations",
-  "declarations": ""
+  "declarations": "system Alarm;\nIO Alarm {close?, lock?, open?, unlock?, armedOff!, armedOn!, flashOff!, flashOn!, soundOff!, soundOn!}"
 }
