@@ -58,10 +58,11 @@ public class MutationTestPlanController {
         testModel.setName(TEST_MODEL_NAME);
         testModel.updateIOList();
 
-        // Mutate
+        // Mutate and make input-enabled with angelic completion
         final Instant start = Instant.now();
         final List<Component> mutants = new ChangeSourceOperator(testModel).computeMutants();
         mutants.addAll(new ChangeTargetOperator(testModel).computeMutants());
+        mutants.forEach(Component::applyAngelicCompletion);
         plan.setMutantsText("Mutants: " + mutants.size() + " - Execution time: " + humanReadableFormat(Duration.between(start, Instant.now())));
 
         // Create test cases
@@ -73,7 +74,7 @@ public class MutationTestPlanController {
             for (int i = 0; i < mutants.size(); i++) {
                 generateTestCase(testModel, mutants.get(i));
 
-                // FXJava cannot be updated in another thread, so make it run at some point
+                // JavaFX elements cannot be updated in another thread, so make it run in a JavaFX thread at some point
                 int finalI = i;
                 Platform.runLater(() -> {
                     progressText.setText("Generating test-cases (" + finalI + "/" + mutants.size() + ")");
