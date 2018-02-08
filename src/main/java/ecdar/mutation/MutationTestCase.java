@@ -8,6 +8,12 @@ import java.util.List;
  * A test case for model-based mutation testing.
  */
 class MutationTestCase {
-    public MutationTestCase(final Component testModel, final Component mutant, final List<String> strategy) {
+    private Component testModel, mutant;
+    private List<String> strategy;
+
+    MutationTestCase(final Component testModel, final Component mutant, final List<String> strategy) {
+        this.testModel = testModel;
+        this.mutant = mutant;
+        this.strategy = strategy;
     }
 }

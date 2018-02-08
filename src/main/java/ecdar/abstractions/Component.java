@@ -188,6 +188,80 @@ public class Component extends HighLevelModelObject implements Boxed {
     }
 
     /**
+     * Applies demonic completion on this component.
+     *
+     * Each guard must be empty or of the form:
+     * [optional whitespace]
+     * [id or integer]
+     * [optional whitespace]
+     * [one of the operators <, <=, ==, !=, >, >=]
+     * [optional whitespace][id or integer]
+     * [optional whitespace]
+     *
+     * Regex: ^\s*(\w+)\s*(<|<=|==|!=|>|>=)\s*(\w+)\s*$
+     *
+     * For instance, no conjunction allowed in a guard.
+     */
+    public void applyDemonicCompletion() {
+        // Make a universal location
+        final Location uniLocation = new Location(this, Location.Type.UNIVERSAL, 0, 0);
+        addLocation(uniLocation);
+
+        final Edge inputEdge = uniLocation.addLeftEdge("*", EdgeStatus.INPUT);
+        inputEdge.setIsLocked(true);
+        addEdge(inputEdge);
+
+        final Edge outputEdge = uniLocation.addRightEdge("*", EdgeStatus.OUTPUT);
+        outputEdge.setIsLocked(true);
+        addEdge(outputEdge);
+
+        for (final Location location : getLocations()) {
+            for (final String input : getInputStrings()) {
+                // Get outgoing input edges that has the chosen input
+                final List<Edge> matchingEdges = getOutgoingEdges(location).stream().filter(
+                        edge -> edge.getStatus().equals(EdgeStatus.INPUT) &&
+                                edge.getSync().equals(input)).collect(Collectors.toList()
+                );
+
+                // If no such edges, add an edge to Universal
+                if (matchingEdges.isEmpty()) {
+                    final Edge edge = new Edge(location, EdgeStatus.INPUT);
+                    edge.setTargetLocation(uniLocation);
+                    edge.addSyncNail(input);
+                    addEdge(edge);
+                    continue;
+                }
+
+                // if an edge has no guard, ignore.
+                // component is already input-enabled with respect to this location and input.
+                if (matchingEdges.stream().anyMatch(edge -> edge.getGuard().isEmpty())) continue;
+
+                // Make an edge to Universal with a guard that is the negation of the guards in the matching edges
+                final List<String> negatedGuards = new ArrayList<>();
+                for (final Edge matchingEdge : matchingEdges) {
+                    final String guard = matchingEdge.getGuard();
+                    final Matcher matcher = Pattern.compile("^\\s*(\\w+)\\s*(<|<=|==|!=|>|>=)\\s*(\\w+)\\s*$").matcher(guard);
+
+                    if (!matcher.find()) {
+                        throw new RuntimeException("Guard \"" + guard + "\" did not match expected pattern");
+                    }
+
+                    // We negate each guard
+                    negatedGuards.add(matcher.group(1) + negateOperator(matcher.group(2)) + matcher.group(3));
+                }
+
+                final Edge edge = new Edge(location, EdgeStatus.INPUT);
+                edge.setTargetLocation(uniLocation);
+                edge.addSyncNail(input);
+                // Multiple edges are a disjunction.
+                // To negate, we use conjunction.
+                edge.addGuardNail(String.join("&&", negatedGuards));
+                addEdge(edge);
+            }
+        }
+    }
+
+    /**
      * Negates one of the operators <, <=, =, !=, >, >=.
      * @param operator the operator to negate
      * @return the negated operator
