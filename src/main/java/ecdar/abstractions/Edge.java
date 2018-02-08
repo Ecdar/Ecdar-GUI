@@ -151,7 +151,7 @@ public class Edge implements Serializable, Nearable {
         return guard.get();
     }
 
-    private void setGuard(final String guard) {
+    public void setGuard(final String guard) {
         this.guard.set(guard);
     }
 
@@ -175,7 +175,7 @@ public class Edge implements Serializable, Nearable {
         return sync.get();
     }
 
-    private void setSync(final String sync) {
+    public void setSync(final String sync) {
         this.sync.set(sync);
     }
 
@@ -440,6 +440,30 @@ public class Edge implements Serializable, Nearable {
         guardProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
         syncProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
         updateProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
+    }
+
+    /**
+     * Adds a synchronization nail at (0, 0).
+     * Adds a specified synchronization property to this edge.
+     * @param sync the specified synchronization property
+     */
+    public void addSyncNail(final String sync) {
+        final Nail nail = new Nail(0, 0);
+        nail.setPropertyType(PropertyType.SYNCHRONIZATION);
+        addNail(nail);
+        setSync(sync);
+    }
+
+    /**
+     * Adds a guard nail at (0, 0).
+     * Adds a specified guard property the this edge.
+     * @param guard the specified guard property
+     */
+    public void addGuardNail(final String guard) {
+        final Nail nail = new Nail(0, 0);
+        nail.setPropertyType(PropertyType.GUARD);
+        addNail(nail);
+        setGuard(guard);
     }
 
 }
