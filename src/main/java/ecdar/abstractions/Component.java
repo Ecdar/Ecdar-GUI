@@ -132,11 +132,11 @@ public class Component extends HighLevelModelObject implements Boxed {
      * [optional whitespace]
      * [id or integer]
      * [optional whitespace]
-     * [one of the operators <, <=, =, !=, >, >=]
+     * [one of the operators <, <=, ==, !=, >, >=]
      * [optional whitespace][id or integer]
      * [optional whitespace]
      *
-     * Regex: ^\s*(\w+)\s*(<|<=|=|!=|>|>=)\s*(\w+)\s*$
+     * Regex: ^\s*(\w+)\s*(<|<=|==|!=|>|>=)\s*(\w+)\s*$
      *
      * For instance, no conjunction allowed in a guard.
      */
@@ -166,7 +166,7 @@ public class Component extends HighLevelModelObject implements Boxed {
                 final List<String> negatedGuards = new ArrayList<>();
                 for (final Edge matchingEdge : matchingEdges) {
                     final String guard = matchingEdge.getGuard();
-                    final Matcher matcher = Pattern.compile("^\\s*(\\w+)\\s*(<|<=|=|!=|>|>=)\\s*(\\w+)\\s*$").matcher(guard);
+                    final Matcher matcher = Pattern.compile("^\\s*(\\w+)\\s*(<|<=|==|!=|>|>=)\\s*(\\w+)\\s*$").matcher(guard);
 
                     if (!matcher.find()) {
                         throw new RuntimeException("Guard \"" + guard + "\" did not match expected pattern");
@@ -198,10 +198,10 @@ public class Component extends HighLevelModelObject implements Boxed {
                 return ">=";
             case "<=":
                 return ">";
-            case "=":
+            case "==":
                 return "!=";
             case "!=":
-                return "=";
+                return "==";
             case ">":
                 return "<=";
             case ">=":
