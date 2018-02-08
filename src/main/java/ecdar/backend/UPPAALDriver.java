@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Consumer;
@@ -40,7 +41,6 @@ public class UPPAALDriver {
             "reuse 0\n" +
             "tigaWarnIO 0";
 
-    private static final String TEMP_FILE_NAME_WITHOUT_EXTENSION = "model";
     private static final String TEMP_DIRECTORY = "temporary";
     public static final String SERVERS_DIRECOTRY = "servers";
 
@@ -53,35 +53,42 @@ public class UPPAALDriver {
     }
 
     /**
-     * Stores a project as a backend XML file "model.xml" in the "temporary" directory.
+     * Stores a project as a backend XML file in the "temporary" directory.
      * @param project project to store
-     * @return the absolute path of the file
+     * @param fileName file name (without extension) of the file to store
+     * @return the path of the file
      * @throws BackendException if an error occurs during generation of backend XML
      * @throws IOException if an error occurs during storing of the file
      * @throws URISyntaxException if an error occurs when getting the URL of the root directory
      */
-    public static String storeBackendModel(final Project project) throws BackendException, IOException, URISyntaxException {
+    public static Path storeBackendModel(final Project project, final String fileName) throws BackendException, IOException, URISyntaxException {
         FileUtils.forceMkdir(new File(getTempDirectoryAbsolutePath()));
 
-        final String path = getTempDirectoryAbsolutePath() + File.separator + TEMP_FILE_NAME_WITHOUT_EXTENSION + ".xml";
+        final String path = getTempDirectoryAbsolutePath() + File.separator + fileName + ".xml";
         storeUppaalFile(new EcdarDocument(project).toXmlDocument(),  path);
 
-        return path;
+        return Paths.get(path);
     }
 
     /**
      * Stores a query as a backend XML query file in the "temporary" directory.
      * @param query the query to store.
+     * @param fileName file name (without extension) of the file to store
+     * @return the path of the file
      * @throws URISyntaxException if an error occurs when getting the URL of the root directory
      * @throws IOException if an error occurs during storing of the file
      */
-    public static void storeQuery(final String query) throws URISyntaxException, IOException {
+    public static Path storeQuery(final String query, final String fileName) throws URISyntaxException, IOException {
         FileUtils.forceMkdir(new File(getTempDirectoryAbsolutePath()));
+
+        final Path path = Paths.get(getTempDirectoryAbsolutePath() + File.separator + fileName + ".q");
         Files.write(
-                Paths.get(getTempDirectoryAbsolutePath() + File.separator + TEMP_FILE_NAME_WITHOUT_EXTENSION + ".q"),
+                path,
                 Collections.singletonList(query),
                 Charset.forName("UTF-8")
         );
+
+        return path;
     }
 
     /**
@@ -89,7 +96,7 @@ public class UPPAALDriver {
      * @return the path
      * @throws URISyntaxException if an error occurs when getting the URL of the root directory
      */
-    private static String getTempDirectoryAbsolutePath() throws URISyntaxException {
+    public static String getTempDirectoryAbsolutePath() throws URISyntaxException {
         return Ecdar.getRootDirectory() + File.separator + TEMP_DIRECTORY;
     }
 

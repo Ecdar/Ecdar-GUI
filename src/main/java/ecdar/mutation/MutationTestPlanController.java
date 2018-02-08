@@ -11,11 +11,16 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Label;
+import org.apache.commons.io.FileUtils;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -28,14 +33,21 @@ public class MutationTestPlanController {
     private final static String TEST_MODEL_NAME = "S";
     private final static String MUTANT_NAME = "M";
 
+    // UI elements
     public JFXComboBox<Label> testModelPicker;
     public JFXButton testButton;
     public Label mutantsText;
     public Label testCasesText;
     public Label progressText;
 
+    // Mutation objects
     private MutationTestPlan plan;
+    private List<Component> mutants;
     private ObservableList<MutationTestCase> testCases;
+
+    // Progress fields
+    private int testCaseGenerationProgress;
+    private Instant generationStart;
 
     public MutationTestPlan getPlan() {
         return plan;
@@ -60,31 +72,40 @@ public class MutationTestPlanController {
 
         // Mutate and make input-enabled with angelic completion
         final Instant start = Instant.now();
-        final List<Component> mutants = new ChangeSourceOperator(testModel).computeMutants();
+        mutants = new ChangeSourceOperator(testModel).computeMutants();
         mutants.addAll(new ChangeTargetOperator(testModel).computeMutants());
         mutants.forEach(Component::applyAngelicCompletion);
         plan.setMutantsText("Mutants: " + mutants.size() + " - Execution time: " + humanReadableFormat(Duration.between(start, Instant.now())));
 
         // Create test cases
-        // This takes a lot of time, so do it in another thread
-        progressText.setText("Generating test-cases (0/" + mutants.size() + ")");
-        new Thread(() -> {
-            final Instant generationStart = Instant.now();
-            testCases = FXCollections.observableArrayList();
-            for (int i = 0; i < mutants.size(); i++) {
-                generateTestCase(testModel, mutants.get(i));
+        testCaseGenerationProgress = 0;
+        progressText.setText("Generating test-cases (0/" + mutants.size() + " mutants processed)");
+        generationStart = Instant.now();
+        testCases = FXCollections.observableArrayList();
+        for (int i = 0; i < mutants.size(); i++) {
+            generateTestCase(testModel, mutants.get(i), i);
+        }
+    }
 
-                // JavaFX elements cannot be updated in another thread, so make it run in a JavaFX thread at some point
-                int finalI = i;
-                Platform.runLater(() -> {
-                    progressText.setText("Generating test-cases (" + finalI + "/" + mutants.size() + ")");
-                    plan.setTestCasesText("Test-cases: " + testCases.size() + " - Generation time: " + humanReadableFormat(Duration.between(generationStart, Instant.now())));
-                });
+    private synchronized void onSingleTestCaseGenerationDone() {
+        testCaseGenerationProgress++;
+
+        plan.setTestCasesText("Test-cases: " + testCases.size() + " - Generation time: " + humanReadableFormat(Duration.between(generationStart, Instant.now())));
+
+        if (testCaseGenerationProgress != mutants.size()) {
+            progressText.setText("Generating test-cases... (" + testCaseGenerationProgress + "/" + mutants.size() + " mutants processed)");
+        } else {
+            try {
+                FileUtils.deleteDirectory(new File(UPPAALDriver.getTempDirectoryAbsolutePath()));
+            } catch (IOException | URISyntaxException e) {
+                e.printStackTrace();
+                Ecdar.showToast("Error: " + e.getMessage());
+                return;
             }
 
-            Platform.runLater(() -> progressText.setText("Done"));
+            progressText.setText("Done");
             testButton.setDisable(false);
-        }).start();
+        }
     }
 
     /**
@@ -102,9 +123,10 @@ public class MutationTestPlanController {
     /**
      * Generates a test-case.
      * @param testModel test model
-     * @param mutant mutant of the test model
+     * @param mutant mutant used for generating
+     * @param mutationIndex index of the mutant used for generating
      */
-    private void generateTestCase(final Component testModel, final Component mutant) {
+    private void generateTestCase(final Component testModel, final Component mutant, final int mutationIndex) {
         // make a project with the test model and the mutant
         final Project project = new Project();
         mutant.setName(MUTANT_NAME);
@@ -113,52 +135,55 @@ public class MutationTestPlanController {
         mutant.updateIOList(); // Update io in order to get the right system declarations for the mutant
         project.setSystemDeclarations(new TwoComponentSystemDeclarations(testModel, mutant));
 
-        try {
-            // Store the project and the refinement query as backend XML
-            final String modelPath = UPPAALDriver.storeBackendModel(project);
-            UPPAALDriver.storeQuery("refinement: " + MUTANT_NAME + "<=" + TEST_MODEL_NAME);
+        new Thread(() -> {
+            final Process process;
+            final Path modelPath, queryPath;
 
-            // Run verifytga to check refinement and to fetch strategy if non-refinement
-            final Process p = Runtime.getRuntime().exec(UPPAALDriver.findVerifytgaAbsolutePath() + " -t0 " + modelPath);
+            try {
+                // Store the project and the refinement query as backend XML
+                modelPath = UPPAALDriver.storeBackendModel(project, "model" + mutationIndex);
+                queryPath = UPPAALDriver.storeQuery("refinement: " + MUTANT_NAME + "<=" + TEST_MODEL_NAME, "model" + mutationIndex);
 
-            new Thread(() -> {
-                BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                // Run verifytga to check refinement and to fetch strategy if non-refinement
+                process = Runtime.getRuntime().exec(UPPAALDriver.findVerifytgaAbsolutePath() + " -t0 " + modelPath);
 
-                List<String > lines = input.lines().collect(Collectors.toList());
+            } catch (BackendException | IOException | URISyntaxException e) {
+                e.printStackTrace();
+                Ecdar.showToast("Error: " + e.getMessage());
+                return;
+            }
 
-                // If refinement, no test-case to generate.
-                // I use endsWith rather than contains,
-                // since verifytga sometimes output some weird symbols at the start of this line.
-                if (lines.stream().anyMatch(line -> line.endsWith(" -- Property is satisfied."))) return;
+            BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
-                // Verifytga should output that the property is not satisfied
-                // If it does not, then this is an error
-                if (lines.stream().noneMatch(line -> line.endsWith(" -- Property is NOT satisfied."))) {
-                    throw new RuntimeException("Output from verifytga not understood:\n" + String.join("\n", lines));
-                }
+            List<String > lines = input.lines().collect(Collectors.toList());
 
-                int strategyIndex = lines.indexOf("Strategy for the attacker:");
+            // If refinement, no test-case to generate.
+            // I use endsWith rather than contains,
+            // since verifytga sometimes output some weird symbols at the start of this line.
+            if (lines.stream().anyMatch(line -> line.endsWith(" -- Property is satisfied."))) {
+                Platform.runLater(this::onSingleTestCaseGenerationDone);
+                return;
+            }
 
-                // If no such index, error
-                if (strategyIndex < 0) {
-                    throw new RuntimeException("Output from verifytga not understood:\n" + String.join("\n", lines));
-                }
+            // Verifytga should output that the property is not satisfied
+            // If it does not, then this is an error
+            if (lines.stream().noneMatch(line -> line.endsWith(" -- Property is NOT satisfied."))) {
+                throw new RuntimeException("Output from verifytga not understood:\n" + String.join("\n", lines));
+            }
 
-                List<String> strategy = lines.subList(strategyIndex + 2, lines.size());
+            int strategyIndex = lines.indexOf("Strategy for the attacker:");
 
-                /*for (String s : strategy) System.out.println(s);
-                System.out.println();
-                System.out.println();*/
+            // If no such index, error
+            if (strategyIndex < 0) {
+                throw new RuntimeException("Output from verifytga not understood:\n" + String.join("\n", lines));
+            }
 
-                testCases.add(new MutationTestCase(testModel, mutant, strategy));
-            }).start();
+            List<String> strategy = lines.subList(strategyIndex + 2, lines.size());
 
-            // We need to wait for each process
-            // Otherwise, the output of verifytga is sometimes cut off
-            p.waitFor();
-        } catch (BackendException | IOException | URISyntaxException | InterruptedException  e) {
-            e.printStackTrace();
-            Ecdar.showToast("Error: " + e.getMessage());
-        }
+            testCases.add(new MutationTestCase(testModel, mutant, strategy));
+
+            // JavaFX elements cannot be updated in another thread, so make it run in a JavaFX thread at some point
+            Platform.runLater(this::onSingleTestCaseGenerationDone);
+        }).start();
     }
 }
