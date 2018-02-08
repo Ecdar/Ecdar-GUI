@@ -8,6 +8,9 @@ import ecdar.backend.UPPAALDriver;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableBooleanValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Label;
@@ -18,9 +21,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -36,19 +36,23 @@ public class MutationTestPlanController {
     // UI elements
     public JFXComboBox<Label> testModelPicker;
     public JFXButton testButton;
+    public JFXButton stopButton;
     public Label mutantsText;
     public Label testCasesText;
     public Label progressText;
 
     // Mutation objects
     private MutationTestPlan plan;
+    private Component testModel;
     private List<Component> mutants;
     private ObservableList<MutationTestCase> testCases;
 
     // Progress fields
-    private int testCaseGenerationProgress;
     private Instant generationStart;
     private String queryFilePath;
+    private int generationJobsStarted;
+    private int generationJobsEnded;
+    private boolean shouldStop;
 
     public MutationTestPlan getPlan() {
         return plan;
@@ -63,11 +67,12 @@ public class MutationTestPlanController {
      * Conducts the test.
      */
     public void onTestButtonPressed() {
-        testButton.setDisable(true);
+        showStopButton();
+        shouldStop = false;
 
         // Find test model from test model picker
         // Clone it, because we want to change its name
-        final Component testModel = Ecdar.getProject().findComponent(testModelPicker.getValue().getText()).cloneForVerification();
+        testModel = Ecdar.getProject().findComponent(testModelPicker.getValue().getText()).cloneForVerification();
         testModel.setName(TEST_MODEL_NAME);
         testModel.updateIOList();
 
@@ -79,8 +84,8 @@ public class MutationTestPlanController {
         plan.setMutantsText("Mutants: " + mutants.size() + " - Execution time: " + humanReadableFormat(Duration.between(start, Instant.now())));
 
         // Create test cases
-        testCaseGenerationProgress = 0;
-        progressText.setText("Generating test-cases (0/" + mutants.size() + " mutants processed)");
+        generationJobsStarted = 0;
+        generationJobsEnded = 0;
         generationStart = Instant.now();
         testCases = FXCollections.observableArrayList();
 
@@ -92,38 +97,12 @@ public class MutationTestPlanController {
             return;
         }
 
-        for (int i = 0; i < mutants.size(); i++) {
-            generateTestCase(testModel, mutants.get(i), i);
-        }
+        updateGenerationJobs();
     }
 
-    /**
-     * Is triggered when a test-case generation attempt is done.
-     * It updates UI labels to tell user about the progress.
-     * Once all test-case generation attempts are done,
-     * this method executes the test-cases (not done)
-     *
-     * This method should be called in a JavaFX thread, since it updates JavaFX elements.
-     */
-    private synchronized void onSingleTestCaseGenerationDone() {
-        testCaseGenerationProgress++;
-
-        plan.setTestCasesText("Test-cases: " + testCases.size() + " - Generation time: " + humanReadableFormat(Duration.between(generationStart, Instant.now())));
-
-        if (testCaseGenerationProgress != mutants.size()) {
-            progressText.setText("Generating test-cases... (" + testCaseGenerationProgress + "/" + mutants.size() + " mutants processed)");
-        } else {
-            try {
-                FileUtils.cleanDirectory(new File(UPPAALDriver.getTempDirectoryAbsolutePath()));
-            } catch (IOException | URISyntaxException e) {
-                e.printStackTrace();
-                Ecdar.showToast("Error: " + e.getMessage());
-                return;
-            }
-
-            progressText.setText("Done");
-            testButton.setDisable(false);
-        }
+    public synchronized void onStopButtonPressed() {
+        shouldStop = true;
+        stopButton.setDisable(true);
     }
 
     /**
@@ -136,6 +115,61 @@ public class MutationTestPlanController {
                 .substring(2)
                 .replaceAll("(\\d[HMS])(?!$)", "$1 ")
                 .toLowerCase();
+    }
+
+    private synchronized void updateGenerationJobs() {
+        if (shouldStop) {
+            if (generationJobsRunning() == 0) {
+                progressText.setText("Stopped");
+                stopButton.setDisable(false);
+
+                showTestButton();
+            }
+
+            return;
+        }
+
+        // If we are done, clean up and move on
+        if (generationJobsEnded == mutants.size()) {
+            try {
+                FileUtils.cleanDirectory(new File(UPPAALDriver.getTempDirectoryAbsolutePath()));
+            } catch (IOException | URISyntaxException e) {
+                e.printStackTrace();
+                Ecdar.showToast("Error: " + e.getMessage());
+                return;
+            }
+
+            progressText.setText("Done");
+            testButton.setDisable(false);
+
+            showTestButton();
+
+            return;
+        }
+
+        progressText.setText("Generating test-cases... (" + generationJobsEnded + "/" + mutants.size() + " mutants processed)");
+
+        // while we have not reach the maximum allowed threads and there are still jobs to start
+        final int MAX_GENERATION_THREADS = 10;
+        while (generationJobsRunning() < MAX_GENERATION_THREADS &&
+                generationJobsStarted < mutants.size()) {
+            generateTestCase(testModel, mutants.get(generationJobsStarted), generationJobsStarted);
+            generationJobsStarted++;
+        }
+    }
+
+    private void showStopButton() {
+        testButton.setManaged(false); testButton.setVisible(false);
+        stopButton.setManaged(true); stopButton.setVisible(true);
+    }
+
+    private void showTestButton() {
+        testButton.setManaged(true); testButton.setVisible(true);
+        stopButton.setManaged(false); stopButton.setVisible(false);
+    }
+
+    private synchronized int generationJobsRunning() {
+        return generationJobsStarted - generationJobsEnded;
     }
 
     /**
@@ -177,7 +211,7 @@ public class MutationTestPlanController {
             // I use endsWith rather than contains,
             // since verifytga sometimes output some weird symbols at the start of this line.
             if (lines.stream().anyMatch(line -> line.endsWith(" -- Property is satisfied."))) {
-                Platform.runLater(this::onSingleTestCaseGenerationDone);
+                Platform.runLater(this::onGenerationJobDone);
                 return;
             }
 
@@ -201,7 +235,23 @@ public class MutationTestPlanController {
             testCases.add(new MutationTestCase(testModel, mutant, strategy));
 
             // JavaFX elements cannot be updated in another thread, so make it run in a JavaFX thread at some point
-            Platform.runLater(this::onSingleTestCaseGenerationDone);
+            Platform.runLater(this::onGenerationJobDone);
         }).start();
+    }
+
+    /**
+     * Is triggered when a test-case generation attempt is done.
+     * It updates UI labels to tell user about the progress.
+     * Once all test-case generation attempts are done,
+     * this method executes the test-cases (not done)
+     *
+     * This method should be called in a JavaFX thread, since it updates JavaFX elements.
+     */
+    private synchronized void onGenerationJobDone() {
+        generationJobsEnded++;
+
+        plan.setTestCasesText("Test-cases: " + testCases.size() + " - Generation time: " + humanReadableFormat(Duration.between(generationStart, Instant.now())));
+
+        updateGenerationJobs();
     }
 }

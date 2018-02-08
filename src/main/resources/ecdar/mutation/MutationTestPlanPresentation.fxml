@@ -17,6 +17,11 @@
                    style="-fx-text-fill:WHITE;-fx-background-color:#52AE64;-fx-font-size:14px;"
                    onMousePressed="#onTestButtonPressed"/>
 
+        <JFXButton fx:id="stopButton" prefWidth="100" prefHeight="40" buttonType="RAISED" text="Stop"
+                   style="-fx-text-fill:WHITE;-fx-background-color:#AE5264;-fx-font-size:14px;"
+                   onMousePressed="#onStopButtonPressed"
+                   managed="false" visible="false"/>
+
         <Label fx:id="progressText"/>
         <Label fx:id="mutantsText"/>
         <Label fx:id="testCasesText"/>
