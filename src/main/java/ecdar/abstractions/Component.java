@@ -141,8 +141,11 @@ public class Component extends HighLevelModelObject implements Boxed {
      * For instance, no conjunction allowed in a guard.
      */
     public void applyAngelicCompletion() {
+        // Cache input signature, since it could be updated when added edges
+        final List<String> inputStrings = new ArrayList<>(getInputStrings());
+
         for (final Location location : getLocations()) {
-            for (final String input : getInputStrings()) {
+            for (final String input : inputStrings) {
                 // Get outgoing input edges that has the chosen input
                 final List<Edge> matchingEdges = getOutgoingEdges(location).stream().filter(
                         edge -> edge.getStatus().equals(EdgeStatus.INPUT) &&
@@ -215,8 +218,11 @@ public class Component extends HighLevelModelObject implements Boxed {
         outputEdge.setIsLocked(true);
         addEdge(outputEdge);
 
+        // Cache input signature, since it could be updated when added edges
+        final List<String> inputStrings = new ArrayList<>(getInputStrings());
+
         for (final Location location : getLocations()) {
-            for (final String input : getInputStrings()) {
+            for (final String input : inputStrings) {
                 // Get outgoing input edges that has the chosen input
                 final List<Edge> matchingEdges = getOutgoingEdges(location).stream().filter(
                         edge -> edge.getStatus().equals(EdgeStatus.INPUT) &&
