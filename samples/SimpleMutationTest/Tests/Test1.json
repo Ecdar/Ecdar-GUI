@@ -1,4 +1,6 @@
 {
   "name": "Test1",
-  "testModelId": "Component1"
+  "testModelId": "Component1",
+  "mutantsText": "Mutants: 24 - Execution time: 0.007s",
+  "testCasesText": "Test-cases: 19 - Generation time: 7.224s"
 }

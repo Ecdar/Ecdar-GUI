@@ -18,10 +18,10 @@ public class MutationTestPlan extends HighLevelModelObject {
     private static final String MUTANTS_TEXT = "mutantsText";
     private static final String TEST_CASES_TEXT = "testCasesText";
 
-    private final StringProperty testModelId = new SimpleStringProperty();
+    private final StringProperty testModelId = new SimpleStringProperty("");
 
-    private final StringProperty mutantsString = new SimpleStringProperty();
-    private final StringProperty testCasesString = new SimpleStringProperty();
+    private final StringProperty mutantsString = new SimpleStringProperty("");
+    private final StringProperty testCasesString = new SimpleStringProperty("");
 
 
     /* Constructors */

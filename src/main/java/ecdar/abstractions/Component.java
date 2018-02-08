@@ -17,6 +17,9 @@ import javafx.collections.ObservableList;
 import javafx.util.Pair;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * A component that models an I/O automata.
@@ -46,7 +49,7 @@ public class Component extends HighLevelModelObject implements Boxed {
     /**
      * Constructs an empty component
      */
-    private Component() {
+    public Component() {
 
     }
 
@@ -120,6 +123,92 @@ public class Component extends HighLevelModelObject implements Boxed {
         }
 
         setDeclarationsText(original.getDeclarationsText());
+    }
+
+    /**
+     * Applies angelic completion on this component.
+     *
+     * Each guard must be empty or of the form:
+     * [optional whitespace]
+     * [id or integer]
+     * [optional whitespace]
+     * [one of the operators <, <=, =, !=, >, >=]
+     * [optional whitespace][id or integer]
+     * [optional whitespace]
+     *
+     * Regex: ^\s*(\w+)\s*(<|<=|=|!=|>|>=)\s*(\w+)\s*$
+     *
+     * For instance, no conjunction allowed in a guard.
+     */
+    public void applyAngelicCompletion() {
+        for (final Location location : getLocations()) {
+            for (final String input : getInputStrings()) {
+                // Get outgoing input edges that has the chosen input
+                final List<Edge> matchingEdges = getOutgoingEdges(location).stream().filter(
+                        edge -> edge.getStatus().equals(EdgeStatus.INPUT) &&
+                                edge.getSync().equals(input)).collect(Collectors.toList()
+                );
+
+                // If no such edges, add a self loop without a guard
+                if (matchingEdges.isEmpty()) {
+                    final Edge edge = new Edge(location, EdgeStatus.INPUT);
+                    edge.setTargetLocation(location);
+                    edge.addSyncNail(input);
+                    addEdge(edge);
+                    continue;
+                }
+
+                // if an edge has no guard, ignore.
+                // component is already input-enabled with respect to this location and input.
+                if (matchingEdges.stream().anyMatch(edge -> edge.getGuard().isEmpty())) continue;
+
+                // Make a self loop with a guard that is the negation of the guards in the matching edges
+                final List<String> negatedGuards = new ArrayList<>();
+                for (final Edge matchingEdge : matchingEdges) {
+                    final String guard = matchingEdge.getGuard();
+                    final Matcher matcher = Pattern.compile("^\\s*(\\w+)\\s*(<|<=|=|!=|>|>=)\\s*(\\w+)\\s*$").matcher(guard);
+
+                    if (!matcher.find()) {
+                        throw new RuntimeException("Guard \"" + guard + "\" did not match expected pattern");
+                    }
+
+                    // We negate each guard
+                    negatedGuards.add(matcher.group(1) + negateOperator(matcher.group(2)) + matcher.group(3));
+                }
+
+                final Edge edge = new Edge(location, EdgeStatus.INPUT);
+                edge.setTargetLocation(location);
+                edge.addSyncNail(input);
+                // Multiple edges are a disjunction.
+                // To negate, we use conjunction.
+                edge.addGuardNail(String.join("&&", negatedGuards));
+                addEdge(edge);
+            }
+        }
+    }
+
+    /**
+     * Negates one of the operators <, <=, =, !=, >, >=.
+     * @param operator the operator to negate
+     * @return the negated operator
+     */
+    private static String negateOperator(final String operator) {
+        switch (operator) {
+            case "<":
+                return ">=";
+            case "<=":
+                return ">";
+            case "=":
+                return "!=";
+            case "!=":
+                return "=";
+            case ">":
+                return "<=";
+            case ">=":
+                return "<";
+            default:
+                throw new RuntimeException("Unexpected operator \"" + operator + "\"");
+        }
     }
 
     /**
@@ -254,6 +343,15 @@ public class Component extends HighLevelModelObject implements Boxed {
         });
 
         return relatedEdges;
+    }
+
+    /**
+     * Get edges that has a specified location as its source.
+     * @param location the specified location
+     * @return the filtered edges
+     */
+    public List<Edge> getOutgoingEdges(final Location location) {
+        return getEdges().filtered(edge -> location == edge.getSourceLocation());
     }
 
     public boolean isDeclarationOpen() {

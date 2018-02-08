@@ -95,4 +95,94 @@ public class ComponentTest {
         Assert.assertEquals(id1, original.getEdges().get(0).getTargetLocation().getId());
         Assert.assertEquals(id2, clone.getEdges().get(0).getTargetLocation().getId());
     }
+
+    @Test
+    public void testAngelicCompletion() {
+        final Component c = new Component();
+        Ecdar.getProject().getComponents().add(c);
+
+        // Has no outgoing edges
+        final Location l1 = new Location();
+        l1.initialize();
+        c.addLocation(l1);
+
+        // Has outgoing a input edge without guard
+        final Location l2 = new Location();
+        l2.initialize();
+        c.addLocation(l2);
+
+        // Has outgoing b input edge with guard x <= 3
+        final Location l3 = new Location();
+        l3.initialize();
+        c.addLocation(l3);
+
+        final Edge e1 = new Edge(l2, EdgeStatus.INPUT);
+        e1.setTargetLocation(l1);
+        e1.setSync("a");
+        c.addEdge(e1);
+
+        final Edge e2 = new Edge(l3, EdgeStatus.INPUT);
+        e2.setTargetLocation(l2);
+        e2.setSync("b");
+        e2.setGuard("x <= 3");
+        c.addEdge(e2);
+
+        // Outputs should not have effect
+        final Edge e3 = new Edge(l3, EdgeStatus.OUTPUT);
+        e3.setTargetLocation(l2);
+        e3.setSync("c");
+        e3.setGuard("x <= 2");
+        c.addEdge(e3);
+
+        c.updateIOList();
+
+        Assert.assertEquals(3, c.getLocations().size());
+        Assert.assertEquals(3, c.getEdges().size());
+
+        c.applyAngelicCompletion();
+
+        Assert.assertEquals(3, c.getLocations().size());
+        Assert.assertEquals(8, c.getEdges().size());
+
+        // l1 should have two new input edges without guards
+        Edge edge = c.getEdges().get(3);
+        Assert.assertEquals(EdgeStatus.INPUT, edge.getStatus());
+        Assert.assertEquals("a", edge.getSync());
+        Assert.assertEquals("", edge.getGuard());
+        Assert.assertEquals(l1, edge.getSourceLocation());
+        Assert.assertEquals(l1, edge.getTargetLocation());
+
+        edge = c.getEdges().get(4);
+        Assert.assertEquals(EdgeStatus.INPUT, edge.getStatus());
+        Assert.assertEquals("b", edge.getSync());
+        Assert.assertEquals("", edge.getGuard());
+        Assert.assertEquals(l1, edge.getSourceLocation());
+        Assert.assertEquals(l1, edge.getTargetLocation());
+
+        // l2 should have one new input edge without guard
+        edge = c.getEdges().get(5);
+        Assert.assertEquals(EdgeStatus.INPUT, edge.getStatus());
+        Assert.assertEquals("b", edge.getSync());
+        Assert.assertEquals("", edge.getGuard());
+        Assert.assertEquals(l2, edge.getSourceLocation());
+        Assert.assertEquals(l2, edge.getTargetLocation());
+
+        // l3 should have two new input edges
+        // one without guard
+        edge = c.getEdges().get(6);
+        Assert.assertEquals(EdgeStatus.INPUT, edge.getStatus());
+        Assert.assertEquals("a", edge.getSync());
+        Assert.assertEquals("", edge.getGuard());
+        Assert.assertEquals(l3, edge.getSourceLocation());
+        Assert.assertEquals(l3, edge.getTargetLocation());
+
+        // and one with negated guard
+        edge = c.getEdges().get(7);
+        Assert.assertEquals(EdgeStatus.INPUT, edge.getStatus());
+        Assert.assertEquals("b", edge.getSync());
+        Assert.assertEquals("x>3", edge.getGuard());
+        Assert.assertEquals(l3, edge.getSourceLocation());
+        Assert.assertEquals(l3, edge.getTargetLocation());
+
+    }
 }
