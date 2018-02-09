@@ -1,6 +1,5 @@
-Upstream [![Build Status](https://travis-ci.com/tgunde13/Ecdar.svg?token=deyCDsqkwkcxRvqzTGxE&branch=master)](https://travis-ci.com/tgunde13/Ecdar)
+[![Build Status](https://travis-ci.com/tgunde13/Ecdar.svg?token=deyCDsqkwkcxRvqzTGxE&branch=master)](https://travis-ci.com/tgunde13/Ecdar)
 
-[![Build Status](https://travis-ci.com/tgunde13/Ecdar.svg?token=FznbqXU3Q5KCswHurpPf&branch=master)](https://travis-ci.com/tgunde13/Ecdar)
 # Ecdar
 
 Made by:
@@ -24,7 +23,14 @@ How to Run
 ----
 Run Jar file with Java 8.
 
-- If the window is blank white, run with java option `-Dprism.order=sw`.
+Known problems
+----
+If you are having problems connecting to the backend, first of all make sure that you are connected to the internet. The backend needs to have a license file in order function.
+
+If that does not work then you are most likely missing a x32 libc6 library
+`sudo apt-get install libc6:i386` 
+
+If the window is blank/white, run with java option `-Dprism.order=sw`.
 
 H-UPPAAL
 ----------
