@@ -1,5 +1,6 @@
 package ecdar.mutation;
 
+import com.jfoenix.controls.JFXTextField;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Project;
@@ -40,6 +41,7 @@ public class MutationTestPlanController {
     public Label mutantsText;
     public Label testCasesText;
     public Label progressText;
+    public JFXTextField generationThreadsTextFields;
 
     // Mutation objects
     private MutationTestPlan plan;
@@ -150,12 +152,18 @@ public class MutationTestPlanController {
         progressText.setText("Generating test-cases... (" + generationJobsEnded + "/" + mutants.size() + " mutants processed)");
 
         // while we have not reach the maximum allowed threads and there are still jobs to start
-        final int MAX_GENERATION_THREADS = 10;
-        while (generationJobsRunning() < MAX_GENERATION_THREADS &&
+        while (generationJobsRunning() < getMaxGenerationThreads() &&
                 generationJobsStarted < mutants.size()) {
             generateTestCase(testModel, mutants.get(generationJobsStarted), generationJobsStarted);
             generationJobsStarted++;
         }
+    }
+
+    private int getMaxGenerationThreads() {
+        if (generationThreadsTextFields.getText().isEmpty() || generationThreadsTextFields.getText().equals("0"))
+            return 1;
+        else
+            return Integer.parseInt(generationThreadsTextFields.getText());
     }
 
     private void showStopButton() {
@@ -195,7 +203,9 @@ public class MutationTestPlanController {
                 final String modelPath = UPPAALDriver.storeBackendModel(project, "model" + mutationIndex);
 
                 // Run verifytga to check refinement and to fetch strategy if non-refinement
-                process = Runtime.getRuntime().exec(UPPAALDriver.findVerifytgaAbsolutePath() + " -t0 " + modelPath + " " + queryFilePath);
+                ProcessBuilder pb = new ProcessBuilder("C:\\Users\\Tobias\\Documents\\ecdar-0.10\\bin-Win32\\verifytga.exe", "-t0", modelPath, queryFilePath);
+                pb.redirectErrorStream(true);
+                process = pb.start();//Runtime.getRuntime().exec("C:\\Users\\Tobias\\Documents\\ecdar-0.10\\bin-Win32\\verifytga.exe" + " -t0 " + modelPath + " " + queryFilePath);
 
             } catch (BackendException | IOException | URISyntaxException e) {
                 e.printStackTrace();
@@ -203,9 +213,14 @@ public class MutationTestPlanController {
                 return;
             }
 
-            BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
-
-            List<String > lines = input.lines().collect(Collectors.toList());
+            List<String> lines;
+            try (BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                lines = input.lines().collect(Collectors.toList());
+            } catch (IOException e) {
+                e.printStackTrace();
+                Ecdar.showToast("Error: " + e.getMessage());
+                return;
+            }
 
             // If refinement, no test-case to generate.
             // I use endsWith rather than contains,

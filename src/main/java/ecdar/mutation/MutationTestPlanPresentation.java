@@ -4,6 +4,8 @@ import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.presentations.EcdarFXMLLoader;
 import ecdar.presentations.HighLevelModelPresentation;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.control.Label;
 
 /**
@@ -54,5 +56,12 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         // Bind UI text to models
         controller.mutantsText.textProperty().bind(controller.getPlan().mutantsTextProperty());
         controller.testCasesText.textProperty().bind(controller.getPlan().testCasesTextProperty());
+
+        // Force the field to be numeric only
+        controller.generationThreadsTextFields.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue.matches("\\d*")) {
+                controller.generationThreadsTextFields.setText(newValue.replaceAll("[^\\d]", ""));
+            }
+        });
     }
 }
