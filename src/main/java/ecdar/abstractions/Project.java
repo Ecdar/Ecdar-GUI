@@ -159,49 +159,67 @@ public class Project {
     }
 
     /**
-     * Reads files in a folder and serializes this based on the files.
-     * @param projectFolder the folder to read files from
-     * @throws IOException throws iff an IO error occurs
+     * Reads files in a folder and deserialize this based on the files and folders.
+     * @param projectFolder the folder where an Ecdar project are supposed to be
+     * @throws IOException if problems occurs when reading a file
      */
     public void deserialize(final File projectFolder) throws IOException {
-        // If there are no files do not try to deserialize
         final File[] projectFiles = projectFolder.listFiles();
+        File componentFolder = null; File systemFolder = null; File testFolder = null;
         if (projectFiles == null || projectFiles.length == 0) return;
 
         for (final File file : projectFiles) {
             if (file.isDirectory()) {
-                // If components folder
-                if (file.getName().equals(FOLDER_NAME_COMPONENTS)) {
-                    deserializeComponents(file);
-                } else if (file.getName().equals(FOLDER_NAME_SYSTEMS)) {
-                    deserializeSystems(file);
-                } else if (file.getName().equals(FOLDER_NAME_TESTS)) {
-                    deserializeTestObjects(file);
+                switch (file.getName()) {
+                    case FOLDER_NAME_COMPONENTS:
+                        componentFolder = file;
+                        break;
+                    case FOLDER_NAME_SYSTEMS:
+                        systemFolder = file;
+                        break;
+                    case FOLDER_NAME_TESTS:
+                        testFolder = file;
+                        break;
                 }
-                continue;
+            } else {
+                // if file is not a folder (i.e. it is a JSON file), use helper method to deserialize the file
+                deserializeFileHelper(file);
             }
+        }
+        // Now we have gone though all the files in the directory we can now deserialize folders
+        if(componentFolder != null || systemFolder != null) {
+            deserializeComponents(componentFolder);
+            deserializeSystems(systemFolder);
+        } else {
+            Ecdar.showToast("Error while loading project");
+            return;
+        }
+        if (testFolder != null) deserializeTestObjects(testFolder);
+    }
 
-            final String fileContent = Files.toString(file, Charset.defaultCharset());
+    /**
+     * A helper method for the {@link Project#deserialize(File)} method which handles deserialization of files
+     * @param file the file with information about a project that should be deserialized
+     * @throws IOException if problems occurs when reading a file
+     */
+    private void deserializeFileHelper(final File file) throws IOException {
+        final String fileContent = Files.toString(file, Charset.defaultCharset());
 
-            if (file.getName().equals(GLOBAL_DCL_FILENAME + JSON_FILENAME_EXTENSION)) {
-                final JsonObject jsonObject = new JsonParser().parse(fileContent).getAsJsonObject();
-                setGlobalDeclarations(new Declarations(jsonObject));
-                continue;
-            }
-
-            if (file.getName().equals(SYSTEM_DCL_FILENAME + JSON_FILENAME_EXTENSION)) {
-                final JsonObject jsonObject = new JsonParser().parse(fileContent).getAsJsonObject();
-                setSystemDeclarations(new Declarations(jsonObject));
-                continue;
-            }
-
-            // If the file represents the queries
-            if (file.getName().equals(QUERIES_FILENAME + JSON_FILENAME_EXTENSION)) {
+        switch (file.getName()) {
+            case GLOBAL_DCL_FILENAME + JSON_FILENAME_EXTENSION:
+                final JsonObject globalJsonObj = new JsonParser().parse(fileContent).getAsJsonObject();
+                setGlobalDeclarations(new Declarations(globalJsonObj));
+                break;
+            case SYSTEM_DCL_FILENAME + JSON_FILENAME_EXTENSION:
+                final JsonObject sysJsonObj = new JsonParser().parse(fileContent).getAsJsonObject();
+                setSystemDeclarations(new Declarations(sysJsonObj));
+                break;
+            case QUERIES_FILENAME + JSON_FILENAME_EXTENSION:
                 new JsonParser().parse(fileContent).getAsJsonArray().forEach(jsonElement -> {
                     final Query newQuery = new Query((JsonObject) jsonElement);
                     getQueries().add(newQuery);
                 });
-            }
+                break;
         }
     }
 
