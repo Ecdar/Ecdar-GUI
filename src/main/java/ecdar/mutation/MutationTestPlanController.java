@@ -82,7 +82,7 @@ public class MutationTestPlanController {
         mutants = new ChangeSourceOperator(testModel).computeMutants();
         mutants.addAll(new ChangeTargetOperator(testModel).computeMutants());
         mutants.forEach(Component::applyAngelicCompletion);
-        plan.setMutantsText("Mutants: " + mutants.size() + " - Execution time: " + humanReadableFormat(Duration.between(start, Instant.now())));
+        plan.setMutantsText("Mutants: " + mutants.size() + " - Execution time: " + readableFormat(Duration.between(start, Instant.now())));
 
         // Create test cases
         generationJobsStarted = 0;
@@ -123,16 +123,19 @@ public class MutationTestPlanController {
      * @param duration the duration
      * @return a string in a human readable format
      */
-    private static String humanReadableFormat(final Duration duration) {
+    private static String readableFormat(final Duration duration) {
         return duration.toString()
                 .substring(2)
                 .replaceAll("(\\d[HMS])(?!$)", "$1 ")
                 .toLowerCase();
     }
 
+    /**
+     * Updates what test-case generation jobs to run.
+     */
     private synchronized void updateGenerationJobs() {
         if (shouldStop) {
-            if (generationJobsRunning() == 0) {
+            if (getGenerationJobsRunning() == 0) {
                 progressText.setText("Stopped");
                 stopButton.setDisable(false);
 
@@ -163,32 +166,46 @@ public class MutationTestPlanController {
         progressText.setText("Generating test-cases... (" + generationJobsEnded + "/" + mutants.size() + " mutants processed)");
 
         // while we have not reach the maximum allowed threads and there are still jobs to start
-        while (generationJobsRunning() < getMaxGenerationThreads() &&
+        while (getGenerationJobsRunning() < getMaxConcurrentGenerationJobs() &&
                 generationJobsStarted < mutants.size()) {
             generateTestCase(testModel, mutants.get(generationJobsStarted), generationJobsStarted);
             generationJobsStarted++;
         }
     }
 
-    private int getMaxGenerationThreads() {
-        if (generationThreadsTextFields.getText().isEmpty() || generationThreadsTextFields.getText().equals("0"))
-            return 1;
-        else
-            return Integer.parseInt(generationThreadsTextFields.getText());
-    }
-
+    /**
+     * Shows the stop button.
+     */
     private void showStopButton() {
         testButton.setManaged(false); testButton.setVisible(false);
         stopButton.setManaged(true); stopButton.setVisible(true);
     }
 
+    /**
+     * Shows the test button.
+     */
     private void showTestButton() {
         testButton.setManaged(true); testButton.setVisible(true);
         stopButton.setManaged(false); stopButton.setVisible(false);
     }
 
-    private synchronized int generationJobsRunning() {
+    /**
+     * Gets the number of generation jobs currently running.
+     * @return the number of jobs running
+     */
+    private synchronized int getGenerationJobsRunning() {
         return generationJobsStarted - generationJobsEnded;
+    }
+
+    /**
+     * Gets the maximum allowed concurrent threads for generating test-cases.
+     * @return the maximum allowed threads
+     */
+    private int getMaxConcurrentGenerationJobs() {
+        if (generationThreadsTextFields.getText().isEmpty() || generationThreadsTextFields.getText().equals("0"))
+            return 1;
+        else
+            return Integer.parseInt(generationThreadsTextFields.getText());
     }
 
     /**
@@ -227,25 +244,7 @@ public class MutationTestPlanController {
             List<String> lines;
             try (BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 lines = inputReader.lines().collect(Collectors.toList());
-
-                try (BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
-                    //final String errorLine = errorReader.readLine();
-                    final List<String> errorLines = errorReader.lines().collect(Collectors.toList());
-
-                    if (!errorLines.isEmpty()) {
-                        // Only show error if the process is not already being stopped
-                        if (!shouldStop) {
-                            Platform.runLater(() -> {
-                                final String message = "Error from the error stream of verifytga: " + String.join("\n", errorLines);
-                                progressText.setText(message);
-                                progressText.setTextFill(Color.RED);
-                                Ecdar.showToast(message);
-                                signalToStop();
-                            });
-                        }
-                        return;
-                    }
-                }
+                if (!handlePotentialErrorsFromVerifytga(process)) return;
             } catch (IOException e) {
                 e.printStackTrace();
 
@@ -295,6 +294,37 @@ public class MutationTestPlanController {
     }
 
     /**
+     * Checks for errors in a process.
+     * The input stream must be completely read before calling this.
+     * Otherwise, we rick getting stuck while reading the error stream.
+     * If an error occurs, this method tells the user and signals this controller to stop.
+     * @param process process to check for
+     * @return true iff process was successful (e.g. no errors was found)
+     * @throws IOException if an I/O error occurs
+     */
+    private boolean handlePotentialErrorsFromVerifytga(final Process process) throws IOException {
+        try (BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+            //final String errorLine = errorReader.readLine();
+            final List<String> errorLines = errorReader.lines().collect(Collectors.toList());
+
+            if (!errorLines.isEmpty()) {
+                // Only show error if the process is not already being stopped
+                if (!shouldStop) {
+                    Platform.runLater(() -> {
+                        final String message = "Error from the error stream of verifytga: " + String.join("\n", errorLines);
+                        progressText.setText(message);
+                        progressText.setTextFill(Color.RED);
+                        Ecdar.showToast(message);
+                        signalToStop();
+                    });
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Is triggered when a test-case generation attempt is done.
      * It updates UI labels to tell user about the progress.
      * Once all test-case generation attempts are done,
@@ -305,7 +335,7 @@ public class MutationTestPlanController {
     private synchronized void onGenerationJobDone() {
         generationJobsEnded++;
 
-        plan.setTestCasesText("Test-cases: " + testCases.size() + " - Generation time: " + humanReadableFormat(Duration.between(generationStart, Instant.now())));
+        plan.setTestCasesText("Test-cases: " + testCases.size() + " - Generation time: " + readableFormat(Duration.between(generationStart, Instant.now())));
 
         updateGenerationJobs();
     }
