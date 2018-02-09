@@ -9,12 +9,10 @@ import ecdar.backend.UPPAALDriver;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
 import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ObservableBooleanValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Label;
+import javafx.scene.paint.Color;
 import org.apache.commons.io.FileUtils;
 
 import java.io.BufferedReader;
@@ -71,6 +69,7 @@ public class MutationTestPlanController {
     public void onTestButtonPressed() {
         showStopButton();
         shouldStop = false;
+        progressText.setTextFill(Color.BLACK);
 
         // Find test model from test model picker
         // Clone it, because we want to change its name
@@ -102,7 +101,19 @@ public class MutationTestPlanController {
         updateGenerationJobs();
     }
 
-    public synchronized void onStopButtonPressed() {
+    /**
+     * Triggered when pressed the stop button.
+     * Signals that this test plan should stop doing jobs.
+     */
+    public void onStopButtonPressed() {
+        signalToStop();
+    }
+
+    /**
+     * Signals that this test plan should stop doing jobs.
+     * Jobs are run in other threads, so it might take some time.
+     */
+    private synchronized void signalToStop() {
         shouldStop = true;
         stopButton.setDisable(true);
     }
@@ -203,9 +214,9 @@ public class MutationTestPlanController {
                 final String modelPath = UPPAALDriver.storeBackendModel(project, "model" + mutationIndex);
 
                 // Run verifytga to check refinement and to fetch strategy if non-refinement
-                ProcessBuilder pb = new ProcessBuilder("C:\\Users\\Tobias\\Documents\\ecdar-0.10\\bin-Win32\\verifytga.exe", "-t0", modelPath, queryFilePath);
-                pb.redirectErrorStream(true);
-                process = pb.start();//Runtime.getRuntime().exec("C:\\Users\\Tobias\\Documents\\ecdar-0.10\\bin-Win32\\verifytga.exe" + " -t0 " + modelPath + " " + queryFilePath);
+                ProcessBuilder builder = new ProcessBuilder(UPPAALDriver.findVerifytgaAbsolutePath(), "-t0", modelPath, queryFilePath);
+                //ProcessBuilder builder = new ProcessBuilder("C:\\Users\\Tobias\\Documents\\ecdar-0.10\\bin-Win32\\verifytga.exe", "-t0", modelPath, queryFilePath);
+                process = builder.start();//Runtime.getRuntime().exec("C:\\Users\\Tobias\\Documents\\ecdar-0.10\\bin-Win32\\verifytga.exe" + " -t0 " + modelPath + " " + queryFilePath);
 
             } catch (BackendException | IOException | URISyntaxException e) {
                 e.printStackTrace();
@@ -214,11 +225,40 @@ public class MutationTestPlanController {
             }
 
             List<String> lines;
-            try (BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                lines = input.lines().collect(Collectors.toList());
+            try (BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                lines = inputReader.lines().collect(Collectors.toList());
+
+                try (BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+                    //final String errorLine = errorReader.readLine();
+                    final List<String> errorLines = errorReader.lines().collect(Collectors.toList());
+
+                    if (!errorLines.isEmpty()) {
+                        // Only show error if the process is not already being stopped
+                        if (!shouldStop) {
+                            Platform.runLater(() -> {
+                                final String message = "Error from the error stream of verifytga: " + String.join("\n", errorLines);
+                                progressText.setText(message);
+                                progressText.setTextFill(Color.RED);
+                                Ecdar.showToast(message);
+                                signalToStop();
+                            });
+                        }
+                        return;
+                    }
+                }
             } catch (IOException e) {
                 e.printStackTrace();
-                Ecdar.showToast("Error: " + e.getMessage());
+
+                // Only show error if the process is not already being stopped
+                if (!shouldStop) {
+                    Platform.runLater(() -> {
+                        final String message = "I/O exception while reading from verifytga: " + e.getMessage();
+                        progressText.setText(message);
+                        progressText.setTextFill(Color.RED);
+                        Ecdar.showToast(message);
+                        signalToStop();
+                    });
+                }
                 return;
             }
 
@@ -233,7 +273,7 @@ public class MutationTestPlanController {
             // Verifytga should output that the property is not satisfied
             // If it does not, then this is an error
             if (lines.stream().noneMatch(line -> line.endsWith(" -- Property is NOT satisfied."))) {
-                throw new RuntimeException("Output from verifytga not understood:\n" + String.join("\n", lines) + "\n" +
+                throw new RuntimeException("Output from verifytga not understood: " + String.join("\n", lines) + "\n" +
                         "Mutation index: " + mutationIndex);
             }
 
@@ -241,7 +281,7 @@ public class MutationTestPlanController {
 
             // If no such index, error
             if (strategyIndex < 0) {
-                throw new RuntimeException("Output from verifytga not understood:\n" + String.join("\n", lines) + "\n" +
+                throw new RuntimeException("Output from verifytga not understood: " + String.join("\n", lines) + "\n" +
                         "Mutation index: " + mutationIndex);
             }
 
