@@ -12,22 +12,12 @@ import java.util.List;
  * Each mutant has a changed target location on an edge.
  * Generates # of edges * (# of locations - 1) mutants.
  */
-public class ChangeTargetOperator {
-    private final Component original;
-
-    /**
-     * Constructor.
-     * @param original component to mutate
-     */
-    public ChangeTargetOperator(final Component original) {
-        this.original = original;
-    }
-
+public class ChangeTargetOperator extends MutationOperator {
     /**
      * Computes mutants.
      * @return the computed mutants
      */
-    public List<Component> computeMutants() {
+    public List<Component> computeMutants(final Component original) {
         final List<Component> mutants = new ArrayList<>();
 
         // For all edges in the original component
@@ -53,5 +43,10 @@ public class ChangeTargetOperator {
         }
 
         return mutants;
+    }
+
+    @Override
+    String getText() {
+        return "Change target.";
     }
 }

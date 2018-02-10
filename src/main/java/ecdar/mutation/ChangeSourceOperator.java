@@ -12,22 +12,13 @@ import java.util.List;
  * Each mutant has a changed source location on an edge.
  * Generates # of edges * (# of locations - 1) mutants.
  */
-class ChangeSourceOperator {
-    private final Component original;
-
-    /**
-     * Constructor.
-     * @param original component to mutate
-     */
-    public ChangeSourceOperator(final Component original) {
-        this.original = original;
-    }
+class ChangeSourceOperator extends MutationOperator {
 
     /**
      * Computes mutants.
      * @return the computed mutants
      */
-    public List<Component> computeMutants() {
+    public List<Component> computeMutants(final Component original) {
         final List<Component> mutants = new ArrayList<>();
 
         // For all edges in the original component
@@ -60,5 +51,10 @@ class ChangeSourceOperator {
         }
 
         return mutants;
+    }
+
+    @Override
+    String getText() {
+        return "Change source.";
     }
 }

@@ -1,5 +1,6 @@
 package ecdar.mutation;
 
+import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXTextField;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
@@ -9,10 +10,16 @@ import ecdar.backend.UPPAALDriver;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
 import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import org.apache.commons.io.FileUtils;
 
 import java.io.BufferedReader;
@@ -22,7 +29,7 @@ import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -33,26 +40,63 @@ public class MutationTestPlanController {
     private final static String MUTANT_NAME = "M";
 
     // UI elements
-    public JFXComboBox<Label> testModelPicker;
+    public JFXComboBox<Label> modelPicker;
     public JFXButton testButton;
     public JFXButton stopButton;
     public Label mutantsText;
     public Label testCasesText;
-    public Label progressText;
-    public JFXTextField generationThreadsTextFields;
+    public JFXTextField generationThreadsField;
+    public VBox operatorsArea;
+    public JFXComboBox<Label> actionPicker;
+    public VBox testDependentArea;
+    public JFXButton selectSutButton;
+    public VBox exportDependantArea;
+    public VBox sutDependentArea;
+    public Label sutPathLabel;
+    public JFXComboBox<Label> formatPicker;
+    public VBox modelDependentArea;
+    public VBox resultsArea;
+    public VBox progressAres;
+    public JFXTextField suvInstancesField;
+    public JFXCheckBox demonicCheckBox;
+    public JFXCheckBox angelicBox;
+    public JFXButton storeMutantsButton;
+    public TextFlow progressTextFlow;
+    public HBox selectSutArea;
+    public VBox demonicArea;
 
     // Mutation objects
+    private Map<JFXCheckBox, MutationOperator> operatorMap;
     private MutationTestPlan plan;
     private Component testModel;
     private List<Component> mutants;
-    private ObservableList<MutationTestCase> testCases;
+    private List<MutationTestCase> testCases;
 
     // Progress fields
     private Instant generationStart;
     private String queryFilePath;
     private int generationJobsStarted;
     private int generationJobsEnded;
-    private boolean shouldStop;
+
+    public MutationTestPlanController() {
+        initializeOperators();
+    }
+
+    public Map<JFXCheckBox, MutationOperator> getOperatorMap() {
+        return operatorMap;
+    }
+
+    private void initializeOperators() {
+        operatorMap = new LinkedHashMap<>(); // This preserves the order
+        final List<MutationOperator> operators = new ArrayList<>();
+        operators.add(new ChangeSourceOperator());
+        operators.add(new ChangeTargetOperator());
+        for (final MutationOperator operator : operators) {
+            final JFXCheckBox checkBox = new JFXCheckBox(operator.getText());
+            checkBox.setSelected(true);
+            operatorMap.put(checkBox, operator);
+        }
+    }
 
     public MutationTestPlan getPlan() {
         return plan;
@@ -67,28 +111,29 @@ public class MutationTestPlanController {
      * Conducts the test.
      */
     public void onTestButtonPressed() {
-        showStopButton();
-        shouldStop = false;
-        progressText.setTextFill(Color.BLACK);
+        getPlan().setStatus(MutationTestPlan.Status.WORKING);
 
         // Find test model from test model picker
         // Clone it, because we want to change its name
-        testModel = Ecdar.getProject().findComponent(testModelPicker.getValue().getText()).cloneForVerification();
+        testModel = Ecdar.getProject().findComponent(modelPicker.getValue().getText()).cloneForVerification();
         testModel.setName(TEST_MODEL_NAME);
         testModel.updateIOList();
 
         // Mutate and make input-enabled with angelic completion
         final Instant start = Instant.now();
-        mutants = new ChangeSourceOperator(testModel).computeMutants();
-        mutants.addAll(new ChangeTargetOperator(testModel).computeMutants());
+        mutants = new ChangeSourceOperator().computeMutants(testModel);
+        mutants.addAll(new ChangeTargetOperator().computeMutants(testModel));
         mutants.forEach(Component::applyAngelicCompletion);
         plan.setMutantsText("Mutants: " + mutants.size() + " - Execution time: " + readableFormat(Duration.between(start, Instant.now())));
+
+        // If chosen, apply demonic completion
+        if (getPlan().isDemonic()) testModel.applyDemonicCompletion();
 
         // Create test cases
         generationJobsStarted = 0;
         generationJobsEnded = 0;
         generationStart = Instant.now();
-        testCases = FXCollections.observableArrayList();
+        testCases = Collections.synchronizedList(new ArrayList<>()); // use synchronized to be thread safe
 
         try {
             queryFilePath = UPPAALDriver.storeQuery("refinement: " + MUTANT_NAME + "<=" + TEST_MODEL_NAME, "query");
@@ -106,16 +151,7 @@ public class MutationTestPlanController {
      * Signals that this test plan should stop doing jobs.
      */
     public void onStopButtonPressed() {
-        signalToStop();
-    }
-
-    /**
-     * Signals that this test plan should stop doing jobs.
-     * Jobs are run in other threads, so it might take some time.
-     */
-    private synchronized void signalToStop() {
-        shouldStop = true;
-        stopButton.setDisable(true);
+        getPlan().setStatus(MutationTestPlan.Status.STOPPING);
     }
 
     /**
@@ -134,12 +170,9 @@ public class MutationTestPlanController {
      * Updates what test-case generation jobs to run.
      */
     private synchronized void updateGenerationJobs() {
-        if (shouldStop) {
+        if (getPlan().getStatus().equals(MutationTestPlan.Status.STOPPING)) {
             if (getGenerationJobsRunning() == 0) {
-                progressText.setText("Stopped");
-                stopButton.setDisable(false);
-
-                showTestButton();
+                getPlan().setStatus(MutationTestPlan.Status.IDLE);
             }
 
             return;
@@ -155,15 +188,15 @@ public class MutationTestPlanController {
                 return;
             }
 
-            progressText.setText("Done");
-            testButton.setDisable(false);
-
-            showTestButton();
+            final Text text = new Text("Done");
+            text.setFill(Color.GREEN);
+            writeProgress(text);
+            getPlan().setStatus(MutationTestPlan.Status.IDLE);
 
             return;
         }
 
-        progressText.setText("Generating test-cases... (" + generationJobsEnded + "/" + mutants.size() + " mutants processed)");
+        writeProgress("Generating test-cases... (" + generationJobsEnded + "/" + mutants.size() + " mutants processed)");
 
         // while we have not reach the maximum allowed threads and there are still jobs to start
         while (getGenerationJobsRunning() < getMaxConcurrentGenerationJobs() &&
@@ -173,20 +206,15 @@ public class MutationTestPlanController {
         }
     }
 
-    /**
-     * Shows the stop button.
-     */
-    private void showStopButton() {
-        testButton.setManaged(false); testButton.setVisible(false);
-        stopButton.setManaged(true); stopButton.setVisible(true);
+    public void writeProgress(final String message) {
+        final Text text = new Text(message);
+        text.setFill(Color.web("#333333"));
+        writeProgress(text);
     }
 
-    /**
-     * Shows the test button.
-     */
-    private void showTestButton() {
-        testButton.setManaged(true); testButton.setVisible(true);
-        stopButton.setManaged(false); stopButton.setVisible(false);
+    private void writeProgress(final Text text) {
+        progressTextFlow.getChildren().clear();
+        progressTextFlow.getChildren().add(text);
     }
 
     /**
@@ -202,10 +230,10 @@ public class MutationTestPlanController {
      * @return the maximum allowed threads
      */
     private int getMaxConcurrentGenerationJobs() {
-        if (generationThreadsTextFields.getText().isEmpty() || generationThreadsTextFields.getText().equals("0"))
+        if (generationThreadsField.getText().isEmpty())
             return 1;
         else
-            return Integer.parseInt(generationThreadsTextFields.getText());
+            return Integer.parseInt(generationThreadsField.getText());
     }
 
     /**
@@ -224,42 +252,11 @@ public class MutationTestPlanController {
         project.setSystemDeclarations(new TwoComponentSystemDeclarations(testModel, mutant));
 
         new Thread(() -> {
-            final Process process;
+            final Process process = startVerifytgaProcess(mutationIndex, project);
+            if (process == null) return;
 
-            try {
-                // Store the project and the refinement query as backend XML
-                final String modelPath = UPPAALDriver.storeBackendModel(project, "model" + mutationIndex);
-
-                // Run verifytga to check refinement and to fetch strategy if non-refinement
-                ProcessBuilder builder = new ProcessBuilder(UPPAALDriver.findVerifytgaAbsolutePath(), "-t0", modelPath, queryFilePath);
-                //ProcessBuilder builder = new ProcessBuilder("C:\\Users\\Tobias\\Documents\\ecdar-0.10\\bin-Win32\\verifytga.exe", "-t0", modelPath, queryFilePath);
-                process = builder.start();//Runtime.getRuntime().exec("C:\\Users\\Tobias\\Documents\\ecdar-0.10\\bin-Win32\\verifytga.exe" + " -t0 " + modelPath + " " + queryFilePath);
-
-            } catch (BackendException | IOException | URISyntaxException e) {
-                e.printStackTrace();
-                Ecdar.showToast("Error: " + e.getMessage());
-                return;
-            }
-
-            List<String> lines;
-            try (BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                lines = inputReader.lines().collect(Collectors.toList());
-                if (!handlePotentialErrorsFromVerifytga(process)) return;
-            } catch (IOException e) {
-                e.printStackTrace();
-
-                // Only show error if the process is not already being stopped
-                if (!shouldStop) {
-                    Platform.runLater(() -> {
-                        final String message = "I/O exception while reading from verifytga: " + e.getMessage();
-                        progressText.setText(message);
-                        progressText.setTextFill(Color.RED);
-                        Ecdar.showToast(message);
-                        signalToStop();
-                    });
-                }
-                return;
-            }
+            List<String> lines = getVerifytgaInputLines(process);
+            if (lines == null) return;
 
             // If refinement, no test-case to generate.
             // I use endsWith rather than contains,
@@ -294,6 +291,64 @@ public class MutationTestPlanController {
     }
 
     /**
+     * Starts varifytga to fetch a strategy.
+     * @param mutationIndex the inputs of the mutant to pass to verifytga
+     * @param project the backend XML project containing the test model and the mutant
+     * @return the started process, or null if an error occurs
+     */
+    private Process startVerifytgaProcess(final int mutationIndex, final Project project) {
+        final Process process;
+
+        try {
+            // Store the project and the refinement query as backend XML
+            final String modelPath = UPPAALDriver.storeBackendModel(project, "model" + mutationIndex);
+
+            // Run verifytga to check refinement and to fetch strategy if non-refinement
+            final ProcessBuilder builder = new ProcessBuilder(UPPAALDriver.findVerifytgaAbsolutePath(), "-t0", modelPath, queryFilePath);
+            process = builder.start();
+
+        } catch (BackendException | IOException | URISyntaxException e) {
+            e.printStackTrace();
+            Ecdar.showToast("Error: " + e.getMessage());
+            return null;
+        }
+
+        return process;
+    }
+
+    /**
+     * Gets the lines from the input stream of verifytga.
+     * If an error occurs, this method tells the user and signals this controller to stop.
+     * @param process the process running verifytga
+     * @return the input lines, or null if an error occurs. Each line is without the newline character.
+     */
+    private List<String> getVerifytgaInputLines(final Process process) {
+        List<String> lines;
+
+        try (BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+            lines = inputReader.lines().collect(Collectors.toList());
+            if (!handlePotentialErrorsFromVerifytga(process)) lines = null;
+        } catch (final IOException e) {
+            e.printStackTrace();
+
+            // Only show error if the process is not already being stopped
+            if (getPlan().getStatus().equals(MutationTestPlan.Status.WORKING)) {
+                getPlan().setStatus(MutationTestPlan.Status.STOPPING);
+                Platform.runLater(() -> {
+                    final String message = "I/O exception while reading from verifytga: " + e.getMessage();
+                    final Text text = new Text(message);
+                    text.setFill(Color.RED);
+                    writeProgress(text);
+                    Ecdar.showToast(message);
+                });
+            }
+            lines = null;
+        }
+
+        return lines;
+    }
+
+    /**
      * Checks for errors in a process.
      * The input stream must be completely read before calling this.
      * Otherwise, we rick getting stuck while reading the error stream.
@@ -309,19 +364,20 @@ public class MutationTestPlanController {
 
             if (!errorLines.isEmpty()) {
                 // Only show error if the process is not already being stopped
-                if (!shouldStop) {
+                if (getPlan().getStatus().equals(MutationTestPlan.Status.WORKING)) {
+                    getPlan().setStatus(MutationTestPlan.Status.STOPPING);
                     Platform.runLater(() -> {
                         final String message = "Error from the error stream of verifytga: " + String.join("\n", errorLines);
-                        progressText.setText(message);
-                        progressText.setTextFill(Color.RED);
+                        final Text text = new Text(message);
+                        text.setFill(Color.RED);
+                        writeProgress(text);
                         Ecdar.showToast(message);
-                        signalToStop();
                     });
                 }
-                return true;
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
     /**
@@ -338,5 +394,14 @@ public class MutationTestPlanController {
         plan.setTestCasesText("Test-cases: " + testCases.size() + " - Generation time: " + readableFormat(Duration.between(generationStart, Instant.now())));
 
         updateGenerationJobs();
+    }
+
+    public void onSelectSutButtonPressed() {
+        sutPathLabel.setText("The\\Path\\To\\My\\System\\Under\\Test");
+        // TODO implement
+    }
+
+    public void onExportButtonPressed() {
+
     }
 }
