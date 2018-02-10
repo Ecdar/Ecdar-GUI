@@ -51,8 +51,12 @@ public class ExportHandler {
         final List<Component> mutants = new ArrayList<>();
         for (final MutationOperator operator : getPlan().getSelectedMutationOperators()) mutants.addAll(operator.compute(getTestModel()));
 
-        // Name them the same name as the test model
-        for (final Component mutant : mutants) mutant.setName(getTestModel().getName());
+        for (final Component mutant : mutants) {
+            // Name them the same name as the test model
+            mutant.setName(getTestModel().getName());
+
+            mutant.updateIOList();
+        }
 
         // Apply angelic completion if selected
         if (getPlan().isAngelicWhenExport())

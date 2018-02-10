@@ -79,30 +79,22 @@ public class Edge implements Serializable, Nearable {
         clone.setTargetLocation(component.findLocation(getTargetLocation().getId()));
 
         // Clone properties if they are non-empty
-        if (!getSelect().isEmpty()) {
+        getNails().stream().filter(nail -> nail.getPropertyType().equals(PropertyType.SELECTION)).findFirst().ifPresent(nail -> {
             clone.setSelect(getSelect());
-            final Nail nail = new Nail(0, 0);
-            nail.setPropertyType(PropertyType.SELECTION);
-            clone.addNail(nail);
-        }
-        if (!getGuard().isEmpty()) {
+            clone.addNail(nail.cloneForVerification());
+        });
+        getNails().stream().filter(nail -> nail.getPropertyType().equals(PropertyType.GUARD)).findFirst().ifPresent(nail -> {
             clone.setGuard(getGuard());
-            final Nail nail = new Nail(0, 0);
-            nail.setPropertyType(PropertyType.GUARD);
-            clone.addNail(nail);
-        }
-        if (!getSync().isEmpty()) {
+            clone.addNail(nail.cloneForVerification());
+        });
+        getNails().stream().filter(nail -> nail.getPropertyType().equals(PropertyType.SYNCHRONIZATION)).findFirst().ifPresent(nail -> {
             clone.setSync(getSync());
-            final Nail nail = new Nail(0, 0);
-            nail.setPropertyType(PropertyType.SYNCHRONIZATION);
-            clone.addNail(nail);
-        }
-        if (!getUpdate().isEmpty()) {
+            clone.addNail(nail.cloneForVerification());
+        });
+        getNails().stream().filter(nail -> nail.getPropertyType().equals(PropertyType.UPDATE)).findFirst().ifPresent(nail -> {
             clone.setUpdate(getUpdate());
-            final Nail nail = new Nail(0, 0);
-            nail.setPropertyType(PropertyType.UPDATE);
-            clone.addNail(nail);
-        }
+            clone.addNail(nail.cloneForVerification());
+        });
 
         // Clone if edge is locked (e.g. the Inconsistent and Universal locations have locked edges)
         clone.setIsLocked(getIsLocked().get());

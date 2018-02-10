@@ -31,7 +31,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     private final StringProperty sutPath = new SimpleStringProperty("");
     private final StringProperty format = new SimpleStringProperty("");
     private final BooleanProperty demonic = new SimpleBooleanProperty(false);
-    private final BooleanProperty angelicWhenExport = new SimpleBooleanProperty(true);
+    private final BooleanProperty angelicWhenExport = new SimpleBooleanProperty(false);
 
     private final StringProperty mutantsText = new SimpleStringProperty("");
     private final StringProperty testCasesText = new SimpleStringProperty("");

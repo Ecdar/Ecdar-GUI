@@ -138,4 +138,19 @@ public class Nail implements Circular, Serializable {
         setPropertyY(json.getAsJsonPrimitive(PROPERTY_Y).getAsDouble());
     }
 
+    /**
+     * Creates a clone of this.
+     * Copies coordinates, property type, and coordinates for property type.
+     * @return the clone
+     */
+    public Nail cloneForVerification() {
+        final Nail clone = new Nail(getX(), getY());
+
+        clone.setPropertyType(getPropertyType());
+
+        clone.setPropertyX(getPropertyX());
+        clone.setPropertyY(getPropertyY());
+
+        return clone;
+    }
 }
