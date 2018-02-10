@@ -17,7 +17,8 @@ public class ChangeTargetOperator extends MutationOperator {
      * Computes mutants.
      * @return the computed mutants
      */
-    public List<Component> computeMutants(final Component original) {
+    @Override
+    public List<Component> compute(final Component original) {
         final List<Component> mutants = new ArrayList<>();
 
         // For all edges in the original component

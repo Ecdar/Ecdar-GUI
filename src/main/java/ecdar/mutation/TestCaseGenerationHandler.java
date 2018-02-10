@@ -3,6 +3,7 @@ package ecdar.mutation;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Project;
+import ecdar.abstractions.SimpleComponentsSystemDeclarations;
 import ecdar.backend.BackendException;
 import ecdar.backend.UPPAALDriver;
 import javafx.application.Platform;
@@ -29,6 +30,19 @@ class TestCaseGenerationHandler {
     private final static String MUTANT_NAME = "M";
 
     private final MutationTestPlan plan;
+
+    public Component getTestModel() {
+        return testModel;
+    }
+
+    public Supplier<Integer> getMaxThreadsSupplier() {
+        return maxThreadsSupplier;
+    }
+
+    public Consumer<Text> getProgressWriter() {
+        return progressWriter;
+    }
+
     private final Component testModel;
     private final Supplier<Integer> maxThreadsSupplier;
     private List<Component> mutants;
@@ -65,12 +79,15 @@ class TestCaseGenerationHandler {
         testModel.setName(TEST_MODEL_NAME);
         testModel.updateIOList();
 
-        // Mutate and make input-enabled with angelic completion
         final Instant start = Instant.now();
-        mutants = new ChangeSourceOperator().computeMutants(testModel);
-        mutants.addAll(new ChangeTargetOperator().computeMutants(testModel));
+
+        // Mutate with selected operators
+        mutants = new ArrayList<>();
+        for (final MutationOperator operator : getPlan().getSelectedMutationOperators()) mutants.addAll(operator.compute(getTestModel()));
+
         mutants.forEach(Component::applyAngelicCompletion);
-        getPlan().setMutantsText("Mutants: " + mutants.size() + " - Execution time: " + readableFormat(Duration.between(start, Instant.now())));
+
+        getPlan().setMutantsText("Mutants: " + mutants.size() + " - Execution time: " + MutationTestPlanPresentation.readableFormat(Duration.between(start, Instant.now())));
 
         // If chosen, apply demonic completion
         if (getPlan().isDemonic()) testModel.applyDemonicCompletion();
@@ -159,7 +176,7 @@ class TestCaseGenerationHandler {
         project.getComponents().addAll(testModel, mutant);
         project.setGlobalDeclarations(Ecdar.getProject().getGlobalDeclarations());
         mutant.updateIOList(); // Update io in order to get the right system declarations for the mutant
-        project.setSystemDeclarations(new TwoComponentSystemDeclarations(testModel, mutant));
+        project.setSystemDeclarations(new SimpleComponentsSystemDeclarations(testModel, mutant));
 
         new Thread(() -> {
             final Process process = startVerifytgaProcess(mutationIndex, project);
@@ -301,20 +318,9 @@ class TestCaseGenerationHandler {
     private synchronized void onGenerationJobDone() {
         generationJobsEnded++;
 
-        getPlan().setTestCasesText("Test-cases: " + testCases.size() + " - Generation time: " + readableFormat(Duration.between(generationStart, Instant.now())));
+        getPlan().setTestCasesText("Test-cases: " + testCases.size() + " - Generation time: " + MutationTestPlanPresentation.readableFormat(Duration.between(generationStart, Instant.now())));
 
         updateGenerationJobs();
     }
 
-    /**
-     * Converts a duration to a human readable format, e.g. 0.293s.
-     * @param duration the duration
-     * @return a string in a human readable format
-     */
-    private static String readableFormat(final Duration duration) {
-        return duration.toString()
-                .substring(2)
-                .replaceAll("(\\d[HMS])(?!$)", "$1 ")
-                .toLowerCase();
-    }
 }

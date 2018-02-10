@@ -11,9 +11,9 @@ import javafx.scene.Node;
 import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
-import javafx.scene.control.TooltipBuilder;
 import javafx.scene.layout.Region;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,6 +32,18 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         controller.setPlan(testPlan);
 
         initialize();
+    }
+
+    /**
+     * Converts a duration to a human readable format, e.g. 0.293s.
+     * @param duration the duration
+     * @return a string in a human readable format
+     */
+    static String readableFormat(final Duration duration) {
+        return duration.toString()
+                .substring(2)
+                .replaceAll("(\\d[HMS])(?!$)", "$1 ")
+                .toLowerCase();
     }
 
     /**

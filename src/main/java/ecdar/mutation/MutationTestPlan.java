@@ -5,7 +5,9 @@ import ecdar.abstractions.HighLevelModelObject;
 import com.google.gson.JsonObject;
 import javafx.beans.property.*;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 /**
  * A test plan for conducting model-based mutation testing on a component.
@@ -17,6 +19,11 @@ public class MutationTestPlan extends HighLevelModelObject {
     private static final String MUTANTS_TEXT = "mutantsText";
     private static final String TEST_CASES_TEXT = "testCasesText";
 
+    public void clearResults() {
+        setMutantsText("");
+        setTestCasesText("");
+    }
+
     public enum Status {IDLE, WORKING, STOPPING}
 
     private final StringProperty testModelId = new SimpleStringProperty("");
@@ -26,8 +33,8 @@ public class MutationTestPlan extends HighLevelModelObject {
     private final BooleanProperty demonic = new SimpleBooleanProperty(false);
     private final BooleanProperty angelicWhenExport = new SimpleBooleanProperty(true);
 
-    private final StringProperty mutantsString = new SimpleStringProperty("");
-    private final StringProperty testCasesString = new SimpleStringProperty("");
+    private final StringProperty mutantsText = new SimpleStringProperty("");
+    private final StringProperty testCasesText = new SimpleStringProperty("");
 
     private final ObjectProperty<Status> status = new SimpleObjectProperty<>(Status.IDLE);
 
@@ -57,28 +64,28 @@ public class MutationTestPlan extends HighLevelModelObject {
         this.testModelId.setValue(testModelId);
     }
 
-    public String getMutantsString() {
-        return mutantsString.get();
+    public String getMutantsText() {
+        return mutantsText.get();
     }
 
     public StringProperty mutantsTextProperty() {
-        return mutantsString;
+        return mutantsText;
     }
 
     public void setMutantsText(final String value) {
-        mutantsString.set(value);
+        mutantsText.set(value);
     }
 
-    public String getTestCasesString() {
-        return testCasesString.get();
+    public String getTestCasesText() {
+        return testCasesText.get();
     }
 
     public StringProperty testCasesTextProperty() {
-        return testCasesString;
+        return testCasesText;
     }
 
     public void setTestCasesText(final String value) {
-        testCasesString.set(value);
+        testCasesText.set(value);
     }
 
 
@@ -89,8 +96,8 @@ public class MutationTestPlan extends HighLevelModelObject {
         final JsonObject result = super.serialize();
 
         result.addProperty(TEST_MODEL_ID, getTestModelId());
-        result.addProperty(MUTANTS_TEXT, getMutantsString());
-        result.addProperty(TEST_CASES_TEXT, getTestCasesString());
+        result.addProperty(MUTANTS_TEXT, getMutantsText());
+        result.addProperty(TEST_CASES_TEXT, getTestCasesText());
 
         return result;
     }
@@ -121,6 +128,15 @@ public class MutationTestPlan extends HighLevelModelObject {
                 return;
             }
         }
+    }
+
+    List<MutationOperator> getSelectedMutationOperators() {
+        final List<MutationOperator> operators = new ArrayList<>();
+
+        operators.add(new ChangeSourceOperator());
+        operators.add(new ChangeTargetOperator());
+
+        return operators;
     }
 
     public String getAction() {

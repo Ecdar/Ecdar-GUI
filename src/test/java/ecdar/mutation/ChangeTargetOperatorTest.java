@@ -9,8 +9,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 public class ChangeTargetOperatorTest {
 
     @Before
@@ -50,6 +48,6 @@ public class ChangeTargetOperatorTest {
         component.addEdge(edge);
 
         // 5 edges, 4 locations. Expect 5 * (4 - 1) = 15 mutants
-        Assert.assertEquals(15, new ChangeTargetOperator(component).computeMutants().size());
+        Assert.assertEquals(15, new ChangeTargetOperator().compute(component).size());
     }
 }

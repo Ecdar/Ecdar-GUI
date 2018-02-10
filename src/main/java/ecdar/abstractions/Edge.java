@@ -91,16 +91,16 @@ public class Edge implements Serializable, Nearable {
             nail.setPropertyType(PropertyType.GUARD);
             clone.addNail(nail);
         }
-        if (!getUpdate().isEmpty()) {
-            clone.setUpdate(getUpdate());
-            final Nail nail = new Nail(0, 0);
-            nail.setPropertyType(PropertyType.UPDATE);
-            clone.addNail(nail);
-        }
         if (!getSync().isEmpty()) {
             clone.setSync(getSync());
             final Nail nail = new Nail(0, 0);
             nail.setPropertyType(PropertyType.SYNCHRONIZATION);
+            clone.addNail(nail);
+        }
+        if (!getUpdate().isEmpty()) {
+            clone.setUpdate(getUpdate());
+            final Nail nail = new Nail(0, 0);
+            nail.setPropertyType(PropertyType.UPDATE);
             clone.addNail(nail);
         }
 

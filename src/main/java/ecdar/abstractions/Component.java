@@ -106,6 +106,8 @@ public class Component extends HighLevelModelObject implements Boxed {
         final Component clone = new Component();
         clone.addVerificationObjects(this);
 
+        clone.setIncludeInPeriodicCheck(false);
+
         return clone;
     }
 

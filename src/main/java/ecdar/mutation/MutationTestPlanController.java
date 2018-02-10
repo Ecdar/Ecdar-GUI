@@ -100,6 +100,8 @@ public class MutationTestPlanController {
      * Conducts the test.
      */
     public void onTestButtonPressed() {
+        getPlan().clearResults();
+
         // Find test model from test model picker
         // Clone it, because we want to change its name
         final Component testModel = Ecdar.getProject().findComponent(modelPicker.getValue().getText()).cloneForVerification();
@@ -143,6 +145,7 @@ public class MutationTestPlanController {
     }
 
     public void onExportButtonPressed() {
-
+        getPlan().clearResults();
+        new ExportHandler(getPlan(), Ecdar.getProject().findComponent(modelPicker.getValue().getText()), this::writeProgress).start();
     }
 }
