@@ -8,5 +8,20 @@
     "query": "specification: Alarm",
     "comment": "",
     "isPeriodic": false
+  },
+  {
+    "query": "E\u003c\u003e Alarm.L11",
+    "comment": "",
+    "isPeriodic": false
+  },
+  {
+    "query": "E\u003c\u003e Alarm.L13",
+    "comment": "",
+    "isPeriodic": false
+  },
+  {
+    "query": "E\u003c\u003e Alarm.L10",
+    "comment": "",
+    "isPeriodic": false
   }
 ]
