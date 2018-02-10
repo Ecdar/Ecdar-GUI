@@ -58,4 +58,9 @@ class ChangeSourceOperator extends MutationOperator {
     String getText() {
         return "Change source.";
     }
+
+    @Override
+    String getJsonName() {
+        return "changeSource";
+    }
 }

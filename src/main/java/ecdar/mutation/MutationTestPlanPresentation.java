@@ -77,6 +77,14 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
                 "We apply angelic completion on the mutants.");
     }
 
+    private void initializeOperators() {
+        for (final MutationOperator operator : controller.getPlan().getOperators()) {
+            final JFXCheckBox checkBox = new JFXCheckBox(operator.getText());
+            checkBox.selectedProperty().bindBidirectional(operator.selectedProperty());
+            controller.operatorsArea.getChildren().add(checkBox);
+        }
+    }
+
     private void InitializeStatusHandling() {
         handleStatusUpdate(null, controller.getPlan().getStatus());
         controller.getPlan().statusProperty().addListener(((observable, oldValue, newValue) -> handleStatusUpdate(oldValue, newValue)));
@@ -124,7 +132,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
 
 
 
-    private void initializePositiveIntegerTextField(final JFXTextField field) {
+    private static void initializePositiveIntegerTextField(final JFXTextField field) {
         // Force the field to be empty positive integer
         field.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue.matches("\\d*")) field.setText(newValue.replaceAll("[^\\d]", ""));
@@ -182,21 +190,11 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         }
     }
 
-    private void initializeOperators() {
-        for (final JFXCheckBox checkBox : controller.getOperatorMap().keySet()) {
-            controller.operatorsArea.getChildren().add(checkBox);
-        }
-    }
-
     /**
      * Initializes the action picker.
      */
     private void initializeActionPicker() {
         final Label testLabel = new Label("Test");
-        installTooltip(testLabel, "Mutates the test model, " +
-                "generates test-cases based on non-refinements between the test model and the mutants, " +
-                "and executes the test-cases on a system under test.");
-
         final Label exportLabel = new Label("Export mutants");
         controller.actionPicker.getItems().addAll(testLabel, exportLabel);
 
@@ -219,9 +217,9 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         else controller.actionPicker.setValue(testLabel);
     }
 
-    private void installTooltip(final Control testLabel, final String text) {
+    private static void installTooltip(final Control testLabel, final String text) {
         final Tooltip tooltip = new Tooltip(text);
-        tooltip.setPrefWidth(400);
+        tooltip.setPrefWidth(250);
         tooltip.setWrapText(true);
         testLabel.setTooltip(tooltip);
     }
@@ -239,14 +237,14 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
                 controller.getPlan().setFormat(newValue.getText())));
     }
 
-    private void show(final Node ... regions) {
+    private static void show(final Node... regions) {
         for (final Node region : regions) {
             region.setManaged(true);
             region.setVisible(true);
         }
     }
 
-    private void hide(final Node ... regions) {
+    private static void hide(final Node... regions) {
         for (final Node region : regions) {
             region.setManaged(false);
             region.setVisible(false);

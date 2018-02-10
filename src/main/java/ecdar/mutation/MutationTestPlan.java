@@ -1,5 +1,6 @@
 package ecdar.mutation;
 
+import com.google.gson.JsonPrimitive;
 import ecdar.Ecdar;
 import ecdar.abstractions.HighLevelModelObject;
 import com.google.gson.JsonObject;
@@ -8,6 +9,7 @@ import javafx.beans.property.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * A test plan for conducting model-based mutation testing on a component.
@@ -18,13 +20,12 @@ public class MutationTestPlan extends HighLevelModelObject {
     private static final String TEST_MODEL_ID = "testModelId";
     private static final String MUTANTS_TEXT = "mutantsText";
     private static final String TEST_CASES_TEXT = "testCasesText";
+    private static final String ACTION = "action";
+    private static final String SUT_PATH = "sutPath";
+    private static final String FORMAT = "exportFormat";
+    private static final String DEMONIC = "useDemonic";
+    private static final String ANGELIC_EXPORT = "useAngelic";
 
-    public void clearResults() {
-        setMutantsText("");
-        setTestCasesText("");
-    }
-
-    public enum Status {IDLE, WORKING, STOPPING}
 
     private final StringProperty testModelId = new SimpleStringProperty("");
     private final StringProperty action = new SimpleStringProperty("");
@@ -36,6 +37,14 @@ public class MutationTestPlan extends HighLevelModelObject {
     private final StringProperty mutantsText = new SimpleStringProperty("");
     private final StringProperty testCasesText = new SimpleStringProperty("");
 
+    public List<MutationOperator> getOperators() {
+        return operators;
+    }
+
+    private final List<MutationOperator> operators = new ArrayList<>();
+
+    public enum Status {IDLE, WORKING, STOPPING}
+
     private final ObjectProperty<Status> status = new SimpleObjectProperty<>(Status.IDLE);
 
 
@@ -43,6 +52,7 @@ public class MutationTestPlan extends HighLevelModelObject {
 
     public MutationTestPlan() {
         generateName();
+        operators.addAll(MutationOperator.getAllOperators());
     }
 
     public MutationTestPlan(final JsonObject json) {
@@ -86,57 +96,6 @@ public class MutationTestPlan extends HighLevelModelObject {
 
     public void setTestCasesText(final String value) {
         testCasesText.set(value);
-    }
-
-
-    /* Other methods */
-
-    @Override
-    public JsonObject serialize() {
-        final JsonObject result = super.serialize();
-
-        result.addProperty(TEST_MODEL_ID, getTestModelId());
-        result.addProperty(MUTANTS_TEXT, getMutantsText());
-        result.addProperty(TEST_CASES_TEXT, getTestCasesText());
-
-        return result;
-    }
-
-    @Override
-    public void deserialize(final JsonObject json) {
-        super.deserialize(json);
-
-        setTestModelId(json.getAsJsonPrimitive(TEST_MODEL_ID).getAsString());
-        setMutantsText(json.getAsJsonPrimitive(MUTANTS_TEXT).getAsString());
-        setTestCasesText(json.getAsJsonPrimitive(TEST_CASES_TEXT).getAsString());
-    }
-
-
-    /**
-     * Generate and sets a unique id for this system
-     */
-    private void generateName() {
-        final HashSet<String> names = new HashSet<>();
-
-        for (final MutationTestPlan plan : Ecdar.getProject().getTestPlans()){
-            names.add(plan.getName());
-        }
-
-        for (int counter = 1; ; counter++) {
-            if (!names.contains(PLAN_NAME_PREFIX + counter)){
-                setName((PLAN_NAME_PREFIX + counter));
-                return;
-            }
-        }
-    }
-
-    List<MutationOperator> getSelectedMutationOperators() {
-        final List<MutationOperator> operators = new ArrayList<>();
-
-        operators.add(new ChangeSourceOperator());
-        operators.add(new ChangeTargetOperator());
-
-        return operators;
     }
 
     public String getAction() {
@@ -209,5 +168,76 @@ public class MutationTestPlan extends HighLevelModelObject {
 
     public void setStatus(final Status value) {
         status.set(value);
+    }
+
+
+    /* Other methods */
+
+    @Override
+    public JsonObject serialize() {
+        final JsonObject result = super.serialize();
+
+        result.addProperty(TEST_MODEL_ID, getTestModelId());
+        result.addProperty(ACTION, getAction());
+        result.addProperty(SUT_PATH, getSutPath());
+        result.addProperty(FORMAT, getFormat());
+        result.addProperty(DEMONIC, isDemonic());
+        result.addProperty(ANGELIC_EXPORT, isAngelicWhenExport());
+
+        result.addProperty(MUTANTS_TEXT, getMutantsText());
+        result.addProperty(TEST_CASES_TEXT, getTestCasesText());
+
+        operators.forEach(operator -> result.addProperty(operator.getJsonName(), operator.isSelected()));
+
+        return result;
+    }
+
+    @Override
+    public void deserialize(final JsonObject json) {
+        super.deserialize(json);
+
+        setTestModelId(json.getAsJsonPrimitive(TEST_MODEL_ID).getAsString());
+        setAction(json.getAsJsonPrimitive(ACTION).getAsString());
+        setSutPath(json.getAsJsonPrimitive(SUT_PATH).getAsString());
+        setFormat(json.getAsJsonPrimitive(FORMAT).getAsString());
+        setDemonic(json.getAsJsonPrimitive(DEMONIC).getAsBoolean());
+        setAngelicWhenExport(json.getAsJsonPrimitive(ANGELIC_EXPORT).getAsBoolean());
+
+        setMutantsText(json.getAsJsonPrimitive(MUTANTS_TEXT).getAsString());
+        setTestCasesText(json.getAsJsonPrimitive(TEST_CASES_TEXT).getAsString());
+
+        operators.addAll(MutationOperator.getAllOperators());
+        operators.forEach(operator -> {
+            final JsonPrimitive primitive = json.getAsJsonPrimitive(operator.getJsonName());
+            if (primitive != null) operator.setSelected(primitive.getAsBoolean());
+        });
+    }
+
+
+    /**
+     * Generate and sets a unique id for this system
+     */
+    private void generateName() {
+        final HashSet<String> names = new HashSet<>();
+
+        for (final MutationTestPlan plan : Ecdar.getProject().getTestPlans()){
+            names.add(plan.getName());
+        }
+
+        for (int counter = 1; ; counter++) {
+            if (!names.contains(PLAN_NAME_PREFIX + counter)){
+                setName((PLAN_NAME_PREFIX + counter));
+                return;
+            }
+        }
+    }
+
+    List<MutationOperator> getSelectedMutationOperators() {
+        return getOperators().stream().filter(MutationOperator::isSelected).collect(Collectors.toList());
+    }
+
+    public void clearResults() {
+        setMutantsText("");
+        setTestCasesText("");
     }
 }

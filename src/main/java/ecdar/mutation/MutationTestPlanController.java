@@ -1,36 +1,17 @@
 package ecdar.mutation;
 
+import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXCheckBox;
+import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXTextField;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
-import ecdar.abstractions.Project;
-import ecdar.backend.BackendException;
-import ecdar.backend.UPPAALDriver;
-import com.jfoenix.controls.JFXButton;
-import com.jfoenix.controls.JFXComboBox;
-import javafx.application.Platform;
-import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
-import org.apache.commons.io.FileUtils;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URISyntaxException;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Controller for a test plan with model-based mutation testing.
@@ -64,28 +45,7 @@ public class MutationTestPlanController {
     public VBox demonicArea;
 
     // Mutation objects
-    private Map<JFXCheckBox, MutationOperator> operatorMap;
     private MutationTestPlan plan;
-
-    public MutationTestPlanController() {
-        initializeOperators();
-    }
-
-    public Map<JFXCheckBox, MutationOperator> getOperatorMap() {
-        return operatorMap;
-    }
-
-    private void initializeOperators() {
-        operatorMap = new LinkedHashMap<>(); // This preserves the order
-        final List<MutationOperator> operators = new ArrayList<>();
-        operators.add(new ChangeSourceOperator());
-        operators.add(new ChangeTargetOperator());
-        for (final MutationOperator operator : operators) {
-            final JFXCheckBox checkBox = new JFXCheckBox(operator.getText());
-            checkBox.setSelected(true);
-            operatorMap.put(checkBox, operator);
-        }
-    }
 
     public MutationTestPlan getPlan() {
         return plan;

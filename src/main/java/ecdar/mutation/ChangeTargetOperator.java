@@ -50,4 +50,9 @@ public class ChangeTargetOperator extends MutationOperator {
     String getText() {
         return "Change target.";
     }
+
+    @Override
+    String getJsonName() {
+        return "changeTarget";
+    }
 }
