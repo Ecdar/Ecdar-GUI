@@ -1,5 +1,6 @@
 package ecdar.controllers;
 
+import com.jfoenix.controls.JFXTextField;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.EcdarSystem;
@@ -11,9 +12,11 @@ import ecdar.utility.UndoRedoStack;
 import com.jfoenix.controls.JFXPopup;
 import com.jfoenix.controls.JFXRippler;
 import com.jfoenix.controls.JFXTextArea;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
@@ -21,10 +24,12 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
+import javax.swing.event.ChangeListener;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 public class ProjectPaneController implements Initializable {
     public StackPane root;
@@ -123,31 +128,30 @@ public class ProjectPaneController implements Initializable {
             moreInformationDropDown.addSpacerElement();
         }
 
-        moreInformationDropDown.addListElement("Description");
+        if (model instanceof Component || model instanceof EcdarSystem) {
+            moreInformationDropDown.addListElement("Description");
 
-        final JFXTextArea textArea = new JFXTextArea();
-        textArea.setMinHeight(30);
+            final JFXTextArea textArea = new JFXTextArea();
+            textArea.setMinHeight(30);
 
-        if (model instanceof Component) {
-            ((Component) model).descriptionProperty().bindBidirectional(textArea.textProperty());
-        } else if (model instanceof EcdarSystem) {
-            ((EcdarSystem) model).getDescriptionProperty().bindBidirectional(textArea.textProperty());
-        }
+            if (model instanceof Component)
+                textArea.textProperty().bindBidirectional(((Component) model).descriptionProperty());
+            else
+                textArea.textProperty().bindBidirectional(((EcdarSystem) model).getDescriptionProperty());
 
-        textArea.textProperty().addListener((obs, oldText, newText) -> {
-            int i = 0;
-            for (final char c : newText.toCharArray()) {
-                if (c == '\n') {
-                    i++;
+            textArea.textProperty().addListener((obs, oldText, newText) -> {
+                int i = 0;
+                for (final char c : newText.toCharArray()) {
+                    if (c == '\n') {
+                        i++;
+                    }
                 }
-            }
+                textArea.setMinHeight(i * 17 + 30);
+            });
 
-            textArea.setMinHeight(i * 17 + 30);
-        });
-
-        moreInformationDropDown.addCustomElement(textArea);
-
-        moreInformationDropDown.addSpacerElement();
+            moreInformationDropDown.addCustomElement(textArea);
+            moreInformationDropDown.addSpacerElement();
+        }
 
         // Add color picker
         if (model instanceof Component) {
@@ -161,10 +165,10 @@ public class ProjectPaneController implements Initializable {
                     ((EcdarSystem) filePresentation.getModel())::dye
             );
         }
-        moreInformationDropDown.addSpacerElement();
 
         // Delete button for components
         if (model instanceof Component) {
+            moreInformationDropDown.addSpacerElement();
             moreInformationDropDown.addClickableListElement("Delete", event -> {
                 UndoRedoStack.pushAndPerform(() -> { // Perform
                     Ecdar.getProject().getComponents().remove(model);
@@ -177,12 +181,36 @@ public class ProjectPaneController implements Initializable {
 
         // Delete button for systems
         if (model instanceof EcdarSystem) {
+            moreInformationDropDown.addSpacerElement();
             moreInformationDropDown.addClickableListElement("Delete", event -> {
                 UndoRedoStack.pushAndPerform(() -> { // Perform
                     Ecdar.getProject().getSystemsProperty().remove(model);
                 }, () -> { // Undo
                     Ecdar.getProject().getSystemsProperty().add((EcdarSystem) model);
                 }, "Deleted system " + model.getName(), "delete");
+                moreInformationDropDown.hide();
+            });
+        }
+
+
+
+        if (model instanceof MutationTestPlan) {
+            moreInformationDropDown.addListElement("Name");
+
+            final JFXTextField textField = new JFXTextField();
+            textField.textProperty().bindBidirectional(model.nameProperty());
+            textField.setPadding(new Insets(0, 10, 0, 10));
+            moreInformationDropDown.addCustomElement(textField);
+
+            moreInformationDropDown.addSpacerElement();
+
+            // Delete button for test plan
+            moreInformationDropDown.addClickableListElement("Delete", event -> {
+                UndoRedoStack.pushAndPerform(() -> { // Perform
+                    Ecdar.getProject().getTestPlans().remove(model);
+                }, () -> { // Undo
+                    Ecdar.getProject().getTestPlans().add((MutationTestPlan) model);
+                }, "Deleted test plan " + model.getName(), "delete");
                 moreInformationDropDown.hide();
             });
         }

@@ -4,6 +4,7 @@ import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXTextField;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
+import ecdar.abstractions.HighLevelModelObject;
 import ecdar.presentations.EcdarFXMLLoader;
 import ecdar.presentations.HighLevelModelPresentation;
 import javafx.collections.ListChangeListener;
@@ -15,6 +16,7 @@ import javafx.scene.layout.Region;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -165,8 +167,8 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
     }
 
     private void initializeModelPicker() {
-        // Fill test model picker with components
-        for (final Component component : Ecdar.getProject().getComponents()) {
+        // Fill test model picker with sorted components
+        Ecdar.getProject().getComponents().stream().sorted(Comparator.comparing(Component::getName)).forEach(component -> {
             final Label label = new Label(component.getName());
             controller.modelPicker.getItems().add(label);
 
@@ -174,7 +176,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
             final String testModelId = controller.getPlan().getTestModelId();
             if (testModelId != null && testModelId.equals(component.getName()))
                 controller.modelPicker.setValue(label);
-        }
+        });
 
         // Bind test plan to test model picker
         controller.modelPicker.valueProperty().addListener(((observable, oldValue, newValue) ->

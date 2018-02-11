@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  * A test plan for conducting model-based mutation testing on a component.
  */
 public class MutationTestPlan extends HighLevelModelObject {
-    private static final String PLAN_NAME_PREFIX = "Test";
+    private static final String PLAN_NAME_PREFIX = "Test ";
 
     private static final String TEST_MODEL_ID = "testModelId";
     private static final String MUTANTS_TEXT = "mutantsText";
