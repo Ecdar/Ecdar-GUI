@@ -4,7 +4,7 @@ import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXTextField;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
-import ecdar.abstractions.HighLevelModelObject;
+import ecdar.controllers.CanvasController;
 import ecdar.presentations.EcdarFXMLLoader;
 import ecdar.presentations.HighLevelModelPresentation;
 import javafx.collections.ListChangeListener;
@@ -24,6 +24,8 @@ import java.util.List;
  */
 public class MutationTestPlanPresentation extends HighLevelModelPresentation {
     private final MutationTestPlanController controller;
+
+    private double offSet, canvasHeight;
 
     /**
      * Constructs the presentation and initializes it.
@@ -77,6 +79,49 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         installTooltip(controller.demonicCheckBox, "Use this, if the test model is not input-enabled, " +
                 "and you want to ignore mutants leading to these missing inputs. " +
                 "We apply angelic completion on the mutants.");
+        initializeWidthAndHeight();
+    }
+
+    /**
+     * Initializes width and height of the text editor field, such that it fills up the whole canvas
+     */
+    private void initializeWidthAndHeight() {
+        controller.scrollPane.setPrefWidth(CanvasController.getWidthProperty().doubleValue());
+        CanvasController.getWidthProperty().addListener((observable, oldValue, newValue) ->
+                controller.scrollPane.setPrefWidth(newValue.doubleValue()));
+
+        updateOffset(CanvasController.getInsetShouldShow().get());
+        CanvasController.getInsetShouldShow().addListener((observable, oldValue, newValue) -> {
+            updateOffset(newValue);
+            updateHeight();
+        });
+
+        canvasHeight = CanvasController.getHeightProperty().doubleValue();
+        updateHeight();
+        CanvasController.getHeightProperty().addListener((observable, oldValue, newValue) -> {
+            canvasHeight = newValue.doubleValue();
+            updateHeight();
+        });
+    }
+
+    /**
+     * Updates if height of the view should have an offset at the bottom.
+     * Whether the view should have an offset is based on the configuration of the error view.
+     * @param shouldHave true iff views should have an offset
+     */
+    private void updateOffset(final boolean shouldHave) {
+        if (shouldHave) {
+            offSet = 20;
+        } else {
+            offSet = 0;
+        }
+    }
+
+    /**
+     * Updates the height of the view.
+     */
+    private void updateHeight() {
+        controller.scrollPane.setPrefHeight(canvasHeight - CanvasController.DECLARATION_Y_MARGIN - offSet);
     }
 
     private void initializeOperators() {

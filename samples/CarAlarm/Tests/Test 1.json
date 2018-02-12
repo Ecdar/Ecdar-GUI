@@ -1,0 +1,13 @@
+{
+  "name": "Test 1",
+  "testModelId": "Alarm",
+  "action": "Test",
+  "sutPath": "The\\Path\\To\\My\\System\\Under\\Test",
+  "exportFormat": "",
+  "useDemonic": true,
+  "useAngelic": false,
+  "mutantsText": "Mutants: 750 - Execution time: 0.133s",
+  "testCasesText": "Test-cases: 0 - Generation time: 13.497s",
+  "changeSource": true,
+  "changeTarget": true
+}

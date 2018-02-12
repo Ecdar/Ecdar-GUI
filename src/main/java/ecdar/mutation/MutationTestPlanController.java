@@ -1,17 +1,20 @@
 package ecdar.mutation;
 
-import com.jfoenix.controls.JFXButton;
-import com.jfoenix.controls.JFXCheckBox;
-import com.jfoenix.controls.JFXComboBox;
-import com.jfoenix.controls.JFXTextField;
+import com.jfoenix.controls.*;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
+import ecdar.controllers.CanvasController;
+import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
+
+import java.net.URL;
+import java.util.ResourceBundle;
 
 /**
  * Controller for a test plan with model-based mutation testing.
@@ -43,6 +46,7 @@ public class MutationTestPlanController {
     public TextFlow progressTextFlow;
     public HBox selectSutArea;
     public VBox demonicArea;
+    public ScrollPane scrollPane;
 
     // Mutation objects
     private MutationTestPlan plan;

@@ -102,7 +102,7 @@ public class DeclarationsController implements Initializable {
      * Updates the height of the view.
      */
     private void updateHeight() {
-        final double value = canvasHeight - CanvasController.DECLARATION_X_MARGIN - offSet;
+        final double value = canvasHeight - CanvasController.DECLARATION_Y_MARGIN - offSet;
 
         root.setMinHeight(value);
         root.setMaxHeight(value);

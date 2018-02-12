@@ -1,80 +1,81 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import com.jfoenix.controls.*?>
-<?import javafx.collections.FXCollections?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.TextFlow?>
+<?import javafx.geometry.Insets?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="StackPane"
          fx:controller="ecdar.mutation.MutationTestPlanController">
+    <ScrollPane fx:id="scrollPane" style="-fx-font-size:13px;-fx-background-color:transparent;" hbarPolicy="NEVER" fitToWidth="true">
+        <padding><Insets top="25" right="25" bottom="25" left="25"/></padding>
+        <VBox spacing="16">
+            <JFXComboBox fx:id="modelPicker"
+                         promptText="Select Test Model"/>
 
-    <VBox spacing="16">
-        <JFXComboBox fx:id="modelPicker"
-                     promptText="Select Test Model"/>
+            <VBox fx:id="modelDependentArea" spacing="16" managed="false" visible="false">
+                <VBox fx:id="operatorsArea" spacing="4">
+                    <Label text="Select mutation operators:"/>
+                </VBox>
 
-        <VBox fx:id="modelDependentArea" spacing="16" managed="false" visible="false">
-            <VBox fx:id="operatorsArea" spacing="4">
-                <Label text="Select mutation operators:"/>
-            </VBox>
+                <JFXComboBox fx:id="actionPicker" promptText="Select Action"/>
 
-            <JFXComboBox fx:id="actionPicker" promptText="Select Action"/>
+                <VBox spacing="16" fx:id="testDependentArea" managed="false" visible="false">
+                    <HBox spacing="8" alignment="BOTTOM_LEFT" fx:id="selectSutArea">
+                        <JFXButton fx:id="selectSutButton" prefWidth="100" prefHeight="40" buttonType="RAISED" text="Select SUT"
+                                   style="-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;"
+                                   onMousePressed="#onSelectSutButtonPressed"/>
+                        <Label fx:id="sutPathLabel"/>
+                    </HBox>
 
-            <VBox spacing="16" fx:id="testDependentArea" managed="false" visible="false">
-                <HBox spacing="8" alignment="BOTTOM_LEFT" fx:id="selectSutArea">
-                    <JFXButton fx:id="selectSutButton" prefWidth="100" prefHeight="40" buttonType="RAISED" text="Select SUT"
-                               style="-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;"
-                               onMousePressed="#onSelectSutButtonPressed"/>
-                    <Label fx:id="sutPathLabel"/>
-                </HBox>
+                    <VBox spacing="16" fx:id="sutDependentArea" managed="false" visible="false">
+                        <VBox fx:id="demonicArea">
+                            <JFXCheckBox fx:id="demonicCheckBox" text="Apply demonic completion on the test model."/>
+                        </VBox>
 
-                <VBox spacing="16" fx:id="sutDependentArea" managed="false" visible="false">
-                    <VBox fx:id="demonicArea">
-                        <JFXCheckBox fx:id="demonicCheckBox" text="Apply demonic completion on the test model."/>
+                        <HBox spacing="8" alignment="BOTTOM_LEFT">
+                            <JFXTextField fx:id="generationThreadsField" text="10" prefWidth="30" alignment="BASELINE_CENTER"/>
+                            <Label text="concurrent thread(s) for test-case generation."/>
+                        </HBox>
+
+                        <HBox spacing="8" alignment="BOTTOM_LEFT">
+                            <JFXTextField fx:id="suvInstancesField" text="1" prefWidth="30" alignment="BASELINE_CENTER"/>
+                            <Label text="concurrent instance(s) of the system under test."/>
+                        </HBox>
+
+                        <JFXButton fx:id="testButton" prefWidth="100" prefHeight="40" buttonType="RAISED" text="Test"
+                                   style="-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;"
+                                   onMousePressed="#onTestButtonPressed"/>
                     </VBox>
+                </VBox>
 
-                    <HBox spacing="8" alignment="BOTTOM_LEFT">
-                        <JFXTextField fx:id="generationThreadsField" text="10" prefWidth="30" alignment="BASELINE_CENTER"/>
-                        <Label text="concurrent thread(s) for test-case generation."/>
-                    </HBox>
+                <VBox spacing="16" fx:id="exportDependantArea" managed="false" visible="false">
+                    <JFXCheckBox fx:id="angelicBox" text="Apply angelic completion on the mutants"/>
 
-                    <HBox spacing="8" alignment="BOTTOM_LEFT">
-                        <JFXTextField fx:id="suvInstancesField" text="1" prefWidth="30" alignment="BASELINE_CENTER"/>
-                        <Label text="concurrent instance(s) of the system under test."/>
-                    </HBox>
+                    <JFXComboBox fx:id="formatPicker" promptText="Select Format"/>
 
-                    <JFXButton fx:id="testButton" prefWidth="100" prefHeight="40" buttonType="RAISED" text="Test"
+                    <JFXButton fx:id="storeMutantsButton" prefWidth="100" prefHeight="40" buttonType="RAISED" text="Export"
                                style="-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;"
-                               onMousePressed="#onTestButtonPressed"/>
+                               onMousePressed="#onExportButtonPressed"/>
+                </VBox>
+
+                <JFXButton fx:id="stopButton" prefWidth="100" prefHeight="40" buttonType="RAISED" text="Stop"
+                           style="-fx-text-fill:WHITE;-fx-background-color:#E53935;-fx-font-size:14px;"
+                           onMousePressed="#onStopButtonPressed"
+                           managed="false" visible="false"/>
+
+                <VBox fx:id="progressAres" spacing="16" managed="false" visible="false">
+                    <Separator/>
+                    <TextFlow fx:id="progressTextFlow"/>
+                </VBox>
+
+                <VBox fx:id="resultsArea" spacing="16" managed="false" visible="false">
+                    <Separator/>
+                    <Label fx:id="mutantsText"/>
+                    <Label fx:id="testCasesText"/>
                 </VBox>
             </VBox>
-
-            <VBox spacing="16" fx:id="exportDependantArea" managed="false" visible="false">
-                <JFXCheckBox fx:id="angelicBox" text="Apply angelic completion on the mutants"/>
-
-                <JFXComboBox fx:id="formatPicker" promptText="Select Format"/>
-
-                <JFXButton fx:id="storeMutantsButton" prefWidth="100" prefHeight="40" buttonType="RAISED" text="Export"
-                           style="-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;"
-                           onMousePressed="#onExportButtonPressed"/>
-            </VBox>
-
-            <JFXButton fx:id="stopButton" prefWidth="100" prefHeight="40" buttonType="RAISED" text="Stop"
-                       style="-fx-text-fill:WHITE;-fx-background-color:#E53935;-fx-font-size:14px;"
-                       onMousePressed="#onStopButtonPressed"
-                       managed="false" visible="false"/>
-
-            <VBox fx:id="progressAres" spacing="16" managed="false" visible="false">
-                <Separator/>
-                <TextFlow fx:id="progressTextFlow"/>
-            </VBox>
-
-            <VBox fx:id="resultsArea" spacing="16" managed="false" visible="false">
-                <Separator/>
-                <Label fx:id="mutantsText"/>
-                <Label fx:id="testCasesText"/>
-            </VBox>
         </VBox>
-    </VBox>
-
+    </ScrollPane>
 </fx:root>
