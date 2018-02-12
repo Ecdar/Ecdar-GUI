@@ -31,15 +31,13 @@ class TestCaseGenerationHandler {
 
     private final MutationTestPlan plan;
 
-    public Component getTestModel() {
+    private Component getTestModel() {
         return testModel;
     }
-
-    public Supplier<Integer> getMaxThreadsSupplier() {
+    private Supplier<Integer> getMaxThreadsSupplier() {
         return maxThreadsSupplier;
     }
-
-    public Consumer<Text> getProgressWriter() {
+    private Consumer<Text> getProgressWriter() {
         return progressWriter;
     }
 
@@ -133,7 +131,7 @@ class TestCaseGenerationHandler {
 
             final Text text = new Text("Done");
             text.setFill(Color.GREEN);
-            progressWriter.accept(text);
+            getProgressWriter().accept(text);
             getPlan().setStatus(MutationTestPlan.Status.IDLE);
 
             return;
@@ -142,7 +140,7 @@ class TestCaseGenerationHandler {
         writeProgress("Generating test-cases... (" + generationJobsEnded + "/" + mutants.size() + " mutants processed)");
 
         // while we have not reach the maximum allowed threads and there are still jobs to start
-        while (getGenerationJobsRunning() < maxThreadsSupplier.get() &&
+        while (getGenerationJobsRunning() < getMaxThreadsSupplier().get() &&
                 generationJobsStarted < mutants.size()) {
             generateTestCase(testModel, mutants.get(generationJobsStarted), generationJobsStarted);
             generationJobsStarted++;
@@ -152,7 +150,7 @@ class TestCaseGenerationHandler {
     private void writeProgress(final String message) {
         final Text text = new Text(message);
         text.setFill(Color.web("#333333"));
-        progressWriter.accept(text);
+        getProgressWriter().accept(text);
     }
 
     /**
@@ -179,38 +177,54 @@ class TestCaseGenerationHandler {
         project.setSystemDeclarations(new SimpleComponentsSystemDeclarations(testModel, mutant));
 
         new Thread(() -> {
-            final Process process = startVerifytgaProcess(mutationIndex, project);
-            if (process == null) return;
+            try {
+                final Process process = startVerifytgaProcess(mutationIndex, project);
+                if (process == null) return;
 
-            List<String> lines = getVerifytgaInputLines(process);
-            if (lines == null) return;
+                List<String> lines = getVerifytgaInputLines(process);
+                if (lines == null) return;
 
-            // If refinement, no test-case to generate.
-            // I use endsWith rather than contains,
-            // since verifytga sometimes output some weird symbols at the start of this line.
-            if (lines.stream().anyMatch(line -> line.endsWith(" -- Property is satisfied."))) {
-                Platform.runLater(this::onGenerationJobDone);
-                return;
+                // If refinement, no test-case to generate.
+                // I use endsWith rather than contains,
+                // since verifytga sometimes output some weird symbols at the start of this line.
+                if (lines.stream().anyMatch(line -> line.endsWith(" -- Property is satisfied."))) {
+                    Platform.runLater(this::onGenerationJobDone);
+                    return;
+                }
+
+                // Verifytga should output that the property is not satisfied
+                // If it does not, then this is an error
+                if (lines.stream().noneMatch(line -> line.endsWith(" -- Property is NOT satisfied."))) {
+                    throw new MutationTestingException("Output from verifytga not understood: " + String.join("\n", lines) + "\n" +
+                            "Mutation index: " + mutationIndex);
+                }
+
+                int strategyIndex = lines.indexOf("Strategy for the attacker:");
+
+                // If no such index, error
+                if (strategyIndex < 0) {
+                    throw new MutationTestingException("Output from verifytga not understood: " + String.join("\n", lines) + "\n" +
+                            "Mutation index: " + mutationIndex);
+                }
+
+                List<String> strategy = lines.subList(strategyIndex + 2, lines.size());
+
+                testCases.add(new MutationTestCase(testModel, mutant, strategy));
+            } catch (MutationTestingException e) {
+                e.printStackTrace();
+
+                // Only show error if the process is not already being stopped
+                if (getPlan().getStatus().equals(MutationTestPlan.Status.WORKING)) {
+                    getPlan().setStatus(MutationTestPlan.Status.STOPPING);
+                    Platform.runLater(() -> {
+                        final String message = "Error while generating test-cases: " + e.getMessage();
+                        final Text text = new Text(message);
+                        text.setFill(Color.RED);
+                        progressWriter.accept(text);
+                        Ecdar.showToast(message);
+                    });
+                }
             }
-
-            // Verifytga should output that the property is not satisfied
-            // If it does not, then this is an error
-            if (lines.stream().noneMatch(line -> line.endsWith(" -- Property is NOT satisfied."))) {
-                throw new RuntimeException("Output from verifytga not understood: " + String.join("\n", lines) + "\n" +
-                        "Mutation index: " + mutationIndex);
-            }
-
-            int strategyIndex = lines.indexOf("Strategy for the attacker:");
-
-            // If no such index, error
-            if (strategyIndex < 0) {
-                throw new RuntimeException("Output from verifytga not understood: " + String.join("\n", lines) + "\n" +
-                        "Mutation index: " + mutationIndex);
-            }
-
-            List<String> strategy = lines.subList(strategyIndex + 2, lines.size());
-
-            testCases.add(new MutationTestCase(testModel, mutant, strategy));
 
             // JavaFX elements cannot be updated in another thread, so make it run in a JavaFX thread at some point
             Platform.runLater(this::onGenerationJobDone);
@@ -223,7 +237,7 @@ class TestCaseGenerationHandler {
      * @param project the backend XML project containing the test model and the mutant
      * @return the started process, or null if an error occurs
      */
-    private Process startVerifytgaProcess(final int mutationIndex, final Project project) {
+    private Process startVerifytgaProcess(final int mutationIndex, final Project project) throws MutationTestingException {
         final Process process;
 
         try {
@@ -235,9 +249,7 @@ class TestCaseGenerationHandler {
             process = builder.start();
 
         } catch (BackendException | IOException | URISyntaxException e) {
-            e.printStackTrace();
-            Ecdar.showToast("Error: " + e.getMessage());
-            return null;
+            throw new MutationTestingException("Error while starting verifytga", e);
         }
 
         return process;
@@ -247,29 +259,17 @@ class TestCaseGenerationHandler {
      * Gets the lines from the input stream of verifytga.
      * If an error occurs, this method tells the user and signals this controller to stop.
      * @param process the process running verifytga
-     * @return the input lines, or null if an error occurs. Each line is without the newline character.
+     * @return the input lines. Each line is without the newline character.
+     * @throws MutationTestingException if an I/O error occurs
      */
-    private List<String> getVerifytgaInputLines(final Process process) {
+    private static List<String> getVerifytgaInputLines(final Process process) throws MutationTestingException {
         List<String> lines;
 
         try (BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
             lines = inputReader.lines().collect(Collectors.toList());
             if (!handlePotentialErrorsFromVerifytga(process)) lines = null;
         } catch (final IOException e) {
-            e.printStackTrace();
-
-            // Only show error if the process is not already being stopped
-            if (getPlan().getStatus().equals(MutationTestPlan.Status.WORKING)) {
-                getPlan().setStatus(MutationTestPlan.Status.STOPPING);
-                Platform.runLater(() -> {
-                    final String message = "I/O exception while reading from verifytga: " + e.getMessage();
-                    final Text text = new Text(message);
-                    text.setFill(Color.RED);
-                    progressWriter.accept(text);
-                    Ecdar.showToast(message);
-                });
-            }
-            lines = null;
+            throw new MutationTestingException("I/O exception while reading from verifytga");
         }
 
         return lines;
@@ -284,24 +284,13 @@ class TestCaseGenerationHandler {
      * @return true iff process was successful (e.g. no errors was found)
      * @throws IOException if an I/O error occurs
      */
-    private boolean handlePotentialErrorsFromVerifytga(final Process process) throws IOException {
+    private static boolean handlePotentialErrorsFromVerifytga(final Process process) throws IOException, MutationTestingException {
         try (BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
             //final String errorLine = errorReader.readLine();
             final List<String> errorLines = errorReader.lines().collect(Collectors.toList());
 
             if (!errorLines.isEmpty()) {
-                // Only show error if the process is not already being stopped
-                if (getPlan().getStatus().equals(MutationTestPlan.Status.WORKING)) {
-                    getPlan().setStatus(MutationTestPlan.Status.STOPPING);
-                    Platform.runLater(() -> {
-                        final String message = "Error from the error stream of verifytga: " + String.join("\n", errorLines);
-                        final Text text = new Text(message);
-                        text.setFill(Color.RED);
-                        progressWriter.accept(text);
-                        Ecdar.showToast(message);
-                    });
-                }
-                return false;
+                throw new MutationTestingException("Error from the error stream of verifytga: " + String.join("\n", errorLines));
             }
         }
         return true;

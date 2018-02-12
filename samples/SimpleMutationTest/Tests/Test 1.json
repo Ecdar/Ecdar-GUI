@@ -4,7 +4,7 @@
   "action": "Test",
   "sutPath": "The\\Path\\To\\My\\System\\Under\\Test",
   "exportFormat": "",
-  "useDemonic": false,
+  "useDemonic": true,
   "useAngelic": false,
   "mutantsText": "Mutants: 24 - Execution time: 0.02s",
   "testCasesText": "Test-cases: 19 - Generation time: 2.095s",

@@ -9,11 +9,11 @@ import java.util.List;
  */
 class MutationTestCase {
     private Component testModel, mutant;
-    private List<String> strategy;
+    private NonRefinementStrategy strategy;
 
-    MutationTestCase(final Component testModel, final Component mutant, final List<String> strategy) {
+    MutationTestCase(final Component testModel, final Component mutant, final List<String> strategy) throws MutationTestingException {
         this.testModel = testModel;
         this.mutant = mutant;
-        this.strategy = strategy;
+        this.strategy = new NonRefinementStrategy(strategy);
     }
 }
