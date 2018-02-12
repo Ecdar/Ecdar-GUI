@@ -22,7 +22,7 @@ public class NonRefinementStrategy {
 
             String line;
             while (iterator.hasNext() && !(line = iterator.next()).isEmpty()) {
-                final String delayRegex = "^While you are in\\\\t\\((.*)\\), wait.$";
+                final String delayRegex = "^While you are in\\s(.*), wait.$";
                 final Matcher delayMatcher = Pattern.compile(delayRegex).matcher(line);
 
                 if (delayMatcher.find()) {
@@ -30,7 +30,7 @@ public class NonRefinementStrategy {
                     continue;
                 }
 
-                final String actionRegex = "^When you are in \\((.*)\\), take transition (.*) \\[SKIP]$";
+                final String actionRegex = "^When you are in\\s(.*), take transition (.*) \\[SKIP]$";
                 final Matcher actionMatcher = Pattern.compile(actionRegex).matcher(line);
 
                 if (actionMatcher.find()) {

@@ -33,7 +33,7 @@
     {
       "id": "L3",
       "nickname": "",
-      "invariant": "",
+      "invariant": "c\u003c\u003d20",
       "type": "NORMAL",
       "urgency": "NORMAL",
       "x": 340.0,
@@ -41,13 +41,13 @@
       "color": "5",
       "nicknameX": 30.0,
       "nicknameY": -10.0,
-      "invariantX": 30.0,
-      "invariantY": 10.0
+      "invariantX": -60.0,
+      "invariantY": -30.0
     },
     {
       "id": "L4",
       "nickname": "",
-      "invariant": "",
+      "invariant": "e\u003c\u003d0",
       "type": "NORMAL",
       "urgency": "NORMAL",
       "x": 340.0,
@@ -55,13 +55,13 @@
       "color": "5",
       "nicknameX": 30.0,
       "nicknameY": -10.0,
-      "invariantX": 30.0,
-      "invariantY": 10.0
+      "invariantX": 20.0,
+      "invariantY": -10.0
     },
     {
       "id": "L5",
       "nickname": "",
-      "invariant": "",
+      "invariant": "e\u003c\u003d0",
       "type": "NORMAL",
       "urgency": "NORMAL",
       "x": 340.0,
@@ -69,13 +69,13 @@
       "color": "5",
       "nicknameX": 30.0,
       "nicknameY": -10.0,
-      "invariantX": 30.0,
-      "invariantY": 10.0
+      "invariantX": 20.0,
+      "invariantY": -10.0
     },
     {
       "id": "L6",
       "nickname": "",
-      "invariant": "",
+      "invariant": "e\u003c\u003d0",
       "type": "NORMAL",
       "urgency": "NORMAL",
       "x": 340.0,
@@ -83,13 +83,13 @@
       "color": "5",
       "nicknameX": 30.0,
       "nicknameY": -10.0,
-      "invariantX": 30.0,
-      "invariantY": 10.0
+      "invariantX": 20.0,
+      "invariantY": -10.0
     },
     {
       "id": "L7",
       "nickname": "",
-      "invariant": "",
+      "invariant": "e\u003c\u003d30",
       "type": "NORMAL",
       "urgency": "NORMAL",
       "x": 340.0,
@@ -97,8 +97,8 @@
       "color": "5",
       "nicknameX": 30.0,
       "nicknameY": -10.0,
-      "invariantX": 30.0,
-      "invariantY": 10.0
+      "invariantX": -20.0,
+      "invariantY": -40.0
     },
     {
       "id": "L8",
@@ -215,16 +215,16 @@
     {
       "id": "L15",
       "nickname": "",
-      "invariant": "",
+      "invariant": "e\u003c\u003d300",
       "type": "NORMAL",
       "urgency": "NORMAL",
       "x": 580.0,
-      "y": 260.0,
+      "y": 250.0,
       "color": "5",
       "nicknameX": 30.0,
       "nicknameY": -10.0,
-      "invariantX": 30.0,
-      "invariantY": 10.0
+      "invariantX": 20.0,
+      "invariantY": -10.0
     }
   ],
   "edges": [
@@ -573,14 +573,14 @@
       "isLocked": false,
       "nails": [
         {
-          "x": 300.0,
+          "x": 290.0,
           "y": 110.0,
           "propertyType": "GUARD",
           "propertyX": -20.0,
           "propertyY": -30.0
         },
         {
-          "x": 250.0,
+          "x": 240.0,
           "y": 110.0,
           "propertyType": "SYNCHRONIZATION",
           "propertyX": -20.0,

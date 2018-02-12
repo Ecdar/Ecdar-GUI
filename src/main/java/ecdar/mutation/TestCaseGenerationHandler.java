@@ -178,11 +178,7 @@ class TestCaseGenerationHandler {
 
         new Thread(() -> {
             try {
-                final Process process = startVerifytgaProcess(mutationIndex, project);
-                if (process == null) return;
-
-                List<String> lines = getVerifytgaInputLines(process);
-                if (lines == null) return;
+                List<String> lines = getVerifytgaInputLines(startVerifytgaProcess(mutationIndex, project));
 
                 // If refinement, no test-case to generate.
                 // I use endsWith rather than contains,
@@ -224,6 +220,8 @@ class TestCaseGenerationHandler {
                         Ecdar.showToast(message);
                     });
                 }
+
+                return;
             }
 
             // JavaFX elements cannot be updated in another thread, so make it run in a JavaFX thread at some point
