@@ -5,14 +5,13 @@ import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.EcdarSystem;
 import ecdar.abstractions.HighLevelModelObject;
-import ecdar.mutation.MutationTestPlan;
+import ecdar.mutation.models.MutationTestPlan;
 import ecdar.presentations.DropDownMenu;
 import ecdar.presentations.FilePresentation;
 import ecdar.utility.UndoRedoStack;
 import com.jfoenix.controls.JFXPopup;
 import com.jfoenix.controls.JFXRippler;
 import com.jfoenix.controls.JFXTextArea;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -24,12 +23,10 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
-import javax.swing.event.ChangeListener;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.ResourceBundle;
-import java.util.function.Consumer;
 
 public class ProjectPaneController implements Initializable {
     public StackPane root;

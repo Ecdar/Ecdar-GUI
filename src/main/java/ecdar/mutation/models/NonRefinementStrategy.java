@@ -1,14 +1,24 @@
-package ecdar.mutation;
+package ecdar.mutation.models;
 
+
+import ecdar.mutation.MutationTestingException;
 
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * A strategy for showing a non-refinement.
+ */
 public class NonRefinementStrategy {
     private Map<String, List<StrategyRule>> rules = new HashMap<>();
 
-    NonRefinementStrategy(final List<String> lines) throws MutationTestingException {
+    /**
+     * Constructs a strategy based on the result of verifytga.
+     * @param lines lines of the strategy as taking from verifytga
+     * @throws MutationTestingException if the lines were not understood
+     */
+    public NonRefinementStrategy(final List<String> lines) throws MutationTestingException {
         final Iterator<String> iterator =  lines.iterator();
         while (iterator.hasNext()) {
             final String locationsLine = iterator.next();

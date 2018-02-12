@@ -1,5 +1,8 @@
-package ecdar.mutation;
+package ecdar.mutation.models;
 
+/**
+ * An action rule in a strategy.
+ */
 public class ActionRule extends StrategyRule {
     private String transition;
 

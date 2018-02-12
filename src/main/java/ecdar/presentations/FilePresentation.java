@@ -6,7 +6,7 @@ import ecdar.abstractions.EcdarSystem;
 import ecdar.abstractions.HighLevelModelObject;
 import ecdar.controllers.CanvasController;
 import ecdar.controllers.FileController;
-import ecdar.mutation.MutationTestPlan;
+import ecdar.mutation.models.MutationTestPlan;
 import ecdar.utility.colors.Color;
 import com.jfoenix.controls.JFXRippler;
 import javafx.beans.property.SimpleObjectProperty;

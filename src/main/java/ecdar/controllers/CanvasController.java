@@ -4,7 +4,7 @@ import ecdar.abstractions.Component;
 import ecdar.abstractions.Declarations;
 import ecdar.abstractions.HighLevelModelObject;
 import ecdar.abstractions.EcdarSystem;
-import ecdar.mutation.MutationTestPlan;
+import ecdar.mutation.models.MutationTestPlan;
 import ecdar.mutation.MutationTestPlanPresentation;
 import ecdar.presentations.*;
 import ecdar.utility.helpers.SelectHelper;

@@ -1,4 +1,4 @@
-package ecdar.mutation;
+package ecdar.mutation.models;
 
 import com.google.gson.JsonPrimitive;
 import ecdar.Ecdar;
@@ -232,7 +232,7 @@ public class MutationTestPlan extends HighLevelModelObject {
         }
     }
 
-    List<MutationOperator> getSelectedMutationOperators() {
+    public List<MutationOperator> getSelectedMutationOperators() {
         return getOperators().stream().filter(MutationOperator::isSelected).collect(Collectors.toList());
     }
 

@@ -9,8 +9,9 @@
          type="StackPane"
          fx:controller="ecdar.mutation.MutationTestPlanController">
     <ScrollPane fx:id="scrollPane" style="-fx-font-size:13px;-fx-background-color:transparent;" hbarPolicy="NEVER" fitToWidth="true">
-        <padding><Insets top="25" right="25" bottom="25" left="25"/></padding>
         <VBox spacing="16">
+            <padding><Insets top="25" right="25" bottom="25" left="25"/></padding>
+
             <JFXComboBox fx:id="modelPicker"
                          promptText="Select Test Model"/>
 

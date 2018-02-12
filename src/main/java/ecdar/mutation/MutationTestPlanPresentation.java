@@ -5,6 +5,8 @@ import com.jfoenix.controls.JFXTextField;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.controllers.CanvasController;
+import ecdar.mutation.models.MutationOperator;
+import ecdar.mutation.models.MutationTestPlan;
 import ecdar.presentations.EcdarFXMLLoader;
 import ecdar.presentations.HighLevelModelPresentation;
 import javafx.collections.ListChangeListener;
@@ -64,7 +66,6 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         controller.progressTextFlow.getChildren().addListener((ListChangeListener<Node>) change -> show(controller.progressAres));
         controller.mutantsText.textProperty().addListener(((observable, oldValue, newValue) -> show(controller.resultsArea)));
 
-        // Bind UI text to models
         controller.mutantsText.textProperty().bind(controller.getPlan().mutantsTextProperty());
         controller.testCasesText.textProperty().bind(controller.getPlan().testCasesTextProperty());
 

@@ -6,7 +6,7 @@ import ecdar.abstractions.*;
 import ecdar.backend.BackendException;
 import ecdar.backend.UPPAALDriver;
 import ecdar.code_analysis.CodeAnalysis;
-import ecdar.mutation.MutationTestPlan;
+import ecdar.mutation.models.MutationTestPlan;
 import ecdar.presentations.*;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;

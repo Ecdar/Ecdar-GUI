@@ -5,6 +5,7 @@ import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
 import ecdar.abstractions.EdgeStatus;
 import ecdar.abstractions.Location;
+import ecdar.mutation.models.ChangeTargetOperator;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

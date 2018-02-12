@@ -1,7 +1,7 @@
 package ecdar.abstractions;
 
 import ecdar.Ecdar;
-import ecdar.mutation.MutationTestPlan;
+import ecdar.mutation.models.MutationTestPlan;
 import com.google.common.io.Files;
 import com.google.gson.*;
 import javafx.beans.property.ObjectProperty;
