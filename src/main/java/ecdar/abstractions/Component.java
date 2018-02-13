@@ -20,8 +20,6 @@ import javafx.collections.ObservableList;
 import javafx.util.Pair;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -175,14 +173,20 @@ public class Component extends HighLevelModelObject implements Boxed {
             // Negate the expression to create self loops for the missing inputs.
             // Convert to disjunctive normal form to make into multiple edges (disjunctions),
             // each with a conjunction of simple expressions.
-            createAngelicSelfLoops(location, input, ExpressionHelper.negateSimpleExpressions(
-                    RuleSet.toCNF(Not.of(ExpressionHelper.toExpression(matchingEdges.stream()
+            createAngelicSelfLoops(location, input, ExpressionHelper.simplifyNegatedSimpleExpressions(
+                    RuleSet.toCNF(Not.of(ExpressionHelper.parseDisjunctionOfGuards(matchingEdges.stream()
                             .map(Edge::getGuard)
                             .collect(Collectors.toList()))
                     ))));
         }));
     }
 
+    /**
+     * Creates self loops on a location to finish missing inputs with an angelic completion.
+     * @param location the location to create self loops on
+     * @param input the input action to use in the synchronization properties
+     * @param guardExpression the expression that represents the guards of the self loops
+     */
     private void createAngelicSelfLoops(final Location location, final String input, final Expression<String> guardExpression) {
         final Edge edge;
 
@@ -270,14 +274,22 @@ public class Component extends HighLevelModelObject implements Boxed {
             // Negate the expression to create edges to Universal for the missing inputs.
             // Convert to disjunctive normal form to make into multiple edges (disjunctions),
             // each with a conjunction of simple expressions.
-            createDemonicEdges(location, uniLocation, input, ExpressionHelper.negateSimpleExpressions(
-                    RuleSet.toCNF(Not.of(ExpressionHelper.toExpression(matchingEdges.stream()
+            createDemonicEdges(location, uniLocation, input, ExpressionHelper.simplifyNegatedSimpleExpressions(
+                    RuleSet.toCNF(Not.of(ExpressionHelper.parseDisjunctionOfGuards(matchingEdges.stream()
                             .map(Edge::getGuard)
                             .collect(Collectors.toList()))
                     ))));
         }));
     }
 
+    /**
+     * Creates edges to a specified Universal location from a location
+     * in order to finish missing inputs with a demonic completion.
+     * @param location the location to create self loops on
+     * @param universal the Universal location to create edge to
+     * @param input the input action to use in the synchronization properties
+     * @param guardExpression the expression that represents the guards of the edges to create
+     */
     private void createDemonicEdges(final Location location, final Location universal, final String input, final Expression<String> guardExpression) {
         final Edge edge;
 

@@ -11,11 +11,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Mutation operator that changes the operator of guards.
- * This only works for simple guards.
- * They must be empty of match this regex:
- * ^\s*(\w+)\s*(<|<=|==|>|>=)\s*(\w+)\s*$
- * For instance, no conjunctions in guards.
+ * Mutation operator that changes an one of the operators <, <=, >, >=, !=, == of a guard.
+ * If a guard is a conjunction, more mutants will be generated from than guard.
+ * This class replaces an operator with one of the operators <, <=, >, >=, ==.
+ * We do not replace with !=, since the engine does not allow this for timing constrains.
  */
 public class ChangeGuardOperator extends MutationOperator {
     private static final String REGEX_SIMPLE_GUARD = "^([^<>=!]+)(<|<=|>|>=|==|!=)([^<>=!]+)$";
