@@ -2,7 +2,6 @@ package ecdar.mutation.models;
 
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
-import ecdar.abstractions.Location;
 import ecdar.mutation.MutationTestingException;
 
 import java.util.ArrayList;
@@ -19,6 +18,8 @@ import java.util.regex.Pattern;
  * For instance, no conjunctions in guards.
  */
 public class ChangeGuardOperator extends MutationOperator {
+    private static final String REGEX_SIMPLE_GUARD = "^([^<>=!]+)(<|<=|>|>=|==|!=)([^<>=!]+)$";
+
     @Override
     public String getText() {
         return "Change guard";
@@ -33,6 +34,7 @@ public class ChangeGuardOperator extends MutationOperator {
     public Collection<? extends Component> compute(final Component original) throws MutationTestingException {
         final List<Component> mutants = new ArrayList<>();
 
+        // Do not use != as this is not allowed for timing constrains
         final List<String> operators = new ArrayList<>();
         operators.add("<");
         operators.add("<=");
@@ -51,23 +53,47 @@ public class ChangeGuardOperator extends MutationOperator {
             // Ignore if guard is empty
             if (originalEdge.getGuard().isEmpty()) continue;
 
-            final Matcher matcher = Pattern.compile("^\\s*(\\w+)\\s*(<|<=|==|>|>=)\\s*(\\w+)\\s*$").matcher(originalEdge.getGuard());
+            final String[] simpleGuards = originalEdge.getGuard().split("&&");
+            for (int simpleGuardIndex = 0; simpleGuardIndex < simpleGuards.length; simpleGuardIndex++) {
+                final String simpleGuard = simpleGuards[simpleGuardIndex];
 
-            if (!matcher.find()) {
-                throw new MutationTestingException("Guard \"" + originalEdge.getGuard() + "\" does not match pattern \"^\\s*(\\w+)\\s*(<|<=|==|>|>=)\\s*(\\w+)\\s*$\"");
+                final Matcher matcher = Pattern.compile(REGEX_SIMPLE_GUARD).matcher(simpleGuard);
+
+                if (!matcher.find()) {
+                    throw new MutationTestingException("Guard " + simpleGuard + " does not match pattern " + REGEX_SIMPLE_GUARD);
+                }
+
+                // Create a mutant for each other operator
+                final int finalSimpleGuardIndex = simpleGuardIndex;
+                operators.forEach(operator -> {
+                    // If operator is the same as with the original, ignore
+                    if (matcher.group(2).equals(operator)) return;
+
+                    mutants.add(createMutant(original, simpleGuards, matcher.group(1) + operator + matcher.group(3), finalSimpleGuardIndex, finalEdgeIndex));
+                });
             }
-
-            // Create a mutant for each other operator
-            operators.forEach(operator -> {
-                // If operator is the same as with the original, ignore
-                if (matcher.group(2).equals(operator)) return;
-
-                final Component mutant = original.cloneForVerification();
-                mutant.getEdges().get(finalEdgeIndex).setGuard(matcher.group(1) + operator + matcher.group(3));
-                mutants.add(mutant);
-            });
         }
 
         return mutants;
+    }
+
+    /**
+     * Creates a mutant with a changed operator.
+     * @param original component to mutate
+     * @param originalSimpleGuards the original simple guards (e.g. x < 2) that the whole original guard is a conjunction of
+     * @param newSimpleGuard new simple guard to replace one of the original simple guards
+     * @param simpleGuardIndex the index of the simple guards that should be changed
+     * @param edgeIndex the index of the edge containing the guard to mutate
+     * @return the created mutant
+     */
+    private static Component createMutant(final Component original, final String[] originalSimpleGuards, final String newSimpleGuard, final int simpleGuardIndex, final int edgeIndex) {
+        final Component mutant = original.cloneForVerification();
+
+        final String[] newSimpleGuards = originalSimpleGuards.clone();
+        newSimpleGuards[simpleGuardIndex] = newSimpleGuard;
+
+        mutant.getEdges().get(edgeIndex).setGuard(String.join("&&", newSimpleGuards));
+
+        return mutant;
     }
 }

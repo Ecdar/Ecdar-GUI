@@ -30,7 +30,7 @@ public class ChangeGuardOperatorTest {
 
         final Collection<? extends Component> mutants = new ChangeGuardOperator().compute(component);
 
-        Assert.assertEquals(3, mutants.size());
+        Assert.assertEquals(4, mutants.size());
         Assert.assertTrue(mutants.stream().anyMatch(mutant -> mutant.getEdges().size() == 1 && mutant.getEdges().get(0).getGuard().equals("20>=x")));
 
         // The original guard should not be present among the mutants
@@ -50,5 +50,44 @@ public class ChangeGuardOperatorTest {
         final Collection<? extends Component> mutants = new ChangeGuardOperator().compute(component);
 
         Assert.assertEquals(0, mutants.size());
+    }
+    @Test
+    public void testComputeGuardNotEqual() throws MutationTestingException {
+        final Component component = new Component();
+
+        component.addLocation(new Location());
+
+        final Edge edge = new Edge(component.getLocations().get(0), EdgeStatus.INPUT);
+        edge.setTargetLocation(component.getLocations().get(0));
+        edge.setGuard("20 != x");
+        component.addEdge(edge);
+
+        final Collection<? extends Component> mutants = new ChangeGuardOperator().compute(component);
+
+        Assert.assertEquals(5, mutants.size());
+        Assert.assertTrue(mutants.stream().anyMatch(mutant -> mutant.getEdges().size() == 1 && mutant.getEdges().get(0).getGuard().equals("20 == x")));
+
+        // The original guard should not be present among the mutants
+        Assert.assertTrue(mutants.stream().noneMatch(mutant -> mutant.getEdges().stream().anyMatch(e -> e.getGuard().equals("20 != x"))));
+    }
+
+    @Test
+    public void testComputeConjunction() throws MutationTestingException {
+        final Component component = new Component();
+
+        component.addLocation(new Location());
+
+        final Edge edge = new Edge(component.getLocations().get(0), EdgeStatus.INPUT);
+        edge.setTargetLocation(component.getLocations().get(0));
+        edge.setGuard("20 < x && y == 2");
+        component.addEdge(edge);
+
+        final Collection<? extends Component> mutants = new ChangeGuardOperator().compute(component);
+
+        Assert.assertEquals(8, mutants.size());
+        Assert.assertTrue(mutants.stream().anyMatch(mutant -> mutant.getEdges().size() == 1 && mutant.getEdges().get(0).getGuard().equals("20 < x && y < 2")));
+
+        // The original guard should not be present among the mutants
+        Assert.assertTrue(mutants.stream().noneMatch(mutant -> mutant.getEdges().stream().anyMatch(e -> e.getGuard().equals("20 < x && y == 2"))));
     }
 }

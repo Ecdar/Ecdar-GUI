@@ -63,6 +63,15 @@ public class ExpressionHelper {
         );
     }
 
+    private static Expression<String> guardToExpression(final String guard) {
+        return And.of(
+                Arrays.stream(guard.split("&&"))
+                        .map(String::trim)
+                        .map(ExpressionHelper::simpleGuardToExpression)
+                        .collect(Collectors.toList())
+        );
+    }
+
     private static Expression<String> simpleGuardToExpression(final String simpleGuard) {
         if (simpleGuard.contains("=="))
             return And.of(
@@ -71,14 +80,5 @@ public class ExpressionHelper {
             );
         else
             return Variable.of(simpleGuard);
-    }
-
-    private static Expression<String> guardToExpression(final String guard) {
-        return And.of(
-                Arrays.stream(guard.split("&&"))
-                        .map(String::trim)
-                        .map(ExpressionHelper::simpleGuardToExpression)
-                        .collect(Collectors.toList())
-        );
     }
 }
