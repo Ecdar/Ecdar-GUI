@@ -169,29 +169,21 @@ public class Component extends HighLevelModelObject implements Boxed {
                 // component is already input-enabled with respect to this location and input.
                 if (matchingEdges.stream().anyMatch(edge -> edge.getGuard().isEmpty())) continue;
 
-
-                final Expression<String> negatedExpressions = negateSimpleExpressions(
+                // There could be multiple matching edges, which is a disjunction of guards.
+                // There could be conjunction in guards.
+                // Convert the matching guards to such a boolean expression.
+                // Negate the expression to create self loops for the missing inputs.
+                // Convert to disjunctive normal form to make into multiple edges (disjunctions),
+                // each with a conjunction of simple expressions.
+                createAngelicSelfLoops(location, input, negateSimpleExpressions(
                         RuleSet.toCNF(Not.of(toExpression(matchingEdges.stream()
                                 .map(Edge::getGuard)
                                 .collect(Collectors.toList()))
-                        )));
-
-
-                if (negatedExpressions.getExprType().equals(And.EXPR_TYPE)) {
-
-                }
-
-                final Edge edge = new Edge(location, EdgeStatus.INPUT);
-                edge.setTargetLocation(location);
-                edge.addSyncNail(input);
-                // Multiple edges are a disjunction.
-                // To negate, we use conjunction.
-                //edge.addGuardNail(String.join("&&", negatedGuards));
-                addEdge(edge);
+                        ))));
             }
         }
     }
-/*
+
     private void createAngelicSelfLoops(final Location location, final String input, final Expression<String> guardExpression) {
         final Edge edge;
 
@@ -209,11 +201,18 @@ public class Component extends HighLevelModelObject implements Boxed {
                 edge.addSyncNail(input);
                 edge.addGuardNail(String.join("&&",
                         ((And<String>) guardExpression).getChildren().stream()
-                ).getValue());
+                                .map(child -> ((Variable<String>) child).getValue())
+                                .collect(Collectors.toList())
+                ));
                 addEdge(edge);
                 break;
+            case Or.EXPR_TYPE:
+                ((Or<String>) guardExpression).getChildren().forEach(child -> createAngelicSelfLoops(location, input, child));
+                break;
+            default:
+                throw new RuntimeException("Type of expression " + guardExpression + " not accepted. It should be a variable, conjunction, or disjunction");
         }
-    }*/
+    }
 
     private static Expression<String> negateSimpleExpressions(final Expression<String> expression) {
         switch (expression.getExprType()) {
@@ -225,14 +224,14 @@ public class Component extends HighLevelModelObject implements Boxed {
                 if (!child.getExprType().equals(Variable.EXPR_TYPE))
                     throw new RuntimeException("Unexpected negation. Expressions \"" + expression.toString() + "\" should be in CNF");
 
-                final Matcher matcher = Pattern.compile("^(.+)(<|<=|>|>=)(.+)$").matcher(((Variable<String>) child).getValue());
+                final Matcher matcher = Pattern.compile("^([^<>=!]+)(<|<=|>|>=)([^<>=!]+)$").matcher(((Variable<String>) child).getValue());
 
                 if (!matcher.find()) {
                     // TODO
                     throw new RuntimeException("Guard \""+ "\" did not match expected pattern");
                 }
 
-                switch (matcher.group(1)) {
+                switch (matcher.group(2)) {
                     case "<":
                         return Variable.of(matcher.group(1) + ">=" + matcher.group(3));
                     case "<=":
@@ -270,6 +269,7 @@ public class Component extends HighLevelModelObject implements Boxed {
     private static Expression<String> guardToExpression(final String guard) {
         return And.of(
                 Arrays.stream(guard.split("&&"))
+                        .map(String::trim)
                         .map(Component::simpleGuardToExpression)
                         .collect(Collectors.toList())
         );

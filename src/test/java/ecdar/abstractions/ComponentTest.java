@@ -34,18 +34,6 @@ public class ComponentTest {
     }
 
     @Test
-    public void fdgdfgd() {
-        Expression<String> nonStandard = Not.of(Or.of(
-                Variable.of("x<4")));
-        System.out.println(nonStandard);
-
-        Expression<String> posForm = RuleSet.toCNF(nonStandard);
-        System.out.println(posForm.getExprType());
-        System.out.println(posForm.toLexicographicString());
-        System.out.println(posForm.toLexicographicString());
-    }
-
-    @Test
     public void testCloneChangeTargetOfOriginal() {
         final Component original = new Component(false);
         Ecdar.getProject().getComponents().add(original);
@@ -158,10 +146,10 @@ public class ComponentTest {
         Assert.assertEquals(3, c.getLocations().size());
         Assert.assertEquals(3, c.getEdges().size());
 
-        /*c.applyAngelicCompletion();
+        c.applyAngelicCompletion();
 
         Assert.assertEquals(3, c.getLocations().size());
-        /*
+
         Assert.assertEquals(8, c.getEdges().size());
 
         // l1 should have two new input edges without guards
@@ -200,9 +188,117 @@ public class ComponentTest {
         edge = c.getEdges().get(7);
         Assert.assertEquals(EdgeStatus.INPUT, edge.getStatus());
         Assert.assertEquals("b", edge.getSync());
-        Assert.assertEquals("x>3", edge.getGuard());
+        Assert.assertEquals("x > 3", edge.getGuard());
         Assert.assertEquals(l3, edge.getSourceLocation());
         Assert.assertEquals(l3, edge.getTargetLocation());
-*/ // TODO
+    }
+
+    @Test
+    public void testAngelicCompletionConjunction() {
+        final Component c = new Component();
+
+        final Location l1 = new Location();
+        l1.initialize();
+        c.addLocation(l1);
+
+        final Edge e1 = new Edge(l1, EdgeStatus.INPUT);
+        e1.setTargetLocation(l1);
+        e1.setSync("a");
+        e1.setGuard("x <= 3 && x > 1");
+        c.addEdge(e1);
+
+        c.updateIOList();
+
+        Assert.assertEquals(1, c.getLocations().size());
+        Assert.assertEquals(1, c.getEdges().size());
+
+        c.applyAngelicCompletion();
+
+        Assert.assertEquals(1, c.getLocations().size());
+        Assert.assertEquals(3, c.getEdges().size());
+
+        Edge edge = c.getEdges().get(1);
+        Assert.assertEquals(EdgeStatus.INPUT, edge.getStatus());
+        Assert.assertEquals("a", edge.getSync());
+        Assert.assertEquals("x <= 1", edge.getGuard());
+        Assert.assertEquals(l1, edge.getSourceLocation());
+        Assert.assertEquals(l1, edge.getTargetLocation());
+
+        edge = c.getEdges().get(2);
+        Assert.assertEquals(EdgeStatus.INPUT, edge.getStatus());
+        Assert.assertEquals("a", edge.getSync());
+        Assert.assertEquals("x > 3", edge.getGuard());
+        Assert.assertEquals(l1, edge.getSourceLocation());
+        Assert.assertEquals(l1, edge.getTargetLocation());
+    }
+
+    @Test
+    public void testAngelicCompletionDisjunction() {
+        final Component c = new Component();
+
+        final Location l1 = new Location();
+        l1.initialize();
+        c.addLocation(l1);
+
+        final Edge e1 = new Edge(l1, EdgeStatus.INPUT);
+        e1.setTargetLocation(l1);
+        e1.setSync("a");
+        e1.setGuard("x > 3");
+        c.addEdge(e1);
+
+        final Edge e2 = new Edge(l1, EdgeStatus.INPUT);
+        e2.setTargetLocation(l1);
+        e2.setSync("a");
+        e2.setGuard("x <= 1");
+        c.addEdge(e2);
+
+        c.updateIOList();
+
+        Assert.assertEquals(1, c.getLocations().size());
+        Assert.assertEquals(2, c.getEdges().size());
+
+        c.applyAngelicCompletion();
+
+        Assert.assertEquals(1, c.getLocations().size());
+        Assert.assertEquals(3, c.getEdges().size());
+
+        final Edge edge = c.getEdges().get(2);
+        Assert.assertEquals(EdgeStatus.INPUT, edge.getStatus());
+        Assert.assertEquals("a", edge.getSync());
+        Assert.assertEquals("x <= 3&&x > 1", edge.getGuard());
+        Assert.assertEquals(l1, edge.getSourceLocation());
+        Assert.assertEquals(l1, edge.getTargetLocation());
+    }
+
+    @Test
+    public void testAngelicCompletionMathInGuard() {
+        final Component c = new Component();
+
+        final Location l1 = new Location();
+        l1.initialize();
+        c.addLocation(l1);
+
+        final Edge e1 = new Edge(l1, EdgeStatus.INPUT);
+        e1.setTargetLocation(l1);
+        e1.setSync("a");
+        e1.setGuard("x - y > 3 + n % 5");
+        c.addEdge(e1);
+
+        c.updateIOList();
+
+        Assert.assertEquals(1, c.getLocations().size());
+        Assert.assertEquals(1, c.getEdges().size());
+
+        c.applyAngelicCompletion();
+
+        Assert.assertEquals(1, c.getLocations().size());
+        Assert.assertEquals(2, c.getEdges().size());
+
+        final Edge edge = c.getEdges().get(1);
+        Assert.assertEquals(EdgeStatus.INPUT, edge.getStatus());
+        Assert.assertEquals("a", edge.getSync());
+        Assert.assertEquals("x - y <= 3 + n % 5", edge.getGuard());
+        Assert.assertEquals(l1, edge.getSourceLocation());
+        Assert.assertEquals(l1, edge.getTargetLocation());
     }
 }
