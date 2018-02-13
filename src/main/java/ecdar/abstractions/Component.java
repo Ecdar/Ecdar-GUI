@@ -1,5 +1,7 @@
 package ecdar.abstractions;
 
+import com.bpodgursky.jbool_expressions.*;
+import com.bpodgursky.jbool_expressions.rules.RuleSet;
 import ecdar.Ecdar;
 import ecdar.controllers.EcdarController;
 import ecdar.presentations.Grid;
@@ -134,11 +136,11 @@ public class Component extends HighLevelModelObject implements Boxed {
      * [optional whitespace]
      * [id or integer]
      * [optional whitespace]
-     * [one of the operators <, <=, ==, !=, >, >=]
+     * [one of the operators <, <=, >, >=]
      * [optional whitespace][id or integer]
      * [optional whitespace]
      *
-     * Regex: ^\s*(\w+)\s*(<|<=|==|!=|>|>=)\s*(\w+)\s*$
+     * Regex: ^\s*(\w+)\s*(<|<=|>|>=)\s*(\w+)\s*$
      *
      * For instance, no conjunction allowed in a guard.
      */
@@ -167,18 +169,16 @@ public class Component extends HighLevelModelObject implements Boxed {
                 // component is already input-enabled with respect to this location and input.
                 if (matchingEdges.stream().anyMatch(edge -> edge.getGuard().isEmpty())) continue;
 
-                // Make a self loop with a guard that is the negation of the guards in the matching edges
-                final List<String> negatedGuards = new ArrayList<>();
-                for (final Edge matchingEdge : matchingEdges) {
-                    final String guard = matchingEdge.getGuard();
-                    final Matcher matcher = Pattern.compile("^\\s*(\\w+)\\s*(<|<=|==|!=|>|>=)\\s*(\\w+)\\s*$").matcher(guard);
+/*
+                final Expression<String> negatedExpressions = negateSimpleExpressions(
+                        RuleSet.toCNF(Not.of(toExpression(matchingEdges.stream()
+                                .map(Edge::getGuard)
+                                .collect(Collectors.toList()))
+                        )));
 
-                    if (!matcher.find()) {
-                        throw new RuntimeException("Guard \"" + guard + "\" did not match expected pattern");
-                    }
 
-                    // We negate each guard
-                    negatedGuards.add(matcher.group(1) + negateOperator(matcher.group(2)) + matcher.group(3));
+                if (negatedExpressions.getExprType().equals(And.EXPR_TYPE)) {
+
                 }
 
                 final Edge edge = new Edge(location, EdgeStatus.INPUT);
@@ -187,8 +187,128 @@ public class Component extends HighLevelModelObject implements Boxed {
                 // Multiple edges are a disjunction.
                 // To negate, we use conjunction.
                 edge.addGuardNail(String.join("&&", negatedGuards));
-                addEdge(edge);
+                addEdge(edge);*/
             }
+        }
+    }
+
+    /*private void createAngelicSelfLoops(final Location location, final String input, final Expression<String> guardExpression) {
+        final Edge edge;
+
+        switch (guardExpression.getExprType()) {
+            case Variable.EXPR_TYPE:
+                edge = new Edge(location, EdgeStatus.INPUT);
+                edge.setTargetLocation(location);
+                edge.addSyncNail(input);
+                edge.addGuardNail(((Variable<String>) guardExpression).getValue());
+                addEdge(edge);
+                break;
+            case And.EXPR_TYPE:
+                edge = new Edge(location, EdgeStatus.INPUT);
+                edge.setTargetLocation(location);
+                edge.addSyncNail(input);
+                edge.addGuardNail(String.join((Variable<String>) guardExpression).getValue());
+                addEdge(edge);
+                break;
+        }
+    }*()
+
+    private static Expression<String> negateSimpleExpressions(final Expression<String> expression) {
+        switch (expression.getExprType()) {
+            case Variable.EXPR_TYPE:
+                return expression;
+            case Not.EXPR_TYPE:
+                final Expression<String> child = ((Not<String>) expression).getE();
+
+                if (!child.getExprType().equals(Variable.EXPR_TYPE))
+                    throw new RuntimeException("Unexpected negation. Expressions \"" + expression.toString() + "\" should be in CNF");
+
+                final Matcher matcher = Pattern.compile("^(.+)(<|<=|>|>=)(.+)$").matcher(((Variable<String>) child).getValue());
+
+                if (!matcher.find()) {
+                    // TODO
+                    throw new RuntimeException("Guard \""+ "\" did not match expected pattern");
+                }
+
+                switch (matcher.group(1)) {
+                    case "<":
+                        return Variable.of(matcher.group(1) + ">=" + matcher.group(3));
+                    case "<=":
+                        return Variable.of(matcher.group(1) + ">" + matcher.group(3));
+                    case ">":
+                        return Variable.of(matcher.group(1) + "<=" + matcher.group(3));
+                    case ">=":
+                        return Variable.of(matcher.group(1) + ">" + matcher.group(3));
+                    default:
+                        // TODO
+                        throw new RuntimeException("Unexpected operator \"" + "\"");
+                }
+            case And.EXPR_TYPE:
+                return And.of(((And<String>) expression).getChildren().stream()
+                        .map(Component::negateSimpleExpressions)
+                        .collect(Collectors.toList()));
+            case Or.EXPR_TYPE:
+                return Or.of(((Or<String>) expression).getChildren().stream()
+                        .map(Component::negateSimpleExpressions)
+                        .collect(Collectors.toList()));
+            default:
+                // TODO
+                throw new RuntimeException("sdfs");
+        }
+    }
+
+    private static Expression<String> toExpression(final List<String> guards) {
+        return Or.of(
+                guards.stream()
+                        .map(Component::guardToExpression)
+                        .collect(Collectors.toList())
+        );
+    }
+
+    private static Expression<String> guardToExpression(final String guard) {
+        return And.of(
+                Arrays.stream(guard.split("&&"))
+                        .map(Component::simpleGuardToExpression)
+                        .collect(Collectors.toList())
+        );
+    }
+
+    private static Expression<String> simpleGuardToExpression(final String simpleGuard) {
+        if (simpleGuard.contains("=="))
+            return And.of(
+                    Variable.of(simpleGuard.replaceFirst("==", "<=")),
+                    Variable.of(simpleGuard.replaceFirst("==",">="))
+            );
+        else
+            return Variable.of(simpleGuard);
+    }
+
+    private Expression<String> negateSimpleGuardExpression(final String expression) {
+        final Matcher matcher = Pattern.compile("^(.+)(<|<=|==|>|>=)(.+)$").matcher(expression);
+
+        if (!matcher.find()) {
+            // TODO
+            throw new RuntimeException("Guard \""+ "\" did not match expected pattern");
+        }
+
+        switch (matcher.group(1)) {
+            case "<":
+                return Variable.of(matcher.group(1) + ">=" + matcher.group(3));
+            case "<=":
+                return Variable.of(matcher.group(1) + ">" + matcher.group(3));
+            case "==":
+                // We do it this way, since Ecdar engine does not allow != in guards
+                return Or.of(
+                        Variable.of(matcher.group(1) + "<" + matcher.group(3)),
+                        Variable.of(matcher.group(1) + ">" + matcher.group(3))
+                );
+            case ">":
+                return Variable.of(matcher.group(1) + "<=" + matcher.group(3));
+            case ">=":
+                return Variable.of(matcher.group(1) + ">" + matcher.group(3));
+            default:
+                // TODO
+                throw new RuntimeException("Unexpected operator \"" + "\"");
         }
     }
 
@@ -199,11 +319,11 @@ public class Component extends HighLevelModelObject implements Boxed {
      * [optional whitespace]
      * [id or integer]
      * [optional whitespace]
-     * [one of the operators <, <=, ==, !=, >, >=]
+     * [one of the operators <, <=, >, >=]
      * [optional whitespace][id or integer]
      * [optional whitespace]
      *
-     * Regex: ^\s*(\w+)\s*(<|<=|==|!=|>|>=)\s*(\w+)\s*$
+     * Regex: ^\s*(\w+)\s*(<|<=|>|>=)\s*(\w+)\s*$
      *
      * For instance, no conjunction allowed in a guard.
      */
@@ -248,7 +368,7 @@ public class Component extends HighLevelModelObject implements Boxed {
                 final List<String> negatedGuards = new ArrayList<>();
                 for (final Edge matchingEdge : matchingEdges) {
                     final String guard = matchingEdge.getGuard();
-                    final Matcher matcher = Pattern.compile("^\\s*(\\w+)\\s*(<|<=|==|!=|>|>=)\\s*(\\w+)\\s*$").matcher(guard);
+                    final Matcher matcher = Pattern.compile("^\\s*(\\w+)\\s*(<|<=|>|>=)\\s*(\\w+)\\s*$").matcher(guard);
 
                     if (!matcher.find()) {
                         throw new RuntimeException("Guard \"" + guard + "\" did not match expected pattern");
@@ -270,7 +390,7 @@ public class Component extends HighLevelModelObject implements Boxed {
     }
 
     /**
-     * Negates one of the operators <, <=, =, !=, >, >=.
+     * Negates one of the operators <, <=, >, >=.
      * @param operator the operator to negate
      * @return the negated operator
      */
@@ -280,10 +400,6 @@ public class Component extends HighLevelModelObject implements Boxed {
                 return ">=";
             case "<=":
                 return ">";
-            case "==":
-                return "!=";
-            case "!=":
-                return "==";
             case ">":
                 return "<=";
             case ">=":

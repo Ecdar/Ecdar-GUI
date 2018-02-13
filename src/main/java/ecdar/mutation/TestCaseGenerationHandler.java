@@ -84,7 +84,12 @@ class TestCaseGenerationHandler {
 
         // Mutate with selected operators
         mutants = new ArrayList<>();
-        for (final MutationOperator operator : getPlan().getSelectedMutationOperators()) mutants.addAll(operator.compute(getTestModel()));
+        try {
+            for (final MutationOperator operator : getPlan().getSelectedMutationOperators()) mutants.addAll(operator.compute(getTestModel()));
+        } catch (final MutationTestingException e) {
+            handleException(e);
+            return;
+        }
 
         mutants.forEach(Component::applyAngelicCompletion);
 
@@ -210,26 +215,29 @@ class TestCaseGenerationHandler {
 
                 testCases.add(new MutationTestCase(testModel, mutant, strategy));
             } catch (MutationTestingException e) {
-                e.printStackTrace();
-
-                // Only show error if the process is not already being stopped
-                if (getPlan().getStatus().equals(MutationTestPlan.Status.WORKING)) {
-                    getPlan().setStatus(MutationTestPlan.Status.STOPPING);
-                    Platform.runLater(() -> {
-                        final String message = "Error while generating test-cases: " + e.getMessage();
-                        final Text text = new Text(message);
-                        text.setFill(Color.RED);
-                        progressWriter.accept(text);
-                        Ecdar.showToast(message);
-                    });
-                }
-
+                handleException(e);
                 return;
             }
 
             // JavaFX elements cannot be updated in another thread, so make it run in a JavaFX thread at some point
             Platform.runLater(this::onGenerationJobDone);
         }).start();
+    }
+
+    private void handleException(final MutationTestingException e) {
+        e.printStackTrace();
+
+        // Only show error if the process is not already being stopped
+        if (getPlan().getStatus().equals(MutationTestPlan.Status.WORKING)) {
+            getPlan().setStatus(MutationTestPlan.Status.STOPPING);
+            Platform.runLater(() -> {
+                final String message = "Error while generating test-cases: " + e.getMessage();
+                final Text text = new Text(message);
+                text.setFill(Color.RED);
+                progressWriter.accept(text);
+                Ecdar.showToast(message);
+            });
+        }
     }
 
     /**

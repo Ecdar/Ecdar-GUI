@@ -1,6 +1,7 @@
 package ecdar.mutation.models;
 
 import ecdar.abstractions.Component;
+import ecdar.mutation.MutationTestingException;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 
@@ -34,13 +35,14 @@ public abstract class MutationOperator {
 
     abstract String getJsonName();
 
-    public abstract Collection<? extends Component> compute(final Component testModel);
+    public abstract Collection<? extends Component> compute(final Component original) throws MutationTestingException;
 
     static List<MutationOperator> getAllOperators() {
         final List<MutationOperator> operators = new ArrayList<>();
 
         operators.add(new ChangeSourceOperator());
         operators.add(new ChangeTargetOperator());
+        operators.add(new ChangeGuardOperator());
 
         return operators;
     }

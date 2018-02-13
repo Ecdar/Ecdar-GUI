@@ -9,6 +9,7 @@ import ecdar.backend.BackendException;
 import ecdar.backend.UPPAALDriver;
 import ecdar.mutation.models.MutationOperator;
 import ecdar.mutation.models.MutationTestPlan;
+import javafx.application.Platform;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import org.apache.commons.io.FileUtils;
@@ -50,7 +51,12 @@ public class ExportHandler {
 
         // Mutate with selected operators
         final List<Component> mutants = new ArrayList<>();
-        for (final MutationOperator operator : getPlan().getSelectedMutationOperators()) mutants.addAll(operator.compute(getTestModel()));
+        try {
+            for (final MutationOperator operator : getPlan().getSelectedMutationOperators()) mutants.addAll(operator.compute(getTestModel()));
+        } catch (final MutationTestingException e) {
+            handleException(e);
+            return;
+        }
 
         for (final Component mutant : mutants) {
             // Name them the same name as the test model
@@ -124,5 +130,21 @@ public class ExportHandler {
 
     public Consumer<Text> getProgressWriter() {
         return progressWriter;
+    }
+
+    private void handleException(final MutationTestingException e) {
+        e.printStackTrace();
+
+        // Only show error if the process is not already being stopped
+        if (getPlan().getStatus().equals(MutationTestPlan.Status.WORKING)) {
+            getPlan().setStatus(MutationTestPlan.Status.STOPPING);
+            Platform.runLater(() -> {
+                final String message = "Error while generating test-cases: " + e.getMessage();
+                final Text text = new Text(message);
+                text.setFill(Color.RED);
+                progressWriter.accept(text);
+                Ecdar.showToast(message);
+            });
+        }
     }
 }

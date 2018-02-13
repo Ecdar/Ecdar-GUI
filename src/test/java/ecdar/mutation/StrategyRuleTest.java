@@ -6,6 +6,8 @@ import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class StrategyRuleTest {
 
@@ -44,5 +46,10 @@ public class StrategyRuleTest {
         values.put("S.f", 0.2);
         values.put("M.f", 0.0);
         Assert.assertFalse(new DelayRule("(20<M.e && S.f==M.f && M.f==0)").isSatisfied(values));
+    }
+
+    @Test
+    public void testIsSatisfi5() {
+        final Matcher matcher = Pattern.compile("(<|<=|==|!=|>|>=)*").matcher("(20<M.e && S.f==M.f && M.f==0)");
     }
 }
