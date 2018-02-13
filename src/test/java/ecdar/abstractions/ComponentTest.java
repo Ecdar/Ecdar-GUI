@@ -158,7 +158,7 @@ public class ComponentTest {
         Assert.assertEquals(3, c.getLocations().size());
         Assert.assertEquals(3, c.getEdges().size());
 
-        c.applyAngelicCompletion();
+        /*c.applyAngelicCompletion();
 
         Assert.assertEquals(3, c.getLocations().size());
         /*

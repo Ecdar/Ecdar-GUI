@@ -169,7 +169,7 @@ public class Component extends HighLevelModelObject implements Boxed {
                 // component is already input-enabled with respect to this location and input.
                 if (matchingEdges.stream().anyMatch(edge -> edge.getGuard().isEmpty())) continue;
 
-/*
+
                 final Expression<String> negatedExpressions = negateSimpleExpressions(
                         RuleSet.toCNF(Not.of(toExpression(matchingEdges.stream()
                                 .map(Edge::getGuard)
@@ -186,13 +186,13 @@ public class Component extends HighLevelModelObject implements Boxed {
                 edge.addSyncNail(input);
                 // Multiple edges are a disjunction.
                 // To negate, we use conjunction.
-                edge.addGuardNail(String.join("&&", negatedGuards));
-                addEdge(edge);*/
+                //edge.addGuardNail(String.join("&&", negatedGuards));
+                addEdge(edge);
             }
         }
     }
-
-    /*private void createAngelicSelfLoops(final Location location, final String input, final Expression<String> guardExpression) {
+/*
+    private void createAngelicSelfLoops(final Location location, final String input, final Expression<String> guardExpression) {
         final Edge edge;
 
         switch (guardExpression.getExprType()) {
@@ -207,11 +207,13 @@ public class Component extends HighLevelModelObject implements Boxed {
                 edge = new Edge(location, EdgeStatus.INPUT);
                 edge.setTargetLocation(location);
                 edge.addSyncNail(input);
-                edge.addGuardNail(String.join((Variable<String>) guardExpression).getValue());
+                edge.addGuardNail(String.join("&&",
+                        ((And<String>) guardExpression).getChildren().stream()
+                ).getValue());
                 addEdge(edge);
                 break;
         }
-    }*()
+    }*/
 
     private static Expression<String> negateSimpleExpressions(final Expression<String> expression) {
         switch (expression.getExprType()) {
