@@ -1,16 +1,9 @@
 package ecdar.abstractions;
 
-import com.bpodgursky.jbool_expressions.Expression;
-import com.bpodgursky.jbool_expressions.Not;
-import com.bpodgursky.jbool_expressions.Or;
-import com.bpodgursky.jbool_expressions.Variable;
-import com.bpodgursky.jbool_expressions.parsers.ExprParser;
-import com.bpodgursky.jbool_expressions.rules.RuleSet;
 import ecdar.Ecdar;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.reactfx.value.Var;
 
 public class ComponentTest {
 
