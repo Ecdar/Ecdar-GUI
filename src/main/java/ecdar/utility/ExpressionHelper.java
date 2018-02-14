@@ -47,7 +47,7 @@ public class ExpressionHelper {
                     case ">":
                         return Variable.of(matcher.group(1) + "<=" + matcher.group(3));
                     case ">=":
-                        return Variable.of(matcher.group(1) + ">" + matcher.group(3));
+                        return Variable.of(matcher.group(1) + "<" + matcher.group(3));
                     case "!=":
                         return Variable.of(matcher.group(1) + "==" + matcher.group(3));
                     default:
