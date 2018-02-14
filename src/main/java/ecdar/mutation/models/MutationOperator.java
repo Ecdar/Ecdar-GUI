@@ -35,8 +35,18 @@ public abstract class MutationOperator {
 
     abstract String getJsonName();
 
-    public abstract Collection<? extends Component> compute(final Component original) throws MutationTestingException;
+    /**
+     * Generates mutants.
+     * @param original the component to mutate
+     * @return the generated mutants
+     * @throws MutationTestingException if a mutation error happens
+     */
+    public abstract Collection<? extends Component> generate(final Component original) throws MutationTestingException;
 
+    /**
+     * Gets all available mutation operators.
+     * @return the operators
+     */
     static List<MutationOperator> getAllOperators() {
         final List<MutationOperator> operators = new ArrayList<>();
 

@@ -84,6 +84,35 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
     }
 
     /**
+     * Initializes the model picker.
+     */
+    private void initializeModelPicker() {
+        // Fill test model picker with sorted components
+        Ecdar.getProject().getComponents().stream().sorted(Comparator.comparing(Component::getName)).forEach(component -> {
+            final Label label = new Label(component.getName());
+            controller.modelPicker.getItems().add(label);
+
+            // If component is the test model of the test plan, select it
+            final String testModelId = controller.getPlan().getTestModelId();
+            if (testModelId != null && testModelId.equals(component.getName()))
+                controller.modelPicker.setValue(label);
+        });
+
+        // Bind test plan to test model picker
+        controller.modelPicker.valueProperty().addListener(((observable, oldValue, newValue) ->
+                controller.getPlan().setTestModelId(newValue.getText())));
+
+        // If test model is selected, show elements
+        if (controller.modelPicker.getValue() != null) {
+            show(controller.modelDependentArea);
+        } else {
+            // Show when selected
+            controller.modelPicker.valueProperty().addListener(((observable, oldValue, newValue) ->
+                    show(controller.modelDependentArea)));
+        }
+    }
+
+    /**
      * Initializes width and height of the text editor field, such that it fills up the whole canvas
      */
     private void initializeWidthAndHeight() {
@@ -125,6 +154,9 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         controller.scrollPane.setPrefHeight(canvasHeight - CanvasController.DECLARATION_Y_MARGIN - offSet);
     }
 
+    /**
+     * Initializes the UI for selecting mutation operators.
+     */
     private void initializeOperators() {
         for (final MutationOperator operator : controller.getPlan().getOperators()) {
             final JFXCheckBox checkBox = new JFXCheckBox(operator.getText());
@@ -133,11 +165,19 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         }
     }
 
+    /**
+     * Initializes handling of the status of the test plan.
+     */
     private void InitializeStatusHandling() {
         handleStatusUpdate(null, controller.getPlan().getStatus());
         controller.getPlan().statusProperty().addListener(((observable, oldValue, newValue) -> handleStatusUpdate(oldValue, newValue)));
     }
 
+    /**
+     * Handles an update of the status of the test plan.
+     * @param oldValue the old status
+     * @param newValue the new status
+     */
     private void handleStatusUpdate(final MutationTestPlan.Status oldValue, final MutationTestPlan.Status newValue) {
         if (oldValue != null) {
             switch (oldValue) {
@@ -151,13 +191,13 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
             case IDLE:
                 show(controller.testButton);
                 hide(controller.stopButton);
-                for (final Region region : getRegionsToDisableWhenWorking()) region.setDisable(false);
+                for (final Region region : getRegionsToDisableWhileWorking()) region.setDisable(false);
                 break;
             case WORKING:
                 hide(controller.testButton);
                 show(controller.stopButton);
                 controller.stopButton.setDisable(false);
-                for (final Region region : getRegionsToDisableWhenWorking()) region.setDisable(true);
+                for (final Region region : getRegionsToDisableWhileWorking()) region.setDisable(true);
                 break;
             case STOPPING:
                 controller.stopButton.setDisable(true);
@@ -165,7 +205,11 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         }
     }
 
-    private List<Region> getRegionsToDisableWhenWorking() {
+    /**
+     * Gets which regions should be disabled while working.
+     * @return the regions
+     */
+    private List<Region> getRegionsToDisableWhileWorking() {
         final List<Region> regions = new ArrayList<>();
 
         regions.add(controller.modelPicker);
@@ -178,8 +222,11 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         return regions;
     }
 
-
-
+    /**
+     * Initializes a text field to enforce its values to be positive integers.
+     * While in focus, the text field can still have an empty value.
+     * @param field the text field
+     */
     private static void initializePositiveIntegerTextField(final JFXTextField field) {
         // Force the field to be empty positive integer
         field.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -212,32 +259,6 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         show(controller.sutDependentArea);
     }
 
-    private void initializeModelPicker() {
-        // Fill test model picker with sorted components
-        Ecdar.getProject().getComponents().stream().sorted(Comparator.comparing(Component::getName)).forEach(component -> {
-            final Label label = new Label(component.getName());
-            controller.modelPicker.getItems().add(label);
-
-            // If component is the test model of the test plan, select it
-            final String testModelId = controller.getPlan().getTestModelId();
-            if (testModelId != null && testModelId.equals(component.getName()))
-                controller.modelPicker.setValue(label);
-        });
-
-        // Bind test plan to test model picker
-        controller.modelPicker.valueProperty().addListener(((observable, oldValue, newValue) ->
-                controller.getPlan().setTestModelId(newValue.getText())));
-
-        // If test model is selected, show elements
-        if (controller.modelPicker.getValue() != null) {
-            show(controller.modelDependentArea);
-        } else {
-            // Show when selected
-            controller.modelPicker.valueProperty().addListener(((observable, oldValue, newValue) ->
-                    show(controller.modelDependentArea)));
-        }
-    }
-
     /**
      * Initializes the action picker.
      */
@@ -265,13 +286,21 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         else controller.actionPicker.setValue(testLabel);
     }
 
-    private static void installTooltip(final Control testLabel, final String text) {
+    /**
+     * Installs a tooltip on a control.
+     * @param control the control
+     * @param text the text of the tooltip
+     */
+    private static void installTooltip(final Control control, final String text) {
         final Tooltip tooltip = new Tooltip(text);
         tooltip.setPrefWidth(250);
         tooltip.setWrapText(true);
-        testLabel.setTooltip(tooltip);
+        control.setTooltip(tooltip);
     }
 
+    /**
+     * Initializes handling of the format picker.
+     */
     private void initializeFormatPicker() {
         final Label jsonLabel = new Label("JSON");
         final Label xmlLabel = new Label("XML");
@@ -285,6 +314,10 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
                 controller.getPlan().setFormat(newValue.getText())));
     }
 
+    /**
+     * Shows some regions and set them to be managed.
+     * @param regions the regions
+     */
     private static void show(final Node... regions) {
         for (final Node region : regions) {
             region.setManaged(true);
@@ -292,6 +325,10 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         }
     }
 
+    /**
+     * Hides some regions and set them to not be managed.
+     * @param regions the regions
+     */
     private static void hide(final Node... regions) {
         for (final Node region : regions) {
             region.setManaged(false);

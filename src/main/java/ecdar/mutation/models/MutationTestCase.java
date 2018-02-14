@@ -2,7 +2,6 @@ package ecdar.mutation.models;
 
 import ecdar.abstractions.Component;
 import ecdar.mutation.MutationTestingException;
-import ecdar.mutation.models.NonRefinementStrategy;
 
 import java.util.List;
 

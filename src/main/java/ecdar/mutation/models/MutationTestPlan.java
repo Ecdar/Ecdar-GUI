@@ -1,9 +1,9 @@
 package ecdar.mutation.models;
 
+import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import ecdar.Ecdar;
 import ecdar.abstractions.HighLevelModelObject;
-import com.google.gson.JsonObject;
 import javafx.beans.property.*;
 
 import java.util.ArrayList;
@@ -15,17 +15,16 @@ import java.util.stream.Collectors;
  * A test plan for conducting model-based mutation testing on a component.
  */
 public class MutationTestPlan extends HighLevelModelObject {
+    public enum Status {IDLE, WORKING, STOPPING}
+
     private static final String PLAN_NAME_PREFIX = "Test ";
 
     private static final String TEST_MODEL_ID = "testModelId";
-    private static final String MUTANTS_TEXT = "mutantsText";
-    private static final String TEST_CASES_TEXT = "testCasesText";
     private static final String ACTION = "action";
     private static final String SUT_PATH = "sutPath";
     private static final String FORMAT = "exportFormat";
     private static final String DEMONIC = "useDemonic";
     private static final String ANGELIC_EXPORT = "useAngelic";
-
 
     private final StringProperty testModelId = new SimpleStringProperty("");
     private final StringProperty action = new SimpleStringProperty("");
@@ -37,14 +36,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     private final StringProperty mutantsText = new SimpleStringProperty("");
     private final StringProperty testCasesText = new SimpleStringProperty("");
 
-    public List<MutationOperator> getOperators() {
-        return operators;
-    }
-
     private final List<MutationOperator> operators = new ArrayList<>();
-
-    public enum Status {IDLE, WORKING, STOPPING}
-
     private final ObjectProperty<Status> status = new SimpleObjectProperty<>(Status.IDLE);
 
 
@@ -170,6 +162,10 @@ public class MutationTestPlan extends HighLevelModelObject {
         status.set(value);
     }
 
+    public List<MutationOperator> getOperators() {
+        return operators;
+    }
+
 
     /* Other methods */
 
@@ -183,9 +179,6 @@ public class MutationTestPlan extends HighLevelModelObject {
         result.addProperty(FORMAT, getFormat());
         result.addProperty(DEMONIC, isDemonic());
         result.addProperty(ANGELIC_EXPORT, isAngelicWhenExport());
-
-        result.addProperty(MUTANTS_TEXT, getMutantsText());
-        result.addProperty(TEST_CASES_TEXT, getTestCasesText());
 
         operators.forEach(operator -> result.addProperty(operator.getJsonName(), operator.isSelected()));
 
@@ -202,9 +195,6 @@ public class MutationTestPlan extends HighLevelModelObject {
         setFormat(json.getAsJsonPrimitive(FORMAT).getAsString());
         setDemonic(json.getAsJsonPrimitive(DEMONIC).getAsBoolean());
         setAngelicWhenExport(json.getAsJsonPrimitive(ANGELIC_EXPORT).getAsBoolean());
-
-        setMutantsText(json.getAsJsonPrimitive(MUTANTS_TEXT).getAsString());
-        setTestCasesText(json.getAsJsonPrimitive(TEST_CASES_TEXT).getAsString());
 
         operators.addAll(MutationOperator.getAllOperators());
         operators.forEach(operator -> {
@@ -232,10 +222,17 @@ public class MutationTestPlan extends HighLevelModelObject {
         }
     }
 
+    /**
+     * Gets the mutation operators selected by the user.
+     * @return the selected operators
+     */
     public List<MutationOperator> getSelectedMutationOperators() {
         return getOperators().stream().filter(MutationOperator::isSelected).collect(Collectors.toList());
     }
 
+    /**
+     * Clears the texts about mutants and test-cases.
+     */
     public void clearResults() {
         setMutantsText("");
         setTestCasesText("");

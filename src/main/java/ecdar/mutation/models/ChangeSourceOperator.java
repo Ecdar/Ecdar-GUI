@@ -10,16 +10,11 @@ import java.util.List;
 /**
  * Generates mutants from a component.
  * Each mutant has a changed source location on an edge.
- * Generates # of edges * (# of locations - 1) mutants.
  */
 class ChangeSourceOperator extends MutationOperator {
 
-    /**
-     * Computes mutants.
-     * @return the computed mutants
-     */
     @Override
-    public List<Component> compute(final Component original) {
+    public List<Component> generate(final Component original) {
         final List<Component> mutants = new ArrayList<>();
 
         // For all edges in the original component

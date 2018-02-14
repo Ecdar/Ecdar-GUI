@@ -1,6 +1,9 @@
 package ecdar.mutation;
 
-import com.jfoenix.controls.*;
+import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXCheckBox;
+import com.jfoenix.controls.JFXComboBox;
+import com.jfoenix.controls.JFXTextField;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.mutation.models.MutationTestPlan;
@@ -88,22 +91,36 @@ public class MutationTestPlanController {
         getPlan().setStatus(MutationTestPlan.Status.STOPPING);
     }
 
+    /**
+     * Writes progress to the user.
+     * @param message the message to display
+     */
     public void writeProgress(final String message) {
         final Text text = new Text(message);
         text.setFill(Color.web("#333333"));
         writeProgress(text);
     }
 
+    /**
+     * Writes progress to the user.
+     * @param text the message to display
+     */
     private void writeProgress(final Text text) {
         progressTextFlow.getChildren().clear();
         progressTextFlow.getChildren().add(text);
     }
 
+    /**
+     * Opens dialog to select a SUT.
+     */
     public void onSelectSutButtonPressed() {
         sutPathLabel.setText("The\\Path\\To\\My\\System\\Under\\Test");
         // TODO implement
     }
 
+    /**
+     * Starts exporting.
+     */
     public void onExportButtonPressed() {
         getPlan().clearResults();
         new ExportHandler(getPlan(), Ecdar.getProject().findComponent(modelPicker.getValue().getText()), this::writeProgress).start();

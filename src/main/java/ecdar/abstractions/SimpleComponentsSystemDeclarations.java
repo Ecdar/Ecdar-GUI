@@ -1,13 +1,11 @@
 package ecdar.abstractions;
 
-import ecdar.abstractions.Component;
-import ecdar.abstractions.Declarations;
-
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Systems declarations for some components.
+ * The generation text will be generated.
  */
 public class SimpleComponentsSystemDeclarations extends Declarations {
     public SimpleComponentsSystemDeclarations(final Component ... components) {

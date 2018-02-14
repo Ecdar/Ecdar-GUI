@@ -130,18 +130,6 @@ public class Component extends HighLevelModelObject implements Boxed {
 
     /**
      * Applies angelic completion on this component.
-     *
-     * Each guard must be empty or of the form:
-     * [optional whitespace]
-     * [id or integer]
-     * [optional whitespace]
-     * [one of the operators <, <=, >, >=]
-     * [optional whitespace][id or integer]
-     * [optional whitespace]
-     *
-     * Regex: ^\s*(\w+)\s*(<|<=|>|>=)\s*(\w+)\s*$
-     *
-     * For instance, no conjunction allowed in a guard.
      */
     public void applyAngelicCompletion() {
         // Cache input signature, since it could be updated when added edges
@@ -219,18 +207,6 @@ public class Component extends HighLevelModelObject implements Boxed {
 
     /**
      * Applies demonic completion on this component.
-     *
-     * Each guard must be empty or of the form:
-     * [optional whitespace]
-     * [id or integer]
-     * [optional whitespace]
-     * [one of the operators <, <=, >, >=]
-     * [optional whitespace][id or integer]
-     * [optional whitespace]
-     *
-     * Regex: ^\s*(\w+)\s*(<|<=|>|>=)\s*(\w+)\s*$
-     *
-     * For instance, no conjunction allowed in a guard.
      */
     public void applyDemonicCompletion() {
         // Make a universal location
@@ -317,26 +293,6 @@ public class Component extends HighLevelModelObject implements Boxed {
                 break;
             default:
                 throw new RuntimeException("Type of expression " + guardExpression + " not accepted. It should be a variable, conjunction, or disjunction");
-        }
-    }
-
-    /**
-     * Negates one of the operators <, <=, >, >=.
-     * @param operator the operator to negate
-     * @return the negated operator
-     */
-    private static String negateOperator(final String operator) {
-        switch (operator) {
-            case "<":
-                return ">=";
-            case "<=":
-                return ">";
-            case ">":
-                return "<=";
-            case ">=":
-                return "<";
-            default:
-                throw new RuntimeException("Unexpected operator \"" + operator + "\"");
         }
     }
 

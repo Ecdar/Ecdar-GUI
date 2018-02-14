@@ -28,6 +28,9 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+/**
+ * Handler for generating test-cases.
+ */
 class TestCaseGenerationHandler {
     private final static String TEST_MODEL_NAME = "S";
     private final static String MUTANT_NAME = "M";
@@ -74,6 +77,9 @@ class TestCaseGenerationHandler {
         return plan;
     }
 
+    /**
+     * Generates mutants and test-cases from them.
+     */
     void start() {
         getPlan().setStatus(MutationTestPlan.Status.WORKING);
 
@@ -85,7 +91,7 @@ class TestCaseGenerationHandler {
         // Mutate with selected operators
         mutants = new ArrayList<>();
         try {
-            for (final MutationOperator operator : getPlan().getSelectedMutationOperators()) mutants.addAll(operator.compute(getTestModel()));
+            for (final MutationOperator operator : getPlan().getSelectedMutationOperators()) mutants.addAll(operator.generate(getTestModel()));
         } catch (final MutationTestingException e) {
             handleException(e);
             return;
@@ -155,6 +161,10 @@ class TestCaseGenerationHandler {
         }
     }
 
+    /**
+     * Writes progress.
+     * @param message the message describing the progress
+     */
     private void writeProgress(final String message) {
         final Text text = new Text(message);
         text.setFill(Color.web("#333333"));
@@ -224,6 +234,13 @@ class TestCaseGenerationHandler {
         }).start();
     }
 
+    /**
+     * Handles a mutation testing exception.
+     * Signal the test plan to stop.
+     * Writes an error message with the progress handler.
+     * Shows an error message with the toast.
+     * @param e the exception to handle
+     */
     private void handleException(final MutationTestingException e) {
         e.printStackTrace();
 

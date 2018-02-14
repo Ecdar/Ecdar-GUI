@@ -24,12 +24,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class ExportHandler {
+/**
+ * Handles generation and export of mutants.
+ */
+class ExportHandler {
     private final MutationTestPlan plan;
-
-    public Component getTestModel() {
-        return testModel;
-    }
 
     private final Component testModel;
     private final Consumer<Text> progressWriter;
@@ -40,10 +39,21 @@ public class ExportHandler {
         this.progressWriter = progressWriter;
     }
 
-    public MutationTestPlan getPlan() {
+    private Component getTestModel() {
+        return testModel;
+    }
+
+    private MutationTestPlan getPlan() {
         return plan;
     }
 
+    private Consumer<Text> getProgressWriter() {
+        return progressWriter;
+    }
+
+    /**
+     * Starts the export.
+     */
     void start() {
         getPlan().setStatus(MutationTestPlan.Status.WORKING);
 
@@ -52,7 +62,7 @@ public class ExportHandler {
         // Mutate with selected operators
         final List<Component> mutants = new ArrayList<>();
         try {
-            for (final MutationOperator operator : getPlan().getSelectedMutationOperators()) mutants.addAll(operator.compute(getTestModel()));
+            for (final MutationOperator operator : getPlan().getSelectedMutationOperators()) mutants.addAll(operator.generate(getTestModel()));
         } catch (final MutationTestingException e) {
             handleException(e);
             return;
@@ -110,7 +120,15 @@ public class ExportHandler {
         }
     }
 
-    private void storeMutantXml(final Component mutant, final int index) throws BackendException, IOException, URISyntaxException {
+    /**
+     * Stores a mutant as an XML file.
+     * @param mutant the mutant
+     * @param index the index of the mutant. This is used in the file name
+     * @throws BackendException if an error occurs during generation of backend XML
+     * @throws IOException if an error occurs during storing of the file
+     * @throws URISyntaxException if an error occurs when getting the URL of the root directory
+     */
+    private static void storeMutantXml(final Component mutant, final int index) throws BackendException, IOException, URISyntaxException {
         // make a project with the mutant
         final Project project = new Project();
         project.getComponents().add(mutant);
@@ -121,17 +139,25 @@ public class ExportHandler {
         UPPAALDriver.storeBackendModel(project, "mutants" + File.separator + "xml", "model" + index);
     }
 
-    private void storeMutantJson(final Component component, final int index) throws URISyntaxException, IOException {
+    /**
+     * Stores a mutant as a JSON file.
+     * @param component the mutant
+     * @param index the index of the mutant. This is used in the file name
+     * @throws IOException if an error occurs during storing of the file
+     * @throws URISyntaxException if an error occurs when getting the URL of the root directory
+     */
+    private static void storeMutantJson(final Component component, final int index) throws URISyntaxException, IOException {
         final FileWriter writer = new FileWriter(Ecdar.getRootDirectory() + File.separator + "mutants" + File.separator + "json" + File.separator + "model" + index + ".json");
 
         new GsonBuilder().setPrettyPrinting().create().toJson(component.serialize(), writer);
         writer.close();
     }
 
-    public Consumer<Text> getProgressWriter() {
-        return progressWriter;
-    }
-
+    /**
+     * Handles a mutation test exception.
+     * Displays a message to the user.
+     * @param e the exception
+     */
     private void handleException(final MutationTestingException e) {
         e.printStackTrace();
 
