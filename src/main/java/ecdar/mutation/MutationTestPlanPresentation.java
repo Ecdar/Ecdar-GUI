@@ -10,10 +10,13 @@ import ecdar.mutation.models.MutationTestPlan;
 import ecdar.presentations.EcdarFXMLLoader;
 import ecdar.presentations.HighLevelModelPresentation;
 import javafx.collections.ListChangeListener;
+import javafx.event.EventHandler;
+import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
 
 import java.time.Duration;
@@ -290,6 +293,8 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
 
     /**
      * Installs a tooltip on a control.
+     * The tooltip is shown without delay on mouse entered.
+     * The tooltip does not disappear after some time.
      * @param control the control
      * @param text the text of the tooltip
      */
@@ -297,7 +302,13 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         final Tooltip tooltip = new Tooltip(text);
         tooltip.setPrefWidth(250);
         tooltip.setWrapText(true);
-        control.setTooltip(tooltip);
+
+        // Show the tooltip at the bottom right of the control as to not trigger on mouse existed
+        control.setOnMouseEntered(event -> {
+            final Point2D point = control.localToScreen(control.getLayoutBounds().getMaxX(), control.getLayoutBounds().getMaxY());
+            tooltip.show(control, point.getX(), point.getY());
+        });
+        control.setOnMouseExited(event -> tooltip.hide());
     }
 
     /**
