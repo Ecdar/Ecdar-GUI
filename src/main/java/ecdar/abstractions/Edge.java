@@ -160,7 +160,7 @@ public class Edge implements Serializable, Nearable {
         return update.get();
     }
 
-    private void setUpdate(final String update) {
+    public void setUpdate(final String update) {
         this.update.set(update);
     }
 
@@ -468,6 +468,18 @@ public class Edge implements Serializable, Nearable {
         nail.setPropertyType(PropertyType.GUARD);
         addNail(nail);
         setGuard(guard);
+    }
+
+    /**
+     * Adds an update nail at (0, 0).
+     * Adds a specified update property the this edge.
+     * @param update the specified update property
+     */
+    public void addUpdateNail(final String update) {
+        final Nail nail = new Nail(0, 0);
+        nail.setPropertyType(PropertyType.UPDATE);
+        addNail(nail);
+        setUpdate(update);
     }
 
 }

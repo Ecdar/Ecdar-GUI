@@ -20,6 +20,8 @@ import javafx.collections.ObservableList;
 import javafx.util.Pair;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -703,5 +705,15 @@ public class Component extends HighLevelModelObject implements Boxed {
     @Override
     public Box getBox() {
         return box;
+    }
+
+    public List<String> getClocks() {
+        final List<String> clocks = new ArrayList<>();
+
+        final Matcher matcher = Pattern.compile("^.*clock\\s+([^;]+);.*$").matcher(getDeclarationsText());
+
+        if (!matcher.find()) return clocks;
+
+        return Arrays.stream(matcher.group(1).split(",")).map(String::trim).collect(Collectors.toList());
     }
 }

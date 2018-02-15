@@ -4,12 +4,15 @@ import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
 import ecdar.abstractions.EdgeStatus;
 import ecdar.abstractions.Location;
-import ecdar.mutation.MutationTestingException;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * A mutation operator that changes an edge to go to a new sink location.
+ * A sink location accepts (but ignores) all inputs and allows for time to pass.
+ */
 public class SinkLocationOperator extends MutationOperator {
     @Override
     public String getText() {
@@ -36,7 +39,7 @@ public class SinkLocationOperator extends MutationOperator {
 
             // Mutate
             final Edge mutantEdge = mutant.getEdges().get(edgeIndex);
-            mutantEdge.setTargetLocation(createSinkLocation(mutant));
+            mutantEdge.setTargetLocation(addSinkLocation(mutant));
 
             mutants.add(mutant);
         }
@@ -49,7 +52,7 @@ public class SinkLocationOperator extends MutationOperator {
      * @param component the component to add the sink to
      * @return the sink location
      */
-    private static Location createSinkLocation(final Component component) {
+    private static Location addSinkLocation(final Component component) {
         final Location sink = new Location();
         component.addLocation(sink);
 

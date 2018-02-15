@@ -5,6 +5,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.List;
+
 public class ComponentTest {
 
     @Before
@@ -293,5 +295,48 @@ public class ComponentTest {
         Assert.assertEquals("x - y <= 3 + n % 5", edge.getGuard());
         Assert.assertEquals(l1, edge.getSourceLocation());
         Assert.assertEquals(l1, edge.getTargetLocation());
+    }
+
+    @Test
+    public void testGetClock() {
+        final Component c = new Component();
+        c.setDeclarationsText("clock a;");
+
+        final List<String> clocks = c.getClocks();
+
+        Assert.assertEquals(1, clocks.size());
+        Assert.assertEquals("a", clocks.get(0));
+    }
+
+    @Test
+    public void testGet2Clocks() {
+        final Component c = new Component();
+        c.setDeclarationsText("clock a, b;");
+
+        final List<String> clocks = c.getClocks();
+
+        Assert.assertEquals(2, clocks.size());
+        Assert.assertEquals("a", clocks.get(0));
+        Assert.assertEquals("b", clocks.get(1));
+    }
+
+    @Test
+    public void testGetClocksEmpty() {
+        final Component c = new Component();
+        c.setDeclarationsText("");
+
+        final List<String> clocks = c.getClocks();
+
+        Assert.assertEquals(0, clocks.size());
+    }
+
+    @Test
+    public void testGetClocksNoClock() {
+        final Component c = new Component();
+        c.setDeclarationsText("int i = 0;\nint n = 2;");
+
+        final List<String> clocks = c.getClocks();
+
+        Assert.assertEquals(0, clocks.size());
     }
 }

@@ -53,6 +53,7 @@ public abstract class MutationOperator {
         operators.add(new ChangeSourceOperator());
         operators.add(new ChangeTargetOperator());
         operators.add(new ChangeGuardOperator());
+        operators.add(new InvertResetOperator());
         operators.add(new SinkLocationOperator());
 
         return operators;
