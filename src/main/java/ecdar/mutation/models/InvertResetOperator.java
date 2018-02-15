@@ -10,8 +10,6 @@ import java.util.List;
 
 /**
  * Mutation operator that inverts a clock reset on an update property.
- * If the clock was reset, the clock is no longer reset.
- * If the clock was not reset, the clock is now reset.
  */
 public class InvertResetOperator extends MutationOperator {
     @Override
@@ -20,7 +18,7 @@ public class InvertResetOperator extends MutationOperator {
     }
 
     @Override
-    String getJsonName() {
+    public String getJsonName() {
         return "invertReset";
     }
 
@@ -51,6 +49,14 @@ public class InvertResetOperator extends MutationOperator {
         }
 
         return mutants;
+    }
+
+    @Override
+    public String getDescription() {
+        return "Inverts a clock reset on an update property. " +
+                "If the clock was reset, the reset will be removed. " +
+                "If the clock was not reset, a reset will be added. " +
+                "Creates [# of edges] * [# of clocks] mutants.";
     }
 
     /**

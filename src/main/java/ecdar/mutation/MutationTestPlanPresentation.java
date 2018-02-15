@@ -162,6 +162,8 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
             final JFXCheckBox checkBox = new JFXCheckBox(operator.getText());
             checkBox.selectedProperty().bindBidirectional(operator.selectedProperty());
             controller.operatorsArea.getChildren().add(checkBox);
+
+            installTooltip(checkBox, operator.getDescription());
         }
     }
 

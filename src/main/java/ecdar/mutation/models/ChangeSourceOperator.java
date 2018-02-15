@@ -12,6 +12,15 @@ import java.util.List;
  * Each mutant has a changed source location on an edge.
  */
 class ChangeSourceOperator extends MutationOperator {
+    @Override
+    public String getText() {
+        return "Change source";
+    }
+
+    @Override
+    public String getJsonName() {
+        return "changeSource";
+    }
 
     @Override
     public List<Component> generate(final Component original) {
@@ -50,12 +59,8 @@ class ChangeSourceOperator extends MutationOperator {
     }
 
     @Override
-    public String getText() {
-        return "Change source.";
-    }
-
-    @Override
-    String getJsonName() {
-        return "changeSource";
+    public String getDescription() {
+        return "Changes the source location of an edge. " +
+               "Creates up to ([# of locations] - 1) * [# of edges] mutants.";
     }
 }

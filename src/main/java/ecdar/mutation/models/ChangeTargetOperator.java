@@ -13,6 +13,16 @@ import java.util.List;
  */
 public class ChangeTargetOperator extends MutationOperator {
     @Override
+    public String getText() {
+        return "Change target";
+    }
+
+    @Override
+    public String getJsonName() {
+        return "changeTarget";
+    }
+
+    @Override
     public List<Component> generate(final Component original) {
         final List<Component> mutants = new ArrayList<>();
 
@@ -42,12 +52,8 @@ public class ChangeTargetOperator extends MutationOperator {
     }
 
     @Override
-    public String getText() {
-        return "Change target.";
-    }
-
-    @Override
-    String getJsonName() {
-        return "changeTarget";
+    public String getDescription() {
+        return "Changes the target location of an edge. " +
+                "Creates up to ([# of locations] - 1) * [# of edges] mutants.";
     }
 }

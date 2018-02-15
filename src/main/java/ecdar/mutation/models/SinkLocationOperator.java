@@ -20,7 +20,7 @@ public class SinkLocationOperator extends MutationOperator {
     }
 
     @Override
-    String getJsonName() {
+    public String getJsonName() {
         return "sinkLocation";
     }
 
@@ -45,6 +45,13 @@ public class SinkLocationOperator extends MutationOperator {
         }
 
         return mutants;
+    }
+
+    @Override
+    public String getDescription() {
+        return "Changes the target location of an edge to a new sink location. " +
+               "Sink locations accept, but ignore, all inputs." +
+               "Creates up to [# of edges] mutants.";
     }
 
     /**

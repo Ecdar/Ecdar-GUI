@@ -25,7 +25,7 @@ public class ChangeGuardOperator extends MutationOperator {
     }
 
     @Override
-    String getJsonName() {
+    public String getJsonName() {
         return "changeGuard";
     }
 
@@ -74,6 +74,13 @@ public class ChangeGuardOperator extends MutationOperator {
         }
 
         return mutants;
+    }
+
+    @Override
+    public String getDescription() {
+        return "Changes one of the operators <, <=, >, >=, !=, == of a guard " +
+                "to one of the operators <, <=, >, >=, ==. " +
+                "Creates up to 5 * [# of uses of operators in guards] mutants.";
     }
 
     /**

@@ -27,13 +27,20 @@ public abstract class MutationOperator {
         this.selected.set(selected);
     }
 
+
+    /* Abstract methods */
+
     /**
      * Gets a readable text to display.
      * @return the text
      */
     public abstract String getText();
 
-    abstract String getJsonName();
+    /**
+     * Gets a string for storing and retrieving with JSON.
+     * @return the string
+     */
+    public abstract String getJsonName();
 
     /**
      * Generates mutants.
@@ -44,10 +51,19 @@ public abstract class MutationOperator {
     public abstract Collection<? extends Component> generate(final Component original) throws MutationTestingException;
 
     /**
+     * Gets a description of the operator to use as a tooltip.
+     * @return the description
+     */
+    public abstract String getDescription();
+
+
+    /* Other methods */
+
+    /**
      * Gets all available mutation operators.
      * @return the operators
      */
-    static List<MutationOperator> getAllOperators() {
+    public static List<MutationOperator> getAllOperators() {
         final List<MutationOperator> operators = new ArrayList<>();
 
         operators.add(new ChangeSourceOperator());
