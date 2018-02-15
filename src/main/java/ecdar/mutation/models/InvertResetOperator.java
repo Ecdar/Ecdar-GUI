@@ -5,7 +5,6 @@ import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -23,7 +22,7 @@ public class InvertResetOperator extends MutationOperator {
     }
 
     @Override
-    public Collection<? extends Component> generate(final Component original) {
+    public List<Component> generate(final Component original) {
         final List<String> clocks = original.getClocks();
 
         final List<Component> mutants = new ArrayList<>();
@@ -54,8 +53,8 @@ public class InvertResetOperator extends MutationOperator {
     @Override
     public String getDescription() {
         return "Inverts a clock reset on an update property. " +
-                "If the clock was reset, the reset will be removed. " +
-                "If the clock was not reset, a reset will be added. " +
+                "If the clock was originally reset, the reset will be removed. " +
+                "Otherwise, a reset will be added. " +
                 "Creates [# of edges] * [# of clocks] mutants.";
     }
 

@@ -48,7 +48,7 @@ public abstract class MutationOperator {
      * @return the generated mutants
      * @throws MutationTestingException if a mutation error happens
      */
-    public abstract Collection<? extends Component> generate(final Component original) throws MutationTestingException;
+    public abstract List<Component> generate(final Component original) throws MutationTestingException;
 
     /**
      * Gets a description of the operator to use as a tooltip.
@@ -69,8 +69,9 @@ public abstract class MutationOperator {
         operators.add(new ChangeSourceOperator());
         operators.add(new ChangeTargetOperator());
         operators.add(new ChangeGuardOperator());
-        operators.add(new InvertResetOperator());
+        operators.add(new ChangeInvariantOperator());
         operators.add(new SinkLocationOperator());
+        operators.add(new InvertResetOperator());
 
         return operators;
     }

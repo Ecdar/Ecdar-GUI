@@ -6,7 +6,6 @@ import ecdar.abstractions.EdgeStatus;
 import ecdar.abstractions.Location;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -25,7 +24,7 @@ public class SinkLocationOperator extends MutationOperator {
     }
 
     @Override
-    public Collection<? extends Component> generate(final Component original) {
+    public List<Component> generate(final Component original) {
         final List<Component> mutants = new ArrayList<>();
 
         // For all edges in the original component

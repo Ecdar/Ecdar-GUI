@@ -5,7 +5,6 @@ import ecdar.abstractions.Edge;
 import ecdar.mutation.MutationTestingException;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,7 +29,7 @@ public class ChangeGuardOperator extends MutationOperator {
     }
 
     @Override
-    public Collection<? extends Component> generate(final Component original) throws MutationTestingException {
+    public List<Component> generate(final Component original) throws MutationTestingException {
         final List<Component> mutants = new ArrayList<>();
 
         // Do not use != as this is not allowed for timing constrains
@@ -52,23 +51,23 @@ public class ChangeGuardOperator extends MutationOperator {
             // Ignore if guard is empty
             if (originalEdge.getGuard().isEmpty()) continue;
 
-            final String[] simpleGuards = originalEdge.getGuard().split("&&");
-            for (int simpleGuardIndex = 0; simpleGuardIndex < simpleGuards.length; simpleGuardIndex++) {
-                final String simpleGuard = simpleGuards[simpleGuardIndex];
+            final String[] guardParts = originalEdge.getGuard().split("&&");
+            for (int partIndex = 0; partIndex < guardParts.length; partIndex++) {
+                final String part = guardParts[partIndex];
 
-                final Matcher matcher = Pattern.compile(REGEX_SIMPLE_GUARD).matcher(simpleGuard);
+                final Matcher matcher = Pattern.compile(REGEX_SIMPLE_GUARD).matcher(part);
 
                 if (!matcher.find()) {
-                    throw new MutationTestingException("Guard " + simpleGuard + " does not match pattern " + REGEX_SIMPLE_GUARD);
+                    throw new MutationTestingException("Guard part " + part + " does not match pattern " + REGEX_SIMPLE_GUARD);
                 }
 
                 // Create a mutant for each other operator
-                final int finalSimpleGuardIndex = simpleGuardIndex;
+                final int finalPartIndex = partIndex;
                 operators.forEach(operator -> {
                     // If operator is the same as with the original, ignore
                     if (matcher.group(2).equals(operator)) return;
 
-                    mutants.add(createMutant(original, simpleGuards, matcher.group(1) + operator + matcher.group(3), finalSimpleGuardIndex, finalEdgeIndex));
+                    mutants.add(createMutant(original, guardParts, matcher.group(1) + operator + matcher.group(3), finalPartIndex, finalEdgeIndex));
                 });
             }
         }
