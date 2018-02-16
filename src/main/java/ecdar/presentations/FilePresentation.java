@@ -140,6 +140,8 @@ public class FilePresentation extends AnchorPane {
             controller.fileImage.setImage(new Image(Ecdar.class.getResource("component_frame.png").toExternalForm()));
         } else if(model.get() instanceof EcdarSystem){
             controller.fileImage.setImage(new Image(Ecdar.class.getResource("system_frame.png").toExternalForm()));
+        } else if(model.get() instanceof MutationTestPlan){
+            controller.fileImage.setImage(new Image(Ecdar.class.getResource("test_frame.png").toExternalForm()));
         } else {
             controller.fileImage.setImage(new Image(Ecdar.class.getResource("description_frame.png").toExternalForm()));
         }

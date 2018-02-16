@@ -158,18 +158,6 @@
                         </graphic>
                     </MenuItem>
 
-                    <MenuItem text="New Test Plan">
-                        <graphic>
-                            <FontIcon iconLiteral="gmi-check-circle" iconSize="24" fill="black"/>
-                        </graphic>
-                    </MenuItem>
-
-                    <MenuItem text="New Test Plan">
-                        <graphic>
-                            <FontIcon iconLiteral="gmi-assessment" iconSize="24" fill="black"/>
-                        </graphic>
-                    </MenuItem>
-
                     <SeparatorMenuItem/>
 
                     <MenuItem fx:id="menuBarFileExportAsPng" text="Export as Png">
