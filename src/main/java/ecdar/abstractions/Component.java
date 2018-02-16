@@ -1,8 +1,11 @@
 package ecdar.abstractions;
 
+import com.bpodgursky.jbool_expressions.*;
+import com.bpodgursky.jbool_expressions.rules.RuleSet;
 import ecdar.Ecdar;
 import ecdar.controllers.EcdarController;
 import ecdar.presentations.Grid;
+import ecdar.utility.ExpressionHelper;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
 import ecdar.utility.colors.EnabledColor;
@@ -106,6 +109,8 @@ public class Component extends HighLevelModelObject implements Boxed {
         final Component clone = new Component();
         clone.addVerificationObjects(this);
 
+        clone.setIncludeInPeriodicCheck(false);
+
         return clone;
     }
 
@@ -127,83 +132,83 @@ public class Component extends HighLevelModelObject implements Boxed {
 
     /**
      * Applies angelic completion on this component.
-     *
-     * Each guard must be empty or of the form:
-     * [optional whitespace]
-     * [id or integer]
-     * [optional whitespace]
-     * [one of the operators <, <=, ==, !=, >, >=]
-     * [optional whitespace][id or integer]
-     * [optional whitespace]
-     *
-     * Regex: ^\s*(\w+)\s*(<|<=|==|!=|>|>=)\s*(\w+)\s*$
-     *
-     * For instance, no conjunction allowed in a guard.
      */
     public void applyAngelicCompletion() {
         // Cache input signature, since it could be updated when added edges
         final List<String> inputStrings = new ArrayList<>(getInputStrings());
 
-        for (final Location location : getLocations()) {
-            for (final String input : inputStrings) {
-                // Get outgoing input edges that has the chosen input
-                final List<Edge> matchingEdges = getOutgoingEdges(location).stream().filter(
-                        edge -> edge.getStatus().equals(EdgeStatus.INPUT) &&
-                                edge.getSync().equals(input)).collect(Collectors.toList()
-                );
+        getLocations().forEach(location -> inputStrings.forEach(input -> {
+            // Get outgoing input edges that has the chosen input
+            final List<Edge> matchingEdges = getOutgoingEdges(location).stream().filter(
+                    edge -> edge.getStatus().equals(EdgeStatus.INPUT) &&
+                            edge.getSync().equals(input)).collect(Collectors.toList()
+            );
 
-                // If no such edges, add a self loop without a guard
-                if (matchingEdges.isEmpty()) {
-                    final Edge edge = new Edge(location, EdgeStatus.INPUT);
-                    edge.setTargetLocation(location);
-                    edge.addSyncNail(input);
-                    addEdge(edge);
-                    continue;
-                }
-
-                // if an edge has no guard, ignore.
-                // component is already input-enabled with respect to this location and input.
-                if (matchingEdges.stream().anyMatch(edge -> edge.getGuard().isEmpty())) continue;
-
-                // Make a self loop with a guard that is the negation of the guards in the matching edges
-                final List<String> negatedGuards = new ArrayList<>();
-                for (final Edge matchingEdge : matchingEdges) {
-                    final String guard = matchingEdge.getGuard();
-                    final Matcher matcher = Pattern.compile("^\\s*(\\w+)\\s*(<|<=|==|!=|>|>=)\\s*(\\w+)\\s*$").matcher(guard);
-
-                    if (!matcher.find()) {
-                        throw new RuntimeException("Guard \"" + guard + "\" did not match expected pattern");
-                    }
-
-                    // We negate each guard
-                    negatedGuards.add(matcher.group(1) + negateOperator(matcher.group(2)) + matcher.group(3));
-                }
-
+            // If no such edges, add a self loop without a guard
+            if (matchingEdges.isEmpty()) {
                 final Edge edge = new Edge(location, EdgeStatus.INPUT);
                 edge.setTargetLocation(location);
                 edge.addSyncNail(input);
-                // Multiple edges are a disjunction.
-                // To negate, we use conjunction.
-                edge.addGuardNail(String.join("&&", negatedGuards));
                 addEdge(edge);
+                return;
             }
+
+            // if an edge has no guard, ignore.
+            // component is already input-enabled with respect to this location and input.
+            if (matchingEdges.stream().anyMatch(edge -> edge.getGuard().isEmpty())) return;
+
+            // There could be multiple matching edges, which is a disjunction of guards.
+            // There could be conjunction in guards.
+            // Convert the matching guards to such a boolean expression.
+            // Negate the expression to create self loops for the missing inputs.
+            // Convert to disjunctive normal form to make into multiple edges (disjunctions),
+            // each with a conjunction of simple expressions.
+            createAngelicSelfLoops(location, input, ExpressionHelper.simplifyNegatedSimpleExpressions(
+                    RuleSet.toCNF(Not.of(ExpressionHelper.parseDisjunctionOfGuards(matchingEdges.stream()
+                            .map(Edge::getGuard)
+                            .collect(Collectors.toList()))
+                    ))));
+        }));
+    }
+
+    /**
+     * Creates self loops on a location to finish missing inputs with an angelic completion.
+     * @param location the location to create self loops on
+     * @param input the input action to use in the synchronization properties
+     * @param guardExpression the expression that represents the guards of the self loops
+     */
+    private void createAngelicSelfLoops(final Location location, final String input, final Expression<String> guardExpression) {
+        final Edge edge;
+
+        switch (guardExpression.getExprType()) {
+            case Variable.EXPR_TYPE:
+                edge = new Edge(location, EdgeStatus.INPUT);
+                edge.setTargetLocation(location);
+                edge.addSyncNail(input);
+                edge.addGuardNail(((Variable<String>) guardExpression).getValue());
+                addEdge(edge);
+                break;
+            case And.EXPR_TYPE:
+                edge = new Edge(location, EdgeStatus.INPUT);
+                edge.setTargetLocation(location);
+                edge.addSyncNail(input);
+                edge.addGuardNail(String.join("&&",
+                        ((And<String>) guardExpression).getChildren().stream()
+                                .map(child -> ((Variable<String>) child).getValue())
+                                .collect(Collectors.toList())
+                ));
+                addEdge(edge);
+                break;
+            case Or.EXPR_TYPE:
+                ((Or<String>) guardExpression).getChildren().forEach(child -> createAngelicSelfLoops(location, input, child));
+                break;
+            default:
+                throw new RuntimeException("Type of expression " + guardExpression + " not accepted. It should be a variable, conjunction, or disjunction");
         }
     }
 
     /**
      * Applies demonic completion on this component.
-     *
-     * Each guard must be empty or of the form:
-     * [optional whitespace]
-     * [id or integer]
-     * [optional whitespace]
-     * [one of the operators <, <=, ==, !=, >, >=]
-     * [optional whitespace][id or integer]
-     * [optional whitespace]
-     *
-     * Regex: ^\s*(\w+)\s*(<|<=|==|!=|>|>=)\s*(\w+)\s*$
-     *
-     * For instance, no conjunction allowed in a guard.
      */
     public void applyDemonicCompletion() {
         // Make a universal location
@@ -221,73 +226,75 @@ public class Component extends HighLevelModelObject implements Boxed {
         // Cache input signature, since it could be updated when added edges
         final List<String> inputStrings = new ArrayList<>(getInputStrings());
 
-        for (final Location location : getLocations()) {
-            for (final String input : inputStrings) {
-                // Get outgoing input edges that has the chosen input
-                final List<Edge> matchingEdges = getOutgoingEdges(location).stream().filter(
-                        edge -> edge.getStatus().equals(EdgeStatus.INPUT) &&
-                                edge.getSync().equals(input)).collect(Collectors.toList()
-                );
+        getLocations().forEach(location -> inputStrings.forEach(input -> {
+            // Get outgoing input edges that has the chosen input
+            final List<Edge> matchingEdges = getOutgoingEdges(location).stream().filter(
+                    edge -> edge.getStatus().equals(EdgeStatus.INPUT) &&
+                            edge.getSync().equals(input)).collect(Collectors.toList()
+            );
 
-                // If no such edges, add an edge to Universal
-                if (matchingEdges.isEmpty()) {
-                    final Edge edge = new Edge(location, EdgeStatus.INPUT);
-                    edge.setTargetLocation(uniLocation);
-                    edge.addSyncNail(input);
-                    addEdge(edge);
-                    continue;
-                }
-
-                // if an edge has no guard, ignore.
-                // component is already input-enabled with respect to this location and input.
-                if (matchingEdges.stream().anyMatch(edge -> edge.getGuard().isEmpty())) continue;
-
-                // Make an edge to Universal with a guard that is the negation of the guards in the matching edges
-                final List<String> negatedGuards = new ArrayList<>();
-                for (final Edge matchingEdge : matchingEdges) {
-                    final String guard = matchingEdge.getGuard();
-                    final Matcher matcher = Pattern.compile("^\\s*(\\w+)\\s*(<|<=|==|!=|>|>=)\\s*(\\w+)\\s*$").matcher(guard);
-
-                    if (!matcher.find()) {
-                        throw new RuntimeException("Guard \"" + guard + "\" did not match expected pattern");
-                    }
-
-                    // We negate each guard
-                    negatedGuards.add(matcher.group(1) + negateOperator(matcher.group(2)) + matcher.group(3));
-                }
-
+            // If no such edges, add an edge to Universal
+            if (matchingEdges.isEmpty()) {
                 final Edge edge = new Edge(location, EdgeStatus.INPUT);
                 edge.setTargetLocation(uniLocation);
                 edge.addSyncNail(input);
-                // Multiple edges are a disjunction.
-                // To negate, we use conjunction.
-                edge.addGuardNail(String.join("&&", negatedGuards));
                 addEdge(edge);
+                return;
             }
-        }
+
+            // if an edge has no guard, ignore.
+            // component is already input-enabled with respect to this location and input.
+            if (matchingEdges.stream().anyMatch(edge -> edge.getGuard().isEmpty())) return;
+
+            // There could be multiple matching edges, which is a disjunction of guards.
+            // There could be conjunction in guards.
+            // Convert the matching guards to such a boolean expression.
+            // Negate the expression to create edges to Universal for the missing inputs.
+            // Convert to disjunctive normal form to make into multiple edges (disjunctions),
+            // each with a conjunction of simple expressions.
+            createDemonicEdges(location, uniLocation, input, ExpressionHelper.simplifyNegatedSimpleExpressions(
+                    RuleSet.toCNF(Not.of(ExpressionHelper.parseDisjunctionOfGuards(matchingEdges.stream()
+                            .map(Edge::getGuard)
+                            .collect(Collectors.toList()))
+                    ))));
+        }));
     }
 
     /**
-     * Negates one of the operators <, <=, =, !=, >, >=.
-     * @param operator the operator to negate
-     * @return the negated operator
+     * Creates edges to a specified Universal location from a location
+     * in order to finish missing inputs with a demonic completion.
+     * @param location the location to create self loops on
+     * @param universal the Universal location to create edge to
+     * @param input the input action to use in the synchronization properties
+     * @param guardExpression the expression that represents the guards of the edges to create
      */
-    private static String negateOperator(final String operator) {
-        switch (operator) {
-            case "<":
-                return ">=";
-            case "<=":
-                return ">";
-            case "==":
-                return "!=";
-            case "!=":
-                return "==";
-            case ">":
-                return "<=";
-            case ">=":
-                return "<";
+    private void createDemonicEdges(final Location location, final Location universal, final String input, final Expression<String> guardExpression) {
+        final Edge edge;
+
+        switch (guardExpression.getExprType()) {
+            case Variable.EXPR_TYPE:
+                edge = new Edge(location, EdgeStatus.INPUT);
+                edge.setTargetLocation(universal);
+                edge.addSyncNail(input);
+                edge.addGuardNail(((Variable<String>) guardExpression).getValue());
+                addEdge(edge);
+                break;
+            case And.EXPR_TYPE:
+                edge = new Edge(location, EdgeStatus.INPUT);
+                edge.setTargetLocation(universal);
+                edge.addSyncNail(input);
+                edge.addGuardNail(String.join("&&",
+                        ((And<String>) guardExpression).getChildren().stream()
+                                .map(child -> ((Variable<String>) child).getValue())
+                                .collect(Collectors.toList())
+                ));
+                addEdge(edge);
+                break;
+            case Or.EXPR_TYPE:
+                ((Or<String>) guardExpression).getChildren().forEach(child -> createDemonicEdges(location, universal, input, child));
+                break;
             default:
-                throw new RuntimeException("Unexpected operator \"" + operator + "\"");
+                throw new RuntimeException("Type of expression " + guardExpression + " not accepted. It should be a variable, conjunction, or disjunction");
         }
     }
 
@@ -698,5 +705,15 @@ public class Component extends HighLevelModelObject implements Boxed {
     @Override
     public Box getBox() {
         return box;
+    }
+
+    public List<String> getClocks() {
+        final List<String> clocks = new ArrayList<>();
+
+        final Matcher matcher = Pattern.compile("^.*clock\\s+([^;]+);.*$").matcher(getDeclarationsText());
+
+        if (!matcher.find()) return clocks;
+
+        return Arrays.stream(matcher.group(1).split(",")).map(String::trim).collect(Collectors.toList());
     }
 }

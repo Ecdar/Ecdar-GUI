@@ -1,4 +1,4 @@
-package ecdar.mutation;
+package ecdar.mutation.models;
 
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
@@ -10,24 +10,20 @@ import java.util.List;
 /**
  * Generates mutants from a component.
  * Each mutant has a changed target location on an edge.
- * Generates # of edges * (# of locations - 1) mutants.
  */
-public class ChangeTargetOperator {
-    private final Component original;
-
-    /**
-     * Constructor.
-     * @param original component to mutate
-     */
-    public ChangeTargetOperator(final Component original) {
-        this.original = original;
+public class ChangeTargetOperator extends MutationOperator {
+    @Override
+    public String getText() {
+        return "Change target";
     }
 
-    /**
-     * Computes mutants.
-     * @return the computed mutants
-     */
-    public List<Component> computeMutants() {
+    @Override
+    public String getJsonName() {
+        return "changeTarget";
+    }
+
+    @Override
+    public List<Component> generate(final Component original) {
         final List<Component> mutants = new ArrayList<>();
 
         // For all edges in the original component
@@ -53,5 +49,11 @@ public class ChangeTargetOperator {
         }
 
         return mutants;
+    }
+
+    @Override
+    public String getDescription() {
+        return "Changes the target location of an edge. " +
+                "Creates up to ([# of locations] - 1) * [# of edges] mutants.";
     }
 }

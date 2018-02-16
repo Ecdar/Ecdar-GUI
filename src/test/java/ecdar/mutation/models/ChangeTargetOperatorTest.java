@@ -1,4 +1,4 @@
-package ecdar.mutation;
+package ecdar.mutation.models;
 
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
@@ -8,8 +8,6 @@ import ecdar.abstractions.Location;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 public class ChangeTargetOperatorTest {
 
@@ -50,6 +48,6 @@ public class ChangeTargetOperatorTest {
         component.addEdge(edge);
 
         // 5 edges, 4 locations. Expect 5 * (4 - 1) = 15 mutants
-        Assert.assertEquals(15, new ChangeTargetOperator(component).computeMutants().size());
+        Assert.assertEquals(15, new ChangeTargetOperator().generate(component).size());
     }
 }

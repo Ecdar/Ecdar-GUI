@@ -1,54 +1,54 @@
 package ecdar.mutation;
 
+import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXCheckBox;
+import com.jfoenix.controls.JFXComboBox;
+import com.jfoenix.controls.JFXTextField;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
-import ecdar.abstractions.Project;
-import ecdar.backend.BackendException;
-import ecdar.backend.UPPAALDriver;
-import com.jfoenix.controls.JFXButton;
-import com.jfoenix.controls.JFXComboBox;
-import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import ecdar.mutation.models.MutationTestPlan;
 import javafx.scene.control.Label;
-import org.apache.commons.io.FileUtils;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.List;
-import java.util.stream.Collectors;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 
 /**
  * Controller for a test plan with model-based mutation testing.
  */
 public class MutationTestPlanController {
-    private final static String TEST_MODEL_NAME = "S";
-    private final static String MUTANT_NAME = "M";
 
     // UI elements
-    public JFXComboBox<Label> testModelPicker;
+    public JFXComboBox<Label> modelPicker;
     public JFXButton testButton;
+    public JFXButton stopButton;
     public Label mutantsText;
     public Label testCasesText;
-    public Label progressText;
+    public JFXTextField generationThreadsField;
+    public VBox operatorsArea;
+    public JFXComboBox<Label> actionPicker;
+    public VBox testDependentArea;
+    public JFXButton selectSutButton;
+    public VBox exportDependantArea;
+    public VBox sutDependentArea;
+    public Label sutPathLabel;
+    public JFXComboBox<Label> formatPicker;
+    public VBox modelDependentArea;
+    public VBox resultsArea;
+    public VBox progressAres;
+    public JFXTextField suvInstancesField;
+    public JFXCheckBox demonicCheckBox;
+    public JFXCheckBox angelicBox;
+    public JFXButton storeMutantsButton;
+    public TextFlow progressTextFlow;
+    public HBox selectSutArea;
+    public VBox demonicArea;
+    public ScrollPane scrollPane;
 
     // Mutation objects
     private MutationTestPlan plan;
-    private List<Component> mutants;
-    private ObservableList<MutationTestCase> testCases;
-
-    // Progress fields
-    private int testCaseGenerationProgress;
-    private Instant generationStart;
-    private String queryFilePath;
 
     public MutationTestPlan getPlan() {
         return plan;
@@ -63,145 +63,66 @@ public class MutationTestPlanController {
      * Conducts the test.
      */
     public void onTestButtonPressed() {
-        testButton.setDisable(true);
+        getPlan().clearResults();
 
         // Find test model from test model picker
         // Clone it, because we want to change its name
-        final Component testModel = Ecdar.getProject().findComponent(testModelPicker.getValue().getText()).cloneForVerification();
-        testModel.setName(TEST_MODEL_NAME);
-        testModel.updateIOList();
+        final Component testModel = Ecdar.getProject().findComponent(modelPicker.getValue().getText()).cloneForVerification();
 
-        // Mutate and make input-enabled with angelic completion
-        final Instant start = Instant.now();
-        mutants = new ChangeSourceOperator(testModel).computeMutants();
-        mutants.addAll(new ChangeTargetOperator(testModel).computeMutants());
-        mutants.forEach(Component::applyAngelicCompletion);
-        plan.setMutantsText("Mutants: " + mutants.size() + " - Execution time: " + humanReadableFormat(Duration.between(start, Instant.now())));
-
-        // Create test cases
-        testCaseGenerationProgress = 0;
-        progressText.setText("Generating test-cases (0/" + mutants.size() + " mutants processed)");
-        generationStart = Instant.now();
-        testCases = FXCollections.observableArrayList();
-
-        try {
-            queryFilePath = UPPAALDriver.storeQuery("refinement: " + MUTANT_NAME + "<=" + TEST_MODEL_NAME, "query");
-        } catch (URISyntaxException | IOException e) {
-            e.printStackTrace();
-            Ecdar.showToast("Error: " + e.getMessage());
-            return;
-        }
-
-        for (int i = 0; i < mutants.size(); i++) {
-            generateTestCase(testModel, mutants.get(i), i);
-        }
+        new TestCaseGenerationHandler(getPlan(), testModel, this::writeProgress, this::getMaxConcurrentGenerationJobs).start();
     }
 
     /**
-     * Is triggered when a test-case generation attempt is done.
-     * It updates UI labels to tell user about the progress.
-     * Once all test-case generation attempts are done,
-     * this method executes the test-cases (not done)
-     *
-     * This method should be called in a JavaFX thread, since it updates JavaFX elements.
+     * Gets the maximum allowed concurrent threads for generating test-cases.
+     * @return the maximum allowed threads
      */
-    private synchronized void onSingleTestCaseGenerationDone() {
-        testCaseGenerationProgress++;
-
-        plan.setTestCasesText("Test-cases: " + testCases.size() + " - Generation time: " + humanReadableFormat(Duration.between(generationStart, Instant.now())));
-
-        if (testCaseGenerationProgress != mutants.size()) {
-            progressText.setText("Generating test-cases... (" + testCaseGenerationProgress + "/" + mutants.size() + " mutants processed)");
-        } else {
-            try {
-                FileUtils.cleanDirectory(new File(UPPAALDriver.getTempDirectoryAbsolutePath()));
-            } catch (IOException | URISyntaxException e) {
-                e.printStackTrace();
-                Ecdar.showToast("Error: " + e.getMessage());
-                return;
-            }
-
-            progressText.setText("Done");
-            testButton.setDisable(false);
-        }
+    private int getMaxConcurrentGenerationJobs() {
+        if (generationThreadsField.getText().isEmpty())
+            return 1;
+        else
+            return Integer.parseInt(generationThreadsField.getText());
     }
 
     /**
-     * Converts a duration to a human readable format, e.g. 0.293s.
-     * @param duration the duration
-     * @return a string in a human readable format
+     * Triggered when pressed the stop button.
+     * Signals that this test plan should stop doing jobs.
      */
-    private static String humanReadableFormat(final Duration duration) {
-        return duration.toString()
-                .substring(2)
-                .replaceAll("(\\d[HMS])(?!$)", "$1 ")
-                .toLowerCase();
+    public void onStopButtonPressed() {
+        getPlan().setStatus(MutationTestPlan.Status.STOPPING);
     }
 
     /**
-     * Generates a test-case.
-     * @param testModel test model
-     * @param mutant mutant used for generating
-     * @param mutationIndex index of the mutant used for generating
+     * Writes progress to the user.
+     * @param message the message to display
      */
-    private void generateTestCase(final Component testModel, final Component mutant, final int mutationIndex) {
-        // make a project with the test model and the mutant
-        final Project project = new Project();
-        mutant.setName(MUTANT_NAME);
-        project.getComponents().addAll(testModel, mutant);
-        project.setGlobalDeclarations(Ecdar.getProject().getGlobalDeclarations());
-        mutant.updateIOList(); // Update io in order to get the right system declarations for the mutant
-        project.setSystemDeclarations(new TwoComponentSystemDeclarations(testModel, mutant));
+    public void writeProgress(final String message) {
+        final Text text = new Text(message);
+        text.setFill(Color.web("#333333"));
+        writeProgress(text);
+    }
 
-        new Thread(() -> {
-            final Process process;
+    /**
+     * Writes progress to the user.
+     * @param text the message to display
+     */
+    private void writeProgress(final Text text) {
+        progressTextFlow.getChildren().clear();
+        progressTextFlow.getChildren().add(text);
+    }
 
-            try {
-                // Store the project and the refinement query as backend XML
-                final String modelPath = UPPAALDriver.storeBackendModel(project, "model" + mutationIndex);
+    /**
+     * Opens dialog to select a SUT.
+     */
+    public void onSelectSutButtonPressed() {
+        sutPathLabel.setText("The\\Path\\To\\My\\System\\Under\\Test");
+        // TODO implement
+    }
 
-                // Run verifytga to check refinement and to fetch strategy if non-refinement
-                process = Runtime.getRuntime().exec(UPPAALDriver.findVerifytgaAbsolutePath() + " -t0 " + modelPath + " " + queryFilePath);
-
-            } catch (BackendException | IOException | URISyntaxException e) {
-                e.printStackTrace();
-                Ecdar.showToast("Error: " + e.getMessage());
-                return;
-            }
-
-            BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
-
-            List<String > lines = input.lines().collect(Collectors.toList());
-
-            // If refinement, no test-case to generate.
-            // I use endsWith rather than contains,
-            // since verifytga sometimes output some weird symbols at the start of this line.
-            if (lines.stream().anyMatch(line -> line.endsWith(" -- Property is satisfied."))) {
-                Platform.runLater(this::onSingleTestCaseGenerationDone);
-                return;
-            }
-
-            // Verifytga should output that the property is not satisfied
-            // If it does not, then this is an error
-            if (lines.stream().noneMatch(line -> line.endsWith(" -- Property is NOT satisfied."))) {
-                throw new RuntimeException("Output from verifytga not understood:\n" + String.join("\n", lines) + "\n" +
-                        "Mutation index: " + mutationIndex);
-            }
-
-            int strategyIndex = lines.indexOf("Strategy for the attacker:");
-
-            // If no such index, error
-            if (strategyIndex < 0) {
-                throw new RuntimeException("Output from verifytga not understood:\n" + String.join("\n", lines) + "\n" +
-                        "Mutation index: " + mutationIndex);
-            }
-
-            List<String> strategy = lines.subList(strategyIndex + 2, lines.size());
-
-            testCases.add(new MutationTestCase(testModel, mutant, strategy));
-
-            // JavaFX elements cannot be updated in another thread, so make it run in a JavaFX thread at some point
-            Platform.runLater(this::onSingleTestCaseGenerationDone);
-        }).start();
+    /**
+     * Starts exporting.
+     */
+    public void onExportButtonPressed() {
+        getPlan().clearResults();
+        new ExportHandler(getPlan(), Ecdar.getProject().findComponent(modelPicker.getValue().getText()), this::writeProgress).start();
     }
 }

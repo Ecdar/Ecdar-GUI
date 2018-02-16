@@ -4,7 +4,7 @@ import ecdar.abstractions.Component;
 import ecdar.abstractions.Declarations;
 import ecdar.abstractions.HighLevelModelObject;
 import ecdar.abstractions.EcdarSystem;
-import ecdar.mutation.MutationTestPlan;
+import ecdar.mutation.models.MutationTestPlan;
 import ecdar.mutation.MutationTestPlanPresentation;
 import ecdar.presentations.*;
 import ecdar.utility.helpers.SelectHelper;
@@ -25,7 +25,7 @@ import java.util.function.Consumer;
 import static ecdar.presentations.Grid.GRID_SIZE;
 
 public class CanvasController implements Initializable {
-    public final static double DECLARATION_X_MARGIN = GRID_SIZE * 5.5;
+    public final static double DECLARATION_Y_MARGIN = GRID_SIZE * 5.5;
 
     public Pane root;
 
@@ -141,7 +141,7 @@ public class CanvasController implements Initializable {
             root.getChildren().add(activeComponentPresentation);
         } else if (newObject instanceof Declarations) {
             root.setTranslateX(0);
-            root.setTranslateY(DECLARATION_X_MARGIN);
+            root.setTranslateY(DECLARATION_Y_MARGIN);
 
             activeComponentPresentation = null;
             root.getChildren().add(new DeclarationPresentation((Declarations) newObject));
@@ -150,8 +150,8 @@ public class CanvasController implements Initializable {
             activeComponentPresentation = null;
             root.getChildren().add(new SystemPresentation((EcdarSystem) newObject));
         } else if (newObject instanceof MutationTestPlan) {
-            root.setTranslateX(50);
-            root.setTranslateY(100);
+            root.setTranslateX(0);
+            root.setTranslateY(DECLARATION_Y_MARGIN);
 
             disallowGrid();
 

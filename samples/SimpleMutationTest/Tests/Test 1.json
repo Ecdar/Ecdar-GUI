@@ -1,0 +1,13 @@
+{
+  "name": "Test 1",
+  "testModelId": "Component1",
+  "action": "Test",
+  "sutPath": "The\\Path\\To\\My\\System\\Under\\Test",
+  "exportFormat": "",
+  "useDemonic": true,
+  "useAngelic": false,
+  "mutantsText": "Mutants: 24 - Execution time: 0.02s",
+  "testCasesText": "Test-cases: 19 - Generation time: 2.095s",
+  "changeSource": true,
+  "changeTarget": true
+}

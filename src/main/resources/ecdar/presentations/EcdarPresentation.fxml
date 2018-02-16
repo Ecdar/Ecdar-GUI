@@ -154,7 +154,7 @@
 
                     <MenuItem fx:id="menuBarFileNewMutationTestObject" text="New Test Plan">
                         <graphic>
-                            <FontIcon iconLiteral="gmi-create-new-folder" iconSize="24" fill="black"/>
+                            <FontIcon iconLiteral="gmi-done-all" iconSize="24" fill="black"/>
                         </graphic>
                     </MenuItem>
 

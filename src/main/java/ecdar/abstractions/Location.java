@@ -97,7 +97,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
      * Creates a clone of another location.
      * Copies objects used for verification.
      * The id of the original is used for this one.
-     * Reachability analysis initialized.
+     * Reachability analysis is not initialized.
      */
     Location cloneForVerification() {
         final Location location = new Location();
@@ -106,6 +106,13 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
         location.setType(getType());
         location.setUrgency(getUrgency());
         location.setInvariant(getInvariant());
+
+        location.setX(getX());
+        location.setY(getY());
+        location.setNicknameX(getNicknameX());
+        location.setNicknameY(getNicknameY());
+        location.setInvariantX(getInvariantX());
+        location.setInvariantY(getInvariantY());
 
         return location;
     }

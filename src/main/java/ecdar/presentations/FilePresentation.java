@@ -6,6 +6,7 @@ import ecdar.abstractions.EcdarSystem;
 import ecdar.abstractions.HighLevelModelObject;
 import ecdar.controllers.CanvasController;
 import ecdar.controllers.FileController;
+import ecdar.mutation.models.MutationTestPlan;
 import ecdar.utility.colors.Color;
 import com.jfoenix.controls.JFXRippler;
 import javafx.beans.property.SimpleObjectProperty;
@@ -38,7 +39,7 @@ public class FilePresentation extends AnchorPane {
     }
 
     private void initializeMoreInformationButton() {
-        if (getModel() instanceof Component || getModel() instanceof EcdarSystem) {
+        if (getModel() instanceof Component || getModel() instanceof EcdarSystem || getModel() instanceof MutationTestPlan) {
             controller.moreInformation.setVisible(true);
             controller.moreInformation.setMaskType(JFXRippler.RipplerMask.CIRCLE);
             controller.moreInformation.setPosition(JFXRippler.RipplerPos.BACK);
@@ -139,6 +140,8 @@ public class FilePresentation extends AnchorPane {
             controller.fileImage.setImage(new Image(Ecdar.class.getResource("component_frame.png").toExternalForm()));
         } else if(model.get() instanceof EcdarSystem){
             controller.fileImage.setImage(new Image(Ecdar.class.getResource("system_frame.png").toExternalForm()));
+        } else if(model.get() instanceof MutationTestPlan){
+            controller.fileImage.setImage(new Image(Ecdar.class.getResource("test_frame.png").toExternalForm()));
         } else {
             controller.fileImage.setImage(new Image(Ecdar.class.getResource("description_frame.png").toExternalForm()));
         }

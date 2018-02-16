@@ -79,30 +79,22 @@ public class Edge implements Serializable, Nearable {
         clone.setTargetLocation(component.findLocation(getTargetLocation().getId()));
 
         // Clone properties if they are non-empty
-        if (!getSelect().isEmpty()) {
+        getNails().stream().filter(nail -> nail.getPropertyType().equals(PropertyType.SELECTION)).findFirst().ifPresent(nail -> {
             clone.setSelect(getSelect());
-            final Nail nail = new Nail(0, 0);
-            nail.setPropertyType(PropertyType.SELECTION);
-            clone.addNail(nail);
-        }
-        if (!getGuard().isEmpty()) {
+            clone.addNail(nail.cloneForVerification());
+        });
+        getNails().stream().filter(nail -> nail.getPropertyType().equals(PropertyType.GUARD)).findFirst().ifPresent(nail -> {
             clone.setGuard(getGuard());
-            final Nail nail = new Nail(0, 0);
-            nail.setPropertyType(PropertyType.GUARD);
-            clone.addNail(nail);
-        }
-        if (!getUpdate().isEmpty()) {
-            clone.setUpdate(getUpdate());
-            final Nail nail = new Nail(0, 0);
-            nail.setPropertyType(PropertyType.UPDATE);
-            clone.addNail(nail);
-        }
-        if (!getSync().isEmpty()) {
+            clone.addNail(nail.cloneForVerification());
+        });
+        getNails().stream().filter(nail -> nail.getPropertyType().equals(PropertyType.SYNCHRONIZATION)).findFirst().ifPresent(nail -> {
             clone.setSync(getSync());
-            final Nail nail = new Nail(0, 0);
-            nail.setPropertyType(PropertyType.SYNCHRONIZATION);
-            clone.addNail(nail);
-        }
+            clone.addNail(nail.cloneForVerification());
+        });
+        getNails().stream().filter(nail -> nail.getPropertyType().equals(PropertyType.UPDATE)).findFirst().ifPresent(nail -> {
+            clone.setUpdate(getUpdate());
+            clone.addNail(nail.cloneForVerification());
+        });
 
         // Clone if edge is locked (e.g. the Inconsistent and Universal locations have locked edges)
         clone.setIsLocked(getIsLocked().get());
@@ -168,7 +160,7 @@ public class Edge implements Serializable, Nearable {
         return update.get();
     }
 
-    private void setUpdate(final String update) {
+    public void setUpdate(final String update) {
         this.update.set(update);
     }
 
@@ -476,6 +468,18 @@ public class Edge implements Serializable, Nearable {
         nail.setPropertyType(PropertyType.GUARD);
         addNail(nail);
         setGuard(guard);
+    }
+
+    /**
+     * Adds an update nail at (0, 0).
+     * Adds a specified update property the this edge.
+     * @param update the specified update property
+     */
+    public void addUpdateNail(final String update) {
+        final Nail nail = new Nail(0, 0);
+        nail.setPropertyType(PropertyType.UPDATE);
+        addNail(nail);
+        setUpdate(update);
     }
 
 }

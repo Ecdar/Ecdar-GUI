@@ -103,7 +103,7 @@
     {
       "id": "L8",
       "nickname": "",
-      "invariant": "e\u003c\u003d300e",
+      "invariant": "e\u003c\u003d300",
       "type": "NORMAL",
       "urgency": "NORMAL",
       "x": 560.0,

@@ -68,6 +68,7 @@
       "guard": "",
       "update": "x:\u003d0",
       "sync": "a",
+      "isLocked": false,
       "nails": [
         {
           "x": 210.0,
@@ -93,6 +94,7 @@
       "guard": "",
       "update": "x:\u003d0",
       "sync": "b",
+      "isLocked": false,
       "nails": [
         {
           "x": 290.0,
@@ -118,6 +120,7 @@
       "guard": "x\u003e\u003d3",
       "update": "",
       "sync": "c",
+      "isLocked": false,
       "nails": [
         {
           "x": 210.0,
@@ -143,6 +146,7 @@
       "guard": "x\u003e\u003d4",
       "update": "",
       "sync": "a",
+      "isLocked": false,
       "nails": [
         {
           "x": 330.0,
