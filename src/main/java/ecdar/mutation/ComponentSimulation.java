@@ -87,15 +87,24 @@ public class ComponentSimulation {
     /**
      * Returns if the current state is deterministic with respect to a specified output.
      * The state is deterministic iff at most one transition with the specified output is available.
-     * @param outputSync synchronization property without !
+     * @param output synchronization property without !
      * @return true iff the state is deterministic
      */
-    public boolean isDeterministic(final String outputSync) {
+    public boolean isDeterministic(final String output) {
+        return getAvailableOutputEdgeStream(output).count() > 1;
+    }
+
+    /**
+     * Gets a stream containing the available output edges matching a specified output.
+     * @param output the specified synchronization output without !
+     * @return the stream
+     */
+    private Stream<Edge> getAvailableOutputEdgeStream(final String output) {
         return component.getOutgoingEdges(currentLocation).stream()
                 .filter(e -> e.getStatus() == EdgeStatus.OUTPUT)
-                .filter(e -> e.getSync().equals(outputSync))
-                .filter(e -> ExpressionHelper.evaluateBooleanExpression(e.getGuard(), getValuations()))
-                .count() > 1;
+                .filter(e -> e.getSync().equals(output))
+                .filter(e -> e.getGuard().trim().isEmpty() ||
+                        ExpressionHelper.evaluateBooleanExpression(e.getGuard(), getValuations()));
     }
 
     /**
@@ -103,17 +112,14 @@ public class ComponentSimulation {
      * The edge must be outgoing from the current location,
      * must be an output edge with the given synchronization property,
      * and its guard must be satisfied.
-     * @param outputSync synchronization property without !
+     * @param output synchronization property without !
      * @return true iff the action succeeded
      * @throws MutationTestingException if multiple transitions with the specified output are available
      */
-    public boolean triggerOutput(final String outputSync) throws MutationTestingException {
-        final Stream<Edge> edgeStream = component.getOutgoingEdges(currentLocation).stream()
-                .filter(e -> e.getStatus() == EdgeStatus.OUTPUT)
-                .filter(e -> e.getSync().equals(outputSync))
-                .filter(e -> ExpressionHelper.evaluateBooleanExpression(e.getGuard(), getValuations()));
+    public boolean triggerOutput(final String output) throws MutationTestingException {
+        final Stream<Edge> edgeStream = getAvailableOutputEdgeStream(output);
 
-        if (edgeStream.count() > 1) throw new MutationTestingException("Simulation of output " + outputSync + " yields a non-deterministic choice");
+        if (edgeStream.count() > 1) throw new MutationTestingException("Simulation of output " + output + " yields a non-deterministic choice");
 
         final Optional<Edge> optionalEdge = edgeStream.findFirst();
         if (!optionalEdge.isPresent()) return false;
