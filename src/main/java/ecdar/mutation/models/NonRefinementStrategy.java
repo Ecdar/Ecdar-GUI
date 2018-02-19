@@ -56,8 +56,8 @@ public class NonRefinementStrategy {
 
     /**
      * Gets the first rule satisfying some specified conditions.
-     * @param specificationLocation the location of the specification
-     * @param mutantLocation the location of the mutant
+     * @param specificationLocation the id of the location of the specification
+     * @param mutantLocation the id of the location of the mutant
      * @param specificationValues the values of variables in the specification
      * @param mutantValues the values of variables of the mutant
      * @return the first satisfying rule, or null if none satisfies the conditions

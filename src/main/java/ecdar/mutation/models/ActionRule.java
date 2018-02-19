@@ -9,10 +9,11 @@ import java.util.regex.Pattern;
  * An action rule in a strategy.
  */
 public class ActionRule extends StrategyRule {
-    private static final String REGEX_TRANSITION = "^\\w+\\.\\w+->\\w+\\.(\\w)+ \\{ [^,]*, [^,]*, (.*) }$";
+    private static final String REGEX_TRANSITION = "^\\w+\\.\\w+->\\w+\\.(\\w+) \\{ [^,]*, (\\w+)[?!], (.*) }$";
 
     private final String endLocationName;
     private final String updateProperty;
+    private final String sync;
 
     public ActionRule(final String condition, final String transition) throws MutationTestingException {
         super(condition);
@@ -22,9 +23,10 @@ public class ActionRule extends StrategyRule {
         if (!matcher.find()) throw new MutationTestingException("Strategy transition " + transition + " does not match " + REGEX_TRANSITION);
 
         endLocationName = matcher.group(1);
+        sync = matcher.group(2);
 
-        if (matcher.group(2).equals("1")) updateProperty = "";
-        else updateProperty = matcher.group(2);
+        if (matcher.group(3).equals("1")) updateProperty = "";
+        else updateProperty = matcher.group(3);
     }
 
 
@@ -36,5 +38,9 @@ public class ActionRule extends StrategyRule {
 
     public String getUpdateProperty() {
         return updateProperty;
+    }
+
+    public String getSync() {
+        return sync;
     }
 }

@@ -42,10 +42,6 @@ public class ComponentSimulation {
         return valuations;
     }
 
-    private Component getComponent() {
-        return component;
-    }
-
     private void setCurrentLocation(final Location currentLocation) {
         this.currentLocation = currentLocation;
     }
