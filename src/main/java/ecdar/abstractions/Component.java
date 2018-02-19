@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  * A component that models an I/O automata.
  */
 public class Component extends HighLevelModelObject implements Boxed {
-    static final String COMPONENT = "Component";
+    private static final String COMPONENT = "Component";
     private static final String LOCATIONS = "locations";
     private static final String EDGES = "edges";
     private static final String INCLUDE_IN_PERIODIC_CHECK = "includeInPeriodicCheck";
@@ -101,7 +101,7 @@ public class Component extends HighLevelModelObject implements Boxed {
      * Copies objects used for verification (e.g. locations, edges and the declarations).
      * Does not copy UI elements (sizes and positions).
      * It locations are cloned from the original component. Their ids are the same.
-     * Does not initialize io listeners.
+     * Does not initialize io listeners, but copies the input and output strings.
      * Reachability analysis binding is not initialized.
      * @return the clone
      */
@@ -110,6 +110,9 @@ public class Component extends HighLevelModelObject implements Boxed {
         clone.addVerificationObjects(this);
 
         clone.setIncludeInPeriodicCheck(false);
+
+        clone.inputStrings.addAll(getInputStrings());
+        clone.outputStrings.addAll(getOutputStrings());
 
         return clone;
     }
