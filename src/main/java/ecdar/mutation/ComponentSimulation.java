@@ -8,6 +8,7 @@ import ecdar.mutation.models.ActionRule;
 import ecdar.utility.ExpressionHelper;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * Simulation of a component.
@@ -84,24 +85,41 @@ public class ComponentSimulation {
     }
 
     /**
+     * Returns if the current state is deterministic with respect to a specified output.
+     * The state is deterministic iff at most one transition with the specified output is available.
+     * @param outputSync synchronization property without !
+     * @return true iff the state is deterministic
+     */
+    public boolean isDeterministic(final String outputSync) {
+        return component.getOutgoingEdges(currentLocation).stream()
+                .filter(e -> e.getStatus() == EdgeStatus.OUTPUT)
+                .filter(e -> e.getSync().equals(outputSync))
+                .filter(e -> ExpressionHelper.evaluateBooleanExpression(e.getGuard(), getValuations()))
+                .count() > 1;
+    }
+
+    /**
      * If a valid output edge is available, runs a transition of that edge.
      * The edge must be outgoing from the current location,
      * must be an output edge with the given synchronization property,
      * and its guard must be satisfied.
      * @param outputSync synchronization property without !
      * @return true iff the action succeeded
+     * @throws MutationTestingException if multiple transitions with the specified output are available
      */
-    public boolean triggerOutput(final String outputSync) {
-        final Optional<Edge> edge = component.getOutgoingEdges(currentLocation).stream()
+    public boolean triggerOutput(final String outputSync) throws MutationTestingException {
+        final Stream<Edge> edgeStream = component.getOutgoingEdges(currentLocation).stream()
                 .filter(e -> e.getStatus() == EdgeStatus.OUTPUT)
                 .filter(e -> e.getSync().equals(outputSync))
-                .filter(e -> ExpressionHelper.evaluateBooleanExpression(e.getGuard(), getValuations()))
-                .findAny();
+                .filter(e -> ExpressionHelper.evaluateBooleanExpression(e.getGuard(), getValuations()));
 
-        if (!edge.isPresent()) return false;
+        if (edgeStream.count() > 1) throw new MutationTestingException("Simulation of output " + outputSync + " yields a non-deterministic choice");
 
-        currentLocation = edge.get().getTargetLocation();
-        runUpdateProperty(edge.get().getUpdate());
+        final Optional<Edge> optionalEdge = edgeStream.findFirst();
+        if (!optionalEdge.isPresent()) return false;
+
+        currentLocation = optionalEdge.get().getTargetLocation();
+        runUpdateProperty(optionalEdge.get().getUpdate());
         return true;
     }
 }

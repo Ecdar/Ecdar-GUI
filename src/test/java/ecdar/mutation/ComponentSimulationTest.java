@@ -27,14 +27,16 @@ public class ComponentSimulationTest {
         Assert.assertTrue(s.getValuations().containsKey("x"));
         Assert.assertTrue(s.getValuations().containsValue(0.0));
 
-        s.delay(1.2);
+        boolean result = s.delay(1.2);
 
+        Assert.assertEquals(true, result);
         Assert.assertEquals(1, s.getValuations().size());
         Assert.assertTrue(s.getValuations().containsKey("x"));
         Assert.assertTrue(s.getValuations().containsValue(1.2));
 
-        s.delay(0.3);
+        result = s.delay(0.3);
 
+        Assert.assertEquals(true, result);
         Assert.assertEquals(1, s.getValuations().size());
         Assert.assertTrue(s.getValuations().containsKey("x"));
         Assert.assertTrue(s.getValuations().containsValue(1.5));
