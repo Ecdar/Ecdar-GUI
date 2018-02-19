@@ -73,7 +73,7 @@ public class InvertResetOperator extends MutationOperator {
         final boolean removed = statements.removeIf(s -> s.matches("^\\s*" + clock + "\\s*:?=\\s*0\\s*$"));
 
         // If not found, add it
-        if (!removed) statements.add(clock + " := 0");
+        if (!removed) statements.add(clock + " = 0");
 
         // Update property
         mutantEdge.setUpdate(String.join(", ", statements));

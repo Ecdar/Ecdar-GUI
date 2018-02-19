@@ -6,8 +6,10 @@
   "exportFormat": "",
   "useDemonic": true,
   "useAngelic": false,
-  "mutantsText": "Mutants: 24 - Execution time: 0.02s",
-  "testCasesText": "Test-cases: 19 - Generation time: 2.095s",
   "changeSource": true,
-  "changeTarget": true
+  "changeTarget": true,
+  "changeGuard": true,
+  "changeInvariant": true,
+  "sinkLocation": true,
+  "invertReset": true
 }
