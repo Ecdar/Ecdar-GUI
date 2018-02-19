@@ -8,6 +8,7 @@ import ecdar.mutation.models.ActionRule;
 import ecdar.utility.ExpressionHelper;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -117,15 +118,14 @@ public class ComponentSimulation {
      * @throws MutationTestingException if multiple transitions with the specified output are available
      */
     public boolean triggerOutput(final String output) throws MutationTestingException {
-        final Stream<Edge> edgeStream = getAvailableOutputEdgeStream(output);
+        final List<Edge> edges = getAvailableOutputEdgeStream(output).collect(Collectors.toList());
 
-        if (edgeStream.count() > 1) throw new MutationTestingException("Simulation of output " + output + " yields a non-deterministic choice");
+        if (edges.size() > 1) throw new MutationTestingException("Simulation of output " + output + " yields a non-deterministic choice");
 
-        final Optional<Edge> optionalEdge = edgeStream.findFirst();
-        if (!optionalEdge.isPresent()) return false;
+        if (edges.size() < 1) return false;
 
-        currentLocation = optionalEdge.get().getTargetLocation();
-        runUpdateProperty(optionalEdge.get().getUpdate());
+        currentLocation = edges.get(0).getTargetLocation();
+        runUpdateProperty(edges.get(0).getUpdate());
         return true;
     }
 }
