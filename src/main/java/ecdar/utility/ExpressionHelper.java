@@ -1,9 +1,12 @@
 package ecdar.utility;
 
 import com.bpodgursky.jbool_expressions.*;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -13,6 +16,7 @@ import java.util.stream.Collectors;
  */
 public class ExpressionHelper {
     private static final String REGEX_SIMPLE_NEGATEABLE_GUARD = "^([^<>=!]+)(<|<=|>|>=|!=)([^<>=!]+)$";
+    public static final String REGEX_UPDATE = "^(\\w+)\\s*:?=\\s*([\\S]+)$";
 
     /**
      * Searches recursively through the expression.
@@ -107,5 +111,35 @@ public class ExpressionHelper {
             );
         else
             return Variable.of(simpleGuard);
+    }
+
+    /**
+     * Gets if an expression is satisfied given some valuations.
+     * @param expression expression to evaluate
+     * @param valuations valuations of variables. These must include (but not necessarily limited to) all variables used in the condition
+     * @return true iff the condition is satisfied
+     */
+    public static boolean evaluateBooleanExpression(String expression, final Map<String, Double> valuations) {
+        for (final Map.Entry<String, Double> entry : valuations.entrySet()) {
+            expression = expression.replace(entry.getKey(), String.valueOf(entry.getValue()));
+        }
+
+        return new SpelExpressionParser().parseExpression(expression).getValue(Boolean.class);
+    }
+
+    public static Map<String, Double> parseUpdateProperty(final String updateProperty) {
+        final Map<String, Double> valuations = new HashMap<>();
+
+        if (updateProperty.trim().isEmpty()) return valuations;
+
+        for (final String update : updateProperty.split(",")) {
+            final Matcher matcher = Pattern.compile(REGEX_UPDATE).matcher(update.trim());
+
+            if (!matcher.find()) throw new RuntimeException("Update " + update + " does not match " + REGEX_UPDATE);
+
+            valuations.put(matcher.group(1), Double.valueOf(matcher.group(2)));
+        }
+
+        return valuations;
     }
 }

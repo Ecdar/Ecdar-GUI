@@ -32,8 +32,7 @@ import java.util.stream.Collectors;
  * Handler for generating test-cases.
  */
 class TestCaseGenerationHandler {
-    private final static String TEST_MODEL_NAME = "S";
-    private final static String MUTANT_NAME = "M";
+
 
     private final MutationTestPlan plan;
 
@@ -83,7 +82,7 @@ class TestCaseGenerationHandler {
     void start() {
         getPlan().setStatus(MutationTestPlan.Status.WORKING);
 
-        testModel.setName(TEST_MODEL_NAME);
+        testModel.setName(MutationTestPlanController.SPEC_NAME);
         testModel.updateIOList();
 
         final Instant start = Instant.now();
@@ -111,7 +110,7 @@ class TestCaseGenerationHandler {
         testCases = Collections.synchronizedList(new ArrayList<>()); // use synchronized to be thread safe
 
         try {
-            queryFilePath = UPPAALDriver.storeQuery("refinement: " + MUTANT_NAME + "<=" + TEST_MODEL_NAME, "query");
+            queryFilePath = UPPAALDriver.storeQuery("refinement: " + MutationTestPlanController.MUTANT_NAME + "<=" + MutationTestPlanController.SPEC_NAME, "query");
         } catch (URISyntaxException | IOException e) {
             e.printStackTrace();
             Ecdar.showToast("Error: " + e.getMessage());
@@ -188,7 +187,7 @@ class TestCaseGenerationHandler {
     private void generateTestCase(final Component testModel, final Component mutant, final int mutationIndex) {
         // make a project with the test model and the mutant
         final Project project = new Project();
-        mutant.setName(MUTANT_NAME);
+        mutant.setName(MutationTestPlanController.MUTANT_NAME);
         project.getComponents().addAll(testModel, mutant);
         project.setGlobalDeclarations(Ecdar.getProject().getGlobalDeclarations());
         mutant.updateIOList(); // Update io in order to get the right system declarations for the mutant

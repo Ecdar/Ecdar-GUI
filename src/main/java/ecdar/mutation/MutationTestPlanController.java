@@ -19,6 +19,8 @@ import javafx.scene.text.TextFlow;
  * Controller for a test plan with model-based mutation testing.
  */
 public class MutationTestPlanController {
+    public final static String SPEC_NAME = "S";
+    public final static String MUTANT_NAME = "M";
 
     // UI elements
     public JFXComboBox<Label> modelPicker;

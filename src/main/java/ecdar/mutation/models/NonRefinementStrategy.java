@@ -1,6 +1,7 @@
 package ecdar.mutation.models;
 
 
+import ecdar.mutation.MutationTestPlanController;
 import ecdar.mutation.MutationTestingException;
 
 import java.util.*;
@@ -64,10 +65,10 @@ public class NonRefinementStrategy {
     public StrategyRule getRule(final String specificationLocation, final String mutantLocation,
                                 final Map<String, Double> specificationValues, final Map<String, Double> mutantValues) {
         final Map<String, Double> values = new HashMap<>();
-        specificationValues.forEach((key, value) -> values.put("S." + key, value));
-        mutantValues.forEach((key, value) -> values.put("M." + key, value));
+        specificationValues.forEach((key, value) -> values.put(MutationTestPlanController.SPEC_NAME + "." + key, value));
+        mutantValues.forEach((key, value) -> values.put(MutationTestPlanController.MUTANT_NAME + "." + key, value));
 
-        return rules.get("S." + specificationLocation + ", M." + mutantLocation)
+        return rules.get(MutationTestPlanController.SPEC_NAME + "." + specificationLocation + ", " + MutationTestPlanController.MUTANT_NAME + "." + mutantLocation)
                 .stream().filter(rule -> rule.isSatisfied(values)).findFirst().orElse(null);
     }
 
