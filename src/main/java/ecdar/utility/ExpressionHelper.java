@@ -127,6 +127,11 @@ public class ExpressionHelper {
         return new SpelExpressionParser().parseExpression(expression).getValue(Boolean.class);
     }
 
+    /**
+     * Parses an update property to a map of valuations.
+     * @param updateProperty the property
+     * @return the valuations as a map from variable names to values
+     */
     public static Map<String, Double> parseUpdateProperty(final String updateProperty) {
         final Map<String, Double> valuations = new HashMap<>();
 
