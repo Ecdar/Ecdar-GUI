@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
  * A strategy for showing a non-refinement.
  */
 public class NonRefinementStrategy {
-    private Map<String, List<StrategyRule>> rules = new HashMap<>();
+    private final Map<String, List<StrategyRule>> rules = new HashMap<>();
 
     /**
      * Constructs a strategy based on the result of verifytga.

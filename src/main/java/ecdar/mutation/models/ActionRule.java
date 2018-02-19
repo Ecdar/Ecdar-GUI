@@ -40,6 +40,10 @@ public class ActionRule extends StrategyRule {
         return updateProperty;
     }
 
+    /**
+     * Gets the synchronisation property with ? or !.
+     * @return the property
+     */
     public String getSync() {
         return sync;
     }

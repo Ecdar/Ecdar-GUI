@@ -195,7 +195,15 @@ class TestCaseGenerationHandler {
 
         new Thread(() -> {
             try {
-                List<String> lines = getVerifytgaInputLines(startVerifytgaProcess(mutationIndex, project));
+                // Store the project and the refinement query as backend XML
+                final String modelPath;
+                try {
+                    modelPath = UPPAALDriver.storeBackendModel(project, "model" + mutationIndex);
+                } catch (IOException | BackendException | URISyntaxException e) {
+                    throw new MutationTestingException("Error while storing backend model", e);
+                }
+
+                List<String> lines = getVerifytgaInputLines(startVerifytgaProcess(modelPath));
 
                 // If refinement, no test-case to generate.
                 // I use endsWith rather than contains,
@@ -209,7 +217,7 @@ class TestCaseGenerationHandler {
                 // If it does not, then this is an error
                 if (lines.stream().noneMatch(line -> line.endsWith(" -- Property is NOT satisfied."))) {
                     throw new MutationTestingException("Output from verifytga not understood: " + String.join("\n", lines) + "\n" +
-                            "Mutation index: " + mutationIndex);
+                            "Model: " + modelPath);
                 }
 
                 int strategyIndex = lines.indexOf("Strategy for the attacker:");
@@ -217,7 +225,7 @@ class TestCaseGenerationHandler {
                 // If no such index, error
                 if (strategyIndex < 0) {
                     throw new MutationTestingException("Output from verifytga not understood: " + String.join("\n", lines) + "\n" +
-                            "Mutation index: " + mutationIndex);
+                            "Model: " + modelPath);
                 }
 
                 List<String> strategy = lines.subList(strategyIndex + 2, lines.size());
@@ -258,22 +266,18 @@ class TestCaseGenerationHandler {
 
     /**
      * Starts varifytga to fetch a strategy.
-     * @param mutationIndex the inputs of the mutant to pass to verifytga
-     * @param project the backend XML project containing the test model and the mutant
+     * @param modelPath the path to the backend XML project containing the test model and the mutant
      * @return the started process, or null if an error occurs
      */
-    private Process startVerifytgaProcess(final int mutationIndex, final Project project) throws MutationTestingException {
+    private Process startVerifytgaProcess(final String modelPath) throws MutationTestingException {
         final Process process;
 
         try {
-            // Store the project and the refinement query as backend XML
-            final String modelPath = UPPAALDriver.storeBackendModel(project, "model" + mutationIndex);
-
             // Run verifytga to check refinement and to fetch strategy if non-refinement
             final ProcessBuilder builder = new ProcessBuilder(UPPAALDriver.findVerifytgaAbsolutePath(), "-t0", modelPath, queryFilePath);
             process = builder.start();
 
-        } catch (BackendException | IOException | URISyntaxException e) {
+        } catch (final IOException e) {
             throw new MutationTestingException("Error while starting verifytga", e);
         }
 
