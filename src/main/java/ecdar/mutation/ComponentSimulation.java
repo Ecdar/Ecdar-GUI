@@ -78,7 +78,9 @@ public class ComponentSimulation {
      * @return true iff the state is deterministic
      */
     public boolean isDeterministic(final String sync, final EdgeStatus status) {
-        return getAvailableEdgeStream(sync, status).count() > 1;
+        return currentLocation.getType().equals(Location.Type.UNIVERSAL) ||
+                getAvailableEdgeStream(sync, status).count() > 1;
+
     }
 
     /**
@@ -106,6 +108,8 @@ public class ComponentSimulation {
      * @throws MutationTestingException if multiple transitions with the specified output are available
      */
     public boolean runAction(final String sync, final EdgeStatus status) throws MutationTestingException {
+        if (currentLocation.getType().equals(Location.Type.UNIVERSAL)) return true;
+
         final List<Edge> edges = getAvailableEdgeStream(sync, status).collect(Collectors.toList());
 
         if (edges.size() > 1) throw new MutationTestingException("Simulation of " +
