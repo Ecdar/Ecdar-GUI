@@ -210,7 +210,7 @@ public class MutationTestPlan extends HighLevelModelObject {
         result.addProperty(DEMONIC, isDemonic());
         result.addProperty(ANGELIC_EXPORT, isAngelicWhenExport());
 
-        operators.forEach(operator -> result.addProperty(operator.getJsonName(), operator.isSelected()));
+        operators.forEach(operator -> result.addProperty(operator.getCodeName(), operator.isSelected()));
 
         result.addProperty(MAX_GENERATION_THREADS, getConcurrentGenerationThreads());
         result.addProperty(MAX_SUT_INSTANCES, getConcurrentSutInstances());
@@ -231,7 +231,7 @@ public class MutationTestPlan extends HighLevelModelObject {
 
         operators.addAll(MutationOperator.getAllOperators());
         operators.forEach(operator -> {
-            final JsonPrimitive primitive = json.getAsJsonPrimitive(operator.getJsonName());
+            final JsonPrimitive primitive = json.getAsJsonPrimitive(operator.getCodeName());
             if (primitive != null) operator.setSelected(primitive.getAsBoolean());
         });
 

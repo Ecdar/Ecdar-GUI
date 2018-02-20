@@ -48,7 +48,9 @@ class TestCaseGenerationHandler {
 
     private final Component testModel;
     private final Supplier<Integer> maxThreadsSupplier;
+
     private List<Component> mutants;
+    private List<String> testCaseIds;
     private List<MutationTestCase> testCases;
 
     // Progress fields
@@ -89,8 +91,15 @@ class TestCaseGenerationHandler {
 
         // Mutate with selected operators
         mutants = new ArrayList<>();
+        testCaseIds = new ArrayList<>();
         try {
-            for (final MutationOperator operator : getPlan().getSelectedMutationOperators()) mutants.addAll(operator.generate(getTestModel()));
+            for (final MutationOperator operator : getPlan().getSelectedMutationOperators()) {
+                final List<Component> operatorMutants = operator.generate(getTestModel());
+                for (int i = 0; i < operatorMutants.size(); i++) {
+                    mutants.add(operatorMutants.get(i));
+                    testCaseIds.add(operator.getCodeName() + i);
+                }
+            }
         } catch (final MutationTestingException e) {
             handleException(e);
             return;
@@ -155,7 +164,7 @@ class TestCaseGenerationHandler {
         // while we have not reach the maximum allowed threads and there are still jobs to start
         while (getGenerationJobsRunning() < getMaxThreadsSupplier().get() &&
                 generationJobsStarted < mutants.size()) {
-            generateTestCase(testModel, mutants.get(generationJobsStarted), generationJobsStarted);
+            generateTestCase(testModel, mutants.get(generationJobsStarted), testCaseIds.get(generationJobsStarted));
             generationJobsStarted++;
         }
     }
@@ -182,9 +191,9 @@ class TestCaseGenerationHandler {
      * Generates a test-case.
      * @param testModel test model
      * @param mutant mutant used for generating
-     * @param mutationIndex index of the mutant used for generating
+     * @param testCaseId Unique id of the potential test-case to generate
      */
-    private void generateTestCase(final Component testModel, final Component mutant, final int mutationIndex) {
+    private void generateTestCase(final Component testModel, final Component mutant, final String testCaseId) {
         // make a project with the test model and the mutant
         final Project project = new Project();
         mutant.setName(MutationTestPlanController.MUTANT_NAME);
@@ -198,7 +207,7 @@ class TestCaseGenerationHandler {
                 // Store the project and the refinement query as backend XML
                 final String modelPath;
                 try {
-                    modelPath = UPPAALDriver.storeBackendModel(project, "model" + mutationIndex);
+                    modelPath = UPPAALDriver.storeBackendModel(project, testCaseId);
                 } catch (IOException | BackendException | URISyntaxException e) {
                     throw new MutationTestingException("Error while storing backend model", e);
                 }
@@ -230,7 +239,7 @@ class TestCaseGenerationHandler {
 
                 List<String> strategy = lines.subList(strategyIndex + 2, lines.size());
 
-                testCases.add(new MutationTestCase(testModel, mutant, strategy));
+                testCases.add(new MutationTestCase(testModel, mutant, strategy, testCaseId));
             } catch (MutationTestingException e) {
                 handleException(e);
                 return;

@@ -19,7 +19,7 @@ public class SinkLocationOperator extends MutationOperator {
     }
 
     @Override
-    public String getJsonName() {
+    public String getCodeName() {
         return "sinkLocation";
     }
 

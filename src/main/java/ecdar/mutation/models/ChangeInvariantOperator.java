@@ -15,7 +15,7 @@ public class ChangeInvariantOperator extends MutationOperator {
     }
 
     @Override
-    public String getJsonName() {
+    public String getCodeName() {
         return "changeInvariant";
     }
 

@@ -24,7 +24,7 @@ public class ChangeGuardOperator extends MutationOperator {
     }
 
     @Override
-    public String getJsonName() {
+    public String getCodeName() {
         return "changeGuard";
     }
 

@@ -40,7 +40,7 @@ public abstract class MutationOperator {
      * Gets a string for storing and retrieving with JSON.
      * @return the string
      */
-    public abstract String getJsonName();
+    public abstract String getCodeName();
 
     /**
      * Generates mutants.

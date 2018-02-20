@@ -18,7 +18,7 @@ public class ChangeTargetOperator extends MutationOperator {
     }
 
     @Override
-    public String getJsonName() {
+    public String getCodeName() {
         return "changeTarget";
     }
 
