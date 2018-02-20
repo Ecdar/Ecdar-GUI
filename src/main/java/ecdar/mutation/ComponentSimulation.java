@@ -1,5 +1,6 @@
 package ecdar.mutation;
 
+import com.sun.javaws.exceptions.InvalidArgumentException;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
 import ecdar.abstractions.EdgeStatus;
@@ -72,7 +73,20 @@ public class ComponentSimulation {
      * @param rule the rule to run
      */
     public void runActionRule(final ActionRule rule) {
-        setCurrentLocation(component.findLocation(rule.getEndLocationName()));
+        final String backendLocId = rule.getEndLocationName();
+        final Location newLocation;
+
+        if (backendLocId.equals("Universal")) {
+            newLocation = component.getUniversalLocation();
+
+            if (newLocation == null) throw new IllegalArgumentException("End location was the Universal location, but this component was no universal locations.");
+        } else {
+            newLocation = component.findLocation(backendLocId);
+
+            if (newLocation == null) throw new IllegalArgumentException("End location " + backendLocId + " was not found");
+        }
+
+        setCurrentLocation(newLocation);
 
         ExpressionHelper.parseUpdateProperty(rule.getUpdateProperty()).forEach(valuations::put);
     }

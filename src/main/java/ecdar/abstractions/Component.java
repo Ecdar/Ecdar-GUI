@@ -17,6 +17,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.util.Pair;
 
 import java.util.*;
@@ -718,5 +719,17 @@ public class Component extends HighLevelModelObject implements Boxed {
         if (!matcher.find()) return clocks;
 
         return Arrays.stream(matcher.group(1).split(",")).map(String::trim).collect(Collectors.toList());
+    }
+
+    /**
+     * Gets the first occurring universal location in this component.
+     * @return the first universal location, or null if none exists
+     */
+    public Location getUniversalLocation() {
+        final FilteredList<Location> uniLocs = getLocations().filtered(l -> l.getType().equals(Location.Type.UNIVERSAL));
+
+        if (uniLocs.isEmpty()) return null;
+
+        return uniLocs.get(0);
     }
 }
