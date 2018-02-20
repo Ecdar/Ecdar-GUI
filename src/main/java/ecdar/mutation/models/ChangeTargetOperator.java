@@ -23,8 +23,8 @@ public class ChangeTargetOperator extends MutationOperator {
     }
 
     @Override
-    public List<Component> generate(final Component original) {
-        final List<Component> mutants = new ArrayList<>();
+    public List<MutationTestCase> generate(final Component original) {
+        final List<MutationTestCase> cases = new ArrayList<>();
 
         // For all edges in the original component
         for (int edgeIndex = 0; edgeIndex < original.getEdges().size(); edgeIndex++) {
@@ -44,11 +44,15 @@ public class ChangeTargetOperator extends MutationOperator {
                 final String newLocId = originalLocation.getId();
                 mutantEdge.setTargetLocation(mutant.findLocation(newLocId));
 
-                mutants.add(mutant);
+                cases.add(new MutationTestCase(original, mutant,
+                        getCodeName() + "_" + edgeIndex + "_" + originalLocation.getId(),
+                        "Changed target of edge " + originalEdge.getSourceLocation().getId() + " -> " +
+                                originalEdge.getTargetLocation().getId() + " to " + newLocId)
+                );
             }
         }
 
-        return mutants;
+        return cases;
     }
 
     @Override

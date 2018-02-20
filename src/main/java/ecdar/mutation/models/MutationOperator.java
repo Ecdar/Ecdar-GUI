@@ -45,10 +45,10 @@ public abstract class MutationOperator {
     /**
      * Generates mutants.
      * @param original the component to mutate
-     * @return the generated mutants
+     * @return list of potential test-cases
      * @throws MutationTestingException if a mutation error happens
      */
-    public abstract List<Component> generate(final Component original) throws MutationTestingException;
+    public abstract List<MutationTestCase> generate(final Component original) throws MutationTestingException;
 
     /**
      * Gets a description of the operator to use as a tooltip.

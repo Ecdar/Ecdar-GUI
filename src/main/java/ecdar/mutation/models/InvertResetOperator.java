@@ -22,10 +22,10 @@ public class InvertResetOperator extends MutationOperator {
     }
 
     @Override
-    public List<Component> generate(final Component original) {
+    public List<MutationTestCase> generate(final Component original) {
         final List<String> clocks = original.getClocks();
 
-        final List<Component> mutants = new ArrayList<>();
+        final List<MutationTestCase> mutants = new ArrayList<>();
 
         // For all edges in the original component
         for (int edgeIndex = 0; edgeIndex < original.getEdges().size(); edgeIndex++) {
@@ -43,7 +43,11 @@ public class InvertResetOperator extends MutationOperator {
                 // Mutate
                 invertClock(mutantEdge, clock);
 
-                mutants.add(mutant);
+                mutants.add(new MutationTestCase(original, mutant,
+                        getCodeName() + "_" + finalEdgeIndex + "_" + clock,
+                        "Inverted clock reset of clock " + clock + " on the guard of " +
+                                originalEdge.getSourceLocation().getId() + " -> " + originalEdge.getTargetLocation().getId()
+                ));
             });
         }
 

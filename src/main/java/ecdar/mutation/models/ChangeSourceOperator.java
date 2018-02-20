@@ -23,8 +23,8 @@ class ChangeSourceOperator extends MutationOperator {
     }
 
     @Override
-    public List<Component> generate(final Component original) {
-        final List<Component> mutants = new ArrayList<>();
+    public List<MutationTestCase> generate(final Component original) {
+        final List<MutationTestCase> cases = new ArrayList<>();
 
         // For all edges in the original component
         for (int edgeIndex = 0; edgeIndex < original.getEdges().size(); edgeIndex++) {
@@ -34,28 +34,32 @@ class ChangeSourceOperator extends MutationOperator {
             if (originalEdge.getIsLocked().get()) continue;
 
             // Change the source of that edge to (almost) each of the locations
-            for (final Location location : original.getLocations()) {
+            for (final Location originalLocation : original.getLocations()) {
                 // Ignore if location is source in original edge
-                if (originalEdge.getSourceLocation() == location) continue;
+                if (originalEdge.getSourceLocation() == originalLocation) continue;
 
                 // Ignore if location is the Inconsistent or the Universal locations
                 // We do not want to have those as a source location,
                 // since it would break their behaviour
-                if (location.getType().equals(Location.Type.INCONSISTENT) || location.getType().equals(Location.Type.UNIVERSAL))
+                if (originalLocation.getType().equals(Location.Type.INCONSISTENT) || originalLocation.getType().equals(Location.Type.UNIVERSAL))
                     continue;
 
                 final Component mutant = original.cloneForVerification();
 
                 // Mutate
                 final Edge mutantEdge = mutant.getEdges().get(edgeIndex);
-                final String newLocId = location.getId();
+                final String newLocId = originalLocation.getId();
                 mutantEdge.setSourceLocation(mutant.findLocation(newLocId));
 
-                mutants.add(mutant);
+                cases.add(new MutationTestCase(original, mutant,
+                        getCodeName() + "_" + edgeIndex + "_" + originalLocation.getId(),
+                        "Changed source of edge " + originalEdge.getSourceLocation().getId() + " -> " +
+                                originalEdge.getTargetLocation().getId() + " to " + newLocId)
+                );
             }
         }
 
-        return mutants;
+        return cases;
     }
 
     @Override
