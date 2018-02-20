@@ -45,10 +45,6 @@ public class ComponentSimulation {
         return valuations;
     }
 
-    private void setCurrentLocation(final Location currentLocation) {
-        this.currentLocation = currentLocation;
-    }
-
 
     /* Other methods */
 
@@ -67,31 +63,6 @@ public class ComponentSimulation {
     }
 
     /**
-     * Runs an action rule.
-     * This method does not check for guards.
-     * It simply updates the current location and runs the update property.
-     * @param rule the rule to run
-     */
-    public void runActionRule(final ActionRule rule) {
-        final String backendLocId = rule.getEndLocationName();
-        final Location newLocation;
-
-        if (backendLocId.equals("Universal")) {
-            newLocation = component.getUniversalLocation();
-
-            if (newLocation == null) throw new IllegalArgumentException("End location was the Universal location, but this component has no universal locations.");
-        } else {
-            newLocation = component.findLocation(backendLocId);
-
-            if (newLocation == null) throw new IllegalArgumentException("End location " + backendLocId + " was not found");
-        }
-
-        setCurrentLocation(newLocation);
-
-        ExpressionHelper.parseUpdateProperty(rule.getUpdateProperty()).forEach(valuations::put);
-    }
-
-    /**
      * Runs an update property by updating valuations.
      * @param property the update property
      */
@@ -100,41 +71,46 @@ public class ComponentSimulation {
     }
 
     /**
-     * Returns if the current state is deterministic with respect to a specified output.
-     * The state is deterministic iff at most one transition with the specified output is available.
-     * @param output synchronization property without !
+     * Returns if the current state is deterministic with respect to a specified action.
+     * The state is deterministic iff at most one transition with the specified action is available.
+     * @param sync synchronization property without ? or !
+     * @param status the status of the action
      * @return true iff the state is deterministic
      */
-    public boolean isDeterministic(final String output) {
-        return getAvailableOutputEdgeStream(output).count() > 1;
+    public boolean isDeterministic(final String sync, final EdgeStatus status) {
+        return getAvailableEdgeStream(sync, status).count() > 1;
     }
 
     /**
-     * Gets a stream containing the available output edges matching a specified output.
-     * @param output the specified synchronization output without !
+     * Gets a stream containing the available edges matching a specified action.
+     * @param sync the specified synchronization output without ? or !
+     * @param status the status of the action that you look for
      * @return the stream
      */
-    private Stream<Edge> getAvailableOutputEdgeStream(final String output) {
+    private Stream<Edge> getAvailableEdgeStream(final String sync, final EdgeStatus status) {
         return component.getOutgoingEdges(currentLocation).stream()
-                .filter(e -> e.getStatus() == EdgeStatus.OUTPUT)
-                .filter(e -> e.getSync().equals(output))
+                .filter(e -> e.getStatus() == status)
+                .filter(e -> e.getSync().equals(sync))
                 .filter(e -> e.getGuard().trim().isEmpty() ||
                         ExpressionHelper.evaluateBooleanExpression(e.getGuard(), getValuations()));
     }
 
     /**
-     * If a valid output edge is available, runs a transition of that edge.
+     * If a valid action is available, runs a transition of that action.
      * The edge must be outgoing from the current location,
-     * must be an output edge with the given synchronization property,
+     * must be an edge with the given synchronization property,
      * and its guard must be satisfied.
-     * @param output synchronization property without !
+     * @param sync synchronization property without ? or !
+     * @param status the status of the action that you look for
      * @return true iff the action succeeded
      * @throws MutationTestingException if multiple transitions with the specified output are available
      */
-    public boolean triggerOutput(final String output) throws MutationTestingException {
-        final List<Edge> edges = getAvailableOutputEdgeStream(output).collect(Collectors.toList());
+    public boolean runAction(final String sync, final EdgeStatus status) throws MutationTestingException {
+        final List<Edge> edges = getAvailableEdgeStream(sync, status).collect(Collectors.toList());
 
-        if (edges.size() > 1) throw new MutationTestingException("Simulation of output " + output + " yields a non-deterministic choice");
+        if (edges.size() > 1) throw new MutationTestingException("Simulation of " +
+                (status.equals(EdgeStatus.INPUT) ? "input" : "output") +
+                " " + sync + " yields a non-deterministic choice between " + edges.size() + " edges");
 
         if (edges.size() < 1) return false;
 
