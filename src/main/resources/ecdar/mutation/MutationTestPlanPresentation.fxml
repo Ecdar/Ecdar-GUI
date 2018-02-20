@@ -36,12 +36,12 @@
                         </VBox>
 
                         <HBox spacing="8" alignment="BOTTOM_LEFT">
-                            <JFXTextField fx:id="generationThreadsField" text="10" prefWidth="30" alignment="BASELINE_CENTER"/>
+                            <JFXTextField fx:id="generationThreadsField" prefWidth="30" alignment="BASELINE_CENTER"/>
                             <Label text="concurrent thread(s) for test-case generation."/>
                         </HBox>
 
                         <HBox spacing="8" alignment="BOTTOM_LEFT">
-                            <JFXTextField fx:id="suvInstancesField" text="1" prefWidth="30" alignment="BASELINE_CENTER"/>
+                            <JFXTextField fx:id="suvInstancesField" prefWidth="30" alignment="BASELINE_CENTER"/>
                             <Label text="concurrent instance(s) of the system under test."/>
                         </HBox>
 

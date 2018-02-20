@@ -9,14 +9,13 @@ import ecdar.mutation.models.MutationOperator;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.presentations.EcdarFXMLLoader;
 import ecdar.presentations.HighLevelModelPresentation;
+import javafx.beans.property.IntegerProperty;
 import javafx.collections.ListChangeListener;
-import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
 
 import java.time.Duration;
@@ -72,8 +71,8 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         controller.mutantsText.textProperty().bind(controller.getPlan().mutantsTextProperty());
         controller.testCasesText.textProperty().bind(controller.getPlan().testCasesTextProperty());
 
-        initializePositiveIntegerTextField(controller.generationThreadsField);
-        initializePositiveIntegerTextField(controller.suvInstancesField);
+        initializePositiveIntegerTextField(controller.generationThreadsField, controller.getPlan().maxGenerationThreadsProperty());
+        initializePositiveIntegerTextField(controller.suvInstancesField, controller.getPlan().maxSutInstancesProperty());
 
         controller.demonicCheckBox.selectedProperty().bindBidirectional(controller.getPlan().demonicProperty());
         controller.angelicBox.selectedProperty().bindBidirectional(controller.getPlan().angelicWhenExportProperty());
@@ -232,7 +231,15 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      * While in focus, the text field can still have an empty value.
      * @param field the text field
      */
-    private static void initializePositiveIntegerTextField(final JFXTextField field) {
+    private static void initializePositiveIntegerTextField(final JFXTextField field, final IntegerProperty property) {
+        // Set value initially
+        field.setText(String.valueOf(property.get()));
+
+        // Update property when text field changes
+        field.textProperty().addListener(((observable, oldValue, newValue) -> {
+            if (!newValue.isEmpty()) property.setValue(Integer.parseInt(newValue));
+        }));
+
         // Force the field to be empty positive integer
         field.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue.matches("\\d*")) field.setText(newValue.replaceAll("[^\\d]", ""));

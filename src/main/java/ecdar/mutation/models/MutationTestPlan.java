@@ -26,12 +26,18 @@ public class MutationTestPlan extends HighLevelModelObject {
     private static final String DEMONIC = "useDemonic";
     private static final String ANGELIC_EXPORT = "useAngelic";
 
+    private static final String MAX_GENERATION_THREADS = "maxGenerationThreads";
+    private static final String MAX_SUT_INSTANCES = "maxSutInstances";
+
     private final StringProperty testModelId = new SimpleStringProperty("");
     private final StringProperty action = new SimpleStringProperty("");
     private final StringProperty sutPath = new SimpleStringProperty("");
     private final StringProperty format = new SimpleStringProperty("");
     private final BooleanProperty demonic = new SimpleBooleanProperty(false);
     private final BooleanProperty angelicWhenExport = new SimpleBooleanProperty(false);
+
+    private final IntegerProperty concurrentGenerationThreads = new SimpleIntegerProperty(10);
+    private final IntegerProperty concurrentSutInstances = new SimpleIntegerProperty(1);
 
     private final StringProperty mutantsText = new SimpleStringProperty("");
     private final StringProperty testCasesText = new SimpleStringProperty("");
@@ -166,6 +172,30 @@ public class MutationTestPlan extends HighLevelModelObject {
         return operators;
     }
 
+    public int getConcurrentGenerationThreads() {
+        return concurrentGenerationThreads.get();
+    }
+
+    public IntegerProperty maxGenerationThreadsProperty() {
+        return concurrentGenerationThreads;
+    }
+
+    public void setConcurrentGenerationThreads(final int concurrentGenerationThreads) {
+        this.concurrentGenerationThreads.set(concurrentGenerationThreads);
+    }
+
+    public int getConcurrentSutInstances() {
+        return concurrentSutInstances.get();
+    }
+
+    public IntegerProperty maxSutInstancesProperty() {
+        return concurrentSutInstances;
+    }
+
+    public void setConcurrentSutInstances(final int concurrentSutInstances) {
+        this.concurrentSutInstances.set(concurrentSutInstances);
+    }
+
 
     /* Other methods */
 
@@ -181,6 +211,9 @@ public class MutationTestPlan extends HighLevelModelObject {
         result.addProperty(ANGELIC_EXPORT, isAngelicWhenExport());
 
         operators.forEach(operator -> result.addProperty(operator.getJsonName(), operator.isSelected()));
+
+        result.addProperty(MAX_GENERATION_THREADS, getConcurrentGenerationThreads());
+        result.addProperty(MAX_SUT_INSTANCES, getConcurrentSutInstances());
 
         return result;
     }
@@ -201,6 +234,12 @@ public class MutationTestPlan extends HighLevelModelObject {
             final JsonPrimitive primitive = json.getAsJsonPrimitive(operator.getJsonName());
             if (primitive != null) operator.setSelected(primitive.getAsBoolean());
         });
+
+        JsonPrimitive primitive = json.getAsJsonPrimitive(MAX_GENERATION_THREADS);
+        if (primitive != null) setConcurrentGenerationThreads(primitive.getAsInt());
+
+        primitive = json.getAsJsonPrimitive(MAX_SUT_INSTANCES);
+        if (primitive != null) setConcurrentSutInstances(primitive.getAsInt());
     }
 
 

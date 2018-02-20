@@ -11,5 +11,7 @@
   "changeGuard": true,
   "changeInvariant": true,
   "sinkLocation": true,
-  "invertReset": true
+  "invertReset": true,
+  "maxGenerationThreads": 10,
+  "maxSutInstances": 1
 }
