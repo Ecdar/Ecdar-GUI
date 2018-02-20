@@ -79,7 +79,7 @@ public class ComponentSimulation {
         if (backendLocId.equals("Universal")) {
             newLocation = component.getUniversalLocation();
 
-            if (newLocation == null) throw new IllegalArgumentException("End location was the Universal location, but this component was no universal locations.");
+            if (newLocation == null) throw new IllegalArgumentException("End location was the Universal location, but this component has no universal locations.");
         } else {
             newLocation = component.findLocation(backendLocId);
 
