@@ -69,7 +69,7 @@ public class NonRefinementStrategy {
         mutantValues.forEach((key, value) -> values.put(MutationTestPlanController.MUTANT_NAME + "." + key, value));
 
 
-        final List<StrategyRule> ruleList = rules.get(MutationTestPlanController.SPEC_NAME + "." + specificationLocation + ", " +
+        final List<StrategyRule> ruleList = rules.get(MutationTestPlanController.SPEC_NAME + "." + specificationLocation + " " +
                 MutationTestPlanController.MUTANT_NAME + "." + mutantLocation);
 
         if (ruleList == null) return null;
