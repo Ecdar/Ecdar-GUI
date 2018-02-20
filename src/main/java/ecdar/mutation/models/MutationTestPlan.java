@@ -19,31 +19,38 @@ public class MutationTestPlan extends HighLevelModelObject {
 
     private static final String PLAN_NAME_PREFIX = "Test ";
 
+    // JSON constants
     private static final String TEST_MODEL_ID = "testModelId";
     private static final String ACTION = "action";
     private static final String SUT_PATH = "sutPath";
     private static final String FORMAT = "exportFormat";
     private static final String DEMONIC = "useDemonic";
     private static final String ANGELIC_EXPORT = "useAngelic";
-
     private static final String MAX_GENERATION_THREADS = "maxGenerationThreads";
     private static final String MAX_SUT_INSTANCES = "maxSutInstances";
 
+    // General fields
     private final StringProperty testModelId = new SimpleStringProperty("");
     private final StringProperty action = new SimpleStringProperty("");
-    private final StringProperty sutPath = new SimpleStringProperty("");
-    private final StringProperty format = new SimpleStringProperty("");
-    private final BooleanProperty demonic = new SimpleBooleanProperty(false);
-    private final BooleanProperty angelicWhenExport = new SimpleBooleanProperty(false);
+    private final List<MutationOperator> operators = new ArrayList<>();
+    private final ObjectProperty<Status> status = new SimpleObjectProperty<>(Status.IDLE);
 
+    // For testing
+    private final StringProperty sutPath = new SimpleStringProperty("");
+    private final BooleanProperty demonic = new SimpleBooleanProperty(false);
     private final IntegerProperty concurrentGenerationThreads = new SimpleIntegerProperty(10);
     private final IntegerProperty concurrentSutInstances = new SimpleIntegerProperty(1);
 
+    // Temporary values for displaying results of testing
     private final StringProperty mutantsText = new SimpleStringProperty("");
     private final StringProperty testCasesText = new SimpleStringProperty("");
+    private final StringProperty passedText = new SimpleStringProperty("");
+    private final StringProperty InconclusiveText = new SimpleStringProperty("");
+    private final StringProperty FailedText = new SimpleStringProperty("");
 
-    private final List<MutationOperator> operators = new ArrayList<>();
-    private final ObjectProperty<Status> status = new SimpleObjectProperty<>(Status.IDLE);
+    // For exporting
+    private final BooleanProperty angelicWhenExport = new SimpleBooleanProperty(false);
+    private final StringProperty format = new SimpleStringProperty("");
 
 
     /* Constructors */
@@ -196,6 +203,42 @@ public class MutationTestPlan extends HighLevelModelObject {
         this.concurrentSutInstances.set(concurrentSutInstances);
     }
 
+    public String getPassedText() {
+        return passedText.get();
+    }
+
+    public StringProperty passedTextProperty() {
+        return passedText;
+    }
+
+    public void setPassedText(final String passedText) {
+        this.passedText.set(passedText);
+    }
+
+    public String getInconclusiveText() {
+        return InconclusiveText.get();
+    }
+
+    public StringProperty inconclusiveTextProperty() {
+        return InconclusiveText;
+    }
+
+    public void setInconclusiveText(final String inconclusiveText) {
+        this.InconclusiveText.set(inconclusiveText);
+    }
+
+    public String getFailedText() {
+        return FailedText.get();
+    }
+
+    public StringProperty failedTextProperty() {
+        return FailedText;
+    }
+
+    public void setFailedText(final String failedText) {
+        this.FailedText.set(failedText);
+    }
+
 
     /* Other methods */
 
@@ -270,10 +313,13 @@ public class MutationTestPlan extends HighLevelModelObject {
     }
 
     /**
-     * Clears the texts about mutants and test-cases.
+     * Clears the texts used to display results.
      */
     public void clearResults() {
         setMutantsText("");
         setTestCasesText("");
+        setPassedText("");
+        setInconclusiveText("");
+        setFailedText("");
     }
 }

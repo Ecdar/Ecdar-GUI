@@ -22,35 +22,49 @@ public class MutationTestPlanController {
     public final static String SPEC_NAME = "S";
     public final static String MUTANT_NAME = "M";
 
-    // UI elements
+
+    /* UI elements */
+
+    public ScrollPane scrollPane;
     public JFXComboBox<Label> modelPicker;
-    public JFXButton testButton;
-    public JFXButton stopButton;
-    public Label mutantsText;
-    public Label testCasesText;
-    public JFXTextField generationThreadsField;
+    public VBox modelDependentArea;
     public VBox operatorsArea;
     public JFXComboBox<Label> actionPicker;
+
     public VBox testDependentArea;
+    public HBox selectSutArea;
     public JFXButton selectSutButton;
-    public VBox exportDependantArea;
-    public VBox sutDependentArea;
     public Label sutPathLabel;
-    public JFXComboBox<Label> formatPicker;
-    public VBox modelDependentArea;
-    public VBox resultsArea;
-    public VBox progressAres;
-    public JFXTextField suvInstancesField;
+    public VBox sutDependentArea;
+    public VBox demonicArea;
     public JFXCheckBox demonicCheckBox;
+    public JFXTextField generationThreadsField;
+    public JFXTextField suvInstancesField;
+    public JFXButton testButton;
+    public JFXButton stopButton;
+
+    public VBox exportDependantArea;
+    public JFXComboBox<Label> formatPicker;
     public JFXCheckBox angelicBox;
     public JFXButton storeMutantsButton;
-    public TextFlow progressTextFlow;
-    public HBox selectSutArea;
-    public VBox demonicArea;
-    public ScrollPane scrollPane;
 
-    // Mutation objects
+    public VBox progressAres;
+    public TextFlow progressTextFlow;
+
+    public VBox resultsArea;
+    public Label mutantsText;
+    public Label testCasesText;
+    public Label passedText;
+    public Label inconclusiveText;
+    public Label failedText;
+
+
+    /* Mutation fields */
+
     private MutationTestPlan plan;
+
+
+    /* Properties */
 
     public MutationTestPlan getPlan() {
         return plan;
@@ -59,6 +73,9 @@ public class MutationTestPlanController {
     public void setPlan(final MutationTestPlan plan) {
         this.plan = plan;
     }
+
+
+    /* Other methods */
 
     /**
      * Triggered when pressed the test button.

@@ -65,11 +65,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
 
         initializeFormatPicker();
 
-        controller.progressTextFlow.getChildren().addListener((ListChangeListener<Node>) change -> show(controller.progressAres));
-        controller.mutantsText.textProperty().addListener(((observable, oldValue, newValue) -> show(controller.resultsArea)));
-
-        controller.mutantsText.textProperty().bind(controller.getPlan().mutantsTextProperty());
-        controller.testCasesText.textProperty().bind(controller.getPlan().testCasesTextProperty());
+        initializeProgressAndResultsTexts();
 
         initializePositiveIntegerTextField(controller.generationThreadsField, controller.getPlan().maxGenerationThreadsProperty());
         initializePositiveIntegerTextField(controller.suvInstancesField, controller.getPlan().maxSutInstancesProperty());
@@ -83,6 +79,20 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
                 "and you want to ignore mutants leading to these missing inputs. " +
                 "We apply angelic completion on the mutants.");
         initializeWidthAndHeight();
+    }
+
+    /**
+     * Initializes UI elements for displaying progress and results.
+     */
+    private void initializeProgressAndResultsTexts() {
+        controller.progressTextFlow.getChildren().addListener((ListChangeListener<Node>) change -> show(controller.progressAres));
+        controller.mutantsText.textProperty().addListener(((observable, oldValue, newValue) -> show(controller.resultsArea)));
+
+        controller.mutantsText.textProperty().bind(controller.getPlan().mutantsTextProperty());
+        controller.testCasesText.textProperty().bind(controller.getPlan().testCasesTextProperty());
+        controller.passedText.textProperty().bind(controller.getPlan().passedTextProperty());
+        controller.inconclusiveText.textProperty().bind(controller.getPlan().inconclusiveTextProperty());
+        controller.failedText.textProperty().bind(controller.getPlan().failedTextProperty());
     }
 
     /**

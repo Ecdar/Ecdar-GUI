@@ -75,6 +75,9 @@
                     <Separator/>
                     <Label fx:id="mutantsText"/>
                     <Label fx:id="testCasesText"/>
+                    <Label fx:id="passedText"/>
+                    <Label fx:id="inconclusiveText"/>
+                    <Label fx:id="failedText"/>
                 </VBox>
             </VBox>
         </VBox>
