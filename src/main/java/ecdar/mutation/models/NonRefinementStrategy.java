@@ -68,8 +68,13 @@ public class NonRefinementStrategy {
         specificationValues.forEach((key, value) -> values.put(MutationTestPlanController.SPEC_NAME + "." + key, value));
         mutantValues.forEach((key, value) -> values.put(MutationTestPlanController.MUTANT_NAME + "." + key, value));
 
-        return rules.get(MutationTestPlanController.SPEC_NAME + "." + specificationLocation + ", " + MutationTestPlanController.MUTANT_NAME + "." + mutantLocation)
-                .stream().filter(rule -> rule.isSatisfied(values)).findFirst().orElse(null);
+
+        final List<StrategyRule> ruleList = rules.get(MutationTestPlanController.SPEC_NAME + "." + specificationLocation + ", " +
+                MutationTestPlanController.MUTANT_NAME + "." + mutantLocation);
+
+        if (ruleList == null) return null;
+
+        return ruleList.stream().filter(rule -> rule.isSatisfied(values)).findFirst().orElse(null);
     }
 
 }
