@@ -29,7 +29,7 @@ public class ChangeGuardOperator extends MutationOperator {
     }
 
     @Override
-    public List<MutationTestCase> generate(final Component original) throws MutationTestingException {
+    public List<MutationTestCase> generateTestCases(final Component original) throws MutationTestingException {
         final List<MutationTestCase> testCases = new ArrayList<>();
 
         // Do not use != as this is not allowed for timing constrains

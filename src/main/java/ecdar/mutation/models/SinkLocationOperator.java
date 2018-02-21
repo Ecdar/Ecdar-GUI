@@ -24,7 +24,7 @@ public class SinkLocationOperator extends MutationOperator {
     }
 
     @Override
-    public List<MutationTestCase> generate(final Component original) {
+    public List<MutationTestCase> generateTestCases(final Component original) {
         final List<MutationTestCase> mutants = new ArrayList<>();
 
         // For all edges in the original component

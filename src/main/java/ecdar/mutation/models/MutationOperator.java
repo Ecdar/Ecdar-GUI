@@ -8,6 +8,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * An operator for creating mutants of a component.
@@ -46,9 +47,9 @@ public abstract class MutationOperator {
      * Generates mutants.
      * @param original the component to mutate
      * @return list of potential test-cases
-     * @throws MutationTestingException if a mutation error happens
+     * @throws MutationTestingException if a mutation error occurs
      */
-    public abstract List<MutationTestCase> generate(final Component original) throws MutationTestingException;
+    public abstract List<MutationTestCase> generateTestCases(final Component original) throws MutationTestingException;
 
     /**
      * Gets a description of the operator to use as a tooltip.
@@ -58,6 +59,16 @@ public abstract class MutationOperator {
 
 
     /* Other methods */
+
+    /**
+     * Generate mutants.
+     * @param original the component to mutate
+     * @return list of mutants
+     * @throws MutationTestingException if a mutation error occurs
+     */
+    public List<Component> generateMutants(final Component original) throws MutationTestingException {
+        return generateTestCases(original).stream().map(MutationTestCase::getMutant).collect(Collectors.toList());
+    }
 
     /**
      * Gets all available mutation operators.

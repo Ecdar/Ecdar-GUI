@@ -23,7 +23,7 @@ public class ChangeGuardOperatorTest {
         edge.setGuard("20<x");
         component.addEdge(edge);
 
-        final Collection<? extends Component> mutants = new ChangeGuardOperator().generate(component);
+        final Collection<? extends Component> mutants = new ChangeGuardOperator().generateMutants(component);
 
         Assert.assertEquals(4, mutants.size());
         Assert.assertTrue(mutants.stream().anyMatch(mutant -> mutant.getEdges().size() == 1 && mutant.getEdges().get(0).getGuard().equals("20>=x")));
@@ -42,7 +42,7 @@ public class ChangeGuardOperatorTest {
         edge.setTargetLocation(component.getLocations().get(0));
         component.addEdge(edge);
 
-        final Collection<? extends Component> mutants = new ChangeGuardOperator().generate(component);
+        final Collection<? extends Component> mutants = new ChangeGuardOperator().generateMutants(component);
 
         Assert.assertEquals(0, mutants.size());
     }
@@ -57,7 +57,7 @@ public class ChangeGuardOperatorTest {
         edge.setGuard("20 != x");
         component.addEdge(edge);
 
-        final Collection<? extends Component> mutants = new ChangeGuardOperator().generate(component);
+        final Collection<? extends Component> mutants = new ChangeGuardOperator().generateMutants(component);
 
         Assert.assertEquals(5, mutants.size());
         Assert.assertTrue(mutants.stream().anyMatch(mutant -> mutant.getEdges().size() == 1 && mutant.getEdges().get(0).getGuard().equals("20 == x")));
@@ -77,7 +77,7 @@ public class ChangeGuardOperatorTest {
         edge.setGuard("20 < x && y == 2");
         component.addEdge(edge);
 
-        final Collection<? extends Component> mutants = new ChangeGuardOperator().generate(component);
+        final Collection<? extends Component> mutants = new ChangeGuardOperator().generateMutants(component);
 
         Assert.assertEquals(8, mutants.size());
         Assert.assertTrue(mutants.stream().anyMatch(mutant -> mutant.getEdges().size() == 1 && mutant.getEdges().get(0).getGuard().equals("20 < x && y < 2")));

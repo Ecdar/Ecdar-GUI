@@ -93,7 +93,7 @@ class TestCaseGenerationHandler {
         potentialTestCases = new ArrayList<>();
         try {
             for (final MutationOperator operator : getPlan().getSelectedMutationOperators())
-                potentialTestCases.addAll(operator.generate(getTestModel()));
+                potentialTestCases.addAll(operator.generateTestCases(getTestModel()));
         } catch (final MutationTestingException e) {
             handleException(e);
             return;

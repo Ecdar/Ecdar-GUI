@@ -48,6 +48,6 @@ public class ChangeTargetOperatorTest {
         component.addEdge(edge);
 
         // 5 edges, 4 locations. Expect 5 * (4 - 1) = 15 mutants
-        Assert.assertEquals(15, new ChangeTargetOperator().generate(component).size());
+        Assert.assertEquals(15, new ChangeTargetOperator().generateTestCases(component).size());
     }
 }

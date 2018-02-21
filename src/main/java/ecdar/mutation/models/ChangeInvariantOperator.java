@@ -20,7 +20,7 @@ public class ChangeInvariantOperator extends MutationOperator {
     }
 
     @Override
-    public List<MutationTestCase> generate(final Component original) {
+    public List<MutationTestCase> generateTestCases(final Component original) {
         final List<MutationTestCase> cases = new ArrayList<>();
 
         // For all locations in the original component

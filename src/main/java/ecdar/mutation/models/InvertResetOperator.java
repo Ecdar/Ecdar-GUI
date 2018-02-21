@@ -22,7 +22,7 @@ public class InvertResetOperator extends MutationOperator {
     }
 
     @Override
-    public List<MutationTestCase> generate(final Component original) {
+    public List<MutationTestCase> generateTestCases(final Component original) {
         final List<String> clocks = original.getClocks();
 
         final List<MutationTestCase> mutants = new ArrayList<>();
