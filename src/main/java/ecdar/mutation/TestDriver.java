@@ -20,12 +20,10 @@ public class TestDriver {
     private enum Verdict {NONE, INCONCLUSIVE, PASS, FAIL}
 
     public TestDriver(List<MutationTestCase> mutationTestCases, String SUTPath, int timeUnit, int bound){
-        int testcaseNumber = 1;
         for (MutationTestCase testCase  : mutationTestCases) {
             Verdict verdict = Verdict.NONE;
-            System.out.println("testcase" + testcaseNumber);
-            testcaseNumber++;
 
+            System.out.println(testCase.getId());
             NonRefinementStrategy strategy = testCase.getStrategy();
             ComponentSimulation testModelSimulation = new ComponentSimulation(testCase.getTestModel());
             ComponentSimulation mutantSimulation = new ComponentSimulation(testCase.getMutant());
@@ -96,9 +94,7 @@ public class TestDriver {
                 Thread.sleep(timeUnit);
                 //Do Delay
                 long seconds = Duration.between(delayStart, Instant.now()).getSeconds();
-                System.out.println("Delay" + seconds);
                 if(!testModelSimulation.delay(seconds)){
-                    System.out.println("Fail Delay");
                     return Verdict.FAIL;
                 } else {
                     mutantSimulation.delay(Duration.between(delayStart, Instant.now()).getSeconds());
