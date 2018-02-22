@@ -16,6 +16,7 @@ public class TestDriver {
     private BufferedReader input;
     private InputStream inputStream;
     private BufferedWriter output;
+    private Process SUT;
     private enum Verdict {NONE, INCONCLUSIVE, PASS, FAIL}
 
     public TestDriver(List<MutationTestCase> mutationTestCases, String SUTPath, int timeUnit, int bound){
@@ -34,7 +35,6 @@ public class TestDriver {
             int step = 1;
 
             while(verdict.equals(Verdict.NONE)) {
-                System.out.println("c");
                 if(testModelSimulation.getCurrentLocation().getType() == Location.Type.UNIVERSAL){
                     testModelSimulation.getCurrentLocation().setId("Universal");
                 } else if(testModelSimulation.getCurrentLocation().getType() == Location.Type.INCONSISTENT){
@@ -79,7 +79,7 @@ public class TestDriver {
 
     private void initializeAndRunProcess(){
         try {
-            Process SUT = Runtime.getRuntime().exec("java -jar C:\\Users\\Chres\\Desktop\\SimpleMutationProgram\\out\\artifacts\\test\\test.jar");
+            SUT = Runtime.getRuntime().exec("java -jar C:\\Users\\Chres\\Desktop\\SimpleMutationProgram\\out\\artifacts\\test\\test.jar");
             output = new BufferedWriter(new OutputStreamWriter(SUT.getOutputStream()));
             inputStream = SUT.getInputStream();
             input = new BufferedReader(new InputStreamReader(inputStream));
@@ -130,8 +130,12 @@ public class TestDriver {
 
     private void writeToSUT(String outputBroadcast){
         try {
-            output.write(outputBroadcast+"\n");
-            output.flush();
+            if(SUT.isAlive()) {
+                output.write(outputBroadcast + "\n");
+                output.flush();
+            } else {
+                System.out.println("Dead, but write");
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
