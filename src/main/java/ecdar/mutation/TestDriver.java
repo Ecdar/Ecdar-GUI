@@ -1,4 +1,5 @@
 package ecdar.mutation;
+import ecdar.abstractions.Component;
 import ecdar.mutation.models.*;
 
 import java.io.*;
@@ -30,50 +31,8 @@ public class TestDriver {
 
             int step = 1;
 
-            try {
-                Instant delayStart = Instant.now();
-                //Check if any output is ready, if there is none, do delay
-                System.out.println("a");
-                if(inputStream.available() == 0){
-                    System.out.println("b");
-                    Thread.sleep(timeUnit);
-                    System.out.println("ba");
-                    //Do Delay
-                    if(!testModelSimulation.delay(Duration.between(delayStart, Instant.now()).getSeconds())){
-                        System.out.println("bb");
-                        verdict = Verdict.FAIL;
-                        break;
-                    } else {
-                        mutantSimulation.delay(Duration.between(delayStart, Instant.now()).getSeconds());
-                        System.out.println("bc");
-                    }
-                }
-
-                System.out.println("c");
-                //Do output if any output happened when sleeping
-                if(inputStream.available() != 0){
-                    System.out.println("ca");
-                    String outputFromSUT = readFromSUT();
-                    System.out.println("cb");
-                    if(!testModelSimulation.triggerOutput(outputFromSUT)){
-                        verdict = Verdict.FAIL;
-                        break;
-                    } else if (!mutantSimulation.triggerOutput(outputFromSUT)) {
-                        verdict = Verdict.PASS;
-                        break;
-                    }
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (MutationTestingException e) {
-                e.printStackTrace();
-            }
-
-
-            System.out.println("d");
             while(verdict.equals(Verdict.NONE)) {
+                System.out.println("c");
                 StrategyRule rule = strategy.getRule(testModelSimulation.getCurrentLocation().getId(), mutantSimulation.getCurrentLocation().getId(), testModelSimulation.getValuations(), mutantSimulation.getValuations());
                 if((rule) == null){
                     verdict = Verdict.INCONCLUSIVE;
@@ -88,35 +47,7 @@ public class TestDriver {
 
                     writeToSUT(sync);
                 } else if(rule instanceof DelayRule){
-                    Instant delayStart = Instant.now();
-                    try {
-                        //Check if any output is ready, if there is none, do delay
-                        if(inputStream.available() == 0){
-                            Thread.sleep(timeUnit);
-                            //Do Delay
-                            if(!testModelSimulation.delay(Duration.between(delayStart, Instant.now()).getSeconds())){
-                                verdict = Verdict.FAIL;
-                                break;
-                            } else {
-                                mutantSimulation.delay(Duration.between(delayStart, Instant.now()).getSeconds());
-                            }
-                        }
-
-                        //Do output if any output happened when sleeping
-                        if(inputStream.available() != 0){
-                            System.out.println("BITCONNEEEEEECT");
-                            String outputFromSUT = readFromSUT();
-                            if(!testModelSimulation.triggerOutput(outputFromSUT)){
-                                verdict = Verdict.FAIL;
-                            } else if (!mutantSimulation.triggerOutput(outputFromSUT)) {
-                                verdict = Verdict.PASS;
-                            }
-                        }
-                    } catch (InterruptedException e) {
-                                e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    verdict = delay(testModelSimulation, mutantSimulation, timeUnit);
                 }
                 if(step == bound){
                     verdict = Verdict.INCONCLUSIVE;
@@ -134,6 +65,42 @@ public class TestDriver {
             input = new BufferedReader(new InputStreamReader(inputStream));
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private Verdict delay(ComponentSimulation testModelSimulation, ComponentSimulation mutantSimulation, int timeUnit){
+        Instant delayStart = Instant.now();
+        try {
+            //Check if any output is ready, if there is none, do delay
+            if(inputStream.available() == 0){
+                Thread.sleep(timeUnit);
+                //Do Delay
+                if(!testModelSimulation.delay(Duration.between(delayStart, Instant.now()).getSeconds())){
+                    return Verdict.FAIL;
+                } else {
+                    mutantSimulation.delay(Duration.between(delayStart, Instant.now()).getSeconds());
+                }
+            }
+
+            //Do output if any output happened when sleeping
+            if(inputStream.available() != 0){
+                String outputFromSUT = readFromSUT();
+                if(!testModelSimulation.triggerOutput(outputFromSUT)){
+                    return Verdict.FAIL;
+                } else if (!mutantSimulation.triggerOutput(outputFromSUT)) {
+                    return Verdict.PASS;
+                }
+            }
+            return Verdict.NONE;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            return Verdict.INCONCLUSIVE;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return Verdict.INCONCLUSIVE;
+        } catch (MutationTestingException e) {
+            e.printStackTrace();
+            return Verdict.INCONCLUSIVE;
         }
     }
 

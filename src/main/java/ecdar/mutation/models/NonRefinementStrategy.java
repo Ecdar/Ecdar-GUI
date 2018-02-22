@@ -64,7 +64,6 @@ public class NonRefinementStrategy {
      */
     public StrategyRule getRule(final String specificationLocation, final String mutantLocation,
                                 final Map<String, Double> specificationValues, final Map<String, Double> mutantValues) {
-        System.out.println("Rule");
         final Map<String, Double> values = new HashMap<>();
         specificationValues.forEach((key, value) -> values.put(MutationTestPlanController.SPEC_NAME + "." + key, value));
         mutantValues.forEach((key, value) -> values.put(MutationTestPlanController.MUTANT_NAME + "." + key, value));
