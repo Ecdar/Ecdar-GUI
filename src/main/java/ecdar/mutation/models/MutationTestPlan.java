@@ -15,7 +15,12 @@ import java.util.stream.Collectors;
  * A test plan for conducting model-based mutation testing on a component.
  */
 public class MutationTestPlan extends HighLevelModelObject {
-    public enum Status {IDLE, WORKING, STOPPING}
+    /**
+     * The status of the test plan.
+     * STOPPING: Stop by the user
+     * ERROR: An error has just occurred, and we are waiting for the execution to stop because of it
+     */
+    public enum Status {IDLE, WORKING, STOPPING, ERROR}
 
     private static final String PLAN_NAME_PREFIX = "Test ";
 

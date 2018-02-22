@@ -193,19 +193,15 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      * @param newValue the new status
      */
     private void handleStatusUpdate(final MutationTestPlan.Status oldValue, final MutationTestPlan.Status newValue) {
-        if (oldValue != null) {
-            switch (oldValue) {
-                case STOPPING:
-                    controller.writeProgress("Stopped");
-                    break;
-            }
-        }
-
         switch (newValue) {
             case IDLE:
                 show(controller.testButton);
                 hide(controller.stopButton);
                 for (final Region region : getRegionsToDisableWhileWorking()) region.setDisable(false);
+
+                if (oldValue != null && oldValue.equals(MutationTestPlan.Status.STOPPING))
+                    controller.writeProgress("Stopped");
+
                 break;
             case WORKING:
                 hide(controller.testButton);
@@ -214,6 +210,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
                 for (final Region region : getRegionsToDisableWhileWorking()) region.setDisable(true);
                 break;
             case STOPPING:
+            case ERROR:
                 controller.stopButton.setDisable(true);
                 break;
         }

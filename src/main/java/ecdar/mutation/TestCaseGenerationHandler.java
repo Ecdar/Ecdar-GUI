@@ -125,12 +125,13 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
 
     @Override
     public boolean shouldStop() {
-        return getPlan().getStatus().equals(MutationTestPlan.Status.STOPPING);
+        return getPlan().getStatus().equals(MutationTestPlan.Status.STOPPING) ||
+                getPlan().getStatus().equals(MutationTestPlan.Status.ERROR);
     }
 
     @Override
     public void onStopped() {
-        getPlan().setStatus(MutationTestPlan.Status.IDLE);
+        Platform.runLater(() -> getPlan().setStatus(MutationTestPlan.Status.IDLE));
     }
 
     @Override
@@ -249,7 +250,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
 
         // Only show error if the process is not already being stopped
         if (getPlan().getStatus().equals(MutationTestPlan.Status.WORKING)) {
-            getPlan().setStatus(MutationTestPlan.Status.STOPPING);
+            getPlan().setStatus(MutationTestPlan.Status.ERROR);
             Platform.runLater(() -> {
                 final String message = "Error while generating test-cases: " + e.getMessage();
                 final Text text = new Text(message);

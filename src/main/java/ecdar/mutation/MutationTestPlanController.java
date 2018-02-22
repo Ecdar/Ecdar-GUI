@@ -107,6 +107,7 @@ public class MutationTestPlanController {
      * Signals that this test plan should stop doing jobs.
      */
     public void onStopButtonPressed() {
+        writeProgress("Stopping");
         getPlan().setStatus(MutationTestPlan.Status.STOPPING);
     }
 
