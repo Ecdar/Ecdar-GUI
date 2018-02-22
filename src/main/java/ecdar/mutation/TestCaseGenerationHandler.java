@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
  */
 class TestCaseGenerationHandler implements ConcurrentJobsHandler {
     private final MutationTestPlan plan;
+    private final Consumer<List<MutationTestCase>> testCasesConsumer;
 
     private final Component testModel;
 
@@ -55,10 +56,11 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
      * @param testModel the tet model to use
      * @param progressWriter object to write progress with
      */
-    TestCaseGenerationHandler(final MutationTestPlan plan, final Component testModel, final Consumer<Text> progressWriter) {
+    TestCaseGenerationHandler(final MutationTestPlan plan, final Component testModel, final Consumer<Text> progressWriter, final Consumer<List<MutationTestCase>> testCasesConsumer) {
         this.plan = plan;
         this.testModel = testModel;
         this.progressWriter = progressWriter;
+        this.testCasesConsumer = testCasesConsumer;
     }
 
 
@@ -133,7 +135,6 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
     public void onStopped() {
         Platform.runLater(() -> getPlan().setStatus(MutationTestPlan.Status.IDLE));
     }
-
     @Override
     public void onAllJobsSuccessfullyDone() {
         try {
@@ -147,9 +148,10 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
         final Text text = new Text("Done");
         text.setFill(Color.GREEN);
         getProgressWriter().accept(text);
-        getPlan().setStatus(MutationTestPlan.Status.IDLE);
+        
+        testCasesConsumer.accept(finishedTestCases);
     }
-
+    
     @Override
     public void writeProgress(final int jobsEnded) {
         writeProgress("Generating test-cases... (" + jobsEnded + "/" + potentialTestCases.size() + " mutants processed)");

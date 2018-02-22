@@ -1,37 +1,55 @@
 package ecdar.mutation;
+import ecdar.mutation.models.MutationTestCase;
+import ecdar.mutation.models.NonRefinementStrategy;
+
 import java.io.*;
+import java.util.List;
 
 public class TestDriver {
 
     private String SUTPath;
     private String stringInput;
+    private BufferedReader input;
+    private BufferedWriter output;
 
-    public TestDriver(){
-        final Process p;
+    public TestDriver(List<MutationTestCase> mutationTestCases, String SUTPath){
+
+        for (MutationTestCase testCase  : mutationTestCases) {
+            NonRefinementStrategy strategy = testCase.getStrategy();
+
+            initializeAndRunProcess();
+
+            
+        }
+    }
+
+    private void initializeAndRunProcess(){
         try {
-            p = Runtime.getRuntime().exec("java -jar C:\\Users\\Chres\\Desktop\\SimpleMutationProgram\\out\\artifacts\\test\\test.jar");
-        new Thread(() -> {
-            try {
-                BufferedWriter output = new BufferedWriter(new OutputStreamWriter(p.getOutputStream()));
-                BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
-                stringInput = input.readLine();
-                System.out.println(stringInput);
-                output.write("Tobias");
-                output.newLine();
-                output.flush();
-                stringInput = input.readLine();
-                System.out.println(stringInput);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }).start();
-
-        p.waitFor();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            Process SUT = Runtime.getRuntime().exec("java -jar C:\\Users\\Chres\\Desktop\\SimpleMutationProgram\\out\\artifacts\\test\\test.jar");
+            output = new BufferedWriter(new OutputStreamWriter(SUT.getOutputStream()));
+            input = new BufferedReader(new InputStreamReader(SUT.getInputStream()));
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void write(String outputBroadcast){
+        try {
+            output.write(outputBroadcast);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String read(){
+        try {
+            return stringInput = input.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+
     }
 
     public String getSUTPath() {

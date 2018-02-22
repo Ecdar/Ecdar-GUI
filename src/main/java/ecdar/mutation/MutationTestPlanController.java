@@ -6,6 +6,7 @@ import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXTextField;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
+import ecdar.mutation.models.MutationTestCase;
 import ecdar.mutation.models.MutationTestPlan;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -14,6 +15,9 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
+
+import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Controller for a test plan with model-based mutation testing.
@@ -88,7 +92,9 @@ public class MutationTestPlanController {
         // Clone it, because we want to change its name
         final Component testModel = Ecdar.getProject().findComponent(modelPicker.getValue().getText()).cloneForVerification();
 
-        new TestCaseGenerationHandler(getPlan(), testModel, this::writeProgress).start();
+        Consumer<List<MutationTestCase>> runTestDriver = (mutationTestCases) -> new TestDriver(mutationTestCases, sutPathLabel.getText());
+
+        new TestCaseGenerationHandler(getPlan(), testModel, this::writeProgress, runTestDriver).start();
     }
 
     /**
