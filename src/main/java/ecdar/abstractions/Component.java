@@ -168,7 +168,7 @@ public class Component extends HighLevelModelObject implements Boxed {
             // Convert to disjunctive normal form to make into multiple edges (disjunctions),
             // each with a conjunction of simple expressions.
             createAngelicSelfLoops(location, input, ExpressionHelper.simplifyNegatedSimpleExpressions(
-                    RuleSet.toCNF(Not.of(ExpressionHelper.parseDisjunctionOfGuards(matchingEdges.stream()
+                    RuleSet.toDNF(Not.of(ExpressionHelper.parseDisjunctionOfGuards(matchingEdges.stream()
                             .map(Edge::getGuard)
                             .collect(Collectors.toList()))
                     ))));
@@ -177,6 +177,7 @@ public class Component extends HighLevelModelObject implements Boxed {
 
     /**
      * Creates self loops on a location to finish missing inputs with an angelic completion.
+     * The guard expression should be in DNF without negations.
      * @param location the location to create self loops on
      * @param input the input action to use in the synchronization properties
      * @param guardExpression the expression that represents the guards of the self loops
@@ -198,7 +199,14 @@ public class Component extends HighLevelModelObject implements Boxed {
                 edge.addSyncNail(input);
                 edge.addGuardNail(String.join("&&",
                         ((And<String>) guardExpression).getChildren().stream()
-                                .map(child -> ((Variable<String>) child).getValue())
+                                .map(child -> {
+                                    if (!child.getExprType().equals(Variable.EXPR_TYPE))
+                                        throw new RuntimeException("Child " + child + " of type " +
+                                                child.getExprType() + " in and expression " +
+                                                guardExpression + " should be a variable");
+
+                                    return ((Variable<String>) child).getValue();
+                                })
                                 .collect(Collectors.toList())
                 ));
                 addEdge(edge);
@@ -257,7 +265,7 @@ public class Component extends HighLevelModelObject implements Boxed {
             // Convert to disjunctive normal form to make into multiple edges (disjunctions),
             // each with a conjunction of simple expressions.
             createDemonicEdges(location, uniLocation, input, ExpressionHelper.simplifyNegatedSimpleExpressions(
-                    RuleSet.toCNF(Not.of(ExpressionHelper.parseDisjunctionOfGuards(matchingEdges.stream()
+                    RuleSet.toDNF(Not.of(ExpressionHelper.parseDisjunctionOfGuards(matchingEdges.stream()
                             .map(Edge::getGuard)
                             .collect(Collectors.toList()))
                     ))));

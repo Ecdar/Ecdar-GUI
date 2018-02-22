@@ -22,7 +22,7 @@ public class ExpressionHelper {
      * Searches recursively through the expression.
      * If a Not expression of a simple expression (e.g. x < 2) is found,
      * this is replaced with the negated expression (x >= 2).
-     * To use effectively, make sure to put the expression into CNF before calling this method.
+     * To use effectively, make sure to put the expression into DNF before calling this method.
      * @param expression the expression to simplify
      * @return the simplified expression
      */
@@ -34,7 +34,7 @@ public class ExpressionHelper {
                 final Expression<String> child = ((Not<String>) expression).getE();
 
                 if (!child.getExprType().equals(Variable.EXPR_TYPE))
-                    throw new RuntimeException("Unexpected negation. Expressions \"" + expression.toString() + "\" should be in CNF");
+                    throw new RuntimeException("Unexpected negation. Expressions \"" + expression.toString() + "\" should be in DNF");
 
                 final String guard = ((Variable<String>) child).getValue();
                 final Matcher matcher = Pattern.compile(REGEX_SIMPLE_NEGATEABLE_GUARD).matcher(guard);
@@ -100,6 +100,8 @@ public class ExpressionHelper {
 
     /**
      * Parses a simple guards (without conjunctions) to an expression.
+     * The equal operator (==) is parsed as a conjunction of <= and >=,
+     * since the engine does not allow for != for clock valuations.
      * @param simpleGuard the simple guard to parse
      * @return the expression
      */
