@@ -89,7 +89,9 @@ public class ExpressionHelper {
      * @param guard the guard to parse
      * @return the expression
      */
-    private static Expression<String> parseGuard(final String guard) {
+    public static Expression<String> parseGuard(final String guard) {
+        if (guard.isEmpty()) return Literal.getTrue();
+
         return And.of(
                 Arrays.stream(guard.split("&&"))
                         .map(String::trim)
@@ -113,6 +115,17 @@ public class ExpressionHelper {
             );
         else
             return Variable.of(simpleGuard);
+    }
+
+    /**
+     * Parses an invariant to an expression.
+     * This method simply parses it as a guard,
+     * since the set of invariants is included in the set of guards.
+     * @param invariant the invariant to parse
+     * @return the expression
+     */
+    public static Expression<String> parseInvariant(final String invariant) {
+        return parseGuard(invariant);
     }
 
     /**
