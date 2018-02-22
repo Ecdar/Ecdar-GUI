@@ -149,7 +149,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
      * Sets a specific id for this location
      * @param string id to set
      */
-    private void setId(final String string){
+    public void setId(final String string){
         id.set(string);
     }
 

@@ -1,5 +1,7 @@
 package ecdar.mutation;
 import ecdar.abstractions.Component;
+import ecdar.abstractions.EdgeStatus;
+import ecdar.abstractions.Location;
 import ecdar.mutation.models.*;
 
 import java.io.*;
@@ -33,6 +35,16 @@ public class TestDriver {
 
             while(verdict.equals(Verdict.NONE)) {
                 System.out.println("c");
+                if(testModelSimulation.getCurrentLocation().getType() == Location.Type.UNIVERSAL){
+                    testModelSimulation.getCurrentLocation().setId("Universal");
+                } else if(testModelSimulation.getCurrentLocation().getType() == Location.Type.INCONSISTENT){
+                    testModelSimulation.getCurrentLocation().setId("Inconsistent");
+                }
+                if(mutantSimulation.getCurrentLocation().getType() == Location.Type.UNIVERSAL){
+                    mutantSimulation.getCurrentLocation().setId("Universal");
+                } else if(mutantSimulation.getCurrentLocation().getType() == Location.Type.INCONSISTENT){
+                    mutantSimulation.getCurrentLocation().setId("Inconsistent");
+                }
                 StrategyRule rule = strategy.getRule(testModelSimulation.getCurrentLocation().getId(), mutantSimulation.getCurrentLocation().getId(), testModelSimulation.getValuations(), mutantSimulation.getValuations());
                 if((rule) == null){
                     verdict = Verdict.INCONCLUSIVE;
@@ -40,12 +52,20 @@ public class TestDriver {
                 }
 
                 if(rule instanceof ActionRule){
-                    testModelSimulation.runActionRule((ActionRule)rule);
-                    mutantSimulation.runActionRule((ActionRule)rule);
+                    if(((ActionRule) rule).getStatus() == EdgeStatus.OUTPUT){
+                        verdict = delay(testModelSimulation, mutantSimulation, timeUnit);
+                    } else {
+                        try {
+                            testModelSimulation.runAction(((ActionRule) rule).getSync(), ((ActionRule) rule).getStatus());
+                            mutantSimulation.runAction(((ActionRule) rule).getSync(), ((ActionRule) rule).getStatus());
+                        } catch (MutationTestingException e) {
+                            e.printStackTrace();
+                        }
 
-                    String sync = (ActionRule)rule.getSync();
+                        String sync = ((ActionRule) rule).getSync();
 
-                    writeToSUT(sync);
+                        writeToSUT(sync);
+                    }
                 } else if(rule instanceof DelayRule){
                     verdict = delay(testModelSimulation, mutantSimulation, timeUnit);
                 }
@@ -75,7 +95,10 @@ public class TestDriver {
             if(inputStream.available() == 0){
                 Thread.sleep(timeUnit);
                 //Do Delay
-                if(!testModelSimulation.delay(Duration.between(delayStart, Instant.now()).getSeconds())){
+                long seconds = Duration.between(delayStart, Instant.now()).getSeconds();
+                System.out.println("Delay" + seconds);
+                if(!testModelSimulation.delay(seconds)){
+                    System.out.println("Fail Delay");
                     return Verdict.FAIL;
                 } else {
                     mutantSimulation.delay(Duration.between(delayStart, Instant.now()).getSeconds());
@@ -85,9 +108,10 @@ public class TestDriver {
             //Do output if any output happened when sleeping
             if(inputStream.available() != 0){
                 String outputFromSUT = readFromSUT();
-                if(!testModelSimulation.triggerOutput(outputFromSUT)){
+                if(!testModelSimulation.runAction(outputFromSUT, EdgeStatus.OUTPUT)){
+                    System.out.println("Fail Output " + outputFromSUT);
                     return Verdict.FAIL;
-                } else if (!mutantSimulation.triggerOutput(outputFromSUT)) {
+                } else if (!mutantSimulation.runAction(outputFromSUT, EdgeStatus.OUTPUT)) {
                     return Verdict.PASS;
                 }
             }
