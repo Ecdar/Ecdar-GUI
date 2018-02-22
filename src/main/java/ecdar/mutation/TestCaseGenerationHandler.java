@@ -135,6 +135,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
     public void onStopped() {
         Platform.runLater(() -> getPlan().setStatus(MutationTestPlan.Status.IDLE));
     }
+    
     @Override
     public void onAllJobsSuccessfullyDone() {
         try {

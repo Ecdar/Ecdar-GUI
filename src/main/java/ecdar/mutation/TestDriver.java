@@ -3,11 +3,13 @@ import ecdar.abstractions.Component;
 import ecdar.abstractions.EdgeStatus;
 import ecdar.abstractions.Location;
 import ecdar.mutation.models.*;
+import javafx.scene.text.Text;
 
 import java.io.*;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class TestDriver {
 
@@ -17,12 +19,19 @@ public class TestDriver {
     private InputStream inputStream;
     private BufferedWriter output;
     private Process SUT;
+    private int inconclusive;
+    private int passed;
+    private int failed;
+    private MutationTestPlan testPlan;
     private enum Verdict {NONE, INCONCLUSIVE, PASS, FAIL}
 
-    public TestDriver(List<MutationTestCase> mutationTestCases, String SUTPath, int timeUnit, int bound){
+    public TestDriver(List<MutationTestCase> mutationTestCases, MutationTestPlan testPlan, final Consumer<Text> progressWriterText, final Consumer<String> progressWriterString, String SUTPath, int timeUnit, int bound){
+        int testCaseNumber = 0;
         for (MutationTestCase testCase  : mutationTestCases) {
-            Verdict verdict = Verdict.NONE;
+            progressWriterString.accept(testCase.getId() + "Testcase: " + testCaseNumber + "/" + mutationTestCases.size());
 
+            Verdict verdict = Verdict.NONE;
+            this.testPlan = testPlan;
             System.out.println(testCase.getId());
             NonRefinementStrategy strategy = testCase.getStrategy();
             ComponentSimulation testModelSimulation = new ComponentSimulation(testCase.getTestModel());
@@ -46,6 +55,8 @@ public class TestDriver {
                 StrategyRule rule = strategy.getRule(testModelSimulation.getCurrentLocation().getId(), mutantSimulation.getCurrentLocation().getId(), testModelSimulation.getValuations(), mutantSimulation.getValuations());
                 if((rule) == null){
                     verdict = Verdict.INCONCLUSIVE;
+                    inconclusive++;
+                    testPlan.setPassedText("Inconclusive: " + inconclusive);
                     break;
                 }
 
@@ -69,6 +80,8 @@ public class TestDriver {
                 }
                 if(step == bound){
                     verdict = Verdict.INCONCLUSIVE;
+                    inconclusive++;
+                    testPlan.setPassedText("Inconclusive: " + inconclusive);
                 }
                 step++;
             }
@@ -95,6 +108,8 @@ public class TestDriver {
                 //Do Delay
                 long seconds = Duration.between(delayStart, Instant.now()).getSeconds();
                 if(!testModelSimulation.delay(seconds)){
+                    failed++;
+                    testPlan.setPassedText("Failed: " + failed);
                     return Verdict.FAIL;
                 } else {
                     mutantSimulation.delay(Duration.between(delayStart, Instant.now()).getSeconds());
@@ -106,31 +121,40 @@ public class TestDriver {
                 String outputFromSUT = readFromSUT();
                 if(!testModelSimulation.runAction(outputFromSUT, EdgeStatus.OUTPUT)){
                     System.out.println("Fail Output " + outputFromSUT);
+                    failed++;
+                    testPlan.setPassedText("Failed: " + failed);
                     return Verdict.FAIL;
                 } else if (!mutantSimulation.runAction(outputFromSUT, EdgeStatus.OUTPUT)) {
+                    passed++;
+                    testPlan.setPassedText("Passed: " + failed);
                     return Verdict.PASS;
                 }
             }
             return Verdict.NONE;
         } catch (InterruptedException e) {
             e.printStackTrace();
+            inconclusive++;
+            testPlan.setPassedText("Inconclusive: " + inconclusive);
             return Verdict.INCONCLUSIVE;
         } catch (IOException e) {
             e.printStackTrace();
+            inconclusive++;
+            testPlan.setPassedText("Inconclusive: " + inconclusive);
             return Verdict.INCONCLUSIVE;
         } catch (MutationTestingException e) {
             e.printStackTrace();
+            inconclusive++;
+            testPlan.setPassedText("Inconclusive: " + inconclusive);
             return Verdict.INCONCLUSIVE;
         }
     }
 
     private void writeToSUT(String outputBroadcast){
         try {
+            //Write if process is alive, else act like the process accepts but ignore all inputs.
             if(SUT.isAlive()) {
                 output.write(outputBroadcast + "\n");
                 output.flush();
-            } else {
-                System.out.println("Dead, but write");
             }
         } catch (IOException e) {
             e.printStackTrace();
