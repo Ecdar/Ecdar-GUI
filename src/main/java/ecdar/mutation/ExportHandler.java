@@ -63,7 +63,7 @@ class ExportHandler {
         final List<Component> mutants = new ArrayList<>();
         try {
             for (final MutationOperator operator : getPlan().getSelectedMutationOperators())
-                operator.generateTestCases(getTestModel()).forEach(testCase -> mutants.add(testCase.getMutant()));
+                mutants.addAll(operator.generateMutants(getTestModel()));
         } catch (final MutationTestingException e) {
             handleException(e);
             return;

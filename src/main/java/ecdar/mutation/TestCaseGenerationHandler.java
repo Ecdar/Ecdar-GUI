@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 /**
  * Handler for generating test-cases.
  */
-class TestCaseGenerationHandler {
+class TestCaseGenerationHandler implements ConcurrentJobsHandler {
 
 
     private final MutationTestPlan plan;
@@ -53,12 +53,12 @@ class TestCaseGenerationHandler {
     private List<MutationTestCase> potentialTestCases;
     private List<MutationTestCase> finishedTestCases;
 
+    private ConcurrentJobsDriver jobsDriver;
+
     // Progress fields
     private final Consumer<Text> progressWriter;
     private Instant generationStart;
     private String queryFilePath;
-    private int generationJobsStarted;
-    private int generationJobsEnded;
 
     /**
      * Constructs the handler.
@@ -107,8 +107,6 @@ class TestCaseGenerationHandler {
         if (getPlan().isDemonic()) testModel.applyDemonicCompletion();
 
         // Create test cases
-        generationJobsStarted = 0;
-        generationJobsEnded = 0;
         generationStart = Instant.now();
         finishedTestCases = Collections.synchronizedList(new ArrayList<>()); // use synchronized to be thread safe
 
@@ -120,47 +118,40 @@ class TestCaseGenerationHandler {
             return;
         }
 
-        updateGenerationJobs();
+        jobsDriver = new ConcurrentJobsDriver(this, potentialTestCases.size());
+        jobsDriver.start();
     }
 
-    /**
-     * Updates what test-case generation jobs to run.
-     */
-    private synchronized void updateGenerationJobs() {
-        if (getPlan().getStatus().equals(MutationTestPlan.Status.STOPPING)) {
-            if (getGenerationJobsRunning() == 0) {
-                getPlan().setStatus(MutationTestPlan.Status.IDLE);
-            }
 
+    @Override
+    public boolean shouldStop() {
+        return getPlan().getStatus().equals(MutationTestPlan.Status.STOPPING);
+    }
+
+    @Override
+    public void onStopped() {
+        getPlan().setStatus(MutationTestPlan.Status.IDLE);
+    }
+
+    @Override
+    public void onAllJobsSuccessfullyDone() {
+        try {
+            FileUtils.cleanDirectory(new File(UPPAALDriver.getTempDirectoryAbsolutePath()));
+        } catch (IOException | URISyntaxException e) {
+            e.printStackTrace();
+            Ecdar.showToast("Error: " + e.getMessage());
             return;
         }
 
-        // If we are done, clean up and move on
-        if (generationJobsEnded == potentialTestCases.size()) {
-            try {
-                FileUtils.cleanDirectory(new File(UPPAALDriver.getTempDirectoryAbsolutePath()));
-            } catch (IOException | URISyntaxException e) {
-                e.printStackTrace();
-                Ecdar.showToast("Error: " + e.getMessage());
-                return;
-            }
+        final Text text = new Text("Done");
+        text.setFill(Color.GREEN);
+        getProgressWriter().accept(text);
+        getPlan().setStatus(MutationTestPlan.Status.IDLE);
+    }
 
-            final Text text = new Text("Done");
-            text.setFill(Color.GREEN);
-            getProgressWriter().accept(text);
-            getPlan().setStatus(MutationTestPlan.Status.IDLE);
-
-            return;
-        }
-
-        writeProgress("Generating test-cases... (" + generationJobsEnded + "/" + potentialTestCases.size() + " mutants processed)");
-
-        // while we have not reach the maximum allowed threads and there are still jobs to start
-        while (getGenerationJobsRunning() < getMaxThreadsSupplier().get() &&
-                generationJobsStarted < potentialTestCases.size()) {
-            generateTestCase(potentialTestCases.get(generationJobsStarted));
-            generationJobsStarted++;
-        }
+    @Override
+    public void writeProgress(final int jobsEnded) {
+        writeProgress("Generating test-cases... (" + jobsEnded + "/" + potentialTestCases.size() + " mutants processed)");
     }
 
     /**
@@ -173,12 +164,14 @@ class TestCaseGenerationHandler {
         getProgressWriter().accept(text);
     }
 
-    /**
-     * Gets the number of generation jobs currently running.
-     * @return the number of jobs running
-     */
-    private synchronized int getGenerationJobsRunning() {
-        return generationJobsStarted - generationJobsEnded;
+    @Override
+    public int getMaxConcurrentJobs() {
+        return getMaxThreadsSupplier().get();
+    }
+
+    @Override
+    public void startJob(final int index) {
+        generateTestCase(potentialTestCases.get(index));
     }
 
     /**
@@ -265,6 +258,8 @@ class TestCaseGenerationHandler {
                 Ecdar.showToast(message);
             });
         }
+
+        jobsDriver.onJobDone();
     }
 
     /**
@@ -337,12 +332,10 @@ class TestCaseGenerationHandler {
      * This method should be called in a JavaFX thread, since it updates JavaFX elements.
      */
     private synchronized void onGenerationJobDone() {
-        generationJobsEnded++;
-
         getPlan().setTestCasesText("Test-cases: " + finishedTestCases.size() + " - Generation time: " +
                 MutationTestPlanPresentation.readableFormat(Duration.between(generationStart, Instant.now())));
 
-        updateGenerationJobs();
+        jobsDriver.onJobDone();
     }
 
 }
