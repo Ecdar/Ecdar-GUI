@@ -88,7 +88,7 @@ public class MutationTestPlanController {
         // Clone it, because we want to change its name
         final Component testModel = Ecdar.getProject().findComponent(modelPicker.getValue().getText()).cloneForVerification();
 
-        new TestCaseGenerationHandler(getPlan(), testModel, this::writeProgress, this::getMaxConcurrentGenerationJobs).start();
+        new TestCaseGenerationHandler(getPlan(), testModel, this::writeProgress).start();
     }
 
     /**

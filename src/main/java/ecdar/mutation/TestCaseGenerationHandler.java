@@ -26,29 +26,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
  * Handler for generating test-cases.
  */
 class TestCaseGenerationHandler implements ConcurrentJobsHandler {
-
-
     private final MutationTestPlan plan;
 
-    private Component getTestModel() {
-        return testModel;
-    }
-    private Supplier<Integer> getMaxThreadsSupplier() {
-        return maxThreadsSupplier;
-    }
-    private Consumer<Text> getProgressWriter() {
-        return progressWriter;
-    }
-
     private final Component testModel;
-    private final Supplier<Integer> maxThreadsSupplier;
 
     private List<MutationTestCase> potentialTestCases;
     private List<MutationTestCase> finishedTestCases;
@@ -60,23 +46,37 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
     private Instant generationStart;
     private String queryFilePath;
 
+
+    /* Constructors */
+
     /**
      * Constructs the handler.
      * @param plan the test plan containing options for generation
      * @param testModel the tet model to use
      * @param progressWriter object to write progress with
-     * @param maxThreadsSupplier supplier for getting the maximum allowed threads while generating
      */
-    TestCaseGenerationHandler(final MutationTestPlan plan, final Component testModel, final Consumer<Text> progressWriter, final Supplier<Integer> maxThreadsSupplier) {
+    TestCaseGenerationHandler(final MutationTestPlan plan, final Component testModel, final Consumer<Text> progressWriter) {
         this.plan = plan;
         this.testModel = testModel;
         this.progressWriter = progressWriter;
-        this.maxThreadsSupplier = maxThreadsSupplier;
     }
+
+
+    /* Getters and setters */
 
     private MutationTestPlan getPlan() {
         return plan;
     }
+
+    private Component getTestModel() {
+        return testModel;
+    }
+
+    private Consumer<Text> getProgressWriter() {
+        return progressWriter;
+    }
+
+    /* Other methods */
 
     /**
      * Generates mutants and test-cases from them.
@@ -167,7 +167,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
 
     @Override
     public int getMaxConcurrentJobs() {
-        return getMaxThreadsSupplier().get();
+        return getPlan().getConcurrentGenerationThreads();
     }
 
     @Override
