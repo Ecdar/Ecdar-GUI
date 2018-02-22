@@ -78,6 +78,7 @@ public class ComponentSimulation {
      * @param status the status of the action
      * @return true iff the state is deterministic
      */
+    @Deprecated
     public boolean isDeterministic(final String sync, final EdgeStatus status) {
         return currentLocation.getType().equals(Location.Type.UNIVERSAL) ||
                 getAvailableEdgeStream(sync, status).count() > 1;
@@ -95,7 +96,9 @@ public class ComponentSimulation {
                 .filter(e -> e.getStatus() == status)
                 .filter(e -> e.getSync().equals(sync))
                 .filter(e -> e.getGuard().trim().isEmpty() ||
-                        ExpressionHelper.evaluateBooleanExpression(e.getGuard(), getValuations()));
+                        ExpressionHelper.evaluateBooleanExpression(e.getGuard(), getValuations()))
+                .filter(e -> e.getTargetLocation().getInvariant().isEmpty() ||
+                ExpressionHelper.evaluateBooleanExpression(e.getTargetLocation().getInvariant(), getValuations()));
     }
 
     /**
