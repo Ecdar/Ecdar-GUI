@@ -2,6 +2,7 @@ package ecdar.mutation;
 
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
+import ecdar.abstractions.Location;
 import ecdar.abstractions.Project;
 import ecdar.abstractions.SimpleComponentsSystemDeclarations;
 import ecdar.backend.BackendException;
@@ -107,6 +108,23 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
 
         // If chosen, apply demonic completion
         if (getPlan().isDemonic()) testModel.applyDemonicCompletion();
+
+        //Rename universal and inconsistent locations
+        testModel.getLocations().forEach(location -> {
+            if(location.getType().equals(Location.Type.UNIVERSAL)){
+                location.setId("Universal");
+            } else if(location.getType().equals(Location.Type.INCONSISTENT)){
+                location.setId("Inconsistent");
+            }
+        });
+
+        potentialTestCases.forEach(testCase -> testCase.getMutant().getLocations().forEach(location -> {
+            if(location.getType().equals(Location.Type.UNIVERSAL)){
+                location.setId("Universal");
+            } else if(location.getType().equals(Location.Type.INCONSISTENT)){
+                location.setId("Inconsistent");
+            }
+        }));
 
         // Create test cases
         generationStart = Instant.now();
