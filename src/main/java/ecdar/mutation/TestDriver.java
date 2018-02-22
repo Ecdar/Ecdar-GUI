@@ -1,24 +1,18 @@
 package ecdar.mutation;
-import ecdar.Ecdar;
-import ecdar.abstractions.Component;
 import ecdar.abstractions.EdgeStatus;
-import ecdar.abstractions.Location;
-import ecdar.backend.UPPAALDriver;
 import ecdar.mutation.models.*;
 import javafx.application.Platform;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
-import org.apache.commons.io.FileUtils;
 
 import java.io.*;
-import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.Temporal;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
-public class TestDriver {
+public class TestDriver implements ConcurrentJobsHandler {
 
     private String SUTPath;
     private String stringInput;
@@ -26,19 +20,51 @@ public class TestDriver {
     private InputStream inputStream;
     private BufferedWriter output;
     private Process SUT;
-    private List<Verdict> results;
+    private Map<String ,Verdict> results;
     private int passed;
     private int failed;
     private int inconclusive;
     private MutationTestPlan testPlan;
     private int timeUnit;
     private int bound;
-    private int generationJobsStarted;
-    private int generationJobsEnded;
     private List<MutationTestCase> mutationTestCases;
     private Consumer<Text> progressWriterText;
     private Consumer<String> progressWriterString;
     private Instant generationStart;
+    private ConcurrentJobsDriver jobsDriver;
+
+    @Override
+    public boolean shouldStop() {
+        return false;
+    }
+
+    @Override
+    public void onStopped() {
+
+    }
+
+    @Override
+    public void onAllJobsSuccessfullyDone() {
+        final Text text = new Text("Done");
+        text.setFill(Color.GREEN);
+        progressWriterText.accept(text);
+        testPlan.setStatus(MutationTestPlan.Status.IDLE);
+    }
+
+    @Override
+    public void writeProgress(int jobsEnded) {
+        progressWriterString.accept("Testcase: " + jobsEnded + "/" + mutationTestCases.size());
+    }
+
+    @Override
+    public int getMaxConcurrentJobs() {
+        return testPlan.getConcurrentSutInstances();
+    }
+
+    @Override
+    public void startJob(int index) {
+        performTest(mutationTestCases.get(index));
+    }
 
     private enum Verdict {NONE, INCONCLUSIVE, PASS, FAIL}
 
@@ -54,13 +80,14 @@ public class TestDriver {
 
     public void start(){
         generationStart = Instant.now();
-        updateJobs();
+        jobsDriver = new ConcurrentJobsDriver(this, testPlan.getConcurrentSutInstances());
+        //  jobsDriver.start();
+        testPlan.setStatus(MutationTestPlan.Status.IDLE);
     }
 
-    private void performTest(MutationTestCase testCase){
-
-        Verdict verdict = Verdict.NONE;
+    private void performTest(final MutationTestCase testCase){
         new Thread(() -> {
+            System.out.println("a");
             int step = 0;
             NonRefinementStrategy strategy = testCase.getStrategy();
             ComponentSimulation testModelSimulation = new ComponentSimulation(testCase.getTestModel());
@@ -69,29 +96,38 @@ public class TestDriver {
             int step = 0;
 
             while (true) {
-
+                System.out.println("b");
                 if (step == bound) {
+                    System.out.println("bounded");
                     inconclusive++;
                     testPlan.setPassedText("Inconclusive: " + inconclusive);
-                    results.add(Verdict.INCONCLUSIVE);
-                    Platform.runLater(this::onJobDone);
+                    results.put(testCase.getId() ,Verdict.INCONCLUSIVE);
+                    Platform.runLater(this::onTestDone);
+                    jobsDriver.onJobDone();
                     return;
                 }
 
                 StrategyRule rule = strategy.getRule(testModelSimulation.getCurrentLocation().getId(), mutantSimulation.getCurrentLocation().getId(), testModelSimulation.getValuations(), mutantSimulation.getValuations());
                 if (rule == null) {
+                    System.out.println("empty rule");
                     inconclusive++;
                     testPlan.setPassedText("Inconclusive: " + inconclusive);
-                    results.add(Verdict.INCONCLUSIVE);
-                    Platform.runLater(this::onJobDone);
+                    results.put(testCase.getId() ,Verdict.INCONCLUSIVE);
+                    Platform.runLater(this::onTestDone);
+                    jobsDriver.onJobDone();
                     return;
                 }
 
                 if (rule instanceof ActionRule) {
                     if (((ActionRule) rule).getStatus() == EdgeStatus.OUTPUT) {
-                        results.add(delay(testModelSimulation, mutantSimulation, timeUnit));
-                        Platform.runLater(this::onJobDone);
-                        return;
+                        System.out.println("delay until output");
+                        Verdict verdict = delay(testModelSimulation, mutantSimulation, timeUnit);
+                        if(!verdict.equals(Verdict.NONE)) {
+                            results.put(testCase.getId() , verdict);
+                            Platform.runLater(this::onTestDone);
+                            jobsDriver.onJobDone();
+                            return;
+                        }
                     } else {
                         try {
                             testModelSimulation.runAction(((ActionRule) rule).getSync(), ((ActionRule) rule).getStatus());
@@ -103,8 +139,16 @@ public class TestDriver {
                         writeToSUT(sync);
                     }
                 } else if (rule instanceof DelayRule) {
-                    results.add(delay(testModelSimulation, mutantSimulation, timeUnit));
-                    Platform.runLater(this::onJobDone);
+                    System.out.println("Delay");
+                    Verdict verdict = delay(testModelSimulation, mutantSimulation, timeUnit);
+                    if(!verdict.equals(Verdict.NONE)) {
+                        results.put(testCase.getId() , verdict);
+                        Platform.runLater(this::onTestDone);
+                        jobsDriver.onJobDone();
+                        return;
+                    }
+                    Platform.runLater(this::onTestDone);
+                    jobsDriver.onJobDone();
                     return;
                 }
                 step++;
@@ -123,53 +167,15 @@ public class TestDriver {
         }
     }
 
-    private synchronized void updateJobs(){
-        if (testPlan.getStatus().equals(MutationTestPlan.Status.STOPPING)) {
-            if (getGenerationJobsRunning() == 0) {
-                testPlan.setStatus(MutationTestPlan.Status.IDLE);
-            }
-            return;
-        }
-
-        // If we are done, clean up and move on
-        if (generationJobsEnded == mutationTestCases.size()) {
-            final Text text = new Text("Done");
-            text.setFill(Color.GREEN);
-            progressWriterText.accept(text);
-            testPlan.setStatus(MutationTestPlan.Status.IDLE);
-            return;
-        }
-
-        progressWriterString.accept("Testcase: " + generationJobsEnded + "/" + mutationTestCases.size());
-        // while we have not reach the maximum allowed threads and there are still jobs to start
-        while (getGenerationJobsRunning() < testPlan.getConcurrentSutInstances() &&
-                generationJobsStarted < mutationTestCases.size()) {
-            performTest(mutationTestCases.get(generationJobsStarted));
-            generationJobsStarted++;
-        }
-    }
-
-    /**
-     * Gets the number of generation jobs currently running.
-     * @return the number of jobs running
-     */
-    private synchronized int getGenerationJobsRunning() {
-        return generationJobsStarted - generationJobsEnded;
-    }
-
     /**
      * Is triggered when a test-case execution is done.
      * It updates UI labels to tell user about the progress.
      *
      * This method should be called in a JavaFX thread, since it updates JavaFX elements.
      */
-    private synchronized void onJobDone() {
-        generationJobsEnded++;
-
+    private synchronized void onTestDone() {
         testPlan.setTestCasesText("Test-cases: " + mutationTestCases.size() + " - Execution time: " +
                 MutationTestPlanPresentation.readableFormat(Duration.between(generationStart, Instant.now())));
-
-        updateJobs();
     }
 
     private Verdict delay(ComponentSimulation testModelSimulation, ComponentSimulation mutantSimulation, int timeUnit){
@@ -199,7 +205,7 @@ public class TestDriver {
                     return Verdict.FAIL;
                 } else if (!mutantSimulation.runAction(outputFromSUT, EdgeStatus.OUTPUT)) {
                     passed++;
-                    testPlan.setPassedText("Passed: " + failed);
+                    testPlan.setPassedText("Passed: " + passed);
                     return Verdict.PASS;
                 }
             }
@@ -240,9 +246,7 @@ public class TestDriver {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return null;
-
     }
 
     public String getSUTPath() {
