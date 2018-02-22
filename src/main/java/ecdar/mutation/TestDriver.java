@@ -93,7 +93,6 @@ public class TestDriver implements ConcurrentJobsHandler {
             ComponentSimulation testModelSimulation = new ComponentSimulation(testCase.getTestModel());
             ComponentSimulation mutantSimulation = new ComponentSimulation(testCase.getMutant());
             initializeAndRunProcess();
-            int step = 0;
 
             while (true) {
                 System.out.println("b");

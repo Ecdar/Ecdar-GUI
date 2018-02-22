@@ -167,7 +167,6 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
         final Text text = new Text("Done");
         text.setFill(Color.GREEN);
         getProgressWriter().accept(text);
-        
         testCasesConsumer.accept(finishedTestCases);
     }
     

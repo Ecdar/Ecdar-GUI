@@ -92,7 +92,7 @@ public class MutationTestPlanController {
         // Clone it, because we want to change its name
         final Component testModel = Ecdar.getProject().findComponent(modelPicker.getValue().getText()).cloneForVerification();
 
-        Consumer<List<MutationTestCase>> runTestDriver = (mutationTestCases) -> new TestDriver(mutationTestCases, sutPathLabel.getText());
+        Consumer<List<MutationTestCase>> runTestDriver = (mutationTestCases) -> new TestDriver(mutationTestCases, plan, this::writeProgress, this::writeProgress, sutPathLabel.getText(), 1000, 100);
 
         new TestCaseGenerationHandler(getPlan(), testModel, this::writeProgress, runTestDriver).start();
     }
