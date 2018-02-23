@@ -8,6 +8,8 @@ import javafx.scene.text.Text;
 import java.io.*;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -20,58 +22,22 @@ public class TestDriver implements ConcurrentJobsHandler {
     private InputStream inputStream;
     private BufferedWriter output;
     private Process SUT;
-    private Map<String ,Verdict> results;
-    private int passed;
-    private int failed;
-    private int inconclusive;
+    private List<String> passed;
+    private List<String> failed;
+    private List<String> inconclusive;
     private MutationTestPlan testPlan;
     private int timeUnit;
     private int bound;
     private List<MutationTestCase> mutationTestCases;
     private Consumer<Text> progressWriterText;
-    private Consumer<String> progressWriterString;
     private Instant generationStart;
     private ConcurrentJobsDriver jobsDriver;
 
-    @Override
-    public boolean shouldStop() {
-        return false;
-    }
-
-    @Override
-    public void onStopped() {
-
-    }
-
-    @Override
-    public void onAllJobsSuccessfullyDone() {
-        final Text text = new Text("Done");
-        text.setFill(Color.GREEN);
-        progressWriterText.accept(text);
-        testPlan.setStatus(MutationTestPlan.Status.IDLE);
-    }
-
-    @Override
-    public void writeProgress(int jobsEnded) {
-        progressWriterString.accept("Testcase: " + jobsEnded + "/" + mutationTestCases.size());
-    }
-
-    @Override
-    public int getMaxConcurrentJobs() {
-        return testPlan.getConcurrentSutInstances();
-    }
-
-    @Override
-    public void startJob(int index) {
-        performTest(mutationTestCases.get(index));
-    }
-
     private enum Verdict {NONE, INCONCLUSIVE, PASS, FAIL}
 
-    public TestDriver(List<MutationTestCase> mutationTestCases, MutationTestPlan testPlan, final Consumer<Text> progressWriterText, final Consumer<String> progressWriterString, String SUTPath, int timeUnit, int bound) {
+    public TestDriver(List<MutationTestCase> mutationTestCases, MutationTestPlan testPlan, final Consumer<Text> progressWriterText, String SUTPath, int timeUnit, int bound) {
         this.mutationTestCases = mutationTestCases;
         this.progressWriterText = progressWriterText;
-        this.progressWriterString = progressWriterString;
         this.testPlan = testPlan;
         this.SUTPath = SUTPath;
         this.timeUnit = timeUnit;
@@ -80,14 +46,16 @@ public class TestDriver implements ConcurrentJobsHandler {
 
     public void start(){
         generationStart = Instant.now();
-        jobsDriver = new ConcurrentJobsDriver(this, testPlan.getConcurrentSutInstances());
-        //  jobsDriver.start();
-        testPlan.setStatus(MutationTestPlan.Status.IDLE);
+        inconclusive = new ArrayList<>();
+        passed = new ArrayList<>();
+        failed = new ArrayList<>();
+        jobsDriver = new ConcurrentJobsDriver(this, mutationTestCases.size());
+        jobsDriver.start();
+        //testPlan.setStatus(MutationTestPlan.Status.IDLE);
     }
 
     private void performTest(final MutationTestCase testCase){
         new Thread(() -> {
-            System.out.println("a");
             int step = 0;
             NonRefinementStrategy strategy = testCase.getStrategy();
             ComponentSimulation testModelSimulation = new ComponentSimulation(testCase.getTestModel());
@@ -95,36 +63,28 @@ public class TestDriver implements ConcurrentJobsHandler {
             initializeAndRunProcess();
 
             while (true) {
-                System.out.println("b");
+                // Check bounds
                 if (step == bound) {
-                    System.out.println("bounded");
-                    inconclusive++;
-                    testPlan.setPassedText("Inconclusive: " + inconclusive);
-                    results.put(testCase.getId() ,Verdict.INCONCLUSIVE);
-                    Platform.runLater(this::onTestDone);
-                    jobsDriver.onJobDone();
+                    inconclusive.add(testCase.getId());
+                    onTestDone();
                     return;
                 }
 
+                // Get rule and check if its empty
                 StrategyRule rule = strategy.getRule(testModelSimulation.getCurrentLocation().getId(), mutantSimulation.getCurrentLocation().getId(), testModelSimulation.getValuations(), mutantSimulation.getValuations());
                 if (rule == null) {
-                    System.out.println("empty rule");
-                    inconclusive++;
-                    testPlan.setPassedText("Inconclusive: " + inconclusive);
-                    results.put(testCase.getId() ,Verdict.INCONCLUSIVE);
-                    Platform.runLater(this::onTestDone);
-                    jobsDriver.onJobDone();
+                    inconclusive.add(testCase.getId());
+                    onTestDone();
                     return;
                 }
 
+                //Check if rule is an action rule, if it is an output action perform delay,
+                //If it is an input perform it
                 if (rule instanceof ActionRule) {
                     if (((ActionRule) rule).getStatus() == EdgeStatus.OUTPUT) {
-                        System.out.println("delay until output");
-                        Verdict verdict = delay(testModelSimulation, mutantSimulation, timeUnit);
+                        Verdict verdict = delay(testModelSimulation, mutantSimulation, testCase);
                         if(!verdict.equals(Verdict.NONE)) {
-                            results.put(testCase.getId() , verdict);
-                            Platform.runLater(this::onTestDone);
-                            jobsDriver.onJobDone();
+                            onTestDone();
                             return;
                         }
                     } else {
@@ -138,17 +98,11 @@ public class TestDriver implements ConcurrentJobsHandler {
                         writeToSUT(sync);
                     }
                 } else if (rule instanceof DelayRule) {
-                    System.out.println("Delay");
-                    Verdict verdict = delay(testModelSimulation, mutantSimulation, timeUnit);
+                    Verdict verdict = delay(testModelSimulation, mutantSimulation, testCase);
                     if(!verdict.equals(Verdict.NONE)) {
-                        results.put(testCase.getId() , verdict);
-                        Platform.runLater(this::onTestDone);
-                        jobsDriver.onJobDone();
+                        onTestDone();
                         return;
                     }
-                    Platform.runLater(this::onTestDone);
-                    jobsDriver.onJobDone();
-                    return;
                 }
                 step++;
             }
@@ -169,15 +123,19 @@ public class TestDriver implements ConcurrentJobsHandler {
     /**
      * Is triggered when a test-case execution is done.
      * It updates UI labels to tell user about the progress.
-     *
-     * This method should be called in a JavaFX thread, since it updates JavaFX elements.
+     * It also updates the jobsDriver about the job progress
      */
     private synchronized void onTestDone() {
-        testPlan.setTestCasesText("Test-cases: " + mutationTestCases.size() + " - Execution time: " +
-                MutationTestPlanPresentation.readableFormat(Duration.between(generationStart, Instant.now())));
+        Platform.runLater(() -> getPlan().setTestCasesText("Test-cases: " + mutationTestCases.size() + " - Execution time: " +
+                MutationTestPlanPresentation.readableFormat(Duration.between(generationStart, Instant.now()))));
+        Platform.runLater(() -> getPlan().setInconclusiveText("Inconclusive: " + inconclusive.size()));
+        Platform.runLater(() -> getPlan().setPassedText("Passed: " + passed.size()));
+        Platform.runLater(() -> getPlan().setFailedText("Failed: " + failed.size()));
+
+        jobsDriver.onJobDone();
     }
 
-    private Verdict delay(ComponentSimulation testModelSimulation, ComponentSimulation mutantSimulation, int timeUnit){
+    private Verdict delay(ComponentSimulation testModelSimulation, ComponentSimulation mutantSimulation, MutationTestCase testCase){
         Instant delayStart = Instant.now();
         try {
             //Check if any output is ready, if there is none, do delay
@@ -186,11 +144,12 @@ public class TestDriver implements ConcurrentJobsHandler {
                 //Do Delay
                 long seconds = Duration.between(delayStart, Instant.now()).getSeconds();
                 if(!testModelSimulation.delay(seconds)){
-                    failed++;
-                    testPlan.setPassedText("Failed: " + failed);
+                    failed.add(testCase.getId());
                     return Verdict.FAIL;
                 } else {
-                    mutantSimulation.delay(Duration.between(delayStart, Instant.now()).getSeconds());
+                    if(!mutantSimulation.delay(Duration.between(delayStart, Instant.now()).getSeconds())){
+                        //Todo Handle exception
+                    }
                 }
             }
 
@@ -198,38 +157,32 @@ public class TestDriver implements ConcurrentJobsHandler {
             if(inputStream.available() != 0){
                 String outputFromSUT = readFromSUT();
                 if(!testModelSimulation.runAction(outputFromSUT, EdgeStatus.OUTPUT)){
-                    System.out.println("Fail Output " + outputFromSUT);
-                    failed++;
-                    testPlan.setPassedText("Failed: " + failed);
+                    failed.add(testCase.getId());
                     return Verdict.FAIL;
                 } else if (!mutantSimulation.runAction(outputFromSUT, EdgeStatus.OUTPUT)) {
-                    passed++;
-                    testPlan.setPassedText("Passed: " + passed);
+                    failed.add(testCase.getId());
                     return Verdict.PASS;
                 }
             }
             return Verdict.NONE;
         } catch (InterruptedException e) {
             e.printStackTrace();
-            inconclusive++;
-            testPlan.setPassedText("Inconclusive: " + inconclusive);
+            inconclusive.add(testCase.getId());
             return Verdict.INCONCLUSIVE;
         } catch (IOException e) {
             e.printStackTrace();
-            inconclusive++;
-            testPlan.setPassedText("Inconclusive: " + inconclusive);
+            inconclusive.add(testCase.getId());
             return Verdict.INCONCLUSIVE;
         } catch (MutationTestingException e) {
             e.printStackTrace();
-            inconclusive++;
-            testPlan.setPassedText("Inconclusive: " + inconclusive);
+            inconclusive.add(testCase.getId());
             return Verdict.INCONCLUSIVE;
         }
     }
 
     private void writeToSUT(String outputBroadcast){
         try {
-            //Write if process is alive, else act like the process accepts but ignore all inputs.
+            //Write to process if it is alive, else act like the process accepts but ignore all inputs.
             if(SUT.isAlive()) {
                 output.write(outputBroadcast + "\n");
                 output.flush();
@@ -247,6 +200,60 @@ public class TestDriver implements ConcurrentJobsHandler {
         }
         return null;
     }
+
+    @Override
+    public boolean shouldStop() {
+        return getPlan().getStatus().equals(MutationTestPlan.Status.STOPPING) ||
+                getPlan().getStatus().equals(MutationTestPlan.Status.ERROR);
+    }
+
+    @Override
+    public void onStopped() { Platform.runLater(() -> getPlan().setStatus(MutationTestPlan.Status.IDLE)); }
+
+    @Override
+    public void onAllJobsSuccessfullyDone() {
+        final Text text = new Text("Done");
+        text.setFill(Color.GREEN);
+        writeProgress(text);
+        getPlan().setStatus(MutationTestPlan.Status.IDLE);
+    }
+
+    @Override
+    public void writeProgress(int jobsEnded) {
+        writeProgress("Testcase: " + jobsEnded + "/" + mutationTestCases.size());
+    }
+
+    /**
+     * Writes progress.
+     * @param message the message describing the progress
+     */
+    private void writeProgress(final String message) {
+        final Text text = new Text(message);
+        text.setFill(Color.web("#333333"));
+        writeProgress(text);
+    }
+
+    /**
+     * Writes progress in a java fx thread.
+     * @param text the text describing the progress
+     */
+    private void writeProgress(final Text text) {
+        Platform.runLater(() -> getProgressWriter().accept(text));
+    }
+
+    @Override
+    public int getMaxConcurrentJobs() {
+        return getPlan().getConcurrentSutInstances();
+    }
+
+    @Override
+    public void startJob(int index) {
+        performTest(mutationTestCases.get(index));
+    }
+
+    private Consumer<Text> getProgressWriter(){ return progressWriterText; }
+
+    private MutationTestPlan getPlan() {return testPlan; }
 
     public String getSUTPath() {
         return SUTPath;
