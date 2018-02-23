@@ -451,4 +451,8 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
         invariantProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
         urgencyProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
     }
+
+    public boolean isUniversalOrInconsistent() {
+        return getType().equals(Type.UNIVERSAL) || getType().equals(Type.INCONSISTENT);
+    }
 }

@@ -111,6 +111,7 @@ public class ComponentSimulation {
      * @return true iff the action succeeded
      * @throws MutationTestingException if multiple transitions with the specified output are available
      */
+    @Deprecated
     public boolean runAction(final String sync, final EdgeStatus status) throws MutationTestingException {
         if (currentLocation.getType().equals(Location.Type.UNIVERSAL)) return true;
 
@@ -123,6 +124,57 @@ public class ComponentSimulation {
         if (edges.size() < 1) return false;
 
         currentLocation = edges.get(0).getTargetLocation();
+        runUpdateProperty(edges.get(0).getUpdate());
+        return true;
+    }
+
+    /**
+     * Simulates an input action.
+     * @param sync synchronization property without ?
+     * @throws MutationTestingException if simulation yields a non-deterministic choice, no choices, or the Universal
+     * or Inconsistent locations.
+     */
+    public void runInputAction(final String sync) throws MutationTestingException {
+        final List<Edge> edges = getAvailableEdgeStream(sync, EdgeStatus.INPUT).collect(Collectors.toList());
+
+        if (edges.size() > 1) throw new MutationTestingException("Simulation of input " + sync +
+                " yields a non-deterministic choice between " + edges.size() + " edges");
+
+        if (edges.size() < 1) throw new MutationTestingException("Simulation of input " + sync +
+                " yields a no choices. Thus, the component is not input-enabled");
+
+        final Location newLoc = edges.get(0).getTargetLocation();
+
+        if (newLoc.isUniversalOrInconsistent()) throw new MutationTestingException("Simulation of input " + sync +
+                " yields the Universal or Inconsistent location. This should not happen");
+
+        currentLocation = newLoc;
+
+        runUpdateProperty(edges.get(0).getUpdate());
+    }
+
+    /**
+     * Simulations an output action.
+     * @param sync synchronization property without !
+     * @return true iff the simulation succeeded, e.g. we found and run the transition
+     * @throws MutationTestingException if simulation yields a non-deterministic choice or the Universal or
+     * Inconsistent locations.
+     */
+    public boolean runOutAction(final String sync) throws MutationTestingException {
+        final List<Edge> edges = getAvailableEdgeStream(sync, EdgeStatus.INPUT).collect(Collectors.toList());
+
+        if (edges.size() > 1) throw new MutationTestingException("Simulation of input " + sync +
+                " yields a non-deterministic choice between " + edges.size() + " edges");
+
+        if (edges.size() < 1) return false;
+
+        final Location newLoc = edges.get(0).getTargetLocation();
+
+        if (newLoc.isUniversalOrInconsistent()) throw new MutationTestingException("Simulation of input " + sync +
+                " yields the Universal or Inconsistent location. This should not happen");
+
+        currentLocation = newLoc;
+
         runUpdateProperty(edges.get(0).getUpdate());
         return true;
     }
