@@ -56,6 +56,7 @@ public class TestDriver implements ConcurrentJobsHandler {
 
     private void performTest(final MutationTestCase testCase){
         new Thread(() -> {
+            System.out.println(testCase.getId());
             int step = 0;
             NonRefinementStrategy strategy = testCase.getStrategy();
             ComponentSimulation testModelSimulation = new ComponentSimulation(testCase.getTestModel());
@@ -65,6 +66,7 @@ public class TestDriver implements ConcurrentJobsHandler {
             while (true) {
                 // Check bounds
                 if (step == bound) {
+                    System.out.println("out of bounds");
                     inconclusive.add(testCase.getId());
                     onTestDone();
                     return;
@@ -73,6 +75,7 @@ public class TestDriver implements ConcurrentJobsHandler {
                 // Get rule and check if its empty
                 StrategyRule rule = strategy.getRule(testModelSimulation.getCurrentLocation().getId(), mutantSimulation.getCurrentLocation().getId(), testModelSimulation.getValuations(), mutantSimulation.getValuations());
                 if (rule == null) {
+                    System.out.println("Empty Rule");
                     inconclusive.add(testCase.getId());
                     onTestDone();
                     return;
@@ -82,12 +85,14 @@ public class TestDriver implements ConcurrentJobsHandler {
                 //If it is an input perform it
                 if (rule instanceof ActionRule) {
                     if (((ActionRule) rule).getStatus() == EdgeStatus.OUTPUT) {
+                        System.out.println("Output");
                         Verdict verdict = delay(testModelSimulation, mutantSimulation, testCase);
                         if(!verdict.equals(Verdict.NONE)) {
                             onTestDone();
                             return;
                         }
                     } else {
+                        System.out.println("Input");
                         try {
                             testModelSimulation.runAction(((ActionRule) rule).getSync(), ((ActionRule) rule).getStatus());
                             mutantSimulation.runAction(((ActionRule) rule).getSync(), ((ActionRule) rule).getStatus());
@@ -98,6 +103,7 @@ public class TestDriver implements ConcurrentJobsHandler {
                         writeToSUT(sync);
                     }
                 } else if (rule instanceof DelayRule) {
+                    System.out.println("Delay");
                     Verdict verdict = delay(testModelSimulation, mutantSimulation, testCase);
                     if(!verdict.equals(Verdict.NONE)) {
                         onTestDone();
