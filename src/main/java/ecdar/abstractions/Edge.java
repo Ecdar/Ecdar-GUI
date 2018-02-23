@@ -402,6 +402,10 @@ public class Edge implements Serializable, Nearable {
         return ioStatus.get();
     }
 
+    public void setStatus(final EdgeStatus status) {
+        ioStatus.set(status);
+    }
+
     /**
      * Switches if the status of this is input or output
      */

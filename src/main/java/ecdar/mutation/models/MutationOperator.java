@@ -77,6 +77,8 @@ public abstract class MutationOperator {
     public static List<MutationOperator> getAllOperators() {
         final List<MutationOperator> operators = new ArrayList<>();
 
+        operators.add(new ChangeActionInputsOperator());
+        operators.add(new ChangeActionOutputsOperator());
         operators.add(new ChangeSourceOperator());
         operators.add(new ChangeTargetOperator());
         operators.add(new ChangeGuardOperator());
