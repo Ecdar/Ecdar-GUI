@@ -45,6 +45,11 @@
                             <Label text="concurrent instance(s) of the system under test."/>
                         </HBox>
 
+                        <HBox spacing="8" alignment="BOTTOM_LEFT">
+                            <JFXTextField fx:id="outputWaittimeField" prefWidth="30" alignment="BASELINE_CENTER"/>
+                            <Label text="time the test driver should maximum wait for an output from the SUT"/>
+                        </HBox>
+
                         <JFXButton fx:id="testButton" prefWidth="100" prefHeight="40" buttonType="RAISED" text="Test"
                                    style="-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;"
                                    onMousePressed="#onTestButtonPressed"/>

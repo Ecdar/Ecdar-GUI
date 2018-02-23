@@ -51,7 +51,6 @@ public class TestDriver implements ConcurrentJobsHandler {
         failed = new ArrayList<>();
         jobsDriver = new ConcurrentJobsDriver(this, mutationTestCases.size());
         jobsDriver.start();
-        //testPlan.setStatus(MutationTestPlan.Status.IDLE);
     }
 
     private void performTest(final MutationTestCase testCase){
@@ -85,8 +84,7 @@ public class TestDriver implements ConcurrentJobsHandler {
                 //If it is an input perform it
                 if (rule instanceof ActionRule) {
                     if (((ActionRule) rule).getStatus() == EdgeStatus.OUTPUT) {
-                        System.out.println("Output");
-                        Verdict verdict = delay(testModelSimulation, mutantSimulation, testCase);
+                        Verdict verdict = delay(testModelSimulation, mutantSimulation, testCase, getPlan().getOutputWaittime());
                         if(!verdict.equals(Verdict.NONE)) {
                             onTestDone();
                             return;
@@ -104,7 +102,7 @@ public class TestDriver implements ConcurrentJobsHandler {
                     }
                 } else if (rule instanceof DelayRule) {
                     System.out.println("Delay");
-                    Verdict verdict = delay(testModelSimulation, mutantSimulation, testCase);
+                    Verdict verdict = delay(testModelSimulation, mutantSimulation, testCase, 0);
                     if(!verdict.equals(Verdict.NONE)) {
                         onTestDone();
                         return;
@@ -141,49 +139,57 @@ public class TestDriver implements ConcurrentJobsHandler {
         jobsDriver.onJobDone();
     }
 
-    private Verdict delay(ComponentSimulation testModelSimulation, ComponentSimulation mutantSimulation, MutationTestCase testCase){
+    private Verdict delay(ComponentSimulation testModelSimulation, ComponentSimulation mutantSimulation, MutationTestCase testCase, int timeToDelay){
         Instant delayStart = Instant.now();
         try {
-            //Check if any output is ready, if there is none, do delay
-            if(inputStream.available() == 0){
-                Thread.sleep(timeUnit);
-                //Do Delay
-                long seconds = Duration.between(delayStart, Instant.now()).getSeconds();
-                if(!testModelSimulation.delay(seconds)){
-                    failed.add(testCase.getId());
-                    return Verdict.FAIL;
-                } else {
-                    if(!mutantSimulation.delay(Duration.between(delayStart, Instant.now()).getSeconds())){
-                        //Todo Handle exception
+            boolean isOutputting = false;
+            int waitedTimeUnits = 0;
+
+            while (isOutputting == false && waitedTimeUnits < getPlan().getOutputWaittime()) {
+                //Check if any output is ready, if there is none, do delay
+                if (inputStream.available() == 0) {
+                    Thread.sleep(timeUnit);
+                    waitedTimeUnits++;
+                    //Do Delay
+                    long seconds = Duration.between(delayStart, Instant.now()).getSeconds();
+                    if (!testModelSimulation.delay(seconds)) {
+                        failed.add(testCase.getId());
+                        return Verdict.FAIL;
+                    } else {
+                        if (!mutantSimulation.delay(Duration.between(delayStart, Instant.now()).getSeconds())) {
+                            //Todo Handle exception
+                        }
                     }
+                }
+
+                //Do output if any output happened when sleeping
+                if (inputStream.available() != 0) {
+                    String outputFromSUT = readFromSUT();
+                    if (!testModelSimulation.runAction(outputFromSUT, EdgeStatus.OUTPUT)) {
+                        failed.add(testCase.getId());
+                        return Verdict.FAIL;
+                    } else if (!mutantSimulation.runAction(outputFromSUT, EdgeStatus.OUTPUT)) {
+                        passed.add(testCase.getId());
+                        return Verdict.PASS;
+                    }
+                    isOutputting = true;
                 }
             }
 
-            //Do output if any output happened when sleeping
-            if(inputStream.available() != 0){
-                String outputFromSUT = readFromSUT();
-                if(!testModelSimulation.runAction(outputFromSUT, EdgeStatus.OUTPUT)){
-                    failed.add(testCase.getId());
-                    return Verdict.FAIL;
-                } else if (!mutantSimulation.runAction(outputFromSUT, EdgeStatus.OUTPUT)) {
-                    failed.add(testCase.getId());
-                    return Verdict.PASS;
-                }
-            }
             return Verdict.NONE;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            inconclusive.add(testCase.getId());
-            return Verdict.INCONCLUSIVE;
-        } catch (IOException e) {
-            e.printStackTrace();
-            inconclusive.add(testCase.getId());
-            return Verdict.INCONCLUSIVE;
-        } catch (MutationTestingException e) {
-            e.printStackTrace();
-            inconclusive.add(testCase.getId());
-            return Verdict.INCONCLUSIVE;
-        }
+            } catch(InterruptedException e){
+                e.printStackTrace();
+                inconclusive.add(testCase.getId());
+                return Verdict.INCONCLUSIVE;
+            } catch(IOException e){
+                e.printStackTrace();
+                inconclusive.add(testCase.getId());
+                return Verdict.INCONCLUSIVE;
+            } catch(MutationTestingException e){
+                e.printStackTrace();
+                inconclusive.add(testCase.getId());
+                return Verdict.INCONCLUSIVE;
+            }
     }
 
     private void writeToSUT(String outputBroadcast){

@@ -44,6 +44,7 @@ public class MutationTestPlanController {
     public JFXCheckBox demonicCheckBox;
     public JFXTextField generationThreadsField;
     public JFXTextField suvInstancesField;
+    public JFXTextField outputWaittimeField;
     public JFXButton testButton;
     public JFXButton stopButton;
 

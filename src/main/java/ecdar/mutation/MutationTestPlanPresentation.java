@@ -69,6 +69,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
 
         initializePositiveIntegerTextField(controller.generationThreadsField, controller.getPlan().maxGenerationThreadsProperty());
         initializePositiveIntegerTextField(controller.suvInstancesField, controller.getPlan().maxSutInstancesProperty());
+        initializePositiveIntegerTextField(controller.suvInstancesField, controller.getPlan().outputWaittimeProperty());
 
         controller.demonicCheckBox.selectedProperty().bindBidirectional(controller.getPlan().demonicProperty());
         controller.angelicBox.selectedProperty().bindBidirectional(controller.getPlan().angelicWhenExportProperty());
