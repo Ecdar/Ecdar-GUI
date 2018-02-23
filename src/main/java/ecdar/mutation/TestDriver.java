@@ -117,7 +117,7 @@ public class TestDriver implements ConcurrentJobsHandler {
 
     private void initializeAndRunProcess(){
         try {
-            SUT = Runtime.getRuntime().exec("java -jar C:\\Users\\Chres\\Desktop\\SimpleMutationProgram\\out\\artifacts\\test\\test.jar");
+            SUT = Runtime.getRuntime().exec("java -jar samples\\SimpleMutationProgram\\out\\artifacts\\test\\test.jar");
             output = new BufferedWriter(new OutputStreamWriter(SUT.getOutputStream()));
             inputStream = SUT.getInputStream();
             input = new BufferedReader(new InputStreamReader(inputStream));
