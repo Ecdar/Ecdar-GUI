@@ -161,7 +161,7 @@ public class ComponentSimulation {
      * Inconsistent locations.
      */
     public boolean runOutAction(final String sync) throws MutationTestingException {
-        final List<Edge> edges = getAvailableEdgeStream(sync, EdgeStatus.INPUT).collect(Collectors.toList());
+        final List<Edge> edges = getAvailableEdgeStream(sync, EdgeStatus.OUTPUT).collect(Collectors.toList());
 
         if (edges.size() > 1) throw new MutationTestingException("Simulation of input " + sync +
                 " yields a non-deterministic choice between " + edges.size() + " edges");

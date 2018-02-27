@@ -33,7 +33,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     private static final String ANGELIC_EXPORT = "useAngelic";
     private static final String MAX_GENERATION_THREADS = "maxGenerationThreads";
     private static final String MAX_SUT_INSTANCES = "maxSutInstances";
-    private static final String MAX_OUTPUT_WAITTIME = "maxOutputWaittime";
+    private static final String MAX_OUTPUT_WAITTIME = "maxOutputWaitTime";
 
     // General fields
     private final StringProperty testModelId = new SimpleStringProperty("");
@@ -46,7 +46,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     private final BooleanProperty demonic = new SimpleBooleanProperty(false);
     private final IntegerProperty concurrentGenerationThreads = new SimpleIntegerProperty(10);
     private final IntegerProperty concurrentSutInstances = new SimpleIntegerProperty(1);
-    private final IntegerProperty maxOutputWaittime = new SimpleIntegerProperty(1);
+    private final IntegerProperty maxOutputWaitTime = new SimpleIntegerProperty(1);
 
     // Temporary values for displaying results of testing
     private final StringProperty mutantsText = new SimpleStringProperty("");
@@ -203,23 +203,23 @@ public class MutationTestPlan extends HighLevelModelObject {
     }
 
     public int getOutputWaittime() {
-        return maxOutputWaittime.get();
+        return maxOutputWaitTime.get();
     }
 
     public IntegerProperty maxSutInstancesProperty() {
         return concurrentSutInstances;
     }
 
-    public IntegerProperty outputWaittimeProperty() {
-        return maxOutputWaittime;
+    public IntegerProperty outputWaitTimeProperty() {
+        return maxOutputWaitTime;
     }
 
     public void setConcurrentSutInstances(final int concurrentSutInstances) {
         this.concurrentSutInstances.set(concurrentSutInstances);
     }
 
-    public void setOutputWaittime(final int outputWaittime){
-        this.maxOutputWaittime.set(outputWaittime);
+    public void setOutputWaittime(final int outputWaitTime){
+        this.maxOutputWaitTime.set(outputWaitTime);
     }
 
     public String getPassedText() {

@@ -156,13 +156,13 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
     
     @Override
     public void onAllJobsSuccessfullyDone() {
-        /*try {
+        try {
             FileUtils.cleanDirectory(new File(UPPAALDriver.getTempDirectoryAbsolutePath()));
         } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
             Ecdar.showToast("Error: " + e.getMessage());
             return;
-        }*/
+        }
 
         final Text text = new Text("Done");
         text.setFill(Color.GREEN);

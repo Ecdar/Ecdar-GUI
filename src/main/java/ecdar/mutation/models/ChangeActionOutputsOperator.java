@@ -3,13 +3,12 @@ package ecdar.mutation.models;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
 import ecdar.abstractions.EdgeStatus;
+import ecdar.mutation.MutationTestingException;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Mutation operator that changes a synchronization action to (another) output synchronization action.
- */
+
 public class ChangeActionOutputsOperator extends ChangeActionOperator {
     @Override
     public String getText() {

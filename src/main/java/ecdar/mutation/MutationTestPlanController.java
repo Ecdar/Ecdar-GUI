@@ -11,11 +11,16 @@ import ecdar.mutation.models.MutationTestPlan;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
+import javafx.stage.FileChooser;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -44,7 +49,7 @@ public class MutationTestPlanController {
     public JFXCheckBox demonicCheckBox;
     public JFXTextField generationThreadsField;
     public JFXTextField suvInstancesField;
-    public JFXTextField outputWaittimeField;
+    public JFXTextField outputWaitTimeField;
     public JFXButton testButton;
     public JFXButton stopButton;
 
@@ -62,6 +67,7 @@ public class MutationTestPlanController {
     public Label passedText;
     public Label inconclusiveText;
     public Label failedText;
+    public StackPane root;
 
 
     /* Mutation fields */
@@ -93,7 +99,7 @@ public class MutationTestPlanController {
         // Clone it, because we want to change its name
         final Component testModel = Ecdar.getProject().findComponent(modelPicker.getValue().getText()).cloneForVerification();
 
-        Consumer<List<MutationTestCase>> runTestDriver = (mutationTestCases) -> new TestDriver(mutationTestCases, plan, this::writeProgress, sutPathLabel.getText(), 1000, 100).start();
+        Consumer<List<MutationTestCase>> runTestDriver = (mutationTestCases) -> new TestDriver(mutationTestCases, plan, this::writeProgress,1000, 100).start();
 
         new TestCaseGenerationHandler(getPlan(), testModel, this::writeProgress, runTestDriver).start();
     }
@@ -141,8 +147,27 @@ public class MutationTestPlanController {
      * Opens dialog to select a SUT.
      */
     public void onSelectSutButtonPressed() {
-        sutPathLabel.setText("The\\Path\\To\\My\\System\\Under\\Test");
-        // TODO implement
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Choose a SUT jar file");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Jar files", "*.jar"));
+
+        // The initial location for the file choosing dialog
+        final File jarDir;
+        jarDir = new File(System.getProperty("user.dir"));
+
+        // If the file does not exist, we must be running it from a development environment, use an default location
+        if(jarDir.exists()) {
+            fileChooser.setInitialDirectory(jarDir);
+        }
+
+        File file = fileChooser.showOpenDialog(root.getScene().getWindow());
+        if(file != null){
+            file = new File(System.getProperty("user.dir")).toPath().relativize(file.toPath()).toFile();
+            sutPathLabel.setText(file.getPath());
+            plan.setSutPath(file.getPath());
+        } else {
+            Ecdar.showToast("Did not recognize selected file as a jar file");
+        }
     }
 
     /**

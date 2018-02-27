@@ -7,6 +7,7 @@
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="StackPane"
+         fx:id="root"
          fx:controller="ecdar.mutation.MutationTestPlanController">
     <ScrollPane fx:id="scrollPane" style="-fx-font-size:13px;-fx-background-color:transparent;" hbarPolicy="NEVER" fitToWidth="true">
         <VBox spacing="16">
@@ -46,8 +47,8 @@
                         </HBox>
 
                         <HBox spacing="8" alignment="BOTTOM_LEFT">
-                            <JFXTextField fx:id="outputWaittimeField" prefWidth="30" alignment="BASELINE_CENTER"/>
-                            <Label text="time the test driver should maximum wait for an output from the SUT"/>
+                            <JFXTextField fx:id="outputWaitTimeField" prefWidth="30" alignment="BASELINE_CENTER"/>
+                            <Label text="Time units. This is the amount the test driver should maximum wait for an output from the SUT"/>
                         </HBox>
 
                         <JFXButton fx:id="testButton" prefWidth="100" prefHeight="40" buttonType="RAISED" text="Test"
