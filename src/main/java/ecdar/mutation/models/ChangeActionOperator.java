@@ -3,13 +3,20 @@ package ecdar.mutation.models;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
 import ecdar.abstractions.EdgeStatus;
-import ecdar.abstractions.Location;
-import ecdar.mutation.MutationTestingException;
 
-import java.util.ArrayList;
-import java.util.List;
+/**
+ * Mutation operator that changes a synchronization action to another action.
+ */
+abstract class ChangeActionOperator extends MutationOperator {
 
-public abstract class ChangeActionOperator extends MutationOperator {
+    /**
+     * Creates a mutant and generates a test-case with it.
+     * @param original the original component to mutate
+     * @param edgeIndex the index of the edge to mutate
+     * @param sync the new synchronization action without ? or !
+     * @param status the new edge status of the edge to mutate
+     * @return the generated test-case
+     */
     MutationTestCase generateTestCase(final Component original, final int edgeIndex, final String sync, final EdgeStatus status) {
         final Edge originalEdge = original.getEdges().get(edgeIndex);
 

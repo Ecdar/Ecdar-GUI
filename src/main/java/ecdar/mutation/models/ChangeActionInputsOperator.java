@@ -8,6 +8,9 @@ import ecdar.mutation.MutationTestingException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Mutation operator that changes synchronization actions to (other) input actions.
+ */
 public class ChangeActionInputsOperator extends ChangeActionOperator {
     @Override
     public String getText() {

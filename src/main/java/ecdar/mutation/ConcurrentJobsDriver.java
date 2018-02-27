@@ -1,5 +1,8 @@
 package ecdar.mutation;
 
+/**
+ * Driver for running jobs concurrently.
+ */
 public class ConcurrentJobsDriver {
     private final ConcurrentJobsHandler handler;
     private final int jobsNum;
