@@ -228,7 +228,8 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         regions.add(controller.operatorsArea);
         regions.add(controller.actionPicker);
         regions.add(controller.demonicArea);
-        regions.add(controller.selectSutArea);
+        regions.add(controller.selectSutButton);
+        regions.add(controller.sutPathLabel);
         regions.add(controller.exportDependantArea);
 
         return regions;

@@ -24,12 +24,11 @@
                 <JFXComboBox fx:id="actionPicker" promptText="Select Action"/>
 
                 <VBox spacing="16" fx:id="testDependentArea" managed="false" visible="false">
-                    <HBox spacing="8" alignment="BOTTOM_LEFT" fx:id="selectSutArea">
-                        <JFXButton fx:id="selectSutButton" prefWidth="100" prefHeight="40" buttonType="RAISED" text="Select SUT"
-                                   style="-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;"
-                                   onMousePressed="#onSelectSutButtonPressed"/>
-                        <Label fx:id="sutPathLabel"/>
-                    </HBox>
+                    <JFXButton fx:id="selectSutButton" prefWidth="100" prefHeight="40" buttonType="RAISED" text="Select SUT"
+                               style="-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;"
+                               onMousePressed="#onSelectSutButtonPressed"/>
+
+                    <Label fx:id="sutPathLabel"/>
 
                     <VBox spacing="16" fx:id="sutDependentArea" managed="false" visible="false">
                         <VBox fx:id="demonicArea">

@@ -41,7 +41,6 @@ public class MutationTestPlanController {
     public JFXComboBox<Label> actionPicker;
 
     public VBox testDependentArea;
-    public HBox selectSutArea;
     public JFXButton selectSutButton;
     public Label sutPathLabel;
     public VBox sutDependentArea;
