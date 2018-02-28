@@ -61,7 +61,6 @@ public class TestDriver implements ConcurrentJobsHandler {
      */
     private void performTest(final MutationTestCase testCase){
         new Thread(() -> {
-            System.out.println(testCase.getId());
             NonRefinementStrategy strategy = testCase.getStrategy();
             ComponentSimulation testModelSimulation = new ComponentSimulation(testCase.getTestModel());
             ComponentSimulation mutantSimulation = new ComponentSimulation(testCase.getMutant());
@@ -71,7 +70,6 @@ public class TestDriver implements ConcurrentJobsHandler {
                 // Get rule and check if its empty
                 StrategyRule rule = strategy.getRule(testModelSimulation.getCurrentLocation().getId(), mutantSimulation.getCurrentLocation().getId(), testModelSimulation.getValuations(), mutantSimulation.getValuations());
                 if (rule == null) {
-                    System.out.println("Empty Rule");
                     inconclusive.add(testCase.getId());
                     onTestDone();
                     return;
@@ -87,7 +85,6 @@ public class TestDriver implements ConcurrentJobsHandler {
                             return;
                         }
                     } else {
-                        System.out.println("Input");
                         try {
                             testModelSimulation.runAction(((ActionRule) rule).getSync(), EdgeStatus.INPUT);
                             mutantSimulation.runAction(((ActionRule) rule).getSync(), EdgeStatus.INPUT);
@@ -98,7 +95,6 @@ public class TestDriver implements ConcurrentJobsHandler {
                         writeToSut(sync);
                     }
                 } else if (rule instanceof DelayRule) {
-                    System.out.println("Delay");
                     Verdict verdict = delay(testModelSimulation, mutantSimulation, testCase);
                     if(!verdict.equals(Verdict.NONE)) {
                         onTestDone();
@@ -106,7 +102,6 @@ public class TestDriver implements ConcurrentJobsHandler {
                     }
                 }
             }
-            System.out.println("out of bounds");
             inconclusive.add(testCase.getId());
             onTestDone();
         }).start();
