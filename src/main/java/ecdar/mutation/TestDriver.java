@@ -1,4 +1,5 @@
 package ecdar.mutation;
+import ecdar.Ecdar;
 import ecdar.abstractions.EdgeStatus;
 import ecdar.mutation.models.*;
 import javafx.application.Platform;
@@ -116,7 +117,7 @@ public class TestDriver implements ConcurrentJobsHandler {
      */
     private void initializeAndRunProcess(){
         try {
-            sut = Runtime.getRuntime().exec("java -jar " + getPlan().getSutPath());
+            sut = Runtime.getRuntime().exec("java -jar " + Ecdar.projectDirectory.get() + File.separator + getPlan().getSutPath());
             output = new BufferedWriter(new OutputStreamWriter(sut.getOutputStream()));
             inputStream = sut.getInputStream();
             input = new BufferedReader(new InputStreamReader(inputStream));
