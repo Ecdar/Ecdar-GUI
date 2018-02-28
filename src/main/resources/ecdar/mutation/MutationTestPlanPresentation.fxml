@@ -47,7 +47,7 @@
 
                         <HBox spacing="8" alignment="BOTTOM_LEFT">
                             <JFXTextField fx:id="outputWaitTimeField" prefWidth="30" alignment="BASELINE_CENTER"/>
-                            <Label text="Time units. This is the amount the test driver should maximum wait for an output from the SUT"/>
+                            <Label text="time unit(s) to wait for the SUT to output before giving an inconclusive verdict."/>
                         </HBox>
 
                         <JFXButton fx:id="testButton" prefWidth="100" prefHeight="40" buttonType="RAISED" text="Test"

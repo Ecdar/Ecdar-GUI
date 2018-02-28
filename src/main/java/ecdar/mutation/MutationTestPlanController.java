@@ -152,16 +152,21 @@ public class MutationTestPlanController {
 
         // The initial location for the file choosing dialog
         final File jarDir;
-        jarDir = new File(System.getProperty("user.dir"));
+        if(Ecdar.projectDirectory.get() == null) {
+            fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+        } else {
+            jarDir = new File(Ecdar.projectDirectory.get());
 
-        // If the file does not exist, we must be running it from a development environment, use an default location
-        if(jarDir.exists()) {
-            fileChooser.setInitialDirectory(jarDir);
+
+            // If the file does not exist, we must be running it from a development environment, use an default location
+            if(jarDir.exists()) {
+                fileChooser.setInitialDirectory(jarDir);
+            }
         }
 
         File file = fileChooser.showOpenDialog(root.getScene().getWindow());
         if(file != null){
-            file = new File(System.getProperty("user.dir")).toPath().relativize(file.toPath()).toFile();
+            file = new File(Ecdar.projectDirectory.get()).toPath().relativize(file.toPath()).toFile();
             sutPathLabel.setText(file.getPath());
             plan.setSutPath(file.getPath());
         } else {
