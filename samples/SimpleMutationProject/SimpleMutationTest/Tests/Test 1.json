@@ -2,7 +2,7 @@
   "name": "Test 1",
   "testModelId": "Component1",
   "action": "Test",
-  "sutPath": "..\\SimpleMutationProgram\\out\\artifacts\\SimpleMutationProgram_jar\\SimpleMutationProgram.jar",
+  "sutPath": "../SimpleMutationProgram/out/artifacts/SimpleMutationProgram_jar/SimpleMutationProgram.jar",
   "exportFormat": "",
   "useDemonic": true,
   "useAngelic": false,
