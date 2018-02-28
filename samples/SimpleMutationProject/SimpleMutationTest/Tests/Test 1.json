@@ -2,10 +2,12 @@
   "name": "Test 1",
   "testModelId": "Component1",
   "action": "Test",
-  "sutPath": "The\\Path\\To\\My\\System\\Under\\Test",
+  "sutPath": "..\\SimpleMutationProgram\\out\\artifacts\\SimpleMutationProgram_jar\\SimpleMutationProgram.jar",
   "exportFormat": "",
   "useDemonic": true,
   "useAngelic": false,
+  "changeActionInputs": true,
+  "changeActionOutputs": true,
   "changeSource": true,
   "changeTarget": true,
   "changeGuard": true,
@@ -13,5 +15,6 @@
   "sinkLocation": true,
   "invertReset": true,
   "maxGenerationThreads": 10,
-  "maxSutInstances": 1
+  "maxSutInstances": 1,
+  "maxOutputWaitTime": 1
 }
