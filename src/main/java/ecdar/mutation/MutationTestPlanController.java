@@ -165,7 +165,7 @@ public class MutationTestPlanController {
         }
 
         File file = fileChooser.showOpenDialog(root.getScene().getWindow());
-        if(file != null){
+        if(file != null) {
             String path = new File(Ecdar.projectDirectory.get()).toPath().relativize(file.toPath()).toFile().getPath().replace(File.separator, "/");
             sutPathLabel.setText(path);
             plan.setSutPath(path);

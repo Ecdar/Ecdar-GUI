@@ -111,17 +111,17 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
 
         //Rename universal and inconsistent locations
         testModel.getLocations().forEach(location -> {
-            if(location.getType().equals(Location.Type.UNIVERSAL)){
+            if(location.getType().equals(Location.Type.UNIVERSAL)) {
                 location.setId("Universal");
-            } else if(location.getType().equals(Location.Type.INCONSISTENT)){
+            } else if(location.getType().equals(Location.Type.INCONSISTENT)) {
                 location.setId("Inconsistent");
             }
         });
 
         potentialTestCases.forEach(testCase -> testCase.getMutant().getLocations().forEach(location -> {
-            if(location.getType().equals(Location.Type.UNIVERSAL)){
+            if(location.getType().equals(Location.Type.UNIVERSAL)) {
                 location.setId("Universal");
-            } else if(location.getType().equals(Location.Type.INCONSISTENT)){
+            } else if(location.getType().equals(Location.Type.INCONSISTENT)) {
                 location.setId("Inconsistent");
             }
         }));
