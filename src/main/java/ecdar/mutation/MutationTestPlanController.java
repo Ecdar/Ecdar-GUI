@@ -166,9 +166,9 @@ public class MutationTestPlanController {
 
         File file = fileChooser.showOpenDialog(root.getScene().getWindow());
         if(file != null){
-            file = new File(Ecdar.projectDirectory.get()).toPath().relativize(file.toPath()).toFile();
-            sutPathLabel.setText(file.getPath());
-            plan.setSutPath(file.getPath());
+            String path = new File(Ecdar.projectDirectory.get()).toPath().relativize(file.toPath()).toFile().getPath().replace(File.separator, "/");
+            sutPathLabel.setText(path);
+            plan.setSutPath(path);
         } else {
             Ecdar.showToast("Did not recognize selected file as a jar file");
         }

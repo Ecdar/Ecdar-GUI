@@ -46,7 +46,7 @@ public class TestDriver implements ConcurrentJobsHandler {
     /**
      * Starts the test driver.
      */
-    public void start(){
+    public void start() {
         generationStart = Instant.now();
         inconclusive = new ArrayList<>();
         passed = new ArrayList<>();
@@ -59,7 +59,7 @@ public class TestDriver implements ConcurrentJobsHandler {
      * Performs a testcase on the testplans system under test(sut).
      * @param testCase to perform.
      */
-    private void performTest(final MutationTestCase testCase){
+    private void performTest(final MutationTestCase testCase) {
         new Thread(() -> {
             NonRefinementStrategy strategy = testCase.getStrategy();
             ComponentSimulation testModelSimulation = new ComponentSimulation(testCase.getTestModel());
@@ -110,9 +110,9 @@ public class TestDriver implements ConcurrentJobsHandler {
     /**
      * Runs the system under test and initialises the streams.
      */
-    private void initializeAndRunProcess(){
+    private void initializeAndRunProcess() {
         try {
-            sut = Runtime.getRuntime().exec("java -jar " + Ecdar.projectDirectory.get() + File.separator + getPlan().getSutPath());
+            sut = Runtime.getRuntime().exec("java -jar " + Ecdar.projectDirectory.get() + File.separator + getPlan().getSutPath().replace("/", File.separator));
             output = new BufferedWriter(new OutputStreamWriter(sut.getOutputStream()));
             inputStream = sut.getInputStream();
             input = new BufferedReader(new InputStreamReader(inputStream));
@@ -143,7 +143,7 @@ public class TestDriver implements ConcurrentJobsHandler {
      * @param testCase that is being performed.
      * @return a verdict, it is NONE if no verdict were reached from this delay.
      */
-    private Verdict delay(final ComponentSimulation testModelSimulation, final ComponentSimulation mutantSimulation, final MutationTestCase testCase){
+    private Verdict delay(final ComponentSimulation testModelSimulation, final ComponentSimulation mutantSimulation, final MutationTestCase testCase) {
         final Instant delayStart = Instant.now();
         try {
             //Check if any output is ready, if there is none, do delay
@@ -174,7 +174,7 @@ public class TestDriver implements ConcurrentJobsHandler {
             }
 
             return Verdict.NONE;
-            } catch(InterruptedException | MutationTestingException | IOException e){
+            } catch(InterruptedException | MutationTestingException | IOException e) {
                 e.printStackTrace();
                 inconclusive.add(testCase.getId());
                 //Todo stop testing and print error
@@ -186,7 +186,7 @@ public class TestDriver implements ConcurrentJobsHandler {
      * Writes to the system.in of the system under test.
      * @param outputBroadcast the string to write to the system under test.
      */
-    private void writeToSut(final String outputBroadcast){
+    private void writeToSut(final String outputBroadcast) {
         try {
             //Write to process if it is alive, else act like the process accepts but ignore all inputs.
             if(sut.isAlive()) {
@@ -202,7 +202,7 @@ public class TestDriver implements ConcurrentJobsHandler {
      * Reads from the system under tests output stream.
      * @return the string read from the system under test.
      */
-    private String readFromSut(){
+    private String readFromSut() {
         try {
             return input.readLine();
         } catch (final IOException e) {
@@ -261,7 +261,7 @@ public class TestDriver implements ConcurrentJobsHandler {
         performTest(mutationTestCases.get(index));
     }
 
-    private Consumer<Text> getProgressWriter(){ return progressWriterText; }
+    private Consumer<Text> getProgressWriter() { return progressWriterText; }
 
     private MutationTestPlan getPlan() {return testPlan; }
 }
