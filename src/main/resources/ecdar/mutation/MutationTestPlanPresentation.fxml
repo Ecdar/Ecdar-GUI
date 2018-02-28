@@ -7,6 +7,7 @@
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="StackPane"
+         fx:id="root"
          fx:controller="ecdar.mutation.MutationTestPlanController">
     <ScrollPane fx:id="scrollPane" style="-fx-font-size:13px;-fx-background-color:transparent;" hbarPolicy="NEVER" fitToWidth="true">
         <VBox spacing="16">
@@ -23,12 +24,11 @@
                 <JFXComboBox fx:id="actionPicker" promptText="Select Action"/>
 
                 <VBox spacing="16" fx:id="testDependentArea" managed="false" visible="false">
-                    <HBox spacing="8" alignment="BOTTOM_LEFT" fx:id="selectSutArea">
-                        <JFXButton fx:id="selectSutButton" prefWidth="100" prefHeight="40" buttonType="RAISED" text="Select SUT"
-                                   style="-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;"
-                                   onMousePressed="#onSelectSutButtonPressed"/>
-                        <Label fx:id="sutPathLabel"/>
-                    </HBox>
+                    <JFXButton fx:id="selectSutButton" prefWidth="100" prefHeight="40" buttonType="RAISED" text="Select SUT"
+                               style="-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;"
+                               onMousePressed="#onSelectSutButtonPressed"/>
+
+                    <Label fx:id="sutPathLabel"/>
 
                     <VBox spacing="16" fx:id="sutDependentArea" managed="false" visible="false">
                         <VBox fx:id="demonicArea">
@@ -36,13 +36,18 @@
                         </VBox>
 
                         <HBox spacing="8" alignment="BOTTOM_LEFT">
-                            <JFXTextField fx:id="generationThreadsField" text="10" prefWidth="30" alignment="BASELINE_CENTER"/>
+                            <JFXTextField fx:id="generationThreadsField" prefWidth="30" alignment="BASELINE_CENTER"/>
                             <Label text="concurrent thread(s) for test-case generation."/>
                         </HBox>
 
                         <HBox spacing="8" alignment="BOTTOM_LEFT">
-                            <JFXTextField fx:id="suvInstancesField" text="1" prefWidth="30" alignment="BASELINE_CENTER"/>
+                            <JFXTextField fx:id="suvInstancesField" prefWidth="30" alignment="BASELINE_CENTER"/>
                             <Label text="concurrent instance(s) of the system under test."/>
+                        </HBox>
+
+                        <HBox spacing="8" alignment="BOTTOM_LEFT">
+                            <JFXTextField fx:id="outputWaitTimeField" prefWidth="30" alignment="BASELINE_CENTER"/>
+                            <Label text="time unit(s) to wait for the SUT to output before giving an inconclusive verdict."/>
                         </HBox>
 
                         <JFXButton fx:id="testButton" prefWidth="100" prefHeight="40" buttonType="RAISED" text="Test"
@@ -75,6 +80,9 @@
                     <Separator/>
                     <Label fx:id="mutantsText"/>
                     <Label fx:id="testCasesText"/>
+                    <Label fx:id="passedText"/>
+                    <Label fx:id="inconclusiveText"/>
+                    <Label fx:id="failedText"/>
                 </VBox>
             </VBox>
         </VBox>

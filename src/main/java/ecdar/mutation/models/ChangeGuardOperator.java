@@ -24,13 +24,13 @@ public class ChangeGuardOperator extends MutationOperator {
     }
 
     @Override
-    public String getJsonName() {
+    public String getCodeName() {
         return "changeGuard";
     }
 
     @Override
-    public List<Component> generate(final Component original) throws MutationTestingException {
-        final List<Component> mutants = new ArrayList<>();
+    public List<MutationTestCase> generateTestCases(final Component original) throws MutationTestingException {
+        final List<MutationTestCase> testCases = new ArrayList<>();
 
         // Do not use != as this is not allowed for timing constrains
         final List<String> operators = new ArrayList<>();
@@ -42,7 +42,6 @@ public class ChangeGuardOperator extends MutationOperator {
 
         // For all edges in the original component
         for (int edgeIndex = 0; edgeIndex < original.getEdges().size(); edgeIndex++) {
-            final int finalEdgeIndex = edgeIndex;
             final Edge originalEdge = original.getEdges().get(edgeIndex);
 
             // Ignore if locked (e.g. if edge on the Inconsistent or Universal locations)
@@ -61,18 +60,29 @@ public class ChangeGuardOperator extends MutationOperator {
                     throw new MutationTestingException("Guard part " + part + " does not match pattern " + REGEX_SIMPLE_GUARD);
                 }
 
-                // Create a mutant for each other operator
-                final int finalPartIndex = partIndex;
-                operators.forEach(operator -> {
-                    // If operator is the same as with the original, ignore
-                    if (matcher.group(2).equals(operator)) return;
+                final String originalOperator = matcher.group(2);
 
-                    mutants.add(createMutant(original, guardParts, matcher.group(1) + operator + matcher.group(3), finalPartIndex, finalEdgeIndex));
-                });
+                // Create a mutant for each other operator
+                for (int operatorIndex = 0; operatorIndex < operators.size(); operatorIndex++) {
+                    final String newOperator = operators.get(operatorIndex);
+
+                    // If operator is the same as with the original, ignore
+                    if (originalOperator.equals(newOperator)) continue;
+
+                    final Component mutant = createMutant(original, guardParts,
+                            matcher.group(1) + newOperator + matcher.group(3),
+                            partIndex, edgeIndex);
+
+                    testCases.add(new MutationTestCase(original, mutant,
+                            getCodeName() + "_" + edgeIndex + "_" + partIndex + "_" + operatorIndex,
+                            "Changed guard of edge " + originalEdge.getSourceLocation().getId() + " -> " +
+                                    originalEdge.getTargetLocation().getId() + " to " +
+                                    mutant.getEdges().get(edgeIndex).getGuard()));
+                }
             }
         }
 
-        return mutants;
+        return testCases;
     }
 
     @Override

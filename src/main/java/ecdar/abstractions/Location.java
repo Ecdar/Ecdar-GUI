@@ -149,7 +149,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
      * Sets a specific id for this location
      * @param string id to set
      */
-    private void setId(final String string){
+    public void setId(final String string){
         id.set(string);
     }
 
@@ -450,5 +450,9 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     private void bindReachabilityAnalysis() {
         invariantProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
         urgencyProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
+    }
+
+    public boolean isUniversalOrInconsistent() {
+        return getType().equals(Type.UNIVERSAL) || getType().equals(Type.INCONSISTENT);
     }
 }

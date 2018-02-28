@@ -15,13 +15,13 @@ public class ChangeInvariantOperator extends MutationOperator {
     }
 
     @Override
-    public String getJsonName() {
+    public String getCodeName() {
         return "changeInvariant";
     }
 
     @Override
-    public List<Component> generate(final Component original) {
-        final List<Component> mutants = new ArrayList<>();
+    public List<MutationTestCase> generateTestCases(final Component original) {
+        final List<MutationTestCase> cases = new ArrayList<>();
 
         // For all locations in the original component
         for (int locationIndex = 0; locationIndex < original.getLocations().size(); locationIndex++) {
@@ -37,14 +37,17 @@ public class ChangeInvariantOperator extends MutationOperator {
                 final List<String> newParts = new ArrayList<>(invariantParts);
                 newParts.set(partIndex, newParts.get(partIndex) + " + 1");
 
-                mutant.getLocations().get(locationIndex).setInvariant(String.join(" && ", newParts));
+                final String invariant = String.join(" && ", newParts);
+                mutant.getLocations().get(locationIndex).setInvariant(invariant);
 
-                mutants.add(mutant);
+                cases.add(new MutationTestCase(original, mutant,
+                        getCodeName() + "_" + originalLocation.getId() + "_" + partIndex,
+                        "Changed invariant of " + originalLocation.getId() + " to " + invariant));
             }
 
         }
 
-        return mutants;
+        return cases;
     }
 
     @Override

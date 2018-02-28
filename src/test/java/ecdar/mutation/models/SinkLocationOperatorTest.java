@@ -41,6 +41,6 @@ public class SinkLocationOperatorTest {
         component.addEdge(edge);
 
         // 5 edge. Expect 5 mutants
-        Assert.assertEquals(5, new SinkLocationOperator().generate(component).size());
+        Assert.assertEquals(5, new SinkLocationOperator().generateTestCases(component).size());
     }
 }

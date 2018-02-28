@@ -1,6 +1,7 @@
 package ecdar.mutation.models;
 
 
+import ecdar.mutation.MutationTestPlanController;
 import ecdar.mutation.MutationTestingException;
 
 import java.util.*;
@@ -11,7 +12,7 @@ import java.util.regex.Pattern;
  * A strategy for showing a non-refinement.
  */
 public class NonRefinementStrategy {
-    private Map<String, List<StrategyRule>> rules = new HashMap<>();
+    private final Map<String, List<StrategyRule>> rules = new HashMap<>();
 
     /**
      * Constructs a strategy based on the result of verifytga.
@@ -53,5 +54,27 @@ public class NonRefinementStrategy {
         }
     }
 
+    /**
+     * Gets the first rule satisfying some specified conditions.
+     * @param specificationLocation the id of the location of the specification
+     * @param mutantLocation the id of the location of the mutant
+     * @param specificationValues the values of variables in the specification
+     * @param mutantValues the values of variables of the mutant
+     * @return the first satisfying rule, or null if none satisfies the conditions
+     */
+    public StrategyRule getRule(final String specificationLocation, final String mutantLocation,
+                                final Map<String, Double> specificationValues, final Map<String, Double> mutantValues) {
+        final Map<String, Double> values = new HashMap<>();
+        specificationValues.forEach((key, value) -> values.put(MutationTestPlanController.SPEC_NAME + "." + key, value));
+        mutantValues.forEach((key, value) -> values.put(MutationTestPlanController.MUTANT_NAME + "." + key, value));
+
+
+        final List<StrategyRule> ruleList = rules.get(MutationTestPlanController.SPEC_NAME + "." + specificationLocation + " " +
+                MutationTestPlanController.MUTANT_NAME + "." + mutantLocation);
+
+        if (ruleList == null) return null;
+
+        return ruleList.stream().filter(rule -> rule.isSatisfied(values)).findFirst().orElse(null);
+    }
 
 }

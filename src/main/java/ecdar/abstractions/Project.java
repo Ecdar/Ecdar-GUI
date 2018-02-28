@@ -270,7 +270,8 @@ public class Project {
     }
 
     private void deserializeSystems(final File systemsFolder) throws IOException {
-        // If there are no files do not try to deserialize
+        // If there are no folder or no files, do not try to deserialize
+        if (systemsFolder == null) return;
         final File[] files = systemsFolder.listFiles();
         if (files == null || files.length == 0) return;
 

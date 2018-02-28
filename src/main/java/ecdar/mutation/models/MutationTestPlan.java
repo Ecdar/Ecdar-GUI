@@ -15,29 +15,49 @@ import java.util.stream.Collectors;
  * A test plan for conducting model-based mutation testing on a component.
  */
 public class MutationTestPlan extends HighLevelModelObject {
-    public enum Status {IDLE, WORKING, STOPPING}
+    /**
+     * The status of the test plan.
+     * STOPPING: Stop by the user
+     * ERROR: An error has just occurred, and we are waiting for the execution to stop because of it
+     */
+    public enum Status {IDLE, WORKING, STOPPING, ERROR}
 
     private static final String PLAN_NAME_PREFIX = "Test ";
 
+    // JSON constants
     private static final String TEST_MODEL_ID = "testModelId";
     private static final String ACTION = "action";
     private static final String SUT_PATH = "sutPath";
     private static final String FORMAT = "exportFormat";
     private static final String DEMONIC = "useDemonic";
     private static final String ANGELIC_EXPORT = "useAngelic";
+    private static final String MAX_GENERATION_THREADS = "maxGenerationThreads";
+    private static final String MAX_SUT_INSTANCES = "maxSutInstances";
+    private static final String MAX_OUTPUT_WAITTIME = "maxOutputWaitTime";
 
+    // General fields
     private final StringProperty testModelId = new SimpleStringProperty("");
     private final StringProperty action = new SimpleStringProperty("");
-    private final StringProperty sutPath = new SimpleStringProperty("");
-    private final StringProperty format = new SimpleStringProperty("");
-    private final BooleanProperty demonic = new SimpleBooleanProperty(false);
-    private final BooleanProperty angelicWhenExport = new SimpleBooleanProperty(false);
-
-    private final StringProperty mutantsText = new SimpleStringProperty("");
-    private final StringProperty testCasesText = new SimpleStringProperty("");
-
     private final List<MutationOperator> operators = new ArrayList<>();
     private final ObjectProperty<Status> status = new SimpleObjectProperty<>(Status.IDLE);
+
+    // For testing
+    private final StringProperty sutPath = new SimpleStringProperty("");
+    private final BooleanProperty demonic = new SimpleBooleanProperty(false);
+    private final IntegerProperty concurrentGenerationThreads = new SimpleIntegerProperty(10);
+    private final IntegerProperty concurrentSutInstances = new SimpleIntegerProperty(1);
+    private final IntegerProperty maxOutputWaitTime = new SimpleIntegerProperty(1);
+
+    // Temporary values for displaying results of testing
+    private final StringProperty mutantsText = new SimpleStringProperty("");
+    private final StringProperty testCasesText = new SimpleStringProperty("");
+    private final StringProperty passedText = new SimpleStringProperty("");
+    private final StringProperty InconclusiveText = new SimpleStringProperty("");
+    private final StringProperty FailedText = new SimpleStringProperty("");
+
+    // For exporting
+    private final BooleanProperty angelicWhenExport = new SimpleBooleanProperty(false);
+    private final StringProperty format = new SimpleStringProperty("");
 
 
     /* Constructors */
@@ -166,6 +186,78 @@ public class MutationTestPlan extends HighLevelModelObject {
         return operators;
     }
 
+    public int getConcurrentGenerationThreads() {
+        return concurrentGenerationThreads.get();
+    }
+
+    public IntegerProperty maxGenerationThreadsProperty() {
+        return concurrentGenerationThreads;
+    }
+
+    public void setConcurrentGenerationThreads(final int concurrentGenerationThreads) {
+        this.concurrentGenerationThreads.set(concurrentGenerationThreads);
+    }
+
+    public int getConcurrentSutInstances() {
+        return concurrentSutInstances.get();
+    }
+
+    public int getOutputWaittime() {
+        return maxOutputWaitTime.get();
+    }
+
+    public IntegerProperty maxSutInstancesProperty() {
+        return concurrentSutInstances;
+    }
+
+    public IntegerProperty outputWaitTimeProperty() {
+        return maxOutputWaitTime;
+    }
+
+    public void setConcurrentSutInstances(final int concurrentSutInstances) {
+        this.concurrentSutInstances.set(concurrentSutInstances);
+    }
+
+    public void setOutputWaittime(final int outputWaitTime){
+        this.maxOutputWaitTime.set(outputWaitTime);
+    }
+
+    public String getPassedText() {
+        return passedText.get();
+    }
+
+    public StringProperty passedTextProperty() {
+        return passedText;
+    }
+
+    public void setPassedText(final String passedText) {
+        this.passedText.set(passedText);
+    }
+
+    public String getInconclusiveText() {
+        return InconclusiveText.get();
+    }
+
+    public StringProperty inconclusiveTextProperty() {
+        return InconclusiveText;
+    }
+
+    public void setInconclusiveText(final String inconclusiveText) {
+        this.InconclusiveText.set(inconclusiveText);
+    }
+
+    public String getFailedText() {
+        return FailedText.get();
+    }
+
+    public StringProperty failedTextProperty() {
+        return FailedText;
+    }
+
+    public void setFailedText(final String failedText) {
+        this.FailedText.set(failedText);
+    }
+
 
     /* Other methods */
 
@@ -180,7 +272,11 @@ public class MutationTestPlan extends HighLevelModelObject {
         result.addProperty(DEMONIC, isDemonic());
         result.addProperty(ANGELIC_EXPORT, isAngelicWhenExport());
 
-        operators.forEach(operator -> result.addProperty(operator.getJsonName(), operator.isSelected()));
+        operators.forEach(operator -> result.addProperty(operator.getCodeName(), operator.isSelected()));
+
+        result.addProperty(MAX_GENERATION_THREADS, getConcurrentGenerationThreads());
+        result.addProperty(MAX_SUT_INSTANCES, getConcurrentSutInstances());
+        result.addProperty(MAX_OUTPUT_WAITTIME, getOutputWaittime());
 
         return result;
     }
@@ -198,9 +294,18 @@ public class MutationTestPlan extends HighLevelModelObject {
 
         operators.addAll(MutationOperator.getAllOperators());
         operators.forEach(operator -> {
-            final JsonPrimitive primitive = json.getAsJsonPrimitive(operator.getJsonName());
+            final JsonPrimitive primitive = json.getAsJsonPrimitive(operator.getCodeName());
             if (primitive != null) operator.setSelected(primitive.getAsBoolean());
         });
+
+        JsonPrimitive primitive = json.getAsJsonPrimitive(MAX_GENERATION_THREADS);
+        if (primitive != null) setConcurrentGenerationThreads(primitive.getAsInt());
+
+        primitive = json.getAsJsonPrimitive(MAX_SUT_INSTANCES);
+        if (primitive != null) setConcurrentSutInstances(primitive.getAsInt());
+
+        primitive = json.getAsJsonPrimitive(MAX_OUTPUT_WAITTIME);
+        if (primitive != null) setOutputWaittime(primitive.getAsInt());
     }
 
 
@@ -231,10 +336,13 @@ public class MutationTestPlan extends HighLevelModelObject {
     }
 
     /**
-     * Clears the texts about mutants and test-cases.
+     * Clears the texts used to display results.
      */
     public void clearResults() {
         setMutantsText("");
         setTestCasesText("");
+        setPassedText("");
+        setInconclusiveText("");
+        setFailedText("");
     }
 }

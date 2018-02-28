@@ -2,6 +2,7 @@ package ecdar.mutation;
 
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
+import ecdar.abstractions.Location;
 import ecdar.abstractions.Project;
 import ecdar.abstractions.SimpleComponentsSystemDeclarations;
 import ecdar.backend.BackendException;
@@ -9,6 +10,7 @@ import ecdar.backend.UPPAALDriver;
 import ecdar.mutation.models.MutationOperator;
 import ecdar.mutation.models.MutationTestCase;
 import ecdar.mutation.models.MutationTestPlan;
+import ecdar.mutation.models.NonRefinementStrategy;
 import javafx.application.Platform;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
@@ -25,57 +27,59 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
  * Handler for generating test-cases.
  */
-class TestCaseGenerationHandler {
-    private final static String TEST_MODEL_NAME = "S";
-    private final static String MUTANT_NAME = "M";
-
+class TestCaseGenerationHandler implements ConcurrentJobsHandler {
     private final MutationTestPlan plan;
-
-    private Component getTestModel() {
-        return testModel;
-    }
-    private Supplier<Integer> getMaxThreadsSupplier() {
-        return maxThreadsSupplier;
-    }
-    private Consumer<Text> getProgressWriter() {
-        return progressWriter;
-    }
+    private final Consumer<List<MutationTestCase>> testCasesConsumer;
 
     private final Component testModel;
-    private final Supplier<Integer> maxThreadsSupplier;
-    private List<Component> mutants;
-    private List<MutationTestCase> testCases;
+
+    private List<MutationTestCase> potentialTestCases;
+    private List<MutationTestCase> finishedTestCases;
+
+    private ConcurrentJobsDriver jobsDriver;
 
     // Progress fields
     private final Consumer<Text> progressWriter;
     private Instant generationStart;
     private String queryFilePath;
-    private int generationJobsStarted;
-    private int generationJobsEnded;
+
+
+    /* Constructors */
 
     /**
      * Constructs the handler.
      * @param plan the test plan containing options for generation
      * @param testModel the tet model to use
      * @param progressWriter object to write progress with
-     * @param maxThreadsSupplier supplier for getting the maximum allowed threads while generating
      */
-    TestCaseGenerationHandler(final MutationTestPlan plan, final Component testModel, final Consumer<Text> progressWriter, final Supplier<Integer> maxThreadsSupplier) {
+    TestCaseGenerationHandler(final MutationTestPlan plan, final Component testModel, final Consumer<Text> progressWriter, final Consumer<List<MutationTestCase>> testCasesConsumer) {
         this.plan = plan;
         this.testModel = testModel;
         this.progressWriter = progressWriter;
-        this.maxThreadsSupplier = maxThreadsSupplier;
+        this.testCasesConsumer = testCasesConsumer;
     }
+
+
+    /* Getters and setters */
 
     private MutationTestPlan getPlan() {
         return plan;
     }
+
+    private Component getTestModel() {
+        return testModel;
+    }
+
+    private Consumer<Text> getProgressWriter() {
+        return progressWriter;
+    }
+
+    /* Other methods */
 
     /**
      * Generates mutants and test-cases from them.
@@ -83,82 +87,92 @@ class TestCaseGenerationHandler {
     void start() {
         getPlan().setStatus(MutationTestPlan.Status.WORKING);
 
-        testModel.setName(TEST_MODEL_NAME);
+        testModel.setName(MutationTestPlanController.SPEC_NAME);
         testModel.updateIOList();
 
         final Instant start = Instant.now();
 
         // Mutate with selected operators
-        mutants = new ArrayList<>();
+        potentialTestCases = new ArrayList<>();
         try {
-            for (final MutationOperator operator : getPlan().getSelectedMutationOperators()) mutants.addAll(operator.generate(getTestModel()));
+            for (final MutationOperator operator : getPlan().getSelectedMutationOperators())
+                potentialTestCases.addAll(operator.generateTestCases(getTestModel()));
         } catch (final MutationTestingException e) {
             handleException(e);
             return;
         }
 
-        mutants.forEach(Component::applyAngelicCompletion);
+        potentialTestCases.forEach(testCase -> testCase.getMutant().applyAngelicCompletion());
 
-        getPlan().setMutantsText("Mutants: " + mutants.size() + " - Execution time: " + MutationTestPlanPresentation.readableFormat(Duration.between(start, Instant.now())));
+        getPlan().setMutantsText("Mutants: " + potentialTestCases.size() + " - Execution time: " + MutationTestPlanPresentation.readableFormat(Duration.between(start, Instant.now())));
 
         // If chosen, apply demonic completion
         if (getPlan().isDemonic()) testModel.applyDemonicCompletion();
 
+        //Rename universal and inconsistent locations
+        testModel.getLocations().forEach(location -> {
+            if(location.getType().equals(Location.Type.UNIVERSAL)) {
+                location.setId("Universal");
+            } else if(location.getType().equals(Location.Type.INCONSISTENT)) {
+                location.setId("Inconsistent");
+            }
+        });
+
+        potentialTestCases.forEach(testCase -> testCase.getMutant().getLocations().forEach(location -> {
+            if(location.getType().equals(Location.Type.UNIVERSAL)) {
+                location.setId("Universal");
+            } else if(location.getType().equals(Location.Type.INCONSISTENT)) {
+                location.setId("Inconsistent");
+            }
+        }));
+
         // Create test cases
-        generationJobsStarted = 0;
-        generationJobsEnded = 0;
         generationStart = Instant.now();
-        testCases = Collections.synchronizedList(new ArrayList<>()); // use synchronized to be thread safe
+        finishedTestCases = Collections.synchronizedList(new ArrayList<>()); // use synchronized to be thread safe
 
         try {
-            queryFilePath = UPPAALDriver.storeQuery("refinement: " + MUTANT_NAME + "<=" + TEST_MODEL_NAME, "query");
+            queryFilePath = UPPAALDriver.storeQuery("refinement: " + MutationTestPlanController.MUTANT_NAME + "<=" + MutationTestPlanController.SPEC_NAME, "query");
         } catch (URISyntaxException | IOException e) {
             e.printStackTrace();
             Ecdar.showToast("Error: " + e.getMessage());
             return;
         }
 
-        updateGenerationJobs();
+        jobsDriver = new ConcurrentJobsDriver(this, potentialTestCases.size());
+        jobsDriver.start();
     }
 
-    /**
-     * Updates what test-case generation jobs to run.
-     */
-    private synchronized void updateGenerationJobs() {
-        if (getPlan().getStatus().equals(MutationTestPlan.Status.STOPPING)) {
-            if (getGenerationJobsRunning() == 0) {
-                getPlan().setStatus(MutationTestPlan.Status.IDLE);
-            }
 
+    @Override
+    public boolean shouldStop() {
+        return getPlan().getStatus().equals(MutationTestPlan.Status.STOPPING) ||
+                getPlan().getStatus().equals(MutationTestPlan.Status.ERROR);
+    }
+
+    @Override
+    public void onStopped() {
+        Platform.runLater(() -> getPlan().setStatus(MutationTestPlan.Status.IDLE));
+    }
+    
+    @Override
+    public void onAllJobsSuccessfullyDone() {
+        try {
+            FileUtils.cleanDirectory(new File(UPPAALDriver.getTempDirectoryAbsolutePath()));
+        } catch (IOException | URISyntaxException e) {
+            e.printStackTrace();
+            Ecdar.showToast("Error: " + e.getMessage());
             return;
         }
 
-        // If we are done, clean up and move on
-        if (generationJobsEnded == mutants.size()) {
-            try {
-                FileUtils.cleanDirectory(new File(UPPAALDriver.getTempDirectoryAbsolutePath()));
-            } catch (IOException | URISyntaxException e) {
-                e.printStackTrace();
-                Ecdar.showToast("Error: " + e.getMessage());
-                return;
-            }
-
-            final Text text = new Text("Done");
-            text.setFill(Color.GREEN);
-            getProgressWriter().accept(text);
-            getPlan().setStatus(MutationTestPlan.Status.IDLE);
-
-            return;
-        }
-
-        writeProgress("Generating test-cases... (" + generationJobsEnded + "/" + mutants.size() + " mutants processed)");
-
-        // while we have not reach the maximum allowed threads and there are still jobs to start
-        while (getGenerationJobsRunning() < getMaxThreadsSupplier().get() &&
-                generationJobsStarted < mutants.size()) {
-            generateTestCase(testModel, mutants.get(generationJobsStarted), generationJobsStarted);
-            generationJobsStarted++;
-        }
+        final Text text = new Text("Done");
+        text.setFill(Color.GREEN);
+        getProgressWriter().accept(text);
+        testCasesConsumer.accept(finishedTestCases);
+    }
+    
+    @Override
+    public void writeProgress(final int jobsEnded) {
+        writeProgress("Generating test-cases... (" + jobsEnded + "/" + potentialTestCases.size() + " mutants processed)");
     }
 
     /**
@@ -171,24 +185,26 @@ class TestCaseGenerationHandler {
         getProgressWriter().accept(text);
     }
 
-    /**
-     * Gets the number of generation jobs currently running.
-     * @return the number of jobs running
-     */
-    private synchronized int getGenerationJobsRunning() {
-        return generationJobsStarted - generationJobsEnded;
+    @Override
+    public int getMaxConcurrentJobs() {
+        return getPlan().getConcurrentGenerationThreads();
+    }
+
+    @Override
+    public void startJob(final int index) {
+        generateTestCase(potentialTestCases.get(index));
     }
 
     /**
      * Generates a test-case.
-     * @param testModel test model
-     * @param mutant mutant used for generating
-     * @param mutationIndex index of the mutant used for generating
+     * @param testCase potential test-case containing the test model, the mutant, and an id
      */
-    private void generateTestCase(final Component testModel, final Component mutant, final int mutationIndex) {
+    private void generateTestCase(final MutationTestCase testCase) {
+        final Component mutant = testCase.getMutant();
+
         // make a project with the test model and the mutant
         final Project project = new Project();
-        mutant.setName(MUTANT_NAME);
+        mutant.setName(MutationTestPlanController.MUTANT_NAME);
         project.getComponents().addAll(testModel, mutant);
         project.setGlobalDeclarations(Ecdar.getProject().getGlobalDeclarations());
         mutant.updateIOList(); // Update io in order to get the right system declarations for the mutant
@@ -196,7 +212,15 @@ class TestCaseGenerationHandler {
 
         new Thread(() -> {
             try {
-                List<String> lines = getVerifytgaInputLines(startVerifytgaProcess(mutationIndex, project));
+                // Store the project and the refinement query as backend XML
+                final String modelPath;
+                try {
+                    modelPath = UPPAALDriver.storeBackendModel(project, testCase.getId());
+                } catch (IOException | BackendException | URISyntaxException e) {
+                    throw new MutationTestingException("Error while storing backend model", e);
+                }
+
+                List<String> lines = getVerifytgaInputLines(startVerifytgaProcess(modelPath));
 
                 // If refinement, no test-case to generate.
                 // I use endsWith rather than contains,
@@ -210,7 +234,7 @@ class TestCaseGenerationHandler {
                 // If it does not, then this is an error
                 if (lines.stream().noneMatch(line -> line.endsWith(" -- Property is NOT satisfied."))) {
                     throw new MutationTestingException("Output from verifytga not understood: " + String.join("\n", lines) + "\n" +
-                            "Mutation index: " + mutationIndex);
+                            "Model: " + modelPath);
                 }
 
                 int strategyIndex = lines.indexOf("Strategy for the attacker:");
@@ -218,12 +242,12 @@ class TestCaseGenerationHandler {
                 // If no such index, error
                 if (strategyIndex < 0) {
                     throw new MutationTestingException("Output from verifytga not understood: " + String.join("\n", lines) + "\n" +
-                            "Mutation index: " + mutationIndex);
+                            "Model: " + modelPath);
                 }
 
-                List<String> strategy = lines.subList(strategyIndex + 2, lines.size());
+                testCase.setStrategy(new NonRefinementStrategy(lines.subList(strategyIndex + 2, lines.size())));
 
-                testCases.add(new MutationTestCase(testModel, mutant, strategy));
+                finishedTestCases.add(testCase);
             } catch (MutationTestingException e) {
                 handleException(e);
                 return;
@@ -246,7 +270,7 @@ class TestCaseGenerationHandler {
 
         // Only show error if the process is not already being stopped
         if (getPlan().getStatus().equals(MutationTestPlan.Status.WORKING)) {
-            getPlan().setStatus(MutationTestPlan.Status.STOPPING);
+            getPlan().setStatus(MutationTestPlan.Status.ERROR);
             Platform.runLater(() -> {
                 final String message = "Error while generating test-cases: " + e.getMessage();
                 final Text text = new Text(message);
@@ -255,26 +279,24 @@ class TestCaseGenerationHandler {
                 Ecdar.showToast(message);
             });
         }
+
+        jobsDriver.onJobDone();
     }
 
     /**
      * Starts varifytga to fetch a strategy.
-     * @param mutationIndex the inputs of the mutant to pass to verifytga
-     * @param project the backend XML project containing the test model and the mutant
+     * @param modelPath the path to the backend XML project containing the test model and the mutant
      * @return the started process, or null if an error occurs
      */
-    private Process startVerifytgaProcess(final int mutationIndex, final Project project) throws MutationTestingException {
+    private Process startVerifytgaProcess(final String modelPath) throws MutationTestingException {
         final Process process;
 
         try {
-            // Store the project and the refinement query as backend XML
-            final String modelPath = UPPAALDriver.storeBackendModel(project, "model" + mutationIndex);
-
             // Run verifytga to check refinement and to fetch strategy if non-refinement
             final ProcessBuilder builder = new ProcessBuilder(UPPAALDriver.findVerifytgaAbsolutePath(), "-t0", modelPath, queryFilePath);
             process = builder.start();
 
-        } catch (BackendException | IOException | URISyntaxException e) {
+        } catch (final IOException e) {
             throw new MutationTestingException("Error while starting verifytga", e);
         }
 
@@ -331,11 +353,10 @@ class TestCaseGenerationHandler {
      * This method should be called in a JavaFX thread, since it updates JavaFX elements.
      */
     private synchronized void onGenerationJobDone() {
-        generationJobsEnded++;
+        getPlan().setTestCasesText("Test-cases: " + finishedTestCases.size() + " - Generation time: " +
+                MutationTestPlanPresentation.readableFormat(Duration.between(generationStart, Instant.now())));
 
-        getPlan().setTestCasesText("Test-cases: " + testCases.size() + " - Generation time: " + MutationTestPlanPresentation.readableFormat(Duration.between(generationStart, Instant.now())));
-
-        updateGenerationJobs();
+        jobsDriver.onJobDone();
     }
 
 }

@@ -17,15 +17,15 @@ public class InvertResetOperator extends MutationOperator {
     }
 
     @Override
-    public String getJsonName() {
+    public String getCodeName() {
         return "invertReset";
     }
 
     @Override
-    public List<Component> generate(final Component original) {
+    public List<MutationTestCase> generateTestCases(final Component original) {
         final List<String> clocks = original.getClocks();
 
-        final List<Component> mutants = new ArrayList<>();
+        final List<MutationTestCase> mutants = new ArrayList<>();
 
         // For all edges in the original component
         for (int edgeIndex = 0; edgeIndex < original.getEdges().size(); edgeIndex++) {
@@ -43,7 +43,11 @@ public class InvertResetOperator extends MutationOperator {
                 // Mutate
                 invertClock(mutantEdge, clock);
 
-                mutants.add(mutant);
+                mutants.add(new MutationTestCase(original, mutant,
+                        getCodeName() + "_" + finalEdgeIndex + "_" + clock,
+                        "Inverted clock reset of clock " + clock + " on the guard of " +
+                                originalEdge.getSourceLocation().getId() + " -> " + originalEdge.getTargetLocation().getId()
+                ));
             });
         }
 
@@ -73,7 +77,7 @@ public class InvertResetOperator extends MutationOperator {
         final boolean removed = statements.removeIf(s -> s.matches("^\\s*" + clock + "\\s*:?=\\s*0\\s*$"));
 
         // If not found, add it
-        if (!removed) statements.add(clock + " := 0");
+        if (!removed) statements.add(clock + " = 0");
 
         // Update property
         mutantEdge.setUpdate(String.join(", ", statements));

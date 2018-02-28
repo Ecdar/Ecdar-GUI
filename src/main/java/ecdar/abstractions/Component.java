@@ -17,6 +17,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.util.Pair;
 
 import java.util.*;
@@ -28,7 +29,7 @@ import java.util.stream.Collectors;
  * A component that models an I/O automata.
  */
 public class Component extends HighLevelModelObject implements Boxed {
-    static final String COMPONENT = "Component";
+    private static final String COMPONENT = "Component";
     private static final String LOCATIONS = "locations";
     private static final String EDGES = "edges";
     private static final String INCLUDE_IN_PERIODIC_CHECK = "includeInPeriodicCheck";
@@ -101,7 +102,7 @@ public class Component extends HighLevelModelObject implements Boxed {
      * Copies objects used for verification (e.g. locations, edges and the declarations).
      * Does not copy UI elements (sizes and positions).
      * It locations are cloned from the original component. Their ids are the same.
-     * Does not initialize io listeners.
+     * Does not initialize io listeners, but copies the input and output strings.
      * Reachability analysis binding is not initialized.
      * @return the clone
      */
@@ -110,6 +111,9 @@ public class Component extends HighLevelModelObject implements Boxed {
         clone.addVerificationObjects(this);
 
         clone.setIncludeInPeriodicCheck(false);
+
+        clone.inputStrings.addAll(getInputStrings());
+        clone.outputStrings.addAll(getOutputStrings());
 
         return clone;
     }
@@ -153,26 +157,41 @@ public class Component extends HighLevelModelObject implements Boxed {
                 return;
             }
 
-            // if an edge has no guard, ignore.
-            // component is already input-enabled with respect to this location and input.
-            if (matchingEdges.stream().anyMatch(edge -> edge.getGuard().isEmpty())) return;
+            // If an edge has no guard and its target has no invariants, ignore.
+            // Component is already input-enabled with respect to this location and input.
+            if (matchingEdges.stream().anyMatch(edge -> edge.getGuard().isEmpty() &&
+                    edge.getTargetLocation().getInvariant().isEmpty())) return;
 
-            // There could be multiple matching edges, which is a disjunction of guards.
-            // There could be conjunction in guards.
-            // Convert the matching guards to such a boolean expression.
-            // Negate the expression to create self loops for the missing inputs.
-            // Convert to disjunctive normal form to make into multiple edges (disjunctions),
-            // each with a conjunction of simple expressions.
-            createAngelicSelfLoops(location, input, ExpressionHelper.simplifyNegatedSimpleExpressions(
-                    RuleSet.toCNF(Not.of(ExpressionHelper.parseDisjunctionOfGuards(matchingEdges.stream()
-                            .map(Edge::getGuard)
-                            .collect(Collectors.toList()))
-                    ))));
+            // Extract expression for which edges to create.
+            // The expression is in DNF
+            // We create self loops for each child expression in the disjunction.
+            createAngelicSelfLoops(location, input, getNegatedEdgeExpression(matchingEdges));
         }));
     }
 
     /**
+     * Extracts an expression that represents the negation of a list of edges.
+     * Multiple edges are resolved as disjunctions.
+     * There can be conjunction in guards.
+     * We translate each edge to the conjunction of its guard and the invariant of its target location
+     * (since it should also be satisfied).
+     * The result is converted to disjunctive normal form.
+     * @param edges the edges to extract from
+     * @return the expression that represents the negation
+     */
+    private static Expression<String> getNegatedEdgeExpression(final List<Edge> edges) {
+        return ExpressionHelper.simplifyNegatedSimpleExpressions(
+                RuleSet.toDNF(Not.of(Or.of(edges.stream()
+                        .map(edge -> And.of(
+                                ExpressionHelper.parseGuard(edge.getGuard()),
+                                ExpressionHelper.parseInvariant(edge.getTargetLocation().getInvariant()))
+                        ).collect(Collectors.toList()))
+                )));
+    }
+
+    /**
      * Creates self loops on a location to finish missing inputs with an angelic completion.
+     * The guard expression should be in DNF without negations.
      * @param location the location to create self loops on
      * @param input the input action to use in the synchronization properties
      * @param guardExpression the expression that represents the guards of the self loops
@@ -194,7 +213,14 @@ public class Component extends HighLevelModelObject implements Boxed {
                 edge.addSyncNail(input);
                 edge.addGuardNail(String.join("&&",
                         ((And<String>) guardExpression).getChildren().stream()
-                                .map(child -> ((Variable<String>) child).getValue())
+                                .map(child -> {
+                                    if (!child.getExprType().equals(Variable.EXPR_TYPE))
+                                        throw new RuntimeException("Child " + child + " of type " +
+                                                child.getExprType() + " in and expression " +
+                                                guardExpression + " should be a variable");
+
+                                    return ((Variable<String>) child).getValue();
+                                })
                                 .collect(Collectors.toList())
                 ));
                 addEdge(edge);
@@ -241,22 +267,15 @@ public class Component extends HighLevelModelObject implements Boxed {
                 addEdge(edge);
                 return;
             }
+            // If an edge has no guard and its target has no invariants, ignore.
+            // Component is already input-enabled with respect to this location and input.
+            if (matchingEdges.stream().anyMatch(edge -> edge.getGuard().isEmpty() &&
+                    edge.getTargetLocation().getInvariant().isEmpty())) return;
 
-            // if an edge has no guard, ignore.
-            // component is already input-enabled with respect to this location and input.
-            if (matchingEdges.stream().anyMatch(edge -> edge.getGuard().isEmpty())) return;
-
-            // There could be multiple matching edges, which is a disjunction of guards.
-            // There could be conjunction in guards.
-            // Convert the matching guards to such a boolean expression.
-            // Negate the expression to create edges to Universal for the missing inputs.
-            // Convert to disjunctive normal form to make into multiple edges (disjunctions),
-            // each with a conjunction of simple expressions.
-            createDemonicEdges(location, uniLocation, input, ExpressionHelper.simplifyNegatedSimpleExpressions(
-                    RuleSet.toCNF(Not.of(ExpressionHelper.parseDisjunctionOfGuards(matchingEdges.stream()
-                            .map(Edge::getGuard)
-                            .collect(Collectors.toList()))
-                    ))));
+            // Extract expression for which edges to create.
+            // The expression is in DNF
+            // We create edges to Universal for each child expression in the disjunction.
+            createDemonicEdges(location, uniLocation, input, getNegatedEdgeExpression(matchingEdges));
         }));
     }
 
@@ -715,5 +734,17 @@ public class Component extends HighLevelModelObject implements Boxed {
         if (!matcher.find()) return clocks;
 
         return Arrays.stream(matcher.group(1).split(",")).map(String::trim).collect(Collectors.toList());
+    }
+
+    /**
+     * Gets the first occurring universal location in this component.
+     * @return the first universal location, or null if none exists
+     */
+    public Location getUniversalLocation() {
+        final FilteredList<Location> uniLocs = getLocations().filtered(l -> l.getType().equals(Location.Type.UNIVERSAL));
+
+        if (uniLocs.isEmpty()) return null;
+
+        return uniLocs.get(0);
     }
 }

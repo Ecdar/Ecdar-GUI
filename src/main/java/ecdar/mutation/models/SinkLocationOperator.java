@@ -19,13 +19,13 @@ public class SinkLocationOperator extends MutationOperator {
     }
 
     @Override
-    public String getJsonName() {
+    public String getCodeName() {
         return "sinkLocation";
     }
 
     @Override
-    public List<Component> generate(final Component original) {
-        final List<Component> mutants = new ArrayList<>();
+    public List<MutationTestCase> generateTestCases(final Component original) {
+        final List<MutationTestCase> mutants = new ArrayList<>();
 
         // For all edges in the original component
         for (int edgeIndex = 0; edgeIndex < original.getEdges().size(); edgeIndex++) {
@@ -40,7 +40,10 @@ public class SinkLocationOperator extends MutationOperator {
             final Edge mutantEdge = mutant.getEdges().get(edgeIndex);
             mutantEdge.setTargetLocation(addSinkLocation(mutant));
 
-            mutants.add(mutant);
+            mutants.add(new MutationTestCase(original, mutant,
+                    getCodeName() + "_" + edgeIndex,
+                    "Changed target of edge " + originalEdge.getSourceLocation().getId() + " -> " +
+                            originalEdge.getTargetLocation().getId() + " to a new sink location"));
         }
 
         return mutants;

@@ -6,49 +6,75 @@ import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXTextField;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
+import ecdar.mutation.models.MutationTestCase;
 import ecdar.mutation.models.MutationTestPlan;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
+import javafx.stage.FileChooser;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Controller for a test plan with model-based mutation testing.
  */
 public class MutationTestPlanController {
+    public final static String SPEC_NAME = "S";
+    public final static String MUTANT_NAME = "M";
 
-    // UI elements
+
+    /* UI elements */
+
+    public ScrollPane scrollPane;
     public JFXComboBox<Label> modelPicker;
-    public JFXButton testButton;
-    public JFXButton stopButton;
-    public Label mutantsText;
-    public Label testCasesText;
-    public JFXTextField generationThreadsField;
+    public VBox modelDependentArea;
     public VBox operatorsArea;
     public JFXComboBox<Label> actionPicker;
+
     public VBox testDependentArea;
     public JFXButton selectSutButton;
-    public VBox exportDependantArea;
-    public VBox sutDependentArea;
     public Label sutPathLabel;
-    public JFXComboBox<Label> formatPicker;
-    public VBox modelDependentArea;
-    public VBox resultsArea;
-    public VBox progressAres;
-    public JFXTextField suvInstancesField;
+    public VBox sutDependentArea;
+    public VBox demonicArea;
     public JFXCheckBox demonicCheckBox;
+    public JFXTextField generationThreadsField;
+    public JFXTextField suvInstancesField;
+    public JFXTextField outputWaitTimeField;
+    public JFXButton testButton;
+    public JFXButton stopButton;
+
+    public VBox exportDependantArea;
+    public JFXComboBox<Label> formatPicker;
     public JFXCheckBox angelicBox;
     public JFXButton storeMutantsButton;
-    public TextFlow progressTextFlow;
-    public HBox selectSutArea;
-    public VBox demonicArea;
-    public ScrollPane scrollPane;
 
-    // Mutation objects
+    public VBox progressAres;
+    public TextFlow progressTextFlow;
+
+    public VBox resultsArea;
+    public Label mutantsText;
+    public Label testCasesText;
+    public Label passedText;
+    public Label inconclusiveText;
+    public Label failedText;
+    public StackPane root;
+
+
+    /* Mutation fields */
+
     private MutationTestPlan plan;
+
+
+    /* Properties */
 
     public MutationTestPlan getPlan() {
         return plan;
@@ -57,6 +83,9 @@ public class MutationTestPlanController {
     public void setPlan(final MutationTestPlan plan) {
         this.plan = plan;
     }
+
+
+    /* Other methods */
 
     /**
      * Triggered when pressed the test button.
@@ -69,7 +98,9 @@ public class MutationTestPlanController {
         // Clone it, because we want to change its name
         final Component testModel = Ecdar.getProject().findComponent(modelPicker.getValue().getText()).cloneForVerification();
 
-        new TestCaseGenerationHandler(getPlan(), testModel, this::writeProgress, this::getMaxConcurrentGenerationJobs).start();
+        Consumer<List<MutationTestCase>> runTestDriver = (mutationTestCases) -> new TestDriver(mutationTestCases, plan, this::writeProgress,1000, 100).start();
+
+        new TestCaseGenerationHandler(getPlan(), testModel, this::writeProgress, runTestDriver).start();
     }
 
     /**
@@ -88,6 +119,7 @@ public class MutationTestPlanController {
      * Signals that this test plan should stop doing jobs.
      */
     public void onStopButtonPressed() {
+        writeProgress("Stopping");
         getPlan().setStatus(MutationTestPlan.Status.STOPPING);
     }
 
@@ -114,8 +146,32 @@ public class MutationTestPlanController {
      * Opens dialog to select a SUT.
      */
     public void onSelectSutButtonPressed() {
-        sutPathLabel.setText("The\\Path\\To\\My\\System\\Under\\Test");
-        // TODO implement
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Choose a SUT jar file");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Jar files", "*.jar"));
+
+        // The initial location for the file choosing dialog
+        final File jarDir;
+        if(Ecdar.projectDirectory.get() == null) {
+            fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+        } else {
+            jarDir = new File(Ecdar.projectDirectory.get());
+
+
+            // If the file does not exist, we must be running it from a development environment, use an default location
+            if(jarDir.exists()) {
+                fileChooser.setInitialDirectory(jarDir);
+            }
+        }
+
+        File file = fileChooser.showOpenDialog(root.getScene().getWindow());
+        if(file != null) {
+            String path = new File(Ecdar.projectDirectory.get()).toPath().relativize(file.toPath()).toFile().getPath().replace(File.separator, "/");
+            sutPathLabel.setText(path);
+            plan.setSutPath(path);
+        } else {
+            Ecdar.showToast("Did not recognize selected file as a jar file");
+        }
     }
 
     /**

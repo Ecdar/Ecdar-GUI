@@ -9,14 +9,13 @@ import ecdar.mutation.models.MutationOperator;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.presentations.EcdarFXMLLoader;
 import ecdar.presentations.HighLevelModelPresentation;
+import javafx.beans.property.IntegerProperty;
 import javafx.collections.ListChangeListener;
-import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
 
 import java.time.Duration;
@@ -66,14 +65,11 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
 
         initializeFormatPicker();
 
-        controller.progressTextFlow.getChildren().addListener((ListChangeListener<Node>) change -> show(controller.progressAres));
-        controller.mutantsText.textProperty().addListener(((observable, oldValue, newValue) -> show(controller.resultsArea)));
+        initializeProgressAndResultsTexts();
 
-        controller.mutantsText.textProperty().bind(controller.getPlan().mutantsTextProperty());
-        controller.testCasesText.textProperty().bind(controller.getPlan().testCasesTextProperty());
-
-        initializePositiveIntegerTextField(controller.generationThreadsField);
-        initializePositiveIntegerTextField(controller.suvInstancesField);
+        initializePositiveIntegerTextField(controller.generationThreadsField, controller.getPlan().maxGenerationThreadsProperty());
+        initializePositiveIntegerTextField(controller.suvInstancesField, controller.getPlan().maxSutInstancesProperty());
+        initializePositiveIntegerTextField(controller.outputWaitTimeField, controller.getPlan().outputWaitTimeProperty());
 
         controller.demonicCheckBox.selectedProperty().bindBidirectional(controller.getPlan().demonicProperty());
         controller.angelicBox.selectedProperty().bindBidirectional(controller.getPlan().angelicWhenExportProperty());
@@ -84,6 +80,20 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
                 "and you want to ignore mutants leading to these missing inputs. " +
                 "We apply angelic completion on the mutants.");
         initializeWidthAndHeight();
+    }
+
+    /**
+     * Initializes UI elements for displaying progress and results.
+     */
+    private void initializeProgressAndResultsTexts() {
+        controller.progressTextFlow.getChildren().addListener((ListChangeListener<Node>) change -> show(controller.progressAres));
+        controller.mutantsText.textProperty().addListener(((observable, oldValue, newValue) -> show(controller.resultsArea)));
+
+        controller.mutantsText.textProperty().bind(controller.getPlan().mutantsTextProperty());
+        controller.testCasesText.textProperty().bind(controller.getPlan().testCasesTextProperty());
+        controller.passedText.textProperty().bind(controller.getPlan().passedTextProperty());
+        controller.inconclusiveText.textProperty().bind(controller.getPlan().inconclusiveTextProperty());
+        controller.failedText.textProperty().bind(controller.getPlan().failedTextProperty());
     }
 
     /**
@@ -184,19 +194,15 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      * @param newValue the new status
      */
     private void handleStatusUpdate(final MutationTestPlan.Status oldValue, final MutationTestPlan.Status newValue) {
-        if (oldValue != null) {
-            switch (oldValue) {
-                case STOPPING:
-                    controller.writeProgress("Stopped");
-                    break;
-            }
-        }
-
         switch (newValue) {
             case IDLE:
                 show(controller.testButton);
                 hide(controller.stopButton);
                 for (final Region region : getRegionsToDisableWhileWorking()) region.setDisable(false);
+
+                if (oldValue != null && oldValue.equals(MutationTestPlan.Status.STOPPING))
+                    controller.writeProgress("Stopped");
+
                 break;
             case WORKING:
                 hide(controller.testButton);
@@ -205,6 +211,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
                 for (final Region region : getRegionsToDisableWhileWorking()) region.setDisable(true);
                 break;
             case STOPPING:
+            case ERROR:
                 controller.stopButton.setDisable(true);
                 break;
         }
@@ -221,7 +228,8 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         regions.add(controller.operatorsArea);
         regions.add(controller.actionPicker);
         regions.add(controller.demonicArea);
-        regions.add(controller.selectSutArea);
+        regions.add(controller.selectSutButton);
+        regions.add(controller.sutPathLabel);
         regions.add(controller.exportDependantArea);
 
         return regions;
@@ -232,7 +240,15 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      * While in focus, the text field can still have an empty value.
      * @param field the text field
      */
-    private static void initializePositiveIntegerTextField(final JFXTextField field) {
+    private static void initializePositiveIntegerTextField(final JFXTextField field, final IntegerProperty property) {
+        // Set value initially
+        field.setText(String.valueOf(property.get()));
+
+        // Update property when text field changes
+        field.textProperty().addListener(((observable, oldValue, newValue) -> {
+            if (!newValue.isEmpty()) property.setValue(Integer.parseInt(newValue));
+        }));
+
         // Force the field to be empty positive integer
         field.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue.matches("\\d*")) field.setText(newValue.replaceAll("[^\\d]", ""));

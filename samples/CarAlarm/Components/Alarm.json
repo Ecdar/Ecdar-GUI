@@ -234,7 +234,7 @@
       "status": "INPUT",
       "select": "",
       "guard": "",
-      "update": "c:\u003d0",
+      "update": "c\u003d0",
       "sync": "close",
       "isLocked": false,
       "nails": [
@@ -260,7 +260,7 @@
       "status": "INPUT",
       "select": "",
       "guard": "",
-      "update": "c:\u003d0",
+      "update": "c\u003d0",
       "sync": "lock",
       "isLocked": false,
       "nails": [
@@ -523,7 +523,7 @@
       "status": "INPUT",
       "select": "",
       "guard": "",
-      "update": "f:\u003d0",
+      "update": "f\u003d0",
       "sync": "close",
       "isLocked": false,
       "nails": [
@@ -568,7 +568,7 @@
       "status": "INPUT",
       "select": "",
       "guard": "e\u003c30",
-      "update": "g:\u003d0",
+      "update": "g\u003d0",
       "sync": "unlock",
       "isLocked": false,
       "nails": [
@@ -601,7 +601,7 @@
       "status": "INPUT",
       "select": "",
       "guard": "e\u003c300",
-      "update": "g:\u003d0",
+      "update": "g\u003d0",
       "sync": "unlock",
       "isLocked": false,
       "nails": [
@@ -705,7 +705,7 @@
       "status": "INPUT",
       "select": "",
       "guard": "",
-      "update": "e:\u003d0",
+      "update": "e\u003d0",
       "sync": "open",
       "isLocked": false,
       "nails": [
@@ -795,7 +795,7 @@
       "status": "INPUT",
       "select": "",
       "guard": "",
-      "update": "d:\u003d0",
+      "update": "d\u003d0",
       "sync": "unlock",
       "isLocked": false,
       "nails": [

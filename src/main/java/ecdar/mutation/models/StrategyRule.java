@@ -1,5 +1,6 @@
 package ecdar.mutation.models;
 
+import ecdar.utility.ExpressionHelper;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import java.util.Map;
@@ -29,9 +30,6 @@ public abstract class StrategyRule {
      * @return true iff the condition is satisfied
      */
     public boolean isSatisfied(final Map<String, Double> values) {
-        final String[] conditionCopy = {condition};
-        values.forEach((key, value) -> conditionCopy[0] = conditionCopy[0].replace(key, String.valueOf(value)));
-
-        return new SpelExpressionParser().parseExpression(conditionCopy[0]).getValue(Boolean.class);
+        return ExpressionHelper.evaluateBooleanExpression(condition, values);
     }
 }

@@ -8,6 +8,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * An operator for creating mutants of a component.
@@ -40,15 +41,15 @@ public abstract class MutationOperator {
      * Gets a string for storing and retrieving with JSON.
      * @return the string
      */
-    public abstract String getJsonName();
+    public abstract String getCodeName();
 
     /**
      * Generates mutants.
      * @param original the component to mutate
-     * @return the generated mutants
-     * @throws MutationTestingException if a mutation error happens
+     * @return list of potential test-cases
+     * @throws MutationTestingException if a mutation error occurs
      */
-    public abstract List<Component> generate(final Component original) throws MutationTestingException;
+    public abstract List<MutationTestCase> generateTestCases(final Component original) throws MutationTestingException;
 
     /**
      * Gets a description of the operator to use as a tooltip.
@@ -60,12 +61,24 @@ public abstract class MutationOperator {
     /* Other methods */
 
     /**
+     * Generate mutants.
+     * @param original the component to mutate
+     * @return list of mutants
+     * @throws MutationTestingException if a mutation error occurs
+     */
+    public List<Component> generateMutants(final Component original) throws MutationTestingException {
+        return generateTestCases(original).stream().map(MutationTestCase::getMutant).collect(Collectors.toList());
+    }
+
+    /**
      * Gets all available mutation operators.
      * @return the operators
      */
     public static List<MutationOperator> getAllOperators() {
         final List<MutationOperator> operators = new ArrayList<>();
 
+        operators.add(new ChangeActionInputsOperator());
+        operators.add(new ChangeActionOutputsOperator());
         operators.add(new ChangeSourceOperator());
         operators.add(new ChangeTargetOperator());
         operators.add(new ChangeGuardOperator());

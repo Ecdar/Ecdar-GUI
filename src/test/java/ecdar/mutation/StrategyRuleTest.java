@@ -47,9 +47,4 @@ public class StrategyRuleTest {
         values.put("M.f", 0.0);
         Assert.assertFalse(new DelayRule("(20<M.e && S.f==M.f && M.f==0)").isSatisfied(values));
     }
-
-    @Test
-    public void testIsSatisfi5() {
-        final Matcher matcher = Pattern.compile("(<|<=|==|!=|>|>=)*").matcher("(20<M.e && S.f==M.f && M.f==0)");
-    }
 }
