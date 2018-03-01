@@ -1,4 +1,4 @@
-package ecdar.mutation.models;
+package ecdar.mutation.operators;
 
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
