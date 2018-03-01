@@ -1,8 +1,9 @@
-package ecdar.mutation.models;
+package ecdar.mutation.operators;
 
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
 import ecdar.abstractions.EdgeStatus;
+import ecdar.mutation.models.MutationTestCase;
 
 /**
  * Mutation operator that changes a synchronization action to another action.

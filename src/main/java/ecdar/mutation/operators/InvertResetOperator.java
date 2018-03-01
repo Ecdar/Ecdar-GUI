@@ -1,8 +1,9 @@
-package ecdar.mutation.models;
+package ecdar.mutation.operators;
 
 import com.google.common.collect.Lists;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
+import ecdar.mutation.models.MutationTestCase;
 
 import java.util.ArrayList;
 import java.util.List;

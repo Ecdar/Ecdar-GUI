@@ -7,7 +7,7 @@ import ecdar.abstractions.Project;
 import ecdar.abstractions.SimpleComponentsSystemDeclarations;
 import ecdar.backend.BackendException;
 import ecdar.backend.UPPAALDriver;
-import ecdar.mutation.models.MutationOperator;
+import ecdar.mutation.operators.MutationOperator;
 import ecdar.mutation.models.MutationTestCase;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.mutation.models.NonRefinementStrategy;

@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import ecdar.Ecdar;
 import ecdar.abstractions.HighLevelModelObject;
+import ecdar.mutation.operators.MutationOperator;
 import javafx.beans.property.*;
 
 import java.util.ArrayList;

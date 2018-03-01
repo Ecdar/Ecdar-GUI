@@ -5,7 +5,7 @@ import com.jfoenix.controls.JFXTextField;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.controllers.CanvasController;
-import ecdar.mutation.models.MutationOperator;
+import ecdar.mutation.operators.MutationOperator;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.presentations.EcdarFXMLLoader;
 import ecdar.presentations.HighLevelModelPresentation;
