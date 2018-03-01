@@ -192,14 +192,14 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
 
     @Override
     public void startJob(final int index) {
-        generateTestCase(potentialTestCases.get(index));
+        generateTestCase(potentialTestCases.get(index), 3);
     }
 
     /**
      * Generates a test-case.
      * @param testCase potential test-case containing the test model, the mutant, and an id
      */
-    private void generateTestCase(final MutationTestCase testCase) {
+    private void generateTestCase(final MutationTestCase testCase, final int tries) {
         final Component mutant = testCase.getMutant();
 
         // make a project with the test model and the mutant
@@ -233,6 +233,12 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
                 // Verifytga should output that the property is not satisfied
                 // If it does not, then this is an error
                 if (lines.stream().noneMatch(line -> line.endsWith(" -- Property is NOT satisfied."))) {
+                    if (lines.isEmpty() && tries > 1) {
+                        Ecdar.showToast("Verifytga did not respond at " + testCase.getId() + ". We will try again. " + (tries - 1) + " tries left.");
+                        generateTestCase(testCase, tries - 1);
+                        return;
+                    }
+
                     throw new MutationTestingException("Output from verifytga not understood: " + String.join("\n", lines) + "\n" +
                             "Model: " + modelPath);
                 }
