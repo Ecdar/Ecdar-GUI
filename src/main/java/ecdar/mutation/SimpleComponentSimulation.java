@@ -52,7 +52,7 @@ public class SimpleComponentSimulation implements ComponentSimulation {
 
     @Override
     public Map<String, Integer> getLocalVariableValuations() {
-        return null;
+        return localValuations;
     }
 
     @Override
@@ -104,23 +104,9 @@ public class SimpleComponentSimulation implements ComponentSimulation {
      */
     private void runUpdateProperty(final String property) {
         ExpressionHelper.parseUpdateProperty(property).forEach((key, value) -> {
-            if (clocks.contains(key)) getClockValuations().put(key, (Double) value);
+            if (clocks.contains(key)) getClockValuations().put(key, 0d); // Reset clock
             else getLocalVariableValuations().put(key, (Integer) value);
         });
-    }
-
-    /**
-     * Returns if the current state is deterministic with respect to a specified action.
-     * The state is deterministic iff at most one transition with the specified action is available.
-     * @param sync synchronization property without ? or !
-     * @param status the status of the action
-     * @return true iff the state is deterministic
-     */
-    @Deprecated
-    public boolean isDeterministic(final String sync, final EdgeStatus status) {
-        return currentLocation.getType().equals(Location.Type.UNIVERSAL) ||
-                getAvailableEdgeStream(sync, status).count() > 1;
-
     }
 
     /**
@@ -171,17 +157,17 @@ public class SimpleComponentSimulation implements ComponentSimulation {
      * @throws MutationTestingException if simulation yields a non-deterministic choice or the Universal or
      * Inconsistent locations.
      */
-    public boolean runOutAction(final String sync) throws MutationTestingException {
+    public boolean runOutputAction(final String sync) throws MutationTestingException {
         final List<Edge> edges = getAvailableEdgeStream(sync, EdgeStatus.OUTPUT).collect(Collectors.toList());
 
-        if (edges.size() > 1) throw new MutationTestingException("Simulation of input " + sync +
+        if (edges.size() > 1) throw new MutationTestingException("Simulation of output " + sync +
                 " yields a non-deterministic choice between " + edges.size() + " edges");
 
         if (edges.size() < 1) return false;
 
         final Location newLoc = edges.get(0).getTargetLocation();
 
-        if (newLoc.isUniversalOrInconsistent()) throw new MutationTestingException("Simulation of input " + sync +
+        if (newLoc.isUniversalOrInconsistent()) throw new MutationTestingException("Simulation of output " + sync +
                 " yields the Universal or Inconsistent location. This should not happen");
 
         currentLocation = newLoc;

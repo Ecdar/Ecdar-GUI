@@ -164,10 +164,10 @@ public class TestDriver implements ConcurrentJobsHandler {
             //Do output if any output happened when sleeping
             if (inputStream.available() != 0) {
                 final String outputFromSut = readFromSut();
-                if (!testModelSimulation.runOutAction(outputFromSut)) {
+                if (!testModelSimulation.runOutputAction(outputFromSut)) {
                     failed.add(testCase.getId());
                     return Verdict.FAIL;
-                } else if (!mutantSimulation.runOutAction(outputFromSut)) {
+                } else if (!mutantSimulation.runOutputAction(outputFromSut)) {
                     passed.add(testCase.getId());
                     return Verdict.PASS;
                 }
