@@ -62,13 +62,13 @@ public class TestDriver implements ConcurrentJobsHandler {
     private void performTest(final MutationTestCase testCase) {
         new Thread(() -> {
             NonRefinementStrategy strategy = testCase.getStrategy();
-            ComponentSimulation testModelSimulation = new ComponentSimulation(testCase.getTestModel());
-            ComponentSimulation mutantSimulation = new ComponentSimulation(testCase.getMutant());
+            SimpleComponentSimulation testModelSimulation = new SimpleComponentSimulation(testCase.getTestModel());
+            SimpleComponentSimulation mutantSimulation = new SimpleComponentSimulation(testCase.getMutant());
             initializeAndRunProcess();
 
             for(int step = 0; step < bound; step++) {
                 // Get rule and check if its empty
-                StrategyRule rule = strategy.getRule(testModelSimulation.getCurrentLocation().getId(), mutantSimulation.getCurrentLocation().getId(), testModelSimulation.getValuations(), mutantSimulation.getValuations());
+                StrategyRule rule = strategy.getRule(testModelSimulation, mutantSimulation);
                 if (rule == null) {
                     inconclusive.add(testCase.getId());
                     onTestDone();
@@ -86,8 +86,8 @@ public class TestDriver implements ConcurrentJobsHandler {
                         }
                     } else {
                         try {
-                            testModelSimulation.runAction(((ActionRule) rule).getSync(), EdgeStatus.INPUT);
-                            mutantSimulation.runAction(((ActionRule) rule).getSync(), EdgeStatus.INPUT);
+                            testModelSimulation.runInputAction(((ActionRule) rule).getSync());
+                            mutantSimulation.runInputAction(((ActionRule) rule).getSync());
                         } catch (MutationTestingException e) {
                             e.printStackTrace();
                         }
@@ -143,7 +143,7 @@ public class TestDriver implements ConcurrentJobsHandler {
      * @param testCase that is being performed.
      * @return a verdict, it is NONE if no verdict were reached from this delay.
      */
-    private Verdict delay(final ComponentSimulation testModelSimulation, final ComponentSimulation mutantSimulation, final MutationTestCase testCase) {
+    private Verdict delay(final SimpleComponentSimulation testModelSimulation, final SimpleComponentSimulation mutantSimulation, final MutationTestCase testCase) {
         final Instant delayStart = Instant.now();
         try {
             //Check if any output is ready, if there is none, do delay
