@@ -1,12 +1,10 @@
 package ecdar.utility;
 
 import com.bpodgursky.jbool_expressions.*;
+import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -153,28 +151,52 @@ public class ExpressionHelper {
 
     /**
      * Parses an update property to a map of valuations.
-     * @param updateProperty the property
-     * @return the valuations as a map from variable names to values
+     * Examples of update properties:
+     * a=2
+     * a:=2
+     * a = 2
+     * a=2,b=3
+     * a=a+1
+     * @param updateProperty the update property to parse
+     * @param locals the local variables used to evaluate the right sides
+     * @return a map of valuations
      */
-    public static Map<String, Number> parseUpdateProperty(final String updateProperty) {
-        final String REGEX_UPDATE = "^(\\w+)\\s*:?=\\s*([\\S]+)$";
+    public static Map<String, Integer> parseUpdate(final String updateProperty, final Map<String, Integer> locals) {
+        final Map<String, String> sides = getUpdateSides(updateProperty);
 
-        final Map<String, Number> valuations = new HashMap<>();
+        final Map<String, Integer> valuations = new HashMap<>();
 
-        if (updateProperty.trim().isEmpty()) return valuations;
+        sides.forEach((left, right) -> {
+            final String[] expr = {right};
+
+            locals.forEach((key, value1) -> expr[0] = expr[0].replace(key, String.valueOf(value1)));
+
+            valuations.put(left, new SpelExpressionParser().parseExpression(expr[0]).getValue(Integer.TYPE));
+        });
+
+        return valuations;
+    }
+
+    /**
+     * Get the left and right sides of an update property
+     * @param updateProperty the property
+     * @return the sides
+     */
+    public static Map<String, String> getUpdateSides(final String updateProperty) {
+        final String REGEX_UPDATE = "^(\\w+)\\s*:?=\\s*(.+)$";
+
+        final Map<String, String> sides = new HashMap<>();
+
+        if (updateProperty.trim().isEmpty()) return sides;
 
         for (final String update : updateProperty.split(",")) {
             final Matcher matcher = Pattern.compile(REGEX_UPDATE).matcher(update.trim());
 
             if (!matcher.find()) throw new RuntimeException("Update " + update + " does not match " + REGEX_UPDATE);
 
-            final Number value;
-            if (matcher.group(2).contains(".")) value = Double.valueOf(matcher.group(2));
-            else value = Integer.valueOf(matcher.group(2));
-
-            valuations.put(matcher.group(1), value);
+            sides.put(matcher.group(1), matcher.group(2));
         }
 
-        return valuations;
+        return sides;
     }
 }

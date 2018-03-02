@@ -726,6 +726,10 @@ public class Component extends HighLevelModelObject implements Boxed {
         return box;
     }
 
+    /**
+     * Gets the clocks defined in the declarations text.
+     * @return the clocks
+     */
     public List<String> getClocks() {
         final List<String> clocks = new ArrayList<>();
 
@@ -734,6 +738,24 @@ public class Component extends HighLevelModelObject implements Boxed {
         if (!matcher.find()) return clocks;
 
         return Arrays.stream(matcher.group(1).split(",")).map(String::trim).collect(Collectors.toList());
+    }
+
+    /**
+     * Gets the local variables defined in the declarations text.
+     * @return the local variables
+     */
+    public List<String> getLocalVariables() {
+        final List<String> locals = new ArrayList<>();
+
+        Arrays.stream(getDeclarationsText().split(";")).forEach(statement -> {
+            final Matcher matcher = Pattern.compile("^\\s*(\\w+)\\s+(\\w+)(\\W|$)").matcher(statement);
+
+            if ((!matcher.find()) || matcher.group(1).equals("clock")) return;
+
+            locals.add(matcher.group(2));
+        });
+
+        return locals;
     }
 
     /**
