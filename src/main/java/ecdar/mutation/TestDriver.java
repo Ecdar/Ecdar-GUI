@@ -3,6 +3,8 @@ import ecdar.Ecdar;
 import ecdar.abstractions.EdgeStatus;
 import ecdar.mutation.models.*;
 import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
@@ -62,7 +64,8 @@ public class TestDriver implements ConcurrentJobsHandler {
     private void performTest(final MutationTestCase testCase) {
         new Thread(() -> {
             final Instant startTime = Instant.now();
-            Instant lastUpdateTime = startTime;
+            ObjectProperty<Instant> lastUpdateTime = new SimpleObjectProperty<>();
+            lastUpdateTime.setValue(startTime);
             NonRefinementStrategy strategy = testCase.getStrategy();
             SimpleComponentSimulation testModelSimulation = new SimpleComponentSimulation(testCase.getTestModel());
             SimpleComponentSimulation mutantSimulation = new SimpleComponentSimulation(testCase.getMutant());
@@ -145,14 +148,14 @@ public class TestDriver implements ConcurrentJobsHandler {
      * @param testCase that is being performed.
      * @return a verdict, it is NONE if no verdict were reached from this delay.
      */
-    private Verdict delay(final SimpleComponentSimulation testModelSimulation, final SimpleComponentSimulation mutantSimulation, final MutationTestCase testCase, Instant lastUpdateTime, Instant startTime){
+    private Verdict delay(final SimpleComponentSimulation testModelSimulation, final SimpleComponentSimulation mutantSimulation, final MutationTestCase testCase, ObjectProperty<Instant> lastUpdateTime, Instant startTime){
         try {
             //Check if any output is ready, if there is none, do delay
             if (inputStream.available() == 0) {
                 Thread.sleep(timeUnit);
                 //Do Delay
-                final long waitedTimeUnits = Duration.between(startTime.plusMillis(lastUpdateTime.toEpochMilli()), Instant.now()).toMillis()/timeUnit;
-                lastUpdateTime = Instant.now();
+                final long waitedTimeUnits = Duration.between(startTime.plusMillis(lastUpdateTime.get().toEpochMilli()), Instant.now()).toMillis()/timeUnit;
+                lastUpdateTime.setValue(Instant.now());
                 if (!testModelSimulation.delay(waitedTimeUnits)) {
                     failed.add(testCase.getId());
                     return Verdict.FAIL;
