@@ -61,6 +61,8 @@ public class TestDriver implements ConcurrentJobsHandler {
      */
     private void performTest(final MutationTestCase testCase) {
         new Thread(() -> {
+            final Instant startTime = Instant.now();
+            Instant lastUpdateTime = startTime;
             NonRefinementStrategy strategy = testCase.getStrategy();
             SimpleComponentSimulation testModelSimulation = new SimpleComponentSimulation(testCase.getTestModel());
             SimpleComponentSimulation mutantSimulation = new SimpleComponentSimulation(testCase.getMutant());
@@ -79,7 +81,7 @@ public class TestDriver implements ConcurrentJobsHandler {
                 //If it is an input perform it
                 if (rule instanceof ActionRule) {
                     if (((ActionRule) rule).getStatus() == EdgeStatus.OUTPUT) {
-                        Verdict verdict = delay(testModelSimulation, mutantSimulation, testCase);
+                        Verdict verdict = delayForOutput(testModelSimulation, mutantSimulation, testCase);
                         if(!verdict.equals(Verdict.NONE)) {
                             onTestDone();
                             return;
@@ -95,7 +97,7 @@ public class TestDriver implements ConcurrentJobsHandler {
                         writeToSut(sync);
                     }
                 } else if (rule instanceof DelayRule) {
-                    Verdict verdict = delay(testModelSimulation, mutantSimulation, testCase);
+                    Verdict verdict = delay(testModelSimulation, mutantSimulation, testCase, lastUpdateTime ,startTime);
                     if(!verdict.equals(Verdict.NONE)) {
                         onTestDone();
                         return;
@@ -143,19 +145,19 @@ public class TestDriver implements ConcurrentJobsHandler {
      * @param testCase that is being performed.
      * @return a verdict, it is NONE if no verdict were reached from this delay.
      */
-    private Verdict delay(final SimpleComponentSimulation testModelSimulation, final SimpleComponentSimulation mutantSimulation, final MutationTestCase testCase) {
-        final Instant delayStart = Instant.now();
+    private Verdict delay(final SimpleComponentSimulation testModelSimulation, final SimpleComponentSimulation mutantSimulation, final MutationTestCase testCase, Instant lastUpdateTime, Instant startTime){
         try {
             //Check if any output is ready, if there is none, do delay
             if (inputStream.available() == 0) {
                 Thread.sleep(timeUnit);
                 //Do Delay
-                final long seconds = Duration.between(delayStart, Instant.now()).getSeconds();
-                if (!testModelSimulation.delay(seconds)) {
+                final long waitedTimeUnits = Duration.between(startTime.plusMillis(lastUpdateTime.toEpochMilli()), Instant.now()).toMillis()/timeUnit;
+                lastUpdateTime = Instant.now();
+                if (!testModelSimulation.delay(waitedTimeUnits)) {
                     failed.add(testCase.getId());
                     return Verdict.FAIL;
                 } else {
-                    if (!mutantSimulation.delay(Duration.between(delayStart, Instant.now()).getSeconds())) {
+                    if (!mutantSimulation.delay(waitedTimeUnits)) {
                         //Todo Handle exception
                     }
                 }
@@ -174,12 +176,62 @@ public class TestDriver implements ConcurrentJobsHandler {
             }
 
             return Verdict.NONE;
-            } catch(InterruptedException | MutationTestingException | IOException e) {
+        } catch(InterruptedException | MutationTestingException | IOException e){
+            e.printStackTrace();
+            inconclusive.add(testCase.getId());
+            //Todo stop testing and print error
+            return Verdict.INCONCLUSIVE;
+        }
+    }
+
+    /**
+     * performs a delay on the simulations and itself and checks if the system under test made an output during the delay.
+     * @param testModelSimulation simulation representing the test model.
+     * @param mutantSimulation simulation representing the mutated model.
+     * @param testCase that is being performed.
+     * @return a verdict, it is NONE if no verdict were reached from this delay.
+     */
+    private Verdict delayForOutput(final SimpleComponentSimulation testModelSimulation, final SimpleComponentSimulation mutantSimulation, final MutationTestCase testCase){
+        //Do delay until getOutputWaitTime time units has passed
+        for(int i = 0; i < getPlan().getOutputWaitTime(); i++) {
+            final Instant delayStart = Instant.now();
+            try {
+                //Check if any output is ready, if there is none, do delay
+                if (inputStream.available() == 0) {
+                    Thread.sleep(timeUnit);
+                    //Do Delay
+                    final long seconds = Duration.between(delayStart, Instant.now()).getSeconds();
+                    if (!testModelSimulation.delay(seconds)) {
+                        failed.add(testCase.getId());
+                        return Verdict.FAIL;
+                    } else {
+                        if (!mutantSimulation.delay(Duration.between(delayStart, Instant.now()).getSeconds())) {
+                            //Todo Handle exception
+                        }
+                    }
+                }
+
+                //Do output if any output happened when sleeping
+                if (inputStream.available() != 0) {
+                    final String outputFromSut = readFromSut();
+                    if (!testModelSimulation.runOutputAction(outputFromSut)) {
+                        failed.add(testCase.getId());
+                        return Verdict.FAIL;
+                    } else if (!mutantSimulation.runOutputAction(outputFromSut)) {
+                        passed.add(testCase.getId());
+                        return Verdict.PASS;
+                    }
+                    return Verdict.NONE;
+                }
+            } catch (InterruptedException | MutationTestingException | IOException e) {
                 e.printStackTrace();
                 inconclusive.add(testCase.getId());
                 //Todo stop testing and print error
                 return Verdict.INCONCLUSIVE;
             }
+        }
+        inconclusive.add(testCase.getId());
+        return Verdict.INCONCLUSIVE;
     }
 
     /**

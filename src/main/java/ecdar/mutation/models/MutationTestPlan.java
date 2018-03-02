@@ -33,7 +33,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     private static final String ANGELIC_EXPORT = "useAngelic";
     private static final String MAX_GENERATION_THREADS = "maxGenerationThreads";
     private static final String MAX_SUT_INSTANCES = "maxSutInstances";
-    private static final String MAX_OUTPUT_WAITTIME = "maxOutputWaitTime";
+    private static final String MAX_OUTPUT_WAIT_TIME = "maxOutputWaitTime";
 
     // General fields
     private final StringProperty testModelId = new SimpleStringProperty("");
@@ -202,7 +202,7 @@ public class MutationTestPlan extends HighLevelModelObject {
         return concurrentSutInstances.get();
     }
 
-    public int getOutputWaittime() {
+    public int getOutputWaitTime() {
         return maxOutputWaitTime.get();
     }
 
@@ -218,7 +218,7 @@ public class MutationTestPlan extends HighLevelModelObject {
         this.concurrentSutInstances.set(concurrentSutInstances);
     }
 
-    public void setOutputWaittime(final int outputWaitTime){
+    public void setOutputWaitTime(final int outputWaitTime){
         this.maxOutputWaitTime.set(outputWaitTime);
     }
 
@@ -276,7 +276,7 @@ public class MutationTestPlan extends HighLevelModelObject {
 
         result.addProperty(MAX_GENERATION_THREADS, getConcurrentGenerationThreads());
         result.addProperty(MAX_SUT_INSTANCES, getConcurrentSutInstances());
-        result.addProperty(MAX_OUTPUT_WAITTIME, getOutputWaittime());
+        result.addProperty(MAX_OUTPUT_WAIT_TIME, getOutputWaitTime());
 
         return result;
     }
@@ -304,8 +304,8 @@ public class MutationTestPlan extends HighLevelModelObject {
         primitive = json.getAsJsonPrimitive(MAX_SUT_INSTANCES);
         if (primitive != null) setConcurrentSutInstances(primitive.getAsInt());
 
-        primitive = json.getAsJsonPrimitive(MAX_OUTPUT_WAITTIME);
-        if (primitive != null) setOutputWaittime(primitive.getAsInt());
+        primitive = json.getAsJsonPrimitive(MAX_OUTPUT_WAIT_TIME);
+        if (primitive != null) setOutputWaitTime(primitive.getAsInt());
     }
 
 
