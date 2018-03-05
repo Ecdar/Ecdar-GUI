@@ -1,6 +1,7 @@
 package ecdar.mutation.models;
 
 import ecdar.abstractions.EdgeStatus;
+import ecdar.backend.EcdarDocument;
 import ecdar.mutation.MutationTestingException;
 
 import java.util.regex.Matcher;
@@ -23,6 +24,11 @@ public class ActionRule extends StrategyRule {
         final Matcher matcher = Pattern.compile(REGEX_TRANSITION).matcher(transition);
 
         if (!matcher.find()) throw new MutationTestingException("Strategy transition " + transition + " does not match " + REGEX_TRANSITION);
+
+        if (matcher.group(1).equals(EcdarDocument.ENGINE_UNI_ID))
+            throw new MutationTestingException("Strategy leads to the Universal location");
+        if (matcher.group(1).equals(EcdarDocument.ENGINE_INC_ID))
+            throw new MutationTestingException("Strategy leads to the Inconsistent location");
 
         endLocationName = matcher.group(1);
         sync = matcher.group(2);

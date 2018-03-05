@@ -45,7 +45,7 @@
                             <Label text="concurrent instance(s) of the system under test."/>
                         </HBox>
 
-                        <HBox spacing="8" alignment="BOTTOM_LEFT">
+                        <HBox spacing="8" alignment="BOTTOM_LEFT" fx:id="outputWaitTimeBox">
                             <JFXTextField fx:id="outputWaitTimeField" prefWidth="30" alignment="BASELINE_CENTER"/>
                             <Label text="time unit(s) to wait for the SUT to output before giving an inconclusive verdict."/>
                         </HBox>

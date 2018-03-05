@@ -6,8 +6,15 @@
   "exportFormat": "",
   "useDemonic": true,
   "useAngelic": false,
-  "mutantsText": "Mutants: 750 - Execution time: 0.133s",
-  "testCasesText": "Test-cases: 0 - Generation time: 13.497s",
+  "changeActionInputs": true,
+  "changeActionOutputs": true,
   "changeSource": true,
-  "changeTarget": true
+  "changeTarget": true,
+  "changeGuard": true,
+  "changeInvariant": true,
+  "sinkLocation": true,
+  "invertReset": true,
+  "maxGenerationThreads": 10,
+  "maxSutInstances": 1,
+  "maxOutputWaitTime": 1
 }

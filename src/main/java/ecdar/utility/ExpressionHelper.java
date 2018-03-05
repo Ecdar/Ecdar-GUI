@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
  */
 public class ExpressionHelper {
     private static final String REGEX_SIMPLE_NEGATEABLE_GUARD = "^([^<>=!]+)(<|<=|>|>=|!=)([^<>=!]+)$";
-    public static final String REGEX_UPDATE = "^(\\w+)\\s*:?=\\s*([\\S]+)$";
 
     /**
      * Searches recursively through the expression.
@@ -134,8 +133,8 @@ public class ExpressionHelper {
      * @param valuations valuations of variables. These must include (but not necessarily limited to) all variables used in the condition
      * @return true iff the condition is satisfied
      */
-    public static boolean evaluateBooleanExpression(String expression, final Map<String, Double> valuations) {
-        for (final Map.Entry<String, Double> entry : valuations.entrySet()) {
+    public static boolean evaluateBooleanExpression(String expression, final Map<String, Number> valuations) {
+        for (final Map.Entry<String, Number> entry : valuations.entrySet()) {
             expression = expression.replace(entry.getKey(), String.valueOf(entry.getValue()));
         }
 
@@ -143,12 +142,24 @@ public class ExpressionHelper {
     }
 
     /**
+     * Gets if an expression is satisfied given some valuations.
+     * @param expression expression to evaluate
+     * @param valuations valuations of variables. These must include (but not necessarily limited to) all variables used in the condition
+     * @return true iff the condition is satisfied
+     */
+    public static boolean evaluateBooleanExpressionFromDoubles(final String expression, final Map<String, Double> valuations) {
+        return evaluateBooleanExpression(expression, new HashMap<>(valuations));
+    }
+
+    /**
      * Parses an update property to a map of valuations.
      * @param updateProperty the property
      * @return the valuations as a map from variable names to values
      */
-    public static Map<String, Double> parseUpdateProperty(final String updateProperty) {
-        final Map<String, Double> valuations = new HashMap<>();
+    public static Map<String, Number> parseUpdateProperty(final String updateProperty) {
+        final String REGEX_UPDATE = "^(\\w+)\\s*:?=\\s*([\\S]+)$";
+
+        final Map<String, Number> valuations = new HashMap<>();
 
         if (updateProperty.trim().isEmpty()) return valuations;
 
@@ -157,7 +168,11 @@ public class ExpressionHelper {
 
             if (!matcher.find()) throw new RuntimeException("Update " + update + " does not match " + REGEX_UPDATE);
 
-            valuations.put(matcher.group(1), Double.valueOf(matcher.group(2)));
+            final Number value;
+            if (matcher.group(2).contains(".")) value = Double.valueOf(matcher.group(2));
+            else value = Integer.valueOf(matcher.group(2));
+
+            valuations.put(matcher.group(1), value);
         }
 
         return valuations;

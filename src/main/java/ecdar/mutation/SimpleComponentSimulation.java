@@ -4,6 +4,7 @@ import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
 import ecdar.abstractions.EdgeStatus;
 import ecdar.abstractions.Location;
+import ecdar.mutation.models.ComponentSimulation;
 import ecdar.utility.ExpressionHelper;
 
 import java.util.ArrayList;
@@ -18,31 +19,65 @@ import java.util.stream.Stream;
  * It simulates the current location and clock valuations.
  * It does not simulate local variables.
  */
-public class ComponentSimulation {
+public class SimpleComponentSimulation implements ComponentSimulation {
     private final Component component;
 
     private Location currentLocation;
-    private final Map<String, Double> valuations = new HashMap<>();
+    private final Map<String, Double> clockValuations = new HashMap<>();
+    private final Map<String, Integer> localValuations = new HashMap<>();
     private final List<String> clocks = new ArrayList<>();
 
-    public ComponentSimulation(final Component component) {
+    public SimpleComponentSimulation(final Component component) {
         this.component = component;
         currentLocation = component.getInitialLocation();
 
         component.getClocks().forEach(clock -> {
             clocks.add(clock);
-            valuations.put(clock, 0.0);
+            clockValuations.put(clock, 0.0);
         });
     }
 
 
     /* Getters and setters */
 
+    @Override
+    public String getName() {
+        return getComponent().getName();
+    }
+
+    @Override
+    public String getCurrentLocId() {
+        return getCurrentLocation().getId();
+    }
+
+    @Override
+    public Map<String, Integer> getLocalVariableValuations() {
+        return localValuations;
+    }
+
+    @Override
+    public Map<String, Double> getClockValuations() {
+        return clockValuations;
+    }
+
     public Location getCurrentLocation() {
         return currentLocation;
     }
 
-    public Map<String, Double> getValuations() {
+    public Component getComponent() {
+        return component;
+    }
+
+    /**
+     * Gets clock and local variable valuations.
+     * @return the valuations
+     */
+    public Map<String, Number> getAllValuations() {
+        final Map<String, Number> valuations = new HashMap<>();
+
+        valuations.putAll(getClockValuations());
+        valuations.putAll(getLocalVariableValuations());
+
         return valuations;
     }
 
@@ -56,11 +91,11 @@ public class ComponentSimulation {
      * @return true iff the delay was run successfully
      */
     public boolean delay(final double time) {
-        clocks.forEach(c -> valuations.put(c, valuations.get(c) + time));
+        clocks.forEach(c -> clockValuations.put(c, clockValuations.get(c) + time));
 
         final String invariant = getCurrentLocation().getInvariant();
 
-        return invariant.isEmpty() || ExpressionHelper.evaluateBooleanExpression(invariant, valuations);
+        return invariant.isEmpty() || ExpressionHelper.evaluateBooleanExpression(invariant, getAllValuations());
     }
 
     /**
@@ -68,21 +103,10 @@ public class ComponentSimulation {
      * @param property the update property
      */
     private void runUpdateProperty(final String property) {
-        ExpressionHelper.parseUpdateProperty(property).forEach(valuations::put);
-    }
-
-    /**
-     * Returns if the current state is deterministic with respect to a specified action.
-     * The state is deterministic iff at most one transition with the specified action is available.
-     * @param sync synchronization property without ? or !
-     * @param status the status of the action
-     * @return true iff the state is deterministic
-     */
-    @Deprecated
-    public boolean isDeterministic(final String sync, final EdgeStatus status) {
-        return currentLocation.getType().equals(Location.Type.UNIVERSAL) ||
-                getAvailableEdgeStream(sync, status).count() > 1;
-
+        ExpressionHelper.parseUpdateProperty(property).forEach((key, value) -> {
+            if (clocks.contains(key)) getClockValuations().put(key, 0d); // Reset clock
+            else getLocalVariableValuations().put(key, (Integer) value);
+        });
     }
 
     /**
@@ -96,36 +120,9 @@ public class ComponentSimulation {
                 .filter(e -> e.getStatus() == status)
                 .filter(e -> e.getSync().equals(sync))
                 .filter(e -> e.getGuard().trim().isEmpty() ||
-                        ExpressionHelper.evaluateBooleanExpression(e.getGuard(), getValuations()))
+                        ExpressionHelper.evaluateBooleanExpression(e.getGuard(), getAllValuations()))
                 .filter(e -> e.getTargetLocation().getInvariant().isEmpty() ||
-                ExpressionHelper.evaluateBooleanExpression(e.getTargetLocation().getInvariant(), getValuations()));
-    }
-
-    /**
-     * If a valid action is available, runs a transition of that action.
-     * The edge must be outgoing from the current location,
-     * must be an edge with the given synchronization property,
-     * and its guard must be satisfied.
-     * @param sync synchronization property without ? or !
-     * @param status the status of the action that you look for
-     * @return true iff the action succeeded
-     * @throws MutationTestingException if multiple transitions with the specified output are available
-     */
-    @Deprecated
-    public boolean runAction(final String sync, final EdgeStatus status) throws MutationTestingException {
-        if (currentLocation.getType().equals(Location.Type.UNIVERSAL)) return true;
-
-        final List<Edge> edges = getAvailableEdgeStream(sync, status).collect(Collectors.toList());
-
-        if (edges.size() > 1) throw new MutationTestingException("Simulation of " +
-                (status.equals(EdgeStatus.INPUT) ? "input" : "output") +
-                " " + sync + " yields a non-deterministic choice between " + edges.size() + " edges");
-
-        if (edges.size() < 1) return false;
-
-        currentLocation = edges.get(0).getTargetLocation();
-        runUpdateProperty(edges.get(0).getUpdate());
-        return true;
+                ExpressionHelper.evaluateBooleanExpression(e.getTargetLocation().getInvariant(), getAllValuations()));
     }
 
     /**
@@ -160,17 +157,17 @@ public class ComponentSimulation {
      * @throws MutationTestingException if simulation yields a non-deterministic choice or the Universal or
      * Inconsistent locations.
      */
-    public boolean runOutAction(final String sync) throws MutationTestingException {
+    public boolean runOutputAction(final String sync) throws MutationTestingException {
         final List<Edge> edges = getAvailableEdgeStream(sync, EdgeStatus.OUTPUT).collect(Collectors.toList());
 
-        if (edges.size() > 1) throw new MutationTestingException("Simulation of input " + sync +
+        if (edges.size() > 1) throw new MutationTestingException("Simulation of output " + sync +
                 " yields a non-deterministic choice between " + edges.size() + " edges");
 
         if (edges.size() < 1) return false;
 
         final Location newLoc = edges.get(0).getTargetLocation();
 
-        if (newLoc.isUniversalOrInconsistent()) throw new MutationTestingException("Simulation of input " + sync +
+        if (newLoc.isUniversalOrInconsistent()) throw new MutationTestingException("Simulation of output " + sync +
                 " yields the Universal or Inconsistent location. This should not happen");
 
         currentLocation = newLoc;

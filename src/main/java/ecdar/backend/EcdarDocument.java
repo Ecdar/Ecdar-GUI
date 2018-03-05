@@ -13,7 +13,7 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 
-class EcdarDocument {
+public class EcdarDocument {
     private static final String DECLARATION_PROPERTY_TAG = "declaration"; // Global and local declarations
     private static final String NAME_PROPERTY_TAG = "name";
     private static final String INVARIANT_PROPERTY_TAG = "invariant";
@@ -21,6 +21,9 @@ class EcdarDocument {
     private static final String SYNC_PROPERTY_TAG = "synchronisation";
     private static final String UPDATE_PROPERTY_TAG = "assignment";
     private static final String SYSTEM_DCL_TAG = "system";
+
+    public static final String ENGINE_UNI_ID = "Universal"; // The engine uses this id for the Universal location
+    public static final String ENGINE_INC_ID = "Inconsistent"; // The engine uses this id for the Inconsistent location
 
     private final Document xmlDocument = new Document(new PrototypeDocument());
 
@@ -121,7 +124,7 @@ class EcdarDocument {
      */
     private void addInconsistentLocation(Component component, Template template) {
 
-        inconsistentLocation = new Location("Inconsistent");
+        inconsistentLocation = new Location(ENGINE_INC_ID);
         inconsistentLocation.setUrgency(Location.Urgency.URGENT);
         final com.uppaal.model.core2.Location xmlInconsistentLocation = addLocation(template, inconsistentLocation);
         addLocationsToMaps(inconsistentLocation, xmlInconsistentLocation);
@@ -134,7 +137,7 @@ class EcdarDocument {
      * @throws BackendException throws a backend exception if addEdge fails
      */
     private void addUniversalLocation(Component component, Template template) throws BackendException {
-        universalLocation = new Location("Universal");
+        universalLocation = new Location(ENGINE_UNI_ID);
         final com.uppaal.model.core2.Location xmlUniversalLocation = addLocation(template, universalLocation);
         addLocationsToMaps(universalLocation, xmlUniversalLocation);
         for (String input : component.getInputStrings()) {

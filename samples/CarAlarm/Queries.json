@@ -15,17 +15,17 @@
     "isPeriodic": false
   },
   {
-    "query": "E\u003c\u003e Alarm.L13",
+    "query": "E\u003c\u003e Alarm.L12",
     "comment": "",
     "isPeriodic": false
   },
   {
-    "query": "E\u003c\u003e Alarm.L10",
+    "query": "E\u003c\u003e Alarm.L9",
     "comment": "",
     "isPeriodic": false
   },
   {
-    "query": "specification: (Alarm : A[] not Alarm.L7 || Alarm.e\u003c\u003d30)",
+    "query": "specification: (Alarm : A[] not Alarm.L7 || Alarm.x\u003c\u003d30)",
     "comment": "",
     "isPeriodic": false
   }

@@ -1,7 +1,6 @@
 package ecdar.mutation.models;
 
 import ecdar.utility.ExpressionHelper;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import java.util.Map;
 
@@ -30,6 +29,6 @@ public abstract class StrategyRule {
      * @return true iff the condition is satisfied
      */
     public boolean isSatisfied(final Map<String, Double> values) {
-        return ExpressionHelper.evaluateBooleanExpression(condition, values);
+        return ExpressionHelper.evaluateBooleanExpressionFromDoubles(condition, values);
     }
 }

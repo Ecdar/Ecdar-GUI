@@ -1,6 +1,6 @@
 {
   "name": "Alarm",
-  "declarations": "clock c, d, e, f, g;",
+  "declarations": "clock x;\n\nbool sound;",
   "locations": [
     {
       "id": "L1",
@@ -33,7 +33,7 @@
     {
       "id": "L3",
       "nickname": "",
-      "invariant": "c\u003c\u003d20",
+      "invariant": "x\u003c\u003d21",
       "type": "NORMAL",
       "urgency": "NORMAL",
       "x": 340.0,
@@ -41,13 +41,13 @@
       "color": "5",
       "nicknameX": 30.0,
       "nicknameY": -10.0,
-      "invariantX": -60.0,
+      "invariantX": 20.0,
       "invariantY": -30.0
     },
     {
       "id": "L4",
       "nickname": "",
-      "invariant": "e\u003c\u003d0",
+      "invariant": "x\u003c\u003d1",
       "type": "NORMAL",
       "urgency": "NORMAL",
       "x": 340.0,
@@ -61,7 +61,7 @@
     {
       "id": "L5",
       "nickname": "",
-      "invariant": "e\u003c\u003d0",
+      "invariant": "x\u003c\u003d1",
       "type": "NORMAL",
       "urgency": "NORMAL",
       "x": 340.0,
@@ -75,7 +75,7 @@
     {
       "id": "L6",
       "nickname": "",
-      "invariant": "e\u003c\u003d0",
+      "invariant": "x\u003c\u003d1",
       "type": "NORMAL",
       "urgency": "NORMAL",
       "x": 340.0,
@@ -89,7 +89,7 @@
     {
       "id": "L7",
       "nickname": "",
-      "invariant": "e\u003c\u003d30",
+      "invariant": "x\u003c\u003d31",
       "type": "NORMAL",
       "urgency": "NORMAL",
       "x": 340.0,
@@ -103,10 +103,10 @@
     {
       "id": "L8",
       "nickname": "",
-      "invariant": "e\u003c\u003d300",
+      "invariant": "x\u003c\u003d301",
       "type": "NORMAL",
       "urgency": "NORMAL",
-      "x": 510.0,
+      "x": 530.0,
       "y": 60.0,
       "color": "5",
       "nicknameX": 30.0,
@@ -145,7 +145,7 @@
     {
       "id": "L10",
       "nickname": "",
-      "invariant": "f\u003c\u003d0",
+      "invariant": "x\u003c\u003d1",
       "type": "NORMAL",
       "urgency": "NORMAL",
       "x": 450.0,
@@ -159,7 +159,7 @@
     {
       "id": "L11",
       "nickname": "",
-      "invariant": "d\u003c\u003d0",
+      "invariant": "x\u003c\u003d1",
       "type": "NORMAL",
       "urgency": "NORMAL",
       "x": 170.0,
@@ -173,30 +173,16 @@
     {
       "id": "L12",
       "nickname": "",
-      "invariant": "g\u003c\u003d0",
+      "invariant": "x\u003c\u003d1",
       "type": "NORMAL",
       "urgency": "NORMAL",
-      "x": 150.0,
-      "y": 60.0,
+      "x": 120.0,
+      "y": 110.0,
       "color": "5",
       "nicknameX": 30.0,
       "nicknameY": -10.0,
-      "invariantX": -60.0,
-      "invariantY": -10.0
-    },
-    {
-      "id": "L13",
-      "nickname": "",
-      "invariant": "g\u003c\u003d0",
-      "type": "NORMAL",
-      "urgency": "NORMAL",
-      "x": 100.0,
-      "y": 470.0,
-      "color": "5",
-      "nicknameX": 30.0,
-      "nicknameY": -10.0,
-      "invariantX": 20.0,
-      "invariantY": -10.0
+      "invariantX": 10.0,
+      "invariantY": 20.0
     },
     {
       "id": "L14",
@@ -211,20 +197,6 @@
       "nicknameY": -10.0,
       "invariantX": 30.0,
       "invariantY": 10.0
-    },
-    {
-      "id": "L15",
-      "nickname": "",
-      "invariant": "e\u003c\u003d300",
-      "type": "NORMAL",
-      "urgency": "NORMAL",
-      "x": 580.0,
-      "y": 250.0,
-      "color": "5",
-      "nicknameX": 30.0,
-      "nicknameY": -10.0,
-      "invariantX": 20.0,
-      "invariantY": -10.0
     }
   ],
   "edges": [
@@ -234,7 +206,7 @@
       "status": "INPUT",
       "select": "",
       "guard": "",
-      "update": "c\u003d0",
+      "update": "x\u003d0",
       "sync": "close",
       "isLocked": false,
       "nails": [
@@ -260,7 +232,7 @@
       "status": "INPUT",
       "select": "",
       "guard": "",
-      "update": "c\u003d0",
+      "update": "x\u003d0",
       "sync": "lock",
       "isLocked": false,
       "nails": [
@@ -285,7 +257,7 @@
       "targetLocation": "L1",
       "status": "INPUT",
       "select": "",
-      "guard": "c\u003c20",
+      "guard": "x\u003c\u003d19",
       "update": "",
       "sync": "unlock",
       "isLocked": false,
@@ -311,7 +283,7 @@
       "targetLocation": "L2",
       "status": "INPUT",
       "select": "",
-      "guard": "c\u003c20",
+      "guard": "x\u003c\u003d19",
       "update": "",
       "sync": "open",
       "isLocked": false,
@@ -343,7 +315,7 @@
       "isLocked": false,
       "nails": [
         {
-          "x": 340.0,
+          "x": 400.0,
           "y": 290.0,
           "propertyType": "SYNCHRONIZATION",
           "propertyX": 10.0,
@@ -362,7 +334,7 @@
       "isLocked": false,
       "nails": [
         {
-          "x": 340.0,
+          "x": 380.0,
           "y": 220.0,
           "propertyType": "SYNCHRONIZATION",
           "propertyX": 10.0,
@@ -376,15 +348,22 @@
       "status": "OUTPUT",
       "select": "",
       "guard": "",
-      "update": "",
+      "update": "sound\u003d1",
       "sync": "soundOn",
       "isLocked": false,
       "nails": [
         {
-          "x": 340.0,
+          "x": 380.0,
           "y": 150.0,
           "propertyType": "SYNCHRONIZATION",
           "propertyX": 10.0,
+          "propertyY": -10.0
+        },
+        {
+          "x": 300.0,
+          "y": 150.0,
+          "propertyType": "UPDATE",
+          "propertyX": -70.0,
           "propertyY": -10.0
         }
       ]
@@ -394,13 +373,13 @@
       "targetLocation": "L8",
       "status": "OUTPUT",
       "select": "",
-      "guard": "e\u003d\u003d30",
-      "update": "",
+      "guard": "x\u003e29",
+      "update": "sound\u003d0",
       "sync": "soundOff",
       "isLocked": false,
       "nails": [
         {
-          "x": 400.0,
+          "x": 390.0,
           "y": 110.0,
           "propertyType": "GUARD",
           "propertyX": -20.0,
@@ -410,8 +389,15 @@
           "x": 450.0,
           "y": 110.0,
           "propertyType": "SYNCHRONIZATION",
-          "propertyX": 10.0,
-          "propertyY": -10.0
+          "propertyX": -30.0,
+          "propertyY": -30.0
+        },
+        {
+          "x": 490.0,
+          "y": 110.0,
+          "propertyType": "UPDATE",
+          "propertyX": -30.0,
+          "propertyY": 10.0
         }
       ]
     },
@@ -523,7 +509,7 @@
       "status": "INPUT",
       "select": "",
       "guard": "",
-      "update": "f\u003d0",
+      "update": "x\u003d0",
       "sync": "close",
       "isLocked": false,
       "nails": [
@@ -567,8 +553,8 @@
       "targetLocation": "L12",
       "status": "INPUT",
       "select": "",
-      "guard": "e\u003c30",
-      "update": "g\u003d0",
+      "guard": "x\u003c\u003d29",
+      "update": "x\u003d0",
       "sync": "unlock",
       "isLocked": false,
       "nails": [
@@ -600,8 +586,8 @@
       "targetLocation": "L12",
       "status": "INPUT",
       "select": "",
-      "guard": "e\u003c300",
-      "update": "g\u003d0",
+      "guard": "x\u003c\u003d299",
+      "update": "x\u003d0",
       "sync": "unlock",
       "isLocked": false,
       "nails": [
@@ -620,7 +606,7 @@
           "propertyY": -30.0
         },
         {
-          "x": 250.0,
+          "x": 200.0,
           "y": 60.0,
           "propertyType": "UPDATE",
           "propertyX": -20.0,
@@ -629,69 +615,24 @@
       ]
     },
     {
-      "sourceLocation": "L12",
-      "targetLocation": "L13",
-      "status": "OUTPUT",
-      "select": "",
-      "guard": "",
-      "update": "",
-      "sync": "soundOff",
-      "isLocked": false,
-      "nails": [
-        {
-          "x": 100.0,
-          "y": 110.0,
-          "propertyType": "SYNCHRONIZATION",
-          "propertyX": -30.0,
-          "propertyY": 10.0
-        }
-      ]
-    },
-    {
-      "sourceLocation": "L13",
-      "targetLocation": "L0",
-      "status": "OUTPUT",
-      "select": "",
-      "guard": "",
-      "update": "",
-      "sync": "flashOff",
-      "isLocked": false,
-      "nails": [
-        {
-          "x": 100.0,
-          "y": 760.0,
-          "propertyType": "SYNCHRONIZATION",
-          "propertyX": -30.0,
-          "propertyY": -30.0
-        },
-        {
-          "x": 300.0,
-          "y": 760.0,
-          "propertyType": "NONE",
-          "propertyX": 0.0,
-          "propertyY": 0.0
-        }
-      ]
-    },
-    {
       "sourceLocation": "L3",
       "targetLocation": "L14",
       "status": "OUTPUT",
       "select": "",
-      "guard": "c\u003d\u003d20",
+      "guard": "x\u003e19",
       "update": "",
       "sync": "armedOn",
       "isLocked": false,
       "nails": [
         {
-          "x": 340.0,
+          "x": 330.0,
           "y": 470.0,
           "propertyType": "GUARD",
-          "propertyX": 10.0,
+          "propertyX": -50.0,
           "propertyY": -10.0
         },
         {
-          "x": 340.0,
+          "x": 360.0,
           "y": 450.0,
           "propertyType": "SYNCHRONIZATION",
           "propertyX": 10.0,
@@ -705,22 +646,22 @@
       "status": "INPUT",
       "select": "",
       "guard": "",
-      "update": "e\u003d0",
+      "update": "x\u003d0",
       "sync": "open",
       "isLocked": false,
       "nails": [
         {
-          "x": 340.0,
-          "y": 380.0,
+          "x": 370.0,
+          "y": 360.0,
           "propertyType": "SYNCHRONIZATION",
           "propertyX": 10.0,
           "propertyY": -10.0
         },
         {
-          "x": 340.0,
-          "y": 360.0,
+          "x": 300.0,
+          "y": 350.0,
           "propertyType": "UPDATE",
-          "propertyX": 10.0,
+          "propertyX": -50.0,
           "propertyY": -10.0
         }
       ]
@@ -745,57 +686,12 @@
       ]
     },
     {
-      "sourceLocation": "L8",
-      "targetLocation": "L15",
-      "status": "OUTPUT",
-      "select": "",
-      "guard": "e\u003d\u003d300",
-      "update": "",
-      "sync": "soundOff",
-      "isLocked": false,
-      "nails": [
-        {
-          "x": 580.0,
-          "y": 130.0,
-          "propertyType": "GUARD",
-          "propertyX": 10.0,
-          "propertyY": -10.0
-        },
-        {
-          "x": 580.0,
-          "y": 170.0,
-          "propertyType": "SYNCHRONIZATION",
-          "propertyX": 10.0,
-          "propertyY": -10.0
-        }
-      ]
-    },
-    {
-      "sourceLocation": "L15",
-      "targetLocation": "L9",
-      "status": "OUTPUT",
-      "select": "",
-      "guard": "",
-      "update": "",
-      "sync": "flashOff",
-      "isLocked": false,
-      "nails": [
-        {
-          "x": 580.0,
-          "y": 320.0,
-          "propertyType": "SYNCHRONIZATION",
-          "propertyX": 10.0,
-          "propertyY": -10.0
-        }
-      ]
-    },
-    {
       "sourceLocation": "L14",
       "targetLocation": "L11",
       "status": "INPUT",
       "select": "",
       "guard": "",
-      "update": "d\u003d0",
+      "update": "x\u003d0",
       "sync": "unlock",
       "isLocked": false,
       "nails": [
@@ -811,7 +707,99 @@
           "y": 410.0,
           "propertyType": "UPDATE",
           "propertyX": -20.0,
+          "propertyY": -40.0
+        }
+      ]
+    },
+    {
+      "sourceLocation": "L8",
+      "targetLocation": "L9",
+      "status": "OUTPUT",
+      "select": "",
+      "guard": "x\u003e299",
+      "update": "",
+      "sync": "flashOff",
+      "isLocked": false,
+      "nails": [
+        {
+          "x": 580.0,
+          "y": 110.0,
+          "propertyType": "GUARD",
+          "propertyX": 10.0,
+          "propertyY": -10.0
+        },
+        {
+          "x": 580.0,
+          "y": 250.0,
+          "propertyType": "SYNCHRONIZATION",
+          "propertyX": 10.0,
+          "propertyY": -10.0
+        }
+      ]
+    },
+    {
+      "sourceLocation": "L12",
+      "targetLocation": "L12",
+      "status": "OUTPUT",
+      "select": "",
+      "guard": "sound\u003d\u003d1",
+      "update": "sound\u003d0",
+      "sync": "soundOff",
+      "isLocked": false,
+      "nails": [
+        {
+          "x": 120.0,
+          "y": 60.0,
+          "propertyType": "GUARD",
+          "propertyX": -30.0,
           "propertyY": -30.0
+        },
+        {
+          "x": 50.0,
+          "y": 60.0,
+          "propertyType": "SYNCHRONIZATION",
+          "propertyX": -30.0,
+          "propertyY": -30.0
+        },
+        {
+          "x": 50.0,
+          "y": 110.0,
+          "propertyType": "UPDATE",
+          "propertyX": -30.0,
+          "propertyY": 10.0
+        }
+      ]
+    },
+    {
+      "sourceLocation": "L12",
+      "targetLocation": "L0",
+      "status": "OUTPUT",
+      "select": "",
+      "guard": "sound\u003d\u003d0",
+      "update": "",
+      "sync": "flashOff",
+      "isLocked": false,
+      "nails": [
+        {
+          "x": 120.0,
+          "y": 250.0,
+          "propertyType": "GUARD",
+          "propertyX": -30.0,
+          "propertyY": -30.0
+        },
+        {
+          "x": 120.0,
+          "y": 760.0,
+          "propertyType": "SYNCHRONIZATION",
+          "propertyX": -30.0,
+          "propertyY": -30.0
+        },
+        {
+          "x": 300.0,
+          "y": 760.0,
+          "propertyType": "NONE",
+          "propertyX": 0.0,
+          "propertyY": 0.0
         }
       ]
     }
