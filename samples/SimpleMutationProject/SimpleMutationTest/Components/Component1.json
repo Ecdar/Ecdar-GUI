@@ -33,7 +33,7 @@
     {
       "id": "L2",
       "nickname": "",
-      "invariant": "x\u003c\u003d5",
+      "invariant": "x\u003c\u003d6",
       "type": "NORMAL",
       "urgency": "NORMAL",
       "x": 370.0,
@@ -42,7 +42,7 @@
       "nicknameX": 30.0,
       "nicknameY": -10.0,
       "invariantX": 20.0,
-      "invariantY": -10.0
+      "invariantY": -40.0
     },
     {
       "id": "L3",
@@ -117,7 +117,7 @@
       "targetLocation": "L2",
       "status": "INPUT",
       "select": "",
-      "guard": "x\u003e\u003d3",
+      "guard": "x\u003e\u003d3 \u0026\u0026 x\u003c\u003d4",
       "update": "",
       "sync": "c",
       "isLocked": false,
@@ -126,8 +126,8 @@
           "x": 210.0,
           "y": 400.0,
           "propertyType": "GUARD",
-          "propertyX": 10.0,
-          "propertyY": -10.0
+          "propertyX": -20.0,
+          "propertyY": -30.0
         },
         {
           "x": 290.0,
@@ -143,7 +143,7 @@
       "targetLocation": "L3",
       "status": "OUTPUT",
       "select": "",
-      "guard": "x\u003e\u003d4",
+      "guard": "x\u003e\u003d3",
       "update": "",
       "sync": "a",
       "isLocked": false,

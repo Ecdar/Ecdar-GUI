@@ -16,5 +16,5 @@
   "invertReset": true,
   "maxGenerationThreads": 10,
   "maxSutInstances": 1,
-  "maxOutputWaitTime": 1
+  "maxOutputWaitTime": 5
 }

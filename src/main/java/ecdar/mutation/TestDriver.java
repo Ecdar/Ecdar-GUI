@@ -63,12 +63,12 @@ public class TestDriver implements ConcurrentJobsHandler {
      */
     private void performTest(final MutationTestCase testCase) {
         new Thread(() -> {
-            final Instant startTime = Instant.now();
             ObjectProperty<Instant> lastUpdateTime = new SimpleObjectProperty<>();
-            lastUpdateTime.setValue(startTime);
+            lastUpdateTime.setValue(Instant.now());
             NonRefinementStrategy strategy = testCase.getStrategy();
             SimpleComponentSimulation testModelSimulation = new SimpleComponentSimulation(testCase.getTestModel());
             SimpleComponentSimulation mutantSimulation = new SimpleComponentSimulation(testCase.getMutant());
+            System.out.println(testCase.getId());
             initializeAndRunProcess();
 
             for(int step = 0; step < bound; step++) {
@@ -84,7 +84,7 @@ public class TestDriver implements ConcurrentJobsHandler {
                 //If it is an input perform it
                 if (rule instanceof ActionRule) {
                     if (((ActionRule) rule).getStatus() == EdgeStatus.OUTPUT) {
-                        Verdict verdict = delayForOutput(testModelSimulation, mutantSimulation, testCase);
+                        Verdict verdict = delayForOutput(testModelSimulation, mutantSimulation, testCase, lastUpdateTime);
                         if(!verdict.equals(Verdict.NONE)) {
                             onTestDone();
                             return;
@@ -100,7 +100,7 @@ public class TestDriver implements ConcurrentJobsHandler {
                         writeToSut(sync);
                     }
                 } else if (rule instanceof DelayRule) {
-                    Verdict verdict = delay(testModelSimulation, mutantSimulation, testCase, lastUpdateTime ,startTime);
+                    Verdict verdict = delay(testModelSimulation, mutantSimulation, testCase, lastUpdateTime);
                     if(!verdict.equals(Verdict.NONE)) {
                         onTestDone();
                         return;
@@ -148,16 +148,19 @@ public class TestDriver implements ConcurrentJobsHandler {
      * @param testCase that is being performed.
      * @return a verdict, it is NONE if no verdict were reached from this delay.
      */
-    private Verdict delay(final SimpleComponentSimulation testModelSimulation, final SimpleComponentSimulation mutantSimulation, final MutationTestCase testCase, ObjectProperty<Instant> lastUpdateTime, Instant startTime){
+    private Verdict delay(final SimpleComponentSimulation testModelSimulation, final SimpleComponentSimulation mutantSimulation, final MutationTestCase testCase, ObjectProperty<Instant> lastUpdateTime){
         try {
             //Check if any output is ready, if there is none, do delay
             if (inputStream.available() == 0) {
                 Thread.sleep(timeUnit);
                 //Do Delay
-                final long waitedTimeUnits = Duration.between(startTime.plusMillis(lastUpdateTime.get().toEpochMilli()), Instant.now()).toMillis()/timeUnit;
+                System.out.println(Duration.between(lastUpdateTime.get(), Instant.now()).toMillis());
+                final long waitedTimeUnits = Duration.between(lastUpdateTime.get(), Instant.now()).toMillis()/timeUnit;
                 lastUpdateTime.setValue(Instant.now());
+                System.out.println("Delay " + waitedTimeUnits);
                 if (!testModelSimulation.delay(waitedTimeUnits)) {
                     failed.add(testCase.getId());
+                    System.out.println("Failed2");
                     return Verdict.FAIL;
                 } else {
                     if (!mutantSimulation.delay(waitedTimeUnits)) {
@@ -171,6 +174,7 @@ public class TestDriver implements ConcurrentJobsHandler {
                 final String outputFromSut = readFromSut();
                 if (!testModelSimulation.runOutputAction(outputFromSut)) {
                     failed.add(testCase.getId());
+                    System.out.println("Failed1");
                     return Verdict.FAIL;
                 } else if (!mutantSimulation.runOutputAction(outputFromSut)) {
                     passed.add(testCase.getId());
@@ -194,21 +198,23 @@ public class TestDriver implements ConcurrentJobsHandler {
      * @param testCase that is being performed.
      * @return a verdict, it is NONE if no verdict were reached from this delay.
      */
-    private Verdict delayForOutput(final SimpleComponentSimulation testModelSimulation, final SimpleComponentSimulation mutantSimulation, final MutationTestCase testCase){
+    private Verdict delayForOutput(final SimpleComponentSimulation testModelSimulation, final SimpleComponentSimulation mutantSimulation, final MutationTestCase testCase, ObjectProperty<Instant> lastUpdateTime){
         //Do delay until getOutputWaitTime time units has passed
         for(int i = 0; i < getPlan().getOutputWaitTime(); i++) {
-            final Instant delayStart = Instant.now();
             try {
                 //Check if any output is ready, if there is none, do delay
                 if (inputStream.available() == 0) {
                     Thread.sleep(timeUnit);
                     //Do Delay
-                    final long seconds = Duration.between(delayStart, Instant.now()).getSeconds();
-                    if (!testModelSimulation.delay(seconds)) {
+                    final long waitedTimeUnits = Duration.between(lastUpdateTime.get(), Instant.now()).toMillis()/timeUnit;
+                    lastUpdateTime.setValue(Instant.now());
+                    System.out.println("Delay " + waitedTimeUnits);
+                    if (!testModelSimulation.delay(waitedTimeUnits)) {
                         failed.add(testCase.getId());
+                        System.out.println("Failed3");
                         return Verdict.FAIL;
                     } else {
-                        if (!mutantSimulation.delay(Duration.between(delayStart, Instant.now()).getSeconds())) {
+                        if (!mutantSimulation.delay(waitedTimeUnits)) {
                             //Todo Handle exception
                         }
                     }
@@ -219,6 +225,7 @@ public class TestDriver implements ConcurrentJobsHandler {
                     final String outputFromSut = readFromSut();
                     if (!testModelSimulation.runOutputAction(outputFromSut)) {
                         failed.add(testCase.getId());
+                        System.out.println("Failed4");
                         return Verdict.FAIL;
                     } else if (!mutantSimulation.runOutputAction(outputFromSut)) {
                         passed.add(testCase.getId());
