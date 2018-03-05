@@ -180,14 +180,22 @@ public class Component extends HighLevelModelObject implements Boxed {
      * @param edges the edges to extract from
      * @return the expression that represents the negation
      */
-    private static Expression<String> getNegatedEdgeExpression(final List<Edge> edges) {
+    private Expression<String> getNegatedEdgeExpression(final List<Edge> edges) {
+        final List<String> clocks = getClocks();
+
         return ExpressionHelper.simplifyNegatedSimpleExpressions(
-                RuleSet.toDNF(Not.of(Or.of(edges.stream()
-                        .map(edge -> And.of(
-                                ExpressionHelper.parseGuard(edge.getGuard()),
-                                ExpressionHelper.parseInvariant(edge.getTargetLocation().getInvariant()))
+                RuleSet.toDNF(RuleSet.simplify(Not.of(Or.of(edges.stream()
+                        .map(edge -> {
+                                    final List<String> clocksToReset = ExpressionHelper.getUpdateSides(edge.getUpdate())
+                                            .keySet().stream().filter(clocks::contains).collect(Collectors.toList());
+
+                                    return And.of(
+                                            ExpressionHelper.parseGuard(edge.getGuard()),
+                                            ExpressionHelper.parseInvariantButIgnore(edge.getTargetLocation().getInvariant(), clocksToReset)
+                                    );
+                                }
                         ).collect(Collectors.toList()))
-                )));
+                ))));
     }
 
     /**
@@ -201,6 +209,12 @@ public class Component extends HighLevelModelObject implements Boxed {
         final Edge edge;
 
         switch (guardExpression.getExprType()) {
+            case Literal.EXPR_TYPE:
+                // If false, do not create any loops
+                if (!((Literal<String>) guardExpression).getValue()) break;
+
+                // It should never be true, since that should be handled before calling this method
+                throw new RuntimeException("Type of expression " + guardExpression + " not accepted");
             case Variable.EXPR_TYPE:
                 edge = new Edge(location, EdgeStatus.INPUT);
                 edge.setTargetLocation(location);
@@ -230,7 +244,7 @@ public class Component extends HighLevelModelObject implements Boxed {
                 ((Or<String>) guardExpression).getChildren().forEach(child -> createAngelicSelfLoops(location, input, child));
                 break;
             default:
-                throw new RuntimeException("Type of expression " + guardExpression + " not accepted. It should be a variable, conjunction, or disjunction");
+                throw new RuntimeException("Type of expression " + guardExpression + " not accepted");
         }
     }
 
@@ -292,6 +306,12 @@ public class Component extends HighLevelModelObject implements Boxed {
         final Edge edge;
 
         switch (guardExpression.getExprType()) {
+            case Literal.EXPR_TYPE:
+                // If false, do not create any edges
+                if (!((Literal<String>) guardExpression).getValue()) break;
+
+                // It should never be true, since that should be handled before calling this method
+                throw new RuntimeException("Type of expression " + guardExpression + " not accepted");
             case Variable.EXPR_TYPE:
                 edge = new Edge(location, EdgeStatus.INPUT);
                 edge.setTargetLocation(universal);
@@ -314,7 +334,7 @@ public class Component extends HighLevelModelObject implements Boxed {
                 ((Or<String>) guardExpression).getChildren().forEach(child -> createDemonicEdges(location, universal, input, child));
                 break;
             default:
-                throw new RuntimeException("Type of expression " + guardExpression + " not accepted. It should be a variable, conjunction, or disjunction");
+                throw new RuntimeException("Type of expression " + guardExpression + " not accepted");
         }
     }
 

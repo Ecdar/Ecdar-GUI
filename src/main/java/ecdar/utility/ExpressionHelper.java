@@ -1,6 +1,7 @@
 package ecdar.utility;
 
 import com.bpodgursky.jbool_expressions.*;
+import org.apache.regexp.RE;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
@@ -26,6 +27,7 @@ public class ExpressionHelper {
     public static Expression<String> simplifyNegatedSimpleExpressions(final Expression<String> expression) {
         switch (expression.getExprType()) {
             case Variable.EXPR_TYPE:
+            case Literal.EXPR_TYPE:
                 return expression;
             case Not.EXPR_TYPE:
                 final Expression<String> child = ((Not<String>) expression).getE();
@@ -87,7 +89,7 @@ public class ExpressionHelper {
      * @return the expression
      */
     public static Expression<String> parseGuard(final String guard) {
-        if (guard.isEmpty()) return Literal.getTrue();
+        if (guard.trim().isEmpty()) return Literal.getTrue();
 
         return And.of(
                 Arrays.stream(guard.split("&&"))
@@ -123,6 +125,27 @@ public class ExpressionHelper {
      */
     public static Expression<String> parseInvariant(final String invariant) {
         return parseGuard(invariant);
+    }
+
+    public static Expression<String> parseInvariantButIgnore(final String invariant, final List<String> ignored) {
+        if (invariant.trim().isEmpty()) return Literal.getTrue();
+
+        final List<Expression<String>> expressions = new ArrayList<>();
+
+        for (final String simpleInv : invariant.split("&&")) {
+            final String REGEX = "^(\\w+)\\W.*";
+            final Matcher matcher = Pattern.compile(REGEX).matcher(simpleInv.trim());
+
+            if (!matcher.find()) throw new RuntimeException("Simple invariant " + simpleInv.trim() + " does not match " + REGEX);
+
+            if (ignored.contains(matcher.group(1))) continue;
+
+            expressions.add(Variable.of(simpleInv.trim()));
+        }
+
+        if (expressions.isEmpty()) return Literal.getTrue();
+
+        return And.of(expressions);
     }
 
     /**
