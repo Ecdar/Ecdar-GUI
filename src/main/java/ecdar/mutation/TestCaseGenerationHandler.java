@@ -255,7 +255,22 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
 
                 finishedTestCases.add(testCase);
             } catch (MutationTestingException e) {
-                handleException(e);
+                e.printStackTrace();
+
+                // Only show error if the process is not already being stopped
+                if (getPlan().getStatus().equals(MutationTestPlan.Status.WORKING)) {
+                    getPlan().setStatus(MutationTestPlan.Status.ERROR);
+                    Platform.runLater(() -> {
+                        final String message = "Error while generating test-case " + testCase.getId() + ", " +
+                                testCase.getDescription() + ": " + e.getMessage();
+                        final Text text = new Text(message);
+                        text.setFill(Color.RED);
+                        progressWriter.accept(text);
+                        Ecdar.showToast(message);
+                    });
+                }
+
+                jobsDriver.onJobDone();
                 return;
             }
 
