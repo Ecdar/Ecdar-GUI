@@ -44,7 +44,7 @@ public class MutationTestPlan extends HighLevelModelObject {
 
     // For testing
     private final StringProperty sutPath = new SimpleStringProperty("");
-    private final BooleanProperty demonic = new SimpleBooleanProperty(false);
+    private final BooleanProperty demonic = new SimpleBooleanProperty(true);
     private final IntegerProperty concurrentGenerationThreads = new SimpleIntegerProperty(10);
     private final IntegerProperty concurrentSutInstances = new SimpleIntegerProperty(1);
     private final IntegerProperty maxOutputWaitTime = new SimpleIntegerProperty(5);
