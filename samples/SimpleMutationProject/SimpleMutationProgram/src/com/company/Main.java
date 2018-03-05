@@ -16,16 +16,11 @@ public class Main {
         x = Instant.now();
         try {
             input = reader.readLine();
-            if (input.equals("c") && Duration.between(x, Instant.now()).toMillis() >= 3000 && Duration.between(x, Instant.now()).toMillis() <= 4000) {
-                while (Duration.between(x, Instant.now()).toMillis() <= 3000) {
-                    Thread.sleep(100);
-                }
-                if (Duration.between(x, Instant.now()).toMillis() <= 5000) {
+            if (input.equals("c") && Duration.between(x, Instant.now()).toMillis() >= 3000 && Duration.between(x, Instant.now()).toMillis() <= 6000) {
+                if (Duration.between(x, Instant.now()).toMillis() <= 6000) {
                     System.out.println("a");
                 }
             }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
