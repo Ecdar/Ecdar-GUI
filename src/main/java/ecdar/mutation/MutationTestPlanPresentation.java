@@ -231,6 +231,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         regions.add(controller.selectSutButton);
         regions.add(controller.sutPathLabel);
         regions.add(controller.exportDependantArea);
+        regions.add(controller.outputWaitTimeBox);
 
         return regions;
     }

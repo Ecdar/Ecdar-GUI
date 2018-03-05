@@ -46,7 +46,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     private final BooleanProperty demonic = new SimpleBooleanProperty(false);
     private final IntegerProperty concurrentGenerationThreads = new SimpleIntegerProperty(10);
     private final IntegerProperty concurrentSutInstances = new SimpleIntegerProperty(1);
-    private final IntegerProperty maxOutputWaitTime = new SimpleIntegerProperty(1);
+    private final IntegerProperty maxOutputWaitTime = new SimpleIntegerProperty(5);
 
     // Temporary values for displaying results of testing
     private final StringProperty mutantsText = new SimpleStringProperty("");
