@@ -340,7 +340,6 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
      */
     private static boolean handlePotentialErrorsFromVerifytga(final Process process) throws IOException, MutationTestingException {
         try (BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
-            //final String errorLine = errorReader.readLine();
             final List<String> errorLines = errorReader.lines().collect(Collectors.toList());
 
             if (!errorLines.isEmpty()) {

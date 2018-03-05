@@ -67,7 +67,7 @@ public class Declarations extends HighLevelModelObject {
     public List<Triple<String, Integer, Integer>> getTypedefs() {
         final List<Triple<String, Integer, Integer>> types = new ArrayList<>();
 
-        final Matcher matcher = Pattern.compile("typedef\\s+int\\s*\\[(\\d+)\\s*,\\s*(\\d+)]\\*(\\w)\\s*;").matcher(getDeclarationsText());
+        final Matcher matcher = Pattern.compile(".*typedef\\s+int\\s*\\[(\\d+)\\s*,\\s*(\\d+)]\\s*(\\w*)\\s*;.*").matcher(getDeclarationsText());
 
         while (matcher.find()) {
             types.add(Triple.of(matcher.group(3), Integer.parseInt(matcher.group(1)), Integer.parseInt(matcher.group(2))));
