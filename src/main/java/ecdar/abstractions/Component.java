@@ -754,7 +754,7 @@ public class Component extends HighLevelModelObject implements Boxed {
     public List<String> getClocks() {
         final List<String> clocks = new ArrayList<>();
 
-        final Matcher matcher = Pattern.compile("^.*clock\\s+([^;]+);.*$").matcher(getDeclarationsText());
+        final Matcher matcher = Pattern.compile(".*clock\\s+([^;]+);.*").matcher(getDeclarationsText());
 
         if (!matcher.find()) return clocks;
 

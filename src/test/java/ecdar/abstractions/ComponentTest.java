@@ -341,6 +341,19 @@ public class ComponentTest {
     }
 
     @Test
+    public void testGetClocksWithNoise() {
+        final Component c = new Component();
+        c.setDeclarationsText("clock x;\n" +
+                "\n" +
+                "sound_t sound;");
+
+        final List<String> clocks = c.getClocks();
+
+        Assert.assertEquals(1, clocks.size());
+        Assert.assertEquals("x", clocks.get(0));
+    }
+
+    @Test
     public void getLocalVariablesBool() {
         final Component c = new Component();
         c.setDeclarationsText("clock x;\n\nbool sound;");
