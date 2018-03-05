@@ -35,8 +35,8 @@ abstract class ChangeActionOperator extends MutationOperator {
                 getCodeName() + "_" + edgeIndex + "_" + sync,
                 "Changed action of edge " + originalEdge.getSourceLocation().getId() + " -> " +
                         originalEdge.getTargetLocation().getId() + " from " +
-                        (originalEdge.getStatus().equals(EdgeStatus.INPUT) ? "input" : "output") +
-                        originalEdge.getSync() + "to " + (status.equals(EdgeStatus.INPUT) ? "input" : "output") +
-                        originalEdge.getSync());
+                        (originalEdge.getStatus().equals(EdgeStatus.INPUT) ? "input " : "output ") +
+                        originalEdge.getSync() + " to " + (status.equals(EdgeStatus.INPUT) ? "input " : "output ") +
+                        mutantEdge.getSync());
     }
 }

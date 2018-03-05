@@ -31,7 +31,7 @@ public class ChangeActionOutputsOperator extends ChangeActionOperator {
             // Ignore if locked (e.g. if edge on the Inconsistent or Universal locations)
             if (originalEdge.getIsLocked().get()) continue;
 
-            // Change the action of that edge to other action
+            // Change the action of that edge to another action
             final int finalEdgeIndex = edgeIndex;
             original.getOutputStrings().forEach(output -> {
                 final MutationTestCase testCase = generateTestCase(original, finalEdgeIndex, output, EdgeStatus.OUTPUT);
