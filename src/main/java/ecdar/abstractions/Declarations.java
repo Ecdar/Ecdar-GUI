@@ -6,6 +6,13 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import org.apache.commons.lang3.tuple.Triple;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Overall declarations of a model.
@@ -55,5 +62,17 @@ public class Declarations extends HighLevelModelObject {
 
     public void clearDeclarationsText() {
         setDeclarationsText("");
+    }
+
+    public List<Triple<String, Integer, Integer>> getTypedefs() {
+        final List<Triple<String, Integer, Integer>> types = new ArrayList<>();
+
+        final Matcher matcher = Pattern.compile("typedef\\s+int\\s*\\[(\\d+)\\s*,\\s*(\\d+)]\\*(\\w)\\s*;").matcher(getDeclarationsText());
+
+        while (matcher.find()) {
+            types.add(Triple.of(matcher.group(3), Integer.parseInt(matcher.group(1)), Integer.parseInt(matcher.group(2))));
+        }
+
+        return types;
     }
 }

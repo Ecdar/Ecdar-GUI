@@ -19,6 +19,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.util.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -753,6 +754,25 @@ public class Component extends HighLevelModelObject implements Boxed {
             if ((!matcher.find()) || matcher.group(1).equals("clock")) return;
 
             locals.add(matcher.group(2));
+        });
+
+        return locals;
+    }
+
+    public List<Triple<String, Integer, Integer>> getLocalVariablesWithBounds() {
+        final List<Triple<String, Integer, Integer>> typedefs = Ecdar.getProject().getGlobalDeclarations().getTypedefs();
+
+        final List<Triple<String, Integer, Integer>> locals = new ArrayList<>();
+
+        Arrays.stream(getDeclarationsText().split(";")).forEach(statement -> {
+            final Matcher matcher = Pattern.compile("^\\s*(\\w+)\\s+(\\w+)(\\W|$)").matcher(statement);
+            if (!matcher.find()) return;
+
+            final Optional<Triple<String, Integer, Integer>> typedef = typedefs.stream()
+                    .filter(def -> def.getLeft().equals(matcher.group(1))).findAny();
+            if (!typedef.isPresent()) return;
+
+            locals.add(Triple.of(matcher.group(2), typedef.get().getMiddle(), typedef.get().getRight()));
         });
 
         return locals;

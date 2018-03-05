@@ -5,6 +5,7 @@ import ecdar.abstractions.Edge;
 import ecdar.mutation.MutationTestingException;
 import ecdar.mutation.models.MutationTestCase;
 import ecdar.utility.ExpressionHelper;
+import org.apache.commons.lang3.tuple.Triple;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,8 +23,8 @@ public class ChangeVarUpdateOperator extends MutationOperator {
     }
 
     @Override
-    public List<MutationTestCase> generateTestCases(final Component original) throws MutationTestingException {
-        final List<String> vars = original.getLocalVariables();
+    public List<MutationTestCase> generateTestCases(final Component original) {
+        final List<Triple<String, Integer, Integer>> locals = original.getLocalVariablesWithBounds();
 
         final List<MutationTestCase> cases = new ArrayList<>();
 
@@ -39,72 +40,54 @@ public class ChangeVarUpdateOperator extends MutationOperator {
 
             // For each variable
             final int finalEdgeIndex = edgeIndex;
-            vars.forEach(var -> {
-
-                if (sides.containsKey(var)) {
-                    {
+            locals.forEach(local -> {
+                // If variable is not assigned, add it
+                if (sides.get(local.getLeft()) == null) {
+                    // For each possible assignment of that variable
+                    for (int value = local.getMiddle(); value <= local.getRight(); value++) {
                         final Component mutant = original.cloneForVerification();
                         final Edge mutantEdge = mutant.getEdges().get(finalEdgeIndex);
 
-                        final String change = "-1";
                         final List<String> newSimpleUpdates = new ArrayList<>();
 
-                        sides.forEach((left, right) -> {
-                            if (left.equals(var)) newSimpleUpdates.add(left + "=" + right + change);
-                            else newSimpleUpdates.add(left + "=" + right);
-                        });
+                        sides.forEach((left, right) -> newSimpleUpdates.add(left + "=" + right));
+                        newSimpleUpdates.add(local.getLeft() + "=" + value);
 
-                        cases.add(generateCase(
-                                original, originalEdge, finalEdgeIndex, var,
-                                mutant, mutantEdge, change, newSimpleUpdates
-                        ));
-                    } {
-                        final Component mutant = original.cloneForVerification();
-                        final Edge mutantEdge = mutant.getEdges().get(finalEdgeIndex);
+                        mutantEdge.setUpdate(String.join(",", newSimpleUpdates));
 
-                        final String change = "+1";
-                        final List<String> newSimpleUpdates = new ArrayList<>();
-
-                        sides.forEach((left, right) -> {
-                            if (left.equals(var)) newSimpleUpdates.add(left + "=" + right + change);
-                            else newSimpleUpdates.add(left + "=" + right);
-                        });
-
-                        cases.add(generateCase(
-                                original, originalEdge, finalEdgeIndex, var,
-                                mutant, mutantEdge, change, newSimpleUpdates
+                        cases.add(new MutationTestCase(
+                                original, mutant,
+                                getCodeName() + "_" + finalEdgeIndex + "_" + local.getLeft() + "_" + value,
+                                "Changed update of edge " + originalEdge.getSourceLocation().getId() +
+                                        " -> " + originalEdge.getTargetLocation().getId() + " from " +
+                                        originalEdge.getUpdate() + "to " + mutantEdge.getUpdate()
                         ));
                     }
-                } else {
-                    {
-                        final Component mutant = original.cloneForVerification();
-                        final Edge mutantEdge = mutant.getEdges().get(finalEdgeIndex);
-
-                        final String change = "-1";
-                        final List<String> newSimpleUpdates = new ArrayList<>();
-
-                        sides.forEach((left, right) -> newSimpleUpdates.add(left + "=" + right));
-
-                        newSimpleUpdates.add(var + "=" + var + change);
-
-                        cases.add(generateCase(
-                                original, originalEdge, finalEdgeIndex, var,
-                                mutant, mutantEdge, change, newSimpleUpdates
-                        ));
-                    } {
+                } else { // Otherwise, replace the assignment
+                    // For each possible assignment of that variable
+                    for (int value = local.getMiddle(); value <= local.getRight(); value++) {
+                        // If this is already the original assignment, ignore
+                        if (sides.get(local.getLeft()).equals(String.valueOf(value))) continue;
 
                         final Component mutant = original.cloneForVerification();
                         final Edge mutantEdge = mutant.getEdges().get(finalEdgeIndex);
-                        final String change = "+1";
+
                         final List<String> newSimpleUpdates = new ArrayList<>();
 
-                        sides.forEach((left, right) -> newSimpleUpdates.add(left + "=" + right));
+                        final int finalValue = value;
+                        sides.forEach((left, right) -> {
+                            if (left.equals(local.getLeft())) newSimpleUpdates.add(left + "=" + finalValue);
+                            else newSimpleUpdates.add(left + "=" + right);
+                        });
 
-                        newSimpleUpdates.add(var + "=" + var + change);
+                        mutantEdge.setUpdate(String.join(",", newSimpleUpdates));
 
-                        cases.add(generateCase(
-                                original, originalEdge, finalEdgeIndex, var,
-                                mutant, mutantEdge, change, newSimpleUpdates
+                        cases.add(new MutationTestCase(
+                                original, mutant,
+                                getCodeName() + "_" + finalEdgeIndex + "_" + local.getLeft() + "_" + value,
+                                "Changed update of edge " + originalEdge.getSourceLocation().getId() +
+                                        " -> " + originalEdge.getTargetLocation().getId() + " from " +
+                                        originalEdge.getUpdate() + "to " + mutantEdge.getUpdate()
                         ));
                     }
                 }
@@ -114,38 +97,13 @@ public class ChangeVarUpdateOperator extends MutationOperator {
         return cases;
     }
 
-    /**
-     * Generates a test-case.
-     * @param original original component
-     * @param originalEdge original edge to mutate
-     * @param edgeIndex index of the edge to mutate
-     * @param var local variable to mutate with
-     * @param mutant mutant component
-     * @param mutantEdge edge to mutate
-     * @param change an id of what is changed
-     * @param newSimpleUpdates the new update property, as a list of simple expressions
-     * @return the generated test-case
-     */
-    private MutationTestCase generateCase(final Component original, final Edge originalEdge, final int edgeIndex,
-                                          final String var, final Component mutant, final Edge mutantEdge,
-                                          final String change, final List<String> newSimpleUpdates) {
-
-        mutantEdge.setUpdate(String.join(",", newSimpleUpdates));
-
-        return new MutationTestCase(
-                original, mutant,
-                getCodeName() + "_" + edgeIndex + "_" + var + "_" + change,
-                "Changed update of edge " + originalEdge.getSourceLocation().getId() + " -> " +
-                        originalEdge.getTargetLocation().getId() + " from " +
-                        originalEdge.getUpdate() + "to " + mutantEdge.getUpdate()
-        );
-    }
-
     @Override
     public String getDescription() {
-        return "Changes the assignment of a local variable " +
-                "in an update property to +/- 1 of the original assignment. " +
-                "If the variable is not assigned in this property," +
-                "the variable will be assigned to 1 more/less that its previous value.";
+        return "Changes (or adds, if the variable is not assigned in this edge) the assignment of a local variable " +
+                "in an update property to any of its defined values. " +
+                "Creates up to [# of edges] * [# of variables] * [# of possible values in the type of the variables] mutants." +
+                "This operator only considers variables of a custom type defined with typedef int[a, b] c, " +
+                "where a and b are literals, and c is the type name. " +
+                "This operator assumes that all right sides of variable assignments are literals.";
     }
 }

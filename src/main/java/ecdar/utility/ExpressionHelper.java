@@ -183,18 +183,18 @@ public class ExpressionHelper {
      * @return the sides
      */
     public static Map<String, String> getUpdateSides(final String updateProperty) {
-        final String REGEX_UPDATE = "^(\\w+)\\s*:?=\\s*(.+)$";
 
         final Map<String, String> sides = new HashMap<>();
 
         if (updateProperty.trim().isEmpty()) return sides;
 
         for (final String update : updateProperty.split(",")) {
+            final String REGEX_UPDATE = "^(\\w+)\\s*:?=\\s*(.+)$";
             final Matcher matcher = Pattern.compile(REGEX_UPDATE).matcher(update.trim());
 
             if (!matcher.find()) throw new RuntimeException("Update " + update + " does not match " + REGEX_UPDATE);
 
-            sides.put(matcher.group(1), matcher.group(2));
+            sides.put(matcher.group(1), matcher.group(2).trim());
         }
 
         return sides;
