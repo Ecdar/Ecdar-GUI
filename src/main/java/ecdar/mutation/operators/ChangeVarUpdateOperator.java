@@ -11,6 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Mutation operator that changes the assignment of local variables.
+ */
 public class ChangeVarUpdateOperator extends MutationOperator {
     @Override
     public String getText() {
