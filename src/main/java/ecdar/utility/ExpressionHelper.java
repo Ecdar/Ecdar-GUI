@@ -1,12 +1,11 @@
 package ecdar.utility;
 
 import com.bpodgursky.jbool_expressions.*;
+import org.apache.regexp.RE;
+import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -28,6 +27,7 @@ public class ExpressionHelper {
     public static Expression<String> simplifyNegatedSimpleExpressions(final Expression<String> expression) {
         switch (expression.getExprType()) {
             case Variable.EXPR_TYPE:
+            case Literal.EXPR_TYPE:
                 return expression;
             case Not.EXPR_TYPE:
                 final Expression<String> child = ((Not<String>) expression).getE();
@@ -89,7 +89,7 @@ public class ExpressionHelper {
      * @return the expression
      */
     public static Expression<String> parseGuard(final String guard) {
-        if (guard.isEmpty()) return Literal.getTrue();
+        if (guard.trim().isEmpty()) return Literal.getTrue();
 
         return And.of(
                 Arrays.stream(guard.split("&&"))
@@ -128,6 +128,35 @@ public class ExpressionHelper {
     }
 
     /**
+     * Parses an invariant to an expression.
+     * Ignores some variables.
+     * E.g. if x is ignored in the invariant x<=1 && y<=2, then only y<=2 is extracted.
+     * @param invariant the invariant to parse
+     * @param ignored the variables to ignore
+     * @return the parsed expression
+     */
+    public static Expression<String> parseInvariantButIgnore(final String invariant, final List<String> ignored) {
+        if (invariant.trim().isEmpty()) return Literal.getTrue();
+
+        final List<Expression<String>> expressions = new ArrayList<>();
+
+        for (final String simpleInv : invariant.split("&&")) {
+            final String REGEX = "^(\\w+)\\W.*";
+            final Matcher matcher = Pattern.compile(REGEX).matcher(simpleInv.trim());
+
+            if (!matcher.find()) throw new RuntimeException("Simple invariant " + simpleInv.trim() + " does not match " + REGEX);
+
+            if (ignored.contains(matcher.group(1))) continue;
+
+            expressions.add(Variable.of(simpleInv.trim()));
+        }
+
+        if (expressions.isEmpty()) return Literal.getTrue();
+
+        return And.of(expressions);
+    }
+
+    /**
      * Gets if an expression is satisfied given some valuations.
      * @param expression expression to evaluate
      * @param valuations valuations of variables. These must include (but not necessarily limited to) all variables used in the condition
@@ -153,28 +182,52 @@ public class ExpressionHelper {
 
     /**
      * Parses an update property to a map of valuations.
-     * @param updateProperty the property
-     * @return the valuations as a map from variable names to values
+     * Examples of update properties:
+     * a=2
+     * a:=2
+     * a = 2
+     * a=2,b=3
+     * a=a+1
+     * @param updateProperty the update property to parse
+     * @param locals the local variables used to evaluate the right sides
+     * @return a map of valuations
      */
-    public static Map<String, Number> parseUpdateProperty(final String updateProperty) {
-        final String REGEX_UPDATE = "^(\\w+)\\s*:?=\\s*([\\S]+)$";
+    public static Map<String, Integer> parseUpdate(final String updateProperty, final Map<String, Integer> locals) {
+        final Map<String, String> sides = getUpdateSides(updateProperty);
 
-        final Map<String, Number> valuations = new HashMap<>();
+        final Map<String, Integer> valuations = new HashMap<>();
 
-        if (updateProperty.trim().isEmpty()) return valuations;
+        sides.forEach((left, right) -> {
+            final String[] expr = {right};
+
+            locals.forEach((key, value1) -> expr[0] = expr[0].replace(key, String.valueOf(value1)));
+
+            valuations.put(left, new SpelExpressionParser().parseExpression(expr[0]).getValue(Integer.TYPE));
+        });
+
+        return valuations;
+    }
+
+    /**
+     * Get the left and right sides of an update property
+     * @param updateProperty the property
+     * @return the sides
+     */
+    public static Map<String, String> getUpdateSides(final String updateProperty) {
+
+        final Map<String, String> sides = new HashMap<>();
+
+        if (updateProperty.trim().isEmpty()) return sides;
 
         for (final String update : updateProperty.split(",")) {
+            final String REGEX_UPDATE = "^(\\w+)\\s*:?=\\s*(.+)$";
             final Matcher matcher = Pattern.compile(REGEX_UPDATE).matcher(update.trim());
 
             if (!matcher.find()) throw new RuntimeException("Update " + update + " does not match " + REGEX_UPDATE);
 
-            final Number value;
-            if (matcher.group(2).contains(".")) value = Double.valueOf(matcher.group(2));
-            else value = Integer.valueOf(matcher.group(2));
-
-            valuations.put(matcher.group(1), value);
+            sides.put(matcher.group(1), matcher.group(2).trim());
         }
 
-        return valuations;
+        return sides;
     }
 }

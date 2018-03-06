@@ -1,10 +1,11 @@
-package ecdar.mutation.models;
+package ecdar.mutation.operators;
 
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
 import ecdar.abstractions.EdgeStatus;
 import ecdar.abstractions.Location;
 import ecdar.mutation.MutationTestingException;
+import ecdar.mutation.operators.InvertResetOperator;
 import org.junit.Assert;
 import org.junit.Test;
 

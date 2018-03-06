@@ -25,11 +25,6 @@ public class ActionRule extends StrategyRule {
 
         if (!matcher.find()) throw new MutationTestingException("Strategy transition " + transition + " does not match " + REGEX_TRANSITION);
 
-        if (matcher.group(1).equals(EcdarDocument.ENGINE_UNI_ID))
-            throw new MutationTestingException("Strategy leads to the Universal location");
-        if (matcher.group(1).equals(EcdarDocument.ENGINE_INC_ID))
-            throw new MutationTestingException("Strategy leads to the Inconsistent location");
-
         endLocationName = matcher.group(1);
         sync = matcher.group(2);
         status = matcher.group(3).equals("?") ? EdgeStatus.INPUT : EdgeStatus.OUTPUT;

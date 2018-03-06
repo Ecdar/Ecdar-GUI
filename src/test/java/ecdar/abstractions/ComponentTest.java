@@ -339,4 +339,52 @@ public class ComponentTest {
 
         Assert.assertEquals(0, clocks.size());
     }
+
+    @Test
+    public void testGetClocksWithNoise() {
+        final Component c = new Component();
+        c.setDeclarationsText("clock x;\n" +
+                "\n" +
+                "sound_t sound;");
+
+        final List<String> clocks = c.getClocks();
+
+        Assert.assertEquals(1, clocks.size());
+        Assert.assertEquals("x", clocks.get(0));
+    }
+
+    @Test
+    public void getLocalVariablesBool() {
+        final Component c = new Component();
+        c.setDeclarationsText("clock x;\n\nbool sound;");
+
+        final List<String> vars = c.getLocalVariables();
+
+        Assert.assertEquals(1, vars.size());
+        Assert.assertEquals("sound", vars.get(0));
+    }
+
+    @Test
+    public void getLocalVariablesCustomType() {
+        final Component c = new Component();
+        c.setDeclarationsText("// Place local declarations here.\n" +
+                "clock x;\n" +
+                "id_t cur;");
+
+        final List<String> vars = c.getLocalVariables();
+
+        Assert.assertEquals(1, vars.size());
+        Assert.assertEquals("cur", vars.get(0));
+    }
+
+    @Test
+    public void getLocalVariablesBoolAssignment() {
+        final Component c = new Component();
+        c.setDeclarationsText("clock x;\n\nbool sound = 1;");
+
+        final List<String> vars = c.getLocalVariables();
+
+        Assert.assertEquals(1, vars.size());
+        Assert.assertEquals("sound", vars.get(0));
+    }
 }

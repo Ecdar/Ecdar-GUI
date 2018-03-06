@@ -33,7 +33,7 @@ public class SimpleComponentSimulation implements ComponentSimulation {
 
         component.getClocks().forEach(clock -> {
             clocks.add(clock);
-            clockValuations.put(clock, 0.0);
+            resetClock(clock);
         });
     }
 
@@ -103,10 +103,18 @@ public class SimpleComponentSimulation implements ComponentSimulation {
      * @param property the update property
      */
     private void runUpdateProperty(final String property) {
-        ExpressionHelper.parseUpdateProperty(property).forEach((key, value) -> {
-            if (clocks.contains(key)) getClockValuations().put(key, 0d); // Reset clock
-            else getLocalVariableValuations().put(key, (Integer) value);
+        ExpressionHelper.parseUpdate(property, getLocalVariableValuations()).forEach((key, value) -> {
+            if (clocks.contains(key)) resetClock(key);
+            else getLocalVariableValuations().put(key, value);
         });
+    }
+
+    /**
+     * Resets a clock.
+     * @param clock the clock to reset
+     */
+    private void resetClock(final String clock) {
+        getClockValuations().put(clock, 0d);
     }
 
     /**

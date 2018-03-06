@@ -1,12 +1,12 @@
-package ecdar.mutation.models;
+package ecdar.mutation.operators;
 
 import ecdar.abstractions.Component;
 import ecdar.mutation.MutationTestingException;
+import ecdar.mutation.models.MutationTestCase;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -82,6 +82,7 @@ public abstract class MutationOperator {
         operators.add(new ChangeSourceOperator());
         operators.add(new ChangeTargetOperator());
         operators.add(new ChangeGuardOperator());
+        operators.add(new ChangeVarUpdateOperator());
         operators.add(new ChangeInvariantOperator());
         operators.add(new SinkLocationOperator());
         operators.add(new InvertResetOperator());

@@ -1,8 +1,9 @@
-package ecdar.mutation.models;
+package ecdar.mutation.operators;
 
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Location;
 import ecdar.mutation.MutationTestingException;
+import ecdar.mutation.operators.ChangeInvariantOperator;
 import org.junit.Assert;
 import org.junit.Test;
 

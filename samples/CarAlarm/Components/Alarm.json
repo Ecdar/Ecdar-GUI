@@ -1,6 +1,6 @@
 {
   "name": "Alarm",
-  "declarations": "clock x;\n\nbool sound;",
+  "declarations": "clock x;\n\nsound_t sound;",
   "locations": [
     {
       "id": "L1",

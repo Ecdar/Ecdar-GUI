@@ -1,8 +1,9 @@
-package ecdar.mutation.models;
+package ecdar.mutation.operators;
 
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
 import ecdar.abstractions.EdgeStatus;
+import ecdar.mutation.models.MutationTestCase;
 
 /**
  * Mutation operator that changes a synchronization action to another action.
@@ -34,8 +35,8 @@ abstract class ChangeActionOperator extends MutationOperator {
                 getCodeName() + "_" + edgeIndex + "_" + sync,
                 "Changed action of edge " + originalEdge.getSourceLocation().getId() + " -> " +
                         originalEdge.getTargetLocation().getId() + " from " +
-                        (originalEdge.getStatus().equals(EdgeStatus.INPUT) ? "input" : "output") +
-                        originalEdge.getSync() + "to " + (status.equals(EdgeStatus.INPUT) ? "input" : "output") +
-                        originalEdge.getSync());
+                        (originalEdge.getStatus().equals(EdgeStatus.INPUT) ? "input " : "output ") +
+                        originalEdge.getSync() + " to " + (status.equals(EdgeStatus.INPUT) ? "input " : "output ") +
+                        mutantEdge.getSync());
     }
 }

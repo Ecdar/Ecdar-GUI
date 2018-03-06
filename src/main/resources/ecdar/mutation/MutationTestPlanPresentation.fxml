@@ -50,6 +50,11 @@
                             <Label text="time unit(s) to wait for the SUT to output before giving an inconclusive verdict."/>
                         </HBox>
 
+                        <HBox spacing="8" alignment="BOTTOM_LEFT">
+                            <JFXTextField fx:id="verifytgaTriesField" prefWidth="30" alignment="BASELINE_CENTER"/>
+                            <Label text="try(-ies) of calling verifytga with empty response before giving up."/>
+                        </HBox>
+
                         <JFXButton fx:id="testButton" prefWidth="100" prefHeight="40" buttonType="RAISED" text="Test"
                                    style="-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;"
                                    onMousePressed="#onTestButtonPressed"/>

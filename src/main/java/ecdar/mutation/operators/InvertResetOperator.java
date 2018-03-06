@@ -1,8 +1,9 @@
-package ecdar.mutation.models;
+package ecdar.mutation.operators;
 
 import com.google.common.collect.Lists;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
+import ecdar.mutation.models.MutationTestCase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +26,7 @@ public class InvertResetOperator extends MutationOperator {
     public List<MutationTestCase> generateTestCases(final Component original) {
         final List<String> clocks = original.getClocks();
 
-        final List<MutationTestCase> mutants = new ArrayList<>();
+        final List<MutationTestCase> cases = new ArrayList<>();
 
         // For all edges in the original component
         for (int edgeIndex = 0; edgeIndex < original.getEdges().size(); edgeIndex++) {
@@ -43,7 +44,7 @@ public class InvertResetOperator extends MutationOperator {
                 // Mutate
                 invertClock(mutantEdge, clock);
 
-                mutants.add(new MutationTestCase(original, mutant,
+                cases.add(new MutationTestCase(original, mutant,
                         getCodeName() + "_" + finalEdgeIndex + "_" + clock,
                         "Inverted clock reset of clock " + clock + " on the guard of " +
                                 originalEdge.getSourceLocation().getId() + " -> " + originalEdge.getTargetLocation().getId()
@@ -51,7 +52,7 @@ public class InvertResetOperator extends MutationOperator {
             });
         }
 
-        return mutants;
+        return cases;
     }
 
     @Override

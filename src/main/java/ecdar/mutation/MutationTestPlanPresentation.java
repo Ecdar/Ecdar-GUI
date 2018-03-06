@@ -5,7 +5,7 @@ import com.jfoenix.controls.JFXTextField;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.controllers.CanvasController;
-import ecdar.mutation.models.MutationOperator;
+import ecdar.mutation.operators.MutationOperator;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.presentations.EcdarFXMLLoader;
 import ecdar.presentations.HighLevelModelPresentation;
@@ -70,6 +70,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         initializePositiveIntegerTextField(controller.generationThreadsField, controller.getPlan().maxGenerationThreadsProperty());
         initializePositiveIntegerTextField(controller.suvInstancesField, controller.getPlan().maxSutInstancesProperty());
         initializePositiveIntegerTextField(controller.outputWaitTimeField, controller.getPlan().outputWaitTimeProperty());
+        initializePositiveIntegerTextField(controller.verifytgaTriesField, controller.getPlan().verifytgaTriesProperty());
 
         controller.demonicCheckBox.selectedProperty().bindBidirectional(controller.getPlan().demonicProperty());
         controller.angelicBox.selectedProperty().bindBidirectional(controller.getPlan().angelicWhenExportProperty());

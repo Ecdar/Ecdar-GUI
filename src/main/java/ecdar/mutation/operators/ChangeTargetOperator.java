@@ -1,25 +1,26 @@
-package ecdar.mutation.models;
+package ecdar.mutation.operators;
 
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
 import ecdar.abstractions.Location;
+import ecdar.mutation.models.MutationTestCase;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Generates mutants from a component.
- * Each mutant has a changed source location on an edge.
+ * Each mutant has a changed target location on an edge.
  */
-class ChangeSourceOperator extends MutationOperator {
+public class ChangeTargetOperator extends MutationOperator {
     @Override
     public String getText() {
-        return "Change source";
+        return "Change target";
     }
 
     @Override
     public String getCodeName() {
-        return "changeSource";
+        return "changeTarget";
     }
 
     @Override
@@ -33,27 +34,20 @@ class ChangeSourceOperator extends MutationOperator {
             // Ignore if locked (e.g. if edge on the Inconsistent or Universal locations)
             if (originalEdge.getIsLocked().get()) continue;
 
-            // Change the source of that edge to (almost) each of the locations
             for (final Location originalLocation : original.getLocations()) {
-                // Ignore if location is source in original edge
-                if (originalEdge.getSourceLocation() == originalLocation) continue;
-
-                // Ignore if location is the Inconsistent or the Universal locations
-                // We do not want to have those as a source location,
-                // since it would break their behaviour
-                if (originalLocation.getType().equals(Location.Type.INCONSISTENT) || originalLocation.getType().equals(Location.Type.UNIVERSAL))
-                    continue;
+                // Ignore if location is target in original edge
+                if (originalEdge.getTargetLocation() == originalLocation) continue;
 
                 final Component mutant = original.cloneForVerification();
 
                 // Mutate
                 final Edge mutantEdge = mutant.getEdges().get(edgeIndex);
                 final String newLocId = originalLocation.getId();
-                mutantEdge.setSourceLocation(mutant.findLocation(newLocId));
+                mutantEdge.setTargetLocation(mutant.findLocation(newLocId));
 
                 cases.add(new MutationTestCase(original, mutant,
                         getCodeName() + "_" + edgeIndex + "_" + originalLocation.getId(),
-                        "Changed source of edge " + originalEdge.getSourceLocation().getId() + " -> " +
+                        "Changed target of edge " + originalEdge.getSourceLocation().getId() + " -> " +
                                 originalEdge.getTargetLocation().getId() + " to " + newLocId)
                 );
             }
@@ -64,7 +58,7 @@ class ChangeSourceOperator extends MutationOperator {
 
     @Override
     public String getDescription() {
-        return "Changes the source location of an edge. " +
-               "Creates up to ([# of locations] - 1) * [# of edges] mutants.";
+        return "Changes the target location of an edge. " +
+                "Creates up to ([# of locations] - 1) * [# of edges] mutants.";
     }
 }

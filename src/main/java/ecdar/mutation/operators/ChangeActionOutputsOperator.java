@@ -1,9 +1,9 @@
-package ecdar.mutation.models;
+package ecdar.mutation.operators;
 
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
 import ecdar.abstractions.EdgeStatus;
-import ecdar.mutation.MutationTestingException;
+import ecdar.mutation.models.MutationTestCase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +31,7 @@ public class ChangeActionOutputsOperator extends ChangeActionOperator {
             // Ignore if locked (e.g. if edge on the Inconsistent or Universal locations)
             if (originalEdge.getIsLocked().get()) continue;
 
-            // Change the action of that edge to other action
+            // Change the action of that edge to another action
             final int finalEdgeIndex = edgeIndex;
             original.getOutputStrings().forEach(output -> {
                 final MutationTestCase testCase = generateTestCase(original, finalEdgeIndex, output, EdgeStatus.OUTPUT);

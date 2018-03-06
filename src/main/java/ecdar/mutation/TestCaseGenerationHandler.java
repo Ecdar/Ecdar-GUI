@@ -7,7 +7,7 @@ import ecdar.abstractions.Project;
 import ecdar.abstractions.SimpleComponentsSystemDeclarations;
 import ecdar.backend.BackendException;
 import ecdar.backend.UPPAALDriver;
-import ecdar.mutation.models.MutationOperator;
+import ecdar.mutation.operators.MutationOperator;
 import ecdar.mutation.models.MutationTestCase;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.mutation.models.NonRefinementStrategy;
@@ -192,14 +192,14 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
 
     @Override
     public void startJob(final int index) {
-        generateTestCase(potentialTestCases.get(index));
+        generateTestCase(potentialTestCases.get(index), getPlan().getVerifytgaTries());
     }
 
     /**
      * Generates a test-case.
      * @param testCase potential test-case containing the test model, the mutant, and an id
      */
-    private void generateTestCase(final MutationTestCase testCase) {
+    private void generateTestCase(final MutationTestCase testCase, final int tries) {
         final Component mutant = testCase.getMutant();
 
         // make a project with the test model and the mutant
@@ -233,6 +233,19 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
                 // Verifytga should output that the property is not satisfied
                 // If it does not, then this is an error
                 if (lines.stream().noneMatch(line -> line.endsWith(" -- Property is NOT satisfied."))) {
+                    if (lines.isEmpty()) {
+                        if (tries > 1) {
+                            final int newTries = tries - 1;
+                            Ecdar.showToast("Empty response from verifytga with " + testCase.getId() +
+                                    ". We will try again. " + newTries + " tr" + (newTries == 1 ? "y" : "ies") +
+                                    " left.");
+                            generateTestCase(testCase, tries - 1);
+                            return;
+                        } else {
+                            throw new MutationTestingException("Output from verifytga is empty. Model: " + modelPath);
+                        }
+                    }
+
                     throw new MutationTestingException("Output from verifytga not understood: " + String.join("\n", lines) + "\n" +
                             "Model: " + modelPath);
                 }
@@ -249,7 +262,22 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
 
                 finishedTestCases.add(testCase);
             } catch (MutationTestingException e) {
-                handleException(e);
+                e.printStackTrace();
+
+                // Only show error if the process is not already being stopped
+                if (getPlan().getStatus().equals(MutationTestPlan.Status.WORKING)) {
+                    getPlan().setStatus(MutationTestPlan.Status.ERROR);
+                    Platform.runLater(() -> {
+                        final String message = "Error while generating test-case " + testCase.getId() + ", " +
+                                testCase.getDescription() + ": " + e.getMessage();
+                        final Text text = new Text(message);
+                        text.setFill(Color.RED);
+                        progressWriter.accept(text);
+                        Ecdar.showToast(message);
+                    });
+                }
+
+                jobsDriver.onJobDone();
                 return;
             }
 
@@ -334,7 +362,6 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
      */
     private static boolean handlePotentialErrorsFromVerifytga(final Process process) throws IOException, MutationTestingException {
         try (BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
-            //final String errorLine = errorReader.readLine();
             final List<String> errorLines = errorReader.lines().collect(Collectors.toList());
 
             if (!errorLines.isEmpty()) {
