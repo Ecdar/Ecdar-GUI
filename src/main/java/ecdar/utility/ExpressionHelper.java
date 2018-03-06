@@ -127,6 +127,14 @@ public class ExpressionHelper {
         return parseGuard(invariant);
     }
 
+    /**
+     * Parses an invariant to an expression.
+     * Ignores some variables.
+     * E.g. if x is ignored in the invariant x<=1 && y<=2, then only y<=2 is extracted.
+     * @param invariant the invariant to parse
+     * @param ignored the variables to ignore
+     * @return the parsed expression
+     */
     public static Expression<String> parseInvariantButIgnore(final String invariant, final List<String> ignored) {
         if (invariant.trim().isEmpty()) return Literal.getTrue();
 
