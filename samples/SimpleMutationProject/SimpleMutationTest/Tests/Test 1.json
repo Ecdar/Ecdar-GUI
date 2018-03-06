@@ -11,10 +11,11 @@
   "changeSource": true,
   "changeTarget": true,
   "changeGuard": true,
+  "changeVarUpdate": true,
   "changeInvariant": true,
   "sinkLocation": true,
   "invertReset": true,
   "maxGenerationThreads": 10,
-  "maxSutInstances": 1,
+  "maxSutInstances": 40,
   "maxOutputWaitTime": 5
 }

@@ -64,6 +64,10 @@ public class Declarations extends HighLevelModelObject {
         setDeclarationsText("");
     }
 
+    /**
+     * Gets the custom types defined with typedef of a range of ints.
+     * @return Triples containing (left) name of the type, (middle) lower bound, (right) upper bound
+     */
     public List<Triple<String, Integer, Integer>> getTypedefs() {
         final List<Triple<String, Integer, Integer>> types = new ArrayList<>();
 

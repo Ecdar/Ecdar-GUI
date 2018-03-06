@@ -99,7 +99,7 @@ public class ChangeVarUpdateOperator extends MutationOperator {
 
     @Override
     public String getDescription() {
-        return "Changes (or adds, if the variable is not assigned in this edge) the assignment of a local variable " +
+        return "Changes the assignment (or adds, if the variable is not assigned in corresponding edge) of a local variable " +
                 "in an update property to any of its defined values. " +
                 "Creates up to [# of edges] * [# of variables] * [# of possible values in the type of the variables] mutants." +
                 "This operator only considers variables of a custom type defined with typedef int[a, b] c, " +

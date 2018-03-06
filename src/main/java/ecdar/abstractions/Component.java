@@ -779,6 +779,11 @@ public class Component extends HighLevelModelObject implements Boxed {
         return locals;
     }
 
+    /**
+     * Gets the local variables defined in the declarations text.
+     * Also gets the lower and upper bounds for these variables.
+     * @return Triples containing (left) name of the variable, (middle) lower bound, (right) upper bound
+     */
     public List<Triple<String, Integer, Integer>> getLocalVariablesWithBounds() {
         final List<Triple<String, Integer, Integer>> typedefs = Ecdar.getProject().getGlobalDeclarations().getTypedefs();
 
