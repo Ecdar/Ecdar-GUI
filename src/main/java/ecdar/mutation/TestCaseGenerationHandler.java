@@ -192,7 +192,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
 
     @Override
     public void startJob(final int index) {
-        generateTestCase(potentialTestCases.get(index), 3);
+        generateTestCase(potentialTestCases.get(index), getPlan().getVerifytgaTries());
     }
 
     /**
@@ -233,10 +233,17 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
                 // Verifytga should output that the property is not satisfied
                 // If it does not, then this is an error
                 if (lines.stream().noneMatch(line -> line.endsWith(" -- Property is NOT satisfied."))) {
-                    if (lines.isEmpty() && tries > 1) {
-                        Ecdar.showToast("Verifytga did not respond at " + testCase.getId() + ". We will try again. " + (tries - 1) + " tries left.");
-                        generateTestCase(testCase, tries - 1);
-                        return;
+                    if (lines.isEmpty()) {
+                        if (tries > 1) {
+                            final int newTries = tries - 1;
+                            Ecdar.showToast("Empty response from verifytga with " + testCase.getId() +
+                                    ". We will try again. " + newTries + " tr" + (newTries == 1 ? "y" : "ies") +
+                                    " left.");
+                            generateTestCase(testCase, tries - 1);
+                            return;
+                        } else {
+                            throw new MutationTestingException("Output from verifytga is empty. Model: " + modelPath);
+                        }
                     }
 
                     throw new MutationTestingException("Output from verifytga not understood: " + String.join("\n", lines) + "\n" +

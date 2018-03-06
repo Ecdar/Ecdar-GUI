@@ -68,6 +68,7 @@ public class MutationTestPlanController {
     public Label inconclusiveText;
     public Label failedText;
     public StackPane root;
+    public JFXTextField verifytgaTriesField;
 
 
     /* Mutation fields */

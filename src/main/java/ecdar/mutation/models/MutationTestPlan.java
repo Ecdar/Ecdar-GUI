@@ -35,6 +35,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     private static final String MAX_GENERATION_THREADS = "maxGenerationThreads";
     private static final String MAX_SUT_INSTANCES = "maxSutInstances";
     private static final String MAX_OUTPUT_WAIT_TIME = "maxOutputWaitTime";
+    private static final String VERIFYTGA_TRIES = "verifytgaTries";
 
     // General fields
     private final StringProperty testModelId = new SimpleStringProperty("");
@@ -48,6 +49,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     private final IntegerProperty concurrentGenerationThreads = new SimpleIntegerProperty(10);
     private final IntegerProperty concurrentSutInstances = new SimpleIntegerProperty(1);
     private final IntegerProperty maxOutputWaitTime = new SimpleIntegerProperty(5);
+    private final IntegerProperty verifytgaTries = new SimpleIntegerProperty(3);
 
     // Temporary values for displaying results of testing
     private final StringProperty mutantsText = new SimpleStringProperty("");
@@ -259,7 +261,17 @@ public class MutationTestPlan extends HighLevelModelObject {
         this.FailedText.set(failedText);
     }
 
+    public int getVerifytgaTries() {
+        return verifytgaTries.get();
+    }
 
+    public IntegerProperty verifytgaTriesProperty() {
+        return verifytgaTries;
+    }
+
+    public void setVerifytgaTries(final int verifytgaTries) {
+        this.verifytgaTries.set(verifytgaTries);
+    }
     /* Other methods */
 
     @Override
@@ -278,6 +290,7 @@ public class MutationTestPlan extends HighLevelModelObject {
         result.addProperty(MAX_GENERATION_THREADS, getConcurrentGenerationThreads());
         result.addProperty(MAX_SUT_INSTANCES, getConcurrentSutInstances());
         result.addProperty(MAX_OUTPUT_WAIT_TIME, getOutputWaitTime());
+        result.addProperty(VERIFYTGA_TRIES, getVerifytgaTries());
 
         return result;
     }
@@ -307,6 +320,9 @@ public class MutationTestPlan extends HighLevelModelObject {
 
         primitive = json.getAsJsonPrimitive(MAX_OUTPUT_WAIT_TIME);
         if (primitive != null) setOutputWaitTime(primitive.getAsInt());
+
+        primitive = json.getAsJsonPrimitive(VERIFYTGA_TRIES);
+        if (primitive != null) setVerifytgaTries(primitive.getAsInt());
     }
 
 
