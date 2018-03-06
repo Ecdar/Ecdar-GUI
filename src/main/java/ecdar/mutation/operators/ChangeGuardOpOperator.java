@@ -12,34 +12,20 @@ import java.util.regex.Pattern;
 
 /**
  * Mutation operator that changes an one of the operators <, <=, >, >=, !=, == of a guard.
- * If a guard is a conjunction, more mutants will be generated from than guard.
- * This class replaces an operator with one of the operators <, <=, >, >=, ==.
- * We do not replace with !=, since the engine does not allow this for timing constrains.
+ * If a guard is a conjunction, more mutants will be generated from that guard.
  */
-public class ChangeGuardOperator extends MutationOperator {
-    private static final String REGEX_SIMPLE_GUARD = "^([^<>=!]+)(<|<=|>|>=|==|!=)([^<>=!]+)$";
-
-    @Override
-    public String getText() {
-        return "Change guard";
-    }
-
-    @Override
-    public String getCodeName() {
-        return "changeGuard";
-    }
+public abstract class ChangeGuardOpOperator extends MutationOperator {
+    public abstract List<String> getOperators();
+    public abstract boolean shouldContainClocks();
 
     @Override
     public List<MutationTestCase> generateTestCases(final Component original) throws MutationTestingException {
         final List<MutationTestCase> testCases = new ArrayList<>();
 
         // Do not use != as this is not allowed for timing constrains
-        final List<String> operators = new ArrayList<>();
-        operators.add("<");
-        operators.add("<=");
-        operators.add("==");
-        operators.add(">");
-        operators.add(">=");
+        final List<String> operators = getOperators();
+
+        final List<String> clocks = original.getClocks();
 
         // For all edges in the original component
         for (int edgeIndex = 0; edgeIndex < original.getEdges().size(); edgeIndex++) {
@@ -51,15 +37,19 @@ public class ChangeGuardOperator extends MutationOperator {
             // Ignore if guard is empty
             if (originalEdge.getGuard().isEmpty()) continue;
 
+            // For all parts in the conjunction
             final String[] guardParts = originalEdge.getGuard().split("&&");
             for (int partIndex = 0; partIndex < guardParts.length; partIndex++) {
                 final String part = guardParts[partIndex];
 
+                // If it does not contain clocks, ignore
+                if (containsVar(part, clocks) != shouldContainClocks()) continue;
+
+                final String REGEX_SIMPLE_GUARD = "^([^<>=!]+)(<|<=|>|>=|==|!=)([^<>=!]+)$";
                 final Matcher matcher = Pattern.compile(REGEX_SIMPLE_GUARD).matcher(part);
 
-                if (!matcher.find()) {
-                    throw new MutationTestingException("Guard part " + part + " does not match pattern " + REGEX_SIMPLE_GUARD);
-                }
+                if (!matcher.find())
+                    throw new MutationTestingException("Guard part " + part + " does not match " + REGEX_SIMPLE_GUARD);
 
                 final String originalOperator = matcher.group(2);
 
@@ -77,8 +67,8 @@ public class ChangeGuardOperator extends MutationOperator {
                     testCases.add(new MutationTestCase(original, mutant,
                             getCodeName() + "_" + edgeIndex + "_" + partIndex + "_" + operatorIndex,
                             "Changed guard of edge " + originalEdge.getSourceLocation().getId() + " -> " +
-                                    originalEdge.getTargetLocation().getId() + " to " +
-                                    mutant.getEdges().get(edgeIndex).getGuard()));
+                                    originalEdge.getTargetLocation().getId() + " from " + originalEdge.getGuard() +
+                                    " to " + mutant.getEdges().get(edgeIndex).getGuard()));
                 }
             }
         }
@@ -86,11 +76,17 @@ public class ChangeGuardOperator extends MutationOperator {
         return testCases;
     }
 
-    @Override
-    public String getDescription() {
-        return "Changes one of the operators <, <=, >, >=, !=, == of a guard " +
-                "to one of the operators <, <=, >, >=, ==. " +
-                "Creates up to 5 * [# of uses of operators in guards] mutants.";
+    /**
+     * Gets if an expression contains at least on of some specified variables
+     * @param expr the expression to check
+     * @param vars the variables
+     * @return true iff the expression contains at least on of the variables
+     */
+    private static boolean containsVar(final String expr, final List<String> vars) {
+        for (final String var : vars)
+            if (Pattern.compile("(.*\\W)?" + var + "(\\W.*)?").matcher(expr).find()) return true;
+
+        return false;
     }
 
     /**
@@ -102,7 +98,8 @@ public class ChangeGuardOperator extends MutationOperator {
      * @param edgeIndex the index of the edge containing the guard to mutate
      * @return the created mutant
      */
-    private static Component createMutant(final Component original, final String[] originalSimpleGuards, final String newSimpleGuard, final int simpleGuardIndex, final int edgeIndex) {
+    private static Component createMutant(final Component original, final String[] originalSimpleGuards,
+                                          final String newSimpleGuard, final int simpleGuardIndex, final int edgeIndex) {
         final Component mutant = original.cloneForVerification();
 
         final String[] newSimpleGuards = originalSimpleGuards.clone();

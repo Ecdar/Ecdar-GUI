@@ -102,7 +102,7 @@ public class ExpressionHelper {
     /**
      * Parses a simple guards (without conjunctions) to an expression.
      * The equal operator (==) is parsed as a conjunction of <= and >=,
-     * since the engine does not allow for != for clock valuations.
+     * since the engine does not allow for != for clock valuations (in case it is negated).
      * @param simpleGuard the simple guard to parse
      * @return the expression
      */
