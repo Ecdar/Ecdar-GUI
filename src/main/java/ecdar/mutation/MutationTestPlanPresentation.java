@@ -246,17 +246,22 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         // Set value initially
         field.setText(String.valueOf(property.get()));
 
-        // Update property when text field changes
-        field.textProperty().addListener(((observable, oldValue, newValue) -> {
-            if (!newValue.isEmpty()) property.setValue(Integer.parseInt(newValue));
-        }));
-
         // Force the field to be empty positive integer
         field.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue.matches("\\d*")) field.setText(newValue.replaceAll("[^\\d]", ""));
-            if (newValue.equals("0")) field.setText("1");
+            String updateValue = newValue;
+
+            if (!updateValue.matches("\\d*")) updateValue = newValue.replaceAll("[^\\d]", "");
+            if (updateValue.equals("0")) updateValue = "1";
+
+            if (!updateValue.equals(newValue)) {
+                field.setText(updateValue);
+            }
+
+            // Update property when text field changes, if not empty
+            if (!updateValue.isEmpty() && !updateValue.equals(String.valueOf(property.get()))) property.set(Integer.parseInt(updateValue));
         });
 
+        // If empty when leaving focus, set to "1"
         field.focusedProperty().addListener(((observable, oldValue, newValue) -> {
             if (!newValue && field.getText().isEmpty()) field.setText("1");
         }));
