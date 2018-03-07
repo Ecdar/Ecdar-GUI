@@ -128,8 +128,15 @@ public class SimpleComponentSimulation implements ComponentSimulation {
                 .filter(e -> e.getSync().equals(sync))
                 .filter(e -> e.getGuard().trim().isEmpty() ||
                         ExpressionHelper.evaluateBooleanExpression(e.getGuard(), getAllValuations()))
-                .filter(e -> e.getTargetLocation().getInvariant().isEmpty() ||
-                ExpressionHelper.evaluateBooleanExpression(e.getTargetLocation().getInvariant(), getAllValuations()));
+                .filter(e -> {
+                    // Simulate the update, then check if invariant is satisfied
+                    final Map<String, Number> newValuations = new HashMap<>();
+                    newValuations.putAll(getAllValuations());
+                    newValuations.putAll(ExpressionHelper.parseUpdate(e.getUpdate(), getLocalVariableValuations()));
+
+                    return e.getTargetLocation().getInvariant().isEmpty() ||
+                            ExpressionHelper.evaluateBooleanExpression(e.getTargetLocation().getInvariant(), newValuations);
+                });
     }
 
     /**
@@ -145,7 +152,7 @@ public class SimpleComponentSimulation implements ComponentSimulation {
                 " yields a non-deterministic choice between " + edges.size() + " edges");
 
         if (edges.size() < 1) throw new MutationTestingException("Simulation of input " + sync +
-                " yields a no choices. Thus, the component is not input-enabled");
+                " yields no choices. Thus, the component is not input-enabled");
 
         final Location newLoc = edges.get(0).getTargetLocation();
 
