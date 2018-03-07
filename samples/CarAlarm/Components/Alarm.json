@@ -33,7 +33,7 @@
     {
       "id": "L3",
       "nickname": "",
-      "invariant": "x\u003c\u003d21",
+      "invariant": "x\u003c\u003d25",
       "type": "NORMAL",
       "urgency": "NORMAL",
       "x": 340.0,
@@ -47,7 +47,7 @@
     {
       "id": "L4",
       "nickname": "",
-      "invariant": "x\u003c\u003d1",
+      "invariant": "x\u003c\u003d5",
       "type": "NORMAL",
       "urgency": "NORMAL",
       "x": 340.0,
@@ -61,7 +61,7 @@
     {
       "id": "L5",
       "nickname": "",
-      "invariant": "x\u003c\u003d1",
+      "invariant": "x\u003c\u003d5",
       "type": "NORMAL",
       "urgency": "NORMAL",
       "x": 340.0,
@@ -75,7 +75,7 @@
     {
       "id": "L6",
       "nickname": "",
-      "invariant": "x\u003c\u003d1",
+      "invariant": "x\u003c\u003d5",
       "type": "NORMAL",
       "urgency": "NORMAL",
       "x": 340.0,
@@ -89,7 +89,7 @@
     {
       "id": "L7",
       "nickname": "",
-      "invariant": "x\u003c\u003d31",
+      "invariant": "x\u003c\u003d35",
       "type": "NORMAL",
       "urgency": "NORMAL",
       "x": 340.0,
@@ -103,7 +103,7 @@
     {
       "id": "L8",
       "nickname": "",
-      "invariant": "x\u003c\u003d301",
+      "invariant": "x\u003c\u003d305",
       "type": "NORMAL",
       "urgency": "NORMAL",
       "x": 530.0,
@@ -145,7 +145,7 @@
     {
       "id": "L10",
       "nickname": "",
-      "invariant": "x\u003c\u003d1",
+      "invariant": "x\u003c\u003d5",
       "type": "NORMAL",
       "urgency": "NORMAL",
       "x": 450.0,
@@ -159,7 +159,7 @@
     {
       "id": "L11",
       "nickname": "",
-      "invariant": "x\u003c\u003d1",
+      "invariant": "x\u003c\u003d5",
       "type": "NORMAL",
       "urgency": "NORMAL",
       "x": 170.0,
@@ -173,7 +173,7 @@
     {
       "id": "L12",
       "nickname": "",
-      "invariant": "x\u003c\u003d1",
+      "invariant": "x\u003c\u003d5",
       "type": "NORMAL",
       "urgency": "NORMAL",
       "x": 120.0,

@@ -19,6 +19,6 @@
   "invertReset": false,
   "maxGenerationThreads": 10,
   "maxSutInstances": 1,
-  "maxOutputWaitTime": 1,
+  "maxOutputWaitTime": 100,
   "verifytgaTries": 3
 }
