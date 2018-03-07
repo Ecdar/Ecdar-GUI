@@ -7,10 +7,7 @@ import ecdar.abstractions.Location;
 import ecdar.mutation.models.ComponentSimulation;
 import ecdar.utility.ExpressionHelper;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -25,16 +22,14 @@ public class SimpleComponentSimulation implements ComponentSimulation {
     private Location currentLocation;
     private final Map<String, Double> clockValuations = new HashMap<>();
     private final Map<String, Integer> localValuations = new HashMap<>();
-    private final List<String> clocks = new ArrayList<>();
 
     public SimpleComponentSimulation(final Component component) {
         this.component = component;
         currentLocation = component.getInitialLocation();
 
-        component.getClocks().forEach(clock -> {
-            clocks.add(clock);
-            resetClock(clock);
-        });
+        component.getClocks().forEach(this::resetClock);
+
+        component.getLocalVariables().forEach(local -> localValuations.put(local, 0));
     }
 
 
@@ -68,6 +63,10 @@ public class SimpleComponentSimulation implements ComponentSimulation {
         return component;
     }
 
+    public Set<String> getClocks() {
+        return clockValuations.keySet();
+    }
+
     /**
      * Gets clock and local variable valuations.
      * @return the valuations
@@ -91,7 +90,7 @@ public class SimpleComponentSimulation implements ComponentSimulation {
      * @return true iff the delay was run successfully
      */
     public boolean delay(final double time) {
-        clocks.forEach(c -> clockValuations.put(c, clockValuations.get(c) + time));
+        getClocks().forEach(c -> clockValuations.put(c, clockValuations.get(c) + time));
 
         final String invariant = getCurrentLocation().getInvariant();
 
@@ -104,7 +103,7 @@ public class SimpleComponentSimulation implements ComponentSimulation {
      */
     private void runUpdateProperty(final String property) {
         ExpressionHelper.parseUpdate(property, getLocalVariableValuations()).forEach((key, value) -> {
-            if (clocks.contains(key)) resetClock(key);
+            if (getClocks().contains(key)) resetClock(key);
             else getLocalVariableValuations().put(key, value);
         });
     }
