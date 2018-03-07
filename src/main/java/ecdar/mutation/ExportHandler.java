@@ -7,6 +7,7 @@ import ecdar.abstractions.Project;
 import ecdar.abstractions.SimpleComponentsSystemDeclarations;
 import ecdar.backend.BackendException;
 import ecdar.backend.UPPAALDriver;
+import ecdar.mutation.models.MutationTestCase;
 import ecdar.mutation.operators.MutationOperator;
 import ecdar.mutation.models.MutationTestPlan;
 import javafx.application.Platform;
@@ -60,27 +61,27 @@ class ExportHandler {
         final Instant start = Instant.now();
 
         // Mutate with selected operators
-        final List<Component> mutants = new ArrayList<>();
+        final List<MutationTestCase> cases = new ArrayList<>();
         try {
             for (final MutationOperator operator : getPlan().getSelectedMutationOperators())
-                mutants.addAll(operator.generateMutants(getTestModel()));
+                cases.addAll(operator.generateTestCases(getTestModel()));
         } catch (final MutationTestingException e) {
             handleException(e);
             return;
         }
 
-        for (final Component mutant : mutants) {
+        cases.stream().map(MutationTestCase::getMutant).forEach(mutant -> {
             // Name them the same name as the test model
             mutant.setName(getTestModel().getName());
 
             mutant.updateIOList();
-        }
+        });
 
         // Apply angelic completion if selected
         if (getPlan().isAngelicWhenExport())
-            mutants.forEach(Component::applyAngelicCompletion);
+            cases.stream().map(MutationTestCase::getMutant).forEach(Component::applyAngelicCompletion);
 
-        getPlan().setMutantsText("Mutants: " + mutants.size() + " - Execution time: " + MutationTestPlanPresentation.readableFormat(Duration.between(start, Instant.now())));
+        getPlan().setMutantsText("Mutants: " + cases.size() + " - Execution time: " + MutationTestPlanPresentation.readableFormat(Duration.between(start, Instant.now())));
 
 
         try {
@@ -92,8 +93,8 @@ class ExportHandler {
                 FileUtils.forceMkdir(new File(path));
                 FileUtils.cleanDirectory(new File(path));
 
-                for (int i = 0; i < mutants.size(); i++) {
-                    storeMutantXml(mutants.get(i), i);
+                for (final MutationTestCase aCase : cases) {
+                    storeMutantXml(aCase);
                 }
             } else {
                 path = Ecdar.getRootDirectory() + File.separator + "mutants" + File.separator + "json";
@@ -101,8 +102,8 @@ class ExportHandler {
                 FileUtils.forceMkdir(new File(path));
                 FileUtils.cleanDirectory(new File(path));
 
-                for (int i = 0; i < mutants.size(); i++) {
-                    storeMutantJson(mutants.get(i), i);
+                for (final MutationTestCase aCase : cases) {
+                    storeMutantJson(aCase);
                 }
             }
 
@@ -123,13 +124,14 @@ class ExportHandler {
 
     /**
      * Stores a mutant as an XML file.
-     * @param mutant the mutant
-     * @param index the index of the mutant. This is used in the file name
+     * @param testCase test-case containing the mutant
      * @throws BackendException if an error occurs during generation of backend XML
      * @throws IOException if an error occurs during storing of the file
      * @throws URISyntaxException if an error occurs when getting the URL of the root directory
      */
-    private static void storeMutantXml(final Component mutant, final int index) throws BackendException, IOException, URISyntaxException {
+    private static void storeMutantXml(final MutationTestCase testCase) throws BackendException, IOException, URISyntaxException {
+        final Component mutant = testCase.getMutant();
+
         // make a project with the mutant
         final Project project = new Project();
         project.getComponents().add(mutant);
@@ -137,20 +139,19 @@ class ExportHandler {
         mutant.updateIOList(); // Update io in order to get the right system declarations for the mutant
         project.setSystemDeclarations(new SimpleComponentsSystemDeclarations(mutant));
 
-        UPPAALDriver.storeBackendModel(project, "mutants" + File.separator + "xml", "model" + index);
+        UPPAALDriver.storeBackendModel(project, "mutants" + File.separator + "xml", testCase.getId());
     }
 
     /**
      * Stores a mutant as a JSON file.
-     * @param component the mutant
-     * @param index the index of the mutant. This is used in the file name
+     * @param testCase test-case containing the mutant
      * @throws IOException if an error occurs during storing of the file
      * @throws URISyntaxException if an error occurs when getting the URL of the root directory
      */
-    private static void storeMutantJson(final Component component, final int index) throws URISyntaxException, IOException {
-        final FileWriter writer = new FileWriter(Ecdar.getRootDirectory() + File.separator + "mutants" + File.separator + "json" + File.separator + "model" + index + ".json");
+    private static void storeMutantJson(final MutationTestCase testCase) throws URISyntaxException, IOException {
+        final FileWriter writer = new FileWriter(Ecdar.getRootDirectory() + File.separator + "mutants" + File.separator + "json" + File.separator + testCase.getId() + ".json");
 
-        new GsonBuilder().setPrettyPrinting().create().toJson(component.serialize(), writer);
+        new GsonBuilder().setPrettyPrinting().create().toJson(testCase.getMutant().serialize(), writer);
         writer.close();
     }
 
