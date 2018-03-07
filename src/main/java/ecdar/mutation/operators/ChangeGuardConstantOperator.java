@@ -43,7 +43,6 @@ public class ChangeGuardConstantOperator extends MutationOperator {
 
             int index = 0;
             while (matcher.find()) {
-                System.out.println(matcher.start() + ", " + matcher.end() + ", " + matcher.group(1));
                 {
                     final Component mutant = original.cloneForVerification();
                     final Edge mutantEdge = mutant.getEdges().get(edgeIndex);

@@ -67,7 +67,6 @@ public class TestDriver implements ConcurrentJobsHandler {
             NonRefinementStrategy strategy = testCase.getStrategy();
             SimpleComponentSimulation testModelSimulation = new SimpleComponentSimulation(testCase.getTestModel());
             SimpleComponentSimulation mutantSimulation = new SimpleComponentSimulation(testCase.getMutant());
-            System.out.println(testCase.getId());
 
             try {
                 sut = Runtime.getRuntime().exec("java -jar " + Ecdar.projectDirectory.get() + File.separator + getPlan().getSutPath().replace("/", File.separator));
@@ -99,7 +98,6 @@ public class TestDriver implements ConcurrentJobsHandler {
                         }
                     } else {
                         try {
-                            System.out.println(input);
                             testModelSimulation.runInputAction(((ActionRule) rule).getSync());
                             mutantSimulation.runInputAction(((ActionRule) rule).getSync());
                         } catch (MutationTestingException e) {
@@ -149,13 +147,10 @@ public class TestDriver implements ConcurrentJobsHandler {
             if (inputStream.available() == 0) {
                 Thread.sleep(timeUnit);
                 //Do Delay
-                System.out.println(Duration.between(lastUpdateTime.get(), Instant.now()).toMillis());
                 final double waitedTimeUnits = Duration.between(lastUpdateTime.get(), Instant.now()).toMillis()/(double)timeUnit;
                 lastUpdateTime.setValue(Instant.now());
-                System.out.println("Delay " + waitedTimeUnits);
                 if (!testModelSimulation.delay(waitedTimeUnits)) {
                     failed.add(testCase.getId());
-                    System.out.println("Failed2");
                     return Verdict.FAIL;
                 } else {
                     if (!mutantSimulation.delay(waitedTimeUnits)) {
@@ -169,7 +164,6 @@ public class TestDriver implements ConcurrentJobsHandler {
                 final String outputFromSut = readFromSut(input);
                 if (!testModelSimulation.runOutputAction(outputFromSut)) {
                     failed.add(testCase.getId());
-                    System.out.println("Failed1");
                     return Verdict.FAIL;
                 } else if (!mutantSimulation.runOutputAction(outputFromSut)) {
                     passed.add(testCase.getId());
@@ -180,7 +174,6 @@ public class TestDriver implements ConcurrentJobsHandler {
             return Verdict.NONE;
         } catch(InterruptedException | MutationTestingException | IOException e){
             e.printStackTrace();
-            System.out.println("Interrupted");
             inconclusive.add(testCase.getId());
             //Todo stop testing and print error
             return Verdict.INCONCLUSIVE;
