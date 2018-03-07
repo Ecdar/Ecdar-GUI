@@ -136,7 +136,7 @@ public class CarAlarm {
 
     private location L3() {
         try {
-            if (Duration.between(clockX, Instant.now()).toMillis() <= 1900) {
+            if (Duration.between(clockX, Instant.now()).toMillis() <= 2000) {
                 if (System.in.available() != 0) {
                     final String input = reader.readLine();
 
@@ -146,10 +146,10 @@ public class CarAlarm {
                         return location.L2;
                     }
                 } else {
-                    Thread.sleep(100);
+                    Thread.sleep(25);
                     return location.L3;
                 }
-            } else if(Duration.between(clockX, Instant.now()).toMillis() <= 2100){
+            } else {
                 System.out.println(OUTPUT_ARMED_ON);
                 return location.L14;
             }
@@ -209,7 +209,7 @@ public class CarAlarm {
                     clockX = Instant.now();
                     return location.L12;
                 } else {
-                    Thread.sleep(100);
+                    Thread.sleep(25);
                     return location.L8;
                 }
             } else if(Duration.between (clockX, Instant.now()).toMillis() > 30000){
@@ -234,7 +234,7 @@ public class CarAlarm {
                     return location.L0;
                 }
             }
-            Thread.sleep(100);
+            Thread.sleep(25);
             return location.L9;
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
