@@ -145,7 +145,7 @@ public class TestDriver implements ConcurrentJobsHandler {
         try {
             //Check if any output is ready, if there is none, do delay
             if (inputStream.available() == 0) {
-                Thread.sleep(timeUnit);
+                Thread.sleep(timeUnit/4);
                 //Do Delay
                 final double waitedTimeUnits = Duration.between(lastUpdateTime.get(), Instant.now()).toMillis()/(double)timeUnit;
                 lastUpdateTime.setValue(Instant.now());
@@ -193,7 +193,7 @@ public class TestDriver implements ConcurrentJobsHandler {
             try {
                 //Check if any output is ready, if there is none, do delay
                 if (inputStream.available() == 0) {
-                    Thread.sleep(timeUnit);
+                    Thread.sleep(timeUnit/4);
                     //Do Delay
                     final double waitedTimeUnits = Duration.between(lastUpdateTime.get(), Instant.now()).toMillis()/(double)timeUnit;
                     lastUpdateTime.setValue(Instant.now());
