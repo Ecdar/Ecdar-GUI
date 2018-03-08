@@ -33,7 +33,7 @@
     {
       "id": "L3",
       "nickname": "",
-      "invariant": "x\u003c\u003d25",
+      "invariant": "x\u003c\u003d30",
       "type": "NORMAL",
       "urgency": "NORMAL",
       "x": 340.0,

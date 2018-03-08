@@ -167,12 +167,12 @@ public class TestDriver implements ConcurrentJobsHandler {
 
             //Do output if any output happened when sleeping
             if (inputStream.available() != 0) {
-                System.out.println("delay Output");
+                //System.out.println("delay Output");
                 final String outputFromSut = readFromSut(input);
-                Matcher match = Pattern.compile("^Debug: (.*)").matcher(outputFromSut);
+                Matcher match = Pattern.compile("Debug: (.*)").matcher(outputFromSut);
 
                 if(match.find()) {
-                    System.out.println(match.group(1));
+                    //System.out.println(match.group(1));
                 } else if (!testModelSimulation.runOutputAction(outputFromSut)) {
                     failed.add(testCase.getId());
                     return Verdict.FAIL;
@@ -224,7 +224,7 @@ public class TestDriver implements ConcurrentJobsHandler {
                     Matcher match = Pattern.compile("Debug: (.*)").matcher(outputFromSut);
 
                     if(match.find()){
-                        System.out.println(match.group(1));
+                        //System.out.println(match.group(1));
                     } else if (!testModelSimulation.runOutputAction(outputFromSut)) {
                         failed.add(testCase.getId());
                         return Verdict.FAIL;

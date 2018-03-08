@@ -32,7 +32,7 @@ public class CarAlarm {
         reader = new BufferedReader(new InputStreamReader(inputStream));
     }
 
-    void start(){
+    void start() throws IOException, InterruptedException {
         clockX = Instant.now();
         location nextLocation = location.L0;
         while(!nextLocation.equals(location.Done)){
@@ -80,9 +80,9 @@ public class CarAlarm {
                     nextLocation = L14();
                     break;
                 case Done:
-                    return;
+                    break;
             }
-            System.out.println("Debug: " + nextLocation.toString() + ", x=" + clockX.toString());
+            System.out.println("Debug: " + nextLocation.toString() + ", x=" + (Duration.between(clockX, Instant.now()).toMillis() / 100.0));
         }
         return;
     }
@@ -134,27 +134,28 @@ public class CarAlarm {
         return location.Done;
     }
 
-    private location L3() {
-        try {
-            if (Duration.between(clockX, Instant.now()).toMillis() <= 2000) {
-                if (System.in.available() != 0) {
-                    final String input = reader.readLine();
+    private location L3() throws IOException, InterruptedException {
+        boolean timeOk = Duration.between(clockX, Instant.now()).toMillis() <= 2000;
+        System.out.println();
+        if (timeOk) {
+            if (System.in.available() != 0) {
+                System.out.println("Debug: readline L3");
+                final String input = reader.readLine();
+                System.out.println("Debug: readline L3 done " + input);
 
-                    if(input.equals(INPUT_UNLOCK)) {
-                        return location.L1;
-                    } else if(input.equals(INPUT_OPEN)) {
-                        return location.L2;
-                    }
-                } else {
-                    Thread.sleep(25);
-                    return location.L3;
+                if(input.equals(INPUT_UNLOCK)) {
+                    return location.L1;
+                } else if(input.equals(INPUT_OPEN)) {
+                    return location.L2;
                 }
             } else {
-                System.out.println(OUTPUT_ARMED_ON);
-                return location.L14;
+                Thread.sleep(25);
+                return location.L3;
             }
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+        } else {
+            System.out.println("Debug: armed on output");
+            System.out.println(OUTPUT_ARMED_ON);
+            return location.L14;
         }
         return location.Done;
     }
