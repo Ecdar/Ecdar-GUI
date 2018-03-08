@@ -30,7 +30,6 @@ public class CarAlarm {
     CarAlarm(){
         inputStream = System.in;
         reader = new BufferedReader(new InputStreamReader(inputStream));
-        start();
     }
 
     void start(){
@@ -160,11 +159,8 @@ public class CarAlarm {
     }
 
     private location L4(){
-        if(Duration.between(clockX, Instant.now()).toMillis() <= 100){
-            System.out.println(OUTPUT_ARMED_OFF);
-            return location.L5;
-        }
-        return location.Done;
+        System.out.println(OUTPUT_ARMED_OFF);
+        return location.L5;
     }
 
     private location L5(){
@@ -173,29 +169,31 @@ public class CarAlarm {
     }
 
     private location L6() {
-        if(Duration.between(clockX, Instant.now()).toMillis() <= 100) {
-            System.out.println(OUTPUT_SOUND_ON);
-            sound = true;
-            return location.L7;
-        }
-        return location.Done;
+        System.out.println(OUTPUT_SOUND_ON);
+        sound = true;
+        return location.L7;
     }
 
     private location L7() {
         try {
-            if(Duration.between(clockX, Instant.now()).toMillis() <= 3000){
-                    if(inputStream.available() != 0 && reader.readLine().equals(INPUT_UNLOCK)) {
+            if(Duration.between(clockX, Instant.now()).toMillis() <= 3000) {
+                if(inputStream.available() != 0) {
+                    if (reader.readLine().equals(INPUT_UNLOCK)) {
                         clockX = Instant.now();
                         return location.L12;
-                    } else {
-                        return location.L7;
                     }
-            } else if(Duration.between(clockX, Instant.now()).toMillis() > 3000){
+                } else {
+                    Thread.sleep(25);
+                    return location.L7;
+                }
+            } else {
                 System.out.println(OUTPUT_SOUND_OFF);
                 sound = false;
                 return location.L8;
             }
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
         //Error happend
@@ -205,9 +203,11 @@ public class CarAlarm {
     private location L8(){
         try {
             if(Duration.between(clockX, Instant.now()).toMillis() <= 30000){
-                if(inputStream.available() != 0 && reader.readLine().equals(INPUT_UNLOCK)) {
-                    clockX = Instant.now();
-                    return location.L12;
+                if(inputStream.available() != 0 ) {
+                    if (reader.readLine().equals(INPUT_UNLOCK)) {
+                        clockX = Instant.now();
+                        return location.L12;
+                    }
                 } else {
                     Thread.sleep(25);
                     return location.L8;
@@ -227,10 +227,10 @@ public class CarAlarm {
         try {
             if (inputStream.available() != 0) {
                 String input = reader.readLine();
-                if(input.equals(INPUT_CLOSE)) {
+                if (input.equals(INPUT_CLOSE)) {
                     clockX = Instant.now();
                     return location.L10;
-                } else if(input.equals(INPUT_UNLOCK)) {
+                } else if (input.equals(INPUT_UNLOCK)) {
                     return location.L0;
                 }
             }
@@ -249,11 +249,8 @@ public class CarAlarm {
     }
 
     private location L11(){
-        if(Duration.between(clockX, Instant.now()).toMillis() <= 100){
-            System.out.println(OUTPUT_ARMED_OFF);
-            return location.L1;
-        }
-        return location.Done;
+        System.out.println(OUTPUT_ARMED_OFF);
+        return location.L1;
     }
 
     private location L12(){

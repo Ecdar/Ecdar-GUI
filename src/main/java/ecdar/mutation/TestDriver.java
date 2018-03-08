@@ -83,7 +83,7 @@ public class TestDriver implements ConcurrentJobsHandler {
                 StrategyRule rule = strategy.getRule(testModelSimulation, mutantSimulation);
                 if (rule == null) {
                     inconclusive.add(testCase.getId());
-                    onTestDone();
+                    onTestDone(output, sut);
                     return;
                 }
 
@@ -93,10 +93,11 @@ public class TestDriver implements ConcurrentJobsHandler {
                     if (((ActionRule) rule).getStatus() == EdgeStatus.OUTPUT) {
                         Verdict verdict = delayForOutput(testModelSimulation, mutantSimulation, testCase, lastUpdateTime, inputStream, input);
                         if(!verdict.equals(Verdict.NONE)) {
-                            onTestDone();
+                            onTestDone(output, sut);
                             return;
                         }
                     } else {
+                        System.out.println("Input");
                         try {
                             testModelSimulation.runInputAction(((ActionRule) rule).getSync());
                             mutantSimulation.runInputAction(((ActionRule) rule).getSync());
@@ -109,13 +110,13 @@ public class TestDriver implements ConcurrentJobsHandler {
                 } else if (rule instanceof DelayRule) {
                     Verdict verdict = delay(testModelSimulation, mutantSimulation, testCase, lastUpdateTime, inputStream, input);
                     if(!verdict.equals(Verdict.NONE)) {
-                        onTestDone();
+                        onTestDone(output, sut);
                         return;
                     }
                 }
             }
             inconclusive.add(testCase.getId());
-            onTestDone();
+            onTestDone(output, sut);
         }).start();
     }
 
@@ -124,7 +125,9 @@ public class TestDriver implements ConcurrentJobsHandler {
      * It updates UI labels to tell user about the progress.
      * It also updates the jobsDriver about the job progress.
      */
-    private synchronized void onTestDone() {
+    private synchronized void onTestDone(BufferedWriter output, Process sut) {
+        writeToSut("Done", output, sut);
+
         Platform.runLater(() -> getPlan().setTestCasesText("Test-cases: " + mutationTestCases.size() + " - Execution time: " +
                 MutationTestPlanPresentation.readableFormat(Duration.between(generationStart, Instant.now()))));
         Platform.runLater(() -> getPlan().setInconclusiveText("Inconclusive: " + inconclusive.size()));
@@ -161,6 +164,7 @@ public class TestDriver implements ConcurrentJobsHandler {
 
             //Do output if any output happened when sleeping
             if (inputStream.available() != 0) {
+                System.out.println("delay Output");
                 final String outputFromSut = readFromSut(input);
                 if (!testModelSimulation.runOutputAction(outputFromSut)) {
                     failed.add(testCase.getId());
@@ -209,6 +213,7 @@ public class TestDriver implements ConcurrentJobsHandler {
 
                 //Do output if any output happened when sleeping
                 if (inputStream.available() != 0) {
+                    System.out.println("Output");
                     final String outputFromSut = readFromSut(input);
                     if (!testModelSimulation.runOutputAction(outputFromSut)) {
                         failed.add(testCase.getId());
