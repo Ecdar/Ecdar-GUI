@@ -78,6 +78,8 @@ public class TestDriver implements ConcurrentJobsHandler {
                 return;
             }
 
+            System.out.println("\nNew test");
+
             for(int step = 0; step < bound; step++) {
                 // Get rule and check if its empty
                 StrategyRule rule = strategy.getRule(testModelSimulation, mutantSimulation);
@@ -240,6 +242,7 @@ public class TestDriver implements ConcurrentJobsHandler {
      * @param outputBroadcast the string to write to the system under test.
      */
     private void writeToSut(final String outputBroadcast, final BufferedWriter output, final Process sut) {
+        System.out.println("Write input " + outputBroadcast);
         try {
             //Write to process if it is alive, else act like the process accepts but ignore all inputs.
             if(sut.isAlive()) {
@@ -257,7 +260,9 @@ public class TestDriver implements ConcurrentJobsHandler {
      */
     private String readFromSut(BufferedReader input) {
         try {
-            return input.readLine();
+            final String line = input.readLine();
+            System.out.println("Read output " + line);
+            return line;
         } catch (final IOException e) {
             e.printStackTrace();
         }
