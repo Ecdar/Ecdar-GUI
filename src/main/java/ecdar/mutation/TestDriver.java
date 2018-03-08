@@ -101,7 +101,6 @@ public class TestDriver implements ConcurrentJobsHandler {
                             return;
                         }
                     } else {
-                        System.out.println("Input");
                         try {
                             testModelSimulation.runInputAction(((ActionRule) rule).getSync());
                             mutantSimulation.runInputAction(((ActionRule) rule).getSync());
@@ -221,11 +220,8 @@ public class TestDriver implements ConcurrentJobsHandler {
 
                 //Do output if any output happened when sleeping
                 if (inputStream.available() != 0) {
-                    System.out.println("Output");
-
-                    //Debugging
                     final String outputFromSut = readFromSut(input);
-                    Matcher match = Pattern.compile("^Debug: (.*)").matcher(outputFromSut);
+                    Matcher match = Pattern.compile("Debug: (.*)").matcher(outputFromSut);
 
                     if(match.find()){
                         System.out.println(match.group(1));

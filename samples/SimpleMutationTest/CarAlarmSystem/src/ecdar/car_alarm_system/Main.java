@@ -7,5 +7,6 @@ public class Main {
     public static void main(String[] args) {
         CarAlarm alarm = new CarAlarm();
         alarm.start();
+        System.out.println("Debug: Done");
     }
 }

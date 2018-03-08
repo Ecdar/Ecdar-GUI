@@ -82,6 +82,7 @@ public class CarAlarm {
                 case Done:
                     return;
             }
+            System.out.println("Debug: " + nextLocation.toString() + ", x=" + clockX.toString());
         }
         return;
     }
