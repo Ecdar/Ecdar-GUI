@@ -14,6 +14,8 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A test driver that runs testcases on a system under test (sut).
@@ -168,7 +170,11 @@ public class TestDriver implements ConcurrentJobsHandler {
             if (inputStream.available() != 0) {
                 System.out.println("delay Output");
                 final String outputFromSut = readFromSut(input);
-                if (!testModelSimulation.runOutputAction(outputFromSut)) {
+                Matcher match = Pattern.compile("^Debug: (.*)").matcher(outputFromSut);
+
+                if(match.find()) {
+                    System.out.println(match.group(1));
+                } else if (!testModelSimulation.runOutputAction(outputFromSut)) {
                     failed.add(testCase.getId());
                     return Verdict.FAIL;
                 } else if (!mutantSimulation.runOutputAction(outputFromSut)) {
@@ -216,8 +222,14 @@ public class TestDriver implements ConcurrentJobsHandler {
                 //Do output if any output happened when sleeping
                 if (inputStream.available() != 0) {
                     System.out.println("Output");
+
+                    //Debugging
                     final String outputFromSut = readFromSut(input);
-                    if (!testModelSimulation.runOutputAction(outputFromSut)) {
+                    Matcher match = Pattern.compile("^Debug: (.*)").matcher(outputFromSut);
+
+                    if(match.find()){
+                        System.out.println(match.group(1));
+                    } else if (!testModelSimulation.runOutputAction(outputFromSut)) {
                         failed.add(testCase.getId());
                         return Verdict.FAIL;
                     } else if (!mutantSimulation.runOutputAction(outputFromSut)) {
