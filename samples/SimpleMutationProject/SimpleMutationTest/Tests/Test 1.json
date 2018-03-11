@@ -10,12 +10,15 @@
   "changeActionOutputs": true,
   "changeSource": true,
   "changeTarget": true,
-  "changeGuard": true,
+  "changeGuardConstant": true,
+  "changeGuardOpClocks": true,
+  "changeGuardOpLocals": true,
   "changeVarUpdate": true,
   "changeInvariant": true,
   "sinkLocation": true,
   "invertReset": true,
   "maxGenerationThreads": 10,
-  "maxSutInstances": 40,
-  "maxOutputWaitTime": 5
+  "maxSutInstances": 1,
+  "maxOutputWaitTime": 5,
+  "verifytgaTries": 3
 }

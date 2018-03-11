@@ -136,7 +136,6 @@ public class CarAlarm {
 
     private location L3() throws IOException, InterruptedException {
         boolean timeOk = Duration.between(clockX, Instant.now()).toMillis() <= 2000;
-        System.out.println();
         if (timeOk) {
             if (System.in.available() != 0) {
                 System.out.println("Debug: readline L3");
@@ -149,11 +148,14 @@ public class CarAlarm {
                     return location.L2;
                 }
             } else {
+                System.out.println("Debug: before sleep");
                 Thread.sleep(25);
+                System.out.println("Debug: after sleep");
                 return location.L3;
             }
         } else {
             System.out.println("Debug: armed on output");
+            System.out.println(clockX);
             System.out.println(OUTPUT_ARMED_ON);
             return location.L14;
         }

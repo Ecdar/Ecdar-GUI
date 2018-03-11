@@ -55,6 +55,12 @@ public class SimpleComponentSimulation implements ComponentSimulation {
         return clockValuations;
     }
 
+    public Map<String, Double> getFullyQuantifiedClockValuations() {
+        final Map<String, Double> clocks = new HashMap<>();
+        getClockValuations().forEach((key, value) -> clocks.put(getName() + "." + key, value));
+        return clocks;
+    }
+
     public Location getCurrentLocation() {
         return currentLocation;
     }
