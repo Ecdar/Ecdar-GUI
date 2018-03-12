@@ -16,9 +16,10 @@ public class Main {
         x = Instant.now();
         try {
             input = reader.readLine();
-                if (input.equals("c") && Duration.between(x, Instant.now()).toMillis() >= 3000 && Duration.between(x, Instant.now()).toMillis() <= 6000) {
-                if (Duration.between(x, Instant.now()).toMillis() <= 6000) {
+            if (input.equals("c") && Duration.between(x, Instant.now()).toMillis() >= 3000 && Duration.between(x, Instant.now()).toMillis() <= 6000) {
+                if (Duration.between(x, Instant.now()).toMillis() <= 8000) {
                     System.out.println("a");
+
                 }
             }
         } catch (IOException e) {
