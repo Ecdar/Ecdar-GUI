@@ -58,8 +58,8 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
             root.setLayoutY(newNail.getY());
 
             // Reflect future updates from the presentation into the abstraction
-            newNail.xProperty().bind(root.layoutXProperty());
-            newNail.yProperty().bind(root.layoutYProperty());
+            newNail.xProperty().bindBidirectional(root.layoutXProperty());
+            newNail.yProperty().bindBidirectional(root.layoutYProperty());
 
         });
 

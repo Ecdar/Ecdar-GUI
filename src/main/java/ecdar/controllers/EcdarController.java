@@ -99,6 +99,11 @@ public class EcdarController implements Initializable {
     public JFXButton switchToOutputButton;
     public JFXToggleButton switchEdgeStatusButton;
 
+    public MenuItem menuEditMoveLeft;
+    public MenuItem menuEditMoveUp;
+    public MenuItem menuEditMoveRight;
+    public MenuItem menuEditMoveDown;
+
     private double expandHeight = 300;
 
     public final Transition expandMessagesContainer = new Transition() {
@@ -440,6 +445,8 @@ public class EcdarController implements Initializable {
 
         initializeFileExportAsPng();
 
+        initializeEditMenu();
+
         initializeViewMenu();
 
         initializeUICacheMenuElement();
@@ -454,6 +461,40 @@ public class EcdarController implements Initializable {
         menuBarOptionsCache.setOnAction(event -> {
             final BooleanProperty isCached = Ecdar.toggleUICache();
             menuBarOptionsCache.getGraphic().opacityProperty().bind(new When(isCached).then(1).otherwise(0));
+        });
+    }
+
+    private void initializeEditMenu() {
+        menuEditMoveLeft.setAccelerator(new KeyCodeCombination(KeyCode.LEFT, KeyCombination.CONTROL_DOWN));
+        menuEditMoveLeft.setOnAction(event -> {
+            final HighLevelModelObject activeModel = CanvasController.getActiveModel();
+
+            if (activeModel instanceof Component) ((Component) activeModel).moveAllNodesLeft();
+            else Ecdar.showToast("This can only be performed on components.");
+        });
+
+        menuEditMoveRight.setAccelerator(new KeyCodeCombination(KeyCode.RIGHT, KeyCombination.CONTROL_DOWN));
+        menuEditMoveRight.setOnAction(event -> {
+            final HighLevelModelObject activeModel = CanvasController.getActiveModel();
+
+            if (activeModel instanceof Component) ((Component) activeModel).moveAllNodesRight();
+            else Ecdar.showToast("This can only be performed on components.");
+        });
+
+        menuEditMoveUp.setAccelerator(new KeyCodeCombination(KeyCode.UP, KeyCombination.CONTROL_DOWN));
+        menuEditMoveUp.setOnAction(event -> {
+            final HighLevelModelObject activeModel = CanvasController.getActiveModel();
+
+            if (activeModel instanceof Component) ((Component) activeModel).moveAllNodesUp();
+            else Ecdar.showToast("This can only be performed on components.");
+        });
+
+        menuEditMoveDown.setAccelerator(new KeyCodeCombination(KeyCode.DOWN, KeyCombination.CONTROL_DOWN));
+        menuEditMoveDown.setOnAction(event -> {
+            final HighLevelModelObject activeModel = CanvasController.getActiveModel();
+
+            if (activeModel instanceof Component) ((Component) activeModel).moveAllNodesDown();
+            else Ecdar.showToast("This can only be performed on components.");
         });
     }
 
