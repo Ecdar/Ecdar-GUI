@@ -10,6 +10,7 @@ import javafx.beans.property.StringProperty;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
+import javax.sound.midi.SysexMessage;
 import java.io.*;
 import java.time.Duration;
 import java.time.Instant;
@@ -18,6 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A test driver that runs testcases on a system under test (sut).
@@ -97,14 +100,13 @@ public class TestDriver implements ConcurrentJobsHandler {
                     // Get rule and check if its empty
                     StrategyRule rule = strategy.getRule(testModelSimulation, mutantSimulation);
                     if (rule == null) {
-                        message.setValue("No rule to perform\n" +
-                                "Test model is in location: " + testModelSimulation.getCurrentLocation() + " with values: " + testModelSimulation.getAllValuations() + "\nMutant is in location: " + mutantSimulation.getCurrentLocation() + "with values: " + mutantSimulation.getAllValuations());
+                        message.setValue("No rule to perform\n");
                         verdict = Verdict.INCONCLUSIVE;
                     } else {
                             //Check if rule is an delay rule or output action rule, if it is either, perform delay,
                             // if it is an input action perform input
                             if (rule instanceof DelayRule || (rule instanceof ActionRule && ((ActionRule) rule).getStatus() == EdgeStatus.OUTPUT)) {
-                                verdict = delay(rule, testModelSimulation, mutantSimulation, testCase, lastUpdateTime, inputStream, input, message);
+                                verdict = delay(rule, testModelSimulation, mutantSimulation, lastUpdateTime, inputStream, input, message);
                             } else {
                                 String sync = ((ActionRule) rule).getSync();
                                 testModelSimulation.runInputAction(sync);
@@ -116,7 +118,7 @@ public class TestDriver implements ConcurrentJobsHandler {
                 }
 
                 //Finish test, we now know that either the verdict has been set or the time ran out
-                onTestDone(output, sut, verdict, testCase, message);
+                onTestDone(output, sut, verdict, testCase, message, testModelSimulation, mutantSimulation);
             } catch (MutationTestingException | IOException e) {
                 if (getPlan().getStatus().equals(MutationTestPlan.Status.WORKING)) {
                     getPlan().setStatus(MutationTestPlan.Status.ERROR);
@@ -137,15 +139,25 @@ public class TestDriver implements ConcurrentJobsHandler {
      * Is triggered when a test-case execution is done.
      * It updates UI labels to tell user about the progress.
      * It also updates the jobsDriver about the job progress.
+     * @param output the buffered writer to write the output to
+     * @param sut the process to write to
+     * @param verdict the verdict that was given at the end of the test
+     * @param testCase the testcase that was running on the system under test
+     * @param message the message given by the result of this test
+     * @param testModelSimulation the test model simulation
+     * @param mutantSimulation the mutant model simulation
+     * @throws IOException
      */
-    private synchronized void onTestDone(BufferedWriter output, Process sut, Verdict verdict, MutationTestCase testCase, StringProperty message) throws IOException {
+    private synchronized void onTestDone(BufferedWriter output, Process sut, Verdict verdict, MutationTestCase testCase, StringProperty message, SimpleComponentSimulation testModelSimulation, SimpleComponentSimulation mutantSimulation) throws IOException {
         //We treat a none verdict the same as inconclusive, as it should only be none if the bound has been surpassed
         switch (verdict) {
             case NONE:
             case INCONCLUSIVE:
                 inconclusive.add(testCase.getId());
-                Platform.runLater(() -> getPlan().setInconclusiveText("Inconclusive: " + inconclusive.size()));
-                getPlan().getFailedMessageList().add(testCase + "reached inconclusive with message: " + message.get());
+                Platform.runLater(() -> {
+                    getPlan().setInconclusiveText("Inconclusive: " + inconclusive.size());
+                    getPlan().getInconclusiveMessageList().add(testCase.getId() + " " + testCase.getDescription() + ":\n" + "Reached inconclusive with message: " + message.get() + "Test model is in location: " + testModelSimulation.getCurrentLocation().getId() + " with values: " + testModelSimulation.getAllValuations() + "\nMutant is in location: " + mutantSimulation.getCurrentLocation().getId() + " with values: " + mutantSimulation.getAllValuations());
+                });
                 break;
             case PASS:
                 passed.add(testCase.getId());
@@ -154,10 +166,9 @@ public class TestDriver implements ConcurrentJobsHandler {
             case FAIL:
                 failed.add(testCase.getId());
                 Platform.runLater(() -> {
-                    getPlan().setInconclusiveText("Failed: " + failed.size());
-                    getPlan().getFailedMessageList().add(testCase + "failed with message: " + message.get());
+                    getPlan().setFailedText("Failed: " + failed.size());
+                    getPlan().getFailedMessageList().add(testCase.getId() + " " + testCase.getDescription() + ":\n" + "Failed with message: " + message.get() + "Test model is in location: " + testModelSimulation.getCurrentLocation().getId() + " with values: " + testModelSimulation.getAllValuations() + "\nMutant is in location: " + mutantSimulation.getCurrentLocation().getId() + " with values: " + mutantSimulation.getAllValuations());
                 });
-
                 break;
         }
 
@@ -173,10 +184,9 @@ public class TestDriver implements ConcurrentJobsHandler {
      * performs a delay on the simulations and itself and checks if the system under test made an output during the delay.
      * @param testModelSimulation simulation representing the test model.
      * @param mutantSimulation simulation representing the mutated model.
-     * @param testCase that is being performed.
      * @return a verdict, it is NONE if no verdict were reached from this delay.
      */
-    private Verdict delay(final StrategyRule rule, final SimpleComponentSimulation testModelSimulation, final SimpleComponentSimulation mutantSimulation, final MutationTestCase testCase, ObjectProperty<Instant> lastUpdateTime, final InputStream inputStream, final BufferedReader input, final StringProperty message) throws MutationTestingException {
+    private Verdict delay(final StrategyRule rule, final SimpleComponentSimulation testModelSimulation, final SimpleComponentSimulation mutantSimulation, ObjectProperty<Instant> lastUpdateTime, final InputStream inputStream, final BufferedReader input, final StringProperty message) throws MutationTestingException {
         try {
             Instant delayDuration = Instant.now();
             Map<String, Double> clockValuations = getClockValuations(testModelSimulation, mutantSimulation);
@@ -187,20 +197,30 @@ public class TestDriver implements ConcurrentJobsHandler {
 
                 //Check if the maximum waittime has been exceeded, if it is, give inconclusive verdict
                 if (!(Duration.between(delayDuration, Instant.now()).toMillis()/(double)timeUnit <= testPlan.getOutputWaitTime())){
-                    message.setValue("Maximum wait time reached without recieving an output.\n" +
-                            "Test model is in location: " + testModelSimulation.getCurrentLocation() + " with values: " + testModelSimulation.getAllValuations() + "\nMutant is in location: " + mutantSimulation.getCurrentLocation() + "with values: " + mutantSimulation.getAllValuations());
+                    message.setValue("Maximum wait time reached without recieving an output.\n");
                     return Verdict.INCONCLUSIVE;
                 }
                 String output;
                 Thread.sleep(timeUnit/4);
                 if (!simulateDelay(testModelSimulation, mutantSimulation, lastUpdateTime)) {
-                    message.setValue("Failed simulating delay on test model\n" +
-                            "Test model is in location: " + testModelSimulation.getCurrentLocation() + " with values: " + testModelSimulation.getAllValuations() + "\nMutant is in location: " + mutantSimulation.getCurrentLocation() + "with values: " + mutantSimulation.getAllValuations());
+                    message.setValue("Failed simulating delay on test model\n");
                     return Verdict.FAIL;
                 }
                 if(inputStream.available() != 0){
                     output = input.readLine();
-                    return simulateOutput(testModelSimulation, mutantSimulation, output, message);
+
+                    if (output == null) {
+                        message.setValue("Program terminated before we reached a proper verdict.\n");
+                        return Verdict.INCONCLUSIVE;
+                    }
+                    //Catch SUT debug commands
+                    Matcher match = Pattern.compile("Debug: (.*)").matcher(output);
+                    if(match.find()) {
+                        System.out.println(match.group(1));
+                    } else {
+                        return simulateOutput(testModelSimulation, mutantSimulation, output, message);
+                    }
+
                 }
                 clockValuations = getClockValuations(testModelSimulation, mutantSimulation);
             }
@@ -235,13 +255,8 @@ public class TestDriver implements ConcurrentJobsHandler {
      * @throws MutationTestingException if an exception occured
      */
     private Verdict simulateOutput(SimpleComponentSimulation testModelSimulation, SimpleComponentSimulation mutantSimulation, String output, StringProperty message) throws MutationTestingException {
-        if (output == null){
-            message.setValue("Program terminated before we reached a proper verdict.\n" +
-                    "Test model is in location: " + testModelSimulation.getCurrentLocation() + " with values: " + testModelSimulation.getAllValuations() + "\nMutant is in location: " + mutantSimulation.getCurrentLocation() + "with values: " + mutantSimulation.getAllValuations());
-            return Verdict.INCONCLUSIVE;
-        } else if (!testModelSimulation.runOutputAction(output)){
-            message.setValue("Failed simulating output " + output + " on test model.\n" +
-                    "Test model is in location: " + testModelSimulation.getCurrentLocation() + " with values: " + testModelSimulation.getAllValuations() + "\nMutant is in location: " + mutantSimulation.getCurrentLocation() + "with values: " + mutantSimulation.getAllValuations());
+        if (!testModelSimulation.runOutputAction(output)){
+            message.setValue("Failed simulating output " + output + " on test model.\n");
             return Verdict.FAIL;
         } else if (!mutantSimulation.runOutputAction(output)){
             return Verdict.PASS;

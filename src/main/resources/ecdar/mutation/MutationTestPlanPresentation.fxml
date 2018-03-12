@@ -87,7 +87,9 @@
                     <Label fx:id="testCasesText"/>
                     <Label fx:id="passedText"/>
                     <Label fx:id="inconclusiveText"/>
+                    <ListView fx:id="inconclusiveMessageList"/>
                     <Label fx:id="failedText"/>
+                    <ListView fx:id="failedMessageList"/>
                 </VBox>
             </VBox>
         </VBox>

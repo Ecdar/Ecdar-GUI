@@ -6,6 +6,7 @@ import ecdar.Ecdar;
 import ecdar.abstractions.HighLevelModelObject;
 import ecdar.mutation.operators.MutationOperator;
 import javafx.beans.property.*;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.util.ArrayList;
@@ -57,9 +58,9 @@ public class MutationTestPlan extends HighLevelModelObject {
     private final StringProperty testCasesText = new SimpleStringProperty("");
     private final StringProperty passedText = new SimpleStringProperty("");
     private final StringProperty InconclusiveText = new SimpleStringProperty("");
-    private final ListProperty<String> inconclusiveMessageList = new SimpleListProperty<>();
+    private final ListProperty<String> inconclusiveMessageList = new SimpleListProperty<>(FXCollections.observableArrayList());
     private final StringProperty FailedText = new SimpleStringProperty("");
-    private final ListProperty<String> failedMessageList = new SimpleListProperty<>();
+    private final ListProperty<String> failedMessageList = new SimpleListProperty<>(FXCollections.observableArrayList());
 
     // For exporting
     private final BooleanProperty angelicWhenExport = new SimpleBooleanProperty(false);
@@ -270,7 +271,8 @@ public class MutationTestPlan extends HighLevelModelObject {
 
     public ObservableList<String> getInconclusiveMessageList() { return inconclusiveMessageList.get(); }
 
-    public ListProperty<String> inconclusiveMessageListProperty() { return inconclusiveMessageList; }
+    public ListProperty<String> inconclusiveMessageListProperty() {
+        return inconclusiveMessageList; }
 
     public int getVerifytgaTries() {
         return verifytgaTries.get();

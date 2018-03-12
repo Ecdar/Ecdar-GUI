@@ -94,7 +94,9 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         controller.testCasesText.textProperty().bind(controller.getPlan().testCasesTextProperty());
         controller.passedText.textProperty().bind(controller.getPlan().passedTextProperty());
         controller.inconclusiveText.textProperty().bind(controller.getPlan().inconclusiveTextProperty());
+        controller.inconclusiveMessageList.itemsProperty().bind(controller.getPlan().inconclusiveMessageListProperty());
         controller.failedText.textProperty().bind(controller.getPlan().failedTextProperty());
+        controller.failedMessageList.itemsProperty().bind(controller.getPlan().failedMessageListProperty());
     }
 
     /**

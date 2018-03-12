@@ -9,6 +9,7 @@ import ecdar.abstractions.Component;
 import ecdar.mutation.models.MutationTestCase;
 import ecdar.mutation.models.MutationTestPlan;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -69,6 +70,8 @@ public class MutationTestPlanController {
     public Label failedText;
     public StackPane root;
     public JFXTextField verifytgaTriesField;
+    public ListView inconclusiveMessageList;
+    public ListView failedMessageList;
 
 
     /* Mutation fields */
@@ -100,7 +103,7 @@ public class MutationTestPlanController {
         // Clone it, because we want to change its name
         final Component testModel = Ecdar.getProject().findComponent(modelPicker.getValue().getText()).cloneForVerification();
 
-        Consumer<List<MutationTestCase>> runTestDriver = (mutationTestCases) -> new TestDriver(mutationTestCases, plan, this::writeProgress,100, 100).start();
+        Consumer<List<MutationTestCase>> runTestDriver = (mutationTestCases) -> new TestDriver(mutationTestCases, plan, this::writeProgress,1000, 100).start();
 
         new TestCaseGenerationHandler(getPlan(), testModel, this::writeProgress, runTestDriver).start();
     }
