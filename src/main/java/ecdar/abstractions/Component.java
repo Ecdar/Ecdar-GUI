@@ -819,12 +819,7 @@ public class Component extends HighLevelModelObject implements Boxed {
      * Moves all nodes one grid size left.
      */
     public void moveAllNodesLeft() {
-        getLocations().forEach(loc -> {
-            loc.setX(loc.getX() - Grid.GRID_SIZE);
-            loc.setInvariantX(loc.getInvariantX() - Grid.GRID_SIZE);
-            loc.setNicknameX(loc.getNicknameX() - Grid.GRID_SIZE);
-        });
-
+        getLocations().forEach(loc -> loc.setX(loc.getX() - Grid.GRID_SIZE));
         getEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setX(nail.getX() - Grid.GRID_SIZE)));
     }
 
@@ -832,12 +827,7 @@ public class Component extends HighLevelModelObject implements Boxed {
      * Moves all nodes one grid size right.
      */
     public void moveAllNodesRight() {
-        getLocations().forEach(loc -> {
-            loc.setX(loc.getX() + Grid.GRID_SIZE);
-            loc.setInvariantX(loc.getInvariantX() + Grid.GRID_SIZE);
-            loc.setNicknameX(loc.getNicknameX() + Grid.GRID_SIZE);
-        });
-
+        getLocations().forEach(loc -> loc.setX(loc.getX() + Grid.GRID_SIZE));
         getEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setX(nail.getX() + Grid.GRID_SIZE)));
     }
 
@@ -845,12 +835,7 @@ public class Component extends HighLevelModelObject implements Boxed {
      * Moves all nodes one grid size down.
      */
     public void moveAllNodesDown() {
-        getLocations().forEach(loc -> {
-            loc.setY(loc.getY() + Grid.GRID_SIZE);
-            loc.setInvariantY(loc.getInvariantY() + Grid.GRID_SIZE);
-            loc.setNicknameY(loc.getNicknameY() + Grid.GRID_SIZE);
-        });
-
+        getLocations().forEach(loc -> loc.setY(loc.getY() + Grid.GRID_SIZE));
         getEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setY(nail.getY() + Grid.GRID_SIZE)));
     }
 
@@ -858,12 +843,7 @@ public class Component extends HighLevelModelObject implements Boxed {
      * Moves all nodes one grid size up.
      */
     public void moveAllNodesUp() {
-        getLocations().forEach(loc -> {
-            loc.setY(loc.getY() - Grid.GRID_SIZE);
-            loc.setInvariantY(loc.getInvariantY() - Grid.GRID_SIZE);
-            loc.setNicknameY(loc.getNicknameY() - Grid.GRID_SIZE);
-        });
-
+        getLocations().forEach(loc -> loc.setY(loc.getY() - Grid.GRID_SIZE));
         getEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setY(nail.getY() - Grid.GRID_SIZE)));
     }
 }
