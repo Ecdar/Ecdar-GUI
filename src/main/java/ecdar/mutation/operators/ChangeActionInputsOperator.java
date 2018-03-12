@@ -47,7 +47,7 @@ public class ChangeActionInputsOperator extends ChangeActionOperator {
     @Override
     public String getDescription() {
         return "Changes the action of an edge to an arbitrary input action. " +
-                "Creates [# of input edges] * ([# of input actions in the I/O signature] - 1) + " +
+                "Creates up to [# of input edges] * ([# of input actions in the I/O signature] - 1) + " +
                 "[# of output edges] * [# of input actions in the I/O signature]  mutants.";
     }
 }
