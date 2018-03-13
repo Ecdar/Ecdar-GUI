@@ -195,19 +195,13 @@ public class TestDriver implements ConcurrentJobsHandler {
             //Will return inside while loop if maximum wait time is exceeded or an output has been given
             while((rule.isSatisfied(clockValuations))) {
 
-                //Check if the maximum waittime has been exceeded, if it is, give inconclusive verdict
+                //Check if the maximum wait time has been exceeded, if it is, give inconclusive verdict
                 if (!(Duration.between(delayDuration, Instant.now()).toMillis()/(double)timeUnit <= testPlan.getOutputWaitTime())){
                     message.setValue("Maximum wait time reached without recieving an output.\n");
                     return Verdict.INCONCLUSIVE;
                 }
-                String output;
-                Thread.sleep(timeUnit/4);
-                if (!simulateDelay(testModelSimulation, mutantSimulation, lastUpdateTime)) {
-                    message.setValue("Failed simulating delay on test model\n");
-                    return Verdict.FAIL;
-                }
                 if(inputStream.available() != 0){
-                    output = input.readLine();
+                    String output = input.readLine();
 
                     if (output == null) {
                         message.setValue("Program terminated before we reached a proper verdict.\n");
@@ -221,6 +215,12 @@ public class TestDriver implements ConcurrentJobsHandler {
                         return simulateOutput(testModelSimulation, mutantSimulation, output, message);
                     }
 
+                } else {
+                    Thread.sleep(timeUnit / 4);
+                    if (!simulateDelay(testModelSimulation, mutantSimulation, lastUpdateTime)) {
+                        message.setValue("Failed simulating delay on test model\n");
+                        return Verdict.FAIL;
+                    }
                 }
                 clockValuations = getClockValuations(testModelSimulation, mutantSimulation);
             }
