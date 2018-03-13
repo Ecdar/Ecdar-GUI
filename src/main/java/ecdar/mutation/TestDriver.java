@@ -219,10 +219,11 @@ public class TestDriver implements ConcurrentJobsHandler {
                     }
 
                 } else {
+                    Verdict verdict;
                     Thread.sleep(timeUnit / 4);
-                    if (!simulateDelay(testModelSimulation, mutantSimulation, lastUpdateTime)) {
-                        message.setValue("Failed simulating delay on test model\n");
-                        return Verdict.FAIL;
+                    verdict = simulateDelay(testModelSimulation, mutantSimulation, lastUpdateTime, message);
+                    if(!verdict.equals(Verdict.NONE)){
+                        return verdict;
                     }
                 }
                 clockValuations = getClockValuations(testModelSimulation, mutantSimulation);
@@ -279,17 +280,18 @@ public class TestDriver implements ConcurrentJobsHandler {
      * @return true if the delay was simulated successfully, false if it failed on the test model.
      * @throws MutationTestingException if the simulation failed on the mutant model.
      */
-    private boolean simulateDelay(SimpleComponentSimulation testModelSimulation, SimpleComponentSimulation mutantSimulation, ObjectProperty<Instant> lastUpdateTime) throws MutationTestingException {
+    private Verdict simulateDelay(SimpleComponentSimulation testModelSimulation, SimpleComponentSimulation mutantSimulation, ObjectProperty<Instant> lastUpdateTime, StringProperty message) throws MutationTestingException {
         final double waitedTimeUnits = Duration.between(lastUpdateTime.get(), Instant.now()).toMillis() / (double) timeUnit;
         lastUpdateTime.setValue(Instant.now());
         if (!testModelSimulation.delay(waitedTimeUnits)) {
-            return false;
+            message.setValue("Failed simulating delay on test model\n");
+            return Verdict.FAIL;
+        } else if (!mutantSimulation.delay(waitedTimeUnits)) {
+            return Verdict.PASS;
         } else {
-            if (!mutantSimulation.delay(waitedTimeUnits)) {
-                throw new MutationTestingException("Mutant could not be delayed, while the simulation could, this should not happen");
-            }
+            return Verdict.NONE;
         }
-        return true;
+
     }
 
     /**
