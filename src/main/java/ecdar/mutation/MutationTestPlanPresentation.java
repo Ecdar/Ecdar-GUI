@@ -71,6 +71,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         initializePositiveIntegerTextField(controller.suvInstancesField, controller.getPlan().maxSutInstancesProperty());
         initializePositiveIntegerTextField(controller.outputWaitTimeField, controller.getPlan().outputWaitTimeProperty());
         initializePositiveIntegerTextField(controller.verifytgaTriesField, controller.getPlan().verifytgaTriesProperty());
+        initializePositiveIntegerTextField(controller.timeUnitField, controller.getPlan().timeUnitProperty());
 
         controller.demonicCheckBox.selectedProperty().bindBidirectional(controller.getPlan().demonicProperty());
         controller.angelicBox.selectedProperty().bindBidirectional(controller.getPlan().angelicWhenExportProperty());
@@ -235,6 +236,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         regions.add(controller.sutPathLabel);
         regions.add(controller.exportDependantArea);
         regions.add(controller.outputWaitTimeBox);
+        regions.add(controller.timeUnitBox);
 
         return regions;
     }

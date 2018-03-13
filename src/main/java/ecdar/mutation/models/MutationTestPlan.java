@@ -38,6 +38,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     private static final String MAX_SUT_INSTANCES = "maxSutInstances";
     private static final String MAX_OUTPUT_WAIT_TIME = "maxOutputWaitTime";
     private static final String VERIFYTGA_TRIES = "verifytgaTries";
+    private static final String TIME_UNIT = "timeUnit";
 
     // General fields
     private final StringProperty testModelId = new SimpleStringProperty("");
@@ -52,6 +53,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     private final IntegerProperty concurrentSutInstances = new SimpleIntegerProperty(1);
     private final IntegerProperty maxOutputWaitTime = new SimpleIntegerProperty(5);
     private final IntegerProperty verifytgaTries = new SimpleIntegerProperty(3);
+    private final IntegerProperty timeUnit = new SimpleIntegerProperty(1000);
 
     // Temporary values for displaying results of testing
     private final StringProperty mutantsText = new SimpleStringProperty("");
@@ -209,20 +211,20 @@ public class MutationTestPlan extends HighLevelModelObject {
         return concurrentSutInstances.get();
     }
 
-    public int getOutputWaitTime() {
-        return maxOutputWaitTime.get();
-    }
-
     public IntegerProperty maxSutInstancesProperty() {
         return concurrentSutInstances;
     }
 
-    public IntegerProperty outputWaitTimeProperty() {
-        return maxOutputWaitTime;
-    }
-
     public void setConcurrentSutInstances(final int concurrentSutInstances) {
         this.concurrentSutInstances.set(concurrentSutInstances);
+    }
+
+    public int getOutputWaitTime() {
+        return maxOutputWaitTime.get();
+    }
+
+    public IntegerProperty outputWaitTimeProperty() {
+        return maxOutputWaitTime;
     }
 
     public void setOutputWaitTime(final int outputWaitTime){
@@ -285,6 +287,19 @@ public class MutationTestPlan extends HighLevelModelObject {
     public void setVerifytgaTries(final int verifytgaTries) {
         this.verifytgaTries.set(verifytgaTries);
     }
+
+    public int getTimeUnit() {
+        return timeUnit.get();
+    }
+
+    public IntegerProperty timeUnitProperty() {
+        return timeUnit;
+    }
+
+    public void setTimeUnit(final int timeUnit) {
+        this.timeUnit.set(timeUnit);
+    }
+
     /* Other methods */
 
     @Override
@@ -304,6 +319,7 @@ public class MutationTestPlan extends HighLevelModelObject {
         result.addProperty(MAX_SUT_INSTANCES, getConcurrentSutInstances());
         result.addProperty(MAX_OUTPUT_WAIT_TIME, getOutputWaitTime());
         result.addProperty(VERIFYTGA_TRIES, getVerifytgaTries());
+        result.addProperty(TIME_UNIT, getTimeUnit());
 
         return result;
     }
@@ -336,6 +352,9 @@ public class MutationTestPlan extends HighLevelModelObject {
 
         primitive = json.getAsJsonPrimitive(VERIFYTGA_TRIES);
         if (primitive != null) setVerifytgaTries(primitive.getAsInt());
+
+        primitive = json.getAsJsonPrimitive(TIME_UNIT);
+        if (primitive != null) setTimeUnit(primitive.getAsInt());
     }
 
 

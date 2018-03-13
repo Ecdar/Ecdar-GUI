@@ -32,6 +32,8 @@ public class MutationTestPlanController {
     public final static String SPEC_NAME = "S";
     public final static String MUTANT_NAME = "M";
 
+    private static final int TEST_STEP_BOUND = 100;
+
 
     /* UI elements */
 
@@ -72,6 +74,8 @@ public class MutationTestPlanController {
     public JFXTextField verifytgaTriesField;
     public ListView inconclusiveMessageList;
     public ListView failedMessageList;
+    public JFXTextField timeUnitField;
+    public HBox timeUnitBox;
 
 
     /* Mutation fields */
@@ -103,9 +107,15 @@ public class MutationTestPlanController {
         // Clone it, because we want to change its name
         final Component testModel = Ecdar.getProject().findComponent(modelPicker.getValue().getText()).cloneForVerification();
 
-        Consumer<List<MutationTestCase>> runTestDriver = (mutationTestCases) -> new TestDriver(mutationTestCases, plan, this::writeProgress,100, 100).start();
+        new TestCaseGenerationHandler(getPlan(), testModel, this::writeProgress, this::startTestDriver).start();
+    }
 
-        new TestCaseGenerationHandler(getPlan(), testModel, this::writeProgress, runTestDriver).start();
+    /**
+     * Starts the test driver.
+     * @param cases the mutation test cases to test with
+     */
+    private void startTestDriver(final List<MutationTestCase> cases) {
+        new TestDriver(cases, plan, this::writeProgress, getPlan().getTimeUnit(), TEST_STEP_BOUND).start();
     }
 
     /**
