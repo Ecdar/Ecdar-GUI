@@ -34,7 +34,6 @@ public class TestDriver implements ConcurrentJobsHandler {
     private final int bound;
     private final List<MutationTestCase> mutationTestCases;
     private final Consumer<Text> progressWriterText;
-    private Instant generationStart;
     private ConcurrentJobsDriver jobsDriver;
 
     private enum Verdict {NONE, INCONCLUSIVE, PASS, FAIL}
@@ -54,7 +53,6 @@ public class TestDriver implements ConcurrentJobsHandler {
      * Starts the test driver.
      */
     public void start() {
-        generationStart = Instant.now();
         inconclusive = new ArrayList<>();
         passed = new ArrayList<>();
         failed = new ArrayList<>();
@@ -109,6 +107,10 @@ public class TestDriver implements ConcurrentJobsHandler {
                                 verdict = delay(rule, testModelSimulation, mutantSimulation, lastUpdateTime, inputStream, input, message);
                             } else {
                                 String sync = ((ActionRule) rule).getSync();
+                                if(!testModelSimulation.isDeterministic(sync, EdgeStatus.INPUT) || !testModelSimulation.isDeterministic(output, EdgeStatus.OUTPUT)){
+                                    message.setValue("Non-deterministic choice with input " + sync + ".\n");
+                                    return Verdict.INCONCLUSIVE;
+                                }
                                 testModelSimulation.runInputAction(sync);
                                 mutantSimulation.runInputAction(sync);
                                 writeToSut(sync, output, sut);
@@ -255,6 +257,10 @@ public class TestDriver implements ConcurrentJobsHandler {
      * @throws MutationTestingException if an exception occured
      */
     private Verdict simulateOutput(SimpleComponentSimulation testModelSimulation, SimpleComponentSimulation mutantSimulation, String output, StringProperty message) throws MutationTestingException {
+        if(!testModelSimulation.isDeterministic(output, EdgeStatus.OUTPUT) || !testModelSimulation.isDeterministic(output, EdgeStatus.OUTPUT)){
+            message.setValue("Non-deterministic choice with output " + output + ".\n");
+            return Verdict.INCONCLUSIVE;
+        }
         if (!testModelSimulation.runOutputAction(output)){
             message.setValue("Failed simulating output " + output + " on test model.\n");
             return Verdict.FAIL;
