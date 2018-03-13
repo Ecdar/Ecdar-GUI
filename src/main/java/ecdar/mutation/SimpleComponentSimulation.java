@@ -146,6 +146,17 @@ public class SimpleComponentSimulation implements ComponentSimulation {
     }
 
     /**
+     * Returns if the current state is deterministic with respect to a specified action.
+     * The state is deterministic iff at most one transition with the specified action is available.
+     * @param sync synchronization property without ? or !
+     * @param status status of the action
+     * @return true iff the state is deterministic
+     */
+    public boolean isDeterministic(final String sync, final EdgeStatus status) {
+        return getAvailableEdgeStream(sync, status).count() < 1;
+    }
+
+    /**
      * Simulates an input action.
      * @param sync synchronization property without ?
      * @throws MutationTestingException if simulation yields a non-deterministic choice, no choices, or the Universal
