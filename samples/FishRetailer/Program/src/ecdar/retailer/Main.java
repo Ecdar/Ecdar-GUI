@@ -26,7 +26,7 @@ public class Main {
                                 x = Instant.now();
                                 loc = 1;
                             } else loc = -1;
-                        } else if (free == 1 && getValue(x) > 1.0) {
+                        } else if (free == 1 && getValue(x) > 5.0) {
                             write(GARNISH);
                             free = 0;
                         } else delay();
@@ -42,7 +42,7 @@ public class Main {
                         break;
                 }
 
-                write("Debug: loc=" + loc + "x=" + getValue(x));
+                //write("Debug: loc=" + loc + " x=" + getValue(x));
             }
 
             write("Debug: Done");

@@ -63,7 +63,7 @@
       "targetLocation": "L0",
       "status": "OUTPUT",
       "select": "",
-      "guard": "free\u003d\u003d1 \u0026\u0026 x\u003e1",
+      "guard": "free\u003d\u003d1 \u0026\u0026 x\u003e5",
       "update": "free\u003d0",
       "sync": "garnish",
       "isLocked": false,

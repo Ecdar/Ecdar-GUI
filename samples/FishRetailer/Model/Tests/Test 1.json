@@ -18,7 +18,7 @@
   "sinkLocation": true,
   "invertReset": true,
   "maxGenerationThreads": 10,
-  "maxSutInstances": 10,
+  "maxSutInstances": 100,
   "maxOutputWaitTime": 5,
   "verifytgaTries": 3
 }
