@@ -3,6 +3,7 @@ package ecdar.car_alarm_system;
 import java.io.*;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Scanner;
 
 public class CarAlarm {
     //Inputs
@@ -28,8 +29,6 @@ public class CarAlarm {
 
 
     CarAlarm(){
-        inputStream = System.in;
-        reader = new BufferedReader(new InputStreamReader(inputStream));
     }
 
     void start() throws IOException, InterruptedException {
@@ -88,48 +87,36 @@ public class CarAlarm {
     }
 
     private location L0() {
-        try {
-            String input = reader.readLine();
+        String input = read();
 
-            if(input.equals(INPUT_CLOSE)) {
-                return location.L1;
-            } else if(input.equals(INPUT_LOCK)) {
-                return location.L2;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        if(input.equals(INPUT_CLOSE)) {
+            return location.L1;
+        } else if(input.equals(INPUT_LOCK)) {
+            return location.L2;
         }
         return location.Done;
     }
 
     private location L1(){
-        try {
-            String input = reader.readLine();
+        String input = read();
 
-            if(input.equals(INPUT_OPEN)) {
-                return location.L0;
-            } else if(input.equals(INPUT_LOCK)) {
-                clockX = Instant.now();
-                return location.L3;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        if(input.equals(INPUT_OPEN)) {
+            return location.L0;
+        } else if(input.equals(INPUT_LOCK)) {
+            clockX = Instant.now();
+            return location.L3;
         }
         return location.Done;
     }
 
     private location L2() {
-        try {
-            String input = reader.readLine();
+        String input = read();
 
-            if(input.equals(INPUT_UNLOCK)) {
-                return location.L0;
-            } else if(input.equals(INPUT_CLOSE)) {
-                clockX = Instant.now();
-                return location.L3;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        if(input.equals(INPUT_UNLOCK)) {
+            return location.L0;
+        } else if(input.equals(INPUT_CLOSE)) {
+            clockX = Instant.now();
+            return location.L3;
         }
         return location.Done;
     }
@@ -137,10 +124,8 @@ public class CarAlarm {
     private location L3() throws IOException, InterruptedException {
         boolean timeOk = Duration.between(clockX, Instant.now()).toMillis() <= 2000;
         if (timeOk) {
-            if (System.in.available() != 0) {
-                System.out.println("Debug: readline L3");
-                final String input = reader.readLine();
-                System.out.println("Debug: readline L3 done " + input);
+            if (inputReady()) {
+                final String input = read();
 
                 if(input.equals(INPUT_UNLOCK)) {
                     return location.L1;
@@ -148,32 +133,28 @@ public class CarAlarm {
                     return location.L2;
                 }
             } else {
-                System.out.println("Debug: before sleep");
-                Thread.sleep(25);
-                System.out.println("Debug: after sleep");
+                delay();
                 return location.L3;
             }
         } else {
-            System.out.println("Debug: armed on output");
-            System.out.println(clockX);
-            System.out.println(OUTPUT_ARMED_ON);
+            write(OUTPUT_ARMED_ON);
             return location.L14;
         }
         return location.Done;
     }
 
     private location L4(){
-        System.out.println(OUTPUT_ARMED_OFF);
+        write(OUTPUT_ARMED_OFF);
         return location.L5;
     }
 
     private location L5(){
-        System.out.println(OUTPUT_FLASH_ON);
+        write(OUTPUT_FLASH_ON);
         return location.L6;
     }
 
     private location L6() {
-        System.out.println(OUTPUT_SOUND_ON);
+        write(OUTPUT_SOUND_ON);
         sound = true;
         return location.L7;
     }
@@ -181,23 +162,21 @@ public class CarAlarm {
     private location L7() {
         try {
             if(Duration.between(clockX, Instant.now()).toMillis() <= 3000) {
-                if(inputStream.available() != 0) {
-                    if (reader.readLine().equals(INPUT_UNLOCK)) {
+                if(inputReady()) {
+                    if (read().equals(INPUT_UNLOCK)) {
                         clockX = Instant.now();
                         return location.L12;
                     }
                 } else {
-                    Thread.sleep(25);
+                    delay();
                     return location.L7;
                 }
             } else {
-                System.out.println(OUTPUT_SOUND_OFF);
+                write(OUTPUT_SOUND_OFF);
                 sound = false;
                 return location.L8;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
         //Error happend
@@ -207,17 +186,17 @@ public class CarAlarm {
     private location L8(){
         try {
             if(Duration.between(clockX, Instant.now()).toMillis() <= 30000){
-                if(inputStream.available() != 0 ) {
-                    if (reader.readLine().equals(INPUT_UNLOCK)) {
+                if(inputReady()) {
+                    if (read().equals(INPUT_UNLOCK)) {
                         clockX = Instant.now();
                         return location.L12;
                     }
                 } else {
-                    Thread.sleep(25);
+                    delay();
                     return location.L8;
                 }
             } else if(Duration.between (clockX, Instant.now()).toMillis() > 30000){
-                System.out.println(OUTPUT_FLASH_OFF);
+                write(OUTPUT_FLASH_OFF);
                 return location.L9;
             }
         } catch (IOException | InterruptedException e) {
@@ -229,8 +208,8 @@ public class CarAlarm {
 
     private location L9() {
         try {
-            if (inputStream.available() != 0) {
-                String input = reader.readLine();
+            if (inputReady()) {
+                String input = read();
                 if (input.equals(INPUT_CLOSE)) {
                     clockX = Instant.now();
                     return location.L10;
@@ -238,7 +217,7 @@ public class CarAlarm {
                     return location.L0;
                 }
             }
-            Thread.sleep(25);
+            delay();
             return location.L9;
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -248,22 +227,22 @@ public class CarAlarm {
     }
 
     private location L10(){
-        System.out.println(OUTPUT_ARMED_ON);
+        write(OUTPUT_ARMED_ON);
         return location.L14;
     }
 
     private location L11(){
-        System.out.println(OUTPUT_ARMED_OFF);
+        write(OUTPUT_ARMED_OFF);
         return location.L1;
     }
 
     private location L12(){
         if(sound) {
-            System.out.println(OUTPUT_SOUND_OFF);
+            write(OUTPUT_SOUND_OFF);
             sound = false;
             return location.L12;
         } else if(!sound) {
-            System.out.println(OUTPUT_FLASH_OFF);
+            write(OUTPUT_FLASH_OFF);
             return location.L0;
         } else {
             return location.Done;
@@ -271,19 +250,38 @@ public class CarAlarm {
     }
 
     private location L14(){
-        try {
-            String input = reader.readLine();
+        String input = read();
 
-            if(input.equals(INPUT_UNLOCK)) {
-                clockX = Instant.now();
-                return location.L11;
-            } else if(input.equals(INPUT_OPEN)) {
-                clockX = Instant.now();
-                return location.L4;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        if(input.equals(INPUT_UNLOCK)) {
+            clockX = Instant.now();
+            return location.L11;
+        } else if(input.equals(INPUT_OPEN)) {
+            clockX = Instant.now();
+            return location.L4;
         }
         return location.Done;
+    }
+
+    private static boolean inputReady() throws IOException {
+        System.out.flush();
+        return System.in.available() != 0;
+    }
+
+    private static String read() {
+        System.out.flush();
+        return new Scanner(System.in).nextLine();
+    }
+
+    private static void write(final String message) {
+        System.out.println(message);
+        System.out.flush();
+    }
+
+    private static double getValue(final Instant clock) {
+        return Duration.between(clock, Instant.now()).toMillis() / 100.0;
+    }
+
+    private static void delay() throws InterruptedException {
+        Thread.sleep(25);
     }
 }
