@@ -158,6 +158,7 @@ public class TestDriver implements ConcurrentJobsHandler {
         //We treat a none verdict the same as inconclusive, as it should only be none if the bound has been surpassed
         switch (verdict) {
             case NONE:
+                message.setValue("Out of bounds\n");
             case INCONCLUSIVE:
                 inconclusive.add(testCase.getId());
                 Platform.runLater(() -> {
