@@ -104,7 +104,7 @@ public class TestDriver implements ConcurrentJobsHandler {
                             //Check if rule is an delay rule or output action rule, if it is either, perform delay,
                             // if it is an input action perform input
                             if (rule instanceof DelayRule || (rule instanceof ActionRule && ((ActionRule) rule).getStatus() == EdgeStatus.OUTPUT)) {
-                                verdict = delay(rule, testModelSimulation, mutantSimulation, lastUpdateTime, inputStream, input, message);
+                                verdict = delay(rule, testModelSimulation, mutantSimulation, lastUpdateTime, inputStream, input, message, output);
                             } else {
                                 String sync = ((ActionRule) rule).getSync();
                                 if(!testModelSimulation.isDeterministic(sync, EdgeStatus.INPUT) || !mutantSimulation.isDeterministic(sync, EdgeStatus.OUTPUT)){
@@ -163,10 +163,10 @@ public class TestDriver implements ConcurrentJobsHandler {
                 Platform.runLater(() -> {
                     getPlan().setInconclusiveText("Inconclusive: " + inconclusive.size());
                     getPlan().getInconclusiveMessageList().add(testCase.getId() + " " + testCase.getDescription() + ":\n" +
-                            "Reached inconclusive with message: " + message.get() + "Test model is in location: " + testModelSimulation.getCurrentLocation().getId() + " with values: " + testModelSimulation.getAllValuations() +
+                            "Reached inconclusive with message: " + message.get() +
+                            "Test model is in location: " + testModelSimulation.getCurrentLocation().getId() + " with values: " + testModelSimulation.getAllValuations() +
                             "\nMutant is in location: " + mutantSimulation.getCurrentLocation().getId() + " with values: " + mutantSimulation.getAllValuations() +
-                            "\nSpecification trace: " + String.join(" -> ", testModelSimulation.getTrace()) +
-                            "\nMutant trace: " + String.join(" -> ", mutantSimulation.getTrace()));
+                            "\nTrace: " + String.join(" -> ", testModelSimulation.getTrace()));
                 });
                 break;
             case PASS:
@@ -178,10 +178,10 @@ public class TestDriver implements ConcurrentJobsHandler {
                 Platform.runLater(() -> {
                     getPlan().setFailedText("Failed: " + failed.size());
                     getPlan().getFailedMessageList().add(testCase.getId() + " " + testCase.getDescription() + ":\n" +
-                            "Failed with message: " + message.get() + "Test model is in location: " + testModelSimulation.getCurrentLocation().getId() + " with values: " + testModelSimulation.getAllValuations() +
+                            "Failed with message: " + message.get() +
+                            "Test model is in location: " + testModelSimulation.getCurrentLocation().getId() + " with values: " + testModelSimulation.getAllValuations() +
                             "\nMutant is in location: " + mutantSimulation.getCurrentLocation().getId() + " with values: " + mutantSimulation.getAllValuations() +
-                            "\nSpecification trace: " + String.join(" -> ", testModelSimulation.getTrace()) +
-                            "\nMutant trace: " + String.join(" -> ", mutantSimulation.getTrace()));
+                            "\nTrace: " + String.join(" -> ", testModelSimulation.getTrace()));
                 });
                 break;
         }
@@ -200,7 +200,10 @@ public class TestDriver implements ConcurrentJobsHandler {
      * @param mutantSimulation simulation representing the mutated model.
      * @return a verdict, it is NONE if no verdict were reached from this delay.
      */
-    private Verdict delay(final StrategyRule rule, final SimpleComponentSimulation testModelSimulation, final SimpleComponentSimulation mutantSimulation, ObjectProperty<Instant> lastUpdateTime, final InputStream inputStream, final BufferedReader input, final StringProperty message) throws MutationTestingException {
+    private Verdict delay(final StrategyRule rule, final SimpleComponentSimulation testModelSimulation,
+                          final SimpleComponentSimulation mutantSimulation, ObjectProperty<Instant> lastUpdateTime,
+                          final InputStream inputStream, final BufferedReader input, final StringProperty message,
+                          final BufferedWriter bufferedWriter) throws MutationTestingException {
         try {
             Instant delayDuration = Instant.now();
             Map<String, Double> clockValuations = getClockValuations(testModelSimulation, mutantSimulation);
@@ -214,6 +217,7 @@ public class TestDriver implements ConcurrentJobsHandler {
                     message.setValue("Maximum wait time reached without recieving an output.\n");
                     return Verdict.INCONCLUSIVE;
                 }
+                bufferedWriter.flush();
                 if(inputStream.available() != 0){
                     String output = input.readLine();
 

@@ -42,7 +42,7 @@ public class Main {
                         break;
                 }
 
-                write("Debug: x=" + getValue(x));
+                write("Debug: loc=" + loc + "x=" + getValue(x));
             }
 
             write("Debug: Done");
@@ -52,15 +52,18 @@ public class Main {
     }
 
     private static boolean inputReady() throws IOException {
+        System.out.flush();
         return System.in.available() != 0;
     }
 
     private static String read() {
+        System.out.flush();
         return new Scanner(System.in).nextLine();
     }
 
     private static void write(final String message) {
         System.out.println(message);
+        System.out.flush();
     }
 
     private static double getValue(final Instant clock) {
