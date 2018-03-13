@@ -153,7 +153,7 @@ public class SimpleComponentSimulation implements ComponentSimulation {
      * @return true iff the state is deterministic
      */
     public boolean isDeterministic(final String sync, final EdgeStatus status) {
-        return getAvailableEdgeStream(sync, status).count() < 1;
+        return getAvailableEdgeStream(sync, status).count() <= 1;
     }
 
     /**
