@@ -107,13 +107,14 @@ public class TestDriver implements ConcurrentJobsHandler {
                                 verdict = delay(rule, testModelSimulation, mutantSimulation, lastUpdateTime, inputStream, input, message);
                             } else {
                                 String sync = ((ActionRule) rule).getSync();
-                                if(!testModelSimulation.isDeterministic(sync, EdgeStatus.INPUT) || !mutantSimulation.isDeterministic(output, EdgeStatus.OUTPUT)){
+                                if(!testModelSimulation.isDeterministic(sync, EdgeStatus.INPUT) || !mutantSimulation.isDeterministic(sync, EdgeStatus.OUTPUT)){
                                     message.setValue("Non-deterministic choice with input " + sync + ".\n");
-                                    return Verdict.INCONCLUSIVE;
+                                    verdict = Verdict.INCONCLUSIVE;
+                                } else {
+                                    testModelSimulation.runInputAction(sync);
+                                    mutantSimulation.runInputAction(sync);
+                                    writeToSut(sync, output, sut);
                                 }
-                                testModelSimulation.runInputAction(sync);
-                                mutantSimulation.runInputAction(sync);
-                                writeToSut(sync, output, sut);
                             }
                     }
                     i++;
