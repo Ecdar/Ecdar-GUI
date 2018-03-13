@@ -41,6 +41,8 @@ public class Main {
 
                         break;
                 }
+
+                write("Debug: x=" + getValue(x));
             }
 
             write("Debug: Done");

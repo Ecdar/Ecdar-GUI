@@ -151,7 +151,10 @@ public class TestDriver implements ConcurrentJobsHandler {
      * @param mutantSimulation the mutant model simulation
      * @throws IOException
      */
-    private synchronized void onTestDone(BufferedWriter output, Process sut, Verdict verdict, MutationTestCase testCase, StringProperty message, SimpleComponentSimulation testModelSimulation, SimpleComponentSimulation mutantSimulation) throws IOException {
+    private synchronized void onTestDone(final BufferedWriter output, final Process sut, final Verdict verdict,
+                                         final MutationTestCase testCase, final StringProperty message,
+                                         final SimpleComponentSimulation testModelSimulation,
+                                         final SimpleComponentSimulation mutantSimulation) throws IOException {
         //We treat a none verdict the same as inconclusive, as it should only be none if the bound has been surpassed
         switch (verdict) {
             case NONE:
@@ -159,7 +162,11 @@ public class TestDriver implements ConcurrentJobsHandler {
                 inconclusive.add(testCase.getId());
                 Platform.runLater(() -> {
                     getPlan().setInconclusiveText("Inconclusive: " + inconclusive.size());
-                    getPlan().getInconclusiveMessageList().add(testCase.getId() + " " + testCase.getDescription() + ":\n" + "Reached inconclusive with message: " + message.get() + "Test model is in location: " + testModelSimulation.getCurrentLocation().getId() + " with values: " + testModelSimulation.getAllValuations() + "\nMutant is in location: " + mutantSimulation.getCurrentLocation().getId() + " with values: " + mutantSimulation.getAllValuations());
+                    getPlan().getInconclusiveMessageList().add(testCase.getId() + " " + testCase.getDescription() + ":\n" +
+                            "Reached inconclusive with message: " + message.get() + "Test model is in location: " + testModelSimulation.getCurrentLocation().getId() + " with values: " + testModelSimulation.getAllValuations() +
+                            "\nMutant is in location: " + mutantSimulation.getCurrentLocation().getId() + " with values: " + mutantSimulation.getAllValuations() +
+                            "\nSpecification trace: " + String.join(" -> ", testModelSimulation.getTrace()) +
+                            "\nMutant trace: " + String.join(" -> ", mutantSimulation.getTrace()));
                 });
                 break;
             case PASS:
@@ -170,7 +177,11 @@ public class TestDriver implements ConcurrentJobsHandler {
                 failed.add(testCase.getId());
                 Platform.runLater(() -> {
                     getPlan().setFailedText("Failed: " + failed.size());
-                    getPlan().getFailedMessageList().add(testCase.getId() + " " + testCase.getDescription() + ":\n" + "Failed with message: " + message.get() + "Test model is in location: " + testModelSimulation.getCurrentLocation().getId() + " with values: " + testModelSimulation.getAllValuations() + "\nMutant is in location: " + mutantSimulation.getCurrentLocation().getId() + " with values: " + mutantSimulation.getAllValuations());
+                    getPlan().getFailedMessageList().add(testCase.getId() + " " + testCase.getDescription() + ":\n" +
+                            "Failed with message: " + message.get() + "Test model is in location: " + testModelSimulation.getCurrentLocation().getId() + " with values: " + testModelSimulation.getAllValuations() +
+                            "\nMutant is in location: " + mutantSimulation.getCurrentLocation().getId() + " with values: " + mutantSimulation.getAllValuations() +
+                            "\nSpecification trace: " + String.join(" -> ", testModelSimulation.getTrace()) +
+                            "\nMutant trace: " + String.join(" -> ", mutantSimulation.getTrace()));
                 });
                 break;
         }

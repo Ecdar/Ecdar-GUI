@@ -22,6 +22,7 @@ public class SimpleComponentSimulation implements ComponentSimulation {
     private Location currentLocation;
     private final Map<String, Double> clockValuations = new HashMap<>();
     private final Map<String, Integer> localValuations = new HashMap<>();
+    private final List<String> trace = new ArrayList<>();
 
     public SimpleComponentSimulation(final Component component) {
         this.component = component;
@@ -89,6 +90,9 @@ public class SimpleComponentSimulation implements ComponentSimulation {
 
     /* Other methods */
 
+    private boolean lastActionWasDelay = false;
+    private double accumulatedDelay = 0.0;
+
     /**
      * Delays.
      * The delay is run successfully if the invariant of the current location still holds.
@@ -98,8 +102,16 @@ public class SimpleComponentSimulation implements ComponentSimulation {
     public boolean delay(final double time) {
         getClocks().forEach(c -> clockValuations.put(c, clockValuations.get(c) + time));
 
-        final String invariant = getCurrentLocation().getInvariant();
+        accumulatedDelay += time;
+        final String traceDelay = "delay " + String.format("%.2f", accumulatedDelay);
 
+        // If last action was also a delay
+        if (lastActionWasDelay) trace.set(trace.size() - 1, traceDelay);
+        else trace.add(traceDelay);
+
+        lastActionWasDelay = true;
+
+        final String invariant = getCurrentLocation().getInvariant();
         return invariant.isEmpty() || ExpressionHelper.evaluateBooleanExpression(invariant, getAllValuations());
     }
 
@@ -179,6 +191,10 @@ public class SimpleComponentSimulation implements ComponentSimulation {
         currentLocation = newLoc;
 
         runUpdateProperty(edges.get(0).getUpdate());
+
+        trace.add("input " + sync);
+        lastActionWasDelay = false;
+        accumulatedDelay = 0.0;
     }
 
     /**
@@ -204,6 +220,15 @@ public class SimpleComponentSimulation implements ComponentSimulation {
         currentLocation = newLoc;
 
         runUpdateProperty(edges.get(0).getUpdate());
+
+        trace.add("output " + sync);
+        lastActionWasDelay = false;
+        accumulatedDelay = 0.0;
+
         return true;
+    }
+
+    public List<String> getTrace() {
+        return trace;
     }
 }
