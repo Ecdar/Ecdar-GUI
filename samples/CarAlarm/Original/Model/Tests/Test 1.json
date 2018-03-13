@@ -2,7 +2,7 @@
   "name": "Test 1",
   "testModelId": "Alarm",
   "action": "Test",
-  "sutPath": "../SimpleMutationTest/CarAlarmSystem/out/artifacts/CarAlarmSystem_jar/CarAlarmSystem.jar",
+  "sutPath": "../Program/out/artifacts/CarAlarmSystem_jar/CarAlarmSystem.jar",
   "exportFormat": "",
   "useDemonic": true,
   "useAngelic": false,

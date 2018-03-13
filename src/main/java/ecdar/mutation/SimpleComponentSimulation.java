@@ -111,6 +111,8 @@ public class SimpleComponentSimulation implements ComponentSimulation {
 
         lastActionWasDelay = true;
 
+        if (getName().equals("S")) System.out.println("Simulate delay x=" + getClockValuations().get("x"));
+
         final String invariant = getCurrentLocation().getInvariant();
         return invariant.isEmpty() || ExpressionHelper.evaluateBooleanExpression(invariant, getAllValuations());
     }

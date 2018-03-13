@@ -32,6 +32,8 @@ public class CarAlarm {
     }
 
     void start() throws IOException, InterruptedException {
+        write("Debug: Start");
+
         clockX = Instant.now();
         location nextLocation = location.L0;
         while(!nextLocation.equals(location.Done)){
@@ -81,7 +83,7 @@ public class CarAlarm {
                 case Done:
                     break;
             }
-            System.out.println("Debug: " + nextLocation.toString() + ", x=" + (Duration.between(clockX, Instant.now()).toMillis() / 100.0));
+            write("Debug: " + nextLocation.toString() + ", x=" + getValue(clockX));
         }
         return;
     }
@@ -122,7 +124,7 @@ public class CarAlarm {
     }
 
     private location L3() throws IOException, InterruptedException {
-        boolean timeOk = Duration.between(clockX, Instant.now()).toMillis() <= 2000;
+        boolean timeOk = getValue(clockX) < 20.0;
         if (timeOk) {
             if (inputReady()) {
                 final String input = read();
