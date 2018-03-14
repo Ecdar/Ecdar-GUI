@@ -8,6 +8,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 public class CarAlarm {
     //Inputs
@@ -102,38 +103,56 @@ public class CarAlarm {
         }
     }
 
-    private location L0() {
-        String input = read();
+    private location L0() throws InterruptedException {
+        if (inputReady()) {
+            String input = read();
 
-        if(input.equals(INPUT_CLOSE)) {
+            if(input.equals(INPUT_CLOSE)) {
+                return location.L1;
+            } else if(input.equals(INPUT_LOCK)) {
+                return location.L2;
+            }
+        } else {
+            delay();
+            return location.L0;
+        }
+
+        return location.Done;
+    }
+
+    private location L1() throws InterruptedException {
+        if (inputReady()) {
+            String input = read();
+
+            if(input.equals(INPUT_OPEN)) {
+                return location.L0;
+            } else if(input.equals(INPUT_LOCK)) {
+                clockX = Instant.now();
+                return location.L3;
+            }
+        } else {
+            delay();
             return location.L1;
-        } else if(input.equals(INPUT_LOCK)) {
+        }
+
+        return location.Done;
+    }
+
+    private location L2() throws InterruptedException {
+        if (inputReady()) {
+            String input = read();
+
+            if(input.equals(INPUT_UNLOCK)) {
+                return location.L0;
+            } else if(input.equals(INPUT_CLOSE)) {
+                clockX = Instant.now();
+                return location.L3;
+            }
+        } else {
+            delay();
             return location.L2;
         }
-        return location.Done;
-    }
 
-    private location L1(){
-        String input = read();
-
-        if(input.equals(INPUT_OPEN)) {
-            return location.L0;
-        } else if(input.equals(INPUT_LOCK)) {
-            clockX = Instant.now();
-            return location.L3;
-        }
-        return location.Done;
-    }
-
-    private location L2() {
-        String input = read();
-
-        if(input.equals(INPUT_UNLOCK)) {
-            return location.L0;
-        } else if(input.equals(INPUT_CLOSE)) {
-            clockX = Instant.now();
-            return location.L3;
-        }
         return location.Done;
     }
 
@@ -263,16 +282,22 @@ public class CarAlarm {
         }
     }
 
-    private location L14(){
-        String input = read();
+    private location L14() throws InterruptedException {
+        if (inputReady()) {
+            String input = read();
 
-        if(input.equals(INPUT_UNLOCK)) {
-            clockX = Instant.now();
-            return location.L11;
-        } else if(input.equals(INPUT_OPEN)) {
-            clockX = Instant.now();
-            return location.L4;
+            if(input.equals(INPUT_UNLOCK)) {
+                clockX = Instant.now();
+                return location.L11;
+            } else if(input.equals(INPUT_OPEN)) {
+                clockX = Instant.now();
+                return location.L4;
+            }
+        } else {
+            delay();
+            return location.L14;
         }
+
         return location.Done;
     }
 

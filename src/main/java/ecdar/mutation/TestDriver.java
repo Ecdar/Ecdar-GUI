@@ -228,7 +228,7 @@ public class TestDriver implements ConcurrentJobsHandler {
                     return Verdict.INCONCLUSIVE;
                 }
                 bufferedWriter.flush();
-                if(lines.isEmpty()){
+                if(!lines.isEmpty()){
                     String output = lines.get(0);
                     lines.remove(0);
 
