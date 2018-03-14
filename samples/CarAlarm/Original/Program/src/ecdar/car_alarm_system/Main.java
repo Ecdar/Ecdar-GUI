@@ -1,8 +1,5 @@
 package ecdar.car_alarm_system;
 
-import java.io.IOException;
-import java.time.Instant;
-
 public class Main {
 
     public static void main(String[] args) {

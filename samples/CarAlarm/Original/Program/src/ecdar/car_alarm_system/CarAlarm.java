@@ -1,38 +1,53 @@
 package ecdar.car_alarm_system;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class CarAlarm {
     //Inputs
-    public static final String INPUT_CLOSE = "close";
-    public static final String INPUT_OPEN = "open";
-    public static final String INPUT_LOCK = "lock";
-    public static final String INPUT_UNLOCK = "unlock";
+    private static final String INPUT_CLOSE = "close";
+    private static final String INPUT_OPEN = "open";
+    private static final String INPUT_LOCK = "lock";
+    private static final String INPUT_UNLOCK = "unlock";
 
     //Outputs
-    public static final String OUTPUT_ARMED_OFF = "armedOff";
-    public static final String OUTPUT_ARMED_ON = "armedOn";
-    public static final String OUTPUT_FLASH_OFF = "flashOff";
-    public static final String OUTPUT_FLASH_ON = "flashOn";
-    public static final String OUTPUT_SOUND_OFF = "soundOff";
-    public static final String OUTPUT_SOUND_ON = "soundOn";
+    private static final String OUTPUT_ARMED_OFF = "armedOff";
+    private static final String OUTPUT_ARMED_ON = "armedOn";
+    private static final String OUTPUT_FLASH_OFF = "flashOff";
+    private static final String OUTPUT_FLASH_ON = "flashOn";
+    private static final String OUTPUT_SOUND_OFF = "soundOff";
+    private static final String OUTPUT_SOUND_ON = "soundOn";
 
     enum location {L0, L1, L2, L3, L4, L5, L6, L7, L8, L9, L10, L11, L12, L14, Done}
 
-    Instant clockX;
-    boolean sound;
-    BufferedReader reader;
-    InputStream inputStream;
+    private Instant clockX;
+    private boolean sound;
+    private static List<String> inputs = Collections.synchronizedList(new ArrayList<>()); // use synchronized to be thread safe
 
 
     CarAlarm(){
     }
 
-    void start() throws IOException, InterruptedException {
+    void start() throws InterruptedException {
         write("Debug: Start");
+
+        new Thread(() -> {
+            String line;
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+            try {
+                while ((line = reader.readLine()) != null) {
+                    inputs.add(line);
+                }
+            } catch (IOException e) {
+                write("Debug: " + e.getMessage());
+            }
+        }).start();
 
         clockX = Instant.now();
         location nextLocation = location.L0;
@@ -85,7 +100,6 @@ public class CarAlarm {
             }
             write("Debug: " + nextLocation.toString() + ", x=" + getValue(clockX));
         }
-        return;
     }
 
     private location L0() {
@@ -123,7 +137,7 @@ public class CarAlarm {
         return location.Done;
     }
 
-    private location L3() throws IOException, InterruptedException {
+    private location L3() throws InterruptedException {
         boolean timeOk = getValue(clockX) < 20.0;
         if (timeOk) {
             if (inputReady()) {
@@ -178,7 +192,7 @@ public class CarAlarm {
                 sound = false;
                 return location.L8;
             }
-        } catch (IOException | InterruptedException e) {
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
         //Error happend
@@ -201,7 +215,7 @@ public class CarAlarm {
                 write(OUTPUT_FLASH_OFF);
                 return location.L9;
             }
-        } catch (IOException | InterruptedException e) {
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
         //Error happend
@@ -221,7 +235,7 @@ public class CarAlarm {
             }
             delay();
             return location.L9;
-        } catch (IOException | InterruptedException e) {
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
         //Error happend
@@ -243,11 +257,9 @@ public class CarAlarm {
             write(OUTPUT_SOUND_OFF);
             sound = false;
             return location.L12;
-        } else if(!sound) {
+        } else {
             write(OUTPUT_FLASH_OFF);
             return location.L0;
-        } else {
-            return location.Done;
         }
     }
 
@@ -264,19 +276,20 @@ public class CarAlarm {
         return location.Done;
     }
 
-    private static boolean inputReady() throws IOException {
-        System.out.flush();
-        return System.in.available() != 0;
+
+
+    private static boolean inputReady() {
+        return !inputs.isEmpty();
     }
 
     private static String read() {
-        System.out.flush();
-        return new Scanner(System.in).nextLine();
+        final String input = inputs.get(0);
+        inputs.remove(0);
+        return input;
     }
 
     private static void write(final String message) {
         System.out.println(message);
-        System.out.flush();
     }
 
     private static double getValue(final Instant clock) {
