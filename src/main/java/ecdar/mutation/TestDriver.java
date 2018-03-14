@@ -196,7 +196,7 @@ public class TestDriver implements ConcurrentJobsHandler {
                 break;
         }
 
-        writeToSut("Done", output, sut);
+        sut.destroy();
 
         /*Platform.runLater(() -> getPlan().setTestCasesText("Test-cases: " + mutationTestCases.size() + " - Execution time: " +
                 MutationTestPlanPresentation.readableFormat(Duration.between(generationStart, Instant.now()))));*/
