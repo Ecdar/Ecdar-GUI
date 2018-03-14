@@ -36,8 +36,6 @@ public class CarAlarm {
     }
 
     void start() throws InterruptedException {
-        write("Debug: Start");
-
         new Thread(() -> {
             String line;
             final BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
@@ -99,7 +97,6 @@ public class CarAlarm {
                 case Done:
                     break;
             }
-            write("Debug: " + nextLocation.toString() + ", x=" + getValue(clockX));
         }
     }
 
