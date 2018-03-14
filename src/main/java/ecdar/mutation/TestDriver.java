@@ -11,13 +11,11 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
 import javax.sound.midi.SysexMessage;
+import javax.swing.plaf.TableHeaderUI;
 import java.io.*;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -88,8 +86,19 @@ public class TestDriver implements ConcurrentJobsHandler {
                 sut = Runtime.getRuntime().exec("java -jar " + Ecdar.projectDirectory.get() + File.separator + getPlan().getSutPath().replace("/", File.separator));
                 lastUpdateTime.setValue(Instant.now());
                 output = new BufferedWriter(new OutputStreamWriter(sut.getOutputStream()));
-                inputStream = sut.getInputStream();
-                input = new BufferedReader(new InputStreamReader(inputStream));
+                List<String> inputLines = Collections.synchronizedList(new ArrayList<>());
+
+                new Thread(() -> {
+                    try {
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(sut.getInputStream()));
+                        String line;
+                        while((line = reader.readLine()) != null){
+                            inputLines.add(line);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }).start();
 
                 //Begin the new test
                 Verdict verdict = Verdict.NONE;
@@ -104,7 +113,7 @@ public class TestDriver implements ConcurrentJobsHandler {
                             //Check if rule is an delay rule or output action rule, if it is either, perform delay,
                             // if it is an input action perform input
                             if (rule instanceof DelayRule || (rule instanceof ActionRule && ((ActionRule) rule).getStatus() == EdgeStatus.OUTPUT)) {
-                                verdict = delay(rule, testModelSimulation, mutantSimulation, lastUpdateTime, inputStream, input, message, output);
+                                verdict = delay(rule, testModelSimulation, mutantSimulation, lastUpdateTime, inputLines, message, output);
                             } else {
                                 String sync = ((ActionRule) rule).getSync();
                                 if(!testModelSimulation.isDeterministic(sync, EdgeStatus.INPUT) || !mutantSimulation.isDeterministic(sync, EdgeStatus.OUTPUT)){
@@ -202,8 +211,8 @@ public class TestDriver implements ConcurrentJobsHandler {
      * @return a verdict, it is NONE if no verdict were reached from this delay.
      */
     private Verdict delay(final StrategyRule rule, final SimpleComponentSimulation testModelSimulation,
-                          final SimpleComponentSimulation mutantSimulation, ObjectProperty<Instant> lastUpdateTime,
-                          final InputStream inputStream, final BufferedReader input, final StringProperty message,
+                          final SimpleComponentSimulation mutantSimulation, final ObjectProperty<Instant> lastUpdateTime,
+                          final List<String> lines, final StringProperty message,
                           final BufferedWriter bufferedWriter) throws MutationTestingException {
         try {
             Instant delayDuration = Instant.now();
@@ -219,8 +228,16 @@ public class TestDriver implements ConcurrentJobsHandler {
                     return Verdict.INCONCLUSIVE;
                 }
                 bufferedWriter.flush();
-                if(inputStream.available() != 0){
-                    String output = input.readLine();
+                if(lines.isEmpty()){
+                    String output = lines.get(0);
+                    lines.remove(0);
+
+                    Verdict verdict;
+                    Thread.sleep(timeUnit / 4);
+                    verdict = simulateDelay(testModelSimulation, mutantSimulation, lastUpdateTime, message);
+                    if(!verdict.equals(Verdict.NONE)){
+                        return verdict;
+                    }
 
                     if (output == null) {
                         message.setValue("Program terminated before we reached a proper verdict.\n");
@@ -229,7 +246,7 @@ public class TestDriver implements ConcurrentJobsHandler {
                     //Catch SUT debug commands
                     Matcher match = Pattern.compile("Debug: (.*)").matcher(output);
                     if(match.find()) {
-                        System.out.println(match.group(1));
+                        System.out.println(match.group(0));
                     } else {
                         return simulateOutput(testModelSimulation, mutantSimulation, output, message);
                     }
