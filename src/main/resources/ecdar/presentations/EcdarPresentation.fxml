@@ -172,6 +172,31 @@
                     </MenuItem>
                 </Menu>
 
+
+                <Menu text="Edit">
+                    <MenuItem fx:id="menuEditMoveLeft" text="Move All Nodes Left">
+                        <graphic>
+                            <FontIcon iconLiteral="gmi-keyboard-arrow-left" iconSize="24" fill="black"/>
+                        </graphic>
+                    </MenuItem>
+                    <MenuItem fx:id="menuEditMoveUp" text="Move All Nodes Up">
+                        <graphic>
+                            <FontIcon iconLiteral="gmi-keyboard-arrow-up" iconSize="24" fill="black"/>
+                        </graphic>
+                    </MenuItem>
+                    <MenuItem fx:id="menuEditMoveRight" text="Move All Nodes Right">
+                        <graphic>
+                            <FontIcon iconLiteral="gmi-keyboard-arrow-right" iconSize="24" fill="black"/>
+                        </graphic>
+                    </MenuItem>
+                    <MenuItem fx:id="menuEditMoveDown" text="Move All Nodes Down">
+                        <graphic>
+                            <FontIcon iconLiteral="gmi-keyboard-arrow-down" iconSize="24" fill="black"/>
+                        </graphic>
+                    </MenuItem>
+                </Menu>
+
+
                 <Menu text="View">
                     <MenuItem fx:id="menuBarViewFilePanel" text="Project Panel">
                         <graphic>

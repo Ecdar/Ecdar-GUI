@@ -260,13 +260,13 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
         this.location.set(location);
 
         if (ComponentController.isPlacingLocation()) {
-            root.layoutXProperty().bind(location.xProperty());
-            root.layoutYProperty().bind(location.yProperty());
+            root.layoutXProperty().bindBidirectional(location.xProperty());
+            root.layoutYProperty().bindBidirectional(location.yProperty());
         } else {
             root.setLayoutX(location.getX());
             root.setLayoutY(location.getY());
-            location.xProperty().bind(root.layoutXProperty());
-            location.yProperty().bind(root.layoutYProperty());
+            location.xProperty().bindBidirectional(root.layoutXProperty());
+            location.yProperty().bindBidirectional(root.layoutYProperty());
             root.setPlaced(true);
         }
     }
@@ -409,8 +409,8 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                     root.layoutYProperty().unbind();
 
                     // Bind the location to the presentation root x and y
-                    getLocation().xProperty().bind(root.layoutXProperty());
-                    getLocation().yProperty().bind(root.layoutYProperty());
+                    getLocation().xProperty().bindBidirectional(root.layoutXProperty());
+                    getLocation().yProperty().bindBidirectional(root.layoutYProperty());
 
                     // Notify that the location was placed
                     root.setPlaced(true);

@@ -199,10 +199,10 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
         }
 
         // Bind the model to the layout
-        loc.nicknameXProperty().bind(controller.nicknameTag.translateXProperty());
-        loc.nicknameYProperty().bind(controller.nicknameTag.translateYProperty());
-        loc.invariantXProperty().bind(controller.invariantTag.translateXProperty());
-        loc.invariantYProperty().bind(controller.invariantTag.translateYProperty());
+        loc.nicknameXProperty().bindBidirectional(controller.nicknameTag.translateXProperty());
+        loc.nicknameYProperty().bindBidirectional(controller.nicknameTag.translateYProperty());
+        loc.invariantXProperty().bindBidirectional(controller.invariantTag.translateXProperty());
+        loc.invariantYProperty().bindBidirectional(controller.invariantTag.translateYProperty());
 
         final Consumer<Location> updateTags = location -> {
             // Update the color

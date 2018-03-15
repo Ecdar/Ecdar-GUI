@@ -814,4 +814,36 @@ public class Component extends HighLevelModelObject implements Boxed {
 
         return uniLocs.get(0);
     }
+
+    /**
+     * Moves all nodes one grid size left.
+     */
+    public void moveAllNodesLeft() {
+        getLocations().forEach(loc -> loc.setX(loc.getX() - Grid.GRID_SIZE));
+        getEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setX(nail.getX() - Grid.GRID_SIZE)));
+    }
+
+    /**
+     * Moves all nodes one grid size right.
+     */
+    public void moveAllNodesRight() {
+        getLocations().forEach(loc -> loc.setX(loc.getX() + Grid.GRID_SIZE));
+        getEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setX(nail.getX() + Grid.GRID_SIZE)));
+    }
+
+    /**
+     * Moves all nodes one grid size down.
+     */
+    public void moveAllNodesDown() {
+        getLocations().forEach(loc -> loc.setY(loc.getY() + Grid.GRID_SIZE));
+        getEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setY(nail.getY() + Grid.GRID_SIZE)));
+    }
+
+    /**
+     * Moves all nodes one grid size up.
+     */
+    public void moveAllNodesUp() {
+        getLocations().forEach(loc -> loc.setY(loc.getY() - Grid.GRID_SIZE));
+        getEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setY(nail.getY() - Grid.GRID_SIZE)));
+    }
 }
