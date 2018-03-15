@@ -232,10 +232,8 @@ public class TestDriver implements ConcurrentJobsHandler {
                     String output = lines.get(0);
                     lines.remove(0);
 
-                    Verdict verdict;
-                    Thread.sleep(timeUnit / 4);
-                    verdict = simulateDelay(testModelSimulation, mutantSimulation, lastUpdateTime, message);
-                    if(!verdict.equals(Verdict.NONE)){
+                    final Verdict verdict = simulateDelay(testModelSimulation, mutantSimulation, lastUpdateTime, message);
+                    if (!verdict.equals(Verdict.NONE)){
                         return verdict;
                     }
 
