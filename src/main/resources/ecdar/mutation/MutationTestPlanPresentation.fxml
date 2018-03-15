@@ -52,7 +52,7 @@
 
                         <HBox fx:id="timeUnitBox" spacing="8" alignment="BOTTOM_LEFT">
                             <JFXTextField fx:id="timeUnitField" prefWidth="30" alignment="BASELINE_CENTER"/>
-                            <Label text="ms correspond(s) to 1 time unit."/>
+                            <Label text="ms corresponds to 1 time unit."/>
                         </HBox>
 
                         <HBox spacing="8" alignment="BOTTOM_LEFT">
