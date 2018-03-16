@@ -86,11 +86,9 @@ public class MutationTestPlan extends HighLevelModelObject {
     public String getTestModelId() {
         return testModelId.get();
     }
-
     public StringProperty testModelIdProperty() {
         return testModelId;
     }
-
     public void setTestModelId(final String testModelId) {
         this.testModelId.setValue(testModelId);
     }
@@ -98,11 +96,9 @@ public class MutationTestPlan extends HighLevelModelObject {
     public String getMutantsText() {
         return mutantsText.get();
     }
-
     public StringProperty mutantsTextProperty() {
         return mutantsText;
     }
-
     public void setMutantsText(final String value) {
         mutantsText.set(value);
     }
@@ -110,11 +106,9 @@ public class MutationTestPlan extends HighLevelModelObject {
     public String getTestCasesText() {
         return testCasesText.get();
     }
-
     public StringProperty testCasesTextProperty() {
         return testCasesText;
     }
-
     public void setTestCasesText(final String value) {
         testCasesText.set(value);
     }
@@ -122,11 +116,9 @@ public class MutationTestPlan extends HighLevelModelObject {
     public String getAction() {
         return action.get();
     }
-
     public StringProperty actionProperty() {
         return action;
     }
-
     public void setAction(final String value) {
         action.set(value);
     }
@@ -134,11 +126,9 @@ public class MutationTestPlan extends HighLevelModelObject {
     public String getSutPath() {
         return sutPath.get();
     }
-
     public StringProperty sutPathProperty() {
         return sutPath;
     }
-
     public void setSutPath(final String value) {
         sutPath.set(value);
     }
@@ -146,11 +136,9 @@ public class MutationTestPlan extends HighLevelModelObject {
     public String getFormat() {
         return format.get();
     }
-
     public StringProperty formatProperty() {
         return format;
     }
-
     public void setFormat(final String value) {
         format.set(value);
     }
@@ -158,11 +146,9 @@ public class MutationTestPlan extends HighLevelModelObject {
     public boolean isDemonic() {
         return demonic.get();
     }
-
     public BooleanProperty demonicProperty() {
         return demonic;
     }
-
     public void setDemonic(final boolean value) {
         demonic.set(value);
     }
@@ -170,11 +156,9 @@ public class MutationTestPlan extends HighLevelModelObject {
     public boolean isAngelicWhenExport() {
         return angelicWhenExport.get();
     }
-
     public BooleanProperty angelicWhenExportProperty() {
         return angelicWhenExport;
     }
-
     public void setAngelicWhenExport(final boolean value) {
         angelicWhenExport.set(value);
     }
@@ -182,11 +166,9 @@ public class MutationTestPlan extends HighLevelModelObject {
     public Status getStatus() {
         return status.get();
     }
-
     public ObjectProperty<Status> statusProperty() {
         return status;
     }
-
     public void setStatus(final Status value) {
         status.set(value);
     }
@@ -198,11 +180,9 @@ public class MutationTestPlan extends HighLevelModelObject {
     public int getConcurrentGenerationThreads() {
         return concurrentGenerationThreads.get();
     }
-
-    public IntegerProperty maxGenerationThreadsProperty() {
+    public IntegerProperty concurrentGenerationsThreadsProperty() {
         return concurrentGenerationThreads;
     }
-
     public void setConcurrentGenerationThreads(final int concurrentGenerationThreads) {
         this.concurrentGenerationThreads.set(concurrentGenerationThreads);
     }
@@ -210,11 +190,9 @@ public class MutationTestPlan extends HighLevelModelObject {
     public int getConcurrentSutInstances() {
         return concurrentSutInstances.get();
     }
-
-    public IntegerProperty maxSutInstancesProperty() {
+    public IntegerProperty concurrentSutInstancesProperty() {
         return concurrentSutInstances;
     }
-
     public void setConcurrentSutInstances(final int concurrentSutInstances) {
         this.concurrentSutInstances.set(concurrentSutInstances);
     }
@@ -222,11 +200,9 @@ public class MutationTestPlan extends HighLevelModelObject {
     public int getOutputWaitTime() {
         return maxOutputWaitTime.get();
     }
-
     public IntegerProperty outputWaitTimeProperty() {
         return maxOutputWaitTime;
     }
-
     public void setOutputWaitTime(final int outputWaitTime){
         this.maxOutputWaitTime.set(outputWaitTime);
     }
@@ -234,11 +210,9 @@ public class MutationTestPlan extends HighLevelModelObject {
     public String getPassedText() {
         return passedText.get();
     }
-
     public StringProperty passedTextProperty() {
         return passedText;
     }
-
     public void setPassedText(final String passedText) {
         this.passedText.set(passedText);
     }
@@ -246,11 +220,9 @@ public class MutationTestPlan extends HighLevelModelObject {
     public String getInconclusiveText() {
         return InconclusiveText.get();
     }
-
     public StringProperty inconclusiveTextProperty() {
         return InconclusiveText;
     }
-
     public void setInconclusiveText(final String inconclusiveText) {
         this.InconclusiveText.set(inconclusiveText);
     }
@@ -258,32 +230,33 @@ public class MutationTestPlan extends HighLevelModelObject {
     public String getFailedText() {
         return FailedText.get();
     }
-
     public StringProperty failedTextProperty() {
         return FailedText;
     }
-
     public void setFailedText(final String failedText) {
         this.FailedText.set(failedText);
     }
 
-    public ObservableList<String> getFailedMessageList() { return failedMessageList.get(); }
+    public ObservableList<String> getFailedMessageList() {
+        return failedMessageList.get();
+    }
+    public ListProperty<String> failedMessageListProperty() {
+        return failedMessageList;
+    }
 
-    public ListProperty<String> failedMessageListProperty() { return failedMessageList; }
-
-    public ObservableList<String> getInconclusiveMessageList() { return inconclusiveMessageList.get(); }
-
+    public ObservableList<String> getInconclusiveMessageList() {
+        return inconclusiveMessageList.get();
+    }
     public ListProperty<String> inconclusiveMessageListProperty() {
-        return inconclusiveMessageList; }
+        return inconclusiveMessageList;
+    }
 
     public int getVerifytgaTries() {
         return verifytgaTries.get();
     }
-
     public IntegerProperty verifytgaTriesProperty() {
         return verifytgaTries;
     }
-
     public void setVerifytgaTries(final int verifytgaTries) {
         this.verifytgaTries.set(verifytgaTries);
     }
@@ -291,11 +264,9 @@ public class MutationTestPlan extends HighLevelModelObject {
     public int getTimeUnit() {
         return timeUnit.get();
     }
-
     public IntegerProperty timeUnitProperty() {
         return timeUnit;
     }
-
     public void setTimeUnit(final int timeUnit) {
         this.timeUnit.set(timeUnit);
     }
