@@ -1,8 +1,8 @@
 {
   "name": "Test 1",
-  "testModelId": "Alarm",
+  "testModelId": "Retailer",
   "action": "Test",
-  "sutPath": "The\\Path\\To\\My\\System\\Under\\Test",
+  "sutPath": "../Program/out/artifacts/Program_jar/Program.jar",
   "exportFormat": "",
   "useDemonic": true,
   "useAngelic": false,
@@ -10,11 +10,15 @@
   "changeActionOutputs": true,
   "changeSource": true,
   "changeTarget": true,
-  "changeGuard": true,
+  "changeGuardConstant": true,
+  "changeGuardOpClocks": true,
+  "changeGuardOpLocals": true,
+  "changeVarUpdate": true,
   "changeInvariant": true,
   "sinkLocation": true,
   "invertReset": true,
   "maxGenerationThreads": 10,
-  "maxSutInstances": 1,
-  "maxOutputWaitTime": 1
+  "maxSutInstances": 100,
+  "maxOutputWaitTime": 5,
+  "verifytgaTries": 3
 }

@@ -45,9 +45,14 @@
                             <Label text="concurrent instance(s) of the system under test."/>
                         </HBox>
 
-                        <HBox spacing="8" alignment="BOTTOM_LEFT" fx:id="outputWaitTimeBox">
+                        <HBox fx:id="outputWaitTimeBox" spacing="8" alignment="BOTTOM_LEFT">
                             <JFXTextField fx:id="outputWaitTimeField" prefWidth="30" alignment="BASELINE_CENTER"/>
                             <Label text="time unit(s) to wait for the SUT to output before giving an inconclusive verdict."/>
+                        </HBox>
+
+                        <HBox fx:id="timeUnitBox" spacing="8" alignment="BOTTOM_LEFT">
+                            <JFXTextField fx:id="timeUnitField" prefWidth="30" alignment="BASELINE_CENTER"/>
+                            <Label text="ms corresponds to 1 time unit."/>
                         </HBox>
 
                         <HBox spacing="8" alignment="BOTTOM_LEFT">
@@ -87,7 +92,9 @@
                     <Label fx:id="testCasesText"/>
                     <Label fx:id="passedText"/>
                     <Label fx:id="inconclusiveText"/>
+                    <ListView fx:id="inconclusiveMessageList"/>
                     <Label fx:id="failedText"/>
+                    <ListView fx:id="failedMessageList"/>
                 </VBox>
             </VBox>
         </VBox>

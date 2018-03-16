@@ -81,6 +81,6 @@ public class ChangeGuardConstantOperator extends MutationOperator {
     @Override
     public String getDescription() {
         return "Adds or subtracts 1 to or from a constant in a guard. " +
-                "Creates up to [# of constants in guards] mutants.";
+                "Creates up to 2 * [# of constants in guards] mutants.";
     }
 }

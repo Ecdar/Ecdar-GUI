@@ -67,10 +67,11 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
 
         initializeProgressAndResultsTexts();
 
-        initializePositiveIntegerTextField(controller.generationThreadsField, controller.getPlan().maxGenerationThreadsProperty());
-        initializePositiveIntegerTextField(controller.suvInstancesField, controller.getPlan().maxSutInstancesProperty());
+        initializePositiveIntegerTextField(controller.generationThreadsField, controller.getPlan().concurrentGenerationsThreadsProperty());
+        initializePositiveIntegerTextField(controller.suvInstancesField, controller.getPlan().concurrentSutInstancesProperty());
         initializePositiveIntegerTextField(controller.outputWaitTimeField, controller.getPlan().outputWaitTimeProperty());
         initializePositiveIntegerTextField(controller.verifytgaTriesField, controller.getPlan().verifytgaTriesProperty());
+        initializePositiveIntegerTextField(controller.timeUnitField, controller.getPlan().timeUnitProperty());
 
         controller.demonicCheckBox.selectedProperty().bindBidirectional(controller.getPlan().demonicProperty());
         controller.angelicBox.selectedProperty().bindBidirectional(controller.getPlan().angelicWhenExportProperty());
@@ -94,7 +95,9 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         controller.testCasesText.textProperty().bind(controller.getPlan().testCasesTextProperty());
         controller.passedText.textProperty().bind(controller.getPlan().passedTextProperty());
         controller.inconclusiveText.textProperty().bind(controller.getPlan().inconclusiveTextProperty());
+        controller.inconclusiveMessageList.itemsProperty().bind(controller.getPlan().inconclusiveMessageListProperty());
         controller.failedText.textProperty().bind(controller.getPlan().failedTextProperty());
+        controller.failedMessageList.itemsProperty().bind(controller.getPlan().failedMessageListProperty());
     }
 
     /**
@@ -233,6 +236,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         regions.add(controller.sutPathLabel);
         regions.add(controller.exportDependantArea);
         regions.add(controller.outputWaitTimeBox);
+        regions.add(controller.timeUnitBox);
 
         return regions;
     }

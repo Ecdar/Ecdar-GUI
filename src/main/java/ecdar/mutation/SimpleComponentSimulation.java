@@ -7,10 +7,7 @@ import ecdar.abstractions.Location;
 import ecdar.mutation.models.ComponentSimulation;
 import ecdar.utility.ExpressionHelper;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -25,16 +22,15 @@ public class SimpleComponentSimulation implements ComponentSimulation {
     private Location currentLocation;
     private final Map<String, Double> clockValuations = new HashMap<>();
     private final Map<String, Integer> localValuations = new HashMap<>();
-    private final List<String> clocks = new ArrayList<>();
+    private final List<String> trace = new ArrayList<>();
 
     public SimpleComponentSimulation(final Component component) {
         this.component = component;
         currentLocation = component.getInitialLocation();
 
-        component.getClocks().forEach(clock -> {
-            clocks.add(clock);
-            resetClock(clock);
-        });
+        component.getClocks().forEach(this::resetClock);
+
+        component.getLocalVariables().forEach(local -> localValuations.put(local, 0));
     }
 
 
@@ -60,12 +56,22 @@ public class SimpleComponentSimulation implements ComponentSimulation {
         return clockValuations;
     }
 
+    public Map<String, Double> getFullyQuantifiedClockValuations() {
+        final Map<String, Double> clocks = new HashMap<>();
+        getClockValuations().forEach((key, value) -> clocks.put(getName() + "." + key, value));
+        return clocks;
+    }
+
     public Location getCurrentLocation() {
         return currentLocation;
     }
 
     public Component getComponent() {
         return component;
+    }
+
+    public Set<String> getClocks() {
+        return clockValuations.keySet();
     }
 
     /**
@@ -84,6 +90,9 @@ public class SimpleComponentSimulation implements ComponentSimulation {
 
     /* Other methods */
 
+    private boolean lastActionWasDelay = false;
+    private double accumulatedDelay = 0.0;
+
     /**
      * Delays.
      * The delay is run successfully if the invariant of the current location still holds.
@@ -91,10 +100,18 @@ public class SimpleComponentSimulation implements ComponentSimulation {
      * @return true iff the delay was run successfully
      */
     public boolean delay(final double time) {
-        clocks.forEach(c -> clockValuations.put(c, clockValuations.get(c) + time));
+        getClocks().forEach(c -> clockValuations.put(c, clockValuations.get(c) + time));
+
+        accumulatedDelay += time;
+        final String traceDelay = "delay " + String.format("%.2f", accumulatedDelay);
+
+        // If last action was also a delay
+        if (lastActionWasDelay) trace.set(trace.size() - 1, traceDelay);
+        else trace.add(traceDelay);
+
+        lastActionWasDelay = true;
 
         final String invariant = getCurrentLocation().getInvariant();
-
         return invariant.isEmpty() || ExpressionHelper.evaluateBooleanExpression(invariant, getAllValuations());
     }
 
@@ -104,7 +121,7 @@ public class SimpleComponentSimulation implements ComponentSimulation {
      */
     private void runUpdateProperty(final String property) {
         ExpressionHelper.parseUpdate(property, getLocalVariableValuations()).forEach((key, value) -> {
-            if (clocks.contains(key)) resetClock(key);
+            if (getClocks().contains(key)) resetClock(key);
             else getLocalVariableValuations().put(key, value);
         });
     }
@@ -129,8 +146,26 @@ public class SimpleComponentSimulation implements ComponentSimulation {
                 .filter(e -> e.getSync().equals(sync))
                 .filter(e -> e.getGuard().trim().isEmpty() ||
                         ExpressionHelper.evaluateBooleanExpression(e.getGuard(), getAllValuations()))
-                .filter(e -> e.getTargetLocation().getInvariant().isEmpty() ||
-                ExpressionHelper.evaluateBooleanExpression(e.getTargetLocation().getInvariant(), getAllValuations()));
+                .filter(e -> {
+                    // Simulate the update, then check if invariant is satisfied
+                    final Map<String, Number> newValuations = new HashMap<>();
+                    newValuations.putAll(getAllValuations());
+                    newValuations.putAll(ExpressionHelper.parseUpdate(e.getUpdate(), getLocalVariableValuations()));
+
+                    return e.getTargetLocation().getInvariant().isEmpty() ||
+                            ExpressionHelper.evaluateBooleanExpression(e.getTargetLocation().getInvariant(), newValuations);
+                });
+    }
+
+    /**
+     * Returns if the current state is deterministic with respect to a specified action.
+     * The state is deterministic iff at most one transition with the specified action is available.
+     * @param sync synchronization property without ? or !
+     * @param status status of the action
+     * @return true iff the state is deterministic
+     */
+    public boolean isDeterministic(final String sync, final EdgeStatus status) {
+        return getAvailableEdgeStream(sync, status).count() <= 1;
     }
 
     /**
@@ -146,7 +181,7 @@ public class SimpleComponentSimulation implements ComponentSimulation {
                 " yields a non-deterministic choice between " + edges.size() + " edges");
 
         if (edges.size() < 1) throw new MutationTestingException("Simulation of input " + sync +
-                " yields a no choices. Thus, the component is not input-enabled");
+                " yields no choices. Thus, the component is not input-enabled");
 
         final Location newLoc = edges.get(0).getTargetLocation();
 
@@ -156,6 +191,10 @@ public class SimpleComponentSimulation implements ComponentSimulation {
         currentLocation = newLoc;
 
         runUpdateProperty(edges.get(0).getUpdate());
+
+        trace.add("input " + sync);
+        lastActionWasDelay = false;
+        accumulatedDelay = 0.0;
     }
 
     /**
@@ -181,6 +220,15 @@ public class SimpleComponentSimulation implements ComponentSimulation {
         currentLocation = newLoc;
 
         runUpdateProperty(edges.get(0).getUpdate());
+
+        trace.add("output " + sync);
+        lastActionWasDelay = false;
+        accumulatedDelay = 0.0;
+
         return true;
+    }
+
+    public List<String> getTrace() {
+        return trace;
     }
 }

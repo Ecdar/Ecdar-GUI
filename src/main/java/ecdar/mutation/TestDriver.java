@@ -5,15 +5,20 @@ import ecdar.mutation.models.*;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
+import javax.sound.midi.SysexMessage;
+import javax.swing.plaf.TableHeaderUI;
 import java.io.*;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A test driver that runs testcases on a system under test (sut).
@@ -27,11 +32,13 @@ public class TestDriver implements ConcurrentJobsHandler {
     private final int bound;
     private final List<MutationTestCase> mutationTestCases;
     private final Consumer<Text> progressWriterText;
-    private Instant generationStart;
     private ConcurrentJobsDriver jobsDriver;
 
     private enum Verdict {NONE, INCONCLUSIVE, PASS, FAIL}
 
+    /**
+     * Constructor for the test driver, needs a list of mutation test cases, a test plan, a consumer to write progress to, an long representing a time units length in miliseconds and a bound
+     */
     TestDriver(final List<MutationTestCase> mutationTestCases, final MutationTestPlan testPlan, final Consumer<Text> progressWriterText, final long timeUnit, final int bound) {
         this.mutationTestCases = mutationTestCases;
         this.progressWriterText = progressWriterText;
@@ -44,11 +51,17 @@ public class TestDriver implements ConcurrentJobsHandler {
      * Starts the test driver.
      */
     public void start() {
-        generationStart = Instant.now();
         inconclusive = new ArrayList<>();
         passed = new ArrayList<>();
         failed = new ArrayList<>();
         jobsDriver = new ConcurrentJobsDriver(this, mutationTestCases.size());
+
+        Platform.runLater(() -> {
+            getPlan().setInconclusiveText("Inconclusive: " + 0);
+            getPlan().setPassedText("Passed: " + 0);
+            getPlan().setFailedText("Failed: " + 0);
+        });
+
         jobsDriver.start();
     }
 
@@ -62,60 +75,75 @@ public class TestDriver implements ConcurrentJobsHandler {
             final BufferedWriter output;
             final InputStream inputStream;
             final BufferedReader input;
+            StringProperty message = new SimpleStringProperty("");
             ObjectProperty<Instant> lastUpdateTime = new SimpleObjectProperty<>();
-            lastUpdateTime.setValue(Instant.now());
             NonRefinementStrategy strategy = testCase.getStrategy();
             SimpleComponentSimulation testModelSimulation = new SimpleComponentSimulation(testCase.getTestModel());
             SimpleComponentSimulation mutantSimulation = new SimpleComponentSimulation(testCase.getMutant());
 
             try {
+                //Start process
                 sut = Runtime.getRuntime().exec("java -jar " + Ecdar.projectDirectory.get() + File.separator + getPlan().getSutPath().replace("/", File.separator));
+                lastUpdateTime.setValue(Instant.now());
                 output = new BufferedWriter(new OutputStreamWriter(sut.getOutputStream()));
-                inputStream = sut.getInputStream();
-                input = new BufferedReader(new InputStreamReader(inputStream));
-            } catch (final IOException e) {
-                e.printStackTrace();
-                return;
-            }
+                List<String> inputLines = Collections.synchronizedList(new ArrayList<>());
 
-            for(int step = 0; step < bound; step++) {
-                // Get rule and check if its empty
-                StrategyRule rule = strategy.getRule(testModelSimulation, mutantSimulation);
-                if (rule == null) {
-                    inconclusive.add(testCase.getId());
-                    onTestDone();
-                    return;
-                }
-
-                //Check if rule is an action rule, if it is an output action perform delay,
-                //If it is an input perform it
-                if (rule instanceof ActionRule) {
-                    if (((ActionRule) rule).getStatus() == EdgeStatus.OUTPUT) {
-                        Verdict verdict = delayForOutput(testModelSimulation, mutantSimulation, testCase, lastUpdateTime, inputStream, input);
-                        if(!verdict.equals(Verdict.NONE)) {
-                            onTestDone();
-                            return;
+                new Thread(() -> {
+                    try {
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(sut.getInputStream()));
+                        String line;
+                        while((line = reader.readLine()) != null){
+                            inputLines.add(line);
                         }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }).start();
+
+                //Begin the new test
+                Verdict verdict = Verdict.NONE;
+                int i = 0;
+                while(verdict.equals(Verdict.NONE) && i <= bound) {
+                    // Get rule and check if its empty
+                    StrategyRule rule = strategy.getRule(testModelSimulation, mutantSimulation);
+                    if (rule == null) {
+                        message.setValue("No rule to perform\n");
+                        verdict = Verdict.INCONCLUSIVE;
                     } else {
-                        try {
-                            testModelSimulation.runInputAction(((ActionRule) rule).getSync());
-                            mutantSimulation.runInputAction(((ActionRule) rule).getSync());
-                        } catch (MutationTestingException e) {
-                            e.printStackTrace();
-                        }
-                        String sync = ((ActionRule) rule).getSync();
-                        writeToSut(sync, output, sut);
+                            //Check if rule is an delay rule or output action rule, if it is either, perform delay,
+                            // if it is an input action perform input
+                            if (rule instanceof DelayRule || (rule instanceof ActionRule && ((ActionRule) rule).getStatus() == EdgeStatus.OUTPUT)) {
+                                verdict = delay(rule, testModelSimulation, mutantSimulation, lastUpdateTime, inputLines, message, output);
+                            } else {
+                                String sync = ((ActionRule) rule).getSync();
+                                if(!testModelSimulation.isDeterministic(sync, EdgeStatus.INPUT) || !mutantSimulation.isDeterministic(sync, EdgeStatus.OUTPUT)){
+                                    message.setValue("Non-deterministic choice with input " + sync + ".\n");
+                                    verdict = Verdict.INCONCLUSIVE;
+                                } else {
+                                    testModelSimulation.runInputAction(sync);
+                                    mutantSimulation.runInputAction(sync);
+                                    writeToSut(sync, output, sut);
+                                }
+                            }
                     }
-                } else if (rule instanceof DelayRule) {
-                    Verdict verdict = delay(testModelSimulation, mutantSimulation, testCase, lastUpdateTime, inputStream, input);
-                    if(!verdict.equals(Verdict.NONE)) {
-                        onTestDone();
-                        return;
-                    }
+                    i++;
+                }
+
+                //Finish test, we now know that either the verdict has been set or the time ran out
+                onTestDone(output, sut, verdict, testCase, message, testModelSimulation, mutantSimulation);
+            } catch (MutationTestingException | IOException e) {
+                if (getPlan().getStatus().equals(MutationTestPlan.Status.WORKING)) {
+                    getPlan().setStatus(MutationTestPlan.Status.ERROR);
+                    Platform.runLater(() -> {
+                        final String errorMessage = "Error while running test-case " + testCase.getId() + ", " +
+                                testCase.getDescription() + ": " + e.getMessage();
+                        final Text text = new Text(errorMessage);
+                        text.setFill(Color.RED);
+                        writeProgress(text);
+                        Ecdar.showToast(errorMessage);
+                    });
                 }
             }
-            inconclusive.add(testCase.getId());
-            onTestDone();
         }).start();
     }
 
@@ -123,13 +151,55 @@ public class TestDriver implements ConcurrentJobsHandler {
      * Is triggered when a test-case execution is done.
      * It updates UI labels to tell user about the progress.
      * It also updates the jobsDriver about the job progress.
+     * @param output the buffered writer to write the output to
+     * @param sut the process to write to
+     * @param verdict the verdict that was given at the end of the test
+     * @param testCase the testcase that was running on the system under test
+     * @param message the message given by the result of this test
+     * @param testModelSimulation the test model simulation
+     * @param mutantSimulation the mutant model simulation
+     * @throws IOException
      */
-    private synchronized void onTestDone() {
-        Platform.runLater(() -> getPlan().setTestCasesText("Test-cases: " + mutationTestCases.size() + " - Execution time: " +
-                MutationTestPlanPresentation.readableFormat(Duration.between(generationStart, Instant.now()))));
-        Platform.runLater(() -> getPlan().setInconclusiveText("Inconclusive: " + inconclusive.size()));
-        Platform.runLater(() -> getPlan().setPassedText("Passed: " + passed.size()));
-        Platform.runLater(() -> getPlan().setFailedText("Failed: " + failed.size()));
+    private synchronized void onTestDone(final BufferedWriter output, final Process sut, final Verdict verdict,
+                                         final MutationTestCase testCase, final StringProperty message,
+                                         final SimpleComponentSimulation testModelSimulation,
+                                         final SimpleComponentSimulation mutantSimulation) throws IOException {
+        //We treat a none verdict the same as inconclusive, as it should only be none if the bound has been surpassed
+        switch (verdict) {
+            case NONE:
+                message.setValue("Out of bounds\n");
+            case INCONCLUSIVE:
+                inconclusive.add(testCase.getId());
+                Platform.runLater(() -> {
+                    getPlan().setInconclusiveText("Inconclusive: " + inconclusive.size());
+                    getPlan().getInconclusiveMessageList().add(testCase.getId() + " " + testCase.getDescription() + ":\n" +
+                            "Reached inconclusive with message: " + message.get() +
+                            "Test model is in location: " + testModelSimulation.getCurrentLocation().getId() + " with values: " + testModelSimulation.getAllValuations() +
+                            "\nMutant is in location: " + mutantSimulation.getCurrentLocation().getId() + " with values: " + mutantSimulation.getAllValuations() +
+                            "\nTrace: " + String.join(" -> ", testModelSimulation.getTrace()));
+                });
+                break;
+            case PASS:
+                passed.add(testCase.getId());
+                Platform.runLater(() -> getPlan().setPassedText("Passed: " + passed.size()));
+                break;
+            case FAIL:
+                failed.add(testCase.getId());
+                Platform.runLater(() -> {
+                    getPlan().setFailedText("Failed: " + failed.size());
+                    getPlan().getFailedMessageList().add(testCase.getId() + " " + testCase.getDescription() + ":\n" +
+                            "Failed with message: " + message.get() +
+                            "Test model is in location: " + testModelSimulation.getCurrentLocation().getId() + " with values: " + testModelSimulation.getAllValuations() +
+                            "\nMutant is in location: " + mutantSimulation.getCurrentLocation().getId() + " with values: " + mutantSimulation.getAllValuations() +
+                            "\nTrace: " + String.join(" -> ", testModelSimulation.getTrace()));
+                });
+                break;
+        }
+
+        sut.destroy();
+
+        /*Platform.runLater(() -> getPlan().setTestCasesText("Test-cases: " + mutationTestCases.size() + " - Execution time: " +
+                MutationTestPlanPresentation.readableFormat(Duration.between(generationStart, Instant.now()))));*/
 
         jobsDriver.onJobDone();
     }
@@ -138,125 +208,133 @@ public class TestDriver implements ConcurrentJobsHandler {
      * performs a delay on the simulations and itself and checks if the system under test made an output during the delay.
      * @param testModelSimulation simulation representing the test model.
      * @param mutantSimulation simulation representing the mutated model.
-     * @param testCase that is being performed.
      * @return a verdict, it is NONE if no verdict were reached from this delay.
      */
-    private Verdict delay(final SimpleComponentSimulation testModelSimulation, final SimpleComponentSimulation mutantSimulation, final MutationTestCase testCase, ObjectProperty<Instant> lastUpdateTime, final InputStream inputStream, final BufferedReader input){
+    private Verdict delay(final StrategyRule rule, final SimpleComponentSimulation testModelSimulation,
+                          final SimpleComponentSimulation mutantSimulation, final ObjectProperty<Instant> lastUpdateTime,
+                          final List<String> lines, final StringProperty message,
+                          final BufferedWriter bufferedWriter) throws MutationTestingException {
         try {
-            //Check if any output is ready, if there is none, do delay
-            if (inputStream.available() == 0) {
-                Thread.sleep(timeUnit);
-                //Do Delay
-                final double waitedTimeUnits = Duration.between(lastUpdateTime.get(), Instant.now()).toMillis()/(double)timeUnit;
-                lastUpdateTime.setValue(Instant.now());
-                if (!testModelSimulation.delay(waitedTimeUnits)) {
-                    failed.add(testCase.getId());
-                    return Verdict.FAIL;
+            Instant delayDuration = Instant.now();
+            Map<String, Double> clockValuations = getClockValuations(testModelSimulation, mutantSimulation);
+
+            //Keep delaying until the rule has been satisfied,
+            //Will return inside while loop if maximum wait time is exceeded or an output has been given
+            while((rule.isSatisfied(clockValuations))) {
+
+                //Check if the maximum wait time has been exceeded, if it is, give inconclusive verdict
+                if (!(Duration.between(delayDuration, Instant.now()).toMillis()/(double)timeUnit <= testPlan.getOutputWaitTime())){
+                    message.setValue("Maximum wait time reached without recieving an output.\n");
+                    return Verdict.INCONCLUSIVE;
+                }
+                bufferedWriter.flush();
+                if(!lines.isEmpty()){
+                    String output = lines.get(0);
+                    lines.remove(0);
+
+                    final Verdict verdict = simulateDelay(testModelSimulation, mutantSimulation, lastUpdateTime, message);
+                    if (!verdict.equals(Verdict.NONE)){
+                        return verdict;
+                    }
+
+                    if (output == null) {
+                        message.setValue("Program terminated before we reached a proper verdict.\n");
+                        return Verdict.INCONCLUSIVE;
+                    }
+                    //Catch SUT debug commands
+                    Matcher match = Pattern.compile("Debug: (.*)").matcher(output);
+                    if(match.find()) {
+                        System.out.println(match.group(0));
+                    } else {
+                        return simulateOutput(testModelSimulation, mutantSimulation, output, message);
+                    }
+
                 } else {
-                    if (!mutantSimulation.delay(waitedTimeUnits)) {
-                        //Todo Handle exception
+                    Verdict verdict;
+                    Thread.sleep(timeUnit / 4);
+                    verdict = simulateDelay(testModelSimulation, mutantSimulation, lastUpdateTime, message);
+                    if(!verdict.equals(Verdict.NONE)){
+                        return verdict;
                     }
                 }
+                clockValuations = getClockValuations(testModelSimulation, mutantSimulation);
             }
-
-            //Do output if any output happened when sleeping
-            if (inputStream.available() != 0) {
-                final String outputFromSut = readFromSut(input);
-                if (!testModelSimulation.runOutputAction(outputFromSut)) {
-                    failed.add(testCase.getId());
-                    return Verdict.FAIL;
-                } else if (!mutantSimulation.runOutputAction(outputFromSut)) {
-                    passed.add(testCase.getId());
-                    return Verdict.PASS;
-                }
-            }
-
             return Verdict.NONE;
-        } catch(InterruptedException | MutationTestingException | IOException e){
-            e.printStackTrace();
-            inconclusive.add(testCase.getId());
-            //Todo stop testing and print error
-            return Verdict.INCONCLUSIVE;
+        } catch(IOException e){
+            throw new MutationTestingException("An error occured when reading from the stream");
+        } catch (InterruptedException e) {
+            throw new MutationTestingException("Sleep was interrupted unexpectedly");
         }
     }
 
     /**
-     * performs a delay on the simulations and itself and checks if the system under test made an output during the delay.
-     * @param testModelSimulation simulation representing the test model.
-     * @param mutantSimulation simulation representing the mutated model.
-     * @param testCase that is being performed.
-     * @return a verdict, it is NONE if no verdict were reached from this delay.
+     * Gets the clock valuations from the simulated test model and simulated mutant model
+     * @param testModelSimulation test model.
+     * @param mutantSimulation mutant model.
+     * @return a map of clock valuations, their id and value.
      */
-    private Verdict delayForOutput(final SimpleComponentSimulation testModelSimulation, final SimpleComponentSimulation mutantSimulation, final MutationTestCase testCase, ObjectProperty<Instant> lastUpdateTime, final InputStream inputStream, final BufferedReader input){
-        //Do delay until getOutputWaitTime time units has passed
-        for(int i = 0; i < getPlan().getOutputWaitTime(); i++) {
-            try {
-                //Check if any output is ready, if there is none, do delay
-                if (inputStream.available() == 0) {
-                    Thread.sleep(timeUnit);
-                    //Do Delay
-                    final double waitedTimeUnits = Duration.between(lastUpdateTime.get(), Instant.now()).toMillis()/(double)timeUnit;
-                    lastUpdateTime.setValue(Instant.now());
-                    if (!testModelSimulation.delay(waitedTimeUnits)) {
-                        failed.add(testCase.getId());
-                        return Verdict.FAIL;
-                    } else {
-                        if (!mutantSimulation.delay(waitedTimeUnits)) {
-                            //Todo Handle exception
-                        }
-                    }
-                }
+    private Map<String, Double> getClockValuations(SimpleComponentSimulation testModelSimulation, SimpleComponentSimulation mutantSimulation) {
+        Map<String, Double> clockValuations = new HashMap<>();
+        clockValuations.putAll(testModelSimulation.getFullyQuantifiedClockValuations());
+        clockValuations.putAll(mutantSimulation.getFullyQuantifiedClockValuations());
+        return clockValuations;
+    }
 
-                //Do output if any output happened when sleeping
-                if (inputStream.available() != 0) {
-                    final String outputFromSut = readFromSut(input);
-                    if (!testModelSimulation.runOutputAction(outputFromSut)) {
-                        failed.add(testCase.getId());
-                        return Verdict.FAIL;
-                    } else if (!mutantSimulation.runOutputAction(outputFromSut)) {
-                        passed.add(testCase.getId());
-                        return Verdict.PASS;
-                    }
-                    return Verdict.NONE;
-                }
-            } catch (InterruptedException | MutationTestingException | IOException e) {
-                e.printStackTrace();
-                inconclusive.add(testCase.getId());
-                //Todo stop testing and print error
-                return Verdict.INCONCLUSIVE;
-            }
+    /**
+     * Simulates an output on the test model and mutant model.
+     * @param testModelSimulation the test model
+     * @param mutantSimulation the mutant model
+     * @param output the output to simulate
+     * @return INCONCLUSIVE if the output is empty, FAIL if the output failed on the test model, PASS if it failed on the mutant,
+     * NONE if both simulations succeeded
+     * @throws MutationTestingException if an exception occured
+     */
+    private Verdict simulateOutput(SimpleComponentSimulation testModelSimulation, SimpleComponentSimulation mutantSimulation, String output, StringProperty message) throws MutationTestingException {
+        if(!testModelSimulation.isDeterministic(output, EdgeStatus.OUTPUT) || !mutantSimulation.isDeterministic(output, EdgeStatus.OUTPUT)){
+            message.setValue("Non-deterministic choice with output " + output + ".\n");
+            return Verdict.INCONCLUSIVE;
         }
-        inconclusive.add(testCase.getId());
-        return Verdict.INCONCLUSIVE;
+        if (!testModelSimulation.runOutputAction(output)){
+            message.setValue("Failed simulating output " + output + " on test model.\n");
+            return Verdict.FAIL;
+        } else if (!mutantSimulation.runOutputAction(output)){
+            return Verdict.PASS;
+        }
+        return Verdict.NONE;
+    }
+
+    /**
+     * Simulates an output on the test model and mutant model.
+     * @param testModelSimulation the test model.
+     * @param mutantSimulation the mutant model.
+     * @param lastUpdateTime the time we determine the delay length from.
+     * @return true if the delay was simulated successfully, false if it failed on the test model.
+     * @throws MutationTestingException if the simulation failed on the mutant model.
+     */
+    private Verdict simulateDelay(SimpleComponentSimulation testModelSimulation, SimpleComponentSimulation mutantSimulation, ObjectProperty<Instant> lastUpdateTime, StringProperty message) throws MutationTestingException {
+        final double waitedTimeUnits = Duration.between(lastUpdateTime.get(), Instant.now()).toMillis() / (double) timeUnit;
+        lastUpdateTime.setValue(Instant.now());
+        if (!testModelSimulation.delay(waitedTimeUnits)) {
+            message.setValue("Failed simulating delay on test model\n");
+            return Verdict.FAIL;
+        } else if (!mutantSimulation.delay(waitedTimeUnits)) {
+            return Verdict.PASS;
+        } else {
+            return Verdict.NONE;
+        }
+
     }
 
     /**
      * Writes to the system.in of the system under test.
      * @param outputBroadcast the string to write to the system under test.
      */
-    private void writeToSut(final String outputBroadcast, final BufferedWriter output, final Process sut) {
-        try {
-            //Write to process if it is alive, else act like the process accepts but ignore all inputs.
-            if(sut.isAlive()) {
-                output.write(outputBroadcast + "\n");
-                output.flush();
-            }
-        } catch (final IOException e) {
-            e.printStackTrace();
+    private void writeToSut(final String outputBroadcast, final BufferedWriter output, final Process sut) throws IOException {
+        //Write to process if it is alive, else act like the process accepts but ignore all inputs.
+        if(sut.isAlive()) {
+            output.write(outputBroadcast + "\n");
+            output.flush();
         }
-    }
-
-    /**
-     * Reads from the system under tests output stream.
-     * @return the string read from the system under test.
-     */
-    private String readFromSut(BufferedReader input) {
-        try {
-            return input.readLine();
-        } catch (final IOException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 
     @Override

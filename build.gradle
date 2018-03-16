@@ -37,7 +37,6 @@ dependencies {
     compile 'org.springframework:spring-core:5.0.3.RELEASE' // Used for evaluating expressions
     compile 'org.springframework:spring-expression:5.0.3.RELEASE' // Used for evaluating expressions
     compile 'com.bpodgursky:jbool_expressions:1.13' // Used for converting boolean expressions to disjunctive normal form
-    compile group: 'com.google.guava', name: 'guava', version: 'r05'
     compile group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.6.10'
     compile fileTree(dir: 'src/libs', include: ['*.jar'])
 }
