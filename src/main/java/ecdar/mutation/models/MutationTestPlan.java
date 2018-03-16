@@ -363,6 +363,8 @@ public class MutationTestPlan extends HighLevelModelObject {
         setTestCasesText("");
         setPassedText("");
         setInconclusiveText("");
+        getInconclusiveMessageList().clear();
         setFailedText("");
+        getFailedMessageList().clear();
     }
 }
