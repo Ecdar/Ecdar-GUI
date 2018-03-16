@@ -8,7 +8,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
 public class CarAlarm {
     //Inputs
@@ -25,7 +24,7 @@ public class CarAlarm {
     private static final String OUTPUT_SOUND_OFF = "soundOff";
     private static final String OUTPUT_SOUND_ON = "soundOn";
 
-    enum location {L0, L1, L2, L3, L4, L5, L6, L7, L8, L9, L10, L11, L12, L14, Done}
+    private enum location {L0, L1, L2, L3, L4, L7, L8, L9, L10, L11, L12, L14, Done}
 
     private Instant clockX;
     private boolean sound;
@@ -67,12 +66,6 @@ public class CarAlarm {
                 case L4:
                     nextLocation = L4();
                     break;
-                case L5:
-                    nextLocation = L5();
-                    break;
-                case L6:
-                    nextLocation = L6();
-                    break;
                 case L7:
                     nextLocation = L7();
                     break;
@@ -96,6 +89,8 @@ public class CarAlarm {
                     break;
                 case Done:
                     break;
+                default:
+                    throw new RuntimeException("Location " + nextLocation.toString() + " not expected");
             }
         }
     }
@@ -176,17 +171,7 @@ public class CarAlarm {
     }
 
     private location L4(){
-        write(OUTPUT_ARMED_OFF);
-        return location.L5;
-    }
-
-    private location L5(){
-        write(OUTPUT_FLASH_ON);
-        return location.L6;
-    }
-
-    private location L6() {
-        write(OUTPUT_SOUND_ON);
+        write(OUTPUT_ARMED_OFF, OUTPUT_FLASH_ON, OUTPUT_SOUND_ON);
         sound = true;
         return location.L7;
     }
@@ -310,8 +295,8 @@ public class CarAlarm {
         return input;
     }
 
-    private static void write(final String message) {
-        System.out.println(message);
+    private static void write(final String... messages) {
+        System.out.println(String.join("\n", messages));
     }
 
     private static double getValue(final Instant clock) {
