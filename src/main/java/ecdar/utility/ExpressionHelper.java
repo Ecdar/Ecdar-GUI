@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
  * Helper for working with expressions like the ones used in guards.
  */
 public class ExpressionHelper {
-    private static final String REGEX_SIMPLE_NEGATEABLE_GUARD = "^([^<>=!]+)(<|<=|>|>=|!=)([^<>=!]+)$";
+    private static final String REGEX_SIMPLE_NEGATEABLE_GUARD = "^([^<>=!]+)(<|<=|>|>=|==|!=)([^<>=!]+)$";
 
     /**
      * Searches recursively through the expression.
@@ -51,6 +51,8 @@ public class ExpressionHelper {
                         return Variable.of(matcher.group(1) + "<=" + matcher.group(3));
                     case ">=":
                         return Variable.of(matcher.group(1) + "<" + matcher.group(3));
+                    case "==":
+                        return Variable.of(matcher.group(1) + "!=" + matcher.group(3));
                     case "!=":
                         return Variable.of(matcher.group(1) + "==" + matcher.group(3));
                     default:
