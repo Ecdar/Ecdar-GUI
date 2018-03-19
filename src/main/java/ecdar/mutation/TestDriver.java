@@ -171,11 +171,11 @@ public class TestDriver implements ConcurrentJobsHandler {
                 inconclusive.add(testCase.getId());
                 Platform.runLater(() -> {
                     getPlan().setInconclusiveText("Inconclusive: " + inconclusive.size());
-                    getPlan().getInconclusiveMessageList().add(testCase.getId() + " " + testCase.getDescription() + ":\n" +
-                            "Reached inconclusive with message: " + message.get() +
+                    getPlan().getInconclusiveMessageList().add(new ExpandableContent(testCase.getDescription(), "Id: " + testCase.getId() + ":\n" +
+                            "Reason: " + message.get() +
                             "Test model is in location: " + testModelSimulation.getCurrentLocation().getId() + " with values: " + testModelSimulation.getAllValuations() +
                             "\nMutant is in location: " + mutantSimulation.getCurrentLocation().getId() + " with values: " + mutantSimulation.getAllValuations() +
-                            "\nTrace: " + String.join(" -> ", testModelSimulation.getTrace()));
+                            "\nTrace: " + String.join(" -> ", testModelSimulation.getTrace())));
                 });
                 break;
             case PASS:
@@ -186,11 +186,11 @@ public class TestDriver implements ConcurrentJobsHandler {
                 failed.add(testCase.getId());
                 Platform.runLater(() -> {
                     getPlan().setFailedText("Failed: " + failed.size());
-                    getPlan().getFailedMessageList().add(testCase.getId() + " " + testCase.getDescription() + ":\n" +
-                            "Failed with message: " + message.get() +
+                    getPlan().getFailedMessageList().add(new ExpandableContent(testCase.getDescription(), "Id: " + testCase.getId() + ":\n" +
+                            "Reason: " + message.get() +
                             "Test model is in location: " + testModelSimulation.getCurrentLocation().getId() + " with values: " + testModelSimulation.getAllValuations() +
                             "\nMutant is in location: " + mutantSimulation.getCurrentLocation().getId() + " with values: " + mutantSimulation.getAllValuations() +
-                            "\nTrace: " + String.join(" -> ", testModelSimulation.getTrace()));
+                            "\nTrace: " + String.join(" -> ", testModelSimulation.getTrace())));
                 });
                 break;
         }

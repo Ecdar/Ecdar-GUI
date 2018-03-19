@@ -3,6 +3,7 @@ package ecdar.mutation;
 import com.jfoenix.controls.*;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
+import ecdar.mutation.models.ExpandableContent;
 import ecdar.mutation.models.MutationTestCase;
 import ecdar.mutation.models.MutationTestPlan;
 import javafx.scene.control.DialogPane;
@@ -16,6 +17,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.FileChooser;
+import jdk.nashorn.internal.ir.ExpressionStatement;
 
 import java.io.File;
 import java.io.IOException;
@@ -70,8 +72,8 @@ public class MutationTestPlanController {
     public Label failedText;
     public StackPane root;
     public JFXTextField verifytgaTriesField;
-    public ListView inconclusiveMessageList;
-    public ListView failedMessageList;
+    public ListView<ExpandableContent> inconclusiveMessageList;
+    public ListView<ExpandableContent> failedMessageList;
     public JFXTextField timeUnitField;
     public HBox timeUnitBox;
     public JFXListView fListView;

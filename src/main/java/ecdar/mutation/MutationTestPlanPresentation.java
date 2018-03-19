@@ -5,21 +5,25 @@ import com.jfoenix.controls.JFXTextField;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.controllers.CanvasController;
+import ecdar.mutation.models.ExpandableContent;
 import ecdar.mutation.operators.MutationOperator;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.presentations.EcdarFXMLLoader;
 import ecdar.presentations.HighLevelModelPresentation;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.ListChangeListener;
+import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
-import javafx.scene.control.Control;
-import javafx.scene.control.Label;
-import javafx.scene.control.Tooltip;
+import javafx.scene.control.*;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Text;
+import javafx.util.Callback;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -31,6 +35,8 @@ import java.util.List;
  */
 public class MutationTestPlanPresentation extends HighLevelModelPresentation {
     private final MutationTestPlanController controller;
+
+    private final static int ARROW_HEIGHT = 19; // Height of view containing the arrow for expaning and collapsing views. For labels, this is 19
 
     private double offSet, canvasHeight;
 
@@ -89,8 +95,6 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
 
         initializeExpand(controller.opsLabel, controller.operatorsArea);
         initializeExpand(controller.advancedOptionsLabel, controller.advancedOptions);
-        initializeExpand(controller.inconclusiveText, controller.inconclusiveMessageList);
-        initializeExpand(controller.failedText, controller.failedMessageList);
 
 
     }
@@ -98,27 +102,27 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
     private void initializeExpand(final Label label, final Region area) {
         final boolean[] isHidden = {true};
 
-        label.heightProperty().addListener(((observable, oldValue, newValue) -> {
-            final int height = newValue.intValue();
+        label.setGraphic(createArrowPath(false));
+        label.setGraphicTextGap(10);
 
-            label.setGraphic(createArrowPath(height, false));
-            label.setGraphicTextGap(10);
-
-            label.setOnMouseClicked(me -> {
-                isHidden[0] = !isHidden[0];
-                if (isHidden[0]) {
-                    label.setGraphic(createArrowPath(height, false));
-                    hide(area);
-                }
-                else {
-                    label.setGraphic(createArrowPath(height, true));
-                    show(area);
-                }
-            });
-        }));
+        label.setOnMouseClicked(me -> {
+            isHidden[0] = !isHidden[0];
+            if (isHidden[0]) {
+                label.setGraphic(createArrowPath(false));
+                hide(area);
+            }
+            else {
+                label.setGraphic(createArrowPath(true));
+                show(area);
+            }
+        });
 
         // Hide initially
         hide(area);
+    }
+
+    private static SVGPath createArrowPath(final boolean up) {
+        return createArrowPath(ARROW_HEIGHT, up);
     }
 
     /**
@@ -162,10 +166,117 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         controller.mutantsText.textProperty().bind(controller.getPlan().mutantsTextProperty());
         controller.testCasesText.textProperty().bind(controller.getPlan().testCasesTextProperty());
         controller.passedText.textProperty().bind(controller.getPlan().passedTextProperty());
+
+
+
+
         controller.inconclusiveText.textProperty().bind(controller.getPlan().inconclusiveTextProperty());
+        initializeExpand(controller.inconclusiveText, controller.inconclusiveMessageList);
+        //controller.inconclusiveText.textProperty().addListener(((observable, oldValue, newValue) -> show(controller.inconclusiveText))); // Only show when has text
         controller.inconclusiveMessageList.itemsProperty().bind(controller.getPlan().inconclusiveMessageListProperty());
+
+        final DoubleProperty inconclusiveListHegiht = new SimpleDoubleProperty(0.0);
+
+        controller.inconclusiveMessageList.setCellFactory(new Callback<ListView<ExpandableContent>, ListCell<ExpandableContent>>() {
+            @Override
+            public ListCell<ExpandableContent> call(final ListView<ExpandableContent> listView) {
+                return new ListCell<ExpandableContent>() {
+                    @Override
+                    protected void updateItem(final ExpandableContent item, final boolean empty) {
+                        super.updateItem(item, empty);
+                        final VBox vbox = new VBox();
+                        setGraphic(vbox);
+
+                        if (item != null && getIndex() > -1) {
+                            final Label labelHeader = new Label(item.getTitle());
+
+                            labelHeader.setGraphic(createArrowPath(false));
+                            labelHeader.setGraphicTextGap(10);
+                            labelHeader.setId("tableview-columnheader-default-bg");
+                            labelHeader.setPrefWidth(listView.getWidth() - 25);
+
+                            labelHeader.setOnMouseClicked(e -> {
+                                item.setHidden(!item.isHidden());
+                                final double heightBefore = vbox.getHeight();
+                                if (item.isHidden()) {
+                                    labelHeader.setGraphic(createArrowPath(false));
+                                    vbox.getChildren().remove(vbox.getChildren().size() - 1);
+                                } else {
+                                    labelHeader.setGraphic(createArrowPath(true));
+                                    vbox.getChildren().add(new Label(item.getContent()));
+                                }
+                                final double heightAfter = vbox.getHeight();
+
+                                inconclusiveListHegiht.set(inconclusiveListHegiht.get() - heightBefore + heightAfter);
+                            });
+
+                            vbox.getChildren().add(labelHeader);
+
+                            inconclusiveListHegiht.set(inconclusiveListHegiht.get() + vbox.getHeight());
+                        }
+                    }
+                };
+            }
+        });
+
+
+
+
+
         controller.failedText.textProperty().bind(controller.getPlan().failedTextProperty());
+        initializeExpand(controller.failedText, controller.failedMessageList);
+        //controller.failedText.textProperty().addListener(((observable, oldValue, newValue) -> show(controller.failedText))); // Only show when has text
         controller.failedMessageList.itemsProperty().bind(controller.getPlan().failedMessageListProperty());
+
+
+        final DoubleProperty failedListHeight = new SimpleDoubleProperty(0.0);
+
+        controller.failedMessageList.setCellFactory(new Callback<ListView<ExpandableContent>, ListCell<ExpandableContent>>() {
+            @Override
+            public ListCell<ExpandableContent> call(final ListView<ExpandableContent> listView) {
+                return new ListCell<ExpandableContent>() {
+                    @Override
+                    protected void updateItem(final ExpandableContent item, final boolean empty) {
+                        super.updateItem(item, empty);
+                        final VBox vbox = new VBox();
+                        setGraphic(vbox);
+
+                        if (item != null && getIndex() > -1) {
+                            final Label labelHeader = new Label(item.getTitle());
+
+                            labelHeader.setGraphic(createArrowPath(false));
+                            labelHeader.setGraphicTextGap(10);
+                            labelHeader.setId("tableview-columnheader-default-bg");
+                            labelHeader.setPrefWidth(listView.getWidth() - 50);
+
+                            labelHeader.setOnMouseClicked(e -> {
+                                item.setHidden(!item.isHidden());
+                                final double heightBefore = getHeight();
+                                if (item.isHidden()) {
+                                    labelHeader.setGraphic(createArrowPath(false));
+                                    vbox.getChildren().remove(vbox.getChildren().size() - 1);
+                                } else {
+                                    labelHeader.setGraphic(createArrowPath(true));
+                                    vbox.getChildren().add(new Label(item.getContent()));
+                                }
+                                final double heightAfter = getHeight();
+
+                                failedListHeight.set(failedListHeight.get() - heightBefore + heightAfter);
+                                System.out.println("update: " + failedListHeight);
+                            });
+
+                            vbox.getChildren().add(labelHeader);
+
+                            failedListHeight.set(failedListHeight.get() + getHeight());
+                            System.out.println("new: " + failedListHeight);
+                        }
+                    }
+                };
+            }
+        });
+
+        //failedListHeight.addListener(((observable, oldValue, newValue) -> controller.failedMessageList.setPrefHeight(newValue.doubleValue())));
+
     }
 
     /**

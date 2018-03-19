@@ -64,9 +64,9 @@ public class MutationTestPlan extends HighLevelModelObject {
     private final StringProperty testCasesText = new SimpleStringProperty("");
     private final StringProperty passedText = new SimpleStringProperty("");
     private final StringProperty InconclusiveText = new SimpleStringProperty("");
-    private final ListProperty<String> inconclusiveMessageList = new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final ListProperty<ExpandableContent> inconclusiveMessageList = new SimpleListProperty<>(FXCollections.observableArrayList());
     private final StringProperty FailedText = new SimpleStringProperty("");
-    private final ListProperty<String> failedMessageList = new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final ListProperty<ExpandableContent> failedMessageList = new SimpleListProperty<>(FXCollections.observableArrayList());
 
     // For exporting
     private final BooleanProperty angelicWhenExport = new SimpleBooleanProperty(false);
@@ -241,17 +241,17 @@ public class MutationTestPlan extends HighLevelModelObject {
         this.FailedText.set(failedText);
     }
 
-    public ObservableList<String> getFailedMessageList() {
+    public ObservableList<ExpandableContent> getFailedMessageList() {
         return failedMessageList.get();
     }
-    public ListProperty<String> failedMessageListProperty() {
+    public ListProperty<ExpandableContent> failedMessageListProperty() {
         return failedMessageList;
     }
 
-    public ObservableList<String> getInconclusiveMessageList() {
+    public ObservableList<ExpandableContent> getInconclusiveMessageList() {
         return inconclusiveMessageList.get();
     }
-    public ListProperty<String> inconclusiveMessageListProperty() {
+    public ListProperty<ExpandableContent> inconclusiveMessageListProperty() {
         return inconclusiveMessageList;
     }
 
