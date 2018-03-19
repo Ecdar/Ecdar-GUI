@@ -49,6 +49,15 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         initialize();
     }
 
+    /* Properties */
+
+    private MutationTestPlan getPlan() {
+        return controller.getPlan();
+    }
+
+
+    /* Other */
+
     /**
      * Converts a duration to a human readable format, e.g. 0.293s.
      * @param duration the duration
@@ -74,14 +83,14 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
 
         initializeProgressAndResultsTexts();
 
-        initializePositiveIntegerTextField(controller.generationThreadsField, controller.getPlan().concurrentGenerationsThreadsProperty());
-        initializePositiveIntegerTextField(controller.suvInstancesField, controller.getPlan().concurrentSutInstancesProperty());
-        initializePositiveIntegerTextField(controller.outputWaitTimeField, controller.getPlan().outputWaitTimeProperty());
-        initializePositiveIntegerTextField(controller.verifytgaTriesField, controller.getPlan().verifytgaTriesProperty());
-        initializePositiveIntegerTextField(controller.timeUnitField, controller.getPlan().timeUnitProperty());
+        initializePositiveIntegerTextField(controller.generationThreadsField, getPlan().concurrentGenerationsThreadsProperty());
+        initializePositiveIntegerTextField(controller.suvInstancesField, getPlan().concurrentSutInstancesProperty());
+        initializePositiveIntegerTextField(controller.outputWaitTimeField, getPlan().outputWaitTimeProperty());
+        initializePositiveIntegerTextField(controller.verifytgaTriesField, getPlan().verifytgaTriesProperty());
+        initializePositiveIntegerTextField(controller.timeUnitField, getPlan().timeUnitProperty());
 
-        controller.demonicCheckBox.selectedProperty().bindBidirectional(controller.getPlan().demonicProperty());
-        controller.angelicBox.selectedProperty().bindBidirectional(controller.getPlan().angelicWhenExportProperty());
+        controller.demonicCheckBox.selectedProperty().bindBidirectional(getPlan().demonicProperty());
+        controller.angelicBox.selectedProperty().bindBidirectional(getPlan().angelicWhenExportProperty());
 
         InitializeStatusHandling();
 
@@ -97,28 +106,38 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
 
     }
 
-    private void initializeExpand(final Label label, final Region area) {
+    /**
+     * Makes a region show/hide when pressing a label.
+     * @param label the label
+     * @param region the region
+     */
+    private static void initializeExpand(final Label label, final Region region) {
         final boolean[] isHidden = {true};
 
         label.setGraphic(createArrowPath(false));
         label.setGraphicTextGap(10);
 
-        label.setOnMouseClicked(me -> {
+        label.setOnMousePressed(event -> {
             isHidden[0] = !isHidden[0];
             if (isHidden[0]) {
                 label.setGraphic(createArrowPath(false));
-                hide(area);
+                hide(region);
             }
             else {
                 label.setGraphic(createArrowPath(true));
-                show(area);
+                show(region);
             }
         });
 
         // Hide initially
-        hide(area);
+        hide(region);
     }
 
+    /**
+     * Creates an arrow head path to draw expand and collapse graphics.
+     * @param up true iff the arrow should point up
+     * @return the arrow head graphics
+     */
     private static SVGPath createArrowPath(final boolean up) {
         return createArrowPath(ARROW_HEIGHT, up);
     }
@@ -127,7 +146,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      * Creates an arrow head path to draw expand and collapse graphics.
      * From: http://tech.chitgoks.com/2013/05/19/how-to-create-a-listview-with-title-header-that-expands-collapses-in-java-fx/
      * @param height height of the view it should match
-     * @param up true if the arrow should point up, otherwise false
+     * @param up true iff the arrow should point up
      * @return the arrow head graphics
      */
     private static SVGPath createArrowPath(final int height, final boolean up) {
@@ -151,27 +170,33 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         controller.mutantsText.textProperty().addListener(((observable, oldValue, newValue) -> show(controller.resultsArea)));
 
         // Add progress initially
-        controller.getPlan().getProgressTexts().forEach(text -> controller.progressTextFlow.getChildren().add(text));
+        getPlan().getProgressTexts().forEach(text -> controller.progressTextFlow.getChildren().add(text));
 
         // Add and remove when changed
-        controller.getPlan().getProgressTexts().addListener((ListChangeListener<Text>) change -> {
+        getPlan().getProgressTexts().addListener((ListChangeListener<Text>) change -> {
             while (change.next()) {
                 change.getAddedSubList().forEach(text -> controller.progressTextFlow.getChildren().add(text));
                 change.getRemoved().forEach(text -> controller.progressTextFlow.getChildren().remove(text));
             }
         });
 
-        controller.mutantsText.textProperty().bind(controller.getPlan().mutantsTextProperty());
-        controller.testCasesText.textProperty().bind(controller.getPlan().testCasesTextProperty());
-        controller.passedText.textProperty().bind(controller.getPlan().passedTextProperty());
+        controller.mutantsText.textProperty().bind(getPlan().mutantsTextProperty());
 
-        controller.inconclusiveText.textProperty().bind(controller.getPlan().inconclusiveTextProperty());
+        controller.testCasesText.textProperty().bind(getPlan().testCasesTextProperty());
+
+        controller.testTimeText.textProperty().bindBidirectional(getPlan().testTimeTextProperty());
+
+        controller.passedText.textProperty().bind(getPlan().passedTextProperty());
+
+        controller.inconclusiveText.textProperty().bind(getPlan().inconclusiveTextProperty());
         initializeExpand(controller.inconclusiveText, controller.inconclusiveRegion);
-        controller.getPlan().inconclusiveMessageListProperty().addListener(getExpandableListListener(controller.inconclusiveMessageList.getChildren()));
+        getPlan().inconclusiveTextProperty().addListener(((observable, oldValue, newValue) -> show(controller.inconclusiveText))); // Show when has value
+        getPlan().inconclusiveMessageListProperty().addListener(getExpandableListListener(controller.inconclusiveMessageList.getChildren()));
 
-        controller.failedText.textProperty().bind(controller.getPlan().failedTextProperty());
+        controller.failedText.textProperty().bind(getPlan().failedTextProperty());
         initializeExpand(controller.failedText, controller.failedRegion);
-        controller.getPlan().failedMessageListProperty().addListener(getExpandableListListener(controller.failedMessageList.getChildren()));
+        getPlan().failedTextProperty().addListener(((observable, oldValue, newValue) -> show(controller.failedText))); // Show when has value
+        getPlan().failedMessageListProperty().addListener(getExpandableListListener(controller.failedMessageList.getChildren()));
     }
 
     /**
@@ -226,14 +251,14 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
             controller.modelPicker.getItems().add(label);
 
             // If component is the test model of the test plan, select it
-            final String testModelId = controller.getPlan().getTestModelId();
+            final String testModelId = getPlan().getTestModelId();
             if (testModelId != null && testModelId.equals(component.getName()))
                 controller.modelPicker.setValue(label);
         });
 
         // Bind test plan to test model picker
         controller.modelPicker.valueProperty().addListener(((observable, oldValue, newValue) ->
-                controller.getPlan().setTestModelId(newValue.getText())));
+                getPlan().setTestModelId(newValue.getText())));
 
         // If test model is selected, show elements
         if (controller.modelPicker.getValue() != null) {
@@ -291,7 +316,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      * Initializes the UI for selecting mutation operators.
      */
     private void initializeOperators() {
-        for (final MutationOperator operator : controller.getPlan().getOperators()) {
+        for (final MutationOperator operator : getPlan().getOperators()) {
             final JFXCheckBox checkBox = new JFXCheckBox(operator.getText());
             checkBox.selectedProperty().bindBidirectional(operator.selectedProperty());
             controller.operatorsArea.getChildren().add(checkBox);
@@ -304,8 +329,8 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      * Initializes handling of the status of the test plan.
      */
     private void InitializeStatusHandling() {
-        handleStatusUpdate(null, controller.getPlan().getStatus());
-        controller.getPlan().statusProperty().addListener(((observable, oldValue, newValue) -> handleStatusUpdate(oldValue, newValue)));
+        handleStatusUpdate(null, getPlan().getStatus());
+        getPlan().statusProperty().addListener(((observable, oldValue, newValue) -> handleStatusUpdate(oldValue, newValue)));
     }
 
     /**
@@ -321,7 +346,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
                 for (final Region region : getRegionsToDisableWhileWorking()) region.setDisable(false);
 
                 if (oldValue != null && oldValue.equals(MutationTestPlan.Status.STOPPING))
-                    controller.getPlan().writeProgress("Stopped");
+                    getPlan().writeProgress("Stopped");
 
                 break;
             case WORKING:
@@ -394,7 +419,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      * Otherwise, show them when it becomes non-empty.
      */
     private void initializeSutPath() {
-        controller.sutPathLabel.textProperty().bindBidirectional(controller.getPlan().sutPathProperty());
+        controller.sutPathLabel.textProperty().bindBidirectional(getPlan().sutPathProperty());
         if (!controller.sutPathLabel.getText().isEmpty() && controller.sutPathLabel.isVisible()) showSutArea();
         else controller.sutPathLabel.textProperty().addListener(((observable, oldValue, newValue) -> showSutArea()));
     }
@@ -417,7 +442,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         controller.actionPicker.getItems().addAll(testLabel, exportLabel);
 
         controller.actionPicker.valueProperty().addListener(((observable, oldValue, newValue) ->
-                controller.getPlan().setAction(newValue.getText())));
+                getPlan().setAction(newValue.getText())));
 
         // Change visibility of areas when action changes
         controller.actionPicker.valueProperty().addListener(((observable, oldValue, newValue) -> {
@@ -431,7 +456,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         }));
 
         // Set action from model, or Test if not selected
-        if (controller.getPlan().getAction().equals("Export mutants")) controller.actionPicker.setValue(exportLabel);
+        if (getPlan().getAction().equals("Export mutants")) controller.actionPicker.setValue(exportLabel);
         else controller.actionPicker.setValue(testLabel);
     }
 
@@ -464,11 +489,11 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         controller.formatPicker.getItems().addAll(jsonLabel, xmlLabel);
 
         // Set action from model, or JSON if not selected
-        if (controller.getPlan().getAction().equals("XML")) controller.formatPicker.setValue(xmlLabel);
+        if (getPlan().getAction().equals("XML")) controller.formatPicker.setValue(xmlLabel);
         else controller.formatPicker.setValue(jsonLabel);
 
         controller.formatPicker.valueProperty().addListener(((observable, oldValue, newValue) ->
-                controller.getPlan().setFormat(newValue.getText())));
+                getPlan().setFormat(newValue.getText())));
     }
 
     /**

@@ -82,6 +82,7 @@ public class MutationTestPlanController {
     public Pane advancedOptions;
     public HBox failedRegion;
     public HBox inconclusiveRegion;
+    public Label testTimeText;
 
 
     /* Mutation fields */

@@ -32,6 +32,7 @@ public class TestDriver implements ConcurrentJobsHandler {
     private final int bound;
     private final List<MutationTestCase> mutationTestCases;
     private ConcurrentJobsDriver jobsDriver;
+    private Instant jobsStart;
 
     private enum Verdict {NONE, INCONCLUSIVE, PASS, FAIL}
 
@@ -59,6 +60,8 @@ public class TestDriver implements ConcurrentJobsHandler {
             getPlan().setPassedText("Passed: " + 0);
             getPlan().setFailedText("Failed: " + 0);
         });
+
+        jobsStart = Instant.now();
 
         jobsDriver.start();
     }
@@ -197,8 +200,9 @@ public class TestDriver implements ConcurrentJobsHandler {
 
         sut.destroy();
 
-        /*Platform.runLater(() -> getPlan().setTestCasesText("Test-cases: " + mutationTestCases.size() + " - Execution time: " +
-                MutationTestPlanPresentation.readableFormat(Duration.between(generationStart, Instant.now()))));*/
+        Platform.runLater(() -> getPlan().setTestTimeText(
+                "Testing time: " + MutationTestPlanPresentation.readableFormat(Duration.between(jobsStart, Instant.now()))
+        ));
 
         jobsDriver.onJobDone();
     }
@@ -355,7 +359,7 @@ public class TestDriver implements ConcurrentJobsHandler {
 
     @Override
     public void writeProgress(final int jobsEnded) {
-        writeProgress("Testcase: " + jobsEnded + "/" + mutationTestCases.size());
+        writeProgress("Testing... (" + jobsEnded + "/" + mutationTestCases.size() + " test-cases)");
     }
 
     /**

@@ -62,6 +62,8 @@ public class MutationTestPlan extends HighLevelModelObject {
     private final ObservableList<Text> progressTexts = FXCollections.observableArrayList();
     private final StringProperty mutantsText = new SimpleStringProperty("");
     private final StringProperty testCasesText = new SimpleStringProperty("");
+
+    private final StringProperty testTimeText = new SimpleStringProperty("");
     private final StringProperty passedText = new SimpleStringProperty("");
     private final StringProperty InconclusiveText = new SimpleStringProperty("");
     private final ListProperty<ExpandableContent> inconclusiveMessageList = new SimpleListProperty<>(FXCollections.observableArrayList());
@@ -279,6 +281,16 @@ public class MutationTestPlan extends HighLevelModelObject {
         return progressTexts;
     }
 
+    public String getTestTimeText() {
+        return testTimeText.get();
+    }
+    public StringProperty testTimeTextProperty() {
+        return testTimeText;
+    }
+    public void setTestTimeText(final String testTimeText) {
+        this.testTimeText.set(testTimeText);
+    }
+
     /* Other methods */
 
     @Override
@@ -394,4 +406,6 @@ public class MutationTestPlan extends HighLevelModelObject {
         progressTexts.clear();
         progressTexts.add(text);
     }
+
+
 }
