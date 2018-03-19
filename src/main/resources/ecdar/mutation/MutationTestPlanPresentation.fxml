@@ -17,9 +17,8 @@
                          promptText="Select Test Model"/>
 
             <VBox fx:id="modelDependentArea" spacing="16" managed="false" visible="false">
-                <VBox fx:id="operatorsArea" spacing="4">
-                    <Label text="Select mutation operators:"/>
-                </VBox>
+                <Label fx:id="opsLabel" text="Select mutation operators"/>
+                <VBox fx:id="operatorsArea" spacing="4" managed="false" visible="false"/>
 
                 <JFXComboBox fx:id="actionPicker" promptText="Select Action"/>
 

@@ -17,6 +17,7 @@ import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.Region;
+import javafx.scene.shape.SVGPath;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -82,6 +83,53 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
                 "and you want to ignore mutants leading to these missing inputs. " +
                 "We apply angelic completion on the mutants.");
         initializeWidthAndHeight();
+
+
+        initializeOperatorCollapse();
+
+
+    }
+
+    private void initializeOperatorCollapse() {
+        controller.opsLabel.heightProperty().addListener(((observable, oldValue, newValue) -> {
+            final int height = (int) controller.opsLabel.getHeight();
+
+            controller.opsLabel.setGraphic(createArrowPath(height, false));
+            controller.opsLabel.setGraphicTextGap(10);
+
+            controller.opsLabel.setOnMouseClicked(me -> {
+                isOperatorsHidden = !isOperatorsHidden;
+                if (isOperatorsHidden) {
+                    controller.opsLabel.setGraphic(createArrowPath(height, false));
+                    hide(controller.operatorsArea);
+                }
+                else {
+                    controller.opsLabel.setGraphic(createArrowPath(height, true));
+                    show(controller.operatorsArea);
+                }
+            });
+        }));
+    }
+
+    private boolean isOperatorsHidden = true;
+
+    /**
+     * Creates an arrow head path to draw expand and collapse graphics.
+     * From: http://tech.chitgoks.com/2013/05/19/how-to-create-a-listview-with-title-header-that-expands-collapses-in-java-fx/
+     * @param height height of the view it should match
+     * @param up true if the arrow should point up, otherwise false
+     * @return the arrow head graphics
+     */
+    private static SVGPath createArrowPath(final int height, final boolean up) {
+        final SVGPath svg = new SVGPath();
+        final int width = height / 4;
+
+        if (up)
+            svg.setContent("M" + width + " 0 L" + (width * 2) + " " + width + " L0 " + width + " Z");
+        else
+            svg.setContent("M0 0 L" + (width * 2) + " 0 L" + width + " " + width + " Z");
+
+        return svg;
     }
 
     /**

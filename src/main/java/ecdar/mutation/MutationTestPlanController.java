@@ -1,13 +1,11 @@
 package ecdar.mutation;
 
-import com.jfoenix.controls.JFXButton;
-import com.jfoenix.controls.JFXCheckBox;
-import com.jfoenix.controls.JFXComboBox;
-import com.jfoenix.controls.JFXTextField;
+import com.jfoenix.controls.*;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.mutation.models.MutationTestCase;
 import ecdar.mutation.models.MutationTestPlan;
+import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
@@ -76,6 +74,10 @@ public class MutationTestPlanController {
     public ListView failedMessageList;
     public JFXTextField timeUnitField;
     public HBox timeUnitBox;
+    public JFXListView fListView;
+    public JFXButton collapseButton;
+    public JFXButton expandButton;
+    public Label opsLabel;
 
 
     /* Mutation fields */
