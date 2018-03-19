@@ -3,28 +3,19 @@ package ecdar.mutation;
 import com.jfoenix.controls.*;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
-import ecdar.mutation.models.ExpandableContent;
 import ecdar.mutation.models.MutationTestCase;
 import ecdar.mutation.models.MutationTestPlan;
-import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.FileChooser;
-import jdk.nashorn.internal.ir.ExpressionStatement;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * Controller for a test plan with model-based mutation testing.
@@ -122,7 +113,7 @@ public class MutationTestPlanController {
      * @param cases the mutation test cases to test with
      */
     private void startTestDriver(final List<MutationTestCase> cases) {
-        new TestDriver(cases, plan, getPlan().getTimeUnit(), TEST_STEP_BOUND).start();
+        new AllTestsDriver(cases, plan, getPlan().getTimeUnit(), TEST_STEP_BOUND).start();
     }
 
     /**
