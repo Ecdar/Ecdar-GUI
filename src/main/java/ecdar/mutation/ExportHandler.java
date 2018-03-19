@@ -32,12 +32,10 @@ class ExportHandler {
     private final MutationTestPlan plan;
 
     private final Component testModel;
-    private final Consumer<Text> progressWriter;
 
-    ExportHandler(final MutationTestPlan plan, final Component testModel, final Consumer<Text> progressWriter) {
+    ExportHandler(final MutationTestPlan plan, final Component testModel) {
         this.plan = plan;
         this.testModel = testModel;
-        this.progressWriter = progressWriter;
     }
 
     private Component getTestModel() {
@@ -49,7 +47,7 @@ class ExportHandler {
     }
 
     private Consumer<Text> getProgressWriter() {
-        return progressWriter;
+        return text -> getPlan().writeProgress(text);
     }
 
     /**
@@ -170,7 +168,7 @@ class ExportHandler {
                 final String message = "Error while generating test-cases: " + e.getMessage();
                 final Text text = new Text(message);
                 text.setFill(Color.RED);
-                progressWriter.accept(text);
+                getProgressWriter().accept(text);
                 Ecdar.showToast(message);
             });
         }

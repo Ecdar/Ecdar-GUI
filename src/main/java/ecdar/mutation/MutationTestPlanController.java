@@ -109,7 +109,7 @@ public class MutationTestPlanController {
         // Clone it, because we want to change its name
         final Component testModel = Ecdar.getProject().findComponent(modelPicker.getValue().getText()).cloneForVerification();
 
-        new TestCaseGenerationHandler(getPlan(), testModel, this::writeProgress, this::startTestDriver).start();
+        new TestCaseGenerationHandler(getPlan(), testModel, this::startTestDriver).start();
     }
 
     /**
@@ -117,7 +117,7 @@ public class MutationTestPlanController {
      * @param cases the mutation test cases to test with
      */
     private void startTestDriver(final List<MutationTestCase> cases) {
-        new TestDriver(cases, plan, this::writeProgress, getPlan().getTimeUnit(), TEST_STEP_BOUND).start();
+        new TestDriver(cases, plan, getPlan().getTimeUnit(), TEST_STEP_BOUND).start();
     }
 
     /**
@@ -136,27 +136,8 @@ public class MutationTestPlanController {
      * Signals that this test plan should stop doing jobs.
      */
     public void onStopButtonPressed() {
-        writeProgress("Stopping");
+        getPlan().writeProgress("Stopping");
         getPlan().setStatus(MutationTestPlan.Status.STOPPING);
-    }
-
-    /**
-     * Writes progress to the user.
-     * @param message the message to display
-     */
-    public void writeProgress(final String message) {
-        final Text text = new Text(message);
-        text.setFill(Color.web("#333333"));
-        writeProgress(text);
-    }
-
-    /**
-     * Writes progress to the user.
-     * @param text the message to display
-     */
-    private void writeProgress(final Text text) {
-        progressTextFlow.getChildren().clear();
-        progressTextFlow.getChildren().add(text);
     }
 
     /**
@@ -196,6 +177,6 @@ public class MutationTestPlanController {
      */
     public void onExportButtonPressed() {
         getPlan().clearResults();
-        new ExportHandler(getPlan(), Ecdar.getProject().findComponent(modelPicker.getValue().getText()), this::writeProgress).start();
+        new ExportHandler(getPlan(), Ecdar.getProject().findComponent(modelPicker.getValue().getText())).start();
     }
 }

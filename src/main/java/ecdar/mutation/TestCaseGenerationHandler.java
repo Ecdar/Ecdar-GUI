@@ -44,7 +44,6 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
     private ConcurrentJobsDriver jobsDriver;
 
     // Progress fields
-    private final Consumer<Text> progressWriter;
     private Instant generationStart;
     private String queryFilePath;
 
@@ -55,12 +54,10 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
      * Constructs the handler.
      * @param plan the test plan containing options for generation
      * @param testModel the tet model to use
-     * @param progressWriter object to write progress with
      */
-    TestCaseGenerationHandler(final MutationTestPlan plan, final Component testModel, final Consumer<Text> progressWriter, final Consumer<List<MutationTestCase>> testCasesConsumer) {
+    TestCaseGenerationHandler(final MutationTestPlan plan, final Component testModel, final Consumer<List<MutationTestCase>> testCasesConsumer) {
         this.plan = plan;
         this.testModel = testModel;
-        this.progressWriter = progressWriter;
         this.testCasesConsumer = testCasesConsumer;
     }
 
@@ -73,10 +70,6 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
 
     private Component getTestModel() {
         return testModel;
-    }
-
-    private Consumer<Text> getProgressWriter() {
-        return progressWriter;
     }
 
     /* Other methods */
@@ -166,23 +159,13 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
 
         final Text text = new Text("Done");
         text.setFill(Color.GREEN);
-        getProgressWriter().accept(text);
+        getPlan().writeProgress(text);
         testCasesConsumer.accept(finishedTestCases);
     }
     
     @Override
     public void writeProgress(final int jobsEnded) {
-        writeProgress("Generating test-cases... (" + jobsEnded + "/" + potentialTestCases.size() + " mutants processed)");
-    }
-
-    /**
-     * Writes progress.
-     * @param message the message describing the progress
-     */
-    private void writeProgress(final String message) {
-        final Text text = new Text(message);
-        text.setFill(Color.web("#333333"));
-        getProgressWriter().accept(text);
+        getPlan().writeProgress("Generating test-cases... (" + jobsEnded + "/" + potentialTestCases.size() + " mutants processed)");
     }
 
     @Override
@@ -272,7 +255,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
                                 testCase.getDescription() + ": " + e.getMessage();
                         final Text text = new Text(message);
                         text.setFill(Color.RED);
-                        progressWriter.accept(text);
+                        getPlan().writeProgress(text);
                         Ecdar.showToast(message);
                     });
                 }
@@ -303,7 +286,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
                 final String message = "Error while generating test-cases: " + e.getMessage();
                 final Text text = new Text(message);
                 text.setFill(Color.RED);
-                progressWriter.accept(text);
+                getPlan().writeProgress(text);
                 Ecdar.showToast(message);
             });
         }

@@ -31,7 +31,6 @@ public class TestDriver implements ConcurrentJobsHandler {
     private final long timeUnit;
     private final int bound;
     private final List<MutationTestCase> mutationTestCases;
-    private final Consumer<Text> progressWriterText;
     private ConcurrentJobsDriver jobsDriver;
 
     private enum Verdict {NONE, INCONCLUSIVE, PASS, FAIL}
@@ -39,9 +38,8 @@ public class TestDriver implements ConcurrentJobsHandler {
     /**
      * Constructor for the test driver, needs a list of mutation test cases, a test plan, a consumer to write progress to, an long representing a time units length in miliseconds and a bound
      */
-    TestDriver(final List<MutationTestCase> mutationTestCases, final MutationTestPlan testPlan, final Consumer<Text> progressWriterText, final long timeUnit, final int bound) {
+    TestDriver(final List<MutationTestCase> mutationTestCases, final MutationTestPlan testPlan, final long timeUnit, final int bound) {
         this.mutationTestCases = mutationTestCases;
-        this.progressWriterText = progressWriterText;
         this.testPlan = testPlan;
         this.timeUnit = timeUnit;
         this.bound = bound;
@@ -388,7 +386,7 @@ public class TestDriver implements ConcurrentJobsHandler {
         performTest(mutationTestCases.get(index));
     }
 
-    private Consumer<Text> getProgressWriter() { return progressWriterText; }
+    private Consumer<Text> getProgressWriter() { return text -> getPlan().writeProgress(text); }
 
     private MutationTestPlan getPlan() {return testPlan; }
 }

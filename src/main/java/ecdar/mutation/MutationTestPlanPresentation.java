@@ -18,6 +18,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.Region;
 import javafx.scene.shape.SVGPath;
+import javafx.scene.text.Text;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -136,8 +137,20 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      * Initializes UI elements for displaying progress and results.
      */
     private void initializeProgressAndResultsTexts() {
+        // Show info when added
         controller.progressTextFlow.getChildren().addListener((ListChangeListener<Node>) change -> show(controller.progressAres));
         controller.mutantsText.textProperty().addListener(((observable, oldValue, newValue) -> show(controller.resultsArea)));
+
+        // Add progress initially
+        controller.getPlan().getProgressTexts().forEach(text -> controller.progressTextFlow.getChildren().add(text));
+
+        // Add and remove when changed
+        controller.getPlan().getProgressTexts().addListener((ListChangeListener<Text>) change -> {
+            while (change.next()) {
+                change.getAddedSubList().forEach(text -> controller.progressTextFlow.getChildren().add(text));
+                change.getRemoved().forEach(text -> controller.progressTextFlow.getChildren().remove(text));
+            }
+        });
 
         controller.mutantsText.textProperty().bind(controller.getPlan().mutantsTextProperty());
         controller.testCasesText.textProperty().bind(controller.getPlan().testCasesTextProperty());
@@ -253,7 +266,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
                 for (final Region region : getRegionsToDisableWhileWorking()) region.setDisable(false);
 
                 if (oldValue != null && oldValue.equals(MutationTestPlan.Status.STOPPING))
-                    controller.writeProgress("Stopped");
+                    controller.getPlan().writeProgress("Stopped");
 
                 break;
             case WORKING:

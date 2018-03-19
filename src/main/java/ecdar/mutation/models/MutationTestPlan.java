@@ -8,6 +8,9 @@ import ecdar.mutation.operators.MutationOperator;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -56,6 +59,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     private final IntegerProperty timeUnit = new SimpleIntegerProperty(1000);
 
     // Temporary values for displaying results of testing
+    private final ObservableList<Text> progressTexts = FXCollections.observableArrayList();
     private final StringProperty mutantsText = new SimpleStringProperty("");
     private final StringProperty testCasesText = new SimpleStringProperty("");
     private final StringProperty passedText = new SimpleStringProperty("");
@@ -271,6 +275,10 @@ public class MutationTestPlan extends HighLevelModelObject {
         this.timeUnit.set(timeUnit);
     }
 
+    public ObservableList<Text> getProgressTexts() {
+        return progressTexts;
+    }
+
     /* Other methods */
 
     @Override
@@ -366,5 +374,24 @@ public class MutationTestPlan extends HighLevelModelObject {
         getInconclusiveMessageList().clear();
         setFailedText("");
         getFailedMessageList().clear();
+    }
+
+    /**
+     * Writes progress to the user.
+     * @param message the message to display
+     */
+    public void writeProgress(final String message) {
+        final Text text = new Text(message);
+        text.setFill(Color.web("#333333"));
+        writeProgress(text);
+    }
+
+    /**
+     * Writes progress to the user.
+     * @param text the message to display
+     */
+    public void writeProgress(final Text text) {
+        progressTexts.clear();
+        progressTexts.add(text);
     }
 }
