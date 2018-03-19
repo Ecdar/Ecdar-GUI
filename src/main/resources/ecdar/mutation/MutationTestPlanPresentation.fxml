@@ -94,9 +94,9 @@
                     <Label fx:id="mutantsText"/>
                     <Label fx:id="testCasesText"/>
                     <Label fx:id="passedText"/>
-                    <Label fx:id="inconclusiveText"/>
+                    <Label fx:id="inconclusiveText" prefWidth="Infinity"/>
                     <ListView fx:id="inconclusiveMessageList"/>
-                    <Label fx:id="failedText"/>
+                    <Label fx:id="failedText" prefWidth="Infinity"/>
                     <ListView fx:id="failedMessageList"/>
                 </VBox>
             </VBox>

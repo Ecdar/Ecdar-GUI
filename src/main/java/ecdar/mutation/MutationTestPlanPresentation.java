@@ -89,11 +89,13 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
 
         initializeExpand(controller.opsLabel, controller.operatorsArea);
         initializeExpand(controller.advancedOptionsLabel, controller.advancedOptions);
+        initializeExpand(controller.inconclusiveText, controller.inconclusiveMessageList);
+        initializeExpand(controller.failedText, controller.failedMessageList);
 
 
     }
 
-    private void initializeExpand(final Label label, final VBox area) {
+    private void initializeExpand(final Label label, final Region area) {
         final boolean[] isHidden = {true};
 
         label.heightProperty().addListener(((observable, oldValue, newValue) -> {
