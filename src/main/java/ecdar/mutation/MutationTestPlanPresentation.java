@@ -167,14 +167,19 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
 
         controller.inconclusiveText.textProperty().bind(controller.getPlan().inconclusiveTextProperty());
         initializeExpand(controller.inconclusiveText, controller.inconclusiveRegion);
-        controller.getPlan().inconclusiveMessageListProperty().addListener(expandableListListener(controller.inconclusiveMessageList.getChildren()));
+        controller.getPlan().inconclusiveMessageListProperty().addListener(getExpandableListListener(controller.inconclusiveMessageList.getChildren()));
 
         controller.failedText.textProperty().bind(controller.getPlan().failedTextProperty());
         initializeExpand(controller.failedText, controller.failedRegion);
-        controller.getPlan().failedMessageListProperty().addListener(expandableListListener(controller.failedMessageList.getChildren()));
+        controller.getPlan().failedMessageListProperty().addListener(getExpandableListListener(controller.failedMessageList.getChildren()));
     }
 
-    private static ListChangeListener<ExpandableContent> expandableListListener(final ObservableList<Node> list) {
+    /**
+     * Gets a listener for adding expandable content.
+     * @param list the list to add the content to
+     * @return the listener
+     */
+    private static ListChangeListener<ExpandableContent> getExpandableListListener(final ObservableList<Node> list) {
         return change -> {
             while (change.next()) {
                 change.getAddedSubList().forEach(item -> {
@@ -185,7 +190,6 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
 
                     labelHeader.setGraphic(createArrowPath(false));
                     labelHeader.setGraphicTextGap(10);
-                    //labelHeader.setId("tableview-columnheader-default-bg");
 
                     labelHeader.setOnMouseClicked(e -> {
                         item.setHidden(!item.isHidden());
@@ -198,7 +202,9 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
                             final HBox hBox = new HBox();
                             hBox.setSpacing(8);
                             hBox.getChildren().add(new Separator(Orientation.VERTICAL));
-                            hBox.getChildren().add(new Label(item.getContent()));
+                            final Label content = new Label(item.getContent());
+                            content.setWrapText(true);
+                            hBox.getChildren().add(content);
 
                             vbox.getChildren().add(hBox);
                         }
