@@ -17,6 +17,7 @@ import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Text;
 
@@ -86,33 +87,37 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         initializeWidthAndHeight();
 
 
-        initializeOperatorCollapse();
+        initializeExpand(controller.opsLabel, controller.operatorsArea);
+        initializeExpand(controller.advancedOptionsLabel, controller.advancedOptions);
 
 
     }
 
-    private void initializeOperatorCollapse() {
-        controller.opsLabel.heightProperty().addListener(((observable, oldValue, newValue) -> {
-            final int height = (int) controller.opsLabel.getHeight();
+    private void initializeExpand(final Label label, final VBox area) {
+        final boolean[] isHidden = {true};
 
-            controller.opsLabel.setGraphic(createArrowPath(height, false));
-            controller.opsLabel.setGraphicTextGap(10);
+        label.heightProperty().addListener(((observable, oldValue, newValue) -> {
+            final int height = newValue.intValue();
 
-            controller.opsLabel.setOnMouseClicked(me -> {
-                isOperatorsHidden = !isOperatorsHidden;
-                if (isOperatorsHidden) {
-                    controller.opsLabel.setGraphic(createArrowPath(height, false));
-                    hide(controller.operatorsArea);
+            label.setGraphic(createArrowPath(height, false));
+            label.setGraphicTextGap(10);
+
+            label.setOnMouseClicked(me -> {
+                isHidden[0] = !isHidden[0];
+                if (isHidden[0]) {
+                    label.setGraphic(createArrowPath(height, false));
+                    hide(area);
                 }
                 else {
-                    controller.opsLabel.setGraphic(createArrowPath(height, true));
-                    show(controller.operatorsArea);
+                    label.setGraphic(createArrowPath(height, true));
+                    show(area);
                 }
             });
         }));
-    }
 
-    private boolean isOperatorsHidden = true;
+        // Hide initially
+        hide(area);
+    }
 
     /**
      * Creates an arrow head path to draw expand and collapse graphics.
@@ -298,6 +303,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         regions.add(controller.exportDependantArea);
         regions.add(controller.outputWaitTimeBox);
         regions.add(controller.timeUnitBox);
+        regions.add(controller.opsLabel);
 
         return regions;
     }

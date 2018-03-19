@@ -78,6 +78,8 @@ public class MutationTestPlanController {
     public JFXButton collapseButton;
     public JFXButton expandButton;
     public Label opsLabel;
+    public Label advancedOptionsLabel;
+    public VBox advancedOptions;
 
 
     /* Mutation fields */

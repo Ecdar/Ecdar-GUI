@@ -17,8 +17,8 @@
                          promptText="Select Test Model"/>
 
             <VBox fx:id="modelDependentArea" spacing="16" managed="false" visible="false">
-                <Label fx:id="opsLabel" text="Select mutation operators"/>
-                <VBox fx:id="operatorsArea" spacing="4" managed="false" visible="false"/>
+                <Label fx:id="opsLabel" text="Select mutation operators" prefWidth="Infinity"/>
+                <VBox fx:id="operatorsArea" spacing="4"/>
 
                 <JFXComboBox fx:id="actionPicker" promptText="Select Action"/>
 
@@ -30,34 +30,38 @@
                     <Label fx:id="sutPathLabel"/>
 
                     <VBox spacing="16" fx:id="sutDependentArea" managed="false" visible="false">
-                        <VBox fx:id="demonicArea">
-                            <JFXCheckBox fx:id="demonicCheckBox" text="Apply demonic completion on the test model."/>
-                        </VBox>
-
-                        <HBox spacing="8" alignment="BOTTOM_LEFT">
-                            <JFXTextField fx:id="generationThreadsField" prefWidth="30" alignment="BASELINE_CENTER"/>
-                            <Label text="concurrent thread(s) for test-case generation."/>
-                        </HBox>
-
-                        <HBox spacing="8" alignment="BOTTOM_LEFT">
-                            <JFXTextField fx:id="suvInstancesField" prefWidth="30" alignment="BASELINE_CENTER"/>
-                            <Label text="concurrent instance(s) of the system under test."/>
-                        </HBox>
-
-                        <HBox fx:id="outputWaitTimeBox" spacing="8" alignment="BOTTOM_LEFT">
-                            <JFXTextField fx:id="outputWaitTimeField" prefWidth="30" alignment="BASELINE_CENTER"/>
-                            <Label text="time unit(s) to wait for the SUT to output before giving an inconclusive verdict."/>
-                        </HBox>
-
                         <HBox fx:id="timeUnitBox" spacing="8" alignment="BOTTOM_LEFT">
                             <JFXTextField fx:id="timeUnitField" prefWidth="30" alignment="BASELINE_CENTER"/>
                             <Label text="ms corresponds to 1 time unit."/>
                         </HBox>
 
-                        <HBox spacing="8" alignment="BOTTOM_LEFT">
-                            <JFXTextField fx:id="verifytgaTriesField" prefWidth="30" alignment="BASELINE_CENTER"/>
-                            <Label text="try(-ies) of calling verifytga with empty response before giving up."/>
-                        </HBox>
+                        <Label fx:id="advancedOptionsLabel" text="Advanced Options" prefWidth="Infinity"/>
+
+                        <VBox fx:id="advancedOptions" spacing="16">
+                            <VBox fx:id="demonicArea">
+                                <JFXCheckBox fx:id="demonicCheckBox" text="Apply demonic completion on the test model."/>
+                            </VBox>
+
+                            <HBox spacing="8" alignment="BOTTOM_LEFT">
+                                <JFXTextField fx:id="generationThreadsField" prefWidth="30" alignment="BASELINE_CENTER"/>
+                                <Label text="concurrent thread(s) for test-case generation."/>
+                            </HBox>
+
+                            <HBox spacing="8" alignment="BOTTOM_LEFT">
+                                <JFXTextField fx:id="suvInstancesField" prefWidth="30" alignment="BASELINE_CENTER"/>
+                                <Label text="concurrent instance(s) of the system under test."/>
+                            </HBox>
+
+                            <HBox fx:id="outputWaitTimeBox" spacing="8" alignment="BOTTOM_LEFT">
+                                <JFXTextField fx:id="outputWaitTimeField" prefWidth="30" alignment="BASELINE_CENTER"/>
+                                <Label text="time unit(s) to wait for the SUT to output before giving an inconclusive verdict."/>
+                            </HBox>
+
+                            <HBox spacing="8" alignment="BOTTOM_LEFT">
+                                <JFXTextField fx:id="verifytgaTriesField" prefWidth="30" alignment="BASELINE_CENTER"/>
+                                <Label text="try(-ies) of calling verifytga with empty response before giving up."/>
+                            </HBox>
+                        </VBox>
 
                         <JFXButton fx:id="testButton" prefWidth="100" prefHeight="40" buttonType="RAISED" text="Test"
                                    style="-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;"
