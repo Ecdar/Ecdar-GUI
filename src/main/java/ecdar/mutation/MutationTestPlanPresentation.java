@@ -10,20 +10,18 @@ import ecdar.mutation.operators.MutationOperator;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.presentations.EcdarFXMLLoader;
 import ecdar.presentations.HighLevelModelPresentation;
-import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.ListChangeListener;
-import javafx.event.EventHandler;
+import javafx.collections.ObservableList;
+import javafx.geometry.Orientation;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Text;
-import javafx.util.Callback;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -167,116 +165,49 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         controller.testCasesText.textProperty().bind(controller.getPlan().testCasesTextProperty());
         controller.passedText.textProperty().bind(controller.getPlan().passedTextProperty());
 
-
-
-
         controller.inconclusiveText.textProperty().bind(controller.getPlan().inconclusiveTextProperty());
-        initializeExpand(controller.inconclusiveText, controller.inconclusiveMessageList);
-        //controller.inconclusiveText.textProperty().addListener(((observable, oldValue, newValue) -> show(controller.inconclusiveText))); // Only show when has text
-        controller.inconclusiveMessageList.itemsProperty().bind(controller.getPlan().inconclusiveMessageListProperty());
-
-        final DoubleProperty inconclusiveListHegiht = new SimpleDoubleProperty(0.0);
-
-        controller.inconclusiveMessageList.setCellFactory(new Callback<ListView<ExpandableContent>, ListCell<ExpandableContent>>() {
-            @Override
-            public ListCell<ExpandableContent> call(final ListView<ExpandableContent> listView) {
-                return new ListCell<ExpandableContent>() {
-                    @Override
-                    protected void updateItem(final ExpandableContent item, final boolean empty) {
-                        super.updateItem(item, empty);
-                        final VBox vbox = new VBox();
-                        setGraphic(vbox);
-
-                        if (item != null && getIndex() > -1) {
-                            final Label labelHeader = new Label(item.getTitle());
-
-                            labelHeader.setGraphic(createArrowPath(false));
-                            labelHeader.setGraphicTextGap(10);
-                            labelHeader.setId("tableview-columnheader-default-bg");
-                            labelHeader.setPrefWidth(listView.getWidth() - 25);
-
-                            labelHeader.setOnMouseClicked(e -> {
-                                item.setHidden(!item.isHidden());
-                                final double heightBefore = vbox.getHeight();
-                                if (item.isHidden()) {
-                                    labelHeader.setGraphic(createArrowPath(false));
-                                    vbox.getChildren().remove(vbox.getChildren().size() - 1);
-                                } else {
-                                    labelHeader.setGraphic(createArrowPath(true));
-                                    vbox.getChildren().add(new Label(item.getContent()));
-                                }
-                                final double heightAfter = vbox.getHeight();
-
-                                inconclusiveListHegiht.set(inconclusiveListHegiht.get() - heightBefore + heightAfter);
-                            });
-
-                            vbox.getChildren().add(labelHeader);
-
-                            inconclusiveListHegiht.set(inconclusiveListHegiht.get() + vbox.getHeight());
-                        }
-                    }
-                };
-            }
-        });
-
-
-
-
+        initializeExpand(controller.inconclusiveText, controller.inconclusiveRegion);
+        controller.getPlan().inconclusiveMessageListProperty().addListener(expandableListListener(controller.inconclusiveMessageList.getChildren()));
 
         controller.failedText.textProperty().bind(controller.getPlan().failedTextProperty());
-        initializeExpand(controller.failedText, controller.failedMessageList);
-        //controller.failedText.textProperty().addListener(((observable, oldValue, newValue) -> show(controller.failedText))); // Only show when has text
-        controller.failedMessageList.itemsProperty().bind(controller.getPlan().failedMessageListProperty());
+        initializeExpand(controller.failedText, controller.failedRegion);
+        controller.getPlan().failedMessageListProperty().addListener(expandableListListener(controller.failedMessageList.getChildren()));
+    }
 
+    private static ListChangeListener<ExpandableContent> expandableListListener(final ObservableList<Node> list) {
+        return change -> {
+            while (change.next()) {
+                change.getAddedSubList().forEach(item -> {
+                    final VBox vbox = new VBox();
+                    list.add(vbox);
 
-        final DoubleProperty failedListHeight = new SimpleDoubleProperty(0.0);
+                    final Label labelHeader = new Label(item.getTitle());
 
-        controller.failedMessageList.setCellFactory(new Callback<ListView<ExpandableContent>, ListCell<ExpandableContent>>() {
-            @Override
-            public ListCell<ExpandableContent> call(final ListView<ExpandableContent> listView) {
-                return new ListCell<ExpandableContent>() {
-                    @Override
-                    protected void updateItem(final ExpandableContent item, final boolean empty) {
-                        super.updateItem(item, empty);
-                        final VBox vbox = new VBox();
-                        setGraphic(vbox);
+                    labelHeader.setGraphic(createArrowPath(false));
+                    labelHeader.setGraphicTextGap(10);
+                    //labelHeader.setId("tableview-columnheader-default-bg");
 
-                        if (item != null && getIndex() > -1) {
-                            final Label labelHeader = new Label(item.getTitle());
-
+                    labelHeader.setOnMouseClicked(e -> {
+                        item.setHidden(!item.isHidden());
+                        if (item.isHidden()) {
                             labelHeader.setGraphic(createArrowPath(false));
-                            labelHeader.setGraphicTextGap(10);
-                            labelHeader.setId("tableview-columnheader-default-bg");
-                            labelHeader.setPrefWidth(listView.getWidth() - 50);
+                            vbox.getChildren().remove(vbox.getChildren().size() - 1);
+                        } else {
+                            labelHeader.setGraphic(createArrowPath(true));
 
-                            labelHeader.setOnMouseClicked(e -> {
-                                item.setHidden(!item.isHidden());
-                                final double heightBefore = getHeight();
-                                if (item.isHidden()) {
-                                    labelHeader.setGraphic(createArrowPath(false));
-                                    vbox.getChildren().remove(vbox.getChildren().size() - 1);
-                                } else {
-                                    labelHeader.setGraphic(createArrowPath(true));
-                                    vbox.getChildren().add(new Label(item.getContent()));
-                                }
-                                final double heightAfter = getHeight();
+                            final HBox hBox = new HBox();
+                            hBox.setSpacing(8);
+                            hBox.getChildren().add(new Separator(Orientation.VERTICAL));
+                            hBox.getChildren().add(new Label(item.getContent()));
 
-                                failedListHeight.set(failedListHeight.get() - heightBefore + heightAfter);
-                                System.out.println("update: " + failedListHeight);
-                            });
-
-                            vbox.getChildren().add(labelHeader);
-
-                            failedListHeight.set(failedListHeight.get() + getHeight());
-                            System.out.println("new: " + failedListHeight);
+                            vbox.getChildren().add(hBox);
                         }
-                    }
-                };
+                    });
+
+                    vbox.getChildren().add(labelHeader);
+                });
             }
-        });
-
-        //failedListHeight.addListener(((observable, oldValue, newValue) -> controller.failedMessageList.setPrefHeight(newValue.doubleValue())));
-
+        };
     }
 
     /**

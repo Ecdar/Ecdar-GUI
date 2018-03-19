@@ -11,6 +11,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -72,16 +73,15 @@ public class MutationTestPlanController {
     public Label failedText;
     public StackPane root;
     public JFXTextField verifytgaTriesField;
-    public ListView<ExpandableContent> inconclusiveMessageList;
-    public ListView<ExpandableContent> failedMessageList;
+    public VBox inconclusiveMessageList;
+    public VBox failedMessageList;
     public JFXTextField timeUnitField;
     public HBox timeUnitBox;
-    public JFXListView fListView;
-    public JFXButton collapseButton;
-    public JFXButton expandButton;
     public Label opsLabel;
     public Label advancedOptionsLabel;
-    public VBox advancedOptions;
+    public Pane advancedOptions;
+    public HBox failedRegion;
+    public HBox inconclusiveRegion;
 
 
     /* Mutation fields */
