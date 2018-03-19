@@ -141,6 +141,7 @@ public class TestDriver implements ConcurrentJobsHandler {
                         text.setFill(Color.RED);
                         writeProgress(text);
                         Ecdar.showToast(errorMessage);
+                        e.printStackTrace();
                     });
                 }
             }
