@@ -1,7 +1,12 @@
 package ecdar.mutation.models;
 
+/**
+ * Some content with a title.
+ * The content can be hidden.
+ */
 public class ExpandableContent {
-    private String title, content;
+    private final String title;
+    private final String content;
     private boolean hidden = true;
 
     public ExpandableContent(final String title, final String content) {
