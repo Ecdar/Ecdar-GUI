@@ -117,17 +117,6 @@ public class MutationTestPlanController {
     }
 
     /**
-     * Gets the maximum allowed concurrent threads for generating test-cases.
-     * @return the maximum allowed threads
-     */
-    private int getMaxConcurrentGenerationJobs() {
-        if (generationThreadsField.getText().isEmpty())
-            return 1;
-        else
-            return Integer.parseInt(generationThreadsField.getText());
-    }
-
-    /**
      * Triggered when pressed the stop button.
      * Signals that this test plan should stop doing jobs.
      */

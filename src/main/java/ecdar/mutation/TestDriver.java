@@ -4,19 +4,24 @@ import ecdar.Ecdar;
 import ecdar.abstractions.EdgeStatus;
 import ecdar.mutation.models.*;
 import javafx.application.Platform;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * A driver for running model-based mutation testing for a single test-case.
+ */
 public class TestDriver {
     private final MutationTestCase testCase;
     private final MutationTestPlan plan;
@@ -25,7 +30,17 @@ public class TestDriver {
     private Process sut;
     private final SimpleComponentSimulation testModelSimulation, mutantSimulation;
     private BufferedWriter writer;
+    private Instant lastUpdateTime;
 
+    /**
+     * Constructor.
+     * @param testCase test-case to run
+     * @param plan test plan to fetch information about how to test
+     * @param resultConsumer a consumer to be called when testing is done.
+     *                       This is always called exactly once.
+     *                       If an error happens, or if the test plan signals to stop,
+     *                       the consumer is called with null as argument
+     */
     TestDriver(final MutationTestCase testCase, final MutationTestPlan plan, final Consumer<TestResult> resultConsumer) {
         this.testCase = testCase;
         this.plan = plan;
@@ -51,11 +66,19 @@ public class TestDriver {
 
     /* Other */
 
-    public boolean shouldStop() {
+    /**
+     * If this should stop testing.
+     * @return true iff should stop
+     */
+    private boolean shouldStop() {
         return getPlan().getStatus().equals(MutationTestPlan.Status.STOPPING) ||
                 getPlan().getStatus().equals(MutationTestPlan.Status.ERROR);
     }
 
+    /**
+     * Starts testing in new thread.
+     * When done, the result consumer is called.
+     */
     public void start() {
         new Thread(() -> {
             TestResult result = null;
@@ -82,13 +105,19 @@ public class TestDriver {
         }).start();
     }
 
+    /**
+     * tests.
+     * @return the test result, or null if stopped
+     * @throws IOException if an IO error happens
+     * @throws MutationTestingException if an error related to mutation testing happens
+     * @throws InterruptedException if an error happens when trying to sleep
+     */
     private TestResult test() throws IOException, MutationTestingException, InterruptedException {
-        final ObjectProperty<Instant> lastUpdateTime = new SimpleObjectProperty<>();
         final NonRefinementStrategy strategy = testCase.getStrategy();
 
         //Start process
         sut = Runtime.getRuntime().exec("java -jar " + Ecdar.projectDirectory.get() + File.separator + getPlan().getSutPath().replace("/", File.separator));
-        lastUpdateTime.setValue(Instant.now());
+        lastUpdateTime = Instant.now();
         writer = new BufferedWriter(new OutputStreamWriter(sut.getOutputStream()));
 
         reader = new AsyncInputReader(sut);
@@ -104,7 +133,7 @@ public class TestDriver {
                 // Check if rule is an delay rule or output action rule, if it is either, perform delay,
                 // if it is an input action perform input
                 if (rule instanceof DelayRule || (rule instanceof ActionRule && ((ActionRule) rule).getStatus() == EdgeStatus.OUTPUT)) {
-                    final TestResult result = delay(rule, testModelSimulation, mutantSimulation, lastUpdateTime);
+                    final TestResult result = delay(rule);
                     if (result != null) return result;
                 } else if (rule instanceof  ActionRule){
                     final String sync = ((ActionRule) rule).getSync();
@@ -113,7 +142,7 @@ public class TestDriver {
                     } else {
                         testModelSimulation.runInputAction(sync);
                         mutantSimulation.runInputAction(sync);
-                        writeToSut(sync, sut);
+                        writeToSut(sync);
                     }
                 } else {
                     throw new MutationTestingException("Rule " + rule + " is neither a delay nor an action rule.");
@@ -130,14 +159,12 @@ public class TestDriver {
     }
 
     /**
-     * performs a delay on the simulations and itself and checks if the system under test made an output during the delay.
-     * @param testModelSimulation simulation representing the test model.
-     * @param mutantSimulation simulation representing the mutated model.
+     * Sleeps and simulates the delay on the two simulations and checks if the system under test made an output during the delay.
+     * @param rule strategy rule to check with. This methods sleeps only as long as this is satisfied
      */
-    private TestResult delay(final StrategyRule rule, final SimpleComponentSimulation testModelSimulation,
-                       final SimpleComponentSimulation mutantSimulation, final ObjectProperty<Instant> lastUpdateTime) throws MutationTestingException, InterruptedException, IOException {
+    private TestResult delay(final StrategyRule rule) throws MutationTestingException, InterruptedException, IOException {
         final Instant delayDuration = Instant.now();
-        Map<String, Double> clockValuations = getClockValuations(testModelSimulation, mutantSimulation);
+        Map<String, Double> clockValuations = getClockValuations();
 
         // Keep delaying until the rule has been satisfied,
         // Will return inside while loop if maximum wait time is exceeded or an output has been given
@@ -152,7 +179,7 @@ public class TestDriver {
             if (reader.ready()) {
                 final String output = reader.read();
 
-                final TestResult delayResult = simulateDelay(testModelSimulation, mutantSimulation, lastUpdateTime);
+                final TestResult delayResult = simulateDelay();
                 if (delayResult != null) return delayResult;
 
                 //Catch SUT debug commands
@@ -160,18 +187,18 @@ public class TestDriver {
                 if (match.find()) {
                     System.out.println(match.group(0));
                 } else {
-                    final TestResult outputResult = simulateOutput(testModelSimulation, mutantSimulation, output);
+                    final TestResult outputResult = simulateOutput(output);
                     if (outputResult != null) return outputResult;
                 }
             } else {
                 sleep();
-                final TestResult result = simulateDelay(testModelSimulation, mutantSimulation, lastUpdateTime);
+                final TestResult result = simulateDelay();
                 if (result != null) return result;
             }
 
             if (shouldStop()) return null;
 
-            clockValuations = getClockValuations(testModelSimulation, mutantSimulation);
+            clockValuations = getClockValuations();
         }
 
         return null;
@@ -183,12 +210,9 @@ public class TestDriver {
 
     /**
      * Gets the clock valuations from the simulated test model and simulated mutant model
-     * @param testModelSimulation test model.
-     * @param mutantSimulation mutant model.
      * @return a map of clock valuations, their id and value.
      */
-    private static Map<String, Double> getClockValuations(final SimpleComponentSimulation testModelSimulation,
-                                                          final SimpleComponentSimulation mutantSimulation) {
+    private Map<String, Double> getClockValuations() {
         final Map<String, Double> clockValuations = new HashMap<>();
         clockValuations.putAll(testModelSimulation.getFullyQuantifiedClockValuations());
         clockValuations.putAll(mutantSimulation.getFullyQuantifiedClockValuations());
@@ -199,14 +223,10 @@ public class TestDriver {
 
     /**
      * Simulates an output on the test model and mutant model.
-     * @param testModelSimulation the test model.
-     * @param mutantSimulation the mutant model.
-     * @param lastUpdateTime the time we determine the delay length from.
      */
-    private TestResult simulateDelay(final SimpleComponentSimulation testModelSimulation, final SimpleComponentSimulation mutantSimulation,
-                               final ObjectProperty<Instant> lastUpdateTime) {
-        final double waitedTimeUnits = Duration.between(lastUpdateTime.get(), Instant.now()).toMillis() / (double) getTimeUnitInMs();
-        lastUpdateTime.setValue(Instant.now());
+    private TestResult simulateDelay() {
+        final double waitedTimeUnits = Duration.between(lastUpdateTime, Instant.now()).toMillis() / (double) getTimeUnitInMs();
+        lastUpdateTime = Instant.now();
 
         if (!testModelSimulation.delay(waitedTimeUnits)) {
             return makeResult(TestResult.Verdict.FAIL, "Failed simulating delay on test model.");
@@ -219,13 +239,10 @@ public class TestDriver {
 
     /**
      * Simulates an output on the test model and mutant model.
-     * @param testModelSimulation the test model
-     * @param mutantSimulation the mutant model
      * @param output the output to simulate
-     * @throws MutationTestingException if an exception occured
+     * @throws MutationTestingException if an exception occurred
      */
-    private TestResult simulateOutput(final SimpleComponentSimulation testModelSimulation,
-                                      final SimpleComponentSimulation mutantSimulation, final String output) throws MutationTestingException {
+    private TestResult simulateOutput(final String output) throws MutationTestingException {
         if(!testModelSimulation.isDeterministic(output, EdgeStatus.OUTPUT) || !mutantSimulation.isDeterministic(output, EdgeStatus.OUTPUT)){
             return makeResult(TestResult.Verdict.INCONCLUSIVE, "Non-deterministic choice with output " + output + ".");
         } else if (!testModelSimulation.runOutputAction(output)){
@@ -240,7 +257,7 @@ public class TestDriver {
      * Writes to the system.in of the system under test.
      * @param outputBroadcast the string to write to the system under test.
      */
-    private void writeToSut(final String outputBroadcast, final Process sut) throws IOException {
+    private void writeToSut(final String outputBroadcast) throws IOException {
         //Write to process if it is alive, else act like the process accepts but ignore all inputs.
         if (sut.isAlive()) {
             writer.write(outputBroadcast + "\n");
@@ -256,10 +273,20 @@ public class TestDriver {
         Platform.runLater(() -> getPlan().writeProgress(text));
     }
 
+    /**
+     * Constructs a test result.
+     * @param verdict the verdict of the test
+     * @param reason the reason for that verdict
+     * @return the test result
+     */
     private TestResult makeResult(final TestResult.Verdict verdict, final String reason) {
         return new TestResult(testCase.getId(), testCase.getDescription(), reason, testModelSimulation, mutantSimulation, verdict);
     }
 
+    /**
+     * Destroys the system under test.
+     * This will automatically close the reader that reads outputs from the system under test.
+     */
     private void tearDown() {
         sut.destroy();
     }

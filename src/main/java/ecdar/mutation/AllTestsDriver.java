@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * A test driver that runs testcases on a system under test (sut).
+ * A test driver that runs test-cases on a system under test (sut).
  */
 public class AllTestsDriver implements ConcurrentJobsHandler {
     private int passedNum;
