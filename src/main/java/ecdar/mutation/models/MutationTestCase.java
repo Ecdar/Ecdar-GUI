@@ -1,9 +1,6 @@
 package ecdar.mutation.models;
 
 import ecdar.abstractions.Component;
-import ecdar.mutation.MutationTestingException;
-
-import java.util.List;
 
 /**
  * A test case for model-based mutation testing.

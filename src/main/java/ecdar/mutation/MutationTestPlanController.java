@@ -1,6 +1,9 @@
 package ecdar.mutation;
 
-import com.jfoenix.controls.*;
+import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXCheckBox;
+import com.jfoenix.controls.JFXComboBox;
+import com.jfoenix.controls.JFXTextField;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.mutation.models.MutationTestCase;
@@ -129,13 +132,13 @@ public class MutationTestPlanController {
      * Opens dialog to select a SUT.
      */
     public void onSelectSutButtonPressed() {
-        FileChooser fileChooser = new FileChooser();
+        final FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Choose a SUT jar file");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Jar files", "*.jar"));
 
         // The initial location for the file choosing dialog
         final File jarDir;
-        if(Ecdar.projectDirectory.get() == null) {
+        if (Ecdar.projectDirectory.get() == null) {
             fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         } else {
             jarDir = new File(Ecdar.projectDirectory.get());
@@ -147,9 +150,9 @@ public class MutationTestPlanController {
             }
         }
 
-        File file = fileChooser.showOpenDialog(root.getScene().getWindow());
-        if(file != null) {
-            String path = new File(Ecdar.projectDirectory.get()).toPath().relativize(file.toPath()).toFile().getPath().replace(File.separator, "/");
+        final File file = fileChooser.showOpenDialog(root.getScene().getWindow());
+        if (file != null) {
+            final String path = new File(Ecdar.projectDirectory.get()).toPath().relativize(file.toPath()).toFile().getPath().replace(File.separator, "/");
             sutPathLabel.setText(path);
             plan.setSutPath(path);
         } else {

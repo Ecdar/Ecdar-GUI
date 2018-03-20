@@ -171,7 +171,7 @@ public class TestDriver {
         while ((rule.isSatisfied(clockValuations))) {
             //Check if the maximum wait time has been exceeded, if it is, give inconclusive verdict
             if (!(Duration.between(delayDuration, Instant.now()).toMillis()/(double)getTimeUnitInMs() <= getPlan().getOutputWaitTime())) {
-                return makeResult(TestResult.Verdict.INCONCLUSIVE, "Maximum wait time reached without recieving an output.");
+                return makeResult(TestResult.Verdict.INCONCLUSIVE, "Maximum wait time reached without receiving an output.");
             }
 
             if (reader.isException()) throw reader.getException();
@@ -182,7 +182,7 @@ public class TestDriver {
                 final TestResult delayResult = simulateDelay();
                 if (delayResult != null) return delayResult;
 
-                //Catch SUT debug commands
+                // Catch SUT debug commands
                 final Matcher match = Pattern.compile("Debug: (.*)").matcher(output);
                 if (match.find()) {
                     System.out.println(match.group(0));

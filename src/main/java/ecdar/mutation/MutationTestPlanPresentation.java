@@ -6,8 +6,8 @@ import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.controllers.CanvasController;
 import ecdar.mutation.models.ExpandableContent;
-import ecdar.mutation.operators.MutationOperator;
 import ecdar.mutation.models.MutationTestPlan;
+import ecdar.mutation.operators.MutationOperator;
 import ecdar.presentations.EcdarFXMLLoader;
 import ecdar.presentations.HighLevelModelPresentation;
 import javafx.beans.property.IntegerProperty;
@@ -16,7 +16,10 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Orientation;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.Control;
+import javafx.scene.control.Label;
+import javafx.scene.control.Separator;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -32,7 +35,7 @@ import java.util.*;
 public class MutationTestPlanPresentation extends HighLevelModelPresentation {
     private final MutationTestPlanController controller;
 
-    private final static int ARROW_HEIGHT = 19; // Height of view containing the arrow for expaning and collapsing views. For labels, this is 19
+    private final static int ARROW_HEIGHT = 19; // Height of view containing the arrow for expanding and collapsing views. For labels, this is 19
 
     private double offSet, canvasHeight;
 

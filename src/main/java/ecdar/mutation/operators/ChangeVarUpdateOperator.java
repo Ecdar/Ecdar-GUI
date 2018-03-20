@@ -2,7 +2,6 @@ package ecdar.mutation.operators;
 
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
-import ecdar.mutation.MutationTestingException;
 import ecdar.mutation.models.MutationTestCase;
 import ecdar.utility.ExpressionHelper;
 import org.apache.commons.lang3.tuple.Triple;

@@ -1,7 +1,6 @@
 package ecdar.mutation.models;
 
 import ecdar.abstractions.EdgeStatus;
-import ecdar.backend.EcdarDocument;
 import ecdar.mutation.MutationTestingException;
 
 import java.util.regex.Matcher;

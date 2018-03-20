@@ -32,6 +32,26 @@ public class AllTestsDriver implements ConcurrentJobsHandler {
         this.testPlan = testPlan;
     }
 
+
+    /* Properties */
+
+    @Override
+    public int getMaxConcurrentJobs() {
+        return getPlan().getConcurrentSutInstances();
+    }
+
+    @Override
+    public void startJob(final int index) {
+        performTest(mutationTestCases.get(index));
+    }
+
+    private Consumer<Text> getProgressWriter() { return text -> getPlan().writeProgress(text); }
+
+    private MutationTestPlan getPlan() {return testPlan; }
+
+
+    /* Other */
+
     /**
      * Starts the test driver.
      */
@@ -51,7 +71,7 @@ public class AllTestsDriver implements ConcurrentJobsHandler {
     }
 
     /**
-     * Performs a testcase on the testplans system under test(sut).
+     * Performs a test-case on the test plans system under test(sut).
      * @param testCase to perform.
      */
     private void performTest(final MutationTestCase testCase) {
@@ -132,18 +152,4 @@ public class AllTestsDriver implements ConcurrentJobsHandler {
     private void writeProgress(final Text text) {
         Platform.runLater(() -> getProgressWriter().accept(text));
     }
-
-    @Override
-    public int getMaxConcurrentJobs() {
-        return getPlan().getConcurrentSutInstances();
-    }
-
-    @Override
-    public void startJob(final int index) {
-        performTest(mutationTestCases.get(index));
-    }
-
-    private Consumer<Text> getProgressWriter() { return text -> getPlan().writeProgress(text); }
-
-    private MutationTestPlan getPlan() {return testPlan; }
 }
