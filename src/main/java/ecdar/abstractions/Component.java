@@ -474,10 +474,11 @@ public class Component extends HighLevelModelObject implements Boxed {
 
     /**
      * Get edges that has a specified location as its source.
+     * This is synchronized to avoid problems with multiple threads.
      * @param location the specified location
      * @return the filtered edges
      */
-    public List<Edge> getOutgoingEdges(final Location location) {
+    public synchronized List<Edge> getOutgoingEdges(final Location location) {
         return getEdges().filtered(edge -> location == edge.getSourceLocation());
     }
 

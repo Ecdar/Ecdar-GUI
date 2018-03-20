@@ -32,7 +32,7 @@ public class MutationTestPlanController {
     public ScrollPane scrollPane;
     public JFXComboBox<Label> modelPicker;
     public VBox modelDependentArea;
-    public VBox operatorsArea;
+    public VBox operatorsInnerRegion;
     public JFXComboBox<Label> actionPicker;
 
     public VBox testDependentArea;
@@ -74,6 +74,7 @@ public class MutationTestPlanController {
     public HBox failedRegion;
     public HBox inconclusiveRegion;
     public Label testTimeText;
+    public HBox operatorsOuterRegion;
 
 
     /* Mutation fields */

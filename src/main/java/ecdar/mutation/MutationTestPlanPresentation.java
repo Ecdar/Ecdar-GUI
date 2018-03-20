@@ -24,9 +24,7 @@ import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Text;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Presentation for a test plan with model-based mutation testing.
@@ -100,7 +98,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         initializeWidthAndHeight();
 
 
-        initializeExpand(controller.opsLabel, controller.operatorsArea);
+        initializeExpand(controller.opsLabel, controller.operatorsOuterRegion);
         initializeExpand(controller.advancedOptionsLabel, controller.advancedOptions);
 
 
@@ -190,12 +188,18 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
 
         controller.inconclusiveText.textProperty().bind(getPlan().inconclusiveTextProperty());
         initializeExpand(controller.inconclusiveText, controller.inconclusiveRegion);
-        getPlan().inconclusiveTextProperty().addListener(((observable, oldValue, newValue) -> show(controller.inconclusiveText))); // Show when has value
+        getPlan().inconclusiveTextProperty().addListener(((observable, oldValue, newValue) -> {
+            if (newValue.isEmpty()) hide(controller.inconclusiveText);
+            else show(controller.inconclusiveText);
+        })); // Show when has value
         getPlan().inconclusiveMessageListProperty().addListener(getExpandableListListener(controller.inconclusiveMessageList.getChildren()));
 
         controller.failedText.textProperty().bind(getPlan().failedTextProperty());
         initializeExpand(controller.failedText, controller.failedRegion);
-        getPlan().failedTextProperty().addListener(((observable, oldValue, newValue) -> show(controller.failedText))); // Show when has value
+        getPlan().failedTextProperty().addListener(((observable, oldValue, newValue) -> {
+            if (newValue.isEmpty()) hide(controller.failedText);
+            else show(controller.failedText);
+        })); // Show when has value
         getPlan().failedMessageListProperty().addListener(getExpandableListListener(controller.failedMessageList.getChildren()));
     }
 
@@ -205,11 +209,14 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      * @return the listener
      */
     private static ListChangeListener<ExpandableContent> getExpandableListListener(final ObservableList<Node> list) {
+        final Map<ExpandableContent, VBox> contentModelMap = new HashMap<>();
+
         return change -> {
             while (change.next()) {
                 change.getAddedSubList().forEach(item -> {
-                    final VBox vbox = new VBox();
-                    list.add(vbox);
+                    final VBox vBox = new VBox();
+                    contentModelMap.put(item, vBox);
+                    list.add(vBox);
 
                     final Label labelHeader = new Label(item.getTitle());
 
@@ -220,7 +227,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
                         item.setHidden(!item.isHidden());
                         if (item.isHidden()) {
                             labelHeader.setGraphic(createArrowPath(false));
-                            vbox.getChildren().remove(vbox.getChildren().size() - 1);
+                            vBox.getChildren().remove(vBox.getChildren().size() - 1);
                         } else {
                             labelHeader.setGraphic(createArrowPath(true));
 
@@ -231,12 +238,14 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
                             content.setWrapText(true);
                             hBox.getChildren().add(content);
 
-                            vbox.getChildren().add(hBox);
+                            vBox.getChildren().add(hBox);
                         }
                     });
 
-                    vbox.getChildren().add(labelHeader);
+                    vBox.getChildren().add(labelHeader);
                 });
+
+                change.getRemoved().forEach(item -> list.remove(contentModelMap.get(item)));
             }
         };
     }
@@ -319,7 +328,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         for (final MutationOperator operator : getPlan().getOperators()) {
             final JFXCheckBox checkBox = new JFXCheckBox(operator.getText());
             checkBox.selectedProperty().bindBidirectional(operator.selectedProperty());
-            controller.operatorsArea.getChildren().add(checkBox);
+            controller.operatorsInnerRegion.getChildren().add(checkBox);
 
             installTooltip(checkBox, operator.getDescription());
         }
@@ -370,7 +379,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         final List<Region> regions = new ArrayList<>();
 
         regions.add(controller.modelPicker);
-        regions.add(controller.operatorsArea);
+        regions.add(controller.operatorsInnerRegion);
         regions.add(controller.actionPicker);
         regions.add(controller.demonicArea);
         regions.add(controller.selectSutButton);
@@ -378,7 +387,6 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         regions.add(controller.exportDependantArea);
         regions.add(controller.outputWaitTimeBox);
         regions.add(controller.timeUnitBox);
-        regions.add(controller.opsLabel);
 
         return regions;
     }

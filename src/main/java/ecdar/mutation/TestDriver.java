@@ -98,7 +98,7 @@ public class TestDriver {
             // Get rule and check if its empty
             final StrategyRule rule = strategy.getRule(testModelSimulation, mutantSimulation);
             if (rule == null) {
-                makeResult(TestResult.Verdict.INCONCLUSIVE, "No rule to perform.");
+                return makeResult(TestResult.Verdict.INCONCLUSIVE, "No rule to perform.");
             } else {
                 // Check if rule is an delay rule or output action rule, if it is either, perform delay,
                 // if it is an input action perform input
@@ -108,7 +108,7 @@ public class TestDriver {
                 } else if (rule instanceof  ActionRule){
                     final String sync = ((ActionRule) rule).getSync();
                     if (!testModelSimulation.isDeterministic(sync, EdgeStatus.INPUT) || !mutantSimulation.isDeterministic(sync, EdgeStatus.INPUT)) {
-                        makeResult(TestResult.Verdict.INCONCLUSIVE, "Non-deterministic choice with input " + sync + ".");
+                        return makeResult(TestResult.Verdict.INCONCLUSIVE, "Non-deterministic choice with input " + sync + ".");
                     } else {
                         testModelSimulation.runInputAction(sync);
                         mutantSimulation.runInputAction(sync);

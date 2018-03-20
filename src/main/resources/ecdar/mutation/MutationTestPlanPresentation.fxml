@@ -18,7 +18,10 @@
 
             <VBox fx:id="modelDependentArea" spacing="16" managed="false" visible="false">
                 <Label fx:id="opsLabel" text="Select mutation operators" prefWidth="Infinity"/>
-                <VBox fx:id="operatorsArea" spacing="4"/>
+                <HBox fx:id="operatorsOuterRegion" spacing="8">
+                    <Separator orientation="VERTICAL"/>
+                    <VBox fx:id="operatorsInnerRegion" spacing="4"/>
+                </HBox>
 
                 <JFXComboBox fx:id="actionPicker" promptText="Select Action"/>
 
