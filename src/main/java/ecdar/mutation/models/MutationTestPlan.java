@@ -292,6 +292,7 @@ public class MutationTestPlan extends HighLevelModelObject {
         this.testTimeText.set(testTimeText);
     }
 
+    @SuppressWarnings("javadoc")
     public int getStepBounds() {
         return stepBounds.get();
     }
