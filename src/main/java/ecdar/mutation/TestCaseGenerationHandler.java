@@ -38,7 +38,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
 
     private final Component testModel;
 
-    private List<MutationTestCase> potentialTestCases;
+    private final List<MutationTestCase> potentialTestCases;
     private List<MutationTestCase> finishedTestCases;
 
     private ConcurrentJobsDriver jobsDriver;
@@ -54,12 +54,14 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
      * Constructs the handler.
      * @param plan the test plan containing options for generation
      * @param testModel the tet model to use
+     * @param potentialTestCases potential test-cases containing the mutants
      * @param testCasesConsumer consumer to be called when all test-cases are generated
      */
-    TestCaseGenerationHandler(final MutationTestPlan plan, final Component testModel, final Consumer<List<MutationTestCase>> testCasesConsumer) {
+    TestCaseGenerationHandler(final MutationTestPlan plan, final Component testModel, final List<MutationTestCase> potentialTestCases, final Consumer<List<MutationTestCase>> testCasesConsumer) {
         this.plan = plan;
         this.testModel = testModel;
         this.testCasesConsumer = testCasesConsumer;
+        this.potentialTestCases = potentialTestCases;
     }
 
 
@@ -79,48 +81,6 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
      * Generates mutants and test-cases from them.
      */
     void start() {
-        getPlan().setStatus(MutationTestPlan.Status.WORKING);
-
-        testModel.setName(MutationTestPlanController.SPEC_NAME);
-        testModel.updateIOList();
-
-        final Instant start = Instant.now();
-
-        // Mutate with selected operators
-        potentialTestCases = new ArrayList<>();
-        try {
-            for (final MutationOperator operator : getPlan().getSelectedMutationOperators())
-                potentialTestCases.addAll(operator.generateTestCases(getTestModel()));
-        } catch (final MutationTestingException e) {
-            handleException(e);
-            return;
-        }
-
-        potentialTestCases.forEach(testCase -> testCase.getMutant().applyAngelicCompletion());
-
-        getPlan().setMutantsText("Mutants: " + potentialTestCases.size() + " - Execution time: " + MutationTestPlanPresentation.readableFormat(Duration.between(start, Instant.now())));
-
-        // If chosen, apply demonic completion
-        if (getPlan().isDemonic()) testModel.applyDemonicCompletion();
-
-        //Rename universal and inconsistent locations
-        testModel.getLocations().forEach(location -> {
-            if(location.getType().equals(Location.Type.UNIVERSAL)) {
-                location.setId("Universal");
-            } else if(location.getType().equals(Location.Type.INCONSISTENT)) {
-                location.setId("Inconsistent");
-            }
-        });
-
-        potentialTestCases.forEach(testCase -> testCase.getMutant().getLocations().forEach(location -> {
-            if(location.getType().equals(Location.Type.UNIVERSAL)) {
-                location.setId("Universal");
-            } else if(location.getType().equals(Location.Type.INCONSISTENT)) {
-                location.setId("Inconsistent");
-            }
-        }));
-
-        // Create test cases
         generationStart = Instant.now();
         finishedTestCases = Collections.synchronizedList(new ArrayList<>()); // use synchronized to be thread safe
 
@@ -139,8 +99,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
 
     @Override
     public boolean shouldStop() {
-        return getPlan().getStatus().equals(MutationTestPlan.Status.STOPPING) ||
-                getPlan().getStatus().equals(MutationTestPlan.Status.ERROR);
+        return getPlan().shouldStop();
     }
 
     @Override
@@ -166,7 +125,9 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
     
     @Override
     public void writeProgress(final int jobsEnded) {
-        getPlan().writeProgress("Generating test-cases... (" + jobsEnded + "/" + potentialTestCases.size() + " mutants processed)");
+        Platform.runLater(() -> getPlan().writeProgress("Generating test-cases... (" + jobsEnded + "/" +
+                potentialTestCases.size() + " mutants processed)")
+        );
     }
 
     @Override
@@ -269,31 +230,6 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
             // JavaFX elements cannot be updated in another thread, so make it run in a JavaFX thread at some point
             Platform.runLater(this::onGenerationJobDone);
         }).start();
-    }
-
-    /**
-     * Handles a mutation testing exception.
-     * Signal the test plan to stop.
-     * Writes an error message with the progress handler.
-     * Shows an error message with the toast.
-     * @param e the exception to handle
-     */
-    private void handleException(final MutationTestingException e) {
-        e.printStackTrace();
-
-        // Only show error if the process is not already being stopped
-        if (getPlan().getStatus().equals(MutationTestPlan.Status.WORKING)) {
-            getPlan().setStatus(MutationTestPlan.Status.ERROR);
-            Platform.runLater(() -> {
-                final String message = "Error while generating test-cases: " + e.getMessage();
-                final Text text = new Text(message);
-                text.setFill(Color.RED);
-                getPlan().writeProgress(text);
-                Ecdar.showToast(message);
-            });
-        }
-
-        jobsDriver.onJobDone();
     }
 
     /**

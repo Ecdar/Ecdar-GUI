@@ -108,7 +108,22 @@ public class MutationTestPlanController {
         // Clone it, because we want to change its name
         final Component testModel = Ecdar.getProject().findComponent(modelPicker.getValue().getText()).cloneForVerification();
 
-        new TestCaseGenerationHandler(getPlan(), testModel, this::startTestDriver).start();
+        new MutationHandler(testModel, getPlan(), cases -> startGeneration(testModel, cases)).start();
+    }
+
+    /**
+     * Starts the test-case generation.
+     * If the status is not working, ignore instead
+     * @param testModel test model
+     * @param cases potential test-cases containing the mutants
+     */
+    private synchronized void startGeneration(final Component testModel, final List<MutationTestCase> cases) {
+        if (getPlan().shouldStop()) {
+            getPlan().setStatus(MutationTestPlan.Status.IDLE);
+            return;
+        }
+
+        new TestCaseGenerationHandler(getPlan(), testModel, cases, this::startTestDriver).start();
     }
 
     /**
@@ -116,7 +131,7 @@ public class MutationTestPlanController {
      * @param cases the mutation test cases to test with
      */
     private void startTestDriver(final List<MutationTestCase> cases) {
-        new AllTestsDriver(cases, plan).start();
+        new TestingHandler(cases, plan).start();
     }
 
     /**

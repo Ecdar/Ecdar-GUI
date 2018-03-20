@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 /**
  * A test driver that runs test-cases on a system under test (sut).
  */
-public class AllTestsDriver implements ConcurrentJobsHandler {
+public class TestingHandler implements ConcurrentJobsHandler {
     private int passedNum;
     private final MutationTestPlan testPlan;
     private final List<MutationTestCase> mutationTestCases;
@@ -29,7 +29,7 @@ public class AllTestsDriver implements ConcurrentJobsHandler {
      * @param mutationTestCases test-cases to test with
      * @param testPlan test plan
      */
-    AllTestsDriver(final List<MutationTestCase> mutationTestCases, final MutationTestPlan testPlan) {
+    TestingHandler(final List<MutationTestCase> mutationTestCases, final MutationTestPlan testPlan) {
         this.mutationTestCases = mutationTestCases;
         this.testPlan = testPlan;
     }

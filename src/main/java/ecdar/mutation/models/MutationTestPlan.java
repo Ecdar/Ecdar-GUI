@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class MutationTestPlan extends HighLevelModelObject {
     /**
      * The status of the test plan.
-     * STOPPING: Stop by the user
+     * STOPPING: Stopped by the user
      * ERROR: An error has just occurred, and we are waiting for the execution to stop because of it
      */
     public enum Status {IDLE, WORKING, STOPPING, ERROR}
@@ -430,5 +430,13 @@ public class MutationTestPlan extends HighLevelModelObject {
         progressTexts.add(text);
     }
 
+    /**
+     * Gets if we should stop working.
+     * @return true iff we should stop
+     */
+    public boolean shouldStop() {
+        return getStatus().equals(MutationTestPlan.Status.STOPPING) ||
+                getStatus().equals(MutationTestPlan.Status.ERROR);
+    }
 
 }
