@@ -176,7 +176,7 @@ public class TestDriver {
         // Will return inside while loop if maximum wait time is exceeded or an output has been given
         while ((rule.isSatisfied(clockValuations))) {
             //Check if the maximum wait time has been exceeded, if it is, give inconclusive verdict
-            if (!(Duration.between(delayDuration, Instant.now()).toMillis()/(double)getTimeUnitInMs() <= getPlan().getOutputWaitTime())) {
+            if (!(Duration.between(delayDuration, Instant.now()).toMillis() / (double)getTimeUnitInMs() <= getPlan().getOutputWaitTime())) {
                 return makeResult(TestResult.Verdict.INCONCLUSIVE, "Maximum wait time reached without receiving an output.");
             }
 
@@ -295,7 +295,7 @@ public class TestDriver {
      * @return the test result
      */
     private TestResult makeResult(final TestResult.Verdict verdict, final String reason) {
-        return new TestResult(testCase.getId(), testCase.getDescription(), reason, testModelSimulation, mutantSimulation, verdict);
+        return new TestResult(testCase, reason, testModelSimulation, mutantSimulation, verdict);
     }
 
     /**

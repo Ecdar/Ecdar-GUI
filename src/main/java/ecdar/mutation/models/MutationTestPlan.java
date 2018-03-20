@@ -66,10 +66,11 @@ public class MutationTestPlan extends HighLevelModelObject {
     private final StringProperty testTimeText = new SimpleStringProperty("");
 
     private final StringProperty passedText = new SimpleStringProperty("");
+    private final ListProperty<TestResult> passedResults = new SimpleListProperty<>(FXCollections.observableArrayList());
     private final StringProperty InconclusiveText = new SimpleStringProperty("");
     private final ListProperty<ExpandableContent> inconclusiveMessageList = new SimpleListProperty<>(FXCollections.observableArrayList());
     private final StringProperty FailedText = new SimpleStringProperty("");
-    private final ListProperty<ExpandableContent> failedMessageList = new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final ListProperty<TestResult> failedMessageList = new SimpleListProperty<>(FXCollections.observableArrayList());
 
     // For exporting
     private final BooleanProperty angelicWhenExport = new SimpleBooleanProperty(false);
@@ -251,10 +252,10 @@ public class MutationTestPlan extends HighLevelModelObject {
         this.FailedText.set(failedText);
     }
 
-    public ObservableList<ExpandableContent> getFailedMessageList() {
+    public ObservableList<TestResult> getPassedResults() {
         return failedMessageList.get();
     }
-    public ListProperty<ExpandableContent> getFailedMessageListProperty() {
+    public ListProperty<TestResult> getPassedResultsProperty() {
         return failedMessageList;
     }
 
@@ -264,6 +265,14 @@ public class MutationTestPlan extends HighLevelModelObject {
     public ListProperty<ExpandableContent> getInconclusiveMessageListProperty() {
         return inconclusiveMessageList;
     }
+
+    public ObservableList<TestResult> getFailedMessageList() {
+        return failedMessageList.get();
+    }
+    public ListProperty<TestResult> getFailedMessageListProperty() {
+        return failedMessageList;
+    }
+
 
     public int getVerifytgaTries() {
         return verifytgaTries.get();
@@ -406,8 +415,9 @@ public class MutationTestPlan extends HighLevelModelObject {
         setTestTimeText("");
         setPassedText("");
         setInconclusiveText("");
-        getInconclusiveMessageList().clear();
         setFailedText("");
+        getPassedResults().clear();
+        getInconclusiveMessageList().clear();
         getFailedMessageList().clear();
     }
 

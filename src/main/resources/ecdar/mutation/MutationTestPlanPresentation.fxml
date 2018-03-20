@@ -115,7 +115,12 @@
                         <VBox fx:id="inconclusiveMessageList" spacing="8"/>
                     </HBox>
 
-                    <Label fx:id="failedText" prefWidth="Infinity" managed="false" visible="false"/>
+                    <HBox spacing="32">
+                        <Label fx:id="failedText" prefWidth="Infinity" managed="false" visible="false"/>
+                        <JFXButton fx:id="failedTestButton" text="Retest"
+                                   style="-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;"
+                                   onMousePressed="#onFailedTestButtonPressed"/>
+                    </HBox>
                     <HBox fx:id="failedRegion" spacing="8">
                         <Separator orientation="VERTICAL"/>
                         <VBox fx:id="failedMessageList" spacing="8"/>

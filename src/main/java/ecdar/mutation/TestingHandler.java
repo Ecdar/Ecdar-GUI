@@ -15,23 +15,20 @@ import java.util.function.Consumer;
 /**
  * A test driver that runs test-cases on a system under test (sut).
  */
-public class TestingHandler implements ConcurrentJobsHandler {
-    private int passedNum;
+public class TestingHandler implements AdjustableConcurrentJobsHandler {
     private final MutationTestPlan testPlan;
-    private final List<MutationTestCase> mutationTestCases;
-    private ConcurrentJobsDriver jobsDriver;
-    private Instant jobsStart;
+    private List<MutationTestCase> mutationTestCases;
+    private Instant testStart;
+    private final AdjustableConcurrentJobsDriver jobsDriver;
 
 
     /**
-     * Constructor for the test driver, needs a list of mutation test cases, a test plan,
-     * a consumer to write progress to, an long representing a time units length in milliseconds and a bound.
-     * @param mutationTestCases test-cases to test with
-     * @param testPlan test plan
+     * Constructs.
+     * @param testPlan
      */
-    TestingHandler(final List<MutationTestCase> mutationTestCases, final MutationTestPlan testPlan) {
-        this.mutationTestCases = mutationTestCases;
+    TestingHandler(final MutationTestPlan testPlan) {
         this.testPlan = testPlan;
+        this.jobsDriver = new AdjustableConcurrentJobsDriver(this);
     }
 
 
@@ -42,11 +39,6 @@ public class TestingHandler implements ConcurrentJobsHandler {
         return getPlan().getConcurrentSutInstances();
     }
 
-    @Override
-    public void startJob(final int index) {
-        performTest(mutationTestCases.get(index));
-    }
-
     private Consumer<Text> getProgressWriter() { return text -> getPlan().writeProgress(text); }
 
     private MutationTestPlan getPlan() {return testPlan; }
@@ -54,12 +46,18 @@ public class TestingHandler implements ConcurrentJobsHandler {
 
     /* Other */
 
+    public void retest(final List<MutationTestCase> cases) {
+        cases.forEach(testCase -> jobsDriver.addJob(() -> performTest(testCase)));
+
+        testStart = null; // Do not measure time when retesting
+        jobsDriver.start();
+    }
+
     /**
      * Starts the test driver.
      */
-    public void start() {
-        passedNum = 0;
-        jobsDriver = new ConcurrentJobsDriver(this, mutationTestCases.size());
+    public void testFromScratch(final List<MutationTestCase> cases) {
+        cases.forEach(testCase -> jobsDriver.addJob(() -> performTest(testCase)));
 
         Platform.runLater(() -> {
             getPlan().setInconclusiveText("Inconclusive: " + 0);
@@ -67,7 +65,7 @@ public class TestingHandler implements ConcurrentJobsHandler {
             getPlan().setFailedText("Failed: " + 0);
         });
 
-        jobsStart = Instant.now();
+        testStart = Instant.now();
 
         jobsDriver.start();
     }
@@ -96,8 +94,10 @@ public class TestingHandler implements ConcurrentJobsHandler {
                     });
                     break;
                 case PASS:
-                    passedNum++;
-                    Platform.runLater(() -> getPlan().setPassedText("Passed: " + passedNum));
+                    Platform.runLater(() -> {
+                        getPlan().getPassedResults().add(result);
+                        getPlan().setPassedText("Passed: " + getPlan().getPassedResults().size());
+                    });
                     break;
                 case FAIL:
                     Platform.runLater(() -> {
@@ -108,7 +108,7 @@ public class TestingHandler implements ConcurrentJobsHandler {
             }
 
             Platform.runLater(() -> getPlan().setTestTimeText(
-                    "Testing time: " + MutationTestPlanPresentation.readableFormat(Duration.between(jobsStart, Instant.now()))
+                    "Testing time: " + MutationTestPlanPresentation.readableFormat(Duration.between(testStart, Instant.now()))
             ));
         }
 
@@ -133,8 +133,8 @@ public class TestingHandler implements ConcurrentJobsHandler {
     }
 
     @Override
-    public void writeProgress(final int jobsEnded) {
-        writeProgress("Testing... (" + jobsEnded + "/" + mutationTestCases.size() + " test-cases)");
+    public void writeProgress(final int jobsEnded, final int totalJobs) {
+        writeProgress("Testing... (" + jobsEnded + "/" + totalJobs + " test-cases)");
     }
 
     /**

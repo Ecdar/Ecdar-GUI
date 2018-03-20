@@ -8,6 +8,7 @@ import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.mutation.models.MutationTestCase;
 import ecdar.mutation.models.MutationTestPlan;
+import ecdar.mutation.models.TestResult;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
@@ -19,6 +20,7 @@ import javafx.stage.FileChooser;
 
 import java.io.File;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Controller for a test plan with model-based mutation testing.
@@ -77,11 +79,13 @@ public class MutationTestPlanController {
     public Label testTimeText;
     public HBox operatorsOuterRegion;
     public JFXTextField stepBoundsField;
+    public JFXButton failedTestButton;
 
 
     /* Mutation fields */
 
     private MutationTestPlan plan;
+    private TestingHandler testingHandler;
 
 
     /* Properties */
@@ -92,6 +96,7 @@ public class MutationTestPlanController {
 
     public void setPlan(final MutationTestPlan plan) {
         this.plan = plan;
+        testingHandler = new TestingHandler(plan);
     }
 
 
@@ -131,7 +136,7 @@ public class MutationTestPlanController {
      * @param cases the mutation test cases to test with
      */
     private void startTestDriver(final List<MutationTestCase> cases) {
-        new TestingHandler(cases, plan).start();
+        new TestingHandler(plan).testFromScratch(cases);
     }
 
     /**
@@ -141,6 +146,18 @@ public class MutationTestPlanController {
     public void onStopButtonPressed() {
         getPlan().writeProgress("Stopping");
         getPlan().setStatus(MutationTestPlan.Status.STOPPING);
+    }
+
+    /**
+     * Triggered when pressed the failed test button.
+     * Retests the failed test-cases.
+     */
+    public void onFailedTestButtonPressed() {
+        final List<MutationTestCase> cases = getPlan().getFailedMessageList().stream().map(TestResult::getTestCase).collect(Collectors.toList());
+
+        getPlan().getFailedMessageList().clear();
+
+
     }
 
     /**
