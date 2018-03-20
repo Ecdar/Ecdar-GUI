@@ -9,6 +9,11 @@ public class ExpandableContent {
     private final String content;
     private boolean hidden = true;
 
+    /**
+     * Constructs.
+     * @param title title
+     * @param content content
+     */
     public ExpandableContent(final String title, final String content) {
         this.title = title;
         this.content = content;

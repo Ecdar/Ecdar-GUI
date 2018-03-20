@@ -9,11 +9,19 @@ public class ConcurrentJobsDriver {
     private int generationJobsStarted = 0;
     private int generationJobsEnded = 0;
 
+    /**
+     * Constructs.
+     * @param handler handler to run jobs with
+     * @param jobsNum total number of jobs to run
+     */
     public ConcurrentJobsDriver(final ConcurrentJobsHandler handler, final int jobsNum) {
         this.handler = handler;
         this.jobsNum = jobsNum;
     }
 
+    /**
+     * Starts the jobs.
+     */
     public void start() {
         updateJobs();
     }

@@ -54,6 +54,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
      * Constructs the handler.
      * @param plan the test plan containing options for generation
      * @param testModel the tet model to use
+     * @param testCasesConsumer consumer to be called when all test-cases are generated
      */
     TestCaseGenerationHandler(final MutationTestPlan plan, final Component testModel, final Consumer<List<MutationTestCase>> testCasesConsumer) {
         this.plan = plan;
@@ -181,6 +182,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
     /**
      * Generates a test-case.
      * @param testCase potential test-case containing the test model, the mutant, and an id
+     * @param tries number of tries with empty response from verifytga before giving up
      */
     private void generateTestCase(final MutationTestCase testCase, final int tries) {
         final Component mutant = testCase.getMutant();
@@ -298,6 +300,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
      * Starts verifytga to fetch a strategy.
      * @param modelPath the path to the backend XML project containing the test model and the mutant
      * @return the started process, or null if an error occurs
+     * @throws IOException if an IO error occurs
      */
     private Process startVerifytgaProcess(final String modelPath) throws IOException {
         // Run verifytga to check refinement and to fetch strategy if non-refinement
@@ -309,7 +312,8 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
      * If an error occurs, this method tells the user and signals this controller to stop.
      * @param process the process running verifytga
      * @return the input lines. Each line is without the newline character.
-     * @throws MutationTestingException if an I/O error occurs
+     * @throws MutationTestingException if verifytga has a non-empty error stream
+     * @throws IOException if an IO error occurs
      */
     private static List<String> getVerifytgaInputLines(final Process process) throws MutationTestingException, IOException {
         final List<String> lines;
@@ -330,6 +334,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
      * If an error occurs, this method throws an exception
      * @param process process to check for
      * @throws IOException if an I/O error occurs
+     * @throws MutationTestingException if verifytga has a non-empty error stream
      */
     private static void checkVerifytgaErrorStream(final Process process) throws IOException, MutationTestingException {
         try (BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {

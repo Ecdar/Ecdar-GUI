@@ -9,6 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+/**
+ * Mutation operator for changing an action to a (different) output.
+ */
 public class ChangeActionOutputsOperator extends ChangeActionOperator {
     @Override
     public String getText() {

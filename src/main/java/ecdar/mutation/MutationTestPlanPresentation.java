@@ -84,15 +84,15 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
 
         initializeProgressAndResultsTexts();
 
-        initializePositiveIntegerTextField(controller.generationThreadsField, getPlan().concurrentGenerationsThreadsProperty());
-        initializePositiveIntegerTextField(controller.suvInstancesField, getPlan().concurrentSutInstancesProperty());
-        initializePositiveIntegerTextField(controller.outputWaitTimeField, getPlan().outputWaitTimeProperty());
-        initializePositiveIntegerTextField(controller.verifytgaTriesField, getPlan().verifytgaTriesProperty());
-        initializePositiveIntegerTextField(controller.timeUnitField, getPlan().timeUnitProperty());
-        initializePositiveIntegerTextField(controller.stepBoundsField, getPlan().stepBoundsProperty());
+        initializePositiveIntegerTextField(controller.generationThreadsField, getPlan().getConcurrentGenerationsThreadsProperty());
+        initializePositiveIntegerTextField(controller.suvInstancesField, getPlan().getConcurrentSutInstancesProperty());
+        initializePositiveIntegerTextField(controller.outputWaitTimeField, getPlan().getOutputWaitTimeProperty());
+        initializePositiveIntegerTextField(controller.verifytgaTriesField, getPlan().getVerifytgaTriesProperty());
+        initializePositiveIntegerTextField(controller.timeUnitField, getPlan().getTimeUnitProperty());
+        initializePositiveIntegerTextField(controller.stepBoundsField, getPlan().getStepBoundsProperty());
 
-        controller.demonicCheckBox.selectedProperty().bindBidirectional(getPlan().demonicProperty());
-        controller.angelicBox.selectedProperty().bindBidirectional(getPlan().angelicWhenExportProperty());
+        controller.demonicCheckBox.selectedProperty().bindBidirectional(getPlan().getDemonicProperty());
+        controller.angelicBox.selectedProperty().bindBidirectional(getPlan().getAngelicWhenExportProperty());
 
         InitializeStatusHandling();
 
@@ -182,29 +182,29 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
             }
         });
 
-        controller.mutantsText.textProperty().bind(getPlan().mutantsTextProperty());
+        controller.mutantsText.textProperty().bind(getPlan().getMutantsTextProperty());
 
-        controller.testCasesText.textProperty().bind(getPlan().testCasesTextProperty());
+        controller.testCasesText.textProperty().bind(getPlan().getTestCasesTextProperty());
 
-        controller.testTimeText.textProperty().bindBidirectional(getPlan().testTimeTextProperty());
+        controller.testTimeText.textProperty().bindBidirectional(getPlan().getTestTimeTextProperty());
 
-        controller.passedText.textProperty().bind(getPlan().passedTextProperty());
+        controller.passedText.textProperty().bind(getPlan().getPassedTextProperty());
 
-        controller.inconclusiveText.textProperty().bind(getPlan().inconclusiveTextProperty());
+        controller.inconclusiveText.textProperty().bind(getPlan().getInconclusiveTextProperty());
         initializeExpand(controller.inconclusiveText, controller.inconclusiveRegion);
-        getPlan().inconclusiveTextProperty().addListener(((observable, oldValue, newValue) -> {
+        getPlan().getInconclusiveTextProperty().addListener(((observable, oldValue, newValue) -> {
             if (newValue.isEmpty()) hide(controller.inconclusiveText);
             else show(controller.inconclusiveText);
         })); // Show when has value
-        getPlan().inconclusiveMessageListProperty().addListener(getExpandableListListener(controller.inconclusiveMessageList.getChildren()));
+        getPlan().getInconclusiveMessageListProperty().addListener(getExpandableListListener(controller.inconclusiveMessageList.getChildren()));
 
-        controller.failedText.textProperty().bind(getPlan().failedTextProperty());
+        controller.failedText.textProperty().bind(getPlan().getFailedTextProperty());
         initializeExpand(controller.failedText, controller.failedRegion);
-        getPlan().failedTextProperty().addListener(((observable, oldValue, newValue) -> {
+        getPlan().getFailedTextProperty().addListener(((observable, oldValue, newValue) -> {
             if (newValue.isEmpty()) hide(controller.failedText);
             else show(controller.failedText);
         })); // Show when has value
-        getPlan().failedMessageListProperty().addListener(getExpandableListListener(controller.failedMessageList.getChildren()));
+        getPlan().getFailedMessageListProperty().addListener(getExpandableListListener(controller.failedMessageList.getChildren()));
     }
 
     /**
@@ -284,7 +284,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
     }
 
     /**
-     * Initializes width and height of the text editor field, such that it fills up the whole canvas
+     * Initializes width and height of the text editor field, such that it fills up the whole canvas.
      */
     private void initializeWidthAndHeight() {
         controller.scrollPane.setPrefWidth(CanvasController.getWidthProperty().doubleValue());
@@ -331,7 +331,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
     private void initializeOperators() {
         for (final MutationOperator operator : getPlan().getOperators()) {
             final JFXCheckBox checkBox = new JFXCheckBox(operator.getText());
-            checkBox.selectedProperty().bindBidirectional(operator.selectedProperty());
+            checkBox.selectedProperty().bindBidirectional(operator.getSelectedProperty());
             controller.operatorsInnerRegion.getChildren().add(checkBox);
 
             installTooltip(checkBox, operator.getDescription());
@@ -343,7 +343,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      */
     private void InitializeStatusHandling() {
         handleStatusUpdate(null, getPlan().getStatus());
-        getPlan().statusProperty().addListener(((observable, oldValue, newValue) -> handleStatusUpdate(oldValue, newValue)));
+        getPlan().getStatusProperty().addListener(((observable, oldValue, newValue) -> handleStatusUpdate(oldValue, newValue)));
     }
 
     /**
@@ -398,7 +398,9 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
     /**
      * Initializes a text field to enforce its values to be positive integers.
      * While in focus, the text field can still have an empty value.
+     * Makes the field update when the property updates.
      * @param field the text field
+     * @param property the property
      */
     private static void initializePositiveIntegerTextField(final JFXTextField field, final IntegerProperty property) {
         // Set value initially
@@ -431,7 +433,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      * Otherwise, show them when it becomes non-empty.
      */
     private void initializeSutPath() {
-        controller.sutPathLabel.textProperty().bindBidirectional(getPlan().sutPathProperty());
+        controller.sutPathLabel.textProperty().bindBidirectional(getPlan().getSutPathProperty());
         if (!controller.sutPathLabel.getText().isEmpty() && controller.sutPathLabel.isVisible()) showSutArea();
         else controller.sutPathLabel.textProperty().addListener(((observable, oldValue, newValue) -> showSutArea()));
     }

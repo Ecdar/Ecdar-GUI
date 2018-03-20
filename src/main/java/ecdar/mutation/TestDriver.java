@@ -160,7 +160,11 @@ public class TestDriver {
 
     /**
      * Sleeps and simulates the delay on the two simulations and checks if the system under test made an output during the delay.
-     * @param rule strategy rule to check with. This methods sleeps only as long as this is satisfied
+     * @param rule strategy rule to check with. This methods sleeps only as long as this is satisfied.
+     * @return the test result (if this concludes the test), or null (if it does not)
+     * @throws MutationTestingException if an error related to mutation testing happens
+     * @throws IOException if an IO error happens
+     * @throws InterruptedException if an error happens when trying to sleep
      */
     private TestResult delay(final StrategyRule rule) throws MutationTestingException, InterruptedException, IOException {
         final Instant delayDuration = Instant.now();
@@ -177,7 +181,7 @@ public class TestDriver {
             if (reader.isException()) throw reader.getException();
 
             if (reader.ready()) {
-                final String output = reader.read();
+                final String output = reader.consume();
 
                 final TestResult delayResult = simulateDelay();
                 if (delayResult != null) return delayResult;
@@ -204,6 +208,10 @@ public class TestDriver {
         return null;
     }
 
+    /**
+     * Sleeps for 1/4 of a time unit.
+     * @throws InterruptedException if an error occurs
+     */
     private void sleep() throws InterruptedException {
         Thread.sleep(getTimeUnitInMs() / 4);
     }
@@ -223,6 +231,7 @@ public class TestDriver {
 
     /**
      * Simulates an output on the test model and mutant model.
+     * @return the test result (if this concludes the test), or null (if it does not)
      */
     private TestResult simulateDelay() {
         final double waitedTimeUnits = Duration.between(lastUpdateTime, Instant.now()).toMillis() / (double) getTimeUnitInMs();
@@ -241,6 +250,7 @@ public class TestDriver {
      * Simulates an output on the test model and mutant model.
      * @param output the output to simulate
      * @throws MutationTestingException if an exception occurred
+     * @return the test result (if this concludes the test), or null (if it does not)
      */
     private TestResult simulateOutput(final String output) throws MutationTestingException {
         if(!testModelSimulation.isDeterministic(output, EdgeStatus.OUTPUT) || !mutantSimulation.isDeterministic(output, EdgeStatus.OUTPUT)){
@@ -256,6 +266,7 @@ public class TestDriver {
     /**
      * Writes to the system.in of the system under test.
      * @param outputBroadcast the string to write to the system under test.
+     * @throws IOException if an IO error occurs
      */
     private void writeToSut(final String outputBroadcast) throws IOException {
         //Write to process if it is alive, else act like the process accepts but ignore all inputs.

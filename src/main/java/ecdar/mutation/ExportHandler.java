@@ -33,6 +33,11 @@ class ExportHandler {
 
     private final Component testModel;
 
+    /**
+     * Constructs.
+     * @param plan the test plan
+     * @param testModel the test model
+     */
     ExportHandler(final MutationTestPlan plan, final Component testModel) {
         this.plan = plan;
         this.testModel = testModel;

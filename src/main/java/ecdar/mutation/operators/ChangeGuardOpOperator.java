@@ -16,6 +16,11 @@ import java.util.regex.Pattern;
  */
 public abstract class ChangeGuardOpOperator extends MutationOperator {
     public abstract List<String> getOperators();
+
+    /**
+     * Gets if we should mutate with guard pats with clocks or without clocks.
+     * @return true if we should mutate with clocks. False if we should mutate without clocks
+     */
     public abstract boolean shouldContainClocks();
 
     @Override
@@ -77,7 +82,7 @@ public abstract class ChangeGuardOpOperator extends MutationOperator {
     }
 
     /**
-     * Gets if an expression contains at least on of some specified variables
+     * Gets if an expression contains at least on of some specified variables.
      * @param expr the expression to check
      * @param vars the variables
      * @return true iff the expression contains at least on of the variables

@@ -26,6 +26,8 @@ public class AllTestsDriver implements ConcurrentJobsHandler {
     /**
      * Constructor for the test driver, needs a list of mutation test cases, a test plan,
      * a consumer to write progress to, an long representing a time units length in milliseconds and a bound.
+     * @param mutationTestCases test-cases to test with
+     * @param testPlan test plan
      */
     AllTestsDriver(final List<MutationTestCase> mutationTestCases, final MutationTestPlan testPlan) {
         this.mutationTestCases = mutationTestCases;

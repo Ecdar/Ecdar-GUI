@@ -7,10 +7,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * A reader that asynchronously reads inputs.
+ */
 public class AsyncInputReader {
     private final List<String> lines = Collections.synchronizedList(new ArrayList<>());
     private IOException exception;
 
+    /**
+     * Constructs the reader and starts reading in another thread.
+     * @param process the process to read from
+     */
     public AsyncInputReader(final Process process) {
         new Thread(() -> {
             try {
@@ -25,19 +32,35 @@ public class AsyncInputReader {
         }).start();
     }
 
+    /**
+     * Gets if an input is ready to be consumed.
+     * @return true iff ready
+     */
     public boolean ready() {
         return !lines.isEmpty();
     }
 
+    /**
+     * Gets the exception that has happened.
+     * @return the exception, or null if not have happened
+     */
     public IOException getException() {
         return exception;
     }
 
+    /**
+     * Gets if an exception has happened.
+     * @return true iff an exception has happened
+     */
     public boolean isException() {
         return exception != null;
     }
 
-    public String read() {
+    /**
+     * Consumes an input.
+     * @return the input
+     */
+    public String consume() {
         final String line = lines.get(0);
         lines.remove(0);
         return line;
