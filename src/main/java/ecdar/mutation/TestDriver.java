@@ -180,7 +180,7 @@ public class TestDriver {
                 return makeResult(TestResult.Verdict.INCONCLUSIVE, "Maximum wait time reached without receiving an output.");
             }
 
-            if (reader.isException()) throw reader.getException();
+            reader.checkExceptions();
 
             if (reader.ready()) {
                 final String output = reader.consume();
