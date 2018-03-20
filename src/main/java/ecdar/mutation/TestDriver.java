@@ -137,8 +137,10 @@ public class TestDriver {
                     if (result != null) return result;
                 } else if (rule instanceof  ActionRule){
                     final String sync = ((ActionRule) rule).getSync();
-                    if (!testModelSimulation.isDeterministic(sync, EdgeStatus.INPUT) || !mutantSimulation.isDeterministic(sync, EdgeStatus.INPUT)) {
-                        return makeResult(TestResult.Verdict.INCONCLUSIVE, "Non-deterministic choice with input " + sync + ".");
+                    if (!testModelSimulation.isDeterministic(sync, EdgeStatus.INPUT)) {
+                        return makeResult(TestResult.Verdict.INCONCLUSIVE, "Non-deterministic choice for test model with input " + sync + ".");
+                    } else if (!mutantSimulation.isDeterministic(sync, EdgeStatus.INPUT)) {
+                        return makeResult(TestResult.Verdict.INCONCLUSIVE, "Non-deterministic choice for mutant with input " + sync + ".");
                     } else {
                         testModelSimulation.runInputAction(sync);
                         mutantSimulation.runInputAction(sync);
@@ -253,8 +255,10 @@ public class TestDriver {
      * @return the test result (if this concludes the test), or null (if it does not)
      */
     private TestResult simulateOutput(final String output) throws MutationTestingException {
-        if(!testModelSimulation.isDeterministic(output, EdgeStatus.OUTPUT) || !mutantSimulation.isDeterministic(output, EdgeStatus.OUTPUT)){
-            return makeResult(TestResult.Verdict.INCONCLUSIVE, "Non-deterministic choice with output " + output + ".");
+        if (!testModelSimulation.isDeterministic(output, EdgeStatus.OUTPUT)) {
+            return makeResult(TestResult.Verdict.INCONCLUSIVE, "Non-deterministic choice for test model with output " + output + ".");
+        } else if (!mutantSimulation.isDeterministic(output, EdgeStatus.OUTPUT)) {
+            return makeResult(TestResult.Verdict.INCONCLUSIVE, "Non-deterministic choice with mutant output " + output + ".");
         } else if (!testModelSimulation.runOutputAction(output)){
             return makeResult(TestResult.Verdict.FAIL, "Failed simulating output " + output + " on test model.");
         } else if (!mutantSimulation.runOutputAction(output)){
