@@ -7,10 +7,10 @@ import ecdar.abstractions.Project;
 import ecdar.abstractions.SimpleComponentsSystemDeclarations;
 import ecdar.backend.BackendException;
 import ecdar.backend.UPPAALDriver;
-import ecdar.mutation.operators.MutationOperator;
 import ecdar.mutation.models.MutationTestCase;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.mutation.models.NonRefinementStrategy;
+import ecdar.mutation.operators.MutationOperator;
 import javafx.application.Platform;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
@@ -38,13 +38,12 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
 
     private final Component testModel;
 
-    private List<MutationTestCase> potentialTestCases;
+    private final List<MutationTestCase> potentialTestCases;
     private List<MutationTestCase> finishedTestCases;
 
     private ConcurrentJobsDriver jobsDriver;
 
     // Progress fields
-    private final Consumer<Text> progressWriter;
     private Instant generationStart;
     private String queryFilePath;
 
@@ -55,13 +54,14 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
      * Constructs the handler.
      * @param plan the test plan containing options for generation
      * @param testModel the tet model to use
-     * @param progressWriter object to write progress with
+     * @param potentialTestCases potential test-cases containing the mutants
+     * @param testCasesConsumer consumer to be called when all test-cases are generated
      */
-    TestCaseGenerationHandler(final MutationTestPlan plan, final Component testModel, final Consumer<Text> progressWriter, final Consumer<List<MutationTestCase>> testCasesConsumer) {
+    TestCaseGenerationHandler(final MutationTestPlan plan, final Component testModel, final List<MutationTestCase> potentialTestCases, final Consumer<List<MutationTestCase>> testCasesConsumer) {
         this.plan = plan;
         this.testModel = testModel;
-        this.progressWriter = progressWriter;
         this.testCasesConsumer = testCasesConsumer;
+        this.potentialTestCases = potentialTestCases;
     }
 
 
@@ -75,58 +75,12 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
         return testModel;
     }
 
-    private Consumer<Text> getProgressWriter() {
-        return progressWriter;
-    }
-
     /* Other methods */
 
     /**
      * Generates mutants and test-cases from them.
      */
     void start() {
-        getPlan().setStatus(MutationTestPlan.Status.WORKING);
-
-        testModel.setName(MutationTestPlanController.SPEC_NAME);
-        testModel.updateIOList();
-
-        final Instant start = Instant.now();
-
-        // Mutate with selected operators
-        potentialTestCases = new ArrayList<>();
-        try {
-            for (final MutationOperator operator : getPlan().getSelectedMutationOperators())
-                potentialTestCases.addAll(operator.generateTestCases(getTestModel()));
-        } catch (final MutationTestingException e) {
-            handleException(e);
-            return;
-        }
-
-        potentialTestCases.forEach(testCase -> testCase.getMutant().applyAngelicCompletion());
-
-        getPlan().setMutantsText("Mutants: " + potentialTestCases.size() + " - Execution time: " + MutationTestPlanPresentation.readableFormat(Duration.between(start, Instant.now())));
-
-        // If chosen, apply demonic completion
-        if (getPlan().isDemonic()) testModel.applyDemonicCompletion();
-
-        //Rename universal and inconsistent locations
-        testModel.getLocations().forEach(location -> {
-            if(location.getType().equals(Location.Type.UNIVERSAL)) {
-                location.setId("Universal");
-            } else if(location.getType().equals(Location.Type.INCONSISTENT)) {
-                location.setId("Inconsistent");
-            }
-        });
-
-        potentialTestCases.forEach(testCase -> testCase.getMutant().getLocations().forEach(location -> {
-            if(location.getType().equals(Location.Type.UNIVERSAL)) {
-                location.setId("Universal");
-            } else if(location.getType().equals(Location.Type.INCONSISTENT)) {
-                location.setId("Inconsistent");
-            }
-        }));
-
-        // Create test cases
         generationStart = Instant.now();
         finishedTestCases = Collections.synchronizedList(new ArrayList<>()); // use synchronized to be thread safe
 
@@ -145,8 +99,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
 
     @Override
     public boolean shouldStop() {
-        return getPlan().getStatus().equals(MutationTestPlan.Status.STOPPING) ||
-                getPlan().getStatus().equals(MutationTestPlan.Status.ERROR);
+        return getPlan().shouldStop();
     }
 
     @Override
@@ -166,23 +119,15 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
 
         final Text text = new Text("Done");
         text.setFill(Color.GREEN);
-        getProgressWriter().accept(text);
+        getPlan().writeProgress(text);
         testCasesConsumer.accept(finishedTestCases);
     }
     
     @Override
     public void writeProgress(final int jobsEnded) {
-        writeProgress("Generating test-cases... (" + jobsEnded + "/" + potentialTestCases.size() + " mutants processed)");
-    }
-
-    /**
-     * Writes progress.
-     * @param message the message describing the progress
-     */
-    private void writeProgress(final String message) {
-        final Text text = new Text(message);
-        text.setFill(Color.web("#333333"));
-        getProgressWriter().accept(text);
+        Platform.runLater(() -> getPlan().writeProgress("Generating test-cases... (" + jobsEnded + "/" +
+                potentialTestCases.size() + " mutants processed)")
+        );
     }
 
     @Override
@@ -198,6 +143,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
     /**
      * Generates a test-case.
      * @param testCase potential test-case containing the test model, the mutant, and an id
+     * @param tries number of tries with empty response from verifytga before giving up
      */
     private void generateTestCase(final MutationTestCase testCase, final int tries) {
         final Component mutant = testCase.getMutant();
@@ -261,7 +207,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
                 testCase.setStrategy(new NonRefinementStrategy(lines.subList(strategyIndex + 2, lines.size())));
 
                 finishedTestCases.add(testCase);
-            } catch (MutationTestingException e) {
+            } catch (MutationTestingException | IOException e) {
                 e.printStackTrace();
 
                 // Only show error if the process is not already being stopped
@@ -272,7 +218,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
                                 testCase.getDescription() + ": " + e.getMessage();
                         final Text text = new Text(message);
                         text.setFill(Color.RED);
-                        progressWriter.accept(text);
+                        getPlan().writeProgress(text);
                         Ecdar.showToast(message);
                     });
                 }
@@ -287,48 +233,14 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
     }
 
     /**
-     * Handles a mutation testing exception.
-     * Signal the test plan to stop.
-     * Writes an error message with the progress handler.
-     * Shows an error message with the toast.
-     * @param e the exception to handle
-     */
-    private void handleException(final MutationTestingException e) {
-        e.printStackTrace();
-
-        // Only show error if the process is not already being stopped
-        if (getPlan().getStatus().equals(MutationTestPlan.Status.WORKING)) {
-            getPlan().setStatus(MutationTestPlan.Status.ERROR);
-            Platform.runLater(() -> {
-                final String message = "Error while generating test-cases: " + e.getMessage();
-                final Text text = new Text(message);
-                text.setFill(Color.RED);
-                progressWriter.accept(text);
-                Ecdar.showToast(message);
-            });
-        }
-
-        jobsDriver.onJobDone();
-    }
-
-    /**
-     * Starts varifytga to fetch a strategy.
+     * Starts verifytga to fetch a strategy.
      * @param modelPath the path to the backend XML project containing the test model and the mutant
      * @return the started process, or null if an error occurs
+     * @throws IOException if an IO error occurs
      */
-    private Process startVerifytgaProcess(final String modelPath) throws MutationTestingException {
-        final Process process;
-
-        try {
-            // Run verifytga to check refinement and to fetch strategy if non-refinement
-            final ProcessBuilder builder = new ProcessBuilder(UPPAALDriver.findVerifytgaAbsolutePath(), "-t0", modelPath, queryFilePath);
-            process = builder.start();
-
-        } catch (final IOException e) {
-            throw new MutationTestingException("Error while starting verifytga", e);
-        }
-
-        return process;
+    private Process startVerifytgaProcess(final String modelPath) throws IOException {
+        // Run verifytga to check refinement and to fetch strategy if non-refinement
+        return new ProcessBuilder(UPPAALDriver.findVerifytgaAbsolutePath(), "-t0", modelPath, queryFilePath).start();
     }
 
     /**
@@ -336,17 +248,17 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
      * If an error occurs, this method tells the user and signals this controller to stop.
      * @param process the process running verifytga
      * @return the input lines. Each line is without the newline character.
-     * @throws MutationTestingException if an I/O error occurs
+     * @throws MutationTestingException if verifytga has a non-empty error stream
+     * @throws IOException if an IO error occurs
      */
-    private static List<String> getVerifytgaInputLines(final Process process) throws MutationTestingException {
-        List<String> lines;
+    private static List<String> getVerifytgaInputLines(final Process process) throws MutationTestingException, IOException {
+        final List<String> lines;
 
         try (BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
             lines = inputReader.lines().collect(Collectors.toList());
-            if (!handlePotentialErrorsFromVerifytga(process)) lines = null;
-        } catch (final IOException e) {
-            throw new MutationTestingException("I/O exception while reading from verifytga");
         }
+
+        checkVerifytgaErrorStream(process);
 
         return lines;
     }
@@ -354,13 +266,13 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
     /**
      * Checks for errors in a process.
      * The input stream must be completely read before calling this.
-     * Otherwise, we rick getting stuck while reading the error stream.
-     * If an error occurs, this method tells the user and signals this controller to stop.
+     * Otherwise, we risk getting stuck while reading the error stream.
+     * If an error occurs, this method throws an exception
      * @param process process to check for
-     * @return true iff process was successful (e.g. no errors was found)
      * @throws IOException if an I/O error occurs
+     * @throws MutationTestingException if verifytga has a non-empty error stream
      */
-    private static boolean handlePotentialErrorsFromVerifytga(final Process process) throws IOException, MutationTestingException {
+    private static void checkVerifytgaErrorStream(final Process process) throws IOException, MutationTestingException {
         try (BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
             final List<String> errorLines = errorReader.lines().collect(Collectors.toList());
 
@@ -368,7 +280,6 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
                 throw new MutationTestingException("Error from the error stream of verifytga: " + String.join("\n", errorLines));
             }
         }
-        return true;
     }
 
     /**

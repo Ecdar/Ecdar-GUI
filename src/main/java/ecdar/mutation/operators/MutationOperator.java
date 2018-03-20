@@ -16,11 +16,14 @@ import java.util.stream.Collectors;
 public abstract class MutationOperator {
     private final BooleanProperty selected = new SimpleBooleanProperty(true);
 
+
+    /* Properties */
+
     public boolean isSelected() {
         return selected.get();
     }
 
-    public BooleanProperty selectedProperty() {
+    public BooleanProperty getSelectedProperty() {
         return selected;
     }
 

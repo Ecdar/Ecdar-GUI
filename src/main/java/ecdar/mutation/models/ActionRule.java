@@ -1,7 +1,6 @@
 package ecdar.mutation.models;
 
 import ecdar.abstractions.EdgeStatus;
-import ecdar.backend.EcdarDocument;
 import ecdar.mutation.MutationTestingException;
 
 import java.util.regex.Matcher;
@@ -18,6 +17,12 @@ public class ActionRule extends StrategyRule {
     private final EdgeStatus status;
     private final String updateProperty;
 
+    /**
+     * Constructs.
+     * @param condition the condition of the rule
+     * @param transition the transition of the rule
+     * @throws MutationTestingException if the transition does not match the expected pattern
+     */
     public ActionRule(final String condition, final String transition) throws MutationTestingException {
         super(condition);
 

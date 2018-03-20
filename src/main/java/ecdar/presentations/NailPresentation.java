@@ -90,7 +90,7 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
                 propertyTag.setVisible(true);
 
                 // Set and bind the location of the property tag
-                if((controller.getNail().getPropertyX() != 0) && (controller.getNail().getPropertyY() != 0)) {
+                if((controller.getNail().getPropertyX() != 0) || (controller.getNail().getPropertyY() != 0)) {
                     propertyTag.setTranslateX(controller.getNail().getPropertyX());
                     propertyTag.setTranslateY(controller.getNail().getPropertyY());
                 }

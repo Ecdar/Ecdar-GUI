@@ -17,9 +17,11 @@
                          promptText="Select Test Model"/>
 
             <VBox fx:id="modelDependentArea" spacing="16" managed="false" visible="false">
-                <VBox fx:id="operatorsArea" spacing="4">
-                    <Label text="Select mutation operators:"/>
-                </VBox>
+                <Label fx:id="opsLabel" text="Select mutation operators" prefWidth="Infinity"/>
+                <HBox fx:id="operatorsOuterRegion" spacing="8">
+                    <Separator orientation="VERTICAL"/>
+                    <VBox fx:id="operatorsInnerRegion" spacing="4"/>
+                </HBox>
 
                 <JFXComboBox fx:id="actionPicker" promptText="Select Action"/>
 
@@ -31,34 +33,48 @@
                     <Label fx:id="sutPathLabel"/>
 
                     <VBox spacing="16" fx:id="sutDependentArea" managed="false" visible="false">
-                        <VBox fx:id="demonicArea">
-                            <JFXCheckBox fx:id="demonicCheckBox" text="Apply demonic completion on the test model."/>
-                        </VBox>
-
-                        <HBox spacing="8" alignment="BOTTOM_LEFT">
-                            <JFXTextField fx:id="generationThreadsField" prefWidth="30" alignment="BASELINE_CENTER"/>
-                            <Label text="concurrent thread(s) for test-case generation."/>
-                        </HBox>
-
-                        <HBox spacing="8" alignment="BOTTOM_LEFT">
-                            <JFXTextField fx:id="suvInstancesField" prefWidth="30" alignment="BASELINE_CENTER"/>
-                            <Label text="concurrent instance(s) of the system under test."/>
-                        </HBox>
-
-                        <HBox fx:id="outputWaitTimeBox" spacing="8" alignment="BOTTOM_LEFT">
-                            <JFXTextField fx:id="outputWaitTimeField" prefWidth="30" alignment="BASELINE_CENTER"/>
-                            <Label text="time unit(s) to wait for the SUT to output before giving an inconclusive verdict."/>
-                        </HBox>
-
                         <HBox fx:id="timeUnitBox" spacing="8" alignment="BOTTOM_LEFT">
                             <JFXTextField fx:id="timeUnitField" prefWidth="30" alignment="BASELINE_CENTER"/>
                             <Label text="ms corresponds to 1 time unit."/>
                         </HBox>
 
-                        <HBox spacing="8" alignment="BOTTOM_LEFT">
-                            <JFXTextField fx:id="verifytgaTriesField" prefWidth="30" alignment="BASELINE_CENTER"/>
-                            <Label text="try(-ies) of calling verifytga with empty response before giving up."/>
+                        <Label fx:id="advancedOptionsLabel" text="Advanced Options" prefWidth="Infinity"/>
+
+                        <HBox fx:id="advancedOptions" spacing="8">
+                            <Separator orientation="VERTICAL"/>
+                            <VBox spacing="16">
+                                <VBox fx:id="demonicArea">
+                                    <JFXCheckBox fx:id="demonicCheckBox" text="Apply demonic completion on the test model."/>
+                                </VBox>
+
+                                <HBox spacing="8" alignment="BOTTOM_LEFT">
+                                    <JFXTextField fx:id="generationThreadsField" prefWidth="30" alignment="BASELINE_CENTER"/>
+                                    <Label text="concurrent thread(s) for test-case generation."/>
+                                </HBox>
+
+                                <HBox spacing="8" alignment="BOTTOM_LEFT">
+                                    <JFXTextField fx:id="suvInstancesField" prefWidth="30" alignment="BASELINE_CENTER"/>
+                                    <Label text="concurrent instance(s) of the system under test."/>
+                                </HBox>
+
+                                <HBox fx:id="outputWaitTimeBox" spacing="8" alignment="BOTTOM_LEFT">
+                                    <JFXTextField fx:id="outputWaitTimeField" prefWidth="30" alignment="BASELINE_CENTER"/>
+                                    <Label text="time unit(s) to wait for the SUT to output before giving an inconclusive verdict."/>
+                                </HBox>
+
+                                <HBox spacing="8" alignment="BOTTOM_LEFT">
+                                    <JFXTextField fx:id="verifytgaTriesField" prefWidth="30" alignment="BASELINE_CENTER"/>
+                                    <Label text="try(-ies) of calling verifytga with empty response before giving up."/>
+                                </HBox>
+
+                                <HBox spacing="8" alignment="BOTTOM_LEFT">
+                                    <JFXTextField fx:id="stepBoundsField" prefWidth="30" alignment="BASELINE_CENTER"/>
+                                    <Label text="strategy rules to visit before giving up."/>
+                                </HBox>
+                            </VBox>
                         </HBox>
+
+
 
                         <JFXButton fx:id="testButton" prefWidth="100" prefHeight="40" buttonType="RAISED" text="Test"
                                    style="-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;"
@@ -90,11 +106,20 @@
                     <Separator/>
                     <Label fx:id="mutantsText"/>
                     <Label fx:id="testCasesText"/>
+                    <Label fx:id="testTimeText"/>
                     <Label fx:id="passedText"/>
-                    <Label fx:id="inconclusiveText"/>
-                    <ListView fx:id="inconclusiveMessageList"/>
-                    <Label fx:id="failedText"/>
-                    <ListView fx:id="failedMessageList"/>
+
+                    <Label fx:id="inconclusiveText" prefWidth="Infinity" managed="false" visible="false"/>
+                    <HBox fx:id="inconclusiveRegion" spacing="8">
+                        <Separator orientation="VERTICAL"/>
+                        <VBox fx:id="inconclusiveMessageList" spacing="8"/>
+                    </HBox>
+
+                    <Label fx:id="failedText" prefWidth="Infinity" managed="false" visible="false"/>
+                    <HBox fx:id="failedRegion" spacing="8">
+                        <Separator orientation="VERTICAL"/>
+                        <VBox fx:id="failedMessageList" spacing="8"/>
+                    </HBox>
                 </VBox>
             </VBox>
         </VBox>

@@ -2,16 +2,12 @@ package ecdar.mutation.operators;
 
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
-import ecdar.abstractions.EdgeStatus;
-import ecdar.abstractions.Location;
 import ecdar.mutation.models.MutationTestCase;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * Mutation operator that changes a constant in a guard.

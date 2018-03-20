@@ -9,6 +9,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Mutation operator that changes an invariant.
+ * It adds 1 to the right side of an invariant part.
+ * Parts are divided by conjunction.
+ */
 public class ChangeInvariantOperator extends MutationOperator {
     @Override
     public String getText() {

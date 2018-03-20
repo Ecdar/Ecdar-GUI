@@ -8,6 +8,8 @@ import ecdar.mutation.operators.MutationOperator;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -20,7 +22,7 @@ import java.util.stream.Collectors;
 public class MutationTestPlan extends HighLevelModelObject {
     /**
      * The status of the test plan.
-     * STOPPING: Stop by the user
+     * STOPPING: Stopped by the user
      * ERROR: An error has just occurred, and we are waiting for the execution to stop because of it
      */
     public enum Status {IDLE, WORKING, STOPPING, ERROR}
@@ -39,6 +41,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     private static final String MAX_OUTPUT_WAIT_TIME = "maxOutputWaitTime";
     private static final String VERIFYTGA_TRIES = "verifytgaTries";
     private static final String TIME_UNIT = "timeUnit";
+    private static final String STEP_BOUNDS = "stepBounds";
 
     // General fields
     private final StringProperty testModelId = new SimpleStringProperty("");
@@ -54,15 +57,19 @@ public class MutationTestPlan extends HighLevelModelObject {
     private final IntegerProperty maxOutputWaitTime = new SimpleIntegerProperty(5);
     private final IntegerProperty verifytgaTries = new SimpleIntegerProperty(3);
     private final IntegerProperty timeUnit = new SimpleIntegerProperty(1000);
+    private final IntegerProperty stepBounds = new SimpleIntegerProperty(100);
 
     // Temporary values for displaying results of testing
+    private final ObservableList<Text> progressTexts = FXCollections.observableArrayList();
     private final StringProperty mutantsText = new SimpleStringProperty("");
     private final StringProperty testCasesText = new SimpleStringProperty("");
+    private final StringProperty testTimeText = new SimpleStringProperty("");
+
     private final StringProperty passedText = new SimpleStringProperty("");
     private final StringProperty InconclusiveText = new SimpleStringProperty("");
-    private final ListProperty<String> inconclusiveMessageList = new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final ListProperty<ExpandableContent> inconclusiveMessageList = new SimpleListProperty<>(FXCollections.observableArrayList());
     private final StringProperty FailedText = new SimpleStringProperty("");
-    private final ListProperty<String> failedMessageList = new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final ListProperty<ExpandableContent> failedMessageList = new SimpleListProperty<>(FXCollections.observableArrayList());
 
     // For exporting
     private final BooleanProperty angelicWhenExport = new SimpleBooleanProperty(false);
@@ -71,11 +78,18 @@ public class MutationTestPlan extends HighLevelModelObject {
 
     /* Constructors */
 
+    /**
+     * Constructs a plan for scratch.
+     */
     public MutationTestPlan() {
         generateName();
         operators.addAll(MutationOperator.getAllOperators());
     }
 
+    /**
+     * Constructs a plan from JSON.
+     * @param json the JSON
+     */
     public MutationTestPlan(final JsonObject json) {
         deserialize(json);
     }
@@ -86,7 +100,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     public String getTestModelId() {
         return testModelId.get();
     }
-    public StringProperty testModelIdProperty() {
+    public StringProperty getTestModelIdProperty() {
         return testModelId;
     }
     public void setTestModelId(final String testModelId) {
@@ -96,7 +110,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     public String getMutantsText() {
         return mutantsText.get();
     }
-    public StringProperty mutantsTextProperty() {
+    public StringProperty getMutantsTextProperty() {
         return mutantsText;
     }
     public void setMutantsText(final String value) {
@@ -106,7 +120,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     public String getTestCasesText() {
         return testCasesText.get();
     }
-    public StringProperty testCasesTextProperty() {
+    public StringProperty getTestCasesTextProperty() {
         return testCasesText;
     }
     public void setTestCasesText(final String value) {
@@ -116,7 +130,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     public String getAction() {
         return action.get();
     }
-    public StringProperty actionProperty() {
+    public StringProperty getActionProperty() {
         return action;
     }
     public void setAction(final String value) {
@@ -126,7 +140,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     public String getSutPath() {
         return sutPath.get();
     }
-    public StringProperty sutPathProperty() {
+    public StringProperty getSutPathProperty() {
         return sutPath;
     }
     public void setSutPath(final String value) {
@@ -136,7 +150,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     public String getFormat() {
         return format.get();
     }
-    public StringProperty formatProperty() {
+    public StringProperty getFormatProperty() {
         return format;
     }
     public void setFormat(final String value) {
@@ -146,7 +160,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     public boolean isDemonic() {
         return demonic.get();
     }
-    public BooleanProperty demonicProperty() {
+    public BooleanProperty getDemonicProperty() {
         return demonic;
     }
     public void setDemonic(final boolean value) {
@@ -156,7 +170,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     public boolean isAngelicWhenExport() {
         return angelicWhenExport.get();
     }
-    public BooleanProperty angelicWhenExportProperty() {
+    public BooleanProperty getAngelicWhenExportProperty() {
         return angelicWhenExport;
     }
     public void setAngelicWhenExport(final boolean value) {
@@ -166,7 +180,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     public Status getStatus() {
         return status.get();
     }
-    public ObjectProperty<Status> statusProperty() {
+    public ObjectProperty<Status> getStatusProperty() {
         return status;
     }
     public void setStatus(final Status value) {
@@ -180,7 +194,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     public int getConcurrentGenerationThreads() {
         return concurrentGenerationThreads.get();
     }
-    public IntegerProperty concurrentGenerationsThreadsProperty() {
+    public IntegerProperty getConcurrentGenerationsThreadsProperty() {
         return concurrentGenerationThreads;
     }
     public void setConcurrentGenerationThreads(final int concurrentGenerationThreads) {
@@ -190,7 +204,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     public int getConcurrentSutInstances() {
         return concurrentSutInstances.get();
     }
-    public IntegerProperty concurrentSutInstancesProperty() {
+    public IntegerProperty getConcurrentSutInstancesProperty() {
         return concurrentSutInstances;
     }
     public void setConcurrentSutInstances(final int concurrentSutInstances) {
@@ -200,7 +214,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     public int getOutputWaitTime() {
         return maxOutputWaitTime.get();
     }
-    public IntegerProperty outputWaitTimeProperty() {
+    public IntegerProperty getOutputWaitTimeProperty() {
         return maxOutputWaitTime;
     }
     public void setOutputWaitTime(final int outputWaitTime){
@@ -210,7 +224,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     public String getPassedText() {
         return passedText.get();
     }
-    public StringProperty passedTextProperty() {
+    public StringProperty getPassedTextProperty() {
         return passedText;
     }
     public void setPassedText(final String passedText) {
@@ -220,7 +234,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     public String getInconclusiveText() {
         return InconclusiveText.get();
     }
-    public StringProperty inconclusiveTextProperty() {
+    public StringProperty getInconclusiveTextProperty() {
         return InconclusiveText;
     }
     public void setInconclusiveText(final String inconclusiveText) {
@@ -230,31 +244,31 @@ public class MutationTestPlan extends HighLevelModelObject {
     public String getFailedText() {
         return FailedText.get();
     }
-    public StringProperty failedTextProperty() {
+    public StringProperty getFailedTextProperty() {
         return FailedText;
     }
     public void setFailedText(final String failedText) {
         this.FailedText.set(failedText);
     }
 
-    public ObservableList<String> getFailedMessageList() {
+    public ObservableList<ExpandableContent> getFailedMessageList() {
         return failedMessageList.get();
     }
-    public ListProperty<String> failedMessageListProperty() {
+    public ListProperty<ExpandableContent> getFailedMessageListProperty() {
         return failedMessageList;
     }
 
-    public ObservableList<String> getInconclusiveMessageList() {
+    public ObservableList<ExpandableContent> getInconclusiveMessageList() {
         return inconclusiveMessageList.get();
     }
-    public ListProperty<String> inconclusiveMessageListProperty() {
+    public ListProperty<ExpandableContent> getInconclusiveMessageListProperty() {
         return inconclusiveMessageList;
     }
 
     public int getVerifytgaTries() {
         return verifytgaTries.get();
     }
-    public IntegerProperty verifytgaTriesProperty() {
+    public IntegerProperty getVerifytgaTriesProperty() {
         return verifytgaTries;
     }
     public void setVerifytgaTries(final int verifytgaTries) {
@@ -264,11 +278,35 @@ public class MutationTestPlan extends HighLevelModelObject {
     public int getTimeUnit() {
         return timeUnit.get();
     }
-    public IntegerProperty timeUnitProperty() {
+    public IntegerProperty getTimeUnitProperty() {
         return timeUnit;
     }
     public void setTimeUnit(final int timeUnit) {
         this.timeUnit.set(timeUnit);
+    }
+
+    public ObservableList<Text> getProgressTexts() {
+        return progressTexts;
+    }
+
+    public String getTestTimeText() {
+        return testTimeText.get();
+    }
+    public StringProperty getTestTimeTextProperty() {
+        return testTimeText;
+    }
+    public void setTestTimeText(final String testTimeText) {
+        this.testTimeText.set(testTimeText);
+    }
+
+    public int getStepBounds() {
+        return stepBounds.get();
+    }
+    public IntegerProperty getStepBoundsProperty() {
+        return stepBounds;
+    }
+    public void setStepBounds(final int stepBounds) {
+        this.stepBounds.set(stepBounds);
     }
 
     /* Other methods */
@@ -291,6 +329,7 @@ public class MutationTestPlan extends HighLevelModelObject {
         result.addProperty(MAX_OUTPUT_WAIT_TIME, getOutputWaitTime());
         result.addProperty(VERIFYTGA_TRIES, getVerifytgaTries());
         result.addProperty(TIME_UNIT, getTimeUnit());
+        result.addProperty(STEP_BOUNDS, getStepBounds());
 
         return result;
     }
@@ -326,11 +365,14 @@ public class MutationTestPlan extends HighLevelModelObject {
 
         primitive = json.getAsJsonPrimitive(TIME_UNIT);
         if (primitive != null) setTimeUnit(primitive.getAsInt());
+
+        primitive = json.getAsJsonPrimitive(STEP_BOUNDS);
+        if (primitive != null) setStepBounds(primitive.getAsInt());
     }
 
 
     /**
-     * Generate and sets a unique id for this system
+     * Generate and sets a unique id for this system.
      */
     private void generateName() {
         final HashSet<String> names = new HashSet<>();
@@ -361,8 +403,40 @@ public class MutationTestPlan extends HighLevelModelObject {
     public void clearResults() {
         setMutantsText("");
         setTestCasesText("");
+        setTestTimeText("");
         setPassedText("");
         setInconclusiveText("");
+        getInconclusiveMessageList().clear();
         setFailedText("");
+        getFailedMessageList().clear();
     }
+
+    /**
+     * Writes progress to the user.
+     * @param message the message to display
+     */
+    public void writeProgress(final String message) {
+        final Text text = new Text(message);
+        text.setFill(Color.web("#333333"));
+        writeProgress(text);
+    }
+
+    /**
+     * Writes progress to the user.
+     * @param text the message to display
+     */
+    public void writeProgress(final Text text) {
+        progressTexts.clear();
+        progressTexts.add(text);
+    }
+
+    /**
+     * Gets if we should stop working.
+     * @return true iff we should stop
+     */
+    public boolean shouldStop() {
+        return getStatus().equals(MutationTestPlan.Status.STOPPING) ||
+                getStatus().equals(MutationTestPlan.Status.ERROR);
+    }
+
 }

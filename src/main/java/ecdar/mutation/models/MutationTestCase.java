@@ -1,9 +1,6 @@
 package ecdar.mutation.models;
 
 import ecdar.abstractions.Component;
-import ecdar.mutation.MutationTestingException;
-
-import java.util.List;
 
 /**
  * A test case for model-based mutation testing.
@@ -15,6 +12,13 @@ public class MutationTestCase {
     private final String id;
     private final String description;
 
+    /**
+     * Constructs.
+     * @param testModel test model
+     * @param mutant mutant model
+     * @param id id of the test-case
+     * @param description description of the test-case
+     */
     public MutationTestCase(final Component testModel, final Component mutant, final String id, final String description) {
         this.testModel = testModel;
         this.mutant = mutant;

@@ -24,6 +24,10 @@ public class SimpleComponentSimulation implements ComponentSimulation {
     private final Map<String, Integer> localValuations = new HashMap<>();
     private final List<String> trace = new ArrayList<>();
 
+    /**
+     * Constructs.
+     * @param component component to simulate
+     */
     public SimpleComponentSimulation(final Component component) {
         this.component = component;
         currentLocation = component.getInitialLocation();

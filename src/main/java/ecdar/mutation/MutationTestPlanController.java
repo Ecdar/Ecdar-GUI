@@ -9,21 +9,16 @@ import ecdar.abstractions.Component;
 import ecdar.mutation.models.MutationTestCase;
 import ecdar.mutation.models.MutationTestPlan;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.FileChooser;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * Controller for a test plan with model-based mutation testing.
@@ -32,15 +27,13 @@ public class MutationTestPlanController {
     public final static String SPEC_NAME = "S";
     public final static String MUTANT_NAME = "M";
 
-    private static final int TEST_STEP_BOUND = 100;
-
 
     /* UI elements */
 
     public ScrollPane scrollPane;
     public JFXComboBox<Label> modelPicker;
     public VBox modelDependentArea;
-    public VBox operatorsArea;
+    public VBox operatorsInnerRegion;
     public JFXComboBox<Label> actionPicker;
 
     public VBox testDependentArea;
@@ -72,10 +65,18 @@ public class MutationTestPlanController {
     public Label failedText;
     public StackPane root;
     public JFXTextField verifytgaTriesField;
-    public ListView inconclusiveMessageList;
-    public ListView failedMessageList;
+    public VBox inconclusiveMessageList;
+    public VBox failedMessageList;
     public JFXTextField timeUnitField;
     public HBox timeUnitBox;
+    public Label opsLabel;
+    public Label advancedOptionsLabel;
+    public Pane advancedOptions;
+    public HBox failedRegion;
+    public HBox inconclusiveRegion;
+    public Label testTimeText;
+    public HBox operatorsOuterRegion;
+    public JFXTextField stepBoundsField;
 
 
     /* Mutation fields */
@@ -107,7 +108,22 @@ public class MutationTestPlanController {
         // Clone it, because we want to change its name
         final Component testModel = Ecdar.getProject().findComponent(modelPicker.getValue().getText()).cloneForVerification();
 
-        new TestCaseGenerationHandler(getPlan(), testModel, this::writeProgress, this::startTestDriver).start();
+        new MutationHandler(testModel, getPlan(), cases -> startGeneration(testModel, cases)).start();
+    }
+
+    /**
+     * Starts the test-case generation.
+     * If the status is not working, ignore instead
+     * @param testModel test model
+     * @param cases potential test-cases containing the mutants
+     */
+    private synchronized void startGeneration(final Component testModel, final List<MutationTestCase> cases) {
+        if (getPlan().shouldStop()) {
+            getPlan().setStatus(MutationTestPlan.Status.IDLE);
+            return;
+        }
+
+        new TestCaseGenerationHandler(getPlan(), testModel, cases, this::startTestDriver).start();
     }
 
     /**
@@ -115,18 +131,7 @@ public class MutationTestPlanController {
      * @param cases the mutation test cases to test with
      */
     private void startTestDriver(final List<MutationTestCase> cases) {
-        new TestDriver(cases, plan, this::writeProgress, getPlan().getTimeUnit(), TEST_STEP_BOUND).start();
-    }
-
-    /**
-     * Gets the maximum allowed concurrent threads for generating test-cases.
-     * @return the maximum allowed threads
-     */
-    private int getMaxConcurrentGenerationJobs() {
-        if (generationThreadsField.getText().isEmpty())
-            return 1;
-        else
-            return Integer.parseInt(generationThreadsField.getText());
+        new TestingHandler(cases, plan).start();
     }
 
     /**
@@ -134,40 +139,21 @@ public class MutationTestPlanController {
      * Signals that this test plan should stop doing jobs.
      */
     public void onStopButtonPressed() {
-        writeProgress("Stopping");
+        getPlan().writeProgress("Stopping");
         getPlan().setStatus(MutationTestPlan.Status.STOPPING);
-    }
-
-    /**
-     * Writes progress to the user.
-     * @param message the message to display
-     */
-    public void writeProgress(final String message) {
-        final Text text = new Text(message);
-        text.setFill(Color.web("#333333"));
-        writeProgress(text);
-    }
-
-    /**
-     * Writes progress to the user.
-     * @param text the message to display
-     */
-    private void writeProgress(final Text text) {
-        progressTextFlow.getChildren().clear();
-        progressTextFlow.getChildren().add(text);
     }
 
     /**
      * Opens dialog to select a SUT.
      */
     public void onSelectSutButtonPressed() {
-        FileChooser fileChooser = new FileChooser();
+        final FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Choose a SUT jar file");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Jar files", "*.jar"));
 
         // The initial location for the file choosing dialog
         final File jarDir;
-        if(Ecdar.projectDirectory.get() == null) {
+        if (Ecdar.projectDirectory.get() == null) {
             fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
         } else {
             jarDir = new File(Ecdar.projectDirectory.get());
@@ -179,9 +165,9 @@ public class MutationTestPlanController {
             }
         }
 
-        File file = fileChooser.showOpenDialog(root.getScene().getWindow());
-        if(file != null) {
-            String path = new File(Ecdar.projectDirectory.get()).toPath().relativize(file.toPath()).toFile().getPath().replace(File.separator, "/");
+        final File file = fileChooser.showOpenDialog(root.getScene().getWindow());
+        if (file != null) {
+            final String path = new File(Ecdar.projectDirectory.get()).toPath().relativize(file.toPath()).toFile().getPath().replace(File.separator, "/");
             sutPathLabel.setText(path);
             plan.setSutPath(path);
         } else {
@@ -194,6 +180,6 @@ public class MutationTestPlanController {
      */
     public void onExportButtonPressed() {
         getPlan().clearResults();
-        new ExportHandler(getPlan(), Ecdar.getProject().findComponent(modelPicker.getValue().getText()), this::writeProgress).start();
+        new ExportHandler(getPlan(), Ecdar.getProject().findComponent(modelPicker.getValue().getText())).start();
     }
 }
