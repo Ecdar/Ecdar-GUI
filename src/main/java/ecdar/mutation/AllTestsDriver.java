@@ -68,28 +68,30 @@ public class AllTestsDriver implements ConcurrentJobsHandler {
      * @param result the test result
      */
     private synchronized void onTestDone(final TestResult result) {
-        switch (result.getVerdict()) {
-            case INCONCLUSIVE:
-                Platform.runLater(() -> {
-                    getPlan().getInconclusiveMessageList().add(result);
-                    getPlan().setInconclusiveText("Inconclusive: " + getPlan().getInconclusiveMessageList().size());
-                });
-                break;
-            case PASS:
-                passedNum++;
-                Platform.runLater(() -> getPlan().setPassedText("Passed: " + passedNum));
-                break;
-            case FAIL:
-                Platform.runLater(() -> {
-                    getPlan().getFailedMessageList().add(result);
-                    getPlan().setFailedText("Failed: " + getPlan().getFailedMessageList().size());
-                });
-                break;
-        }
+        if (result != null) {
+            switch (result.getVerdict()) {
+                case INCONCLUSIVE:
+                    Platform.runLater(() -> {
+                        getPlan().getInconclusiveMessageList().add(result);
+                        getPlan().setInconclusiveText("Inconclusive: " + getPlan().getInconclusiveMessageList().size());
+                    });
+                    break;
+                case PASS:
+                    passedNum++;
+                    Platform.runLater(() -> getPlan().setPassedText("Passed: " + passedNum));
+                    break;
+                case FAIL:
+                    Platform.runLater(() -> {
+                        getPlan().getFailedMessageList().add(result);
+                        getPlan().setFailedText("Failed: " + getPlan().getFailedMessageList().size());
+                    });
+                    break;
+            }
 
-        Platform.runLater(() -> getPlan().setTestTimeText(
-                "Testing time: " + MutationTestPlanPresentation.readableFormat(Duration.between(jobsStart, Instant.now()))
-        ));
+            Platform.runLater(() -> getPlan().setTestTimeText(
+                    "Testing time: " + MutationTestPlanPresentation.readableFormat(Duration.between(jobsStart, Instant.now()))
+            ));
+        }
 
         jobsDriver.onJobDone();
     }

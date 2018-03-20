@@ -21,7 +21,6 @@ public class TestDriver {
     private final MutationTestCase testCase;
     private final int timeUnit, stepBound;
     private final MutationTestPlan plan;
-    private boolean done = false;
     private AsyncInputReader reader;
     private final Consumer<TestResult> resultConsumer;
     private Process sut;
@@ -49,16 +48,19 @@ public class TestDriver {
         return stepBound;
     }
 
-    private boolean isDone() {
-        return done;
-    }
-
     /* Other */
+
+    public boolean shouldStop() {
+        return getPlan().getStatus().equals(MutationTestPlan.Status.STOPPING) ||
+                getPlan().getStatus().equals(MutationTestPlan.Status.ERROR);
+    }
 
     public void start() {
         new Thread(() -> {
+            TestResult result = null;
+
             try {
-                test();
+                result = test();
             } catch (MutationTestingException | IOException | InterruptedException e) {
                 if (getPlan().getStatus().equals(MutationTestPlan.Status.WORKING)) {
                     getPlan().setStatus(MutationTestPlan.Status.ERROR);
@@ -72,11 +74,14 @@ public class TestDriver {
                         e.printStackTrace();
                     });
                 }
+            } finally {
+                resultConsumer.accept(result);
+                tearDown();
             }
         }).start();
     }
 
-    private void test() throws IOException, MutationTestingException, InterruptedException {
+    private TestResult test() throws IOException, MutationTestingException, InterruptedException {
         final ObjectProperty<Instant> lastUpdateTime = new SimpleObjectProperty<>();
         final NonRefinementStrategy strategy = testCase.getStrategy();
 
@@ -89,20 +94,21 @@ public class TestDriver {
 
         //Begin the new test
         int step = 0;
-        while (!isDone() && step < getStepBound()) {
+        while (step < getStepBound()) {
             // Get rule and check if its empty
             final StrategyRule rule = strategy.getRule(testModelSimulation, mutantSimulation);
             if (rule == null) {
-                handIn(TestResult.Verdict.INCONCLUSIVE, "No rule to perform.");
+                makeResult(TestResult.Verdict.INCONCLUSIVE, "No rule to perform.");
             } else {
                 // Check if rule is an delay rule or output action rule, if it is either, perform delay,
                 // if it is an input action perform input
                 if (rule instanceof DelayRule || (rule instanceof ActionRule && ((ActionRule) rule).getStatus() == EdgeStatus.OUTPUT)) {
-                    delay(rule, testModelSimulation, mutantSimulation, lastUpdateTime);
+                    final TestResult result = delay(rule, testModelSimulation, mutantSimulation, lastUpdateTime);
+                    if (result != null) return result;
                 } else if (rule instanceof  ActionRule){
                     final String sync = ((ActionRule) rule).getSync();
-                    if (!testModelSimulation.isDeterministic(sync, EdgeStatus.INPUT) || !mutantSimulation.isDeterministic(sync, EdgeStatus.OUTPUT)){
-                        handIn(TestResult.Verdict.INCONCLUSIVE, "Non-deterministic choice with input " + sync + ".");
+                    if (!testModelSimulation.isDeterministic(sync, EdgeStatus.INPUT) || !mutantSimulation.isDeterministic(sync, EdgeStatus.INPUT)) {
+                        makeResult(TestResult.Verdict.INCONCLUSIVE, "Non-deterministic choice with input " + sync + ".");
                     } else {
                         testModelSimulation.runInputAction(sync);
                         mutantSimulation.runInputAction(sync);
@@ -112,11 +118,14 @@ public class TestDriver {
                     throw new MutationTestingException("Rule " + rule + " is neither a delay nor an action rule.");
                 }
             }
+
+            if (shouldStop()) return null;
+
             step++;
         }
 
         //Finish test, we now know that either the verdict has been set or the time ran out
-        handIn(TestResult.Verdict.INCONCLUSIVE, "Out of bounds.");
+        return makeResult(TestResult.Verdict.INCONCLUSIVE, "Out of bounds.");
     }
 
     /**
@@ -124,7 +133,7 @@ public class TestDriver {
      * @param testModelSimulation simulation representing the test model.
      * @param mutantSimulation simulation representing the mutated model.
      */
-    private void delay(final StrategyRule rule, final SimpleComponentSimulation testModelSimulation,
+    private TestResult delay(final StrategyRule rule, final SimpleComponentSimulation testModelSimulation,
                        final SimpleComponentSimulation mutantSimulation, final ObjectProperty<Instant> lastUpdateTime) throws MutationTestingException, InterruptedException, IOException {
         final Instant delayDuration = Instant.now();
         Map<String, Double> clockValuations = getClockValuations(testModelSimulation, mutantSimulation);
@@ -134,8 +143,7 @@ public class TestDriver {
         while ((rule.isSatisfied(clockValuations))) {
             //Check if the maximum wait time has been exceeded, if it is, give inconclusive verdict
             if (!(Duration.between(delayDuration, Instant.now()).toMillis()/(double)timeUnit <= getPlan().getOutputWaitTime())) {
-                handIn(TestResult.Verdict.INCONCLUSIVE, "Maximum wait time reached without recieving an output.");
-                return;
+                return makeResult(TestResult.Verdict.INCONCLUSIVE, "Maximum wait time reached without recieving an output.");
             }
 
             if (reader.isException()) throw reader.getException();
@@ -143,23 +151,29 @@ public class TestDriver {
             if (reader.ready()) {
                 final String output = reader.read();
 
-                simulateDelay(testModelSimulation, mutantSimulation, lastUpdateTime);
+                final TestResult delayResult = simulateDelay(testModelSimulation, mutantSimulation, lastUpdateTime);
+                if (delayResult != null) return delayResult;
 
                 //Catch SUT debug commands
                 final Matcher match = Pattern.compile("Debug: (.*)").matcher(output);
                 if (match.find()) {
                     System.out.println(match.group(0));
                 } else {
-                    simulateOutput(testModelSimulation, mutantSimulation, output);
-                    if (isDone()) return;
+                    final TestResult outputResult = simulateOutput(testModelSimulation, mutantSimulation, output);
+                    if (outputResult != null) return outputResult;
                 }
             } else {
                 sleep();
-                simulateDelay(testModelSimulation, mutantSimulation, lastUpdateTime);
-                if (isDone()) return;
+                final TestResult result = simulateDelay(testModelSimulation, mutantSimulation, lastUpdateTime);
+                if (result != null) return result;
             }
+
+            if (shouldStop()) return null;
+
             clockValuations = getClockValuations(testModelSimulation, mutantSimulation);
         }
+
+        return null;
     }
 
     private void sleep() throws InterruptedException {
@@ -188,17 +202,18 @@ public class TestDriver {
      * @param mutantSimulation the mutant model.
      * @param lastUpdateTime the time we determine the delay length from.
      */
-    private void simulateDelay(final SimpleComponentSimulation testModelSimulation, final SimpleComponentSimulation mutantSimulation,
+    private TestResult simulateDelay(final SimpleComponentSimulation testModelSimulation, final SimpleComponentSimulation mutantSimulation,
                                final ObjectProperty<Instant> lastUpdateTime) {
         final double waitedTimeUnits = Duration.between(lastUpdateTime.get(), Instant.now()).toMillis() / (double) timeUnit;
         lastUpdateTime.setValue(Instant.now());
 
         if (!testModelSimulation.delay(waitedTimeUnits)) {
-            handIn(TestResult.Verdict.FAIL, "Failed simulating delay on test model.");
+            return makeResult(TestResult.Verdict.FAIL, "Failed simulating delay on test model.");
         } else if (!mutantSimulation.delay(waitedTimeUnits)) {
-            handIn(TestResult.Verdict.PASS, null);
+            return makeResult(TestResult.Verdict.PASS, null);
         }
 
+        return null;
     }
 
     /**
@@ -208,15 +223,16 @@ public class TestDriver {
      * @param output the output to simulate
      * @throws MutationTestingException if an exception occured
      */
-    private void simulateOutput(final SimpleComponentSimulation testModelSimulation,
-                                final SimpleComponentSimulation mutantSimulation, final String output) throws MutationTestingException {
+    private TestResult simulateOutput(final SimpleComponentSimulation testModelSimulation,
+                                      final SimpleComponentSimulation mutantSimulation, final String output) throws MutationTestingException {
         if(!testModelSimulation.isDeterministic(output, EdgeStatus.OUTPUT) || !mutantSimulation.isDeterministic(output, EdgeStatus.OUTPUT)){
-            handIn(TestResult.Verdict.INCONCLUSIVE, "Non-deterministic choice with output " + output + ".");
+            return makeResult(TestResult.Verdict.INCONCLUSIVE, "Non-deterministic choice with output " + output + ".");
         } else if (!testModelSimulation.runOutputAction(output)){
-            handIn(TestResult.Verdict.FAIL, "Failed simulating output " + output + " on test model.");
+            return makeResult(TestResult.Verdict.FAIL, "Failed simulating output " + output + " on test model.");
         } else if (!mutantSimulation.runOutputAction(output)){
-            handIn(TestResult.Verdict.PASS, null);
+            return makeResult(TestResult.Verdict.PASS, null);
         }
+        return null;
     }
 
     /**
@@ -239,11 +255,8 @@ public class TestDriver {
         Platform.runLater(() -> getPlan().writeProgress(text));
     }
 
-    private void handIn(final TestResult.Verdict verdict, final String reason) {
-        done = true;
-        resultConsumer.accept(new TestResult(testCase.getId(), testCase.getDescription(), reason, testModelSimulation, mutantSimulation, verdict));
-
-        tearDown();
+    private TestResult makeResult(final TestResult.Verdict verdict, final String reason) {
+        return new TestResult(testCase.getId(), testCase.getDescription(), reason, testModelSimulation, mutantSimulation, verdict);
     }
 
     private void tearDown() {

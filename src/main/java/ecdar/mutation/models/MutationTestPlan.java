@@ -381,6 +381,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     public void clearResults() {
         setMutantsText("");
         setTestCasesText("");
+        setTestTimeText("");
         setPassedText("");
         setInconclusiveText("");
         getInconclusiveMessageList().clear();
