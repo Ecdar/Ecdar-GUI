@@ -18,21 +18,18 @@ import java.util.function.Consumer;
 public class AllTestsDriver implements ConcurrentJobsHandler {
     private int passedNum;
     private final MutationTestPlan testPlan;
-    private final int timeUnit;
-    private final int bound;
     private final List<MutationTestCase> mutationTestCases;
     private ConcurrentJobsDriver jobsDriver;
     private Instant jobsStart;
 
 
     /**
-     * Constructor for the test driver, needs a list of mutation test cases, a test plan, a consumer to write progress to, an long representing a time units length in miliseconds and a bound
+     * Constructor for the test driver, needs a list of mutation test cases, a test plan,
+     * a consumer to write progress to, an long representing a time units length in milliseconds and a bound.
      */
-    AllTestsDriver(final List<MutationTestCase> mutationTestCases, final MutationTestPlan testPlan, final int timeUnit, final int bound) {
+    AllTestsDriver(final List<MutationTestCase> mutationTestCases, final MutationTestPlan testPlan) {
         this.mutationTestCases = mutationTestCases;
         this.testPlan = testPlan;
-        this.timeUnit = timeUnit;
-        this.bound = bound;
     }
 
     /**
@@ -58,7 +55,7 @@ public class AllTestsDriver implements ConcurrentJobsHandler {
      * @param testCase to perform.
      */
     private void performTest(final MutationTestCase testCase) {
-        new TestDriver(testCase, timeUnit, bound, getPlan(), this::onTestDone).start();
+        new TestDriver(testCase, getPlan(), this::onTestDone).start();
     }
 
     /**

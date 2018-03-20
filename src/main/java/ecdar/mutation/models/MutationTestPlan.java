@@ -42,6 +42,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     private static final String MAX_OUTPUT_WAIT_TIME = "maxOutputWaitTime";
     private static final String VERIFYTGA_TRIES = "verifytgaTries";
     private static final String TIME_UNIT = "timeUnit";
+    private static final String STEP_BOUNDS = "stepBounds";
 
     // General fields
     private final StringProperty testModelId = new SimpleStringProperty("");
@@ -57,13 +58,14 @@ public class MutationTestPlan extends HighLevelModelObject {
     private final IntegerProperty maxOutputWaitTime = new SimpleIntegerProperty(5);
     private final IntegerProperty verifytgaTries = new SimpleIntegerProperty(3);
     private final IntegerProperty timeUnit = new SimpleIntegerProperty(1000);
+    private final IntegerProperty stepBounds = new SimpleIntegerProperty(100);
 
     // Temporary values for displaying results of testing
     private final ObservableList<Text> progressTexts = FXCollections.observableArrayList();
     private final StringProperty mutantsText = new SimpleStringProperty("");
     private final StringProperty testCasesText = new SimpleStringProperty("");
-
     private final StringProperty testTimeText = new SimpleStringProperty("");
+
     private final StringProperty passedText = new SimpleStringProperty("");
     private final StringProperty InconclusiveText = new SimpleStringProperty("");
     private final ListProperty<ExpandableContent> inconclusiveMessageList = new SimpleListProperty<>(FXCollections.observableArrayList());
@@ -291,6 +293,16 @@ public class MutationTestPlan extends HighLevelModelObject {
         this.testTimeText.set(testTimeText);
     }
 
+    public int getStepBounds() {
+        return stepBounds.get();
+    }
+    public IntegerProperty stepBoundsProperty() {
+        return stepBounds;
+    }
+    public void setStepBounds(final int stepBounds) {
+        this.stepBounds.set(stepBounds);
+    }
+
     /* Other methods */
 
     @Override
@@ -311,6 +323,7 @@ public class MutationTestPlan extends HighLevelModelObject {
         result.addProperty(MAX_OUTPUT_WAIT_TIME, getOutputWaitTime());
         result.addProperty(VERIFYTGA_TRIES, getVerifytgaTries());
         result.addProperty(TIME_UNIT, getTimeUnit());
+        result.addProperty(STEP_BOUNDS, getStepBounds());
 
         return result;
     }
@@ -346,6 +359,9 @@ public class MutationTestPlan extends HighLevelModelObject {
 
         primitive = json.getAsJsonPrimitive(TIME_UNIT);
         if (primitive != null) setTimeUnit(primitive.getAsInt());
+
+        primitive = json.getAsJsonPrimitive(STEP_BOUNDS);
+        if (primitive != null) setStepBounds(primitive.getAsInt());
     }
 
 

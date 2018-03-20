@@ -24,8 +24,6 @@ public class MutationTestPlanController {
     public final static String SPEC_NAME = "S";
     public final static String MUTANT_NAME = "M";
 
-    private static final int TEST_STEP_BOUND = 100;
-
 
     /* UI elements */
 
@@ -75,6 +73,7 @@ public class MutationTestPlanController {
     public HBox inconclusiveRegion;
     public Label testTimeText;
     public HBox operatorsOuterRegion;
+    public JFXTextField stepBoundsField;
 
 
     /* Mutation fields */
@@ -114,7 +113,7 @@ public class MutationTestPlanController {
      * @param cases the mutation test cases to test with
      */
     private void startTestDriver(final List<MutationTestCase> cases) {
-        new AllTestsDriver(cases, plan, getPlan().getTimeUnit(), TEST_STEP_BOUND).start();
+        new AllTestsDriver(cases, plan).start();
     }
 
     /**

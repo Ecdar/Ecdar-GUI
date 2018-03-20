@@ -19,7 +19,6 @@ import java.util.regex.Pattern;
 
 public class TestDriver {
     private final MutationTestCase testCase;
-    private final int timeUnit, stepBound;
     private final MutationTestPlan plan;
     private AsyncInputReader reader;
     private final Consumer<TestResult> resultConsumer;
@@ -27,10 +26,8 @@ public class TestDriver {
     private final SimpleComponentSimulation testModelSimulation, mutantSimulation;
     private BufferedWriter writer;
 
-    TestDriver(final MutationTestCase testCase, final int timeUnit, final int stepBound, final MutationTestPlan plan, final Consumer<TestResult> resultConsumer) {
+    TestDriver(final MutationTestCase testCase, final MutationTestPlan plan, final Consumer<TestResult> resultConsumer) {
         this.testCase = testCase;
-        this.timeUnit = timeUnit;
-        this.stepBound = stepBound;
         this.plan = plan;
         this.resultConsumer = resultConsumer;
 
@@ -44,8 +41,12 @@ public class TestDriver {
         return plan;
     }
 
-    private int getStepBound() {
-        return stepBound;
+    private int getStepBounds() {
+        return getPlan().getStepBounds();
+    }
+
+    private int getTimeUnitInMs() {
+        return getPlan().getTimeUnit();
     }
 
     /* Other */
@@ -94,7 +95,7 @@ public class TestDriver {
 
         //Begin the new test
         int step = 0;
-        while (step < getStepBound()) {
+        while (step < getStepBounds()) {
             // Get rule and check if its empty
             final StrategyRule rule = strategy.getRule(testModelSimulation, mutantSimulation);
             if (rule == null) {
@@ -142,7 +143,7 @@ public class TestDriver {
         // Will return inside while loop if maximum wait time is exceeded or an output has been given
         while ((rule.isSatisfied(clockValuations))) {
             //Check if the maximum wait time has been exceeded, if it is, give inconclusive verdict
-            if (!(Duration.between(delayDuration, Instant.now()).toMillis()/(double)timeUnit <= getPlan().getOutputWaitTime())) {
+            if (!(Duration.between(delayDuration, Instant.now()).toMillis()/(double)getTimeUnitInMs() <= getPlan().getOutputWaitTime())) {
                 return makeResult(TestResult.Verdict.INCONCLUSIVE, "Maximum wait time reached without recieving an output.");
             }
 
@@ -177,7 +178,7 @@ public class TestDriver {
     }
 
     private void sleep() throws InterruptedException {
-        Thread.sleep(timeUnit / 4);
+        Thread.sleep(getTimeUnitInMs() / 4);
     }
 
     /**
@@ -204,7 +205,7 @@ public class TestDriver {
      */
     private TestResult simulateDelay(final SimpleComponentSimulation testModelSimulation, final SimpleComponentSimulation mutantSimulation,
                                final ObjectProperty<Instant> lastUpdateTime) {
-        final double waitedTimeUnits = Duration.between(lastUpdateTime.get(), Instant.now()).toMillis() / (double) timeUnit;
+        final double waitedTimeUnits = Duration.between(lastUpdateTime.get(), Instant.now()).toMillis() / (double) getTimeUnitInMs();
         lastUpdateTime.setValue(Instant.now());
 
         if (!testModelSimulation.delay(waitedTimeUnits)) {

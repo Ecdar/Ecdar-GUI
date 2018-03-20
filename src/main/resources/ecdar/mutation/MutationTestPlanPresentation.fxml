@@ -66,6 +66,11 @@
                                     <JFXTextField fx:id="verifytgaTriesField" prefWidth="30" alignment="BASELINE_CENTER"/>
                                     <Label text="try(-ies) of calling verifytga with empty response before giving up."/>
                                 </HBox>
+
+                                <HBox spacing="8" alignment="BOTTOM_LEFT">
+                                    <JFXTextField fx:id="stepBoundsField" prefWidth="30" alignment="BASELINE_CENTER"/>
+                                    <Label text="strategy rules to visit before giving up."/>
+                                </HBox>
                             </VBox>
                         </HBox>
 
