@@ -49,7 +49,10 @@ public class TestingHandler implements AdjustableConcurrentJobsHandler {
     public void retest(final List<MutationTestCase> cases) {
         cases.forEach(testCase -> jobsDriver.addJob(() -> performTest(testCase)));
 
-        testStart = null; // Do not measure time when retesting
+        // Do not measure time when retesting
+        testStart = null;
+        getPlan().setTestTimeText("");
+
         jobsDriver.start();
     }
 
@@ -58,12 +61,6 @@ public class TestingHandler implements AdjustableConcurrentJobsHandler {
      */
     public void testFromScratch(final List<MutationTestCase> cases) {
         cases.forEach(testCase -> jobsDriver.addJob(() -> performTest(testCase)));
-
-        Platform.runLater(() -> {
-            getPlan().setInconclusiveText("Inconclusive: " + 0);
-            getPlan().setPassedText("Passed: " + 0);
-            getPlan().setFailedText("Failed: " + 0);
-        });
 
         testStart = Instant.now();
 
@@ -85,31 +82,26 @@ public class TestingHandler implements AdjustableConcurrentJobsHandler {
      * @param result the test result
      */
     private synchronized void onTestDone(final TestResult result) {
+        // Result is null if an error occurred
         if (result != null) {
             switch (result.getVerdict()) {
                 case INCONCLUSIVE:
-                    Platform.runLater(() -> {
-                        getPlan().getInconclusiveMessageList().add(result);
-                        getPlan().setInconclusiveText("Inconclusive: " + getPlan().getInconclusiveMessageList().size());
-                    });
+                    Platform.runLater(() -> getPlan().getInconclusiveResults().add(result));
                     break;
                 case PASS:
-                    Platform.runLater(() -> {
-                        getPlan().getPassedResults().add(result);
-                        getPlan().setPassedText("Passed: " + getPlan().getPassedResults().size());
-                    });
+                    Platform.runLater(() -> getPlan().getPassedResults().add(result));
                     break;
                 case FAIL:
-                    Platform.runLater(() -> {
-                        getPlan().getFailedMessageList().add(result);
-                        getPlan().setFailedText("Failed: " + getPlan().getFailedMessageList().size());
-                    });
+                    Platform.runLater(() -> getPlan().getFailedResults().add(result));
                     break;
             }
 
-            Platform.runLater(() -> getPlan().setTestTimeText(
-                    "Testing time: " + MutationTestPlanPresentation.readableFormat(Duration.between(testStart, Instant.now()))
-            ));
+            // clock is null if we retest
+            if (testStart != null) {
+                Platform.runLater(() -> getPlan().setTestTimeText(
+                        "Testing time: " + MutationTestPlanPresentation.readableFormat(Duration.between(testStart, Instant.now()))
+                ));
+            }
         }
 
         jobsDriver.onJobDone();
@@ -134,7 +126,7 @@ public class TestingHandler implements AdjustableConcurrentJobsHandler {
 
     @Override
     public void writeProgress(final int jobsEnded, final int totalJobs) {
-        writeProgress("Testing... (" + jobsEnded + "/" + totalJobs + " test-cases)");
+        writeProgress("Testing... (" + jobsEnded + "/" + totalJobs + " test-cases executed)");
     }
 
     /**

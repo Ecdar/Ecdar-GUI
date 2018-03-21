@@ -89,7 +89,7 @@ public class MutationHandler {
 
             cases.forEach(testCase -> testCase.getMutant().applyAngelicCompletion());
 
-            Platform.runLater(() -> getPlan().setMutantsText("Mutants: " + cases.size() + " - Execution time: " +
+            Platform.runLater(() -> getPlan().setMutantsText("Mutants: " + cases.size() + " - Mutation time: " +
                     MutationTestPlanPresentation.readableFormat(Duration.between(start, Instant.now())))
             );
 

@@ -65,12 +65,9 @@ public class MutationTestPlan extends HighLevelModelObject {
     private final StringProperty testCasesText = new SimpleStringProperty("");
     private final StringProperty testTimeText = new SimpleStringProperty("");
 
-    private final StringProperty passedText = new SimpleStringProperty("");
     private final ListProperty<TestResult> passedResults = new SimpleListProperty<>(FXCollections.observableArrayList());
-    private final StringProperty InconclusiveText = new SimpleStringProperty("");
-    private final ListProperty<ExpandableContent> inconclusiveMessageList = new SimpleListProperty<>(FXCollections.observableArrayList());
-    private final StringProperty FailedText = new SimpleStringProperty("");
-    private final ListProperty<TestResult> failedMessageList = new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final ListProperty<TestResult> inconclusiveResults = new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final ListProperty<TestResult> failedResults = new SimpleListProperty<>(FXCollections.observableArrayList());
 
     // For exporting
     private final BooleanProperty angelicWhenExport = new SimpleBooleanProperty(false);
@@ -222,57 +219,17 @@ public class MutationTestPlan extends HighLevelModelObject {
         this.maxOutputWaitTime.set(outputWaitTime);
     }
 
-    public String getPassedText() {
-        return passedText.get();
-    }
-    public StringProperty getPassedTextProperty() {
-        return passedText;
-    }
-    public void setPassedText(final String passedText) {
-        this.passedText.set(passedText);
-    }
-
-    public String getInconclusiveText() {
-        return InconclusiveText.get();
-    }
-    public StringProperty getInconclusiveTextProperty() {
-        return InconclusiveText;
-    }
-    public void setInconclusiveText(final String inconclusiveText) {
-        this.InconclusiveText.set(inconclusiveText);
-    }
-
-    public String getFailedText() {
-        return FailedText.get();
-    }
-    public StringProperty getFailedTextProperty() {
-        return FailedText;
-    }
-    public void setFailedText(final String failedText) {
-        this.FailedText.set(failedText);
-    }
-
     public ObservableList<TestResult> getPassedResults() {
-        return failedMessageList.get();
-    }
-    public ListProperty<TestResult> getPassedResultsProperty() {
-        return failedMessageList;
+        return passedResults.get();
     }
 
-    public ObservableList<ExpandableContent> getInconclusiveMessageList() {
-        return inconclusiveMessageList.get();
-    }
-    public ListProperty<ExpandableContent> getInconclusiveMessageListProperty() {
-        return inconclusiveMessageList;
+    public ObservableList<TestResult> getInconclusiveResults() {
+        return inconclusiveResults.get();
     }
 
-    public ObservableList<TestResult> getFailedMessageList() {
-        return failedMessageList.get();
+    public ObservableList<TestResult> getFailedResults() {
+        return failedResults.get();
     }
-    public ListProperty<TestResult> getFailedMessageListProperty() {
-        return failedMessageList;
-    }
-
 
     public int getVerifytgaTries() {
         return verifytgaTries.get();
@@ -413,12 +370,9 @@ public class MutationTestPlan extends HighLevelModelObject {
         setMutantsText("");
         setTestCasesText("");
         setTestTimeText("");
-        setPassedText("");
-        setInconclusiveText("");
-        setFailedText("");
         getPassedResults().clear();
-        getInconclusiveMessageList().clear();
-        getFailedMessageList().clear();
+        getInconclusiveResults().clear();
+        getFailedResults().clear();
     }
 
     /**

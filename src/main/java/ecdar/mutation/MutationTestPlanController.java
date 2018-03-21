@@ -67,8 +67,8 @@ public class MutationTestPlanController {
     public Label failedText;
     public StackPane root;
     public JFXTextField verifytgaTriesField;
-    public VBox inconclusiveMessageList;
-    public VBox failedMessageList;
+    public VBox inconclusiveResults;
+    public VBox failedResults;
     public JFXTextField timeUnitField;
     public HBox timeUnitBox;
     public Label opsLabel;
@@ -80,6 +80,7 @@ public class MutationTestPlanController {
     public HBox operatorsOuterRegion;
     public JFXTextField stepBoundsField;
     public JFXButton failedTestButton;
+    public JFXButton inconclusiveTestButton;
 
 
     /* Mutation fields */
@@ -149,15 +150,23 @@ public class MutationTestPlanController {
     }
 
     /**
+     * Triggered when pressed the inconclusive test button.
+     * Retests the inconclusive test-cases.
+     */
+    public void onInconclusiveTestButtonPressed() {
+        final List<MutationTestCase> cases = getPlan().getInconclusiveResults().stream().map(TestResult::getTestCase).collect(Collectors.toList());
+        getPlan().getInconclusiveResults().clear();
+        testingHandler.retest(cases);
+    }
+
+    /**
      * Triggered when pressed the failed test button.
      * Retests the failed test-cases.
      */
     public void onFailedTestButtonPressed() {
-        final List<MutationTestCase> cases = getPlan().getFailedMessageList().stream().map(TestResult::getTestCase).collect(Collectors.toList());
-
-        getPlan().getFailedMessageList().clear();
-
-
+        final List<MutationTestCase> cases = getPlan().getFailedResults().stream().map(TestResult::getTestCase).collect(Collectors.toList());
+        getPlan().getFailedResults().clear();
+        testingHandler.retest(cases);
     }
 
     /**

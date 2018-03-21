@@ -107,23 +107,29 @@
                     <Label fx:id="mutantsText"/>
                     <Label fx:id="testCasesText"/>
                     <Label fx:id="testTimeText"/>
+
                     <Label fx:id="passedText"/>
 
-                    <Label fx:id="inconclusiveText" prefWidth="Infinity" managed="false" visible="false"/>
+                    <HBox>
+                        <Label fx:id="inconclusiveText" prefWidth="130"/>
+                        <JFXButton fx:id="inconclusiveTestButton" text="Retest" prefWidth="65"
+                                   style="-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;"
+                                   onMousePressed="#onInconclusiveTestButtonPressed"/>
+                    </HBox>
                     <HBox fx:id="inconclusiveRegion" spacing="8">
                         <Separator orientation="VERTICAL"/>
-                        <VBox fx:id="inconclusiveMessageList" spacing="8"/>
+                        <VBox fx:id="inconclusiveResults" spacing="8"/>
                     </HBox>
 
-                    <HBox spacing="32">
-                        <Label fx:id="failedText" prefWidth="Infinity" managed="false" visible="false"/>
-                        <JFXButton fx:id="failedTestButton" text="Retest"
+                    <HBox>
+                        <Label fx:id="failedText" prefWidth="130"/>
+                        <JFXButton fx:id="failedTestButton" text="Retest" prefWidth="65"
                                    style="-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;"
                                    onMousePressed="#onFailedTestButtonPressed"/>
                     </HBox>
                     <HBox fx:id="failedRegion" spacing="8">
                         <Separator orientation="VERTICAL"/>
-                        <VBox fx:id="failedMessageList" spacing="8"/>
+                        <VBox fx:id="failedResults" spacing="8"/>
                     </HBox>
                 </VBox>
             </VBox>

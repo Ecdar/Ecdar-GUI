@@ -7,6 +7,7 @@ import ecdar.abstractions.Component;
 import ecdar.controllers.CanvasController;
 import ecdar.mutation.models.ExpandableContent;
 import ecdar.mutation.models.MutationTestPlan;
+import ecdar.mutation.models.TestResult;
 import ecdar.mutation.operators.MutationOperator;
 import ecdar.presentations.EcdarFXMLLoader;
 import ecdar.presentations.HighLevelModelPresentation;
@@ -83,6 +84,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         initializeFormatPicker();
 
         initializeProgressAndResultsTexts();
+        initializeTestResults();
 
         initializePositiveIntegerTextField(controller.generationThreadsField, getPlan().getConcurrentGenerationsThreadsProperty());
         initializePositiveIntegerTextField(controller.suvInstancesField, getPlan().getConcurrentSutInstancesProperty());
@@ -183,28 +185,32 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         });
 
         controller.mutantsText.textProperty().bind(getPlan().getMutantsTextProperty());
-
         controller.testCasesText.textProperty().bind(getPlan().getTestCasesTextProperty());
-
         controller.testTimeText.textProperty().bindBidirectional(getPlan().getTestTimeTextProperty());
+    }
 
-        controller.passedText.textProperty().bind(getPlan().getPassedTextProperty());
+    /**
+     * Initializes test results.
+     */
+    private void initializeTestResults() {
+        controller.passedText.setText("Passed: " + getPlan().getPassedResults().size());
+        getPlan().getPassedResults().addListener((ListChangeListener<TestResult>) c -> {
+            while (c.next()) controller.passedText.setText("passed: " + c.getList().size());
+        });
 
-        controller.inconclusiveText.textProperty().bind(getPlan().getInconclusiveTextProperty());
         initializeExpand(controller.inconclusiveText, controller.inconclusiveRegion);
-        getPlan().getInconclusiveTextProperty().addListener(((observable, oldValue, newValue) -> {
-            if (newValue.isEmpty()) hide(controller.inconclusiveText);
-            else show(controller.inconclusiveText);
-        })); // Show when has value
-        getPlan().getInconclusiveMessageListProperty().addListener(getExpandableListListener(controller.inconclusiveMessageList.getChildren()));
+        controller.inconclusiveText.setText("Inconclusive: " + getPlan().getInconclusiveResults().size());
+        getPlan().getInconclusiveResults().addListener((ListChangeListener<TestResult>) c -> {
+            while (c.next()) controller.inconclusiveText.setText("Inconclusive: " + c.getList().size());
+        });
+        getPlan().getInconclusiveResults().addListener(getExpandableListListener(controller.inconclusiveResults.getChildren()));
 
-        controller.failedText.textProperty().bind(getPlan().getFailedTextProperty());
         initializeExpand(controller.failedText, controller.failedRegion);
-        getPlan().getFailedTextProperty().addListener(((observable, oldValue, newValue) -> {
-            if (newValue.isEmpty()) hide(controller.failedText);
-            else show(controller.failedText);
-        })); // Show when has value
-        getPlan().getFailedMessageListProperty().addListener(getExpandableListListener(controller.failedMessageList.getChildren()));
+        controller.failedText.setText("Failed: " + getPlan().getFailedResults().size());
+        getPlan().getFailedResults().addListener((ListChangeListener<TestResult>) c -> {
+            while (c.next()) controller.failedText.setText("Failed: " + c.getList().size());
+        });
+        getPlan().getFailedResults().addListener(getExpandableListListener(controller.failedResults.getChildren()));
     }
 
     /**
