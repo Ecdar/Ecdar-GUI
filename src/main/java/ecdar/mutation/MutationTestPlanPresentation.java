@@ -12,6 +12,7 @@ import ecdar.mutation.models.TestResult;
 import ecdar.mutation.operators.MutationOperator;
 import ecdar.presentations.EcdarFXMLLoader;
 import ecdar.presentations.HighLevelModelPresentation;
+import javafx.application.Platform;
 import javafx.beans.property.IntegerProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -179,12 +180,12 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         getPlan().getProgressTexts().forEach(text -> controller.progressTextFlow.getChildren().add(text));
 
         // Add and remove when changed
-        getPlan().getProgressTexts().addListener((ListChangeListener<Text>) change -> {
+        getPlan().getProgressTexts().addListener((ListChangeListener<Text>) change -> Platform.runLater(() -> {
             while (change.next()) {
                 change.getAddedSubList().forEach(text -> controller.progressTextFlow.getChildren().add(text));
                 change.getRemoved().forEach(text -> controller.progressTextFlow.getChildren().remove(text));
             }
-        });
+        }));
 
         controller.mutantsText.textProperty().bind(getPlan().getMutantsTextProperty());
         controller.testCasesText.textProperty().bind(getPlan().getTestCasesTextProperty());
@@ -227,6 +228,12 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         getPlan().getInconclusiveResults().addListener(getExpandableListListener(controller.inconclusiveResults.getChildren()));
     }
 
+    /**
+     * Initializes handling of failed results.
+     * Expands/collapses results, when pressed on the text.
+     * Shows reset button only when there is something to retest.
+     * Makes each result expandable.
+     */
     private void initializeFailedResults() {
         initializeExpand(controller.failedText, controller.failedRegion);
 
@@ -284,6 +291,13 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         };
     }
 
+    /**
+     * Constructs content for a test result.
+     * This includes a label containing info, and a retest button.
+     * @param testResult the test result
+     * @param resultList the list of results to remove the result from, when retesting
+     * @return the content for the test result
+     */
     private Node makeResultContent(final TestResult testResult, final List<? extends TestResult> resultList) {
         final Label content = new Label(testResult.getContent());
         content.setWrapText(true);

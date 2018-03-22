@@ -9,25 +9,24 @@ import javafx.scene.text.Text;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * A test driver that runs test-cases on a system under test (sut).
+ * A test driver that runs model-based mutation test-cases on a system under test.
+ * The test driver displays information about results.
+ * You can retest test-cases, also while this is still conducting tests.
  */
 public class TestingHandler implements AdjustableConcurrentJobsHandler {
     private final MutationTestPlan testPlan;
-    private List<MutationTestCase> mutationTestCases;
     private Instant testStart;
     private final AdjustableConcurrentJobsDriver jobsDriver;
 
 
     /**
      * Constructs.
-     * @param testPlan
+     * @param testPlan the test plan associated with the tests to run
      */
     TestingHandler(final MutationTestPlan testPlan) {
         this.testPlan = testPlan;
@@ -42,19 +41,36 @@ public class TestingHandler implements AdjustableConcurrentJobsHandler {
         return getPlan().getConcurrentSutInstances();
     }
 
-    private Consumer<Text> getProgressWriter() { return text -> getPlan().writeProgress(text); }
-
-    private MutationTestPlan getPlan() {return testPlan; }
+    private MutationTestPlan getPlan() {
+        return testPlan;
+    }
 
 
     /* Other */
 
+    /**
+     * Tests some test-cases.
+     * @param cases the test-cases
+     */
+    public void testFromScratch(final List<MutationTestCase> cases) {
+        testStart = Instant.now();
+
+        jobsDriver.addJobs(cases.stream().map(testCase -> (Runnable)() -> performTest(testCase)).collect(Collectors.toList()));
+    }
+
+    /**
+     * Retests a single test-case.
+     * @param testCase the test-case
+     */
     public void retest(final MutationTestCase testCase) {
         retest(Stream.of(testCase).collect(Collectors.toList()));
     }
 
+    /**
+     * Retests some test-cases.
+     * @param cases the test-cases
+     */
     public void retest(final List<MutationTestCase> cases) {
-        // TODO When setting status, always sync on plan
         synchronized (getPlan()) {
             if (getPlan().shouldStop()) return;
 
@@ -66,15 +82,6 @@ public class TestingHandler implements AdjustableConcurrentJobsHandler {
         // Do not measure time when retesting
         testStart = null;
         getPlan().setTestTimeText("");
-    }
-
-    /**
-     * Starts the test driver.
-     */
-    public void testFromScratch(final List<MutationTestCase> cases) {
-        testStart = Instant.now();
-
-        jobsDriver.addJobs(cases.stream().map(testCase -> (Runnable)() -> performTest(testCase)).collect(Collectors.toList()));
     }
 
     /**
@@ -154,6 +161,6 @@ public class TestingHandler implements AdjustableConcurrentJobsHandler {
      * @param text the text describing the progress
      */
     private void writeProgress(final Text text) {
-        Platform.runLater(() -> getProgressWriter().accept(text));
+        getPlan().writeProgress(text);
     }
 }

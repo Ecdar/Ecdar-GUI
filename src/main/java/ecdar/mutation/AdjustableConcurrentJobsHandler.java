@@ -1,5 +1,8 @@
 package ecdar.mutation;
 
+/**
+ * Handler for supplying information about job handling and for starting a job.
+ */
 public interface AdjustableConcurrentJobsHandler {
     /**
      * Gets if we should stop working.

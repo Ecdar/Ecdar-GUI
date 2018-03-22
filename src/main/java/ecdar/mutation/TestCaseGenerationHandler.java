@@ -2,7 +2,6 @@ package ecdar.mutation;
 
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
-import ecdar.abstractions.Location;
 import ecdar.abstractions.Project;
 import ecdar.abstractions.SimpleComponentsSystemDeclarations;
 import ecdar.backend.BackendException;
@@ -10,7 +9,6 @@ import ecdar.backend.UPPAALDriver;
 import ecdar.mutation.models.MutationTestCase;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.mutation.models.NonRefinementStrategy;
-import ecdar.mutation.operators.MutationOperator;
 import javafx.application.Platform;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;

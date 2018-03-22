@@ -127,9 +127,11 @@ public class MutationTestPlanController {
      * @param cases potential test-cases containing the mutants
      */
     private synchronized void startGeneration(final Component testModel, final List<MutationTestCase> cases) {
-        if (getPlan().shouldStop()) {
-            getPlan().setStatus(MutationTestPlan.Status.IDLE);
-            return;
+        synchronized (getPlan()) {
+            if (getPlan().shouldStop()) {
+                getPlan().setStatus(MutationTestPlan.Status.IDLE);
+                return;
+            }
         }
 
         new TestCaseGenerationHandler(getPlan(), testModel, cases, this::startTestDriver).start();
@@ -148,8 +150,10 @@ public class MutationTestPlanController {
      * Signals that this test plan should stop doing jobs.
      */
     public void onStopButtonPressed() {
-        getPlan().writeProgress("Stopping");
-        getPlan().setStatus(MutationTestPlan.Status.STOPPING);
+        synchronized (getPlan()) {
+            getPlan().writeProgress("Stopping");
+            getPlan().setStatus(MutationTestPlan.Status.STOPPING);
+        }
     }
 
     /**
@@ -157,9 +161,11 @@ public class MutationTestPlanController {
      * Retests the inconclusive test-cases.
      */
     public void onInconclusiveTestButtonPressed() {
-        final List<MutationTestCase> cases = getPlan().getInconclusiveResults().stream().map(TestResult::getTestCase).collect(Collectors.toList());
-        getPlan().getInconclusiveResults().clear();
-        getTestingHandler().retest(cases);
+        synchronized (getPlan()) {
+            final List<MutationTestCase> cases = getPlan().getInconclusiveResults().stream().map(TestResult::getTestCase).collect(Collectors.toList());
+            getPlan().getInconclusiveResults().clear();
+            getTestingHandler().retest(cases);
+        }
     }
 
     /**
@@ -167,9 +173,11 @@ public class MutationTestPlanController {
      * Retests the failed test-cases.
      */
     public void onFailedTestButtonPressed() {
-        final List<MutationTestCase> cases = getPlan().getFailedResults().stream().map(TestResult::getTestCase).collect(Collectors.toList());
-        getPlan().getFailedResults().clear();
-        getTestingHandler().retest(cases);
+        synchronized (getPlan()) {
+            final List<MutationTestCase> cases = getPlan().getFailedResults().stream().map(TestResult::getTestCase).collect(Collectors.toList());
+            getPlan().getFailedResults().clear();
+            getTestingHandler().retest(cases);
+        }
     }
 
     /**

@@ -5,6 +5,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Driver for running jobs concurrently.
+ * You can add jobs to the driver at any time.
+ */
 public class AdjustableConcurrentJobsDriver {
     private final AdjustableConcurrentJobsHandler handler;
     private final List<Runnable> jobs = new ArrayList<>();
@@ -20,9 +24,9 @@ public class AdjustableConcurrentJobsDriver {
     }
 
     /**
-     * Add jobs.
+     * Adds jobs.
      * If no other jobs are left to be run, this method resets counters for how many jobs are remaining and starts running jobs.
-     * @param jobs the jobs to run
+     * @param jobs the jobs to add
      */
     public synchronized void addJobs(final List<Runnable> jobs) {
         if (getJobsRemaining() == 0) {
@@ -36,6 +40,11 @@ public class AdjustableConcurrentJobsDriver {
         updateJobs();
     }
 
+    /**
+     * Adds a job.
+     * If no other jobs are left to be run, this method resets counters for how many jobs are remaining and starts running jobs.
+     * @param job the job to add
+     */
     public synchronized void addJob(final Runnable job) {
         addJobs(Stream.of(job).collect(Collectors.toList()));
     }
