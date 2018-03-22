@@ -1,5 +1,6 @@
 package ecdar.mutation;
 
+import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXTextField;
 import ecdar.Ecdar;
@@ -244,49 +245,59 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
 
     /**
      * Gets a listener for adding expandable content.
-     * @param list the list to add the content to
+     * @param listView the list to add the content to
      * @return the listener
      */
-    private static ListChangeListener<ExpandableContent> getExpandableListListener(final ObservableList<Node> list) {
+    private ListChangeListener<TestResult> getExpandableListListener(final ObservableList<Node> listView) {
         final Map<ExpandableContent, VBox> contentModelMap = new HashMap<>();
 
         return change -> {
             while (change.next()) {
-                change.getAddedSubList().forEach(item -> {
+                change.getAddedSubList().forEach(testResult -> {
                     final VBox vBox = new VBox();
-                    contentModelMap.put(item, vBox);
-                    list.add(vBox);
+                    contentModelMap.put(testResult, vBox);
+                    listView.add(vBox);
 
-                    final Label labelHeader = new Label(item.getTitle());
+                    final Label labelHeader = new Label(testResult.getTitle());
 
                     labelHeader.setGraphic(createArrowPath(false));
                     labelHeader.setGraphicTextGap(10);
 
                     labelHeader.setOnMouseClicked(e -> {
-                        item.setHidden(!item.isHidden());
-                        if (item.isHidden()) {
+                        testResult.setHidden(!testResult.isHidden());
+                        if (testResult.isHidden()) {
                             labelHeader.setGraphic(createArrowPath(false));
+
+                            // Remove result content
                             vBox.getChildren().remove(vBox.getChildren().size() - 1);
                         } else {
                             labelHeader.setGraphic(createArrowPath(true));
-
-                            final HBox hBox = new HBox();
-                            hBox.setSpacing(8);
-                            hBox.getChildren().add(new Separator(Orientation.VERTICAL));
-                            final Label content = new Label(item.getContent());
-                            content.setWrapText(true);
-                            hBox.getChildren().add(content);
-
-                            vBox.getChildren().add(hBox);
+                            vBox.getChildren().add(makeResultContent(testResult, change.getList()));
                         }
                     });
 
                     vBox.getChildren().add(labelHeader);
                 });
 
-                change.getRemoved().forEach(item -> list.remove(contentModelMap.get(item)));
+                change.getRemoved().forEach(item -> listView.remove(contentModelMap.get(item)));
             }
         };
+    }
+
+    private Node makeResultContent(final TestResult testResult, final List<? extends TestResult> resultList) {
+        final Label content = new Label(testResult.getContent());
+        content.setWrapText(true);
+
+        // Add a retest button
+        final JFXButton button = new JFXButton("Retest");
+        button.setPrefWidth(65);
+        button.setStyle("-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;");
+        button.setOnMousePressed(event -> {
+            resultList.remove(testResult);
+            controller.getTestingHandler().retest(testResult.getTestCase());
+        });
+
+        return new HBox(8, new Separator(Orientation.VERTICAL), new VBox(8, content, button));
     }
 
     /**
