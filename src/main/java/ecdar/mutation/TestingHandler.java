@@ -66,19 +66,15 @@ public class TestingHandler implements AdjustableConcurrentJobsHandler {
         // Do not measure time when retesting
         testStart = null;
         getPlan().setTestTimeText("");
-
-        jobsDriver.start();
     }
 
     /**
      * Starts the test driver.
      */
     public void testFromScratch(final List<MutationTestCase> cases) {
-        cases.forEach(testCase -> jobsDriver.addJob(() -> performTest(testCase)));
-
         testStart = Instant.now();
 
-        jobsDriver.start();
+        jobsDriver.addJobs(cases.stream().map(testCase -> (Runnable)() -> performTest(testCase)).collect(Collectors.toList()));
     }
 
     /**

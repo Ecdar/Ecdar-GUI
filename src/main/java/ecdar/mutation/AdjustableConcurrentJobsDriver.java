@@ -2,6 +2,8 @@ package ecdar.mutation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class AdjustableConcurrentJobsDriver {
     private final AdjustableConcurrentJobsHandler handler;
@@ -18,24 +20,24 @@ public class AdjustableConcurrentJobsDriver {
     }
 
     /**
-     * Starts the jobs.
-     * If no jobs are currently running, this method resets counters for how many jobs are running.
+     * Add jobs.
+     * If no other jobs are left to be run, this method resets counters for how many jobs are remaining and starts running jobs.
+     * @param jobs the jobs to run
      */
-    public synchronized void start() {
-        if (getJobsRunning() == 0) {
+    public synchronized void addJobs(final List<Runnable> jobs) {
+        if (getJobsRemaining() == 0) {
+            this.jobs.clear();
             jobsStarted = 0;
             jobsEnded = 0;
         }
 
+        this.jobs.addAll(jobs);
+
         updateJobs();
     }
 
-    public synchronized void addJobs(final List<Runnable> jobs) {
-        this.jobs.addAll(jobs);
-    }
-
     public synchronized void addJob(final Runnable job) {
-        jobs.add(job);
+        addJobs(Stream.of(job).collect(Collectors.toList()));
     }
 
     /**
