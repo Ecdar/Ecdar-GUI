@@ -9,7 +9,6 @@ import ecdar.controllers.CanvasController;
 import ecdar.mutation.models.ExpandableContent;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.mutation.models.TestResult;
-import ecdar.mutation.operators.MutationOperator;
 import ecdar.presentations.EcdarFXMLLoader;
 import ecdar.presentations.HighLevelModelPresentation;
 import javafx.application.Platform;
@@ -79,10 +78,13 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      * Initializes this.
      */
     private void initialize() {
+        InitializeStatusHandling();
+
         initializeModelPicker();
         initializeOperators();
         initializeActionPicker();
         initializeSutPath();
+        initializeEnablingTestButton();
 
         initializeFormatPicker();
 
@@ -99,7 +101,6 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         controller.demonicCheckBox.selectedProperty().bindBidirectional(getPlan().getDemonicProperty());
         controller.angelicBox.selectedProperty().bindBidirectional(getPlan().getAngelicWhenExportProperty());
 
-        InitializeStatusHandling();
 
         installTooltip(controller.demonicCheckBox, "Use this, if the test model is not input-enabled, " +
                 "and you want to ignore mutants leading to these missing inputs. " +
@@ -111,6 +112,22 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         initializeExpand(controller.advancedOptionsLabel, controller.advancedOptions);
 
 
+    }
+
+    /**
+     * Initializes enabling and disabling of the test button.
+     * The button is disabled when no mutation operators are selected.
+     */
+    private void initializeEnablingTestButton() {
+        final Runnable runnable = () -> {
+            if (getPlan().getSelectedMutationOperators().isEmpty()) controller.testButton.setDisable(true);
+            else controller.testButton.setDisable(false);
+        };
+
+        runnable.run();
+        getPlan().getOperators().forEach(op -> op.getSelectedProperty().addListener(
+                (observable, oldValue, newValue) -> runnable.run()
+        ));
     }
 
     /**
@@ -180,12 +197,12 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         getPlan().getProgressTexts().forEach(text -> controller.progressTextFlow.getChildren().add(text));
 
         // Add and remove when changed
-        getPlan().getProgressTexts().addListener((ListChangeListener<Text>) change -> Platform.runLater(() -> {
+        getPlan().getProgressTexts().addListener((ListChangeListener<Text>) change -> {
             while (change.next()) {
-                change.getAddedSubList().forEach(text -> controller.progressTextFlow.getChildren().add(text));
-                change.getRemoved().forEach(text -> controller.progressTextFlow.getChildren().remove(text));
+                change.getAddedSubList().forEach(text -> Platform.runLater(() -> controller.progressTextFlow.getChildren().add(text)));
+                change.getRemoved().forEach(text -> Platform.runLater(() -> controller.progressTextFlow.getChildren().remove(text)));
             }
-        }));
+        });
 
         controller.mutantsText.textProperty().bind(getPlan().getMutantsTextProperty());
         controller.testCasesText.textProperty().bind(getPlan().getTestCasesTextProperty());
@@ -295,8 +312,8 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      * Constructs content for a test result.
      * This includes a label containing info, and a retest button.
      * @param testResult the test result
-     * @param resultList the list of results to remove the result from, when retesting
-     * @return the content for the test result
+     * @param resultList list of results to remove the test result from, when retesting
+     * @return the content
      */
     private Node makeResultContent(final TestResult testResult, final List<? extends TestResult> resultList) {
         final Label content = new Label(testResult.getContent());
@@ -389,13 +406,13 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      * Initializes the UI for selecting mutation operators.
      */
     private void initializeOperators() {
-        for (final MutationOperator operator : getPlan().getOperators()) {
+        getPlan().getOperators().forEach(operator -> {
             final JFXCheckBox checkBox = new JFXCheckBox(operator.getText());
             checkBox.selectedProperty().bindBidirectional(operator.getSelectedProperty());
             controller.operatorsInnerRegion.getChildren().add(checkBox);
 
             installTooltip(checkBox, operator.getDescription());
-        }
+        });
     }
 
     /**

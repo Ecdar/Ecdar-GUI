@@ -74,8 +74,6 @@
                             </VBox>
                         </HBox>
 
-
-
                         <JFXButton fx:id="testButton" prefWidth="100" prefHeight="40" buttonType="RAISED" text="Test"
                                    style="-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;"
                                    onMousePressed="#onTestButtonPressed"/>
