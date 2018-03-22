@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 /**
  * Handler for generating test-cases.
  */
-class TestCaseGenerationHandler implements ConcurrentJobsHandler {
+class TestCaseGenerationHandler implements AdjustableConcurrentJobsHandler {
     private final MutationTestPlan plan;
     private final Consumer<List<MutationTestCase>> testCasesConsumer;
 
@@ -39,7 +39,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
     private final List<MutationTestCase> potentialTestCases;
     private List<MutationTestCase> finishedTestCases;
 
-    private ConcurrentJobsDriver jobsDriver;
+    private AdjustableConcurrentJobsDriver jobsDriver;
 
     // Progress fields
     private Instant generationStart;
@@ -90,8 +90,8 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
             return;
         }
 
-        jobsDriver = new ConcurrentJobsDriver(this, potentialTestCases.size());
-        jobsDriver.start();
+        jobsDriver = new AdjustableConcurrentJobsDriver(this);
+        jobsDriver.addJobs(potentialTestCases.stream().map(testCase -> (Runnable) () -> generateTestCase(testCase, getPlan().getVerifytgaTries())).collect(Collectors.toList()));
     }
 
 
@@ -120,22 +120,17 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
         getPlan().writeProgress(text);
         testCasesConsumer.accept(finishedTestCases);
     }
-    
+
     @Override
-    public void writeProgress(final int jobsEnded) {
-        Platform.runLater(() -> getPlan().writeProgress("Generating test-cases... (" + jobsEnded + "/" +
-                potentialTestCases.size() + " mutants processed)")
-        );
+    public void onProgressRemaining(final int remaining) {
+        Platform.runLater(() -> getPlan().writeProgress(
+                "Generating test-cases... (" + remaining + " mutant" + (remaining == 1 ? "" : "s") + " remaining)"
+        ));
     }
 
     @Override
     public int getMaxConcurrentJobs() {
         return getPlan().getConcurrentGenerationThreads();
-    }
-
-    @Override
-    public void startJob(final int index) {
-        generateTestCase(potentialTestCases.get(index), getPlan().getVerifytgaTries());
     }
 
     /**

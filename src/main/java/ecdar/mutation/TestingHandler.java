@@ -143,7 +143,7 @@ public class TestingHandler implements AdjustableConcurrentJobsHandler {
 
     @Override
     public void onProgressRemaining(final int remaining) {
-        writeProgress("Testing... (" + remaining + " test-cases remaining)");
+        writeProgress("Testing... (" + remaining + " test-case" + (remaining == 1 ? "" : "s") + " remaining)");
     }
 
     /**
