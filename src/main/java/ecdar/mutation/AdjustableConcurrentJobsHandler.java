@@ -15,13 +15,13 @@ public interface AdjustableConcurrentJobsHandler {
     /**
      * Called if jobs are completed naturally.
      */
-    void onAllJobsSuccessfullyDone();
+    default void onAllJobsSuccessfullyDone() {}
 
     /**
-     * Called to potentially write a progress how many jobs are completed.
-     * @param jobsEnded number of jobs ended
+     * Called when the number of remaining jobs are changed.
+     * @param remaining number of jobs remaining
      */
-    void writeProgress(final int jobsEnded, final int totalJobs);
+    default void onProgressRemaining(final int remaining) {}
 
     /**
      * Gets the maximum number of jobs allowed to run concurrently

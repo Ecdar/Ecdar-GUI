@@ -47,6 +47,13 @@ public class TestingHandler implements AdjustableConcurrentJobsHandler {
     /* Other */
 
     public void retest(final List<MutationTestCase> cases) {
+        // TODO When setting status, always sync on plan
+        synchronized (getPlan()) {
+            if (getPlan().shouldStop()) return;
+
+            getPlan().setStatus(MutationTestPlan.Status.WORKING);
+        }
+
         cases.forEach(testCase -> jobsDriver.addJob(() -> performTest(testCase)));
 
         // Do not measure time when retesting
@@ -125,8 +132,8 @@ public class TestingHandler implements AdjustableConcurrentJobsHandler {
     }
 
     @Override
-    public void writeProgress(final int jobsEnded, final int totalJobs) {
-        writeProgress("Testing... (" + jobsEnded + "/" + totalJobs + " test-cases executed)");
+    public void onProgressRemaining(final int remaining) {
+        writeProgress("Testing... (" + remaining + " test-cases remaining)");
     }
 
     /**

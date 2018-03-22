@@ -29,6 +29,7 @@ import javafx.scene.text.Text;
 
 import java.time.Duration;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * Presentation for a test plan with model-based mutation testing.
@@ -198,18 +199,46 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
             while (c.next()) controller.passedText.setText("passed: " + c.getList().size());
         });
 
-        initializeExpand(controller.inconclusiveText, controller.inconclusiveRegion);
-        controller.inconclusiveText.setText("Inconclusive: " + getPlan().getInconclusiveResults().size());
-        getPlan().getInconclusiveResults().addListener((ListChangeListener<TestResult>) c -> {
-            while (c.next()) controller.inconclusiveText.setText("Inconclusive: " + c.getList().size());
-        });
-        getPlan().getInconclusiveResults().addListener(getExpandableListListener(controller.inconclusiveResults.getChildren()));
+        initializeInconclusiveResults();
 
+        initializeFailedResults();
+    }
+
+    /**
+     * Initializes handling of inconclusive results.
+     * Expands/collapses results, when pressed on the text.
+     * Shows reset button only when there is something to retest.
+     * Makes each result expandable.
+     */
+    private void initializeInconclusiveResults() {
+        initializeExpand(controller.inconclusiveText, controller.inconclusiveRegion);
+
+        final Consumer<List> consumer = list -> {
+            final int size = list.size();
+            controller.inconclusiveText.setText("Inconclusive: " + size);
+            if (size == 0) hide(controller.inconclusiveTestButton);
+            else show(controller.inconclusiveTestButton);
+        };
+
+        consumer.accept(getPlan().getInconclusiveResults());
+        getPlan().getInconclusiveResults().addListener((ListChangeListener<TestResult>) c -> consumer.accept(c.getList()));
+
+        getPlan().getInconclusiveResults().addListener(getExpandableListListener(controller.inconclusiveResults.getChildren()));
+    }
+
+    private void initializeFailedResults() {
         initializeExpand(controller.failedText, controller.failedRegion);
-        controller.failedText.setText("Failed: " + getPlan().getFailedResults().size());
-        getPlan().getFailedResults().addListener((ListChangeListener<TestResult>) c -> {
-            while (c.next()) controller.failedText.setText("Failed: " + c.getList().size());
-        });
+
+        final Consumer<List> consumer = list -> {
+            final int size = list.size();
+            controller.failedText.setText("Failed: " + size);
+            if (size == 0) hide(controller.failedTestButton);
+            else show(controller.failedTestButton);
+        };
+
+        consumer.accept(getPlan().getFailedResults());
+        getPlan().getFailedResults().addListener((ListChangeListener<TestResult>) c -> consumer.accept(c.getList()));
+
         getPlan().getFailedResults().addListener(getExpandableListListener(controller.failedResults.getChildren()));
     }
 

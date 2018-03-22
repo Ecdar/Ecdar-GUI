@@ -100,6 +100,9 @@ public class MutationTestPlanController {
         testingHandler = new TestingHandler(plan);
     }
 
+    public TestingHandler getTestingHandler() {
+        return testingHandler;
+    }
 
     /* Other methods */
 
@@ -137,7 +140,7 @@ public class MutationTestPlanController {
      * @param cases the mutation test cases to test with
      */
     private void startTestDriver(final List<MutationTestCase> cases) {
-        new TestingHandler(plan).testFromScratch(cases);
+        getTestingHandler().testFromScratch(cases);
     }
 
     /**
@@ -156,7 +159,7 @@ public class MutationTestPlanController {
     public void onInconclusiveTestButtonPressed() {
         final List<MutationTestCase> cases = getPlan().getInconclusiveResults().stream().map(TestResult::getTestCase).collect(Collectors.toList());
         getPlan().getInconclusiveResults().clear();
-        testingHandler.retest(cases);
+        getTestingHandler().retest(cases);
     }
 
     /**
@@ -166,7 +169,7 @@ public class MutationTestPlanController {
     public void onFailedTestButtonPressed() {
         final List<MutationTestCase> cases = getPlan().getFailedResults().stream().map(TestResult::getTestCase).collect(Collectors.toList());
         getPlan().getFailedResults().clear();
-        testingHandler.retest(cases);
+        getTestingHandler().retest(cases);
     }
 
     /**
@@ -186,7 +189,7 @@ public class MutationTestPlanController {
 
 
             // If the file does not exist, we must be running it from a development environment, use an default location
-            if(jarDir.exists()) {
+            if (jarDir.exists()) {
                 fileChooser.setInitialDirectory(jarDir);
             }
         }
