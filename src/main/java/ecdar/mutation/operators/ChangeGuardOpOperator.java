@@ -3,6 +3,7 @@ package ecdar.mutation.operators;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
 import ecdar.mutation.MutationTestingException;
+import ecdar.mutation.TextFlowBuilder;
 import ecdar.mutation.models.MutationTestCase;
 
 import java.util.ArrayList;
@@ -71,9 +72,11 @@ public abstract class ChangeGuardOpOperator extends MutationOperator {
 
                     testCases.add(new MutationTestCase(original, mutant,
                             getCodeName() + "_" + edgeIndex + "_" + partIndex + "_" + operatorIndex,
-                            "Changed guard of edge " + originalEdge.getSourceLocation().getId() + " -> " +
-                                    originalEdge.getTargetLocation().getId() + " from " + originalEdge.getGuard() +
-                                    " to " + mutant.getEdges().get(edgeIndex).getGuard()));
+                            new TextFlowBuilder().text("Changed ").boldText("guard").text(" of ")
+                                    .edgeLinks(originalEdge, original.getName()).text(" from ")
+                                    .boldText(originalEdge.getGuard()).text(" to ")
+                                    .boldText(mutant.getEdges().get(edgeIndex).getGuard()).build()
+                    ));
                 }
             }
         }

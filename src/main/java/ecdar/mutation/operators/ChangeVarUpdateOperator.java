@@ -2,6 +2,7 @@ package ecdar.mutation.operators;
 
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
+import ecdar.mutation.TextFlowBuilder;
 import ecdar.mutation.models.MutationTestCase;
 import ecdar.utility.ExpressionHelper;
 import org.apache.commons.lang3.tuple.Triple;
@@ -60,9 +61,10 @@ public class ChangeVarUpdateOperator extends MutationOperator {
                         cases.add(new MutationTestCase(
                                 original, mutant,
                                 getCodeName() + "_" + finalEdgeIndex + "_" + local.getLeft() + "_" + value,
-                                "Changed update of edge " + originalEdge.getSourceLocation().getId() +
-                                        " -> " + originalEdge.getTargetLocation().getId() + " from " +
-                                        originalEdge.getUpdate() + " to " + mutantEdge.getUpdate()
+                                new TextFlowBuilder().text("Changed ").boldText("update").text(" of ")
+                                        .edgeLinks(originalEdge, original.getName()).text(" from ")
+                                        .boldText(originalEdge.getUpdate()).text(" to ")
+                                        .boldText(mutantEdge.getUpdate()).build()
                         ));
                     }
                 } else { // Otherwise, replace the assignment
@@ -87,9 +89,10 @@ public class ChangeVarUpdateOperator extends MutationOperator {
                         cases.add(new MutationTestCase(
                                 original, mutant,
                                 getCodeName() + "_" + finalEdgeIndex + "_" + local.getLeft() + "_" + value,
-                                "Changed update of edge " + originalEdge.getSourceLocation().getId() +
-                                        " -> " + originalEdge.getTargetLocation().getId() + " from " +
-                                        originalEdge.getUpdate() + " to " + mutantEdge.getUpdate()
+                                new TextFlowBuilder().text("Changed ").boldText("update").text(" of ")
+                                        .edgeLinks(originalEdge, original.getName()).text(" from ")
+                                        .boldText(originalEdge.getUpdate()).text(" to ")
+                                        .boldText(mutantEdge.getUpdate()).build()
                         ));
                     }
                 }

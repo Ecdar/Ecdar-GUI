@@ -22,11 +22,11 @@ public class TestResult extends ExpandableContent {
     public TestResult(final MutationTestCase testCase, final String reason,
                       final SimpleComponentSimulation testModelSimulation,
                       final SimpleComponentSimulation mutantSimulation, final Verdict verdict) {
-        super(testCase.getDescription(), "Id: " + testCase.getId() + ":\n" +
+        super(testCase.getDescription(), "Id: " + testCase.getId() + "\n" +
                 "Reason: " + reason + "\n" +
                 "Test model is in location: " + testModelSimulation.getCurrentLocation().getId() + " with values: " + testModelSimulation.getAllValuations() + "\n" +
                 "Mutant is in location: " + mutantSimulation.getCurrentLocation().getId() + " with values: " + mutantSimulation.getAllValuations() + "\n" +
-                "Trace: " + String.join(" -> ", testModelSimulation.getTrace()));
+                "Trace: " + String.join(" → ", testModelSimulation.getTrace()));
 
         this.verdict = verdict;
         this.testCase = testCase;

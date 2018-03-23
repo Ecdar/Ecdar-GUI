@@ -2,6 +2,7 @@ package ecdar.mutation.operators;
 
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
+import ecdar.mutation.TextFlowBuilder;
 import ecdar.mutation.models.MutationTestCase;
 
 import java.util.ArrayList;
@@ -48,9 +49,9 @@ public class ChangeGuardConstantOperator extends MutationOperator {
 
                     cases.add(new MutationTestCase(original, mutant,
                             getCodeName() + "_" + edgeIndex + "_" + index + "_+1",
-                            "Changed guard of edge " + originalEdge.getSourceLocation().getId() + " -> " +
-                                    originalEdge.getTargetLocation().getId() + " from " + originalEdge.getGuard() + " to " +
-                                    mutantEdge.getGuard()
+                            new TextFlowBuilder().text("Changed ").boldText("guard").text(" of ")
+                                    .edgeLinks(originalEdge, original.getName()).text(" from ").boldText(originalGuard)
+                                    .text(" to ").boldText(mutantEdge.getGuard()).build()
                     ));
                 } {
                     final Component mutant = original.cloneForVerification();
@@ -61,9 +62,9 @@ public class ChangeGuardConstantOperator extends MutationOperator {
 
                     cases.add(new MutationTestCase(original, mutant,
                             getCodeName() + "_" + edgeIndex + "_" + index + "_-1",
-                            "Changed guard of edge " + originalEdge.getSourceLocation().getId() + " -> " +
-                                    originalEdge.getTargetLocation().getId() + " from " + originalEdge.getGuard() + " to " +
-                                    mutantEdge.getGuard()
+                            new TextFlowBuilder().text("Changed ").boldText("guard").text(" of ")
+                                    .edgeLinks(originalEdge, original.getName()).text(" from ").boldText(originalGuard)
+                                    .text(" to ").boldText(mutantEdge.getGuard()).build()
                     ));
                 }
 

@@ -3,6 +3,7 @@ package ecdar.mutation.operators;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
 import ecdar.abstractions.Location;
+import ecdar.mutation.TextFlowBuilder;
 import ecdar.mutation.models.MutationTestCase;
 
 import java.util.ArrayList;
@@ -54,9 +55,10 @@ class ChangeSourceOperator extends MutationOperator {
 
                 cases.add(new MutationTestCase(original, mutant,
                         getCodeName() + "_" + edgeIndex + "_" + originalLocation.getId(),
-                        "Changed source of edge " + originalEdge.getSourceLocation().getId() + " -> " +
-                                originalEdge.getTargetLocation().getId() + " to " + newLocId)
-                );
+                        new TextFlowBuilder().text("Changed ").boldText("source").text(" of ")
+                                .edgeLinks(originalEdge, original.getName()).text(" to ")
+                                .locationLink(newLocId, original.getName()).build()
+                ));
             }
         }
 

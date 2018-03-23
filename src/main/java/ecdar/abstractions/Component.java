@@ -115,6 +115,7 @@ public class Component extends HighLevelModelObject implements Boxed {
 
         clone.inputStrings.addAll(getInputStrings());
         clone.outputStrings.addAll(getOutputStrings());
+        clone.setName(getName());
 
         return clone;
     }

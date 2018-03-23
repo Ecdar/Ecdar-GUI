@@ -2,6 +2,7 @@ package ecdar.mutation.operators;
 
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Location;
+import ecdar.mutation.TextFlowBuilder;
 import ecdar.mutation.models.MutationTestCase;
 
 import java.util.ArrayList;
@@ -48,7 +49,10 @@ public class ChangeInvariantOperator extends MutationOperator {
 
                 cases.add(new MutationTestCase(original, mutant,
                         getCodeName() + "_" + originalLocation.getId() + "_" + partIndex,
-                        "Changed invariant of " + originalLocation.getId() + " to " + invariant));
+                        new TextFlowBuilder().text("Changed ").boldText("invariant").text(" of ")
+                                .locationLink(originalLocation.getId(), original.getName()).text(" from ")
+                                .boldText(originalLocation.getInvariant()).text(" to ").boldText(invariant).build()
+                ));
             }
 
         }

@@ -3,6 +3,7 @@ package ecdar.mutation.operators;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
 import ecdar.abstractions.EdgeStatus;
+import ecdar.mutation.TextFlowBuilder;
 import ecdar.mutation.models.MutationTestCase;
 
 /**
@@ -33,10 +34,12 @@ abstract class ChangeActionOperator extends MutationOperator {
 
         return new MutationTestCase(original, mutant,
                 getCodeName() + "_" + edgeIndex + "_" + sync,
-                "Changed action of edge " + originalEdge.getSourceLocation().getId() + " -> " +
-                        originalEdge.getTargetLocation().getId() + " from " +
-                        (originalEdge.getStatus().equals(EdgeStatus.INPUT) ? "input " : "output ") +
-                        originalEdge.getSync() + " to " + (status.equals(EdgeStatus.INPUT) ? "input " : "output ") +
-                        mutantEdge.getSync());
+                new TextFlowBuilder().text("Changed ").boldText("action").text(" of ")
+                        .edgeLinks(originalEdge, original.getName())
+                        .text(" from " + (originalEdge.getStatus().equals(EdgeStatus.INPUT) ? "input" : "output") + " ")
+                        .boldText(originalEdge.getSync())
+                        .text(" to " + (status.equals(EdgeStatus.INPUT) ? "input" : "output") + " ")
+                        .boldText(mutantEdge.getSync()).build()
+        );
     }
 }

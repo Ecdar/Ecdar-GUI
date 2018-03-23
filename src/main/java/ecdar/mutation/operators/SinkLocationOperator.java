@@ -4,6 +4,7 @@ import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
 import ecdar.abstractions.EdgeStatus;
 import ecdar.abstractions.Location;
+import ecdar.mutation.TextFlowBuilder;
 import ecdar.mutation.models.MutationTestCase;
 
 import java.util.ArrayList;
@@ -43,8 +44,10 @@ public class SinkLocationOperator extends MutationOperator {
 
             mutants.add(new MutationTestCase(original, mutant,
                     getCodeName() + "_" + edgeIndex,
-                    "Changed target of edge " + originalEdge.getSourceLocation().getId() + " -> " +
-                            originalEdge.getTargetLocation().getId() + " to a new sink location"));
+                    new TextFlowBuilder().text("Changed ").boldText("target").text(" of ")
+                            .edgeLinks(originalEdge, original.getName()).text(" to a new ").boldText("sink")
+                            .text(" location").build()
+            ));
         }
 
         return mutants;

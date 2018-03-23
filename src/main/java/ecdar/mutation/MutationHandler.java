@@ -62,7 +62,6 @@ public class MutationHandler {
         getPlan().setStatus(MutationTestPlan.Status.WORKING);
 
         new Thread(() -> {
-            testModel.setName(MutationTestPlanController.SPEC_NAME);
             testModel.updateIOList();
 
             final Instant start = Instant.now();
@@ -91,6 +90,8 @@ public class MutationHandler {
             Platform.runLater(() -> getPlan().setMutantsText("Mutants: " + cases.size() + " - Mutation time: " +
                     MutationTestPlanPresentation.readableFormat(Duration.between(start, Instant.now())))
             );
+
+            testModel.setName(MutationTestPlanController.SPEC_NAME);
 
             // If chosen, apply demonic completion
             if (getPlan().isDemonic()) testModel.applyDemonicCompletion();

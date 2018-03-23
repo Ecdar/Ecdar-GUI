@@ -1,11 +1,13 @@
 package ecdar.mutation.models;
 
+import javafx.scene.text.TextFlow;
+
 /**
  * Some content with a title.
  * The content can be hidden.
  */
 public class ExpandableContent {
-    private final String title;
+    private final TextFlow title;
     private final String content;
     private boolean hidden = true;
 
@@ -14,12 +16,12 @@ public class ExpandableContent {
      * @param title title
      * @param content content
      */
-    public ExpandableContent(final String title, final String content) {
+    public ExpandableContent(final TextFlow title, final String content) {
         this.title = title;
         this.content = content;
     }
 
-    public String getTitle() {
+    public TextFlow getTitle() {
         return title;
     }
 

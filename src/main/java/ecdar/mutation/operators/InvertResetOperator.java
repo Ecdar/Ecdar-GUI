@@ -3,6 +3,7 @@ package ecdar.mutation.operators;
 import com.google.common.collect.Lists;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
+import ecdar.mutation.TextFlowBuilder;
 import ecdar.mutation.models.MutationTestCase;
 
 import java.util.ArrayList;
@@ -46,8 +47,9 @@ public class InvertResetOperator extends MutationOperator {
 
                 cases.add(new MutationTestCase(original, mutant,
                         getCodeName() + "_" + finalEdgeIndex + "_" + clock,
-                        "Inverted clock reset of clock " + clock + " on the guard of " +
-                                originalEdge.getSourceLocation().getId() + " -> " + originalEdge.getTargetLocation().getId()
+                        new TextFlowBuilder().text("Inverted ").boldText("clock reset").text(" of clock ")
+                                .boldText(clock).text(" on guard of ").edgeLinks(originalEdge, original.getName())
+                                .build()
                 ));
             });
         }

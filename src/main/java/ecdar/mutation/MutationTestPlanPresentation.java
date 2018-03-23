@@ -242,7 +242,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         consumer.accept(getPlan().getInconclusiveResults());
         getPlan().getInconclusiveResults().addListener((ListChangeListener<TestResult>) c -> consumer.accept(c.getList()));
 
-        getPlan().getInconclusiveResults().addListener(getExpandableListListener(controller.inconclusiveResults.getChildren()));
+        initializeExpandableList(getPlan().getInconclusiveResults(), controller.inconclusiveResults.getChildren());
     }
 
     /**
@@ -264,48 +264,63 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         consumer.accept(getPlan().getFailedResults());
         getPlan().getFailedResults().addListener((ListChangeListener<TestResult>) c -> consumer.accept(c.getList()));
 
-        getPlan().getFailedResults().addListener(getExpandableListListener(controller.failedResults.getChildren()));
+        initializeExpandableList(getPlan().getFailedResults(), controller.failedResults.getChildren());
     }
 
     /**
-     * Gets a listener for adding expandable content.
-     * @param listView the list to add the content to
-     * @return the listener
+     * Initializes handling of a list of test results.
+     * This method makes sure that the view list is adjusted when the model list changes.
+     * @param modelList the list of test results
+     * @param viewList the list of nodes to add and remove nodes from
      */
-    private ListChangeListener<TestResult> getExpandableListListener(final ObservableList<Node> listView) {
+    private void initializeExpandableList(final ObservableList<TestResult> modelList, final List<Node> viewList) {
         final Map<ExpandableContent, VBox> contentModelMap = new HashMap<>();
 
-        return change -> {
+        modelList.forEach(testCase -> addExpandableResultsToView(modelList, viewList, contentModelMap, testCase));
+
+        modelList.addListener((ListChangeListener<TestResult>) change -> {
             while (change.next()) {
-                change.getAddedSubList().forEach(testResult -> {
-                    final VBox vBox = new VBox();
-                    contentModelMap.put(testResult, vBox);
-                    listView.add(vBox);
+                change.getAddedSubList().forEach(testResult ->
+                        addExpandableResultsToView(modelList, viewList, contentModelMap, testResult));
 
-                    final Label labelHeader = new Label(testResult.getTitle());
-
-                    labelHeader.setGraphic(createArrowPath(false));
-                    labelHeader.setGraphicTextGap(10);
-
-                    labelHeader.setOnMouseClicked(e -> {
-                        testResult.setHidden(!testResult.isHidden());
-                        if (testResult.isHidden()) {
-                            labelHeader.setGraphic(createArrowPath(false));
-
-                            // Remove result content
-                            vBox.getChildren().remove(vBox.getChildren().size() - 1);
-                        } else {
-                            labelHeader.setGraphic(createArrowPath(true));
-                            vBox.getChildren().add(makeResultContent(testResult, change.getList()));
-                        }
-                    });
-
-                    vBox.getChildren().add(labelHeader);
-                });
-
-                change.getRemoved().forEach(item -> listView.remove(contentModelMap.get(item)));
+                change.getRemoved().forEach(item -> viewList.remove(contentModelMap.get(item)));
             }
-        };
+        });
+    }
+
+    /**
+     * Adds a test result to af view list.
+     * @param modelList the model list containing the test results
+     * @param viewList the view list visible to the user
+     * @param contentModelMap the map from models to views
+     * @param testResult the test result to add
+     */
+    private void addExpandableResultsToView(final ObservableList<TestResult> modelList, final List<Node> viewList,
+                                            final Map<ExpandableContent, VBox> contentModelMap, final TestResult testResult) {
+        final VBox vBox = new VBox();
+        contentModelMap.put(testResult, vBox);
+        viewList.add(vBox);
+
+        final Label labelHeader = new Label();
+
+        labelHeader.setGraphic(createArrowPath(false));
+
+        final HBox header = new HBox(16, labelHeader, testResult.getTitle());
+
+        header.setOnMouseClicked(e -> {
+            testResult.setHidden(!testResult.isHidden());
+            if (testResult.isHidden()) {
+                labelHeader.setGraphic(createArrowPath(false));
+
+                // Remove result content
+                vBox.getChildren().remove(vBox.getChildren().size() - 1);
+            } else {
+                labelHeader.setGraphic(createArrowPath(true));
+                vBox.getChildren().add(makeResultContent(testResult, modelList));
+            }
+        });
+
+        vBox.getChildren().add(header);
     }
 
     /**
