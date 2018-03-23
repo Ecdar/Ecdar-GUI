@@ -18,10 +18,10 @@ import java.util.stream.Stream;
  * The test driver displays information about results.
  * You can retest test-cases, also while this is still conducting tests.
  */
-public class TestingHandler implements AdjustableConcurrentJobsHandler {
+public class TestingHandler implements ConcurrentJobsHandler {
     private final MutationTestPlan testPlan;
     private Instant testStart;
-    private final AdjustableConcurrentJobsDriver jobsDriver;
+    private final ConcurrentJobsDriver jobsDriver;
 
 
     /**
@@ -30,7 +30,7 @@ public class TestingHandler implements AdjustableConcurrentJobsHandler {
      */
     TestingHandler(final MutationTestPlan testPlan) {
         this.testPlan = testPlan;
-        this.jobsDriver = new AdjustableConcurrentJobsDriver(this);
+        this.jobsDriver = new ConcurrentJobsDriver(this);
     }
 
 

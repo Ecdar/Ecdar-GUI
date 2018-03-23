@@ -9,8 +9,8 @@ import java.util.stream.Stream;
  * Driver for running jobs concurrently.
  * You can add jobs to the driver at any time.
  */
-public class AdjustableConcurrentJobsDriver {
-    private final AdjustableConcurrentJobsHandler handler;
+public class ConcurrentJobsDriver {
+    private final ConcurrentJobsHandler handler;
     private final List<Runnable> jobs = new ArrayList<>();
     private int jobsStarted;
     private int jobsEnded;
@@ -19,7 +19,7 @@ public class AdjustableConcurrentJobsDriver {
      * Constructs.
      * @param handler handler to run jobs with
      */
-    public AdjustableConcurrentJobsDriver(final AdjustableConcurrentJobsHandler handler) {
+    public ConcurrentJobsDriver(final ConcurrentJobsHandler handler) {
         this.handler = handler;
     }
 

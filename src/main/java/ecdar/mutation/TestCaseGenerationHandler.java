@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 /**
  * Handler for generating test-cases.
  */
-class TestCaseGenerationHandler implements AdjustableConcurrentJobsHandler {
+class TestCaseGenerationHandler implements ConcurrentJobsHandler {
     private final MutationTestPlan plan;
     private final Consumer<List<MutationTestCase>> testCasesConsumer;
 
@@ -39,7 +39,7 @@ class TestCaseGenerationHandler implements AdjustableConcurrentJobsHandler {
     private final List<MutationTestCase> potentialTestCases;
     private List<MutationTestCase> finishedTestCases;
 
-    private AdjustableConcurrentJobsDriver jobsDriver;
+    private ConcurrentJobsDriver jobsDriver;
 
     // Progress fields
     private Instant generationStart;
@@ -90,7 +90,7 @@ class TestCaseGenerationHandler implements AdjustableConcurrentJobsHandler {
             return;
         }
 
-        jobsDriver = new AdjustableConcurrentJobsDriver(this);
+        jobsDriver = new ConcurrentJobsDriver(this);
         jobsDriver.addJobs(potentialTestCases.stream().map(testCase -> (Runnable) () -> generateTestCase(testCase, getPlan().getVerifytgaTries())).collect(Collectors.toList()));
     }
 

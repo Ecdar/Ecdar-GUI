@@ -3,7 +3,7 @@ package ecdar.mutation;
 /**
  * Handler for supplying information about job handling and for starting a job.
  */
-public interface AdjustableConcurrentJobsHandler {
+public interface ConcurrentJobsHandler {
     /**
      * Gets if we should stop working.
      * @return true iff we should stop
