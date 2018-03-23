@@ -707,9 +707,10 @@ public class Component extends HighLevelModelObject implements Boxed {
 
     /**
      * Gets the id used by universal and inconsistent locations located in this component,
-     * if neither universal nor inconsistent locations exist in this component it returns null
+     * if neither universal nor inconsistent locations exist in this component it returns null.
+     * @return the id, or null if this component have no universal or inconsistent locations
      */
-    String getUniIncId() {
+    public String getUniIncId() {
         for (final Location location : getLocations()){
             if (location.getType() == Location.Type.UNIVERSAL || location.getType() == Location.Type.INCONSISTENT) {
                 return location.getId().substring(Location.ID_LETTER_LENGTH);

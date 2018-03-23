@@ -12,7 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Mutation operator that changes an one of the operators <, <=, >, >=, !=, == of a guard.
+ * Mutation operator that changes an one of the operators {@code <, <=, >, >=, !=, ==} of a guard.
  * If a guard is a conjunction, more mutants will be generated from that guard.
  */
 public abstract class ChangeGuardOpOperator extends MutationOperator {
@@ -100,7 +100,7 @@ public abstract class ChangeGuardOpOperator extends MutationOperator {
     /**
      * Creates a mutant with a changed operator.
      * @param original component to mutate
-     * @param originalSimpleGuards the original simple guards (e.g. x < 2) that the whole original guard is a conjunction of
+     * @param originalSimpleGuards the original simple guards (e.g. {@code x < 2}) that the whole original guard is a conjunction of
      * @param newSimpleGuard new simple guard to replace one of the original simple guards
      * @param simpleGuardIndex the index of the simple guards that should be changed
      * @param edgeIndex the index of the edge containing the guard to mutate

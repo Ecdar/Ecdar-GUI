@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Mutation operator that changes an one of the operators <, <=, >, >=, !=, == of a guard that do not use a clock.
+ * Mutation operator that changes an one of the operators {@code <, <=, >, >=, !=, ==} of a guard that do not use a clock.
  * If a guard is a conjunction, more mutants will be generated from that guard.
  */
 public class ChangeGuardOpLocalsOperator extends ChangeGuardOpOperator {

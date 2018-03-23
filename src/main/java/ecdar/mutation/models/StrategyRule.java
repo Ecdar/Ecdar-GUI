@@ -14,9 +14,9 @@ public abstract class StrategyRule {
      * Constructs a rule.
      * Examples of conditions:
      * true
-     * (20<M.e)
-     * (20<M.e && S.f==M.f && M.f==0)
-     * (20<=S.c && 20<M.e && M.c<20) || (20<=S.c && M.c<=M.e && M.e<=20) || (S.c<20 && M.c<=M.e)
+     * {@code (20<M.e)}
+     * {@code (20<M.e && S.f==M.f && M.f==0)}
+     * {@code (20<=S.c && 20<M.e && M.c<20) || (20<=S.c && M.c<=M.e && M.e<=20) || (S.c<20 && M.c<=M.e)}
      * @param condition a condition for when the rule is valid
      */
     StrategyRule(final String condition) {

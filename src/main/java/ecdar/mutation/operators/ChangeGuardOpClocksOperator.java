@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Mutation operator that changes an one of the operators <, <=, >, >=, !=, == of a guard that uses a clock.
+ * Mutation operator that changes an one of the operators {@code <, <=, >, >=, !=, ==} of a guard that uses a clock.
  * If a guard is a conjunction, more mutants will be generated from that guard.
- * This class replaces an operator with one of the operators <=, >.
+ * This class replaces an operator with one of the operators {@code <=, >}.
  * We only use those operators for clocks, since these cover all practical scenarios.
- * E.g. It is practical impossible to get x == C for clock x and constant C, since time is continuous.
+ * E.g. It is practical impossible to get {@code x == C} for clock x and constant C, since time is continuous.
  */
 public class ChangeGuardOpClocksOperator extends ChangeGuardOpOperator {
     @Override

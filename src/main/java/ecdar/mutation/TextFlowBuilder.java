@@ -73,10 +73,10 @@ public class TextFlowBuilder {
 
     /**
      * Adds a {@link Text} that links to a location.
-     * @see #locationLink(String, String)
      * @param locationId the id of the location to link to
      * @param componentName the name of the component containing the location
      * @return the text
+     * @see #locationLink(String, String)
      */
     public static Text createLocationLink(final String locationId, final String componentName) {
         final Text text = new Text(locationId);
@@ -116,10 +116,10 @@ public class TextFlowBuilder {
 
     /**
      * Writes an edge in a readable way, e.g. "edge L0 → L1". The location ids are location links.
-     * @see #locationLink(String, String)
      * @param edge the edge
      * @param componentName the name of the component containing the edge
      * @return this
+     * @see #locationLink(String, String)
      */
     public TextFlowBuilder edgeLinks(final Edge edge, final String componentName) {
         return text("edge ")

@@ -201,9 +201,7 @@ public class BindingHelper {
             );
         }
 
-        /**
-         * Calculate the bindings for starting from a circle and ending on the mouse
-         */
+        // Calculate the bindings for starting from a circle and ending on the mouse
         private static LineBinding getCircleBindings(final Circle source, final MouseTracker target) {
             return new BindingHelper.LineBinding(
                     calculateXBinding(source, new Point(target)),

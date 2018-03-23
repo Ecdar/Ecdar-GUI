@@ -116,8 +116,7 @@ public class Ecdar extends Application {
     }
 
     /**
-     * Calls
-     * {@see CanvasPresentation#toggleGrid()}
+     * Calls {@link EcdarPresentation#toggleGrid()}.
      * @return A Boolean Property that is true if the grid has been turned on and false if it is off
      */
     public static BooleanProperty toggleGrid() {

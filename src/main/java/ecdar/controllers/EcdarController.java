@@ -557,7 +557,7 @@ public class EcdarController implements Initializable {
     }
 
     /**
-     * Saves the project to the {@see Ecdar#projectDirectory} path.
+     * Saves the project to the {@link Ecdar#projectDirectory} path.
      * This include making directories, converting project files (components and queries)
      * into Json formatted files.
      */
