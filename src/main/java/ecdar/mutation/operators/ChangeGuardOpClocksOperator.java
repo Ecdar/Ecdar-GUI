@@ -1,5 +1,8 @@
 package ecdar.mutation.operators;
 
+import ecdar.abstractions.Component;
+import ecdar.abstractions.Edge;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,7 +43,33 @@ public class ChangeGuardOpClocksOperator extends ChangeGuardOpOperator {
     public String getDescription() {
         return "Changes one of the operators <, <=, >, >=, !=, == of a guard, " +
                 "where the left or right side uses a clock, " +
-                "to one of the operators <=, >. " +
-                "Creates up to 2 * [# of uses of operators in guards] mutants.";
+                "to one of the operators <=, >.";
+    }
+
+    @Override
+    public int getUpperLimit(final Component original) {
+        int count = 0;
+
+        // For all edges in the original component
+        for (int edgeIndex = 0; edgeIndex < original.getEdges().size(); edgeIndex++) {
+            final Edge originalEdge = original.getEdges().get(edgeIndex);
+
+            // Ignore if locked (e.g. if edge on the Inconsistent or Universal locations)
+            if (originalEdge.getIsLocked().get()) continue;
+
+            // Ignore if guard is empty
+            if (originalEdge.getGuard().isEmpty()) continue;
+
+            final String[] guardParts = originalEdge.getGuard().split("&&");
+
+            count += guardParts.length;
+        }
+
+        return 2 * count;
+    }
+
+    @Override
+    public boolean isUpperLimitExact() {
+        return false;
     }
 }

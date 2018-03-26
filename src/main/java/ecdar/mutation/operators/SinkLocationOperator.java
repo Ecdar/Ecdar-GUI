@@ -53,13 +53,6 @@ public class SinkLocationOperator extends MutationOperator {
         return mutants;
     }
 
-    @Override
-    public String getDescription() {
-        return "Changes the target location of an edge to a new sink location. " +
-               "Sink locations accept, but ignore, all inputs. " +
-               "Creates up to [# of edges] mutants.";
-    }
-
     /**
      * Adds a sink location to a component that accepts (but ignores) all inputs and allowed time to pass.
      * @param component the component to add the sink to
@@ -79,5 +72,22 @@ public class SinkLocationOperator extends MutationOperator {
         });
 
         return sink;
+    }
+
+    @Override
+    public String getDescription() {
+        return "Changes the target location of an edge to a new sink location. " +
+               "Sink locations accept, but ignore, all inputs. ";
+    }
+
+    @Override
+    public int getUpperLimit(final Component original) {
+        return original.getEdges().size();
+
+    }
+
+    @Override
+    public boolean isUpperLimitExact() {
+        return false;
     }
 }

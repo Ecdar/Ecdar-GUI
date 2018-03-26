@@ -3,6 +3,7 @@ package ecdar.mutation.models;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import ecdar.Ecdar;
+import ecdar.abstractions.Component;
 import ecdar.abstractions.HighLevelModelObject;
 import ecdar.mutation.operators.MutationOperator;
 import javafx.beans.property.*;
@@ -44,7 +45,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     private static final String STEP_BOUNDS = "stepBounds";
 
     // General fields
-    private final StringProperty testModelId = new SimpleStringProperty("");
+    private final ObjectProperty<Component> testModel = new SimpleObjectProperty<>(null);
     private final StringProperty action = new SimpleStringProperty("");
     private final List<MutationOperator> operators = new ArrayList<>();
     private final ObjectProperty<Status> status = new SimpleObjectProperty<>(Status.IDLE);
@@ -95,14 +96,14 @@ public class MutationTestPlan extends HighLevelModelObject {
 
     /* Properties */
 
-    public String getTestModelId() {
-        return testModelId.get();
+    public Component getTestModel() {
+        return testModel.get();
     }
-    public StringProperty getTestModelIdProperty() {
-        return testModelId;
+    public ObjectProperty<Component> getTestModelProperty() {
+        return testModel;
     }
-    public void setTestModelId(final String testModelId) {
-        this.testModelId.setValue(testModelId);
+    public void setTestModel(final Component testModel) {
+        this.testModel.setValue(testModel);
     }
 
     public String getMutantsText() {
@@ -281,7 +282,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     public JsonObject serialize() {
         final JsonObject result = super.serialize();
 
-        result.addProperty(TEST_MODEL_ID, getTestModelId());
+        if (getTestModel() != null) result.addProperty(TEST_MODEL_ID, getTestModel().getName());
         result.addProperty(ACTION, getAction());
         result.addProperty(SUT_PATH, getSutPath());
         result.addProperty(FORMAT, getFormat());
@@ -304,7 +305,9 @@ public class MutationTestPlan extends HighLevelModelObject {
     public void deserialize(final JsonObject json) {
         super.deserialize(json);
 
-        setTestModelId(json.getAsJsonPrimitive(TEST_MODEL_ID).getAsString());
+        JsonPrimitive primitive = json.getAsJsonPrimitive(TEST_MODEL_ID);
+        if (primitive != null) setTestModel(Ecdar.getProject().findComponent(primitive.getAsString()));
+
         setAction(json.getAsJsonPrimitive(ACTION).getAsString());
         setSutPath(json.getAsJsonPrimitive(SUT_PATH).getAsString());
         setFormat(json.getAsJsonPrimitive(FORMAT).getAsString());
@@ -313,11 +316,11 @@ public class MutationTestPlan extends HighLevelModelObject {
 
         operators.addAll(MutationOperator.getAllOperators());
         operators.forEach(operator -> {
-            final JsonPrimitive primitive = json.getAsJsonPrimitive(operator.getCodeName());
-            if (primitive != null) operator.setSelected(primitive.getAsBoolean());
+            final JsonPrimitive opPrimitive = json.getAsJsonPrimitive(operator.getCodeName());
+            if (opPrimitive != null) operator.setSelected(opPrimitive.getAsBoolean());
         });
 
-        JsonPrimitive primitive = json.getAsJsonPrimitive(MAX_GENERATION_THREADS);
+        primitive = json.getAsJsonPrimitive(MAX_GENERATION_THREADS);
         if (primitive != null) setConcurrentGenerationThreads(primitive.getAsInt());
 
         primitive = json.getAsJsonPrimitive(MAX_SUT_INSTANCES);

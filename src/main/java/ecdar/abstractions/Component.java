@@ -849,4 +849,12 @@ public class Component extends HighLevelModelObject implements Boxed {
         getLocations().forEach(loc -> loc.setY(loc.getY() - Grid.GRID_SIZE));
         getEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setY(nail.getY() - Grid.GRID_SIZE)));
     }
+
+    public List<Edge> getInputEdges() {
+        return getEdges().filtered(edge -> edge.getStatus().equals(EdgeStatus.INPUT));
+    }
+
+    public List<Edge> getOutputEdges() {
+        return getEdges().filtered(edge -> edge.getStatus().equals(EdgeStatus.OUTPUT));
+    }
 }

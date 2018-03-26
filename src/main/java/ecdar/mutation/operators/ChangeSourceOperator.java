@@ -67,7 +67,16 @@ class ChangeSourceOperator extends MutationOperator {
 
     @Override
     public String getDescription() {
-        return "Changes the source location of an edge. " +
-               "Creates up to ([# of locations] - 1) * [# of edges] mutants.";
+        return "Changes the source location of an edge.";
+    }
+
+    @Override
+    public int getUpperLimit(final Component original) {
+        return (original.getLocations().size() - 1) * original.getEdges().size();
+    }
+
+    @Override
+    public boolean isUpperLimitExact() {
+        return false;
     }
 }

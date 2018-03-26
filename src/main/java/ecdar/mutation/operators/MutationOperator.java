@@ -60,6 +60,20 @@ public abstract class MutationOperator {
      */
     public abstract String getDescription();
 
+    /**
+     * Gets an upper limit for how many mutants the operator would create.
+     * See our paper on mutation testing for the math behind this.
+     * @param original the component to mutate
+     * @return the upper limit
+     */
+    public abstract int getUpperLimit(final Component original);
+
+    /**
+     * Gets if the upper limit is also the exact number of mutants
+     * @return true iff the upper limit is exact
+     */
+    public abstract boolean isUpperLimitExact();
+
 
     /* Other methods */
 

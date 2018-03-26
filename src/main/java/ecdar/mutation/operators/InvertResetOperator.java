@@ -57,14 +57,6 @@ public class InvertResetOperator extends MutationOperator {
         return cases;
     }
 
-    @Override
-    public String getDescription() {
-        return "Inverts a clock reset on an update property. " +
-                "If the clock was originally reset, the reset will be removed. " +
-                "Otherwise, a reset will be added. " +
-                "Creates [# of edges] * [# of clocks] mutants.";
-    }
-
     /**
      * Inverts the reset of a clock on an edge.
      * @param mutantEdge the edge to change
@@ -84,5 +76,23 @@ public class InvertResetOperator extends MutationOperator {
 
         // Update property
         mutantEdge.setUpdate(String.join(", ", statements));
+    }
+
+    @Override
+    public String getDescription() {
+        return "Inverts a clock reset on an update property. " +
+                "If the clock was originally reset, the reset will be removed. " +
+                "Otherwise, a reset will be added.";
+    }
+
+    @Override
+    public int getUpperLimit(final Component original) {
+        return original.getEdges().size() * original.getClocks().size();
+
+    }
+
+    @Override
+    public boolean isUpperLimitExact() {
+        return false;
     }
 }

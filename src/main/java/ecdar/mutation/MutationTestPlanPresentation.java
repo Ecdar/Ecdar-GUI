@@ -9,10 +9,12 @@ import ecdar.controllers.CanvasController;
 import ecdar.mutation.models.ExpandableContent;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.mutation.models.TestResult;
+import ecdar.mutation.operators.MutationOperator;
 import ecdar.presentations.EcdarFXMLLoader;
 import ecdar.presentations.HighLevelModelPresentation;
 import javafx.application.Platform;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.geometry.Orientation;
@@ -25,6 +27,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Text;
 
@@ -356,14 +359,13 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
             controller.modelPicker.getItems().add(label);
 
             // If component is the test model of the test plan, select it
-            final String testModelId = getPlan().getTestModelId();
-            if (testModelId != null && testModelId.equals(component.getName()))
+            if (getPlan().getTestModel() == component)
                 controller.modelPicker.setValue(label);
         });
 
         // Bind test plan to test model picker
         controller.modelPicker.valueProperty().addListener(((observable, oldValue, newValue) ->
-                getPlan().setTestModelId(newValue.getText())));
+                getPlan().setTestModel(Ecdar.getProject().findComponent(newValue.getText()))));
 
         // If test model is selected, show elements
         if (controller.modelPicker.getValue() != null) {
@@ -424,10 +426,31 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         getPlan().getOperators().forEach(operator -> {
             final JFXCheckBox checkBox = new JFXCheckBox(operator.getText());
             checkBox.selectedProperty().bindBidirectional(operator.getSelectedProperty());
-            controller.operatorsInnerRegion.getChildren().add(checkBox);
+
+            final Text mutantsText = new Text();
+            mutantsText.setFill(Color.GRAY);
+
+            final HBox hBox = new HBox(checkBox, mutantsText);
+            controller.operatorsInnerRegion.getChildren().add(hBox);
 
             installTooltip(checkBox, operator.getDescription());
+
+            getMutantsTextUpdater(operator, mutantsText).changed(null, null, getPlan().getTestModel());
+            getPlan().getTestModelProperty().addListener(getMutantsTextUpdater(operator, mutantsText));
         });
+    }
+
+    /**
+     * Gets a change listener of the test model that updates the mutants text for an operator.
+     * @param operator the operator
+     * @param mutantsText the mutants text
+     * @return the change listener
+     */
+    private static ChangeListener<Component> getMutantsTextUpdater(final MutationOperator operator, final Text mutantsText) {
+        return (observable, oldValue, newValue) -> {
+            if (newValue != null) mutantsText.setText(" - " +
+                    (operator.isUpperLimitExact() ? "" : "up to ") + operator.getUpperLimit(newValue) + " mutants");
+        };
     }
 
     /**

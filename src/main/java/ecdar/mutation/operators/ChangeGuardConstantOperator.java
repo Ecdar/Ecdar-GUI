@@ -77,7 +77,31 @@ public class ChangeGuardConstantOperator extends MutationOperator {
 
     @Override
     public String getDescription() {
-        return "Adds or subtracts 1 to or from a constant in a guard. " +
-                "Creates up to 2 * [# of constants in guards] mutants.";
+        return "Adds or subtracts 1 to or from a constant in a guard.";
+    }
+
+    @Override
+    public int getUpperLimit(final Component original) {
+        int count = 0;
+
+        // For all edges in the original component
+        for (int edgeIndex = 0; edgeIndex < original.getEdges().size(); edgeIndex++) {
+            final Edge originalEdge = original.getEdges().get(edgeIndex);
+
+            // Ignore if locked (e.g. if edge on the Inconsistent or Universal locations)
+            if (originalEdge.getIsLocked().get()) continue;
+
+            final String originalGuard = originalEdge.getGuard();
+            final Matcher matcher = Pattern.compile("(\\d+)").matcher(originalGuard);
+
+            while (matcher.find()) count++;
+        }
+
+        return 2 * count;
+    }
+
+    @Override
+    public boolean isUpperLimitExact() {
+        return true;
     }
 }
