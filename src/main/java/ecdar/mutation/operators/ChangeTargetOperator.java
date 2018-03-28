@@ -3,6 +3,7 @@ package ecdar.mutation.operators;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
 import ecdar.abstractions.Location;
+import ecdar.mutation.TextFlowBuilder;
 import ecdar.mutation.models.MutationTestCase;
 
 import java.util.ArrayList;
@@ -47,9 +48,10 @@ public class ChangeTargetOperator extends MutationOperator {
 
                 cases.add(new MutationTestCase(original, mutant,
                         getCodeName() + "_" + edgeIndex + "_" + originalLocation.getId(),
-                        "Changed target of edge " + originalEdge.getSourceLocation().getId() + " -> " +
-                                originalEdge.getTargetLocation().getId() + " to " + newLocId)
-                );
+                        new TextFlowBuilder().text("Changed ").boldText("target").text(" of ")
+                                .edgeLinks(originalEdge, original.getName()).text(" to ")
+                                .locationLink(newLocId, original.getName()).build()
+                ));
             }
         }
 
@@ -58,7 +60,16 @@ public class ChangeTargetOperator extends MutationOperator {
 
     @Override
     public String getDescription() {
-        return "Changes the target location of an edge. " +
-                "Creates up to ([# of locations] - 1) * [# of edges] mutants.";
+        return "Changes the target location of an edge.";
+    }
+
+    @Override
+    public int getUpperLimit(final Component original) {
+        return (original.getLocations().size() - 1) * original.getEdges().size();
+    }
+
+    @Override
+    public boolean isUpperLimitExact() {
+        return false;
     }
 }

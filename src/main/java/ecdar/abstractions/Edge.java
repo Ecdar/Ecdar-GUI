@@ -71,6 +71,7 @@ public class Edge implements Serializable, Nearable {
      * Uses the ids of the source and target to find new source and target objects among the locations of a given component.
      * Be sure that the given component has locations with these ids.
      * @param component component to select a source and a target location within
+     * @return the edge
      */
     Edge cloneForVerification(final Component component) {
         final Edge clone = new Edge(component.findLocation(getSourceLocation().getId()), getStatus());

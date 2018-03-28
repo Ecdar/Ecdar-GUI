@@ -1,29 +1,52 @@
 package ecdar.mutation;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 /**
  * Driver for running jobs concurrently.
+ * You can add jobs to the driver at any time.
  */
 public class ConcurrentJobsDriver {
     private final ConcurrentJobsHandler handler;
-    private final int jobsNum;
-    private int generationJobsStarted = 0;
-    private int generationJobsEnded = 0;
+    private final List<Runnable> jobs = new ArrayList<>();
+    private int jobsStarted;
+    private int jobsEnded;
 
     /**
      * Constructs.
      * @param handler handler to run jobs with
-     * @param jobsNum total number of jobs to run
      */
-    public ConcurrentJobsDriver(final ConcurrentJobsHandler handler, final int jobsNum) {
+    public ConcurrentJobsDriver(final ConcurrentJobsHandler handler) {
         this.handler = handler;
-        this.jobsNum = jobsNum;
     }
 
     /**
-     * Starts the jobs.
+     * Adds jobs.
+     * If no other jobs are left to be run, this method resets counters for how many jobs are remaining and starts running jobs.
+     * @param jobs the jobs to add
      */
-    public void start() {
+    public synchronized void addJobs(final List<Runnable> jobs) {
+        if (getJobsRemaining() == 0) {
+            this.jobs.clear();
+            jobsStarted = 0;
+            jobsEnded = 0;
+        }
+
+        this.jobs.addAll(jobs);
+
         updateJobs();
+    }
+
+    /**
+     * Adds a job.
+     * If no other jobs are left to be run, this method resets counters for how many jobs are remaining and starts running jobs.
+     * @param job the job to add
+     */
+    public synchronized void addJob(final Runnable job) {
+        addJobs(Stream.of(job).collect(Collectors.toList()));
     }
 
     /**
@@ -33,7 +56,7 @@ public class ConcurrentJobsDriver {
      * This method should be called in a JavaFX thread, since it could update JavaFX elements.
      */
     public synchronized void onJobDone() {
-        generationJobsEnded++;
+        jobsEnded++;
         updateJobs();
     }
 
@@ -42,7 +65,7 @@ public class ConcurrentJobsDriver {
      */
     private synchronized void updateJobs() {
         if (handler.shouldStop()) {
-            if (getGenerationJobsRunning() == 0) {
+            if (getJobsRunning() == 0) {
                 handler.onStopped();
             }
 
@@ -50,18 +73,19 @@ public class ConcurrentJobsDriver {
         }
 
         // If we are done, clean up and move on
-        if (generationJobsEnded >= jobsNum) {
+        if (jobsEnded >= jobs.size()) {
+            jobs.clear();
             handler.onAllJobsSuccessfullyDone();
             return;
         }
 
-        handler.writeProgress(generationJobsEnded);
+        handler.onProgressRemaining(getJobsRemaining());
 
         // while we have not reach the maximum allowed threads and there are still jobs to start
-        while (getGenerationJobsRunning() < handler.getMaxConcurrentJobs() &&
-                generationJobsStarted < jobsNum) {
-            handler.startJob(generationJobsStarted);
-            generationJobsStarted++;
+        while (getJobsRunning() < handler.getMaxConcurrentJobs() &&
+                jobsStarted < jobs.size()) {
+            jobs.get(jobsStarted).run();
+            jobsStarted++;
         }
     }
 
@@ -70,7 +94,11 @@ public class ConcurrentJobsDriver {
      * Gets the number of generation jobs currently running.
      * @return the number of jobs running
      */
-    private synchronized int getGenerationJobsRunning() {
-        return generationJobsStarted - generationJobsEnded;
+    private synchronized int getJobsRunning() {
+        return jobsStarted - jobsEnded;
+    }
+
+    private synchronized int getJobsRemaining() {
+        return jobs.size() - jobsEnded;
     }
 }

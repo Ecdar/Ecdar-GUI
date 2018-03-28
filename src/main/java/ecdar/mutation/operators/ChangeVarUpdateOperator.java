@@ -2,6 +2,7 @@ package ecdar.mutation.operators;
 
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
+import ecdar.mutation.TextFlowBuilder;
 import ecdar.mutation.models.MutationTestCase;
 import ecdar.utility.ExpressionHelper;
 import org.apache.commons.lang3.tuple.Triple;
@@ -60,9 +61,10 @@ public class ChangeVarUpdateOperator extends MutationOperator {
                         cases.add(new MutationTestCase(
                                 original, mutant,
                                 getCodeName() + "_" + finalEdgeIndex + "_" + local.getLeft() + "_" + value,
-                                "Changed update of edge " + originalEdge.getSourceLocation().getId() +
-                                        " -> " + originalEdge.getTargetLocation().getId() + " from " +
-                                        originalEdge.getUpdate() + " to " + mutantEdge.getUpdate()
+                                new TextFlowBuilder().text("Changed ").boldText("update").text(" of ")
+                                        .edgeLinks(originalEdge, original.getName()).text(" from ")
+                                        .boldText(originalEdge.getUpdate()).text(" to ")
+                                        .boldText(mutantEdge.getUpdate()).build()
                         ));
                     }
                 } else { // Otherwise, replace the assignment
@@ -87,9 +89,10 @@ public class ChangeVarUpdateOperator extends MutationOperator {
                         cases.add(new MutationTestCase(
                                 original, mutant,
                                 getCodeName() + "_" + finalEdgeIndex + "_" + local.getLeft() + "_" + value,
-                                "Changed update of edge " + originalEdge.getSourceLocation().getId() +
-                                        " -> " + originalEdge.getTargetLocation().getId() + " from " +
-                                        originalEdge.getUpdate() + " to " + mutantEdge.getUpdate()
+                                new TextFlowBuilder().text("Changed ").boldText("update").text(" of ")
+                                        .edgeLinks(originalEdge, original.getName()).text(" from ")
+                                        .boldText(originalEdge.getUpdate()).text(" to ")
+                                        .boldText(mutantEdge.getUpdate()).build()
                         ));
                     }
                 }
@@ -103,9 +106,22 @@ public class ChangeVarUpdateOperator extends MutationOperator {
     public String getDescription() {
         return "Changes the assignment (or adds, if the variable is not assigned in corresponding edge) of a local variable " +
                 "in an update property to any of its defined values. " +
-                "Creates up to [# of edges] * [# of variables] * [# of possible values in the type of the variables] mutants." +
                 "This operator only considers variables of a custom type defined with typedef int[a, b] c, " +
                 "where a and b are literals, and c is the type name. " +
                 "This operator assumes that all right sides of variable assignments are literals.";
+    }
+
+    @Override
+    public int getUpperLimit(final Component original) {
+        // Get the sum of valuations of each variable
+        final int varValueCount = original.getLocalVariablesWithBounds().stream().mapToInt(local -> local.getRight() - local.getMiddle() + 1).sum();
+
+        return original.getEdges().size() * varValueCount;
+
+    }
+
+    @Override
+    public boolean isUpperLimitExact() {
+        return false;
     }
 }

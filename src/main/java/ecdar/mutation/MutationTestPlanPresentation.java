@@ -1,5 +1,6 @@
 package ecdar.mutation;
 
+import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXTextField;
 import ecdar.Ecdar;
@@ -7,10 +8,13 @@ import ecdar.abstractions.Component;
 import ecdar.controllers.CanvasController;
 import ecdar.mutation.models.ExpandableContent;
 import ecdar.mutation.models.MutationTestPlan;
+import ecdar.mutation.models.TestResult;
 import ecdar.mutation.operators.MutationOperator;
 import ecdar.presentations.EcdarFXMLLoader;
 import ecdar.presentations.HighLevelModelPresentation;
+import javafx.application.Platform;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.geometry.Orientation;
@@ -23,11 +27,13 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Text;
 
 import java.time.Duration;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * Presentation for a test plan with model-based mutation testing.
@@ -75,14 +81,18 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      * Initializes this.
      */
     private void initialize() {
+        InitializeStatusHandling();
+
         initializeModelPicker();
         initializeOperators();
         initializeActionPicker();
         initializeSutPath();
+        initializeEnablingTestButton();
 
         initializeFormatPicker();
 
         initializeProgressAndResultsTexts();
+        initializeTestResults();
 
         initializePositiveIntegerTextField(controller.generationThreadsField, getPlan().getConcurrentGenerationsThreadsProperty());
         initializePositiveIntegerTextField(controller.suvInstancesField, getPlan().getConcurrentSutInstancesProperty());
@@ -94,7 +104,6 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         controller.demonicCheckBox.selectedProperty().bindBidirectional(getPlan().getDemonicProperty());
         controller.angelicBox.selectedProperty().bindBidirectional(getPlan().getAngelicWhenExportProperty());
 
-        InitializeStatusHandling();
 
         installTooltip(controller.demonicCheckBox, "Use this, if the test model is not input-enabled, " +
                 "and you want to ignore mutants leading to these missing inputs. " +
@@ -106,6 +115,22 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         initializeExpand(controller.advancedOptionsLabel, controller.advancedOptions);
 
 
+    }
+
+    /**
+     * Initializes enabling and disabling of the test button.
+     * The button is disabled when no mutation operators are selected.
+     */
+    private void initializeEnablingTestButton() {
+        final Runnable runnable = () -> {
+            if (getPlan().getSelectedMutationOperators().isEmpty()) controller.testButton.setDisable(true);
+            else controller.testButton.setDisable(false);
+        };
+
+        runnable.run();
+        getPlan().getOperators().forEach(op -> op.getSelectedProperty().addListener(
+                (observable, oldValue, newValue) -> runnable.run()
+        ));
     }
 
     /**
@@ -177,81 +202,151 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         // Add and remove when changed
         getPlan().getProgressTexts().addListener((ListChangeListener<Text>) change -> {
             while (change.next()) {
-                change.getAddedSubList().forEach(text -> controller.progressTextFlow.getChildren().add(text));
-                change.getRemoved().forEach(text -> controller.progressTextFlow.getChildren().remove(text));
+                change.getAddedSubList().forEach(text -> Platform.runLater(() -> controller.progressTextFlow.getChildren().add(text)));
+                change.getRemoved().forEach(text -> Platform.runLater(() -> controller.progressTextFlow.getChildren().remove(text)));
             }
         });
 
         controller.mutantsText.textProperty().bind(getPlan().getMutantsTextProperty());
-
         controller.testCasesText.textProperty().bind(getPlan().getTestCasesTextProperty());
-
         controller.testTimeText.textProperty().bindBidirectional(getPlan().getTestTimeTextProperty());
-
-        controller.passedText.textProperty().bind(getPlan().getPassedTextProperty());
-
-        controller.inconclusiveText.textProperty().bind(getPlan().getInconclusiveTextProperty());
-        initializeExpand(controller.inconclusiveText, controller.inconclusiveRegion);
-        getPlan().getInconclusiveTextProperty().addListener(((observable, oldValue, newValue) -> {
-            if (newValue.isEmpty()) hide(controller.inconclusiveText);
-            else show(controller.inconclusiveText);
-        })); // Show when has value
-        getPlan().getInconclusiveMessageListProperty().addListener(getExpandableListListener(controller.inconclusiveMessageList.getChildren()));
-
-        controller.failedText.textProperty().bind(getPlan().getFailedTextProperty());
-        initializeExpand(controller.failedText, controller.failedRegion);
-        getPlan().getFailedTextProperty().addListener(((observable, oldValue, newValue) -> {
-            if (newValue.isEmpty()) hide(controller.failedText);
-            else show(controller.failedText);
-        })); // Show when has value
-        getPlan().getFailedMessageListProperty().addListener(getExpandableListListener(controller.failedMessageList.getChildren()));
     }
 
     /**
-     * Gets a listener for adding expandable content.
-     * @param list the list to add the content to
-     * @return the listener
+     * Initializes test results.
      */
-    private static ListChangeListener<ExpandableContent> getExpandableListListener(final ObservableList<Node> list) {
+    private void initializeTestResults() {
+        controller.passedText.setText("Passed: " + getPlan().getPassedResults().size());
+        getPlan().getPassedResults().addListener((ListChangeListener<TestResult>) c -> {
+            while (c.next()) controller.passedText.setText("passed: " + c.getList().size());
+        });
+
+        initializeInconclusiveResults();
+
+        initializeFailedResults();
+    }
+
+    /**
+     * Initializes handling of inconclusive results.
+     * Expands/collapses results, when pressed on the text.
+     * Shows reset button only when there is something to retest.
+     * Makes each result expandable.
+     */
+    private void initializeInconclusiveResults() {
+        initializeExpand(controller.inconclusiveText, controller.inconclusiveRegion);
+
+        final Consumer<List> consumer = list -> {
+            final int size = list.size();
+            controller.inconclusiveText.setText("Inconclusive: " + size);
+            if (size == 0) hide(controller.inconclusiveTestButton);
+            else show(controller.inconclusiveTestButton);
+        };
+
+        consumer.accept(getPlan().getInconclusiveResults());
+        getPlan().getInconclusiveResults().addListener((ListChangeListener<TestResult>) c -> consumer.accept(c.getList()));
+
+        initializeExpandableList(getPlan().getInconclusiveResults(), controller.inconclusiveResults.getChildren());
+    }
+
+    /**
+     * Initializes handling of failed results.
+     * Expands/collapses results, when pressed on the text.
+     * Shows reset button only when there is something to retest.
+     * Makes each result expandable.
+     */
+    private void initializeFailedResults() {
+        initializeExpand(controller.failedText, controller.failedRegion);
+
+        final Consumer<List> consumer = list -> {
+            final int size = list.size();
+            controller.failedText.setText("Failed: " + size);
+            if (size == 0) hide(controller.failedTestButton);
+            else show(controller.failedTestButton);
+        };
+
+        consumer.accept(getPlan().getFailedResults());
+        getPlan().getFailedResults().addListener((ListChangeListener<TestResult>) c -> consumer.accept(c.getList()));
+
+        initializeExpandableList(getPlan().getFailedResults(), controller.failedResults.getChildren());
+    }
+
+    /**
+     * Initializes handling of a list of test results.
+     * This method makes sure that the view list is adjusted when the model list changes.
+     * @param modelList the list of test results
+     * @param viewList the list of nodes to add and remove nodes from
+     */
+    private void initializeExpandableList(final ObservableList<TestResult> modelList, final List<Node> viewList) {
         final Map<ExpandableContent, VBox> contentModelMap = new HashMap<>();
 
-        return change -> {
+        modelList.forEach(testCase -> addExpandableResultsToView(modelList, viewList, contentModelMap, testCase));
+
+        modelList.addListener((ListChangeListener<TestResult>) change -> {
             while (change.next()) {
-                change.getAddedSubList().forEach(item -> {
-                    final VBox vBox = new VBox();
-                    contentModelMap.put(item, vBox);
-                    list.add(vBox);
+                change.getAddedSubList().forEach(testResult ->
+                        addExpandableResultsToView(modelList, viewList, contentModelMap, testResult));
 
-                    final Label labelHeader = new Label(item.getTitle());
-
-                    labelHeader.setGraphic(createArrowPath(false));
-                    labelHeader.setGraphicTextGap(10);
-
-                    labelHeader.setOnMouseClicked(e -> {
-                        item.setHidden(!item.isHidden());
-                        if (item.isHidden()) {
-                            labelHeader.setGraphic(createArrowPath(false));
-                            vBox.getChildren().remove(vBox.getChildren().size() - 1);
-                        } else {
-                            labelHeader.setGraphic(createArrowPath(true));
-
-                            final HBox hBox = new HBox();
-                            hBox.setSpacing(8);
-                            hBox.getChildren().add(new Separator(Orientation.VERTICAL));
-                            final Label content = new Label(item.getContent());
-                            content.setWrapText(true);
-                            hBox.getChildren().add(content);
-
-                            vBox.getChildren().add(hBox);
-                        }
-                    });
-
-                    vBox.getChildren().add(labelHeader);
-                });
-
-                change.getRemoved().forEach(item -> list.remove(contentModelMap.get(item)));
+                change.getRemoved().forEach(item -> viewList.remove(contentModelMap.get(item)));
             }
-        };
+        });
+    }
+
+    /**
+     * Adds a test result to af view list.
+     * @param modelList the model list containing the test results
+     * @param viewList the view list visible to the user
+     * @param contentModelMap the map from models to views
+     * @param testResult the test result to add
+     */
+    private void addExpandableResultsToView(final ObservableList<TestResult> modelList, final List<Node> viewList,
+                                            final Map<ExpandableContent, VBox> contentModelMap, final TestResult testResult) {
+        final VBox vBox = new VBox();
+        contentModelMap.put(testResult, vBox);
+        viewList.add(vBox);
+
+        final Label labelHeader = new Label();
+
+        labelHeader.setGraphic(createArrowPath(false));
+
+        final HBox header = new HBox(16, labelHeader, testResult.getTitle());
+
+        header.setOnMouseClicked(e -> {
+            testResult.setHidden(!testResult.isHidden());
+            if (testResult.isHidden()) {
+                labelHeader.setGraphic(createArrowPath(false));
+
+                // Remove result content
+                vBox.getChildren().remove(vBox.getChildren().size() - 1);
+            } else {
+                labelHeader.setGraphic(createArrowPath(true));
+                vBox.getChildren().add(makeResultContent(testResult, modelList));
+            }
+        });
+
+        vBox.getChildren().add(header);
+    }
+
+    /**
+     * Constructs content for a test result.
+     * This includes a label containing info, and a retest button.
+     * @param testResult the test result
+     * @param resultList list of results to remove the test result from, when retesting
+     * @return the content
+     */
+    private Node makeResultContent(final TestResult testResult, final List<? extends TestResult> resultList) {
+        final Label content = new Label(testResult.getContent());
+        content.setWrapText(true);
+
+        // Add a retest button
+        final JFXButton button = new JFXButton("Retest");
+        button.setPrefWidth(65);
+        button.setStyle("-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;");
+        button.setOnMousePressed(event -> {
+            resultList.remove(testResult);
+            controller.getTestingHandler().retest(testResult.getTestCase());
+        });
+
+        return new HBox(8, new Separator(Orientation.VERTICAL), new VBox(8, content, button));
     }
 
     /**
@@ -264,14 +359,13 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
             controller.modelPicker.getItems().add(label);
 
             // If component is the test model of the test plan, select it
-            final String testModelId = getPlan().getTestModelId();
-            if (testModelId != null && testModelId.equals(component.getName()))
+            if (getPlan().getTestModel() == component)
                 controller.modelPicker.setValue(label);
         });
 
         // Bind test plan to test model picker
         controller.modelPicker.valueProperty().addListener(((observable, oldValue, newValue) ->
-                getPlan().setTestModelId(newValue.getText())));
+                getPlan().setTestModel(Ecdar.getProject().findComponent(newValue.getText()))));
 
         // If test model is selected, show elements
         if (controller.modelPicker.getValue() != null) {
@@ -329,13 +423,34 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      * Initializes the UI for selecting mutation operators.
      */
     private void initializeOperators() {
-        for (final MutationOperator operator : getPlan().getOperators()) {
+        getPlan().getOperators().forEach(operator -> {
             final JFXCheckBox checkBox = new JFXCheckBox(operator.getText());
             checkBox.selectedProperty().bindBidirectional(operator.getSelectedProperty());
-            controller.operatorsInnerRegion.getChildren().add(checkBox);
+
+            final Text mutantsText = new Text();
+            mutantsText.setFill(Color.GRAY);
+
+            final HBox hBox = new HBox(checkBox, mutantsText);
+            controller.operatorsInnerRegion.getChildren().add(hBox);
 
             installTooltip(checkBox, operator.getDescription());
-        }
+
+            getMutantsTextUpdater(operator, mutantsText).changed(null, null, getPlan().getTestModel());
+            getPlan().getTestModelProperty().addListener(getMutantsTextUpdater(operator, mutantsText));
+        });
+    }
+
+    /**
+     * Gets a change listener of the test model that updates the mutants text for an operator.
+     * @param operator the operator
+     * @param mutantsText the mutants text
+     * @return the change listener
+     */
+    private static ChangeListener<Component> getMutantsTextUpdater(final MutationOperator operator, final Text mutantsText) {
+        return (observable, oldValue, newValue) -> {
+            if (newValue != null) mutantsText.setText(" - " +
+                    (operator.isUpperLimitExact() ? "" : "up to ") + operator.getUpperLimit(newValue) + " mutants");
+        };
     }
 
     /**

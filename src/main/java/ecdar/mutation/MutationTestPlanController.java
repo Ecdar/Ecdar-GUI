@@ -8,6 +8,7 @@ import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.mutation.models.MutationTestCase;
 import ecdar.mutation.models.MutationTestPlan;
+import ecdar.mutation.models.TestResult;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
@@ -19,6 +20,7 @@ import javafx.stage.FileChooser;
 
 import java.io.File;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Controller for a test plan with model-based mutation testing.
@@ -65,8 +67,8 @@ public class MutationTestPlanController {
     public Label failedText;
     public StackPane root;
     public JFXTextField verifytgaTriesField;
-    public VBox inconclusiveMessageList;
-    public VBox failedMessageList;
+    public VBox inconclusiveResults;
+    public VBox failedResults;
     public JFXTextField timeUnitField;
     public HBox timeUnitBox;
     public Label opsLabel;
@@ -77,11 +79,14 @@ public class MutationTestPlanController {
     public Label testTimeText;
     public HBox operatorsOuterRegion;
     public JFXTextField stepBoundsField;
+    public JFXButton failedTestButton;
+    public JFXButton inconclusiveTestButton;
 
 
     /* Mutation fields */
 
     private MutationTestPlan plan;
+    private TestingHandler testingHandler;
 
 
     /* Properties */
@@ -92,8 +97,12 @@ public class MutationTestPlanController {
 
     public void setPlan(final MutationTestPlan plan) {
         this.plan = plan;
+        testingHandler = new TestingHandler(plan);
     }
 
+    public TestingHandler getTestingHandler() {
+        return testingHandler;
+    }
 
     /* Other methods */
 
@@ -118,9 +127,11 @@ public class MutationTestPlanController {
      * @param cases potential test-cases containing the mutants
      */
     private synchronized void startGeneration(final Component testModel, final List<MutationTestCase> cases) {
-        if (getPlan().shouldStop()) {
-            getPlan().setStatus(MutationTestPlan.Status.IDLE);
-            return;
+        synchronized (getPlan()) {
+            if (getPlan().shouldStop()) {
+                getPlan().setStatus(MutationTestPlan.Status.IDLE);
+                return;
+            }
         }
 
         new TestCaseGenerationHandler(getPlan(), testModel, cases, this::startTestDriver).start();
@@ -131,7 +142,7 @@ public class MutationTestPlanController {
      * @param cases the mutation test cases to test with
      */
     private void startTestDriver(final List<MutationTestCase> cases) {
-        new TestingHandler(cases, plan).start();
+        getTestingHandler().testFromScratch(cases);
     }
 
     /**
@@ -139,8 +150,34 @@ public class MutationTestPlanController {
      * Signals that this test plan should stop doing jobs.
      */
     public void onStopButtonPressed() {
-        getPlan().writeProgress("Stopping");
-        getPlan().setStatus(MutationTestPlan.Status.STOPPING);
+        synchronized (getPlan()) {
+            getPlan().writeProgress("Stopping");
+            getPlan().setStatus(MutationTestPlan.Status.STOPPING);
+        }
+    }
+
+    /**
+     * Triggered when pressed the inconclusive test button.
+     * Retests the inconclusive test-cases.
+     */
+    public void onInconclusiveTestButtonPressed() {
+        synchronized (getPlan()) {
+            final List<MutationTestCase> cases = getPlan().getInconclusiveResults().stream().map(TestResult::getTestCase).collect(Collectors.toList());
+            getPlan().getInconclusiveResults().clear();
+            getTestingHandler().retest(cases);
+        }
+    }
+
+    /**
+     * Triggered when pressed the failed test button.
+     * Retests the failed test-cases.
+     */
+    public void onFailedTestButtonPressed() {
+        synchronized (getPlan()) {
+            final List<MutationTestCase> cases = getPlan().getFailedResults().stream().map(TestResult::getTestCase).collect(Collectors.toList());
+            getPlan().getFailedResults().clear();
+            getTestingHandler().retest(cases);
+        }
     }
 
     /**
@@ -160,7 +197,7 @@ public class MutationTestPlanController {
 
 
             // If the file does not exist, we must be running it from a development environment, use an default location
-            if(jarDir.exists()) {
+            if (jarDir.exists()) {
                 fileChooser.setInitialDirectory(jarDir);
             }
         }

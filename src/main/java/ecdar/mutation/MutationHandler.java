@@ -15,7 +15,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.regex.Pattern;
 
 /**
  * Handler for mutating.
@@ -63,7 +62,6 @@ public class MutationHandler {
         getPlan().setStatus(MutationTestPlan.Status.WORKING);
 
         new Thread(() -> {
-            testModel.setName(MutationTestPlanController.SPEC_NAME);
             testModel.updateIOList();
 
             final Instant start = Instant.now();
@@ -89,9 +87,11 @@ public class MutationHandler {
 
             cases.forEach(testCase -> testCase.getMutant().applyAngelicCompletion());
 
-            Platform.runLater(() -> getPlan().setMutantsText("Mutants: " + cases.size() + " - Execution time: " +
+            Platform.runLater(() -> getPlan().setMutantsText("Mutants: " + cases.size() + " - Mutation time: " +
                     MutationTestPlanPresentation.readableFormat(Duration.between(start, Instant.now())))
             );
+
+            testModel.setName(MutationTestPlanController.SPEC_NAME);
 
             // If chosen, apply demonic completion
             if (getPlan().isDemonic()) testModel.applyDemonicCompletion();

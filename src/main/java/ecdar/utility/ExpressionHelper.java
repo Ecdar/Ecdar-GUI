@@ -18,8 +18,8 @@ public class ExpressionHelper {
 
     /**
      * Searches recursively through the expression.
-     * If a Not expression of a simple expression (e.g. x < 2) is found,
-     * this is replaced with the negated expression (x >= 2).
+     * If a Not expression of a simple expression (e.g. {@code x < 2}) is found,
+     * this is replaced with the negated expression ({@code x >= 2}).
      * To use effectively, make sure to put the expression into DNF before calling this method.
      * @param expression the expression to simplify
      * @return the simplified expression
@@ -86,7 +86,7 @@ public class ExpressionHelper {
 
     /**
      * Parses a guard to an expression.
-     * The guard can be a simple guard (e.g. x < 2) or a conjunction of simple guards.
+     * The guard can be a simple guard (e.g. {@code x < 2}) or a conjunction of simple guards.
      * @param guard the guard to parse
      * @return the expression
      */
@@ -103,7 +103,7 @@ public class ExpressionHelper {
 
     /**
      * Parses a simple guards (without conjunctions) to an expression.
-     * The equal operator (==) is parsed as a conjunction of <= and >=,
+     * The equal operator ({@code ==}) is parsed as a conjunction of {@code <=} and {@code >=},
      * since the engine does not allow for != for clock valuations (in case it is negated).
      * @param simpleGuard the simple guard to parse
      * @return the expression
@@ -132,7 +132,7 @@ public class ExpressionHelper {
     /**
      * Parses an invariant to an expression.
      * Ignores some variables.
-     * E.g. if x is ignored in the invariant x<=1 && y<=2, then only y<=2 is extracted.
+     * E.g. if x is ignored in the invariant {@code x<=1 && y<=2}, then only {@code y<=2} is extracted.
      * @param invariant the invariant to parse
      * @param ignored the variables to ignore
      * @return the parsed expression

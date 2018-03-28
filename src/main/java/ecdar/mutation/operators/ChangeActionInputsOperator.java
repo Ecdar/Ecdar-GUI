@@ -46,8 +46,17 @@ public class ChangeActionInputsOperator extends ChangeActionOperator {
 
     @Override
     public String getDescription() {
-        return "Changes the action of an edge to an arbitrary input action. " +
-                "Creates up to [# of input edges] * ([# of input actions in the I/O signature] - 1) + " +
-                "[# of output edges] * [# of input actions in the I/O signature]  mutants.";
+        return "Changes the action of an edge to an arbitrary input action.";
+    }
+
+    @Override
+    public int getUpperLimit(final Component original) {
+        return original.getInputEdges().size() * (original.getInputStrings().size() - 1) +
+                original.getOutputEdges().size() * original.getInputStrings().size();
+    }
+
+    @Override
+    public boolean isUpperLimitExact() {
+        return false;
     }
 }

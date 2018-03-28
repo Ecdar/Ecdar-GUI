@@ -10,28 +10,27 @@ import javafx.scene.text.Text;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
- * A test driver that runs test-cases on a system under test (sut).
+ * A test driver that runs model-based mutation test-cases on a system under test.
+ * The test driver displays information about results.
+ * You can retest test-cases, also while this is still conducting tests.
  */
 public class TestingHandler implements ConcurrentJobsHandler {
-    private int passedNum;
     private final MutationTestPlan testPlan;
-    private final List<MutationTestCase> mutationTestCases;
-    private ConcurrentJobsDriver jobsDriver;
-    private Instant jobsStart;
+    private Instant testStart;
+    private final ConcurrentJobsDriver jobsDriver;
 
 
     /**
-     * Constructor for the test driver, needs a list of mutation test cases, a test plan,
-     * a consumer to write progress to, an long representing a time units length in milliseconds and a bound.
-     * @param mutationTestCases test-cases to test with
-     * @param testPlan test plan
+     * Constructs.
+     * @param testPlan the test plan associated with the tests to run
      */
-    TestingHandler(final List<MutationTestCase> mutationTestCases, final MutationTestPlan testPlan) {
-        this.mutationTestCases = mutationTestCases;
+    TestingHandler(final MutationTestPlan testPlan) {
         this.testPlan = testPlan;
+        this.jobsDriver = new ConcurrentJobsDriver(this);
     }
 
 
@@ -42,34 +41,47 @@ public class TestingHandler implements ConcurrentJobsHandler {
         return getPlan().getConcurrentSutInstances();
     }
 
-    @Override
-    public void startJob(final int index) {
-        performTest(mutationTestCases.get(index));
+    private MutationTestPlan getPlan() {
+        return testPlan;
     }
-
-    private Consumer<Text> getProgressWriter() { return text -> getPlan().writeProgress(text); }
-
-    private MutationTestPlan getPlan() {return testPlan; }
 
 
     /* Other */
 
     /**
-     * Starts the test driver.
+     * Tests some test-cases.
+     * @param cases the test-cases
      */
-    public void start() {
-        passedNum = 0;
-        jobsDriver = new ConcurrentJobsDriver(this, mutationTestCases.size());
+    public void testFromScratch(final List<MutationTestCase> cases) {
+        testStart = Instant.now();
 
-        Platform.runLater(() -> {
-            getPlan().setInconclusiveText("Inconclusive: " + 0);
-            getPlan().setPassedText("Passed: " + 0);
-            getPlan().setFailedText("Failed: " + 0);
-        });
+        jobsDriver.addJobs(cases.stream().map(testCase -> (Runnable)() -> performTest(testCase)).collect(Collectors.toList()));
+    }
 
-        jobsStart = Instant.now();
+    /**
+     * Retests a single test-case.
+     * @param testCase the test-case
+     */
+    public void retest(final MutationTestCase testCase) {
+        retest(Stream.of(testCase).collect(Collectors.toList()));
+    }
 
-        jobsDriver.start();
+    /**
+     * Retests some test-cases.
+     * @param cases the test-cases
+     */
+    public void retest(final List<MutationTestCase> cases) {
+        synchronized (getPlan()) {
+            if (getPlan().shouldStop()) return;
+
+            getPlan().setStatus(MutationTestPlan.Status.WORKING);
+        }
+
+        cases.forEach(testCase -> jobsDriver.addJob(() -> performTest(testCase)));
+
+        // Do not measure time when retesting
+        testStart = null;
+        getPlan().setTestTimeText("");
     }
 
     /**
@@ -87,29 +99,26 @@ public class TestingHandler implements ConcurrentJobsHandler {
      * @param result the test result
      */
     private synchronized void onTestDone(final TestResult result) {
+        // Result is null if an error occurred
         if (result != null) {
             switch (result.getVerdict()) {
                 case INCONCLUSIVE:
-                    Platform.runLater(() -> {
-                        getPlan().getInconclusiveMessageList().add(result);
-                        getPlan().setInconclusiveText("Inconclusive: " + getPlan().getInconclusiveMessageList().size());
-                    });
+                    Platform.runLater(() -> getPlan().getInconclusiveResults().add(result));
                     break;
                 case PASS:
-                    passedNum++;
-                    Platform.runLater(() -> getPlan().setPassedText("Passed: " + passedNum));
+                    Platform.runLater(() -> getPlan().getPassedResults().add(result));
                     break;
                 case FAIL:
-                    Platform.runLater(() -> {
-                        getPlan().getFailedMessageList().add(result);
-                        getPlan().setFailedText("Failed: " + getPlan().getFailedMessageList().size());
-                    });
+                    Platform.runLater(() -> getPlan().getFailedResults().add(result));
                     break;
             }
 
-            Platform.runLater(() -> getPlan().setTestTimeText(
-                    "Testing time: " + MutationTestPlanPresentation.readableFormat(Duration.between(jobsStart, Instant.now()))
-            ));
+            // clock is null if we retest
+            if (testStart != null) {
+                Platform.runLater(() -> getPlan().setTestTimeText(
+                        "Testing time: " + MutationTestPlanPresentation.readableFormat(Duration.between(testStart, Instant.now()))
+                ));
+            }
         }
 
         jobsDriver.onJobDone();
@@ -133,8 +142,8 @@ public class TestingHandler implements ConcurrentJobsHandler {
     }
 
     @Override
-    public void writeProgress(final int jobsEnded) {
-        writeProgress("Testing... (" + jobsEnded + "/" + mutationTestCases.size() + " test-cases)");
+    public void onProgressRemaining(final int remaining) {
+        writeProgress("Testing... (" + remaining + " test-case" + (remaining == 1 ? "" : "s") + " remaining)");
     }
 
     /**
@@ -152,6 +161,6 @@ public class TestingHandler implements ConcurrentJobsHandler {
      * @param text the text describing the progress
      */
     private void writeProgress(final Text text) {
-        Platform.runLater(() -> getProgressWriter().accept(text));
+        getPlan().writeProgress(text);
     }
 }

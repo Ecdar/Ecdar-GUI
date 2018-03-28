@@ -2,6 +2,7 @@ package ecdar.mutation.operators;
 
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
+import ecdar.mutation.TextFlowBuilder;
 import ecdar.mutation.models.MutationTestCase;
 
 import java.util.ArrayList;
@@ -48,9 +49,9 @@ public class ChangeGuardConstantOperator extends MutationOperator {
 
                     cases.add(new MutationTestCase(original, mutant,
                             getCodeName() + "_" + edgeIndex + "_" + index + "_+1",
-                            "Changed guard of edge " + originalEdge.getSourceLocation().getId() + " -> " +
-                                    originalEdge.getTargetLocation().getId() + " from " + originalEdge.getGuard() + " to " +
-                                    mutantEdge.getGuard()
+                            new TextFlowBuilder().text("Changed ").boldText("guard").text(" of ")
+                                    .edgeLinks(originalEdge, original.getName()).text(" from ").boldText(originalGuard)
+                                    .text(" to ").boldText(mutantEdge.getGuard()).build()
                     ));
                 } {
                     final Component mutant = original.cloneForVerification();
@@ -61,9 +62,9 @@ public class ChangeGuardConstantOperator extends MutationOperator {
 
                     cases.add(new MutationTestCase(original, mutant,
                             getCodeName() + "_" + edgeIndex + "_" + index + "_-1",
-                            "Changed guard of edge " + originalEdge.getSourceLocation().getId() + " -> " +
-                                    originalEdge.getTargetLocation().getId() + " from " + originalEdge.getGuard() + " to " +
-                                    mutantEdge.getGuard()
+                            new TextFlowBuilder().text("Changed ").boldText("guard").text(" of ")
+                                    .edgeLinks(originalEdge, original.getName()).text(" from ").boldText(originalGuard)
+                                    .text(" to ").boldText(mutantEdge.getGuard()).build()
                     ));
                 }
 
@@ -76,7 +77,31 @@ public class ChangeGuardConstantOperator extends MutationOperator {
 
     @Override
     public String getDescription() {
-        return "Adds or subtracts 1 to or from a constant in a guard. " +
-                "Creates up to 2 * [# of constants in guards] mutants.";
+        return "Adds or subtracts 1 to or from a constant in a guard.";
+    }
+
+    @Override
+    public int getUpperLimit(final Component original) {
+        int count = 0;
+
+        // For all edges in the original component
+        for (int edgeIndex = 0; edgeIndex < original.getEdges().size(); edgeIndex++) {
+            final Edge originalEdge = original.getEdges().get(edgeIndex);
+
+            // Ignore if locked (e.g. if edge on the Inconsistent or Universal locations)
+            if (originalEdge.getIsLocked().get()) continue;
+
+            final String originalGuard = originalEdge.getGuard();
+            final Matcher matcher = Pattern.compile("(\\d+)").matcher(originalGuard);
+
+            while (matcher.find()) count++;
+        }
+
+        return 2 * count;
+    }
+
+    @Override
+    public boolean isUpperLimitExact() {
+        return true;
     }
 }

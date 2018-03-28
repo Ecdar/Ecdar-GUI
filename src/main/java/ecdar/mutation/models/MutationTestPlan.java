@@ -3,6 +3,7 @@ package ecdar.mutation.models;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import ecdar.Ecdar;
+import ecdar.abstractions.Component;
 import ecdar.abstractions.HighLevelModelObject;
 import ecdar.mutation.operators.MutationOperator;
 import javafx.beans.property.*;
@@ -44,7 +45,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     private static final String STEP_BOUNDS = "stepBounds";
 
     // General fields
-    private final StringProperty testModelId = new SimpleStringProperty("");
+    private final ObjectProperty<Component> testModel = new SimpleObjectProperty<>(null);
     private final StringProperty action = new SimpleStringProperty("");
     private final List<MutationOperator> operators = new ArrayList<>();
     private final ObjectProperty<Status> status = new SimpleObjectProperty<>(Status.IDLE);
@@ -65,11 +66,9 @@ public class MutationTestPlan extends HighLevelModelObject {
     private final StringProperty testCasesText = new SimpleStringProperty("");
     private final StringProperty testTimeText = new SimpleStringProperty("");
 
-    private final StringProperty passedText = new SimpleStringProperty("");
-    private final StringProperty InconclusiveText = new SimpleStringProperty("");
-    private final ListProperty<ExpandableContent> inconclusiveMessageList = new SimpleListProperty<>(FXCollections.observableArrayList());
-    private final StringProperty FailedText = new SimpleStringProperty("");
-    private final ListProperty<ExpandableContent> failedMessageList = new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final ListProperty<TestResult> passedResults = new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final ListProperty<TestResult> inconclusiveResults = new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final ListProperty<TestResult> failedResults = new SimpleListProperty<>(FXCollections.observableArrayList());
 
     // For exporting
     private final BooleanProperty angelicWhenExport = new SimpleBooleanProperty(false);
@@ -97,14 +96,14 @@ public class MutationTestPlan extends HighLevelModelObject {
 
     /* Properties */
 
-    public String getTestModelId() {
-        return testModelId.get();
+    public Component getTestModel() {
+        return testModel.get();
     }
-    public StringProperty getTestModelIdProperty() {
-        return testModelId;
+    public ObjectProperty<Component> getTestModelProperty() {
+        return testModel;
     }
-    public void setTestModelId(final String testModelId) {
-        this.testModelId.setValue(testModelId);
+    public void setTestModel(final Component testModel) {
+        this.testModel.setValue(testModel);
     }
 
     public String getMutantsText() {
@@ -221,48 +220,16 @@ public class MutationTestPlan extends HighLevelModelObject {
         this.maxOutputWaitTime.set(outputWaitTime);
     }
 
-    public String getPassedText() {
-        return passedText.get();
-    }
-    public StringProperty getPassedTextProperty() {
-        return passedText;
-    }
-    public void setPassedText(final String passedText) {
-        this.passedText.set(passedText);
+    public ObservableList<TestResult> getPassedResults() {
+        return passedResults.get();
     }
 
-    public String getInconclusiveText() {
-        return InconclusiveText.get();
-    }
-    public StringProperty getInconclusiveTextProperty() {
-        return InconclusiveText;
-    }
-    public void setInconclusiveText(final String inconclusiveText) {
-        this.InconclusiveText.set(inconclusiveText);
+    public ObservableList<TestResult> getInconclusiveResults() {
+        return inconclusiveResults.get();
     }
 
-    public String getFailedText() {
-        return FailedText.get();
-    }
-    public StringProperty getFailedTextProperty() {
-        return FailedText;
-    }
-    public void setFailedText(final String failedText) {
-        this.FailedText.set(failedText);
-    }
-
-    public ObservableList<ExpandableContent> getFailedMessageList() {
-        return failedMessageList.get();
-    }
-    public ListProperty<ExpandableContent> getFailedMessageListProperty() {
-        return failedMessageList;
-    }
-
-    public ObservableList<ExpandableContent> getInconclusiveMessageList() {
-        return inconclusiveMessageList.get();
-    }
-    public ListProperty<ExpandableContent> getInconclusiveMessageListProperty() {
-        return inconclusiveMessageList;
+    public ObservableList<TestResult> getFailedResults() {
+        return failedResults.get();
     }
 
     public int getVerifytgaTries() {
@@ -315,7 +282,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     public JsonObject serialize() {
         final JsonObject result = super.serialize();
 
-        result.addProperty(TEST_MODEL_ID, getTestModelId());
+        if (getTestModel() != null) result.addProperty(TEST_MODEL_ID, getTestModel().getName());
         result.addProperty(ACTION, getAction());
         result.addProperty(SUT_PATH, getSutPath());
         result.addProperty(FORMAT, getFormat());
@@ -338,7 +305,9 @@ public class MutationTestPlan extends HighLevelModelObject {
     public void deserialize(final JsonObject json) {
         super.deserialize(json);
 
-        setTestModelId(json.getAsJsonPrimitive(TEST_MODEL_ID).getAsString());
+        JsonPrimitive primitive = json.getAsJsonPrimitive(TEST_MODEL_ID);
+        if (primitive != null) setTestModel(Ecdar.getProject().findComponent(primitive.getAsString()));
+
         setAction(json.getAsJsonPrimitive(ACTION).getAsString());
         setSutPath(json.getAsJsonPrimitive(SUT_PATH).getAsString());
         setFormat(json.getAsJsonPrimitive(FORMAT).getAsString());
@@ -347,11 +316,11 @@ public class MutationTestPlan extends HighLevelModelObject {
 
         operators.addAll(MutationOperator.getAllOperators());
         operators.forEach(operator -> {
-            final JsonPrimitive primitive = json.getAsJsonPrimitive(operator.getCodeName());
-            if (primitive != null) operator.setSelected(primitive.getAsBoolean());
+            final JsonPrimitive opPrimitive = json.getAsJsonPrimitive(operator.getCodeName());
+            if (opPrimitive != null) operator.setSelected(opPrimitive.getAsBoolean());
         });
 
-        JsonPrimitive primitive = json.getAsJsonPrimitive(MAX_GENERATION_THREADS);
+        primitive = json.getAsJsonPrimitive(MAX_GENERATION_THREADS);
         if (primitive != null) setConcurrentGenerationThreads(primitive.getAsInt());
 
         primitive = json.getAsJsonPrimitive(MAX_SUT_INSTANCES);
@@ -404,11 +373,9 @@ public class MutationTestPlan extends HighLevelModelObject {
         setMutantsText("");
         setTestCasesText("");
         setTestTimeText("");
-        setPassedText("");
-        setInconclusiveText("");
-        getInconclusiveMessageList().clear();
-        setFailedText("");
-        getFailedMessageList().clear();
+        getPassedResults().clear();
+        getInconclusiveResults().clear();
+        getFailedResults().clear();
     }
 
     /**

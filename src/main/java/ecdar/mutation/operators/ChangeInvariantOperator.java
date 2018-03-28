@@ -2,6 +2,7 @@ package ecdar.mutation.operators;
 
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Location;
+import ecdar.mutation.TextFlowBuilder;
 import ecdar.mutation.models.MutationTestCase;
 
 import java.util.ArrayList;
@@ -48,7 +49,10 @@ public class ChangeInvariantOperator extends MutationOperator {
 
                 cases.add(new MutationTestCase(original, mutant,
                         getCodeName() + "_" + originalLocation.getId() + "_" + partIndex,
-                        "Changed invariant of " + originalLocation.getId() + " to " + invariant));
+                        new TextFlowBuilder().text("Changed ").boldText("invariant").text(" of ")
+                                .locationLink(originalLocation.getId(), original.getName()).text(" from ")
+                                .boldText(originalLocation.getInvariant()).text(" to ").boldText(invariant).build()
+                ));
             }
 
         }
@@ -59,7 +63,27 @@ public class ChangeInvariantOperator extends MutationOperator {
     @Override
     public String getDescription() {
         return "Adds 1 to the right side of an invariant part. " +
-                "Invariant parts are divided by conjunction. " +
-                "Creates [# of invariant parts] mutants.";
+                "Invariant parts are divided by conjunction.";
+    }
+
+    @Override
+    public int getUpperLimit(final Component original) {
+        int count = 0;
+
+        // For all locations in the original component
+        for (int locationIndex = 0; locationIndex < original.getLocations().size(); locationIndex++) {
+            final Location originalLocation = original.getLocations().get(locationIndex);
+
+            if (originalLocation.getInvariant().trim().isEmpty()) continue;
+
+            count += originalLocation.getInvariant().split("&&").length;
+        }
+
+        return count;
+    }
+
+    @Override
+    public boolean isUpperLimitExact() {
+        return true;
     }
 }

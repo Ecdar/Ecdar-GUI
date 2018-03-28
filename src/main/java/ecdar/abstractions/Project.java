@@ -149,6 +149,7 @@ public class Project {
      * Gets a new file writer for saving a file.
      * @param filename name of file without extension.
      * @return the file writer
+     * @throws IOException if an IO error occurs
      */
     private static FileWriter getSaveFileWriter(final String filename) throws IOException {
         return new FileWriter(Ecdar.projectDirectory.getValue() + File.separator + filename + ".json");
@@ -308,6 +309,7 @@ public class Project {
     /**
      * Deserializes objects for mutation testing.
      * @param directory directory of the JSON files for mutation testing
+     * @throws IOException if an IO error occurs
      */
     private void deserializeTestObjects(final File directory) throws IOException {
         // If there are no files do not try to deserialize

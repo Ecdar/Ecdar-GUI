@@ -2,7 +2,6 @@ package ecdar.mutation;
 
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
-import ecdar.abstractions.Location;
 import ecdar.abstractions.Project;
 import ecdar.abstractions.SimpleComponentsSystemDeclarations;
 import ecdar.backend.BackendException;
@@ -10,7 +9,6 @@ import ecdar.backend.UPPAALDriver;
 import ecdar.mutation.models.MutationTestCase;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.mutation.models.NonRefinementStrategy;
-import ecdar.mutation.operators.MutationOperator;
 import javafx.application.Platform;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
@@ -92,8 +90,8 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
             return;
         }
 
-        jobsDriver = new ConcurrentJobsDriver(this, potentialTestCases.size());
-        jobsDriver.start();
+        jobsDriver = new ConcurrentJobsDriver(this);
+        jobsDriver.addJobs(potentialTestCases.stream().map(testCase -> (Runnable) () -> generateTestCase(testCase, getPlan().getVerifytgaTries())).collect(Collectors.toList()));
     }
 
 
@@ -122,22 +120,17 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
         getPlan().writeProgress(text);
         testCasesConsumer.accept(finishedTestCases);
     }
-    
+
     @Override
-    public void writeProgress(final int jobsEnded) {
-        Platform.runLater(() -> getPlan().writeProgress("Generating test-cases... (" + jobsEnded + "/" +
-                potentialTestCases.size() + " mutants processed)")
-        );
+    public void onProgressRemaining(final int remaining) {
+        Platform.runLater(() -> getPlan().writeProgress(
+                "Generating test-cases... (" + remaining + " mutant" + (remaining == 1 ? "" : "s") + " remaining)"
+        ));
     }
 
     @Override
     public int getMaxConcurrentJobs() {
         return getPlan().getConcurrentGenerationThreads();
-    }
-
-    @Override
-    public void startJob(final int index) {
-        generateTestCase(potentialTestCases.get(index), getPlan().getVerifytgaTries());
     }
 
     /**

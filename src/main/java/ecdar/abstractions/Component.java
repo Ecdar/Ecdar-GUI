@@ -115,6 +115,7 @@ public class Component extends HighLevelModelObject implements Boxed {
 
         clone.inputStrings.addAll(getInputStrings());
         clone.outputStrings.addAll(getOutputStrings());
+        clone.setName(getName());
 
         return clone;
     }
@@ -706,9 +707,10 @@ public class Component extends HighLevelModelObject implements Boxed {
 
     /**
      * Gets the id used by universal and inconsistent locations located in this component,
-     * if neither universal nor inconsistent locations exist in this component it returns null
+     * if neither universal nor inconsistent locations exist in this component it returns null.
+     * @return the id, or null if this component have no universal or inconsistent locations
      */
-    String getUniIncId() {
+    public String getUniIncId() {
         for (final Location location : getLocations()){
             if (location.getType() == Location.Type.UNIVERSAL || location.getType() == Location.Type.INCONSISTENT) {
                 return location.getId().substring(Location.ID_LETTER_LENGTH);
@@ -846,5 +848,13 @@ public class Component extends HighLevelModelObject implements Boxed {
     public void moveAllNodesUp() {
         getLocations().forEach(loc -> loc.setY(loc.getY() - Grid.GRID_SIZE));
         getEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setY(nail.getY() - Grid.GRID_SIZE)));
+    }
+
+    public List<Edge> getInputEdges() {
+        return getEdges().filtered(edge -> edge.getStatus().equals(EdgeStatus.INPUT));
+    }
+
+    public List<Edge> getOutputEdges() {
+        return getEdges().filtered(edge -> edge.getStatus().equals(EdgeStatus.OUTPUT));
     }
 }

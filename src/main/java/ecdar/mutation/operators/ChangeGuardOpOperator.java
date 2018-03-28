@@ -3,6 +3,7 @@ package ecdar.mutation.operators;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
 import ecdar.mutation.MutationTestingException;
+import ecdar.mutation.TextFlowBuilder;
 import ecdar.mutation.models.MutationTestCase;
 
 import java.util.ArrayList;
@@ -11,7 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Mutation operator that changes an one of the operators <, <=, >, >=, !=, == of a guard.
+ * Mutation operator that changes an one of the operators {@code <, <=, >, >=, !=, ==} of a guard.
  * If a guard is a conjunction, more mutants will be generated from that guard.
  */
 public abstract class ChangeGuardOpOperator extends MutationOperator {
@@ -71,9 +72,11 @@ public abstract class ChangeGuardOpOperator extends MutationOperator {
 
                     testCases.add(new MutationTestCase(original, mutant,
                             getCodeName() + "_" + edgeIndex + "_" + partIndex + "_" + operatorIndex,
-                            "Changed guard of edge " + originalEdge.getSourceLocation().getId() + " -> " +
-                                    originalEdge.getTargetLocation().getId() + " from " + originalEdge.getGuard() +
-                                    " to " + mutant.getEdges().get(edgeIndex).getGuard()));
+                            new TextFlowBuilder().text("Changed ").boldText("guard").text(" of ")
+                                    .edgeLinks(originalEdge, original.getName()).text(" from ")
+                                    .boldText(originalEdge.getGuard()).text(" to ")
+                                    .boldText(mutant.getEdges().get(edgeIndex).getGuard()).build()
+                    ));
                 }
             }
         }
@@ -97,7 +100,7 @@ public abstract class ChangeGuardOpOperator extends MutationOperator {
     /**
      * Creates a mutant with a changed operator.
      * @param original component to mutate
-     * @param originalSimpleGuards the original simple guards (e.g. x < 2) that the whole original guard is a conjunction of
+     * @param originalSimpleGuards the original simple guards (e.g. {@code x < 2}) that the whole original guard is a conjunction of
      * @param newSimpleGuard new simple guard to replace one of the original simple guards
      * @param simpleGuardIndex the index of the simple guards that should be changed
      * @param edgeIndex the index of the edge containing the guard to mutate
