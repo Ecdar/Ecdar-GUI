@@ -23,18 +23,18 @@ public class ConcurrentJobsDriver {
         this.handler = handler;
     }
 
+    private void clearJobs() {
+        this.jobs.clear();
+        jobsStarted = 0;
+        jobsEnded = 0;
+    }
+
     /**
      * Adds jobs.
      * If no other jobs are left to be run, this method resets counters for how many jobs are remaining and starts running jobs.
      * @param jobs the jobs to add
      */
     public synchronized void addJobs(final List<Runnable> jobs) {
-        if (getJobsRemaining() == 0) {
-            this.jobs.clear();
-            jobsStarted = 0;
-            jobsEnded = 0;
-        }
-
         this.jobs.addAll(jobs);
 
         updateJobs();
@@ -73,8 +73,8 @@ public class ConcurrentJobsDriver {
         }
 
         // If we are done, clean up and move on
-        if (jobsEnded >= jobs.size()) {
-            jobs.clear();
+        if (getJobsRemaining() <= 0) {
+            clearJobs();
             handler.onAllJobsSuccessfullyDone();
             return;
         }
