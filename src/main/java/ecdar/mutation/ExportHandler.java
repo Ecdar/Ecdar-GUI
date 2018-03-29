@@ -114,7 +114,7 @@ class ExportHandler {
             text.setFill(Color.GREEN);
             getProgressWriter().accept(text);
             getPlan().setStatus(MutationTestPlan.Status.IDLE);
-        } catch (IOException | BackendException | URISyntaxException e) {
+        } catch (final IOException | BackendException | URISyntaxException e) {
             e.printStackTrace();
             final String message = "Error: " + e.getMessage();
             final Text text = new Text(message);

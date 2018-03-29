@@ -7,6 +7,9 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.Region;
 import javafx.scene.shape.SVGPath;
 
+/**
+ * Collection of helper methods to show, hide, expand, and collapse UI elements.
+ */
 public class VisibilityHelper {
     private final static int ARROW_HEIGHT = 19; // Height of view containing the arrow for expanding and collapsing views. For labels, this is 19
 
@@ -51,6 +54,12 @@ public class VisibilityHelper {
         return svg;
     }
 
+    /**
+     * Shows or hides some content and adjusts the graphic on the header with an arrow.
+     * @param shouldShow true iff should show
+     * @param header the header
+     * @param content the content
+     */
     public static void updateExpand(final boolean shouldShow, final Label header, final Node content) {
         if (shouldShow) {
             header.setGraphic(createArrowPath(true));
@@ -71,16 +80,17 @@ public class VisibilityHelper {
     }
 
     /**
-     * Makes a region show/hide when pressing a label.
-     * @param label the label
-     * @param region the region
+     * Makes some content show/hide when pressing a header.
+     * @param header the header
+     * @param content the the content
      */
-    public static void initializeExpand(final Label label, final Region region) {
-        initializeExpand(new SimpleBooleanProperty(false), label, region);
+    public static void initializeExpand(final Label header, final Region content) {
+        initializeExpand(new SimpleBooleanProperty(false), header, content);
     }
 
     /**
-     * Makes a region show/hide when pressing a label.
+     * Makes some content show/hide when pressing a header.
+     * @param show boolean variable to content if the content should be shown
      * @param label the label
      * @param region the region
      */

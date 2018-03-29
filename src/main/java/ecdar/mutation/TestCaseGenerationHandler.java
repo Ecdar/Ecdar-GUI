@@ -84,7 +84,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
 
         try {
             queryFilePath = UPPAALDriver.storeQuery("refinement: " + MutationTestPlanController.MUTANT_NAME + "<=" + MutationTestPlanController.SPEC_NAME, "query");
-        } catch (URISyntaxException | IOException e) {
+        } catch (final URISyntaxException | IOException e) {
             e.printStackTrace();
             Ecdar.showToast("Error: " + e.getMessage());
             return;
@@ -109,7 +109,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
     public void onAllJobsSuccessfullyDone() {
         try {
             FileUtils.cleanDirectory(new File(UPPAALDriver.getTempDirectoryAbsolutePath()));
-        } catch (IOException | URISyntaxException e) {
+        } catch (final IOException | URISyntaxException e) {
             e.printStackTrace();
             Ecdar.showToast("Error: " + e.getMessage());
             return;
@@ -247,7 +247,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
     private static List<String> getVerifytgaInputLines(final Process process) throws MutationTestingException, IOException {
         final List<String> lines;
 
-        try (BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+        try (final BufferedReader inputReader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
             lines = inputReader.lines().collect(Collectors.toList());
         }
 
@@ -266,7 +266,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
      * @throws MutationTestingException if verifytga has a non-empty error stream
      */
     private static void checkVerifytgaErrorStream(final Process process) throws IOException, MutationTestingException {
-        try (BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+        try (final BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
             final List<String> errorLines = errorReader.lines().collect(Collectors.toList());
 
             if (!errorLines.isEmpty()) {

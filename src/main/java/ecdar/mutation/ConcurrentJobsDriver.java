@@ -23,6 +23,9 @@ public class ConcurrentJobsDriver {
         this.handler = handler;
     }
 
+    /**
+     * Clears jobs and resets variables for jobs.
+     */
     private void clearJobs() {
         this.jobs.clear();
         jobsStarted = 0;
@@ -61,7 +64,7 @@ public class ConcurrentJobsDriver {
     }
 
     /**
-     * Updates what test-case generation jobs to run.
+     * Updates what jobs to run.
      */
     private synchronized void updateJobs() {
         if (handler.shouldStop()) {
@@ -89,9 +92,8 @@ public class ConcurrentJobsDriver {
         }
     }
 
-
     /**
-     * Gets the number of generation jobs currently running.
+     * Gets the number of jobs currently running.
      * @return the number of jobs running
      */
     private synchronized int getJobsRunning() {
