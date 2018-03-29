@@ -28,7 +28,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Text;
 
 import java.time.Duration;
@@ -40,8 +39,6 @@ import java.util.function.Consumer;
  */
 public class MutationTestPlanPresentation extends HighLevelModelPresentation {
     private final MutationTestPlanController controller;
-
-    private final static int ARROW_HEIGHT = 19; // Height of view containing the arrow for expanding and collapsing views. For labels, this is 19
 
     private double offSet, canvasHeight;
 
@@ -111,8 +108,8 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         initializeWidthAndHeight();
 
 
-        initializeExpand(controller.opsLabel, controller.operatorsOuterRegion);
-        initializeExpand(controller.advancedOptionsLabel, controller.advancedOptions);
+        VisibilityHelper.initializeExpand(controller.opsLabel, controller.operatorsOuterRegion);
+        VisibilityHelper.initializeExpand(controller.advancedOptionsLabel, controller.advancedOptions);
 
 
     }
@@ -134,67 +131,12 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
     }
 
     /**
-     * Makes a region show/hide when pressing a label.
-     * @param label the label
-     * @param region the region
-     */
-    private static void initializeExpand(final Label label, final Region region) {
-        final boolean[] isHidden = {true};
-
-        label.setGraphic(createArrowPath(false));
-        label.setGraphicTextGap(10);
-
-        label.setOnMousePressed(event -> {
-            isHidden[0] = !isHidden[0];
-            if (isHidden[0]) {
-                label.setGraphic(createArrowPath(false));
-                hide(region);
-            }
-            else {
-                label.setGraphic(createArrowPath(true));
-                show(region);
-            }
-        });
-
-        // Hide initially
-        hide(region);
-    }
-
-    /**
-     * Creates an arrow head path to draw expand and collapse graphics.
-     * @param up true iff the arrow should point up
-     * @return the arrow head graphics
-     */
-    private static SVGPath createArrowPath(final boolean up) {
-        return createArrowPath(ARROW_HEIGHT, up);
-    }
-
-    /**
-     * Creates an arrow head path to draw expand and collapse graphics.
-     * From: http://tech.chitgoks.com/2013/05/19/how-to-create-a-listview-with-title-header-that-expands-collapses-in-java-fx/
-     * @param height height of the view it should match
-     * @param up true iff the arrow should point up
-     * @return the arrow head graphics
-     */
-    private static SVGPath createArrowPath(final int height, final boolean up) {
-        final SVGPath svg = new SVGPath();
-        final int width = height / 4;
-
-        if (up)
-            svg.setContent("M" + width + " 0 L" + (width * 2) + " " + width + " L0 " + width + " Z");
-        else
-            svg.setContent("M0 0 L" + (width * 2) + " 0 L" + width + " " + width + " Z");
-
-        return svg;
-    }
-
-    /**
      * Initializes UI elements for displaying progress and results.
      */
     private void initializeProgressAndResultsTexts() {
         // Show info when added
-        controller.progressTextFlow.getChildren().addListener((ListChangeListener<Node>) change -> show(controller.progressAres));
-        controller.mutantsText.textProperty().addListener(((observable, oldValue, newValue) -> show(controller.resultsArea)));
+        controller.progressTextFlow.getChildren().addListener((ListChangeListener<Node>) change -> VisibilityHelper.show(controller.progressAres));
+        controller.mutantsText.textProperty().addListener(((observable, oldValue, newValue) -> VisibilityHelper.show(controller.resultsArea)));
 
         // Add progress initially
         getPlan().getProgressTexts().forEach(text -> controller.progressTextFlow.getChildren().add(text));
@@ -233,13 +175,13 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      * Makes each result expandable.
      */
     private void initializeInconclusiveResults() {
-        initializeExpand(controller.inconclusiveText, controller.inconclusiveRegion);
+        VisibilityHelper.initializeExpand(getPlan().getShowInconclusiveProperty(), controller.inconclusiveText, controller.inconclusiveRegion);
 
         final Consumer<List> consumer = list -> {
             final int size = list.size();
             controller.inconclusiveText.setText("Inconclusive: " + size);
-            if (size == 0) hide(controller.inconclusiveTestButton);
-            else show(controller.inconclusiveTestButton);
+            if (size == 0) VisibilityHelper.hide(controller.inconclusiveTestButton);
+            else VisibilityHelper.show(controller.inconclusiveTestButton);
         };
 
         consumer.accept(getPlan().getInconclusiveResults());
@@ -255,13 +197,13 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      * Makes each result expandable.
      */
     private void initializeFailedResults() {
-        initializeExpand(controller.failedText, controller.failedRegion);
+        VisibilityHelper.initializeExpand(getPlan().getShowFailedProperty(), controller.failedText, controller.failedRegion);
 
         final Consumer<List> consumer = list -> {
             final int size = list.size();
             controller.failedText.setText("Failed: " + size);
-            if (size == 0) hide(controller.failedTestButton);
-            else show(controller.failedTestButton);
+            if (size == 0) VisibilityHelper.hide(controller.failedTestButton);
+            else VisibilityHelper.show(controller.failedTestButton);
         };
 
         consumer.accept(getPlan().getFailedResults());
@@ -300,30 +242,24 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      */
     private void addExpandableResultsToView(final ObservableList<TestResult> modelList, final List<Node> viewList,
                                             final Map<ExpandableContent, VBox> contentModelMap, final TestResult testResult) {
-        final VBox vBox = new VBox();
+
+        final Label titleLabel = new Label();
+
+        final HBox header = new HBox(16, titleLabel, testResult.getTitle());
+
+        final Node content = makeResultContent(testResult, modelList);
+
+        final VBox vBox = new VBox(header, content);
         contentModelMap.put(testResult, vBox);
-        viewList.add(vBox);
 
-        final Label labelHeader = new Label();
-
-        labelHeader.setGraphic(createArrowPath(false));
-
-        final HBox header = new HBox(16, labelHeader, testResult.getTitle());
+        VisibilityHelper.updateExpand(!testResult.isHidden(), titleLabel, content);
 
         header.setOnMouseClicked(e -> {
             testResult.setHidden(!testResult.isHidden());
-            if (testResult.isHidden()) {
-                labelHeader.setGraphic(createArrowPath(false));
-
-                // Remove result content
-                vBox.getChildren().remove(vBox.getChildren().size() - 1);
-            } else {
-                labelHeader.setGraphic(createArrowPath(true));
-                vBox.getChildren().add(makeResultContent(testResult, modelList));
-            }
+            VisibilityHelper.updateExpand(!testResult.isHidden(), titleLabel, content);
         });
 
-        vBox.getChildren().add(header);
+        viewList.add(vBox);
     }
 
     /**
@@ -369,11 +305,11 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
 
         // If test model is selected, show elements
         if (controller.modelPicker.getValue() != null) {
-            show(controller.modelDependentArea);
+            VisibilityHelper.show(controller.modelDependentArea);
         } else {
             // Show when selected
             controller.modelPicker.valueProperty().addListener(((observable, oldValue, newValue) ->
-                    show(controller.modelDependentArea)));
+                    VisibilityHelper.show(controller.modelDependentArea)));
         }
     }
 
@@ -469,8 +405,8 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
     private void handleStatusUpdate(final MutationTestPlan.Status oldValue, final MutationTestPlan.Status newValue) {
         switch (newValue) {
             case IDLE:
-                show(controller.testButton);
-                hide(controller.stopButton);
+                VisibilityHelper.show(controller.testButton);
+                VisibilityHelper.hide(controller.stopButton);
                 for (final Region region : getRegionsToDisableWhileWorking()) region.setDisable(false);
 
                 if (oldValue != null && oldValue.equals(MutationTestPlan.Status.STOPPING))
@@ -478,8 +414,8 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
 
                 break;
             case WORKING:
-                hide(controller.testButton);
-                show(controller.stopButton);
+                VisibilityHelper.hide(controller.testButton);
+                VisibilityHelper.show(controller.stopButton);
                 controller.stopButton.setDisable(false);
                 for (final Region region : getRegionsToDisableWhileWorking()) region.setDisable(true);
                 break;
@@ -559,7 +495,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      */
     private void showSutArea() {
         controller.selectSutButton.setStyle("-fx-text-fill:WHITE;-fx-background-color:#9E9E9E;-fx-font-size:14px;");
-        show(controller.sutDependentArea);
+        VisibilityHelper.show(controller.sutDependentArea);
     }
 
     /**
@@ -576,11 +512,11 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         // Change visibility of areas when action changes
         controller.actionPicker.valueProperty().addListener(((observable, oldValue, newValue) -> {
             if (newValue == testLabel) {
-                show(controller.testDependentArea);
-                hide(controller.exportDependantArea);
+                VisibilityHelper.show(controller.testDependentArea);
+                VisibilityHelper.hide(controller.exportDependantArea);
             } else {
-                hide(controller.testDependentArea);
-                show(controller.exportDependantArea);
+                VisibilityHelper.hide(controller.testDependentArea);
+                VisibilityHelper.show(controller.exportDependantArea);
             }
         }));
 
@@ -625,25 +561,4 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
                 getPlan().setFormat(newValue.getText())));
     }
 
-    /**
-     * Shows some regions and set them to be managed.
-     * @param regions the regions
-     */
-    private static void show(final Node... regions) {
-        for (final Node region : regions) {
-            region.setManaged(true);
-            region.setVisible(true);
-        }
-    }
-
-    /**
-     * Hides some regions and set them to not be managed.
-     * @param regions the regions
-     */
-    private static void hide(final Node... regions) {
-        for (final Node region : regions) {
-            region.setManaged(false);
-            region.setVisible(false);
-        }
-    }
 }
