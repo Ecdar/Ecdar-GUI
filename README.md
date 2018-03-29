@@ -33,3 +33,22 @@ Known problems
 H-UPPAAL
 ----------
 This project is a hard fork of https://github.com/ulriknyman/H-Uppaal
+
+Presentation
+----
+Modelling:
+![](presentation/Retailer.gif)
+
+Conformance testing:
+![](presentation/TestExecution.gif)
+![](presentation/TestResults.gif)
+
+Sample Projects
+----
+* See `samples` folder.
+
+Example models:
+
+<img src="presentation/Retailer.png" width="400">
+<img src="presentation/Administration.png" width="400">
+<img src="presentation/UniversityExample.png" width="400">
