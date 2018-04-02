@@ -30,7 +30,7 @@ public class TestDriver {
     private Process sut;
     private final SimpleComponentSimulation testModelSimulation, mutantSimulation;
     private BufferedWriter writer;
-    private Instant lastUpdateTime;
+    private final MutationTestingTimeHandler timeHandler;
 
     /**
      * Constructor.
@@ -48,6 +48,8 @@ public class TestDriver {
 
         testModelSimulation = new SimpleComponentSimulation(testCase.getTestModel());
         mutantSimulation = new SimpleComponentSimulation(testCase.getMutant());
+
+        timeHandler = MutationTestingTimeHandler.getHandler(getPlan());
     }
 
     /* Properties */
@@ -117,7 +119,7 @@ public class TestDriver {
 
         //Start process
         sut = Runtime.getRuntime().exec("java -jar " + Ecdar.projectDirectory.get() + File.separator + getPlan().getSutPath().replace("/", File.separator));
-        lastUpdateTime = Instant.now();
+        timeHandler.onTestStart();
         writer = new BufferedWriter(new OutputStreamWriter(sut.getOutputStream()));
 
         reader = new AsyncInputReader(sut);
@@ -169,18 +171,16 @@ public class TestDriver {
      * @throws InterruptedException if an error happens when trying to sleep
      */
     private TestResult delay(final StrategyRule rule) throws MutationTestingException, InterruptedException, IOException {
-        final Instant delayDuration = Instant.now();
+        timeHandler.onNewDelayRule();
         Map<String, Double> clockValuations = getClockValuations();
 
         // Keep delaying until the rule has been satisfied,
         // Will return inside while loop if maximum wait time is exceeded or an output has been given
         while ((rule.isSatisfied(clockValuations))) {
             //Check if the maximum wait time has been exceeded, if it is, give inconclusive verdict
-            if (!(Duration.between(delayDuration, Instant.now()).toMillis() / (double)getTimeUnitInMs() <= getPlan().getOutputWaitTime())) {
+            if (timeHandler.isMaxWaitTimeExceeded()) {
                 return makeResult(TestResult.Verdict.INCONCLUSIVE, "Maximum wait time reached without receiving an output.");
             }
-
-            reader.checkExceptions();
 
             if (reader.ready()) {
                 final String output = reader.consume();
@@ -215,7 +215,7 @@ public class TestDriver {
      * @throws InterruptedException if an error occurs
      */
     private void sleep() throws InterruptedException {
-        Thread.sleep(getTimeUnitInMs() / 4);
+        timeHandler.sleep();
     }
 
     /**
@@ -236,8 +236,7 @@ public class TestDriver {
      * @return the test result (if this concludes the test), or null (if it does not)
      */
     private TestResult simulateDelay() {
-        final double waitedTimeUnits = Duration.between(lastUpdateTime, Instant.now()).toMillis() / (double) getTimeUnitInMs();
-        lastUpdateTime = Instant.now();
+        final double waitedTimeUnits = timeHandler.getTimeSinceLastTime();
 
         if (!testModelSimulation.delay(waitedTimeUnits)) {
             return makeResult(TestResult.Verdict.FAIL, "Failed simulating delay on test model.");

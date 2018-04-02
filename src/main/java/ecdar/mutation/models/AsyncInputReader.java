@@ -54,8 +54,12 @@ public class AsyncInputReader {
     /**
      * Gets if an input is ready to be consumed.
      * @return true iff ready
+     * @throws MutationTestingException if an error has occurred on the error stream
+     * @throws IOException if an IO error has occurred
      */
-    public boolean ready() {
+    public boolean ready() throws IOException, MutationTestingException {
+        checkExceptions();
+
         return !lines.isEmpty();
     }
 
@@ -64,7 +68,7 @@ public class AsyncInputReader {
      * @throws MutationTestingException if an error has occurred on the error stream
      * @throws IOException if an IO error has occurred
      */
-    public void checkExceptions() throws IOException, MutationTestingException {
+    private void checkExceptions() throws IOException, MutationTestingException {
         if (ioException != null) throw ioException;
         if (mutationException != null) throw mutationException;
     }

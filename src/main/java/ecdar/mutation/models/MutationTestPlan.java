@@ -43,6 +43,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     private static final String VERIFYTGA_TRIES = "verifytgaTries";
     private static final String TIME_UNIT = "timeUnit";
     private static final String STEP_BOUNDS = "stepBounds";
+    private static final String SIMULATE_TIME = "simulateTime";
 
     // General fields
     private final ObjectProperty<Component> testModel = new SimpleObjectProperty<>(null);
@@ -59,6 +60,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     private final IntegerProperty verifytgaTries = new SimpleIntegerProperty(3);
     private final IntegerProperty timeUnit = new SimpleIntegerProperty(1000);
     private final IntegerProperty stepBounds = new SimpleIntegerProperty(100);
+    private final BooleanProperty simulateTime = new SimpleBooleanProperty(false);
 
     // Temporary values for displaying results of testing
     private final ObservableList<Text> progressTexts = FXCollections.observableArrayList();
@@ -300,6 +302,16 @@ public class MutationTestPlan extends HighLevelModelObject {
         this.stepBounds.set(stepBounds);
     }
 
+    public boolean isSimulateTime() {
+        return simulateTime.get();
+    }
+    public BooleanProperty getSimulateTimeProperty() {
+        return simulateTime;
+    }
+    public void setSimulateTime(final boolean simulateTime) {
+        this.simulateTime.set(simulateTime);
+    }
+
     /* Other methods */
 
     @Override
@@ -321,6 +333,7 @@ public class MutationTestPlan extends HighLevelModelObject {
         result.addProperty(VERIFYTGA_TRIES, getVerifytgaTries());
         result.addProperty(TIME_UNIT, getTimeUnit());
         result.addProperty(STEP_BOUNDS, getStepBounds());
+        result.addProperty(SIMULATE_TIME, isSimulateTime());
 
         return result;
     }
@@ -361,6 +374,9 @@ public class MutationTestPlan extends HighLevelModelObject {
 
         primitive = json.getAsJsonPrimitive(STEP_BOUNDS);
         if (primitive != null) setStepBounds(primitive.getAsInt());
+
+        primitive = json.getAsJsonPrimitive(SIMULATE_TIME);
+        if (primitive != null) setSimulateTime(primitive.getAsBoolean());
     }
 
 
