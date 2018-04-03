@@ -275,7 +275,7 @@ public class CarAlarm {
                 clockX = Instant.now();
                 return location.L4;
             }
-        } else if (Duration.between (clockX, Instant.now()).toMillis() > 3000) {
+        } else if (Duration.between (clockX, Instant.now()).toMillis() > 40000) {
             clockX = Instant.now();
             write(OUTPUT_ARMED_OFF);
             return location.L1;

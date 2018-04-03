@@ -784,11 +784,18 @@
       "targetLocation": "L14",
       "status": "OUTPUT",
       "select": "",
-      "guard": "",
+      "guard": "x\u003c\u003d35",
       "update": "disarmed \u003d 1",
       "sync": "armedOn",
       "isLocked": false,
       "nails": [
+        {
+          "x": 400.0,
+          "y": 410.0,
+          "propertyType": "GUARD",
+          "propertyX": 10.0,
+          "propertyY": -10.0
+        },
         {
           "x": 410.0,
           "y": 410.0,
