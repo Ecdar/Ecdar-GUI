@@ -28,6 +28,7 @@ public class CarAlarm {
 
     private Instant clockX;
     private boolean sound;
+    private boolean alarmLocked;
     private static List<String> inputs = Collections.synchronizedList(new ArrayList<>()); // use synchronized to be thread safe
 
 
@@ -165,6 +166,7 @@ public class CarAlarm {
             }
         } else {
             write(OUTPUT_ARMED_ON);
+            alarmLocked = false;
             return location.L14;
         }
         return location.Done;
@@ -246,6 +248,7 @@ public class CarAlarm {
 
     private location L10(){
         write(OUTPUT_ARMED_ON);
+        alarmLocked = true;
         return location.L14;
     }
 
@@ -276,6 +279,10 @@ public class CarAlarm {
                 clockX = Instant.now();
                 return location.L4;
             }
+        } else if (!alarmLocked && Duration.between (clockX, Instant.now()).toMillis() > 40000) {
+            clockX = Instant.now();
+            write(OUTPUT_ARMED_OFF);
+            return location.L1;
         } else {
             delay();
             return location.L14;

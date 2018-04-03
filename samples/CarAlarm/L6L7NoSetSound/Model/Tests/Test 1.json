@@ -17,9 +17,10 @@
   "changeInvariant": true,
   "sinkLocation": true,
   "invertReset": true,
-  "maxGenerationThreads": 10,
+  "maxGenerationThreads": 25,
   "maxSutInstances": 20,
   "maxOutputWaitTime": 500,
   "verifytgaTries": 3,
-  "timeUnit": 100
+  "timeUnit": 100,
+  "stepBounds": 100
 }
