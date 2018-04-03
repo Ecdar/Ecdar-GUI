@@ -3,6 +3,8 @@ package ecdar.retailer;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
@@ -12,41 +14,51 @@ public class SimulatedTimeTestHandler extends TestHandler {
     private static String bufferLine;
     private Instant time;
     private boolean isDelaying = false;
+    private List<String> linesBuffer;
 
     public SimulatedTimeTestHandler(final double timeUnit) {
         super(timeUnit);
 
         time = Instant.now();
+
+        linesBuffer = new ArrayList<>();
+
+        waitForDelay();
     }
 
     @Override
     public boolean inputReady() throws IOException {
-        return (bufferLine != null) || (System.in.available() != 0);
+        return !linesBuffer.isEmpty();
     }
 
     @Override
     public String read() {
-        if (bufferLine != null) {
-            final String line = bufferLine;
-            bufferLine = null;
-            return line;
-        } else return new Scanner(System.in).nextLine();
+        final String line = linesBuffer.get(0);
+        linesBuffer.remove(0);
+        return line;
     }
 
     @Override
     public void onStepDone() {
-        write("Step done");
+        write("Delay done");
 
-        if (bufferLine != null) throw new RuntimeException("While starting new step, buffer is non-empty");
+        waitForDelay();
+    }
 
-        final String line = new Scanner(System.in).nextLine();
+    private void waitForDelay() {
+        boolean done = false;
 
-        final Matcher matcher = Pattern.compile("Delay: (\\d+)").matcher(line);
+        while (!done) {
+            final String line = new Scanner(System.in).nextLine();
 
-        if (matcher.find()) { // If delay, simulate delay
-            time = time.plus(Duration.ofMillis(Long.parseLong(matcher.group(1))));
-        } else { // Else, it is an input, put it on the buffer
-            bufferLine = line;
+            final Matcher matcher = Pattern.compile("Delay: (\\d+)").matcher(line);
+
+            if (matcher.find()) { // If delay, simulate delay
+                time = time.plus(Duration.ofMillis(Long.parseLong(matcher.group(1))));
+                done = true;
+            } else { // Else, it is an input, put it on the buffer
+                linesBuffer.add(line);
+            }
         }
     }
 

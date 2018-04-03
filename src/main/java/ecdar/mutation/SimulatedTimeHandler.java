@@ -31,7 +31,7 @@ public class SimulatedTimeHandler extends MutationTestingTimeHandler {
         writer.writeToSut("Delay: " + getPlan().getTimeUnit());
         delayTime ++;
         lastTime ++;
-        reader.waitAndConsume("Step done");
+        reader.waitAndConsume("Delay done");
     }
 
     @Override
