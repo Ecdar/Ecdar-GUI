@@ -216,6 +216,11 @@ public class MutationTestPlan extends HighLevelModelObject {
         this.concurrentSutInstances.set(concurrentSutInstances);
     }
 
+    /**
+     * Gets the maximum allowed time (in time units) to delay for the execution of a single rule,
+     * before giving the inclusive verdict.
+     * @return the maximum allowed time
+     */
     public int getOutputWaitTime() {
         return maxOutputWaitTime.get();
     }
@@ -268,6 +273,10 @@ public class MutationTestPlan extends HighLevelModelObject {
         this.verifytgaTries.set(verifytgaTries);
     }
 
+    /**
+     * Gets the time (in ms) that corresponds to a time unit.
+     * @return the time that corresponds to a time unit
+     */
     public int getTimeUnit() {
         return timeUnit.get();
     }

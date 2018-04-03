@@ -11,8 +11,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -22,7 +20,7 @@ import java.util.regex.Pattern;
 /**
  * A driver for running model-based mutation testing for a single test-case.
  */
-public class TestDriver {
+public class TestDriver implements SutWriter {
     private final MutationTestCase testCase;
     private final MutationTestPlan plan;
     private AsyncInputReader reader;
@@ -30,7 +28,7 @@ public class TestDriver {
     private Process sut;
     private final SimpleComponentSimulation testModelSimulation, mutantSimulation;
     private BufferedWriter writer;
-    private final MutationTestingTimeHandler timeHandler;
+    private MutationTestingTimeHandler timeHandler;
 
     /**
      * Constructor.
@@ -48,8 +46,6 @@ public class TestDriver {
 
         testModelSimulation = new SimpleComponentSimulation(testCase.getTestModel());
         mutantSimulation = new SimpleComponentSimulation(testCase.getMutant());
-
-        timeHandler = MutationTestingTimeHandler.getHandler(getPlan());
     }
 
     /* Properties */
@@ -92,7 +88,7 @@ public class TestDriver {
                     getPlan().setStatus(MutationTestPlan.Status.ERROR);
                     Platform.runLater(() -> {
                         final String errorMessage = "Error while running test-case " + testCase.getId() + ", " +
-                                testCase.getDescription() + ": " + e.getMessage();
+                                e.getMessage();
                         final Text text = new Text(errorMessage);
                         text.setFill(Color.RED);
                         writeProgress(text);
@@ -119,10 +115,12 @@ public class TestDriver {
 
         //Start process
         sut = Runtime.getRuntime().exec("java -jar " + Ecdar.projectDirectory.get() + File.separator + getPlan().getSutPath().replace("/", File.separator));
-        timeHandler.onTestStart();
         writer = new BufferedWriter(new OutputStreamWriter(sut.getOutputStream()));
 
         reader = new AsyncInputReader(sut);
+
+        timeHandler = MutationTestingTimeHandler.getHandler(getPlan(), this::writeToSut, reader);
+        timeHandler.onTestStart();
 
         //Begin the new test
         int step = 0;
@@ -213,8 +211,9 @@ public class TestDriver {
     /**
      * Sleeps for 1/4 of a time unit.
      * @throws InterruptedException if an error occurs
+     * @throws IOException if an error occurs
      */
-    private void sleep() throws InterruptedException {
+    private void sleep() throws InterruptedException, IOException, MutationTestingException {
         timeHandler.sleep();
     }
 
@@ -271,7 +270,8 @@ public class TestDriver {
      * @param outputBroadcast the string to write to the system under test.
      * @throws IOException if an IO error occurs
      */
-    private void writeToSut(final String outputBroadcast) throws IOException {
+    @Override
+    public void writeToSut(final String outputBroadcast) throws IOException {
         //Write to process if it is alive, else act like the process accepts but ignore all inputs.
         if (sut.isAlive()) {
             writer.write(outputBroadcast + "\n");

@@ -104,7 +104,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
                 "We apply angelic completion on the mutants.");
 
         controller.simulateTimeCheckBox.selectedProperty().bindBidirectional(getPlan().getSimulateTimeProperty());
-        installTooltip(controller.demonicCheckBox, "Simulates time by passing delays as inputs \"Delay: n\", " +
+        installTooltip(controller.simulateTimeCheckBox, "Simulates time by passing delays as inputs \"Delay: n\", " +
                 "where n the simulated time to delay in ms." +
                 "The system under test must always output after a delay." +
                 "It you do no wish to trigger an output in your model, output \"null\", which we ignore.");

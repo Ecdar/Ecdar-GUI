@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -17,6 +18,7 @@ public class AsyncInputReader {
     private final List<String> lines = Collections.synchronizedList(new ArrayList<>());
     private IOException ioException;
     private MutationTestingException mutationException;
+    private final List<Runnable> listeners = new ArrayList<>();
 
     /**
      * Constructs the reader and starts reading in another thread.
@@ -29,6 +31,11 @@ public class AsyncInputReader {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     lines.add(line);
+
+                    synchronized (listeners) {
+                        listeners.forEach(Runnable::run);
+                        listeners.clear();
+                    }
                 }
             } catch (IOException e) {
                 ioException = e;
@@ -81,5 +88,18 @@ public class AsyncInputReader {
         final String line = lines.get(0);
         lines.remove(0);
         return line;
+    }
+
+    public void waitAndConsume(final String line) throws InterruptedException, MutationTestingException {
+        for (int i = 0; i < 100; i++) {
+            if (lines.contains(line)) {
+                lines.remove(line);
+                return;
+            }
+
+            Thread.sleep(50);
+        }
+
+        throw new MutationTestingException("System under test did not respond with \"" + line + "\" within 5 seconds");
     }
 }
