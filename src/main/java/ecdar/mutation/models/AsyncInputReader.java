@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -18,7 +20,6 @@ public class AsyncInputReader {
     private final List<String> lines = Collections.synchronizedList(new ArrayList<>());
     private IOException ioException;
     private MutationTestingException mutationException;
-    private final List<Runnable> listeners = new ArrayList<>();
 
     /**
      * Constructs the reader and starts reading in another thread.
@@ -30,12 +31,14 @@ public class AsyncInputReader {
             try (final BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    lines.add(line);
-
-                    synchronized (listeners) {
-                        listeners.forEach(Runnable::run);
-                        listeners.clear();
+                    // Catch SUT debug messages
+                    final Matcher match = Pattern.compile("Debug: (.*)").matcher(line);
+                    if (match.find()) {
+                        System.out.println("SUT debug: " + match.group(1));
+                        continue;
                     }
+
+                    lines.add(line);
                 }
             } catch (IOException e) {
                 ioException = e;

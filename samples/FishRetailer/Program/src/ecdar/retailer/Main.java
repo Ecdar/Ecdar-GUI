@@ -17,7 +17,7 @@ public class Main {
     private static TestHandler handler;
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException, InterruptedException {
         //handler = new RealTimeTestHandler(1000.0);
         handler = new SimulatedTimeTestHandler(1000.0);
 
@@ -25,24 +25,18 @@ public class Main {
         x = handler.resetTime();
         free = 0;
 
-        try {
-            while (loc >= 0) {
-                stepDone = false;
+        while (loc >= 0) {
+            stepDone = false;
 
-                while (!stepDone) {
-                    update();
-                }
-
-                handler.onStepDone();
-                write("Debug: loc=" + loc + " x=" + getValue(x));
+            while (!stepDone) {
+                update();
             }
 
-            write("Debug: Done");
-        } catch (Exception e) {
-            StringWriter sw = new StringWriter();
-            e.printStackTrace(new PrintWriter(sw));
-            write("Debug: Exception " + e + ": " + e.getMessage() + ". Stacktrace: " + sw.toString());
+            handler.onStepDone();
+            write("Debug: loc=" + loc + " x=" + getValue(x));
         }
+
+        write("Debug: Done");
     }
 
     private static void update() throws IOException, InterruptedException {

@@ -23,6 +23,8 @@ public class SimulatedTimeTestHandler extends TestHandler {
 
         linesBuffer = new ArrayList<>();
 
+        write("Debug: Start");
+
         waitForDelay();
     }
 
@@ -40,26 +42,40 @@ public class SimulatedTimeTestHandler extends TestHandler {
 
     @Override
     public void onStepDone() {
+        write("Debug: onStepDone");
+
         write("Delay done");
 
         waitForDelay();
     }
 
     private void waitForDelay() {
+        write("Debug: waitForDelay");
+
         boolean done = false;
 
         while (!done) {
+            write("Debug: reading next line");
             final String line = new Scanner(System.in).nextLine();
+            write("Debug: Read line " + line);
+
+            if (line.startsWith("Test")) {
+                write("Debug: " + line);
+                continue;
+            }
 
             final Matcher matcher = Pattern.compile("Delay: (\\d+)").matcher(line);
 
             if (matcher.find()) { // If delay, simulate delay
+                write("Debug: Got delay1");
                 time = time.plus(Duration.ofMillis(Long.parseLong(matcher.group(1))));
                 done = true;
             } else { // Else, it is an input, put it on the buffer
                 linesBuffer.add(line);
             }
         }
+
+        write("Debug: Got delay2");
     }
 
     @Override

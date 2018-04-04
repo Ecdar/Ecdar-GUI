@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 /**
  * A driver for running model-based mutation testing for a single test-case.
  */
-public class TestDriver implements SutWriter {
+public class TestDriver {
     private final MutationTestCase testCase;
     private final MutationTestPlan plan;
     private AsyncInputReader reader;
@@ -113,7 +113,7 @@ public class TestDriver implements SutWriter {
     private TestResult test() throws IOException, MutationTestingException, InterruptedException {
         final NonRefinementStrategy strategy = testCase.getStrategy();
 
-        //Start process
+        // Start process
         sut = Runtime.getRuntime().exec("java -jar " + Ecdar.projectDirectory.get() + File.separator + getPlan().getSutPath().replace("/", File.separator));
         writer = new BufferedWriter(new OutputStreamWriter(sut.getOutputStream()));
 
@@ -122,7 +122,7 @@ public class TestDriver implements SutWriter {
         timeHandler = MutationTestingTimeHandler.getHandler(getPlan(), this::writeToSut, reader);
         timeHandler.onTestStart();
 
-        //Begin the new test
+        // Begin the new test
         int step = 0;
         while (step < getStepBounds()) {
             // Get rule and check if its empty
@@ -156,7 +156,7 @@ public class TestDriver implements SutWriter {
             step++;
         }
 
-        //Finish test, we now know that either the verdict has been set or the time ran out
+        // Finish test, we now know that either the verdict has been set or the time ran out
         return makeResult(TestResult.Verdict.INCONCLUSIVE, "Out of bounds.");
     }
 
@@ -186,14 +186,8 @@ public class TestDriver implements SutWriter {
                 final TestResult delayResult = simulateDelay();
                 if (delayResult != null) return delayResult;
 
-                // Catch SUT debug commands
-                final Matcher match = Pattern.compile("Debug: (.*)").matcher(output);
-                if (match.find()) {
-                    System.out.println(match.group(0));
-                } else {
-                    final TestResult outputResult = simulateOutput(output);
-                    if (outputResult != null) return outputResult;
-                }
+                final TestResult outputResult = simulateOutput(output);
+                if (outputResult != null) return outputResult;
             } else {
                 sleep();
                 final TestResult result = simulateDelay();
@@ -214,6 +208,7 @@ public class TestDriver implements SutWriter {
      * @throws IOException if an error occurs
      */
     private void sleep() throws InterruptedException, IOException, MutationTestingException {
+        writeToSut("Test sleep");
         timeHandler.sleep();
     }
 
@@ -270,12 +265,12 @@ public class TestDriver implements SutWriter {
      * @param outputBroadcast the string to write to the system under test.
      * @throws IOException if an IO error occurs
      */
-    @Override
     public void writeToSut(final String outputBroadcast) throws IOException {
-        //Write to process if it is alive, else act like the process accepts but ignore all inputs.
+        // Write to process if it is alive, else act like the process accepts but ignore all inputs.
         if (sut.isAlive()) {
             writer.write(outputBroadcast + "\n");
             writer.flush();
+            System.out.println("writeToSut, " + outputBroadcast);
         }
     }
 
