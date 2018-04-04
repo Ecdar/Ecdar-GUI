@@ -83,8 +83,8 @@
       "color": "5",
       "nicknameX": 30.0,
       "nicknameY": -10.0,
-      "invariantX": 20.0,
-      "invariantY": -10.0
+      "invariantX": 10.0,
+      "invariantY": -30.0
     },
     {
       "id": "L7",
@@ -318,8 +318,8 @@
           "x": 260.0,
           "y": 180.0,
           "propertyType": "SYNCHRONIZATION",
-          "propertyX": 10.0,
-          "propertyY": -10.0
+          "propertyX": -30.0,
+          "propertyY": 10.0
         }
       ]
     },
@@ -356,7 +356,7 @@
           "x": 420.0,
           "y": 150.0,
           "propertyType": "SYNCHRONIZATION",
-          "propertyX": -50.0,
+          "propertyX": -30.0,
           "propertyY": -30.0
         },
         {
@@ -657,7 +657,7 @@
           "y": 180.0,
           "propertyType": "SYNCHRONIZATION",
           "propertyX": -70.0,
-          "propertyY": 10.0
+          "propertyY": -10.0
         }
       ]
     },
@@ -774,7 +774,7 @@
           "x": 320.0,
           "y": 220.0,
           "propertyType": "SYNCHRONIZATION",
-          "propertyX": 10.0,
+          "propertyX": 20.0,
           "propertyY": -10.0
         },
         {
@@ -840,15 +840,15 @@
           "x": 240.0,
           "y": 260.0,
           "propertyType": "SYNCHRONIZATION",
-          "propertyX": -40.0,
+          "propertyX": -20.0,
           "propertyY": 10.0
         },
         {
           "x": 200.0,
           "y": 260.0,
           "propertyType": "UPDATE",
-          "propertyX": -40.0,
-          "propertyY": 10.0
+          "propertyX": -30.0,
+          "propertyY": -30.0
         }
       ]
     },
@@ -873,8 +873,8 @@
           "x": 180.0,
           "y": 300.0,
           "propertyType": "UPDATE",
-          "propertyX": 10.0,
-          "propertyY": -10.0
+          "propertyX": -20.0,
+          "propertyY": -30.0
         },
         {
           "x": 180.0,
