@@ -1,4 +1,0 @@
-{
-  "name": "Global Declarations",
-  "declarations": "broadcast chan close, open, lock, unlock, armedOn, armedOff, flashOn, flashOff, soundOn, soundOff, unlockOut;\n\ntypedef int[0,1] sound_t;\n\ntypedef int[0,1] alarmLocked_t;"
-}
