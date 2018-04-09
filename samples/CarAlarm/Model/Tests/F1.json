@@ -2,7 +2,7 @@
   "name": "F1",
   "testModelId": "Alarm",
   "action": "Test",
-  "sutPath": "../F1/Program/out/artifacts/CarAlarmSystem_jar/CarAlarmSystem.jar",
+  "sutPath": "../F1/out/artifacts/CarAlarmSystem_jar/CarAlarmSystem.jar",
   "exportFormat": "",
   "useDemonic": true,
   "useAngelic": false,
