@@ -6,10 +6,10 @@
   "exportFormat": "",
   "useDemonic": true,
   "useAngelic": false,
-  "changeActionInputs": true,
-  "changeActionOutputs": true,
   "changeSource": true,
   "changeTarget": true,
+  "changeActionInputs": true,
+  "changeActionOutputs": true,
   "changeGuardConstant": true,
   "changeGuardOpClocks": true,
   "changeGuardOpLocals": true,
@@ -20,5 +20,8 @@
   "maxGenerationThreads": 10,
   "maxSutInstances": 100,
   "maxOutputWaitTime": 5,
-  "verifytgaTries": 3
+  "verifytgaTries": 3,
+  "timeUnit": 1000,
+  "stepBounds": 100,
+  "simulateTime": true
 }

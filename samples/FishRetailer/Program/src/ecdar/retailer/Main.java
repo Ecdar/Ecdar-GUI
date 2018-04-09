@@ -1,8 +1,8 @@
 package ecdar.retailer;
 
+import ecdar.sut.TestHandler;
+
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.time.Instant;
 
 public class Main {
@@ -18,66 +18,50 @@ public class Main {
 
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        //handler = new RealTimeTestHandler(1000.0);
-        handler = new SimulatedTimeTestHandler(1000.0);
+        handler = TestHandler.createHandler(1000.0, true);
 
         loc = 0;
         x = handler.resetTime();
         free = 0;
 
-        while (loc >= 0) {
-            stepDone = false;
-
-            while (!stepDone) {
-                update();
-            }
-
-            handler.onStepDone();
-            //write("Debug: loc=" + loc + " x=" + getValue(x));
-        }
-
-        write("Debug: Done");
+        handler.start(Main::runStep);
     }
 
-    private static void update() throws IOException, InterruptedException {
+    private static void runStep() throws IOException, InterruptedException {
+        if (loc < 0) throw new RuntimeException("Loc is " + loc);
+
+        stepDone = false;
+
+        while (!stepDone) {
+            update();
+        }
+
+        handler.onStepDone(Main::runStep);
+    }
+
+    private static void update() throws IOException {
         switch (loc) {
             case 0:
-                if (inputReady()) {
-                    if (read().equals(COIN)) {
+                if (handler.inputReady()) {
+                    if (handler.read().equals(COIN)) {
                         free = 1;
                         x = handler.resetTime();
                         loc = 1;
                     } else loc = -1;
-                } else if (free == 1 && getValue(x) > 5.0) {
-                    write(GARNISH);
+                } else if (free == 1 && handler.getValue(x) > 5.0) {
+                    handler.write(GARNISH);
                     free = 0;
                 } else stepDone = true;
 
                 break;
             case 1:
-                if (inputReady()) loc = -1;
-                else if (getValue(x) > 2.0) {
-                    write(TUNA);
+                if (handler.inputReady()) loc = -1;
+                else if (handler.getValue(x) > 2.0) {
+                    handler.write(TUNA);
                     loc = 0;
                 } else stepDone = true;
 
                 break;
         }
-    }
-
-    private static boolean inputReady() throws IOException {
-        return handler.inputReady();
-    }
-
-    private static String read() {
-        return handler.read();
-    }
-
-    private static void write(final String message) {
-        handler.write(message);
-    }
-
-    private static double getValue(final Instant clock) {
-        return handler.getValue(clock);
     }
 }

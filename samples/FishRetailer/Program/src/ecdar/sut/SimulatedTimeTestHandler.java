@@ -1,49 +1,22 @@
-package ecdar.retailer;
+package ecdar.sut;
 
-import org.omg.PortableServer.THREAD_POLICY_ID;
-
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SimulatedTimeTestHandler extends TestHandler {
-    private static String bufferLine;
     private Instant time;
-    private List<String> linesBuffer;
 
-    public SimulatedTimeTestHandler(final double timeUnit) throws InterruptedException {
+    SimulatedTimeTestHandler(final double timeUnit) {
         super(timeUnit);
 
         time = Instant.now();
-
-        linesBuffer = new ArrayList<>();
-
-
-        new Thread(() -> {
-            String line;
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-            try {
-                while ((line = reader.readLine()) != null) {
-                    linesBuffer.add(line);
-                }
-            } catch (IOException e) {
-                write("Debug: IOException, " + e.getMessage());
-            }
-        }).start();
-
-        waitForDelay();
     }
 
     @Override
-    public boolean inputReady() throws IOException {
+    public boolean inputReady() {
         return !linesBuffer.isEmpty();
     }
 
@@ -55,13 +28,22 @@ public class SimulatedTimeTestHandler extends TestHandler {
     }
 
     @Override
-    public void onStepDone() throws InterruptedException {
-        waitForDelay();
+    public void start(final Runner stepStarter) throws IOException, InterruptedException {
+        waitForDelay(stepStarter);
     }
 
-    private void waitForDelay() throws InterruptedException {
-        // Sleep until delay appears
-        while (linesBuffer.stream().noneMatch(this::isDelay)) Thread.sleep(100);
+    @Override
+    public void onStepDone(final Runner startNewStep) throws IOException, InterruptedException {
+        write("Delay done");
+
+        waitForDelay(startNewStep);
+    }
+
+    private synchronized void waitForDelay(final Runner startNewStep) throws IOException, InterruptedException {
+        if (linesBuffer.stream().noneMatch(this::isDelay)) {
+            tempLinesListeners.add(() -> waitForDelay(startNewStep));
+            return;
+        }
 
         // Fetch delay
         String delayLine = linesBuffer.stream().filter(this::isDelay).findFirst().orElseThrow(() -> new RuntimeException("lines had no delays"));
@@ -72,6 +54,8 @@ public class SimulatedTimeTestHandler extends TestHandler {
             time = time.plus(Duration.ofMillis(Long.parseLong(matcher.group(1))));
             linesBuffer.removeIf(this::isDelay);
         } else throw new RuntimeException("Delay line is not a delay");
+
+        startNewStep.run();
     }
 
     private boolean isDelay(final String input) {
@@ -81,12 +65,12 @@ public class SimulatedTimeTestHandler extends TestHandler {
     }
 
     @Override
-    double getValue(Instant clock) {
+    public double getValue(Instant clock) {
         return Duration.between(clock, time).toMillis() / timeUnit;
     }
 
     @Override
-    Instant resetTime() {
+    public Instant resetTime() {
         return time;
     }
 }

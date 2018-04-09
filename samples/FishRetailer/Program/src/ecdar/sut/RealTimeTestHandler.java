@@ -1,4 +1,4 @@
-package ecdar.retailer;
+package ecdar.sut;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -7,7 +7,7 @@ import java.util.Scanner;
 
 public class RealTimeTestHandler extends TestHandler {
 
-    public RealTimeTestHandler(double timeUnit) {
+    RealTimeTestHandler(double timeUnit) {
         super(timeUnit);
     }
 
@@ -22,8 +22,14 @@ public class RealTimeTestHandler extends TestHandler {
     }
 
     @Override
-    public void onStepDone() throws InterruptedException {
+    public void start(Runner stepStarter) throws IOException, InterruptedException {
+        stepStarter.run();
+    }
+
+    @Override
+    public void onStepDone(Runner startNewStep) throws InterruptedException, IOException {
         Thread.sleep((long) timeUnit / 4);
+        startNewStep.run();
     }
 
     @Override
@@ -32,7 +38,7 @@ public class RealTimeTestHandler extends TestHandler {
     }
 
     @Override
-    Instant resetTime() {
+    public Instant resetTime() {
         return Instant.now();
     }
 }

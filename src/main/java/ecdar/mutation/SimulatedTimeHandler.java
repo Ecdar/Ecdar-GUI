@@ -24,18 +24,14 @@ public class SimulatedTimeHandler extends MutationTestingTimeHandler {
         super(plan);
         this.writer = writer;
         this.reader = reader;
-
-        System.out.println("new SimulatedTimeHandler, " + writer + ", " + reader);
     }
 
     @Override
     void sleep() throws IOException, MutationTestingException, InterruptedException {
-        System.out.println("sleep");
         writer.writeToSut("Delay: " + getPlan().getTimeUnit());
         delayTime ++;
         lastTime ++;
         reader.waitAndConsume("Delay done");
-        System.out.println("sleep done");
     }
 
     @Override

@@ -268,7 +268,6 @@ public class TestDriver {
         if (sut.isAlive()) {
             writer.write(outputBroadcast + "\n");
             writer.flush();
-            System.out.println("writeToSut, " + outputBroadcast);
         }
     }
 
