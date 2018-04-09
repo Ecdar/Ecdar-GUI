@@ -1,6 +1,6 @@
 {
   "name": "Alarm",
-  "declarations": "clock x;\non_off_t sound;\non_off_t alarmLocked;",
+  "declarations": "clock x;\non_off_t sound;\non_off_t shutdown;",
   "locations": [
     {
       "id": "L1",
