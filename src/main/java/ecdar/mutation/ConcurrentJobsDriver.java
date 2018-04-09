@@ -24,17 +24,20 @@ public class ConcurrentJobsDriver {
     }
 
     /**
+     * Clears jobs and resets variables for jobs.
+     */
+    private void clearJobs() {
+        this.jobs.clear();
+        jobsStarted = 0;
+        jobsEnded = 0;
+    }
+
+    /**
      * Adds jobs.
      * If no other jobs are left to be run, this method resets counters for how many jobs are remaining and starts running jobs.
      * @param jobs the jobs to add
      */
     public synchronized void addJobs(final List<Runnable> jobs) {
-        if (getJobsRemaining() == 0) {
-            this.jobs.clear();
-            jobsStarted = 0;
-            jobsEnded = 0;
-        }
-
         this.jobs.addAll(jobs);
 
         updateJobs();
@@ -61,7 +64,7 @@ public class ConcurrentJobsDriver {
     }
 
     /**
-     * Updates what test-case generation jobs to run.
+     * Updates what jobs to run.
      */
     private synchronized void updateJobs() {
         if (handler.shouldStop()) {
@@ -73,8 +76,8 @@ public class ConcurrentJobsDriver {
         }
 
         // If we are done, clean up and move on
-        if (jobsEnded >= jobs.size()) {
-            jobs.clear();
+        if (getJobsRemaining() <= 0) {
+            clearJobs();
             handler.onAllJobsSuccessfullyDone();
             return;
         }
@@ -89,9 +92,8 @@ public class ConcurrentJobsDriver {
         }
     }
 
-
     /**
-     * Gets the number of generation jobs currently running.
+     * Gets the number of jobs currently running.
      * @return the number of jobs running
      */
     private synchronized int getJobsRunning() {
