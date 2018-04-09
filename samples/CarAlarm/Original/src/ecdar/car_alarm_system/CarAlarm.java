@@ -2,14 +2,8 @@ package ecdar.car_alarm_system;
 
 import ecdar.sut.TestHandler;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class CarAlarm {
     //Inputs
@@ -26,7 +20,7 @@ public class CarAlarm {
     private static final String OUTPUT_SOUND_OFF = "soundOff";
     private static final String OUTPUT_SOUND_ON = "soundOn";
 
-    private enum location {L0, L1, L2, L3, L4, L7, L8, L9, L10, L11, L12, L14, Done}
+    private enum location {L0, L1, L2, L3, L6, L9, L11, L12, L13, L5, L10, L4, Done}
 
     private Instant clockX;
     private boolean sound;
@@ -76,11 +70,11 @@ public class CarAlarm {
             case L4:
                 nextLocation = L4();
                 break;
-            case L7:
-                nextLocation = L7();
+            case L5:
+                nextLocation = L5();
                 break;
-            case L8:
-                nextLocation = L8();
+            case L6:
+                nextLocation = L6();
                 break;
             case L9:
                 nextLocation = L9();
@@ -94,8 +88,8 @@ public class CarAlarm {
             case L12:
                 nextLocation = L12();
                 break;
-            case L14:
-                nextLocation = L14();
+            case L13:
+                nextLocation = L13();
                 break;
             case Done:
                 break;
@@ -177,103 +171,21 @@ public class CarAlarm {
         } else {
             write(OUTPUT_ARMED_ON);
             alarmLocked = false;
-            return location.L14;
+            return location.L4;
         }
         return location.Done;
     }
 
-    private location L4(){
-        write(OUTPUT_ARMED_OFF, OUTPUT_FLASH_ON, OUTPUT_SOUND_ON);
-        sound = true;
-        return location.L7;
-    }
-
-    private location L7() {
-        if(getValue(clockX) <= 30) {
-            if(inputReady()) {
-                if (read().equals(INPUT_UNLOCK)) {
-                    clockX = Instant.now();
-                    return location.L12;
-                }
-            } else {
-                stepDone = true;
-                return location.L7;
-            }
-        } else {
-            write(OUTPUT_SOUND_OFF);
-            sound = false;
-            return location.L8;
-        }
-        //Error happend
-        return location.Done;
-    }
-
-    private location L8(){
-        if (handler.getValue(clockX) <= 300.0){
-            if(inputReady()) {
-                if (read().equals(INPUT_UNLOCK)) {
-                    clockX = Instant.now();
-                    return location.L12;
-                }
-            } else {
-                stepDone = true;
-                return location.L8;
-            }
-        } else {
-            write(OUTPUT_FLASH_OFF);
-            return location.L9;
-        }
-
-        // Error happened
-        return location.Done;
-    }
-
-    private location L9() {
-        if (inputReady()) {
-            String input = read();
-            if (input.equals(INPUT_CLOSE)) {
-                clockX = handler.resetTime();
-                return location.L10;
-            } else if (input.equals(INPUT_UNLOCK)) {
-                return location.L0;
-            }
-        }
-        stepDone = true;
-        return location.L9;
-    }
-
-    private location L10(){
-        write(OUTPUT_ARMED_ON);
-        alarmLocked = true;
-        return location.L14;
-    }
-
-    private location L11(){
-        write(OUTPUT_ARMED_OFF);
-        return location.L1;
-    }
-
-    private location L12(){
-        if(sound) {
-            write(OUTPUT_SOUND_OFF);
-            sound = false;
-            return location.L12;
-        } else {
-            write(OUTPUT_FLASH_OFF);
-            return location.L0;
-        }
-    }
-
-    private location L14() {
+    private location L4() {
         if (inputReady()) {
             String input = read();
 
             if(input.equals(INPUT_UNLOCK)) {
                 clockX = handler.resetTime();
-                return location.L11;
+                return location.L5;
             } else if(input.equals(INPUT_OPEN)) {
                 clockX = handler.resetTime();
-                return location.L4;
+                return location.L6;
             }
         } else if (!alarmLocked && getValue(clockX) > 400) {
             clockX = handler.resetTime();
@@ -281,13 +193,93 @@ public class CarAlarm {
             return location.L1;
         } else {
             stepDone = true;
-            return location.L14;
+            return location.L4;
         }
 
         return location.Done;
     }
 
+    private location L5(){
+        write(OUTPUT_ARMED_OFF);
+        return location.L1;
+    }
 
+    private location L6(){
+        write(OUTPUT_ARMED_OFF, OUTPUT_FLASH_ON, OUTPUT_SOUND_ON);
+        sound = true;
+        return location.L9;
+    }
+
+    private location L9() {
+        if(getValue(clockX) <= 30) {
+            if(inputReady()) {
+                if (read().equals(INPUT_UNLOCK)) {
+                    clockX = Instant.now();
+                    return location.L10;
+                }
+            } else {
+                stepDone = true;
+                return location.L9;
+            }
+        } else {
+            write(OUTPUT_SOUND_OFF);
+            sound = false;
+            return location.L11;
+        }
+        //Error happend
+        return location.Done;
+    }
+
+    private location L10(){
+        if(sound) {
+            write(OUTPUT_SOUND_OFF);
+            sound = false;
+            return location.L10;
+        } else {
+            write(OUTPUT_FLASH_OFF);
+            return location.L0;
+        }
+    }
+
+    private location L11(){
+        if (handler.getValue(clockX) <= 300.0){
+            if(inputReady()) {
+                if (read().equals(INPUT_UNLOCK)) {
+                    clockX = Instant.now();
+                    return location.L10;
+                }
+            } else {
+                stepDone = true;
+                return location.L11;
+            }
+        } else {
+            write(OUTPUT_FLASH_OFF);
+            return location.L12;
+        }
+
+        // Error happened
+        return location.Done;
+    }
+
+    private location L12() {
+        if (inputReady()) {
+            String input = read();
+            if (input.equals(INPUT_CLOSE)) {
+                clockX = handler.resetTime();
+                return location.L13;
+            } else if (input.equals(INPUT_UNLOCK)) {
+                return location.L0;
+            }
+        }
+        stepDone = true;
+        return location.L12;
+    }
+
+    private location L13(){
+        write(OUTPUT_ARMED_ON);
+        alarmLocked = true;
+        return location.L4;
+    }
 
     private static boolean inputReady() {
         return handler.inputReady();
