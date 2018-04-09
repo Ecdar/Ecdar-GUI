@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="CarAlarmSystem:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/CarAlarmSystem_jar</output-path>
+    <root id="archive" name="CarAlarmSystem.jar">
+      <element id="module-output" name="CarAlarmSystem" />
+    </root>
+  </artifact>
+</component>
