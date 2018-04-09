@@ -50,7 +50,7 @@ public class StrategyState {
     }
 
     /**
-     * If the specified data matches this state.
+     * Gets if the specified data matches this state.
      * The order of location does not matter.
      * @param location1 a location
      * @param location2 a location
@@ -60,6 +60,6 @@ public class StrategyState {
     public boolean matches(final String location1, final String location2, final List<String> localValuations) {
         return (getLoc1().equals(location1) || getLoc1().equals(location2)) && // First location should match
                 (getLoc2().equals(location1) || getLoc2().equals(location2)) && // Second location should match
-                getLocalValuations().stream().allMatch(localValuations::contains); // All local valuations should match
+                localValuations.containsAll(getLocalValuations()); // All local valuations should match
     }
 }

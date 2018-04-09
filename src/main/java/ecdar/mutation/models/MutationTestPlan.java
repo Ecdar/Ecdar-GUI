@@ -67,7 +67,11 @@ public class MutationTestPlan extends HighLevelModelObject {
     private final StringProperty testTimeText = new SimpleStringProperty("");
 
     private final ListProperty<TestResult> passedResults = new SimpleListProperty<>(FXCollections.observableArrayList());
+
+    private final BooleanProperty showInconclusive = new SimpleBooleanProperty(false);
     private final ListProperty<TestResult> inconclusiveResults = new SimpleListProperty<>(FXCollections.observableArrayList());
+
+    private final BooleanProperty showFailed = new SimpleBooleanProperty(false);
     private final ListProperty<TestResult> failedResults = new SimpleListProperty<>(FXCollections.observableArrayList());
 
     // For exporting
@@ -224,8 +228,28 @@ public class MutationTestPlan extends HighLevelModelObject {
         return passedResults.get();
     }
 
+    public boolean getShowInconclusive() {
+        return showInconclusive.get();
+    }
+    public BooleanProperty getShowInconclusiveProperty() {
+        return showInconclusive;
+    }
+    public void setShowInconclusive(final boolean showInconclusive) {
+        this.showInconclusive.set(showInconclusive);
+    }
+
     public ObservableList<TestResult> getInconclusiveResults() {
         return inconclusiveResults.get();
+    }
+
+    public boolean isShowFailed() {
+        return showFailed.get();
+    }
+    public BooleanProperty getShowFailedProperty() {
+        return showFailed;
+    }
+    public void setShowFailed(final boolean showFailed) {
+        this.showFailed.set(showFailed);
     }
 
     public ObservableList<TestResult> getFailedResults() {
