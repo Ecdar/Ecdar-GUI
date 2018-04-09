@@ -12,16 +12,6 @@ public class RealTimeTestHandler extends TestHandler {
     }
 
     @Override
-    public boolean inputReady() throws IOException {
-        return System.in.available() != 0;
-    }
-
-    @Override
-    public String read() {
-        return new Scanner(System.in).nextLine();
-    }
-
-    @Override
     public void start(Runner stepStarter) throws IOException, InterruptedException {
         stepStarter.run();
     }

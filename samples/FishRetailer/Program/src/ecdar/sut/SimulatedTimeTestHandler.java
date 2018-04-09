@@ -16,18 +16,6 @@ public class SimulatedTimeTestHandler extends TestHandler {
     }
 
     @Override
-    public boolean inputReady() {
-        return !linesBuffer.isEmpty();
-    }
-
-    @Override
-    public String read() {
-        final String line = linesBuffer.get(0);
-        linesBuffer.remove(0);
-        return line;
-    }
-
-    @Override
     public void start(final Runner stepStarter) throws IOException, InterruptedException {
         waitForDelay(stepStarter);
     }

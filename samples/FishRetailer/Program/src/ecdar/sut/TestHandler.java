@@ -50,9 +50,15 @@ public abstract class TestHandler {
         }).start();
     }
 
-    public abstract boolean inputReady() throws IOException;
+    public boolean inputReady() {
+        return !linesBuffer.isEmpty();
+    }
 
-    public abstract String read();
+    public String read() {
+        final String line = linesBuffer.get(0);
+        linesBuffer.remove(0);
+        return line;
+    }
 
     public abstract void start(final Runner stepStarter) throws IOException, InterruptedException;
 
