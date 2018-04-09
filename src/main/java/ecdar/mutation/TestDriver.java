@@ -87,8 +87,7 @@ public class TestDriver {
                 if (getPlan().getStatus().equals(MutationTestPlan.Status.WORKING)) {
                     getPlan().setStatus(MutationTestPlan.Status.ERROR);
                     Platform.runLater(() -> {
-                        final String errorMessage = "Error while running test-case " + testCase.getId() + ", " +
-                                e.getMessage();
+                        final String errorMessage = "Error while running test-case " + testCase.getId() + ": " + e.getMessage();
                         final Text text = new Text(errorMessage);
                         text.setFill(Color.RED);
                         writeProgress(text);
