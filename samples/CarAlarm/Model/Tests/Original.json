@@ -1,5 +1,5 @@
 {
-  "name": "Test 1",
+  "name": "Original",
   "testModelId": "Alarm",
   "action": "Test",
   "sutPath": "../Program/out/artifacts/CarAlarmSystem_jar/CarAlarmSystem.jar",
