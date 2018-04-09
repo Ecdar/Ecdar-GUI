@@ -33,7 +33,7 @@ public class Main {
             }
 
             handler.onStepDone();
-            write("Debug: loc=" + loc + " x=" + getValue(x));
+            //write("Debug: loc=" + loc + " x=" + getValue(x));
         }
 
         write("Debug: Done");

@@ -207,7 +207,6 @@ public class TestDriver {
      * @throws IOException if an error occurs
      */
     private void sleep() throws InterruptedException, IOException, MutationTestingException {
-        writeToSut("Test sleep");
         timeHandler.sleep();
     }
 

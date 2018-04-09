@@ -31,7 +31,6 @@ public class SimulatedTimeHandler extends MutationTestingTimeHandler {
     @Override
     void sleep() throws IOException, MutationTestingException, InterruptedException {
         System.out.println("sleep");
-        writer.writeToSut("Test sleep2");
         writer.writeToSut("Delay: " + getPlan().getTimeUnit());
         delayTime ++;
         lastTime ++;
