@@ -14,8 +14,6 @@ import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * A driver for running model-based mutation testing for a single test-case.
@@ -28,7 +26,7 @@ public class TestDriver {
     private Process sut;
     private final SimpleComponentSimulation testModelSimulation, mutantSimulation;
     private BufferedWriter writer;
-    private MutationTestingTimeHandler timeHandler;
+    private MutationTestTimeHandler timeHandler;
 
     /**
      * Constructor.
@@ -118,7 +116,7 @@ public class TestDriver {
 
         reader = new AsyncInputReader(sut);
 
-        timeHandler = MutationTestingTimeHandler.getHandler(getPlan(), this::writeToSut, reader);
+        timeHandler = MutationTestTimeHandler.getHandler(getPlan(), this::writeToSut, reader);
         timeHandler.onTestStart();
 
         // Begin the new test
@@ -205,6 +203,7 @@ public class TestDriver {
      * Sleeps for 1/4 of a time unit.
      * @throws InterruptedException if an error occurs
      * @throws IOException if an error occurs
+     * @throws MutationTestingException if an error occurs
      */
     private void sleep() throws InterruptedException, IOException, MutationTestingException {
         timeHandler.sleep();

@@ -5,7 +5,13 @@ import ecdar.mutation.models.MutationTestPlan;
 
 import java.io.IOException;
 
-public class SimulatedTimeHandler extends MutationTestingTimeHandler {
+/**
+ * Handler for simulating time when testing.
+ * When the system under test should simulate delay,
+ * this writes "Delay: n", where n is an integer for the time in ms to simulate delay.
+ * The system under test should respond with "Delay done" when it has finished simulating the delay.
+ */
+public class SimulatedTimeHandler extends MutationTestTimeHandler {
     private final SutWriter writer;
     private final AsyncInputReader reader;
 
@@ -20,6 +26,12 @@ public class SimulatedTimeHandler extends MutationTestingTimeHandler {
      */
     private int lastTime;
 
+    /**
+     * Constructs.
+     * @param plan the test plan to test based of
+     * @param writer a writer for writing to the system under test
+     * @param reader the reader for reading inputs from the system under test
+     */
     public SimulatedTimeHandler(final MutationTestPlan plan, final SutWriter writer, final AsyncInputReader reader) {
         super(plan);
         this.writer = writer;

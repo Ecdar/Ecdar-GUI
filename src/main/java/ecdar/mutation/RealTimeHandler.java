@@ -5,9 +5,17 @@ import ecdar.mutation.models.MutationTestPlan;
 import java.time.Duration;
 import java.time.Instant;
 
-public class RealTimeHandler extends MutationTestingTimeHandler {
+/**
+ * Handler for handling time during a mutation test.
+ * This performs actions to make the test run in real-time.
+ */
+public class RealTimeHandler extends MutationTestTimeHandler {
     private Instant delayStart, lastTime;
 
+    /**
+     * Constructs.
+     * @param plan the test plan to test with
+     */
     public RealTimeHandler(final MutationTestPlan plan) {
         super(plan);
     }

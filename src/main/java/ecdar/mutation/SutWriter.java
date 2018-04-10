@@ -2,6 +2,9 @@ package ecdar.mutation;
 
 import java.io.IOException;
 
+/**
+ * Writer for writing to a system under test.
+ */
 public interface SutWriter {
     /**
      * Writes to the system.in of the system under test.

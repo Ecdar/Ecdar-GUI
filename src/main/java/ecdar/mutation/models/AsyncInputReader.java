@@ -8,7 +8,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -93,16 +92,24 @@ public class AsyncInputReader {
         return line;
     }
 
-    public void waitAndConsume(final String line) throws InterruptedException, MutationTestingException {
+    /**
+     * Consumes a specific input.
+     * It does not have to be the input in front.
+     * Waits for about 5 seconds for the input to appear.
+     * @param input the input to consume
+     * @throws InterruptedException if an error occurs
+     * @throws MutationTestingException if the input did not appear within 5 seconds
+     */
+    public void waitAndConsume(final String input) throws InterruptedException, MutationTestingException {
         for (int i = 0; i < 100; i++) {
-            if (lines.contains(line)) {
-                lines.remove(line);
+            if (lines.contains(input)) {
+                lines.remove(input);
                 return;
             }
 
             Thread.sleep(50);
         }
 
-        throw new MutationTestingException("System under test did not respond with \"" + line + "\" within 5 seconds");
+        throw new MutationTestingException("System under test did not respond with \"" + input + "\" within 5 seconds");
     }
 }
