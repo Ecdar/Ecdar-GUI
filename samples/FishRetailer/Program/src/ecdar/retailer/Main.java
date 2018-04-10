@@ -1,76 +1,67 @@
 package ecdar.retailer;
 
+import ecdar.sut.TestHandler;
+
 import java.io.IOException;
-import java.time.Duration;
 import java.time.Instant;
-import java.util.Scanner;
 
 public class Main {
     private static final String COIN = "coin";
     private static final String GARNISH = "garnish";
     private static final String TUNA = "tuna";
 
+    private static Instant x;
+    private static int loc;
+    private static int free;
+    private static boolean stepDone;
+    private static TestHandler handler;
 
-    public static void main(String[] args) {
-        int loc = 0;
-        Instant x = Instant.now();
-        int free = 0;
 
-        try {
-            while (loc >= 0) {
-                switch (loc) {
-                    case 0:
-                        if (inputReady()) {
-                            if (read().equals(COIN)) {
-                                free = 1;
-                                x = Instant.now();
-                                loc = 1;
-                            } else loc = -1;
-                        } else if (free == 1 && getValue(x) > 5.0) {
-                            write(GARNISH);
-                            free = 0;
-                        } else delay();
+    public static void main(String[] args) throws IOException, InterruptedException {
+        handler = TestHandler.createHandler(1000.0, true);
 
-                        break;
-                    case 1:
-                        if (inputReady()) loc = -1;
-                        else if (getValue(x) > 2.0) {
-                            write(TUNA);
-                            loc = 0;
-                        } else delay();
+        loc = 0;
+        x = handler.resetTime();
+        free = 0;
 
-                        break;
-                }
+        handler.start(Main::runStep);
+    }
 
-                //write("Debug: loc=" + loc + " x=" + getValue(x));
-            }
+    private static void runStep() throws IOException, InterruptedException {
+        if (loc < 0) throw new RuntimeException("Loc is " + loc);
 
-            write("Debug: Done");
-        } catch (Exception e) {
-            write("Debug: " + e.getMessage());
+        stepDone = false;
+
+        while (!stepDone) {
+            update();
         }
+
+        handler.onStepDone(Main::runStep);
     }
 
-    private static boolean inputReady() throws IOException {
-        System.out.flush();
-        return System.in.available() != 0;
-    }
+    private static void update() throws IOException {
+        switch (loc) {
+            case 0:
+                if (handler.inputReady()) {
+                    if (handler.read().equals(COIN)) {
+                        free = 1;
+                        x = handler.resetTime();
+                        loc = 1;
+                    } else loc = -1;
+                } else if (free == 1 && handler.getValue(x) > 5.0) {
+                    handler.write(GARNISH);
+                    free = 0;
+                } else stepDone = true;
 
-    private static String read() {
-        System.out.flush();
-        return new Scanner(System.in).nextLine();
-    }
+                break;
+            case 1:
+                if (handler.inputReady()) loc = -1;
+                else if (handler.getValue(x) > 2.0) {
+                    handler.write(TUNA);
+                    loc = 0;
+                } else stepDone = true;
 
-    private static void write(final String message) {
-        System.out.println(message);
-        System.out.flush();
-    }
-
-    private static double getValue(final Instant clock) {
-        return Duration.between(clock, Instant.now()).toMillis() / 1000.0;
-    }
-
-    private static void delay() throws InterruptedException {
-        Thread.sleep(250);
+                break;
+        }
     }
 }

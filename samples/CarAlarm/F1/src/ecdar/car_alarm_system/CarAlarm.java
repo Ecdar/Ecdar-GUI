@@ -1,13 +1,9 @@
 package ecdar.car_alarm_system;
 
-import java.io.BufferedReader;
+import ecdar.sut.TestHandler;
+
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class CarAlarm {
     //Inputs
@@ -24,77 +20,85 @@ public class CarAlarm {
     private static final String OUTPUT_SOUND_OFF = "soundOff";
     private static final String OUTPUT_SOUND_ON = "soundOn";
 
-    private enum location {L0, L1, L2, L3, L4, L7, L8, L9, L10, L11, L12, L14, Done}
+    private enum location {L0, L1, L2, L3, L6, L9, L11, L12, L13, L5, L10, L4, Done}
 
     private Instant clockX;
     private boolean sound;
     private boolean alarmLocked;
-    private static List<String> inputs = Collections.synchronizedList(new ArrayList<>()); // use synchronized to be thread safe
+    private static TestHandler handler;
+    private static boolean stepDone;
+    private location nextLocation;
 
 
     CarAlarm(){
     }
 
-    void start() throws InterruptedException {
-        new Thread(() -> {
-            String line;
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-            try {
-                while ((line = reader.readLine()) != null) {
-                    inputs.add(line);
-                }
-            } catch (IOException e) {
-                write("Debug: " + e.getMessage());
-            }
-        }).start();
+    void start() throws InterruptedException, IOException {
+        handler = TestHandler.createHandler(100.0, false);
 
-        clockX = Instant.now();
-        location nextLocation = location.L0;
-        while(!nextLocation.equals(location.Done)){
-            switch (nextLocation) {
-                case L0:
-                    nextLocation = L0();
-                    break;
-                case L1:
-                    nextLocation = L1();
-                    break;
-                case L2:
-                    nextLocation = L2();
-                    break;
-                case L3:
-                    nextLocation = L3();
-                    break;
-                case L4:
-                    nextLocation = L4();
-                    break;
-                case L7:
-                    nextLocation = L7();
-                    break;
-                case L8:
-                    nextLocation = L8();
-                    break;
-                case L9:
-                    nextLocation = L9();
-                    break;
-                case L10:
-                    nextLocation = L10();
-                    break;
-                case L11:
-                    nextLocation = L11();
-                    break;
-                case L12:
-                    nextLocation = L12();
-                    break;
-                case L14:
-                    nextLocation = L14();
-                    break;
-                case Done:
-                    break;
-                default:
-                    throw new RuntimeException("Location " + nextLocation.toString() + " not expected");
-            }
+        clockX = handler.resetTime();
+        nextLocation = location.L0;
+
+        handler.start(this::runStep);
+    }
+
+    private void runStep() throws IOException, InterruptedException {
+        stepDone = false;
+
+        while (!stepDone) {
+            update();
+        }
+
+        handler.onStepDone(this::runStep);
+    }
+
+    private void update() throws IOException, InterruptedException {
+
+        switch (nextLocation) {
+            case L0:
+                nextLocation = L0();
+                break;
+            case L1:
+                nextLocation = L1();
+                break;
+            case L2:
+                nextLocation = L2();
+                break;
+            case L3:
+                nextLocation = L3();
+                break;
+            case L4:
+                nextLocation = L4();
+                break;
+            case L5:
+                nextLocation = L5();
+                break;
+            case L6:
+                nextLocation = L6();
+                break;
+            case L9:
+                nextLocation = L9();
+                break;
+            case L10:
+                nextLocation = L10();
+                break;
+            case L11:
+                nextLocation = L11();
+                break;
+            case L12:
+                nextLocation = L12();
+                break;
+            case L13:
+                nextLocation = L13();
+                break;
+            case Done:
+                break;
+            default:
+                throw new RuntimeException("Location " + nextLocation.toString() + " not expected");
         }
     }
+
+
 
     private location L0() throws InterruptedException {
         if (inputReady()) {
@@ -106,7 +110,7 @@ public class CarAlarm {
                 return location.L2;
             }
         } else {
-            delay();
+            stepDone = true;
             return location.L0;
         }
 
@@ -120,11 +124,11 @@ public class CarAlarm {
             if(input.equals(INPUT_OPEN)) {
                 return location.L0;
             } else if(input.equals(INPUT_LOCK)) {
-                clockX = Instant.now();
+                clockX = handler.resetTime();
                 return location.L3;
             }
         } else {
-            delay();
+            stepDone = true;
             return location.L1;
         }
 
@@ -138,11 +142,11 @@ public class CarAlarm {
             if(input.equals(INPUT_UNLOCK)) {
                 return location.L0;
             } else if(input.equals(INPUT_CLOSE)) {
-                clockX = Instant.now();
+                clockX = handler.resetTime();
                 return location.L3;
             }
         } else {
-            delay();
+            stepDone = true;
             return location.L2;
         }
 
@@ -161,150 +165,129 @@ public class CarAlarm {
                     return location.L2;
                 }
             } else {
-                delay();
+                stepDone = true;
                 return location.L3;
             }
         } else {
             write(OUTPUT_ARMED_ON);
             alarmLocked = false;
-            return location.L14;
+            return location.L4;
         }
         return location.Done;
     }
 
-    private location L4(){
+    private location L4() {
+        if (inputReady()) {
+            String input = read();
+
+            if(input.equals(INPUT_UNLOCK)) {
+                clockX = handler.resetTime();
+                return location.L5;
+            } else if(input.equals(INPUT_OPEN)) {
+                clockX = handler.resetTime();
+                return location.L6;
+            }
+        } else if (!alarmLocked && getValue(clockX) > 400) {
+            clockX = handler.resetTime();
+            write(OUTPUT_ARMED_OFF);
+            return location.L1;
+        } else {
+            stepDone = true;
+            return location.L4;
+        }
+
+        return location.Done;
+    }
+
+    private location L5(){
+        write(OUTPUT_ARMED_OFF);
+        return location.L1;
+    }
+
+    private location L6(){
         write(OUTPUT_ARMED_OFF, OUTPUT_FLASH_ON, OUTPUT_SOUND_ON);
         sound = true;
-        return location.L7;
-    }
-
-    private location L7() {
-        try {
-            if(Duration.between(clockX, Instant.now()).toMillis() <= 3000) {
-                if(inputReady()) {
-                    if (read().equals(INPUT_UNLOCK)) {
-                        clockX = Instant.now();
-                        return location.L12;
-                    }
-                } else {
-                    delay();
-                    return location.L7;
-                }
-            } else {
-                write(OUTPUT_SOUND_OFF);
-                sound = false;
-                return location.L8;
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        //Error happend
-        return location.Done;
-    }
-
-    private location L8(){
-        try {
-            if(Duration.between(clockX, Instant.now()).toMillis() <= 30000){
-                if(inputReady()) {
-                    if (read().equals(INPUT_UNLOCK)) {
-                        clockX = Instant.now();
-                        return location.L12;
-                    }
-                } else {
-                    delay();
-                    return location.L8;
-                }
-            } else if(Duration.between (clockX, Instant.now()).toMillis() > 30000){
-                write(OUTPUT_FLASH_OFF);
-                return location.L9;
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        //Error happend
-        return location.Done;
+        return location.L9;
     }
 
     private location L9() {
-        try {
-            if (inputReady()) {
-                String input = read();
-                if (input.equals(INPUT_CLOSE)) {
+        if(getValue(clockX) <= 30) {
+            if(inputReady()) {
+                if (read().equals(INPUT_UNLOCK)) {
                     clockX = Instant.now();
                     return location.L10;
-                } else if (input.equals(INPUT_UNLOCK)) {
-                    return location.L0;
                 }
+            } else {
+                stepDone = true;
+                return location.L9;
             }
-            delay();
-            return location.L9;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        } else {
+            write(OUTPUT_SOUND_OFF);
+            sound = false;
+            return location.L11;
         }
         //Error happend
         return location.Done;
     }
 
     private location L10(){
-        write(OUTPUT_ARMED_ON);
-        alarmLocked = true;
-        return location.L14;
-    }
-
-    private location L11(){
-        write(OUTPUT_ARMED_OFF);
-        return location.L1;
-    }
-
-    private location L12(){
         write(OUTPUT_FLASH_OFF);
         return location.L0;
     }
 
-    private location L14() throws InterruptedException {
-        if (inputReady()) {
-            String input = read();
-
-            if(input.equals(INPUT_UNLOCK)) {
-                clockX = Instant.now();
+    private location L11(){
+        if (handler.getValue(clockX) <= 300.0){
+            if(inputReady()) {
+                if (read().equals(INPUT_UNLOCK)) {
+                    clockX = Instant.now();
+                    return location.L10;
+                }
+            } else {
+                stepDone = true;
                 return location.L11;
-            } else if(input.equals(INPUT_OPEN)) {
-                clockX = Instant.now();
-                return location.L4;
             }
-        } else if (!alarmLocked && Duration.between (clockX, Instant.now()).toMillis() > 40000) {
-            clockX = Instant.now();
-            write(OUTPUT_ARMED_OFF);
-            return location.L1;
         } else {
-            delay();
-            return location.L14;
+            write(OUTPUT_FLASH_OFF);
+            return location.L12;
         }
 
+        // Error happened
         return location.Done;
     }
 
+    private location L12() {
+        if (inputReady()) {
+            String input = read();
+            if (input.equals(INPUT_CLOSE)) {
+                clockX = handler.resetTime();
+                return location.L13;
+            } else if (input.equals(INPUT_UNLOCK)) {
+                return location.L0;
+            }
+        }
+        stepDone = true;
+        return location.L12;
+    }
 
+    private location L13(){
+        write(OUTPUT_ARMED_ON);
+        alarmLocked = true;
+        return location.L4;
+    }
 
     private static boolean inputReady() {
-        return !inputs.isEmpty();
+        return handler.inputReady();
     }
 
     private static String read() {
-        final String input = inputs.get(0);
-        inputs.remove(0);
-        return input;
+        return handler.read();
     }
 
     private static void write(final String... messages) {
-        System.out.println(String.join("\n", messages));
+        handler.write(messages);
     }
 
     private static double getValue(final Instant clock) {
-        return Duration.between(clock, Instant.now()).toMillis() / 100.0;
-    }
-
-    private static void delay() throws InterruptedException {
-        Thread.sleep(25);
+        return handler.getValue(clock);
     }
 }

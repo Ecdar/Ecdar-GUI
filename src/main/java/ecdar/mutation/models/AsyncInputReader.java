@@ -8,6 +8,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -28,6 +30,13 @@ public class AsyncInputReader {
             try (final BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
+                    // Catch SUT debug messages
+                    final Matcher match = Pattern.compile("Debug: (.*)").matcher(line);
+                    if (match.find()) {
+                        System.out.println("SUT debug: " + match.group(1));
+                        continue;
+                    }
+
                     lines.add(line);
                 }
             } catch (IOException e) {
@@ -54,8 +63,12 @@ public class AsyncInputReader {
     /**
      * Gets if an input is ready to be consumed.
      * @return true iff ready
+     * @throws MutationTestingException if an error has occurred on the error stream
+     * @throws IOException if an IO error has occurred
      */
-    public boolean ready() {
+    public boolean ready() throws IOException, MutationTestingException {
+        checkExceptions();
+
         return !lines.isEmpty();
     }
 
@@ -64,7 +77,7 @@ public class AsyncInputReader {
      * @throws MutationTestingException if an error has occurred on the error stream
      * @throws IOException if an IO error has occurred
      */
-    public void checkExceptions() throws IOException, MutationTestingException {
+    private void checkExceptions() throws IOException, MutationTestingException {
         if (ioException != null) throw ioException;
         if (mutationException != null) throw mutationException;
     }
@@ -77,5 +90,26 @@ public class AsyncInputReader {
         final String line = lines.get(0);
         lines.remove(0);
         return line;
+    }
+
+    /**
+     * Consumes a specific input.
+     * It does not have to be the input in front.
+     * Waits for about 5 seconds for the input to appear.
+     * @param input the input to consume
+     * @throws InterruptedException if an error occurs
+     * @throws MutationTestingException if the input did not appear within 5 seconds
+     */
+    public void waitAndConsume(final String input) throws InterruptedException, MutationTestingException {
+        for (int i = 0; i < 100; i++) {
+            if (lines.contains(input)) {
+                lines.remove(input);
+                return;
+            }
+
+            Thread.sleep(50);
+        }
+
+        throw new MutationTestingException("System under test did not respond with \"" + input + "\" within 5 seconds");
     }
 }

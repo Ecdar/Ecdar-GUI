@@ -11,13 +11,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * A driver for running model-based mutation testing for a single test-case.
@@ -30,7 +26,7 @@ public class TestDriver {
     private Process sut;
     private final SimpleComponentSimulation testModelSimulation, mutantSimulation;
     private BufferedWriter writer;
-    private Instant lastUpdateTime;
+    private MutationTestTimeHandler timeHandler;
 
     /**
      * Constructor.
@@ -89,8 +85,7 @@ public class TestDriver {
                 if (getPlan().getStatus().equals(MutationTestPlan.Status.WORKING)) {
                     getPlan().setStatus(MutationTestPlan.Status.ERROR);
                     Platform.runLater(() -> {
-                        final String errorMessage = "Error while running test-case " + testCase.getId() + ", " +
-                                testCase.getDescription() + ": " + e.getMessage();
+                        final String errorMessage = "Error while running test-case " + testCase.getId() + ": " + e.getMessage();
                         final Text text = new Text(errorMessage);
                         text.setFill(Color.RED);
                         writeProgress(text);
@@ -115,14 +110,16 @@ public class TestDriver {
     private TestResult test() throws IOException, MutationTestingException, InterruptedException {
         final NonRefinementStrategy strategy = testCase.getStrategy();
 
-        //Start process
+        // Start process
         sut = Runtime.getRuntime().exec("java -jar " + Ecdar.projectDirectory.get() + File.separator + getPlan().getSutPath().replace("/", File.separator));
-        lastUpdateTime = Instant.now();
         writer = new BufferedWriter(new OutputStreamWriter(sut.getOutputStream()));
 
         reader = new AsyncInputReader(sut);
 
-        //Begin the new test
+        timeHandler = MutationTestTimeHandler.getHandler(getPlan(), this::writeToSut, reader);
+        timeHandler.onTestStart();
+
+        // Begin the new test
         int step = 0;
         while (step < getStepBounds()) {
             // Get rule and check if its empty
@@ -156,7 +153,7 @@ public class TestDriver {
             step++;
         }
 
-        //Finish test, we now know that either the verdict has been set or the time ran out
+        // Finish test, we now know that either the verdict has been set or the time ran out
         return makeResult(TestResult.Verdict.INCONCLUSIVE, "Out of bounds.");
     }
 
@@ -169,18 +166,16 @@ public class TestDriver {
      * @throws InterruptedException if an error happens when trying to sleep
      */
     private TestResult delay(final StrategyRule rule) throws MutationTestingException, InterruptedException, IOException {
-        final Instant delayDuration = Instant.now();
+        timeHandler.onNewDelayRule();
         Map<String, Double> clockValuations = getClockValuations();
 
         // Keep delaying until the rule has been satisfied,
         // Will return inside while loop if maximum wait time is exceeded or an output has been given
         while ((rule.isSatisfied(clockValuations))) {
             //Check if the maximum wait time has been exceeded, if it is, give inconclusive verdict
-            if (!(Duration.between(delayDuration, Instant.now()).toMillis() / (double)getTimeUnitInMs() <= getPlan().getOutputWaitTime())) {
+            if (timeHandler.isMaxWaitTimeExceeded()) {
                 return makeResult(TestResult.Verdict.INCONCLUSIVE, "Maximum wait time reached without receiving an output.");
             }
-
-            reader.checkExceptions();
 
             if (reader.ready()) {
                 final String output = reader.consume();
@@ -188,14 +183,8 @@ public class TestDriver {
                 final TestResult delayResult = simulateDelay();
                 if (delayResult != null) return delayResult;
 
-                // Catch SUT debug commands
-                final Matcher match = Pattern.compile("Debug: (.*)").matcher(output);
-                if (match.find()) {
-                    System.out.println(match.group(0));
-                } else {
-                    final TestResult outputResult = simulateOutput(output);
-                    if (outputResult != null) return outputResult;
-                }
+                final TestResult outputResult = simulateOutput(output);
+                if (outputResult != null) return outputResult;
             } else {
                 sleep();
                 final TestResult result = simulateDelay();
@@ -213,9 +202,11 @@ public class TestDriver {
     /**
      * Sleeps for 1/4 of a time unit.
      * @throws InterruptedException if an error occurs
+     * @throws IOException if an error occurs
+     * @throws MutationTestingException if an error occurs
      */
-    private void sleep() throws InterruptedException {
-        Thread.sleep(getTimeUnitInMs() / 4);
+    private void sleep() throws InterruptedException, IOException, MutationTestingException {
+        timeHandler.sleep();
     }
 
     /**
@@ -236,8 +227,7 @@ public class TestDriver {
      * @return the test result (if this concludes the test), or null (if it does not)
      */
     private TestResult simulateDelay() {
-        final double waitedTimeUnits = Duration.between(lastUpdateTime, Instant.now()).toMillis() / (double) getTimeUnitInMs();
-        lastUpdateTime = Instant.now();
+        final double waitedTimeUnits = timeHandler.getTimeSinceLastTime();
 
         if (!testModelSimulation.delay(waitedTimeUnits)) {
             return makeResult(TestResult.Verdict.FAIL, "Failed simulating delay on test model.");
@@ -272,8 +262,8 @@ public class TestDriver {
      * @param outputBroadcast the string to write to the system under test.
      * @throws IOException if an IO error occurs
      */
-    private void writeToSut(final String outputBroadcast) throws IOException {
-        //Write to process if it is alive, else act like the process accepts but ignore all inputs.
+    public void writeToSut(final String outputBroadcast) throws IOException {
+        // Write to process if it is alive, else act like the process accepts but ignore all inputs.
         if (sut.isAlive()) {
             writer.write(outputBroadcast + "\n");
             writer.flush();

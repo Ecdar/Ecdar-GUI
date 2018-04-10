@@ -207,8 +207,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
                 if (getPlan().getStatus().equals(MutationTestPlan.Status.WORKING)) {
                     getPlan().setStatus(MutationTestPlan.Status.ERROR);
                     Platform.runLater(() -> {
-                        final String message = "Error while generating test-case " + testCase.getId() + ", " +
-                                testCase.getDescription() + ": " + e.getMessage();
+                        final String message = "Error while generating test-case " + testCase.getId() + ": " + e.getMessage();
                         final Text text = new Text(message);
                         text.setFill(Color.RED);
                         getPlan().writeProgress(text);

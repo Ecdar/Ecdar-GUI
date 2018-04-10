@@ -71,6 +71,8 @@
                                     <JFXTextField fx:id="stepBoundsField" prefWidth="30" alignment="BASELINE_CENTER"/>
                                     <Label text="strategy rules to visit before giving up."/>
                                 </HBox>
+
+                                <JFXCheckBox fx:id="simulateTimeCheckBox" text="Simulate time."/>
                             </VBox>
                         </HBox>
 

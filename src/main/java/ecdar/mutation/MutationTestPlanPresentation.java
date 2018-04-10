@@ -99,12 +99,22 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         initializePositiveIntegerTextField(controller.stepBoundsField, getPlan().getStepBoundsProperty());
 
         controller.demonicCheckBox.selectedProperty().bindBidirectional(getPlan().getDemonicProperty());
-        controller.angelicBox.selectedProperty().bindBidirectional(getPlan().getAngelicWhenExportProperty());
-
-
         installTooltip(controller.demonicCheckBox, "Use this, if the test model is not input-enabled, " +
                 "and you want to ignore mutants leading to these missing inputs. " +
                 "We apply angelic completion on the mutants.");
+
+        controller.simulateTimeCheckBox.selectedProperty().bindBidirectional(getPlan().getSimulateTimeProperty());
+        installTooltip(controller.simulateTimeCheckBox, "Simulates time by passing delays as inputs \"Delay: n\", " +
+                "where n the simulated time to delay in ms." +
+                "The system under test must always output after a delay." +
+                "It you do no wish to trigger an output in your model, output \"null\", which we ignore.");
+
+
+        controller.angelicBox.selectedProperty().bindBidirectional(getPlan().getAngelicWhenExportProperty());
+
+
+
+
         initializeWidthAndHeight();
 
 
@@ -442,6 +452,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         regions.add(controller.exportDependantArea);
         regions.add(controller.outputWaitTimeBox);
         regions.add(controller.timeUnitBox);
+        regions.add(controller.simulateTimeCheckBox);
 
         return regions;
     }

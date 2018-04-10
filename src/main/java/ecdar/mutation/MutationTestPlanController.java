@@ -81,6 +81,7 @@ public class MutationTestPlanController {
     public JFXTextField stepBoundsField;
     public JFXButton failedTestButton;
     public JFXButton inconclusiveTestButton;
+    public JFXCheckBox simulateTimeCheckBox;
 
 
     /* Mutation fields */
