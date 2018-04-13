@@ -170,7 +170,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
     private void initializeTestResults() {
         controller.passedText.setText("Passed: " + getPlan().getPassedResults().size());
         getPlan().getPassedResults().addListener((ListChangeListener<TestResult>) c -> {
-            while (c.next()) controller.passedText.setText("passed: " + c.getList().size());
+            while (c.next()) controller.passedText.setText("Passed: " + c.getList().size());
         });
 
         initializeInconclusiveResults();
