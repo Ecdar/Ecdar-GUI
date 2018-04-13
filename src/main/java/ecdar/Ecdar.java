@@ -134,9 +134,7 @@ public class Ecdar extends Application {
         project = new Project();
 
         // Set the title for the application
-        final String [] names = {"Ecdar", "UPPAAL I/O", "Ecdar I/O", "UPPAAL Ulrik", "Edgar", "Ecdar 2.0",
-                "Ecdar 0.11", "Ec/dar", "Æcdar", "Supreme Ecdar", "Ecdar Resurrection", "Ecdar SimMut" };
-        stage.setTitle(names[new Random().nextInt((names.length))]);
+        stage.setTitle("Ecdar 2.1");
 
         // Load the fonts required for the project
         IconFontFX.register(GoogleMaterialDesignIcons.getIconFont());
