@@ -232,7 +232,7 @@ public class TestDriver {
         if (!testModelSimulation.delay(waitedTimeUnits)) {
             return makeResult(TestResult.Verdict.FAIL_NORMAL, "Failed simulating delay on test model.");
         } else if (!mutantSimulation.delay(waitedTimeUnits)) {
-            return makeResult(TestResult.Verdict.PASS, null);
+            return makeResult(TestResult.Verdict.INCONCLUSIVE, "Could not simulate delay on mutant");
         }
 
         return null;
