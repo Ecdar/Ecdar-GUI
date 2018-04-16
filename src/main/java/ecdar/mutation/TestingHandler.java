@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 
 /**
  * A test driver that runs model-based mutation test-cases on a system under test.
- * The test driver displays information about results.
+ * The test driver displays information about resultViews.
  * You can retest test-cases, also while this is still conducting tests.
  */
 public class TestingHandler implements ConcurrentJobsHandler {

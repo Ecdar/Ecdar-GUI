@@ -127,7 +127,7 @@ public class TestDriver {
             // Get rule and check if its empty
             final StrategyRule rule = strategy.getRule(testModelSimulation, mutantSimulation);
             if (rule == null) {
-                return makeResult(TestResult.Verdict.INCONCLUSIVE, "No rule to perform.");
+                return makeResult(TestResult.Verdict.NO_RULE, "No rule to perform.");
             } else {
                 // Check if rule is an delay rule or output action rule, if it is either, perform delay,
                 // if it is an input action perform input
@@ -137,9 +137,9 @@ public class TestDriver {
                 } else if (rule instanceof  ActionRule){
                     final String sync = ((ActionRule) rule).getSync();
                     if (!testModelSimulation.isDeterministic(sync, EdgeStatus.INPUT)) {
-                        return makeResult(TestResult.Verdict.ABORT, "Non-deterministic choice for test model with input " + sync + ".");
+                        return makeResult(TestResult.Verdict.NON_DETERMINISM, "Non-deterministic choice for test model with input " + sync + ".");
                     } else if (!mutantSimulation.isDeterministic(sync, EdgeStatus.INPUT)) {
-                        return makeResult(TestResult.Verdict.ABORT, "Non-deterministic choice for mutant with input " + sync + ".");
+                        return makeResult(TestResult.Verdict.NON_DETERMINISM, "Non-deterministic choice for mutant with input " + sync + ".");
                     } else {
                         testModelSimulation.runInputAction(sync);
                         mutantSimulation.runInputAction(sync);
@@ -156,7 +156,7 @@ public class TestDriver {
         }
 
         // Finish test, we ran out of step bounds
-        return makeResult(TestResult.Verdict.ABORT, "Out of bounds.");
+        return makeResult(TestResult.Verdict.OUT_OF_BOUNDS, "Out of bounds.");
     }
 
     /**
@@ -176,7 +176,7 @@ public class TestDriver {
         while ((rule.isSatisfied(clockValuations))) {
             //Check if the maximum wait time has been exceeded, if it is, give inconclusive verdict
             if (timeHandler.isMaxWaitTimeExceeded()) {
-                return makeResult(TestResult.Verdict.ABORT, "Maximum wait time reached without receiving an output.");
+                return makeResult(TestResult.Verdict.MAX_WAIT, "Maximum wait time reached without receiving an output.");
             }
 
             if (reader.ready()) {
@@ -230,7 +230,7 @@ public class TestDriver {
         final double waitedTimeUnits = timeHandler.getTimeSinceLastTime();
 
         if (!testModelSimulation.delay(waitedTimeUnits)) {
-            return makeResult(TestResult.Verdict.FAIL, "Failed simulating delay on test model.");
+            return makeResult(TestResult.Verdict.FAIL_NORMAL, "Failed simulating delay on test model.");
         } else if (!mutantSimulation.delay(waitedTimeUnits)) {
             return makeResult(TestResult.Verdict.PASS, null);
         }
@@ -246,11 +246,11 @@ public class TestDriver {
      */
     private TestResult simulateOutput(final String output) throws MutationTestingException {
         if (!testModelSimulation.isDeterministic(output, EdgeStatus.OUTPUT)) {
-            return makeResult(TestResult.Verdict.ABORT, "Non-deterministic choice for test model with output " + output + ".");
+            return makeResult(TestResult.Verdict.NON_DETERMINISM, "Non-deterministic choice for test model with output " + output + ".");
         } else if (!mutantSimulation.isDeterministic(output, EdgeStatus.OUTPUT)) {
-            return makeResult(TestResult.Verdict.ABORT, "Non-deterministic choice with mutant output " + output + ".");
+            return makeResult(TestResult.Verdict.NON_DETERMINISM, "Non-deterministic choice with mutant output " + output + ".");
         } else if (!testModelSimulation.runOutputAction(output)){
-            return makeResult(TestResult.Verdict.FAIL, "Failed simulating output " + output + " on test model.");
+            return makeResult(TestResult.Verdict.FAIL_NORMAL, "Failed simulating output " + output + " on test model.");
         } else if (!mutantSimulation.runOutputAction(output)){
             return makeResult(TestResult.Verdict.PASS, null);
         }

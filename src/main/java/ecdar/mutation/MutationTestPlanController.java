@@ -9,6 +9,9 @@ import ecdar.abstractions.Component;
 import ecdar.mutation.models.MutationTestCase;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.mutation.models.TestResult;
+import javafx.beans.property.SimpleListProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
@@ -19,6 +22,7 @@ import javafx.scene.text.TextFlow;
 import javafx.stage.FileChooser;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -87,12 +91,25 @@ public class MutationTestPlanController {
     public HBox abortedRegion;
     public VBox abortedResults;
     public Label inconclusiveText;
+    public JFXCheckBox passed;
+    public JFXCheckBox outOfBounds;
+    public JFXCheckBox maxWait;
+    public JFXCheckBox nonDeterminism;
+    public JFXCheckBox inc;
+    public JFXCheckBox noRule;
+    public JFXCheckBox mutNoDelay;
+    public VBox resultViews;
+    public JFXButton retestButton;
+    public JFXCheckBox failed;
+    public JFXCheckBox primaryFailed;
+    public JFXCheckBox normalFailed;
 
 
     /* Mutation fields */
 
     private MutationTestPlan plan;
     private TestingHandler testingHandler;
+    public final ObservableList<TestResult> resultsToShow = new SimpleListProperty<>(FXCollections.observableArrayList());
 
 
     /* Properties */
@@ -163,37 +180,14 @@ public class MutationTestPlanController {
     }
 
     /**
-     * Triggered when pressed the primary failed test button.
-     * Retests the primary failed test-cases.
+     * Triggered when pressed the retest button.
+     * Retests the test-cases that are showing.
      */
-    public void onPrimaryFailedTestButtonPressed() {
+    public void onRetestButtonPressed() {
         synchronized (getPlan()) {
-            final List<MutationTestCase> cases = getPlan().getPrimaryFailedResults().stream().map(TestResult::getTestCase).collect(Collectors.toList());
-            getPlan().getPrimaryFailedResults().clear();
-            getTestingHandler().retest(cases);
-        }
-    }
+            final List<MutationTestCase> cases = resultsToShow.stream().map(TestResult::getTestCase).collect(Collectors.toList());
 
-    /**
-     * Triggered when pressed the failed test button.
-     * Retests the failed test-cases.
-     */
-    public void onFailedTestButtonPressed() {
-        synchronized (getPlan()) {
-            final List<MutationTestCase> cases = getPlan().getFailedResults().stream().map(TestResult::getTestCase).collect(Collectors.toList());
-            getPlan().getFailedResults().clear();
-            getTestingHandler().retest(cases);
-        }
-    }
-
-    /**
-     * Triggered when pressed the aborted test button.
-     * Retests the aborted test-cases.
-     */
-    public void onAbortedTestButtonPressed() {
-        synchronized (getPlan()) {
-            final List<MutationTestCase> cases = getPlan().getAbortedResults().stream().map(TestResult::getTestCase).collect(Collectors.toList());
-            getPlan().getAbortedResults().clear();
+            resultsToShow.forEach(result -> getPlan().getResults().remove(result));
             getTestingHandler().retest(cases);
         }
     }

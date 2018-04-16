@@ -20,10 +20,7 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Orientation;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
-import javafx.scene.control.Control;
-import javafx.scene.control.Label;
-import javafx.scene.control.Separator;
-import javafx.scene.control.Tooltip;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -32,7 +29,6 @@ import javafx.scene.text.Text;
 
 import java.time.Duration;
 import java.util.*;
-import java.util.function.Consumer;
 
 /**
  * Presentation for a test plan with model-based mutation testing.
@@ -141,7 +137,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
     }
 
     /**
-     * Initializes UI elements for displaying progress and results.
+     * Initializes UI elements for displaying progress and resultViews.
      */
     private void initializeProgressAndResultsTexts() {
         // Show info when added
@@ -165,83 +161,89 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
     }
 
     /**
-     * Initializes test results.
+     * Initializes test resultViews.
      */
+    // TODO optimize
     private void initializeTestResults() {
-        controller.passedText.setText("Passed: " + getPlan().getPassedResults().size());
-        getPlan().getPassedResults().addListener((ListChangeListener<TestResult>) c -> {
-            while (c.next()) controller.passedText.setText("Passed: " + c.getList().size());
+        controller.passed.selectedProperty().bindBidirectional(getPlan().getShouldShowProperty(TestResult.Verdict.PASS));
+
+        // Sync inconclusive overall checkbox with all its minor checkboxes
+        controller.inc.setOnAction(e -> {
+            final boolean isSelected = ((CheckBox)e.getSource()).isSelected();
+            Arrays.asList(TestResult.getIncVerdicts()).forEach(verdict ->
+                    getPlan().getShouldShowProperty(verdict).set(isSelected)
+            );
+        });
+        updateIncCheck();
+        getPlan().getShouldShowProperty(TestResult.Verdict.OUT_OF_BOUNDS).addListener(((observable, oldValue, newValue) -> updateIncCheck()));
+        getPlan().getShouldShowProperty(TestResult.Verdict.MAX_WAIT).addListener(((observable, oldValue, newValue) -> updateIncCheck()));
+        getPlan().getShouldShowProperty(TestResult.Verdict.NON_DETERMINISM).addListener(((observable, oldValue, newValue) -> updateIncCheck()));
+        getPlan().getShouldShowProperty(TestResult.Verdict.NO_RULE).addListener(((observable, oldValue, newValue) -> updateIncCheck()));
+        getPlan().getShouldShowProperty(TestResult.Verdict.MUT_NO_DELAY).addListener(((observable, oldValue, newValue) -> updateIncCheck()));
+
+        // Bind inconclusive checkboxes with model
+        controller.outOfBounds.selectedProperty().bindBidirectional(getPlan().getShouldShowProperty(TestResult.Verdict.OUT_OF_BOUNDS));
+        controller.maxWait.selectedProperty().bindBidirectional(getPlan().getShouldShowProperty(TestResult.Verdict.MAX_WAIT));
+        controller.nonDeterminism.selectedProperty().bindBidirectional(getPlan().getShouldShowProperty(TestResult.Verdict.NON_DETERMINISM));
+        controller.noRule.selectedProperty().bindBidirectional(getPlan().getShouldShowProperty(TestResult.Verdict.NO_RULE));
+        controller.mutNoDelay.selectedProperty().bindBidirectional(getPlan().getShouldShowProperty(TestResult.Verdict.MUT_NO_DELAY));
+
+        // Sync failed overall checkbox with all its minor checkboxes
+        controller.failed.setOnAction(e -> {
+            final boolean isSelected = ((CheckBox)e.getSource()).isSelected();
+            Arrays.asList(TestResult.getFailedVerdicts()).forEach(verdict ->
+                    getPlan().getShouldShowProperty(verdict).set(isSelected)
+            );
+        });
+        getPlan().getShouldShowProperty(TestResult.Verdict.FAIL_PRIMARY).addListener(((observable, oldValue, newValue) -> updateFailedCheck()));
+        getPlan().getShouldShowProperty(TestResult.Verdict.FAIL_NORMAL).addListener(((observable, oldValue, newValue) -> updateFailedCheck()));
+
+        // Bind failed checkboxes with model
+        controller.primaryFailed.selectedProperty().bindBidirectional(getPlan().getShouldShowProperty(TestResult.Verdict.FAIL_PRIMARY));
+        controller.normalFailed.selectedProperty().bindBidirectional(getPlan().getShouldShowProperty(TestResult.Verdict.FAIL_NORMAL));
+
+
+        updateResults();
+
+        // Update results to show when there are new results
+        getPlan().getResults().addListener((ListChangeListener<TestResult>) c -> updateResults());
+
+        // Update results when a should-show property is changed
+        Arrays.asList(TestResult.Verdict.values()).forEach(verdict -> {
+            getPlan().getShouldShowProperty(verdict).addListener(((observable, oldValue, newValue) -> updateResults()));
         });
 
-        initializePrimaryFailedResults();
-        initializeFailedResults();
-        initializeAbortedResults();
+        initializeExpandableList(controller.resultsToShow, controller.resultViews.getChildren());
+    }
+
+    private void updateIncCheck() {
+        controller.inc.setSelected(Arrays.stream(TestResult.getIncVerdicts()).allMatch(verdict -> getPlan().shouldShow(verdict)));
+    }
+
+    private void updateFailedCheck() {
+        controller.failed.setSelected(Arrays.stream(TestResult.getFailedVerdicts()).allMatch(verdict -> getPlan().shouldShow(verdict)));
+    }
+
+    private void updateResults() {
+        controller.passed.setText("Passed: " + getPlan().getResults(TestResult.Verdict.PASS).size());
+        controller.inc.setText("Inconclusive: " + getPlan().getResults(TestResult.getIncVerdicts()).size());
+        controller.outOfBounds.setText("Out of bounds: " + getPlan().getResults(TestResult.Verdict.OUT_OF_BOUNDS).size());
+        controller.maxWait.setText("Max waiting time exceeded: " + getPlan().getResults(TestResult.Verdict.MAX_WAIT).size());
+        controller.nonDeterminism.setText("Non-determinism violated: " + getPlan().getResults(TestResult.Verdict.NON_DETERMINISM).size());
+        controller.noRule.setText("No rule: " + getPlan().getResults(TestResult.Verdict.NO_RULE).size());
+        controller.mutNoDelay.setText("Mutant unable to delay: " + getPlan().getResults(TestResult.Verdict.MUT_NO_DELAY).size());
+        controller.failed.setText("Failed: " + getPlan().getResults(TestResult.getFailedVerdicts()).size());
+        controller.primaryFailed.setText("Primary: " + getPlan().getResults(TestResult.Verdict.FAIL_PRIMARY).size());
+        controller.normalFailed.setText("Other: " + getPlan().getResults(TestResult.Verdict.FAIL_NORMAL).size());
+
+        controller.resultsToShow.clear();
+        controller.resultsToShow.addAll(getPlan().getResultsToShow());
     }
 
     /**
-     * Initializes handling of primary failed results.
-     * Expands/collapses results, when pressed on the text.
-     * Shows reset button only when there is something to retest.
-     * Makes each result expandable.
-     */
-    private void initializePrimaryFailedResults() {
-        VisibilityHelper.initializeExpand(getPlan().getShowPrimaryFailedProperty(), controller.primaryFailedText, controller.primaryFailedRegion);
-
-        final Consumer<List> consumer = list -> {
-            controller.primaryFailedText.setText("Primary Failed: " + list.size());
-            VisibilityHelper.setVisibility(!list.isEmpty(), controller.primaryFailedTestButton);
-        };
-
-        consumer.accept(getPlan().getPrimaryFailedResults());
-        getPlan().getPrimaryFailedResults().addListener((ListChangeListener<TestResult>) c -> consumer.accept(c.getList()));
-
-        initializeExpandableList(getPlan().getPrimaryFailedResults(), controller.primaryFailedResults.getChildren());
-    }
-
-    /**
-     * Initializes handling of failed results.
-     * Expands/collapses results, when pressed on the text.
-     * Shows reset button only when there is something to retest.
-     * Makes each result expandable.
-     */
-    private void initializeFailedResults() {
-        VisibilityHelper.initializeExpand(getPlan().getShowFailedProperty(), controller.failedText, controller.failedRegion);
-
-        final Consumer<List> consumer = list -> {
-            controller.failedText.setText("Failed: " + list.size());
-            VisibilityHelper.setVisibility(!list.isEmpty(), controller.failedTestButton);
-        };
-
-        consumer.accept(getPlan().getFailedResults());
-        getPlan().getFailedResults().addListener((ListChangeListener<TestResult>) c -> consumer.accept(c.getList()));
-
-        initializeExpandableList(getPlan().getFailedResults(), controller.failedResults.getChildren());
-    }
-
-    /**
-     * Initializes handling of aborted results.
-     * Expands/collapses results, when pressed on the text.
-     * Shows reset button only when there is something to retest.
-     * Makes each result expandable.
-     */
-    private void initializeAbortedResults() {
-        VisibilityHelper.initializeExpand(getPlan().getShowAbortedProperty(), controller.abortedText, controller.abortedRegion);
-
-        final Consumer<List> consumer = list -> {
-            controller.abortedText.setText("Aborted: " + list.size());
-            VisibilityHelper.setVisibility(!list.isEmpty(), controller.abortedTestButton);
-        };
-
-        consumer.accept(getPlan().getAbortedResults());
-        getPlan().getAbortedResults().addListener((ListChangeListener<TestResult>) c -> consumer.accept(c.getList()));
-
-        initializeExpandableList(getPlan().getAbortedResults(), controller.abortedResults.getChildren());
-    }
-
-    /**
-     * Initializes handling of a list of test results.
+     * Initializes handling of a list of test resultViews.
      * This method makes sure that the view list is adjusted when the model list changes.
-     * @param modelList the list of test results
+     * @param modelList the list of test resultViews
      * @param viewList the list of nodes to add and remove nodes from
      */
     private void initializeExpandableList(final ObservableList<TestResult> modelList, final List<Node> viewList) {
@@ -261,7 +263,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
 
     /**
      * Adds a test result to af view list.
-     * @param modelList the model list containing the test results
+     * @param modelList the model list containing the test resultViews
      * @param viewList the view list visible to the user
      * @param contentModelMap the map from models to views
      * @param testResult the test result to add
@@ -292,7 +294,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      * Constructs content for a test result.
      * This includes a label containing info, and a retest button.
      * @param testResult the test result
-     * @param resultList list of results to remove the test result from, when retesting
+     * @param resultList list of resultViews to remove the test result from, when retesting
      * @return the content
      */
     private Node makeResultContent(final TestResult testResult, final List<? extends TestResult> resultList) {

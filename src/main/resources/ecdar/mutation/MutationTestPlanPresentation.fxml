@@ -108,43 +108,50 @@
                     <Label fx:id="testCasesText"/>
                     <Label fx:id="testTimeText"/>
 
-                    <Label fx:id="passedText"/>
-                    <Label fx:id="inconclusiveText"/>
+                    <VBox spacing="4">
+                        <JFXCheckBox fx:id="passed"/>
 
-                    <HBox>
-                        <Label fx:id="primaryFailedText" prefWidth="130"/>
-                        <JFXButton fx:id="primaryFailedTestButton" text="Retest" prefWidth="65"
-                                   style="-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;"
-                                   onMousePressed="#onPrimaryFailedTestButtonPressed"/>
-                    </HBox>
-                    <HBox fx:id="primaryFailedRegion" spacing="8">
-                        <Separator orientation="VERTICAL"/>
-                        <VBox fx:id="primaryFailedResults" spacing="8"/>
-                    </HBox>
+                        <JFXCheckBox fx:id="inc"/>
+                        <HBox>
+                            <padding><Insets left="28"/></padding>
+                            <JFXCheckBox fx:id="outOfBounds"/>
+                        </HBox>
+                        <HBox>
+                            <padding><Insets left="28"/></padding>
+                            <JFXCheckBox fx:id="maxWait"/>
+                        </HBox>
+                        <HBox>
+                            <padding><Insets left="28"/></padding>
+                            <JFXCheckBox fx:id="nonDeterminism"/>
+                        </HBox>
+                        <HBox>
+                            <padding><Insets left="28"/></padding>
+                            <JFXCheckBox fx:id="noRule"/>
+                        </HBox>
+                        <HBox>
+                            <padding><Insets left="28"/></padding>
+                            <JFXCheckBox fx:id="mutNoDelay"/>
+                        </HBox>
 
-                    <HBox>
-                        <Label fx:id="failedText" prefWidth="130"/>
-                        <JFXButton fx:id="failedTestButton" text="Retest" prefWidth="65"
-                                   style="-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;"
-                                   onMousePressed="#onFailedTestButtonPressed"/>
-                    </HBox>
-                    <HBox fx:id="failedRegion" spacing="8">
-                        <Separator orientation="VERTICAL"/>
-                        <VBox fx:id="failedResults" spacing="8"/>
-                    </HBox>
+                        <JFXCheckBox fx:id="failed"/>
+                        <HBox>
+                            <padding><Insets left="28"/></padding>
+                            <JFXCheckBox fx:id="primaryFailed"/>
+                        </HBox>
+                        <HBox>
+                            <padding><Insets left="28"/></padding>
+                            <JFXCheckBox fx:id="normalFailed"/>
+                        </HBox>
+                    </VBox>
 
-                    <HBox>
-                        <Label fx:id="abortedText" prefWidth="130"/>
-                        <JFXButton fx:id="abortedTestButton" text="Retest" prefWidth="65"
-                                   style="-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;"
-                                   onMousePressed="#onAbortedTestButtonPressed"/>
-                    </HBox>
-                    <HBox fx:id="abortedRegion" spacing="8">
-                        <Separator orientation="VERTICAL"/>
-                        <VBox fx:id="abortedResults" spacing="8"/>
-                    </HBox>
+                    <JFXButton fx:id="retestButton" text="Retest Showing Results" prefWidth="180"
+                               style="-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;"
+                               onMousePressed="#onRetestButtonPressed"/>
+
+                    <VBox fx:id="resultViews" spacing="8"/>
                 </VBox>
             </VBox>
         </VBox>
+
     </ScrollPane>
 </fx:root>

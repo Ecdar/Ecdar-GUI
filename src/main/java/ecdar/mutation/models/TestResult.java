@@ -6,7 +6,7 @@ import ecdar.mutation.SimpleComponentSimulation;
  * A result of a model-based mutation test with respect to a single test-case.
  */
 public class TestResult extends ExpandableContent {
-    public enum Verdict {INCONCLUSIVE, PASS, FAIL, PRIMARY_FAIL, ABORT}
+    public enum Verdict {PASS, FAIL_NORMAL, FAIL_PRIMARY, OUT_OF_BOUNDS, MAX_WAIT, NO_RULE, NON_DETERMINISM, MUT_NO_DELAY}
 
     private final Verdict verdict;
     private final MutationTestCase testCase;
@@ -38,5 +38,13 @@ public class TestResult extends ExpandableContent {
 
     public MutationTestCase getTestCase() {
         return testCase;
+    }
+
+    public static Verdict[] getIncVerdicts() {
+        return new Verdict[]{Verdict.OUT_OF_BOUNDS, Verdict.MAX_WAIT, Verdict.NON_DETERMINISM, Verdict.NO_RULE, Verdict.MUT_NO_DELAY};
+    }
+
+    public static Verdict[] getFailedVerdicts() {
+        return new Verdict[]{Verdict.FAIL_NORMAL, Verdict.FAIL_PRIMARY};
     }
 }
