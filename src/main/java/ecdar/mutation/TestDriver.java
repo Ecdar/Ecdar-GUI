@@ -230,9 +230,11 @@ public class TestDriver {
         final double waitedTimeUnits = timeHandler.getTimeSinceLastTime();
 
         if (!testModelSimulation.delay(waitedTimeUnits)) {
-            return makeResult(TestResult.Verdict.FAIL_NORMAL, "Failed simulating delay on test model.");
+            String reason = "Failed simulating delay on test model";
+            if(mutantSimulation.delay(waitedTimeUnits)) return makeResult(TestResult.Verdict.FAIL_PRIMARY, reason);
+            else return makeResult(TestResult.Verdict.FAIL_NORMAL, reason);
         } else if (!mutantSimulation.delay(waitedTimeUnits)) {
-            return makeResult(TestResult.Verdict.INCONCLUSIVE, "Could not simulate delay on mutant");
+            return makeResult(TestResult.Verdict.MUT_NO_DELAY, "Could not simulate delay on mutant");
         }
 
         return null;
@@ -250,7 +252,9 @@ public class TestDriver {
         } else if (!mutantSimulation.isDeterministic(output, EdgeStatus.OUTPUT)) {
             return makeResult(TestResult.Verdict.NON_DETERMINISM, "Non-deterministic choice with mutant output " + output + ".");
         } else if (!testModelSimulation.runOutputAction(output)){
-            return makeResult(TestResult.Verdict.FAIL_NORMAL, "Failed simulating output " + output + " on test model.");
+            String reason = "Failed simulating output " + output + " on test model.";
+            if (mutantSimulation.runOutputAction(output)) return makeResult(TestResult.Verdict.FAIL_PRIMARY, reason);
+            else return makeResult(TestResult.Verdict.FAIL_NORMAL, reason);
         } else if (!mutantSimulation.runOutputAction(output)){
             return makeResult(TestResult.Verdict.PASS, null);
         }
