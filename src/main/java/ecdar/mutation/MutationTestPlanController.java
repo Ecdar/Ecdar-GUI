@@ -185,9 +185,11 @@ public class MutationTestPlanController {
      */
     public void onRetestButtonPressed() {
         synchronized (getPlan()) {
+            final List<TestResult> results = new ArrayList<>(resultsToShow);
             final List<MutationTestCase> cases = resultsToShow.stream().map(TestResult::getTestCase).collect(Collectors.toList());
 
-            resultsToShow.forEach(result -> getPlan().getResults().remove(result));
+            results.forEach(result -> getPlan().removeResult(result));
+
             getTestingHandler().retest(cases);
         }
     }

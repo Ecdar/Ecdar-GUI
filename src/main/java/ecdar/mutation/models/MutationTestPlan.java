@@ -472,4 +472,8 @@ public class MutationTestPlan extends HighLevelModelObject {
     private List<TestResult.Verdict> getVerdictsToShow() {
         return shouldShowMap.keySet().stream().filter(verdict -> shouldShowMap.get(verdict).get()).collect(Collectors.toList());
     }
+
+    public synchronized void removeResult(final TestResult result) {
+        getResults().remove(result);
+    }
 }
