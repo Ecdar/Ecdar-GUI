@@ -46,6 +46,7 @@ public class TestDriver {
         mutantSimulation = new SimpleComponentSimulation(testCase.getMutant());
     }
 
+
     /* Properties */
 
     private MutationTestPlan getPlan() {
@@ -59,6 +60,7 @@ public class TestDriver {
     private int getTimeUnitInMs() {
         return getPlan().getTimeUnit();
     }
+
 
     /* Other */
 
@@ -219,8 +221,6 @@ public class TestDriver {
         clockValuations.putAll(mutantSimulation.getFullyQuantifiedClockValuations());
         return clockValuations;
     }
-
-
 
     /**
      * Simulates an output on the test model and mutant model.

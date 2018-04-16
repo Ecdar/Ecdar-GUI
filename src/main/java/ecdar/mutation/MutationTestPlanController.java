@@ -63,11 +63,9 @@ public class MutationTestPlanController {
     public Label mutantsText;
     public Label testCasesText;
     public Label passedText;
-    public Label inconclusiveText;
     public Label failedText;
     public StackPane root;
     public JFXTextField verifytgaTriesField;
-    public VBox inconclusiveResults;
     public VBox failedResults;
     public JFXTextField timeUnitField;
     public HBox timeUnitBox;
@@ -75,13 +73,20 @@ public class MutationTestPlanController {
     public Label advancedOptionsLabel;
     public Pane advancedOptions;
     public HBox failedRegion;
-    public HBox inconclusiveRegion;
     public Label testTimeText;
     public HBox operatorsOuterRegion;
     public JFXTextField stepBoundsField;
     public JFXButton failedTestButton;
-    public JFXButton inconclusiveTestButton;
     public JFXCheckBox simulateTimeCheckBox;
+    public Label primaryFailedText;
+    public JFXButton primaryFailedTestButton;
+    public HBox primaryFailedRegion;
+    public VBox primaryFailedResults;
+    public Label abortedText;
+    public JFXButton abortedTestButton;
+    public HBox abortedRegion;
+    public VBox abortedResults;
+    public Label inconclusiveText;
 
 
     /* Mutation fields */
@@ -158,13 +163,13 @@ public class MutationTestPlanController {
     }
 
     /**
-     * Triggered when pressed the inconclusive test button.
-     * Retests the inconclusive test-cases.
+     * Triggered when pressed the primary failed test button.
+     * Retests the primary failed test-cases.
      */
-    public void onInconclusiveTestButtonPressed() {
+    public void onPrimaryFailedTestButtonPressed() {
         synchronized (getPlan()) {
-            final List<MutationTestCase> cases = getPlan().getInconclusiveResults().stream().map(TestResult::getTestCase).collect(Collectors.toList());
-            getPlan().getInconclusiveResults().clear();
+            final List<MutationTestCase> cases = getPlan().getPrimaryFailedResults().stream().map(TestResult::getTestCase).collect(Collectors.toList());
+            getPlan().getPrimaryFailedResults().clear();
             getTestingHandler().retest(cases);
         }
     }
@@ -177,6 +182,18 @@ public class MutationTestPlanController {
         synchronized (getPlan()) {
             final List<MutationTestCase> cases = getPlan().getFailedResults().stream().map(TestResult::getTestCase).collect(Collectors.toList());
             getPlan().getFailedResults().clear();
+            getTestingHandler().retest(cases);
+        }
+    }
+
+    /**
+     * Triggered when pressed the aborted test button.
+     * Retests the aborted test-cases.
+     */
+    public void onAbortedTestButtonPressed() {
+        synchronized (getPlan()) {
+            final List<MutationTestCase> cases = getPlan().getAbortedResults().stream().map(TestResult::getTestCase).collect(Collectors.toList());
+            getPlan().getAbortedResults().clear();
             getTestingHandler().retest(cases);
         }
     }

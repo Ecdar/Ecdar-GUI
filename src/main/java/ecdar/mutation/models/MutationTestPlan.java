@@ -69,12 +69,16 @@ public class MutationTestPlan extends HighLevelModelObject {
     private final StringProperty testTimeText = new SimpleStringProperty("");
 
     private final ListProperty<TestResult> passedResults = new SimpleListProperty<>(FXCollections.observableArrayList());
-
-    private final BooleanProperty showInconclusive = new SimpleBooleanProperty(false);
     private final ListProperty<TestResult> inconclusiveResults = new SimpleListProperty<>(FXCollections.observableArrayList());
+
+    private final BooleanProperty showPrimaryFailed = new SimpleBooleanProperty(false);
+    private final ListProperty<TestResult> primaryFailedResults = new SimpleListProperty<>(FXCollections.observableArrayList());
 
     private final BooleanProperty showFailed = new SimpleBooleanProperty(false);
     private final ListProperty<TestResult> failedResults = new SimpleListProperty<>(FXCollections.observableArrayList());
+
+    private final BooleanProperty showAborted = new SimpleBooleanProperty(false);
+    private final ListProperty<TestResult> abortedResults = new SimpleListProperty<>(FXCollections.observableArrayList());
 
     // For exporting
     private final BooleanProperty angelicWhenExport = new SimpleBooleanProperty(false);
@@ -235,18 +239,22 @@ public class MutationTestPlan extends HighLevelModelObject {
         return passedResults.get();
     }
 
-    public boolean getShowInconclusive() {
-        return showInconclusive.get();
-    }
-    public BooleanProperty getShowInconclusiveProperty() {
-        return showInconclusive;
-    }
-    public void setShowInconclusive(final boolean showInconclusive) {
-        this.showInconclusive.set(showInconclusive);
-    }
-
     public ObservableList<TestResult> getInconclusiveResults() {
         return inconclusiveResults.get();
+    }
+
+    public boolean isShowPrimaryFailed() {
+        return showPrimaryFailed.get();
+    }
+    public BooleanProperty getShowPrimaryFailedProperty() {
+        return showPrimaryFailed;
+    }
+    public void setShowPrimaryFailed(final boolean showPrimaryFailed) {
+        this.showPrimaryFailed.set(showPrimaryFailed);
+    }
+
+    public ObservableList<TestResult> getPrimaryFailedResults() {
+        return primaryFailedResults.get();
     }
 
     public boolean isShowFailed() {
@@ -261,6 +269,20 @@ public class MutationTestPlan extends HighLevelModelObject {
 
     public ObservableList<TestResult> getFailedResults() {
         return failedResults.get();
+    }
+
+    public boolean isShowAborted() {
+        return showAborted.get();
+    }
+    public BooleanProperty getShowAbortedProperty() {
+        return showAborted;
+    }
+    public void setShowAborted(final boolean showAborted) {
+        this.showAborted.set(showAborted);
+    }
+
+    public ObservableList<TestResult> getAbortedResults() {
+        return abortedResults.get();
     }
 
     public int getVerifytgaTries() {
@@ -453,6 +475,30 @@ public class MutationTestPlan extends HighLevelModelObject {
     public boolean shouldStop() {
         return getStatus().equals(MutationTestPlan.Status.STOPPING) ||
                 getStatus().equals(MutationTestPlan.Status.ERROR);
+    }
+
+    /**
+     * Adds a result to the correct list of results.
+     * @param result the result to add
+     */
+    public void addResult(final TestResult result) {
+        getResults(result.getVerdict()).add(result);
+    }
+
+    /**
+     * Gets the results that match a specified verdict.
+     * @param verdict the verdict to search for
+     * @return the results matching the specified verdict
+     */
+    public ObservableList<TestResult> getResults(final TestResult.Verdict verdict) {
+        switch (verdict) {
+            case INCONCLUSIVE: return getInconclusiveResults();
+            case PASS: return getPassedResults();
+            case FAIL: return getFailedResults();
+            case PRIMARY_FAIL: return getPrimaryFailedResults();
+            case ABORT: return getAbortedResults();
+            default: throw new RuntimeException("Verdict " + verdict.toString() + " not expected");
+        }
     }
 
 }

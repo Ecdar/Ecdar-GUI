@@ -101,24 +101,16 @@ public class TestingHandler implements ConcurrentJobsHandler {
     private synchronized void onTestDone(final TestResult result) {
         // Result is null if an error occurred
         if (result != null) {
-            switch (result.getVerdict()) {
-                case INCONCLUSIVE:
-                    Platform.runLater(() -> getPlan().getInconclusiveResults().add(result));
-                    break;
-                case PASS:
-                    Platform.runLater(() -> getPlan().getPassedResults().add(result));
-                    break;
-                case FAIL:
-                    Platform.runLater(() -> getPlan().getFailedResults().add(result));
-                    break;
-            }
+            final Instant endTime = Instant.now();
 
-            // clock is null if we retest
-            if (testStart != null) {
-                Platform.runLater(() -> getPlan().setTestTimeText(
-                        "Testing time: " + MutationTestPlanPresentation.readableFormat(Duration.between(testStart, Instant.now()))
-                ));
-            }
+            Platform.runLater(() -> {
+                getPlan().addResult(result);
+
+                // clock is null if we retest
+                if (testStart != null) {
+                    getPlan().setTestTimeText("Testing time: " + MutationTestPlanPresentation.readableFormat(Duration.between(testStart, endTime)));
+                }
+            });
         }
 
         jobsDriver.onJobDone();

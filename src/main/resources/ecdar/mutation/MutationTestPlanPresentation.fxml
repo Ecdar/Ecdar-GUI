@@ -109,16 +109,17 @@
                     <Label fx:id="testTimeText"/>
 
                     <Label fx:id="passedText"/>
+                    <Label fx:id="inconclusiveText"/>
 
                     <HBox>
-                        <Label fx:id="inconclusiveText" prefWidth="130"/>
-                        <JFXButton fx:id="inconclusiveTestButton" text="Retest" prefWidth="65"
+                        <Label fx:id="primaryFailedText" prefWidth="130"/>
+                        <JFXButton fx:id="primaryFailedTestButton" text="Retest" prefWidth="65"
                                    style="-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;"
-                                   onMousePressed="#onInconclusiveTestButtonPressed"/>
+                                   onMousePressed="#onPrimaryFailedTestButtonPressed"/>
                     </HBox>
-                    <HBox fx:id="inconclusiveRegion" spacing="8">
+                    <HBox fx:id="primaryFailedRegion" spacing="8">
                         <Separator orientation="VERTICAL"/>
-                        <VBox fx:id="inconclusiveResults" spacing="8"/>
+                        <VBox fx:id="primaryFailedResults" spacing="8"/>
                     </HBox>
 
                     <HBox>
@@ -130,6 +131,17 @@
                     <HBox fx:id="failedRegion" spacing="8">
                         <Separator orientation="VERTICAL"/>
                         <VBox fx:id="failedResults" spacing="8"/>
+                    </HBox>
+
+                    <HBox>
+                        <Label fx:id="abortedText" prefWidth="130"/>
+                        <JFXButton fx:id="abortedTestButton" text="Retest" prefWidth="65"
+                                   style="-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;"
+                                   onMousePressed="#onAbortedTestButtonPressed"/>
+                    </HBox>
+                    <HBox fx:id="abortedRegion" spacing="8">
+                        <Separator orientation="VERTICAL"/>
+                        <VBox fx:id="abortedResults" spacing="8"/>
                     </HBox>
                 </VBox>
             </VBox>

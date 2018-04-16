@@ -6,7 +6,7 @@ import ecdar.mutation.SimpleComponentSimulation;
  * A result of a model-based mutation test with respect to a single test-case.
  */
 public class TestResult extends ExpandableContent {
-    public enum Verdict {INCONCLUSIVE, PASS, FAIL}
+    public enum Verdict {INCONCLUSIVE, PASS, FAIL, PRIMARY_FAIL, ABORT}
 
     private final Verdict verdict;
     private final MutationTestCase testCase;

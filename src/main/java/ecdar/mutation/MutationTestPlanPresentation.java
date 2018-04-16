@@ -173,31 +173,29 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
             while (c.next()) controller.passedText.setText("Passed: " + c.getList().size());
         });
 
-        initializeInconclusiveResults();
-
+        initializePrimaryFailedResults();
         initializeFailedResults();
+        initializeAbortedResults();
     }
 
     /**
-     * Initializes handling of inconclusive results.
+     * Initializes handling of primary failed results.
      * Expands/collapses results, when pressed on the text.
      * Shows reset button only when there is something to retest.
      * Makes each result expandable.
      */
-    private void initializeInconclusiveResults() {
-        VisibilityHelper.initializeExpand(getPlan().getShowInconclusiveProperty(), controller.inconclusiveText, controller.inconclusiveRegion);
+    private void initializePrimaryFailedResults() {
+        VisibilityHelper.initializeExpand(getPlan().getShowPrimaryFailedProperty(), controller.primaryFailedText, controller.primaryFailedRegion);
 
         final Consumer<List> consumer = list -> {
-            final int size = list.size();
-            controller.inconclusiveText.setText("Inconclusive: " + size);
-            if (size == 0) VisibilityHelper.hide(controller.inconclusiveTestButton);
-            else VisibilityHelper.show(controller.inconclusiveTestButton);
+            controller.primaryFailedText.setText("Primary Failed: " + list.size());
+            VisibilityHelper.setVisibility(!list.isEmpty(), controller.primaryFailedTestButton);
         };
 
-        consumer.accept(getPlan().getInconclusiveResults());
-        getPlan().getInconclusiveResults().addListener((ListChangeListener<TestResult>) c -> consumer.accept(c.getList()));
+        consumer.accept(getPlan().getPrimaryFailedResults());
+        getPlan().getPrimaryFailedResults().addListener((ListChangeListener<TestResult>) c -> consumer.accept(c.getList()));
 
-        initializeExpandableList(getPlan().getInconclusiveResults(), controller.inconclusiveResults.getChildren());
+        initializeExpandableList(getPlan().getPrimaryFailedResults(), controller.primaryFailedResults.getChildren());
     }
 
     /**
@@ -210,16 +208,34 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         VisibilityHelper.initializeExpand(getPlan().getShowFailedProperty(), controller.failedText, controller.failedRegion);
 
         final Consumer<List> consumer = list -> {
-            final int size = list.size();
-            controller.failedText.setText("Failed: " + size);
-            if (size == 0) VisibilityHelper.hide(controller.failedTestButton);
-            else VisibilityHelper.show(controller.failedTestButton);
+            controller.failedText.setText("Failed: " + list.size());
+            VisibilityHelper.setVisibility(!list.isEmpty(), controller.failedTestButton);
         };
 
         consumer.accept(getPlan().getFailedResults());
         getPlan().getFailedResults().addListener((ListChangeListener<TestResult>) c -> consumer.accept(c.getList()));
 
         initializeExpandableList(getPlan().getFailedResults(), controller.failedResults.getChildren());
+    }
+
+    /**
+     * Initializes handling of aborted results.
+     * Expands/collapses results, when pressed on the text.
+     * Shows reset button only when there is something to retest.
+     * Makes each result expandable.
+     */
+    private void initializeAbortedResults() {
+        VisibilityHelper.initializeExpand(getPlan().getShowAbortedProperty(), controller.abortedText, controller.abortedRegion);
+
+        final Consumer<List> consumer = list -> {
+            controller.abortedText.setText("Aborted: " + list.size());
+            VisibilityHelper.setVisibility(!list.isEmpty(), controller.abortedTestButton);
+        };
+
+        consumer.accept(getPlan().getAbortedResults());
+        getPlan().getAbortedResults().addListener((ListChangeListener<TestResult>) c -> consumer.accept(c.getList()));
+
+        initializeExpandableList(getPlan().getAbortedResults(), controller.abortedResults.getChildren());
     }
 
     /**
