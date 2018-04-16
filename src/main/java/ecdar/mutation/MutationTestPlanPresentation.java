@@ -195,6 +195,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
                     getPlan().getShouldShowProperty(verdict).set(isSelected)
             );
         });
+        updateFailedCheck();
         getPlan().getShouldShowProperty(TestResult.Verdict.FAIL_PRIMARY).addListener(((observable, oldValue, newValue) -> updateFailedCheck()));
         getPlan().getShouldShowProperty(TestResult.Verdict.FAIL_NORMAL).addListener(((observable, oldValue, newValue) -> updateFailedCheck()));
 
