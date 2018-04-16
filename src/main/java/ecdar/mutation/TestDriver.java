@@ -137,9 +137,9 @@ public class TestDriver {
                 } else if (rule instanceof  ActionRule){
                     final String sync = ((ActionRule) rule).getSync();
                     if (!testModelSimulation.isDeterministic(sync, EdgeStatus.INPUT)) {
-                        return makeResult(TestResult.Verdict.INCONCLUSIVE, "Non-deterministic choice for test model with input " + sync + ".");
+                        return makeResult(TestResult.Verdict.ABORT, "Non-deterministic choice for test model with input " + sync + ".");
                     } else if (!mutantSimulation.isDeterministic(sync, EdgeStatus.INPUT)) {
-                        return makeResult(TestResult.Verdict.INCONCLUSIVE, "Non-deterministic choice for mutant with input " + sync + ".");
+                        return makeResult(TestResult.Verdict.ABORT, "Non-deterministic choice for mutant with input " + sync + ".");
                     } else {
                         testModelSimulation.runInputAction(sync);
                         mutantSimulation.runInputAction(sync);
@@ -155,8 +155,8 @@ public class TestDriver {
             step++;
         }
 
-        // Finish test, we now know that either the verdict has been set or the time ran out
-        return makeResult(TestResult.Verdict.INCONCLUSIVE, "Out of bounds.");
+        // Finish test, we ran out of step bounds
+        return makeResult(TestResult.Verdict.ABORT, "Out of bounds.");
     }
 
     /**
@@ -176,7 +176,7 @@ public class TestDriver {
         while ((rule.isSatisfied(clockValuations))) {
             //Check if the maximum wait time has been exceeded, if it is, give inconclusive verdict
             if (timeHandler.isMaxWaitTimeExceeded()) {
-                return makeResult(TestResult.Verdict.INCONCLUSIVE, "Maximum wait time reached without receiving an output.");
+                return makeResult(TestResult.Verdict.ABORT, "Maximum wait time reached without receiving an output.");
             }
 
             if (reader.ready()) {
@@ -246,9 +246,9 @@ public class TestDriver {
      */
     private TestResult simulateOutput(final String output) throws MutationTestingException {
         if (!testModelSimulation.isDeterministic(output, EdgeStatus.OUTPUT)) {
-            return makeResult(TestResult.Verdict.INCONCLUSIVE, "Non-deterministic choice for test model with output " + output + ".");
+            return makeResult(TestResult.Verdict.ABORT, "Non-deterministic choice for test model with output " + output + ".");
         } else if (!mutantSimulation.isDeterministic(output, EdgeStatus.OUTPUT)) {
-            return makeResult(TestResult.Verdict.INCONCLUSIVE, "Non-deterministic choice with mutant output " + output + ".");
+            return makeResult(TestResult.Verdict.ABORT, "Non-deterministic choice with mutant output " + output + ".");
         } else if (!testModelSimulation.runOutputAction(output)){
             return makeResult(TestResult.Verdict.FAIL, "Failed simulating output " + output + " on test model.");
         } else if (!mutantSimulation.runOutputAction(output)){
