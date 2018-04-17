@@ -40,10 +40,10 @@ public class SimulatedTimeHandler extends MutationTestTimeHandler {
 
     @Override
     void sleep() throws IOException, MutationTestingException, InterruptedException {
-        writer.writeToSut("Delay: " + getPlan().getTimeUnit());
+        writer.writeToSut("Delay: 1"); // Tell SUT to delay 1 time unit
         delayTime ++;
         lastTime ++;
-        reader.waitAndConsume("Delay done");
+        reader.waitAndConsume("Delay done"); // Wait until SUT said it has simulated delay
     }
 
     @Override

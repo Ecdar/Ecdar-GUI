@@ -13,6 +13,17 @@ import javafx.scene.shape.SVGPath;
 public class VisibilityHelper {
     private final static int ARROW_HEIGHT = 19; // Height of view containing the arrow for expanding and collapsing views. For labels, this is 19
 
+
+    /**
+     * Shows or hides som regions.
+     * @param show true if should show, false if should hide
+     * @param regions the regions to show or hide
+     */
+    public static void setVisibility(final boolean show, final Node... regions) {
+        if (show) show(regions);
+        else hide(regions);
+    }
+
     /**
      * Shows some regions and set them to be managed.
      * @param regions the regions

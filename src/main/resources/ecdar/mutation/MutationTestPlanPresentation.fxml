@@ -33,6 +33,8 @@
                     <Label fx:id="sutPathLabel"/>
 
                     <VBox spacing="16" fx:id="sutDependentArea" managed="false" visible="false">
+                        <JFXCheckBox fx:id="simulateTimeCheckBox" text="Simulate time."/>
+
                         <HBox fx:id="timeUnitBox" spacing="8" alignment="BOTTOM_LEFT">
                             <JFXTextField fx:id="timeUnitField" prefWidth="30" alignment="BASELINE_CENTER"/>
                             <Label text="ms corresponds to 1 time unit."/>
@@ -71,8 +73,6 @@
                                     <JFXTextField fx:id="stepBoundsField" prefWidth="30" alignment="BASELINE_CENTER"/>
                                     <Label text="strategy rules to visit before giving up."/>
                                 </HBox>
-
-                                <JFXCheckBox fx:id="simulateTimeCheckBox" text="Simulate time."/>
                             </VBox>
                         </HBox>
 

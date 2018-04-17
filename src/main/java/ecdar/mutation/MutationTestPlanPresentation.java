@@ -15,6 +15,7 @@ import ecdar.presentations.HighLevelModelPresentation;
 import javafx.application.Platform;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -248,11 +249,15 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
     private void initializeTimeOptions() {
         controller.simulateTimeCheckBox.selectedProperty().bindBidirectional(getPlan().getSimulateTimeProperty());
         installTooltip(controller.simulateTimeCheckBox, "Simulates time by passing delays as inputs \"Delay: n\", " +
-                "where n the simulated time to delay in ms." +
-                "The system under test must always output after a delay." +
-                "It you do no wish to trigger an output in your model, output \"null\", which we ignore.");
+                "where n the simulated time to delay in integer time units of the chosen model." +
+                "The system under test should simulate the delay, provide outputs (if the system should output), and then output \"Delay done\".");
 
         initializePositiveIntegerTextField(controller.timeUnitField, getPlan().getTimeUnitProperty());
+
+        // Hide time unit field when simulating time
+        controller.simulateTimeCheckBox.selectedProperty().addListener((observable, oldValue, newValue) ->
+                VisibilityHelper.setVisibility(!newValue, controller.timeUnitBox)
+        );
     }
 
     /**

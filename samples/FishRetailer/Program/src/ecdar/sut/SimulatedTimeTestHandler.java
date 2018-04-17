@@ -6,6 +6,11 @@ import java.time.Instant;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * This handler simulates time.
+ * It uses an instant as the time.
+ * For every time unit to pass, the handler increments the instant with a millisecond.
+ */
 public class SimulatedTimeTestHandler extends TestHandler {
     private Instant time;
 
@@ -54,7 +59,7 @@ public class SimulatedTimeTestHandler extends TestHandler {
 
     @Override
     public double getValue(Instant clock) {
-        return Duration.between(clock, time).toMillis() / timeUnit;
+        return Duration.between(clock, time).toMillis();
     }
 
     @Override
