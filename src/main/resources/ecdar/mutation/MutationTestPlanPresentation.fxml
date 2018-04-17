@@ -4,13 +4,14 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.TextFlow?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.shape.Line?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="StackPane"
          fx:id="root"
          fx:controller="ecdar.mutation.MutationTestPlanController">
-    <ScrollPane fx:id="scrollPane" style="-fx-font-size:13px;-fx-background-color:transparent;" hbarPolicy="NEVER" fitToWidth="true">
-        <VBox spacing="16">
+    <ScrollPane fx:id="scrollPane" style="-fx-font-size:13px;-fx-background-color:transparent;" hbarPolicy="NEVER" fitToWidth="true" fitToHeight="true">
+        <VBox fx:id="contentRegion" spacing="16">
             <padding><Insets top="25" right="25" bottom="25" left="25"/></padding>
 
             <JFXComboBox fx:id="modelPicker"
@@ -26,7 +27,7 @@
                 <JFXComboBox fx:id="actionPicker" promptText="Select Action"/>
 
                 <VBox spacing="16" fx:id="testDependentArea" managed="false" visible="false">
-                    <JFXButton fx:id="selectSutButton" prefWidth="100" prefHeight="40" buttonType="RAISED" text="Select SUT"
+                    <JFXButton fx:id="selectSutButton" prefWidth="100" minHeight="40" maxHeight="40" buttonType="RAISED" text="Select SUT"
                                style="-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;"
                                onMousePressed="#onSelectSutButtonPressed"/>
 
@@ -76,7 +77,7 @@
                             </VBox>
                         </HBox>
 
-                        <JFXButton fx:id="testButton" prefWidth="100" prefHeight="40" buttonType="RAISED" text="Test"
+                        <JFXButton fx:id="testButton" prefWidth="100" minHeight="40" maxHeight="40" buttonType="RAISED" text="Test"
                                    style="-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;"
                                    onMousePressed="#onTestButtonPressed"/>
                     </VBox>
@@ -98,7 +99,7 @@
                            managed="false" visible="false"/>
 
                 <VBox fx:id="progressAres" spacing="16" managed="false" visible="false">
-                    <Separator/>
+                    <Separator style="-fx-background-color:transparent;"/>
                     <TextFlow fx:id="progressTextFlow"/>
                 </VBox>
 
@@ -144,7 +145,7 @@
                         </HBox>
                     </VBox>
 
-                    <JFXButton fx:id="retestButton" text="Retest Shown Results" prefWidth="180"
+                    <JFXButton fx:id="retestButton" text="Retest Shown Results" prefWidth="170"
                                style="-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;"
                                onMousePressed="#onRetestButtonPressed"/>
 

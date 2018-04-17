@@ -45,6 +45,9 @@ public class TestingHandler implements ConcurrentJobsHandler {
         return testPlan;
     }
 
+    public ConcurrentJobsDriver getJobsDriver() {
+        return jobsDriver;
+    }
 
     /* Other */
 

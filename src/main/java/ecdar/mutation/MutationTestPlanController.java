@@ -103,6 +103,7 @@ public class MutationTestPlanController {
     public JFXCheckBox failed;
     public JFXCheckBox primaryFailed;
     public JFXCheckBox normalFailed;
+    public VBox contentRegion;
 
 
     /* Mutation fields */

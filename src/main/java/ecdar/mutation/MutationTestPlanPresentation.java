@@ -17,13 +17,12 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
@@ -35,6 +34,9 @@ import java.util.*;
  */
 public class MutationTestPlanPresentation extends HighLevelModelPresentation {
     private final MutationTestPlanController controller;
+
+    private enum FinalVerdict {INCONCLUSIVE, FAIL, PASS}
+    private FinalVerdict finalVerdict = FinalVerdict.INCONCLUSIVE;
 
     private double offSet, canvasHeight;
 
@@ -117,7 +119,47 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         VisibilityHelper.initializeExpand(controller.opsLabel, controller.operatorsOuterRegion);
         VisibilityHelper.initializeExpand(controller.advancedOptionsLabel, controller.advancedOptions);
 
+        // This somehow make the content not truncate
+        // https://stackoverflow.com/questions/33318661/javafx-alert-truncates-the-message
+        controller.contentRegion.setMinHeight(Region.USE_PREF_SIZE);
 
+        updateDisplayFinalVerdict();
+        // Check whenever there is a new result
+        getPlan().getResults().addListener((ListChangeListener<TestResult>) change -> updateDisplayFinalVerdict());
+    }
+
+    private void updateDisplayFinalVerdict() {
+        if (getPlan().getResults().isEmpty()) {
+            displayNoFinalVerdict();
+            return;
+        }
+
+        for (final TestResult result : getPlan().getResults()) {
+            if (result.isFail()) {
+                displayFailFinalVerdict();
+                return;
+            }
+        }
+
+        // If there is not more tests to do, display passed verdict
+        if (!controller.getTestingHandler().getJobsDriver().isJobsRemaining()) {
+            displayPassFinalVerdict();
+            return;
+        }
+
+        displayNoFinalVerdict();
+    }
+
+    private void displayNoFinalVerdict() {
+        controller.contentRegion.setBackground(new Background(new BackgroundFill(Color.color(0, 0, 0, 0), CornerRadii.EMPTY, Insets.EMPTY)));
+    }
+
+    private void displayFailFinalVerdict() {
+        controller.contentRegion.setBackground(new Background(new BackgroundFill(Color.color(1, 0, 0, 0.1), CornerRadii.EMPTY, Insets.EMPTY)));
+    }
+
+    private void displayPassFinalVerdict() {
+        controller.contentRegion.setBackground(new Background(new BackgroundFill(Color.color(0, 1, 0, 0.04), CornerRadii.EMPTY, Insets.EMPTY)));
     }
 
     /**

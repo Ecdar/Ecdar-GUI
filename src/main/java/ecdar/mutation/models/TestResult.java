@@ -2,6 +2,8 @@ package ecdar.mutation.models;
 
 import ecdar.mutation.SimpleComponentSimulation;
 
+import java.util.Arrays;
+
 /**
  * A result of a model-based mutation test with respect to a single test-case.
  */
@@ -46,5 +48,13 @@ public class TestResult extends ExpandableContent {
 
     public static Verdict[] getFailedVerdicts() {
         return new Verdict[]{Verdict.FAIL_NORMAL, Verdict.FAIL_PRIMARY};
+    }
+
+    public boolean isPass() {
+        return verdict == Verdict.PASS;
+    }
+
+    public boolean isFail() {
+        return Arrays.asList(getFailedVerdicts()).contains(verdict);
     }
 }

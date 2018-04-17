@@ -103,4 +103,8 @@ public class ConcurrentJobsDriver {
     private synchronized int getJobsRemaining() {
         return jobs.size() - jobsEnded;
     }
+
+    public synchronized boolean isJobsRemaining() {
+        return getJobsRemaining() > 0;
+    }
 }
