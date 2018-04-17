@@ -35,9 +35,6 @@ import java.util.*;
 public class MutationTestPlanPresentation extends HighLevelModelPresentation {
     private final MutationTestPlanController controller;
 
-    private enum FinalVerdict {INCONCLUSIVE, FAIL, PASS}
-    private FinalVerdict finalVerdict = FinalVerdict.INCONCLUSIVE;
-
     private double offSet, canvasHeight;
 
     /**
@@ -128,6 +125,10 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         getPlan().getResults().addListener((ListChangeListener<TestResult>) change -> updateDisplayFinalVerdict());
     }
 
+    /**
+     * Updates the view to display the final verdict.
+     * Makes the background green if the tests pass, red if failed, and transparent if still testing.
+     */
     private void updateDisplayFinalVerdict() {
         if (getPlan().getResults().isEmpty()) {
             displayNoFinalVerdict();
@@ -150,14 +151,23 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         displayNoFinalVerdict();
     }
 
+    /**
+     * Makes the background transparent in order to display that there is no final verdict yet.
+     */
     private void displayNoFinalVerdict() {
         controller.contentRegion.setBackground(new Background(new BackgroundFill(Color.color(0, 0, 0, 0), CornerRadii.EMPTY, Insets.EMPTY)));
     }
 
+    /**
+     * Makes the background red in order to display that there is a failed test.
+     */
     private void displayFailFinalVerdict() {
         controller.contentRegion.setBackground(new Background(new BackgroundFill(Color.color(1, 0, 0, 0.1), CornerRadii.EMPTY, Insets.EMPTY)));
     }
 
+    /**
+     * Makes the background green in order to display that the test are done and there is no failed tests.
+     */
     private void displayPassFinalVerdict() {
         controller.contentRegion.setBackground(new Background(new BackgroundFill(Color.color(0, 1, 0, 0.04), CornerRadii.EMPTY, Insets.EMPTY)));
     }
@@ -205,7 +215,6 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
     /**
      * Initializes test resultViews.
      */
-    // TODO optimize
     private void initializeTestResults() {
         controller.passed.selectedProperty().bindBidirectional(getPlan().getShouldShowProperty(TestResult.Verdict.PASS));
 
@@ -245,28 +254,36 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         controller.primaryFailed.selectedProperty().bindBidirectional(getPlan().getShouldShowProperty(TestResult.Verdict.FAIL_PRIMARY));
         controller.normalFailed.selectedProperty().bindBidirectional(getPlan().getShouldShowProperty(TestResult.Verdict.FAIL_NORMAL));
 
-
         updateResults();
 
         // Update results to show when there are new results
         getPlan().getResults().addListener((ListChangeListener<TestResult>) c -> updateResults());
 
         // Update results when a should-show property is changed
-        Arrays.asList(TestResult.Verdict.values()).forEach(verdict -> {
-            getPlan().getShouldShowProperty(verdict).addListener(((observable, oldValue, newValue) -> updateResults()));
-        });
+        Arrays.asList(TestResult.Verdict.values()).forEach(verdict ->
+                getPlan().getShouldShowProperty(verdict).addListener(((observable, oldValue, newValue) -> updateResults()))
+        );
 
         initializeExpandableList(controller.resultsToShow, controller.resultViews.getChildren());
     }
 
+    /**
+     * Selects or deselects the check box for choosing to show/hide all inconclusive results according to the sub-inconclusive check boxes.
+     */
     private void updateIncCheck() {
         controller.inc.setSelected(Arrays.stream(TestResult.getIncVerdicts()).allMatch(verdict -> getPlan().shouldShow(verdict)));
     }
 
+    /**
+     * Selects or deselects the check box for choosing to show/hide all failed results according to the sub-failed check boxes.
+     */
     private void updateFailedCheck() {
         controller.failed.setSelected(Arrays.stream(TestResult.getFailedVerdicts()).allMatch(verdict -> getPlan().shouldShow(verdict)));
     }
 
+    /**
+     * Updates the views for the test results.
+     */
     private void updateResults() {
         controller.passed.setText("Passed: " + getPlan().getResults(TestResult.Verdict.PASS).size());
         controller.inc.setText("Inconclusive: " + getPlan().getResults(TestResult.getIncVerdicts()).size());

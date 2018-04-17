@@ -457,12 +457,13 @@ public class MutationTestPlan extends HighLevelModelObject {
         return shouldShowMap.get(verdict);
     }
 
+    /**
+     * Gets if we should show the results with a specified verdict.
+     * @param verdict the specified verdict
+     * @return true iff we should show the results
+     */
     public boolean shouldShow(final TestResult.Verdict verdict) {
         return getShouldShowProperty(verdict).get();
-    }
-
-    public void setShouldShow(final TestResult.Verdict verdict, final boolean shouldShow) {
-        getShouldShowProperty(verdict).set(shouldShow);
     }
 
     public List<TestResult> getResultsToShow() {
@@ -473,6 +474,10 @@ public class MutationTestPlan extends HighLevelModelObject {
         return shouldShowMap.keySet().stream().filter(verdict -> shouldShowMap.get(verdict).get()).collect(Collectors.toList());
     }
 
+    /**
+     * Removes a test result.
+     * @param result the result to remove
+     */
     public synchronized void removeResult(final TestResult result) {
         getResults().remove(result);
     }
