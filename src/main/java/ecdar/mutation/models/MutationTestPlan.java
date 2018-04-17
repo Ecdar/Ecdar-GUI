@@ -466,10 +466,18 @@ public class MutationTestPlan extends HighLevelModelObject {
         return getShouldShowProperty(verdict).get();
     }
 
+    /**
+     * Gets the test results that should be shown to the user.
+     * @return the results to show
+     */
     public List<TestResult> getResultsToShow() {
         return getResults().filtered(result -> getVerdictsToShow().contains(result.getVerdict()));
     }
 
+    /**
+     * Gets the test verdicts for which test results of those verdicts should be shown to the user.
+     * @return the verdicts to show
+     */
     private List<TestResult.Verdict> getVerdictsToShow() {
         return shouldShowMap.keySet().stream().filter(verdict -> shouldShowMap.get(verdict).get()).collect(Collectors.toList());
     }

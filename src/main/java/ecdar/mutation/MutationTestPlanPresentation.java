@@ -48,14 +48,8 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         initialize();
     }
 
-    /* Properties */
 
-    private MutationTestPlan getPlan() {
-        return controller.getPlan();
-    }
-
-
-    /* Other */
+    /* Static helpers */
 
     /**
      * Converts a duration to a human readable format, e.g. 0.293s.
@@ -70,6 +64,81 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
     }
 
     /**
+     * Gets a change listener of the test model that updates the mutants text for an operator.
+     * @param operator the operator
+     * @param mutantsText the mutants text
+     * @return the change listener
+     */
+    private static ChangeListener<Component> getMutantsTextUpdater(final MutationOperator operator, final Text mutantsText) {
+        return (observable, oldValue, newValue) -> {
+            if (newValue != null) mutantsText.setText(" - " +
+                    (operator.isUpperLimitExact() ? "" : "up to ") + operator.getUpperLimit(newValue) + " mutants");
+        };
+    }
+
+    /**
+     * Initializes a text field to enforce its values to be positive integers.
+     * While in focus, the text field can still have an empty value.
+     * Makes the field update when the property updates.
+     * @param field the text field
+     * @param property the property
+     */
+    private static void initializePositiveIntegerTextField(final JFXTextField field, final IntegerProperty property) {
+        // Set value initially
+        field.setText(String.valueOf(property.get()));
+
+        // Force the field to be empty positive integer
+        field.textProperty().addListener((observable, oldValue, newValue) -> {
+            String updateValue = newValue;
+
+            if (!updateValue.matches("\\d*")) updateValue = newValue.replaceAll("[^\\d]", "");
+            if (updateValue.equals("0")) updateValue = "1";
+
+            if (!updateValue.equals(newValue)) {
+                field.setText(updateValue);
+            }
+
+            // Update property when text field changes, if not empty
+            if (!updateValue.isEmpty() && !updateValue.equals(String.valueOf(property.get()))) property.set(Integer.parseInt(updateValue));
+        });
+
+        // If empty when leaving focus, set to "1"
+        field.focusedProperty().addListener(((observable, oldValue, newValue) -> {
+            if (!newValue && field.getText().isEmpty()) field.setText("1");
+        }));
+    }
+
+    /**
+     * Installs a tooltip on a control.
+     * The tooltip is shown without delay on mouse entered.
+     * The tooltip does not disappear after some time.
+     * @param control the control
+     * @param text the text of the tooltip
+     */
+    private static void installTooltip(final Control control, final String text) {
+        final Tooltip tooltip = new Tooltip(text);
+        tooltip.setPrefWidth(250);
+        tooltip.setWrapText(true);
+
+        // Show the tooltip at the bottom right of the control as to not trigger on mouse existed
+        control.setOnMouseEntered(event -> {
+            final Point2D point = control.localToScreen(control.getLayoutBounds().getMaxX(), control.getLayoutBounds().getMaxY());
+            tooltip.show(control, point.getX(), point.getY());
+        });
+        control.setOnMouseExited(event -> tooltip.hide());
+    }
+
+
+    /* Properties */
+
+    private MutationTestPlan getPlan() {
+        return controller.getPlan();
+    }
+
+
+    /* Other */
+
+    /**
      * Initializes this.
      */
     private void initialize() {
@@ -78,51 +147,112 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         initializeModelPicker();
         initializeOperators();
         initializeActionPicker();
-        initializeSutPath();
-        initializeEnablingTestButton();
 
-        initializeFormatPicker();
+        initializeTestUI();
+        initializeExportUI();
 
         initializeProgressAndResultsTexts();
         initializeTestResults();
 
-        initializePositiveIntegerTextField(controller.generationThreadsField, getPlan().getConcurrentGenerationsThreadsProperty());
-        initializePositiveIntegerTextField(controller.suvInstancesField, getPlan().getConcurrentSutInstancesProperty());
-        initializePositiveIntegerTextField(controller.outputWaitTimeField, getPlan().getOutputWaitTimeProperty());
-        initializePositiveIntegerTextField(controller.verifytgaTriesField, getPlan().getVerifytgaTriesProperty());
-        initializePositiveIntegerTextField(controller.timeUnitField, getPlan().getTimeUnitProperty());
-        initializePositiveIntegerTextField(controller.stepBoundsField, getPlan().getStepBoundsProperty());
+        initializeWidthAndHeight();
+
+        initializeFinalVerdictHandling();
+    }
+
+    /**
+     * Initializes handling of the status of the test plan.
+     */
+    private void InitializeStatusHandling() {
+        handleStatusUpdate(null, getPlan().getStatus());
+        getPlan().getStatusProperty().addListener(((observable, oldValue, newValue) -> handleStatusUpdate(oldValue, newValue)));
+    }
+
+    /**
+     * Handles an update of the status of the test plan.
+     * @param oldValue the old status
+     * @param newValue the new status
+     */
+    private void handleStatusUpdate(final MutationTestPlan.Status oldValue, final MutationTestPlan.Status newValue) {
+        switch (newValue) {
+            case IDLE:
+                VisibilityHelper.show(controller.testButton);
+                VisibilityHelper.hide(controller.stopButton);
+                for (final Region region : getRegionsToDisableWhileWorking()) region.setDisable(false);
+
+                if (oldValue != null && oldValue.equals(MutationTestPlan.Status.STOPPING))
+                    getPlan().writeProgress("Stopped");
+
+                break;
+            case WORKING:
+                VisibilityHelper.hide(controller.testButton);
+                VisibilityHelper.show(controller.stopButton);
+                controller.stopButton.setDisable(false);
+                for (final Region region : getRegionsToDisableWhileWorking()) region.setDisable(true);
+                break;
+            case STOPPING:
+            case ERROR:
+                controller.stopButton.setDisable(true);
+                break;
+        }
+    }
+
+    /**
+     * Initializes handling of the final verdict.
+     * The final verdict is the verdict of all test results combined.
+     */
+    private void initializeFinalVerdictHandling() {
+        updateDisplayFinalVerdict();
+        // Check whenever there is a new result
+        getPlan().getResults().addListener((ListChangeListener<TestResult>) change -> updateDisplayFinalVerdict());
+    }
+
+    /**
+     * Initializes UI for testing.
+     */
+    private void initializeTestUI() {
+        initializeSutPath();
+        initializeTimeOptions();
+        initializeAdvancedOptions();
+        initializeTestButton();
+    }
+
+    /**
+     * Initialize. UI for exporting mutants.
+     */
+    private void initializeExportUI() {
+        initializeFormatPicker();
+        controller.angelicBox.selectedProperty().bindBidirectional(getPlan().getAngelicWhenExportProperty());
+    }
+
+    /**
+     * Initializes the advanced options.
+     */
+    private void initializeAdvancedOptions() {
+        VisibilityHelper.initializeExpand(controller.advancedOptionsLabel, controller.advancedOptions);
 
         controller.demonicCheckBox.selectedProperty().bindBidirectional(getPlan().getDemonicProperty());
         installTooltip(controller.demonicCheckBox, "Use this, if the test model is not input-enabled, " +
                 "and you want to ignore mutants leading to these missing inputs. " +
                 "We apply angelic completion on the mutants.");
 
+        initializePositiveIntegerTextField(controller.generationThreadsField, getPlan().getConcurrentGenerationsThreadsProperty());
+        initializePositiveIntegerTextField(controller.suvInstancesField, getPlan().getConcurrentSutInstancesProperty());
+        initializePositiveIntegerTextField(controller.outputWaitTimeField, getPlan().getOutputWaitTimeProperty());
+        initializePositiveIntegerTextField(controller.verifytgaTriesField, getPlan().getVerifytgaTriesProperty());
+        initializePositiveIntegerTextField(controller.stepBoundsField, getPlan().getStepBoundsProperty());
+    }
+
+    /**
+     * Initializes the options for simulated/real-time testing and for the definition of a time unit.
+     */
+    private void initializeTimeOptions() {
         controller.simulateTimeCheckBox.selectedProperty().bindBidirectional(getPlan().getSimulateTimeProperty());
         installTooltip(controller.simulateTimeCheckBox, "Simulates time by passing delays as inputs \"Delay: n\", " +
                 "where n the simulated time to delay in ms." +
                 "The system under test must always output after a delay." +
                 "It you do no wish to trigger an output in your model, output \"null\", which we ignore.");
 
-
-        controller.angelicBox.selectedProperty().bindBidirectional(getPlan().getAngelicWhenExportProperty());
-
-
-
-
-        initializeWidthAndHeight();
-
-
-        VisibilityHelper.initializeExpand(controller.opsLabel, controller.operatorsOuterRegion);
-        VisibilityHelper.initializeExpand(controller.advancedOptionsLabel, controller.advancedOptions);
-
-        // This somehow make the content not truncate
-        // https://stackoverflow.com/questions/33318661/javafx-alert-truncates-the-message
-        controller.contentRegion.setMinHeight(Region.USE_PREF_SIZE);
-
-        updateDisplayFinalVerdict();
-        // Check whenever there is a new result
-        getPlan().getResults().addListener((ListChangeListener<TestResult>) change -> updateDisplayFinalVerdict());
+        initializePositiveIntegerTextField(controller.timeUnitField, getPlan().getTimeUnitProperty());
     }
 
     /**
@@ -176,7 +306,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      * Initializes enabling and disabling of the test button.
      * The button is disabled when no mutation operators are selected.
      */
-    private void initializeEnablingTestButton() {
+    private void initializeTestButton() {
         final Runnable runnable = () -> {
             if (getPlan().getSelectedMutationOperators().isEmpty()) controller.testButton.setDisable(true);
             else controller.testButton.setDisable(false);
@@ -421,6 +551,10 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
             canvasHeight = newValue.doubleValue();
             updateHeight();
         });
+
+        // This somehow make the content not truncate
+        // https://stackoverflow.com/questions/33318661/javafx-alert-truncates-the-message
+        controller.contentRegion.setMinHeight(Region.USE_PREF_SIZE);
     }
 
     /**
@@ -447,6 +581,8 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      * Initializes the UI for selecting mutation operators.
      */
     private void initializeOperators() {
+        VisibilityHelper.initializeExpand(controller.opsLabel, controller.operatorsOuterRegion);
+
         getPlan().getOperators().forEach(operator -> {
             final JFXCheckBox checkBox = new JFXCheckBox(operator.getText());
             checkBox.selectedProperty().bindBidirectional(operator.getSelectedProperty());
@@ -462,56 +598,6 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
             getMutantsTextUpdater(operator, mutantsText).changed(null, null, getPlan().getTestModel());
             getPlan().getTestModelProperty().addListener(getMutantsTextUpdater(operator, mutantsText));
         });
-    }
-
-    /**
-     * Gets a change listener of the test model that updates the mutants text for an operator.
-     * @param operator the operator
-     * @param mutantsText the mutants text
-     * @return the change listener
-     */
-    private static ChangeListener<Component> getMutantsTextUpdater(final MutationOperator operator, final Text mutantsText) {
-        return (observable, oldValue, newValue) -> {
-            if (newValue != null) mutantsText.setText(" - " +
-                    (operator.isUpperLimitExact() ? "" : "up to ") + operator.getUpperLimit(newValue) + " mutants");
-        };
-    }
-
-    /**
-     * Initializes handling of the status of the test plan.
-     */
-    private void InitializeStatusHandling() {
-        handleStatusUpdate(null, getPlan().getStatus());
-        getPlan().getStatusProperty().addListener(((observable, oldValue, newValue) -> handleStatusUpdate(oldValue, newValue)));
-    }
-
-    /**
-     * Handles an update of the status of the test plan.
-     * @param oldValue the old status
-     * @param newValue the new status
-     */
-    private void handleStatusUpdate(final MutationTestPlan.Status oldValue, final MutationTestPlan.Status newValue) {
-        switch (newValue) {
-            case IDLE:
-                VisibilityHelper.show(controller.testButton);
-                VisibilityHelper.hide(controller.stopButton);
-                for (final Region region : getRegionsToDisableWhileWorking()) region.setDisable(false);
-
-                if (oldValue != null && oldValue.equals(MutationTestPlan.Status.STOPPING))
-                    getPlan().writeProgress("Stopped");
-
-                break;
-            case WORKING:
-                VisibilityHelper.hide(controller.testButton);
-                VisibilityHelper.show(controller.stopButton);
-                controller.stopButton.setDisable(false);
-                for (final Region region : getRegionsToDisableWhileWorking()) region.setDisable(true);
-                break;
-            case STOPPING:
-            case ERROR:
-                controller.stopButton.setDisable(true);
-                break;
-        }
     }
 
     /**
@@ -533,38 +619,6 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         regions.add(controller.simulateTimeCheckBox);
 
         return regions;
-    }
-
-    /**
-     * Initializes a text field to enforce its values to be positive integers.
-     * While in focus, the text field can still have an empty value.
-     * Makes the field update when the property updates.
-     * @param field the text field
-     * @param property the property
-     */
-    private static void initializePositiveIntegerTextField(final JFXTextField field, final IntegerProperty property) {
-        // Set value initially
-        field.setText(String.valueOf(property.get()));
-
-        // Force the field to be empty positive integer
-        field.textProperty().addListener((observable, oldValue, newValue) -> {
-            String updateValue = newValue;
-
-            if (!updateValue.matches("\\d*")) updateValue = newValue.replaceAll("[^\\d]", "");
-            if (updateValue.equals("0")) updateValue = "1";
-
-            if (!updateValue.equals(newValue)) {
-                field.setText(updateValue);
-            }
-
-            // Update property when text field changes, if not empty
-            if (!updateValue.isEmpty() && !updateValue.equals(String.valueOf(property.get()))) property.set(Integer.parseInt(updateValue));
-        });
-
-        // If empty when leaving focus, set to "1"
-        field.focusedProperty().addListener(((observable, oldValue, newValue) -> {
-            if (!newValue && field.getText().isEmpty()) field.setText("1");
-        }));
     }
 
     /**
@@ -612,26 +666,6 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         // Set action from model, or Test if not selected
         if (getPlan().getAction().equals("Export mutants")) controller.actionPicker.setValue(exportLabel);
         else controller.actionPicker.setValue(testLabel);
-    }
-
-    /**
-     * Installs a tooltip on a control.
-     * The tooltip is shown without delay on mouse entered.
-     * The tooltip does not disappear after some time.
-     * @param control the control
-     * @param text the text of the tooltip
-     */
-    private static void installTooltip(final Control control, final String text) {
-        final Tooltip tooltip = new Tooltip(text);
-        tooltip.setPrefWidth(250);
-        tooltip.setWrapText(true);
-
-        // Show the tooltip at the bottom right of the control as to not trigger on mouse existed
-        control.setOnMouseEntered(event -> {
-            final Point2D point = control.localToScreen(control.getLayoutBounds().getMaxX(), control.getLayoutBounds().getMaxY());
-            tooltip.show(control, point.getX(), point.getY());
-        });
-        control.setOnMouseExited(event -> tooltip.hide());
     }
 
     /**
