@@ -27,7 +27,7 @@ public class ConcurrentJobsDriver {
      * Clears jobs and resets variables for jobs.
      */
     private void clearJobs() {
-        this.jobs.clear();
+        jobs.clear();
         jobsStarted = 0;
         jobsEnded = 0;
     }
@@ -69,6 +69,7 @@ public class ConcurrentJobsDriver {
     private synchronized void updateJobs() {
         if (handler.shouldStop()) {
             if (getJobsRunning() == 0) {
+                clearJobs();
                 handler.onStopped();
             }
 
