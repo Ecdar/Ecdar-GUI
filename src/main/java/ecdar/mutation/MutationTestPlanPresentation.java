@@ -433,6 +433,9 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
 
         controller.resultsToShow.clear();
         controller.resultsToShow.addAll(getPlan().getResultsToShow());
+
+        // Show retest button iff there are shown results
+        VisibilityHelper.setVisibility(!getPlan().getResultsToShow().isEmpty(), controller.retestButton);
     }
 
     /**

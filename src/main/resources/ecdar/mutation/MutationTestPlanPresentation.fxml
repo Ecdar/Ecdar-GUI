@@ -144,7 +144,7 @@
                         </HBox>
                     </VBox>
 
-                    <JFXButton fx:id="retestButton" text="Retest Shown Results" prefWidth="170"
+                    <JFXButton fx:id="retestButton" text="Retest Shown Results" prefWidth="170" managed="false" visible="false"
                                style="-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;"
                                onMousePressed="#onRetestButtonPressed"/>
 
