@@ -46,12 +46,6 @@ public class UPPAALDriver {
 
     private static EcdarDocument ecdarDocument;
 
-    public static void generateDebugUPPAALModel() throws BackendException, IOException {
-        // Generate and store the debug document
-        buildEcdarDocument();
-        storeUppaalFile(ecdarDocument.toXmlDocument(), Ecdar.debugDirectory + File.separator + "debug.xml");
-    }
-
     /**
      * Stores a project as a backend XML file in the "temporary" directory.
      * @param project project to store
@@ -239,11 +233,11 @@ public class UPPAALDriver {
         final File file;
 
         if (os.contains("Mac")) {
-            file = new File(Ecdar.serverDirectory + File.separator + "bin-MacOS" + File.separator + SERVER_NAME);
+            file = new File(Ecdar.getServerPath() + File.separator + "bin-MacOS" + File.separator + SERVER_NAME);
         } else if (os.contains("Linux")) {
-            file = new File(Ecdar.serverDirectory + File.separator + "bin-Linux" + File.separator + SERVER_NAME);
+            file = new File(Ecdar.getServerPath() + File.separator + "bin-Linux" + File.separator + SERVER_NAME);
         } else {
-            file = new File(Ecdar.serverDirectory + File.separator + "bin-Win32" + File.separator + SERVER_NAME + ".exe");
+            file = new File(Ecdar.getServerPath() + File.separator + "bin-Win32" + File.separator + SERVER_NAME + ".exe");
         }
 
         return file;
@@ -275,11 +269,11 @@ public class UPPAALDriver {
         final String os = System.getProperty("os.name");
 
         if (os.contains("Mac")) {
-            return Ecdar.serverDirectory + File.separator + "bin-MacOS" + File.separator + VERIFYTGA_NAME;
+            return Ecdar.getServerPath() + File.separator + "bin-MacOS" + File.separator + VERIFYTGA_NAME;
         } else if (os.contains("Linux")) {
-            return Ecdar.serverDirectory + File.separator + "bin-Linux" + File.separator + VERIFYTGA_NAME;
+            return Ecdar.getServerPath() + File.separator + "bin-Linux" + File.separator + VERIFYTGA_NAME;
         } else {
-            return Ecdar.serverDirectory + File.separator + "bin-Win32" + File.separator + VERIFYTGA_NAME + ".exe";
+            return Ecdar.getServerPath() + File.separator + "bin-Win32" + File.separator + VERIFYTGA_NAME + ".exe";
         }
     }
 
