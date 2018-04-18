@@ -17,10 +17,19 @@
   "changeInvariant": true,
   "sinkLocation": true,
   "invertReset": true,
-  "maxGenerationThreads": 10,
-  "maxSutInstances": 1,
-  "maxOutputWaitTime": 500,
+  "maxGenerationThreads": 25,
+  "maxSutInstances": 14,
+  "maxOutputWaitTime": 420,
   "verifytgaTries": 3,
   "timeUnit": 100,
-  "stepBounds": 100
+  "stepBounds": 40,
+  "simulateTime": false,
+  "verdictFAIL_PRIMARY": false,
+  "verdictMUT_NO_DELAY": false,
+  "verdictMAX_WAIT": false,
+  "verdictOUT_OF_BOUNDS": false,
+  "verdictNON_DETERMINISM": false,
+  "verdictNO_RULE": false,
+  "verdictPASS": false,
+  "verdictFAIL_NORMAL": false
 }
