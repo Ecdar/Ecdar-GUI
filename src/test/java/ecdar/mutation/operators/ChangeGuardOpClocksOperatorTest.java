@@ -1,16 +1,24 @@
 package ecdar.mutation.operators;
 
+import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
 import ecdar.abstractions.EdgeStatus;
 import ecdar.abstractions.Location;
 import ecdar.mutation.MutationTestingException;
+import javafx.embed.swing.JFXPanel;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collection;
 
 public class ChangeGuardOpClocksOperatorTest {
+
+    @Before
+    public void setup() {
+        Ecdar.setUpForTest();
+    }
 
     @Test
     public void generateMutants1() throws MutationTestingException {

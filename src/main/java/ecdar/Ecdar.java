@@ -17,6 +17,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ListChangeListener;
+import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
@@ -237,6 +238,11 @@ public class Ecdar extends Application {
     public static void setUpForTest() {
         project = new Project();
         project.reset();
+
+        // This implicitly starts the fx-application thread
+        // It prevents java.lang.RuntimeException: Internal graphics not initialized yet
+        // https://stackoverflow.com/questions/27839441/internal-graphics-not-initialized-yet-javafx
+        new JFXPanel();
     }
 
     public static void initializeProjectFolder() throws IOException {
