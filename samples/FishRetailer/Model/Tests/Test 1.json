@@ -18,10 +18,18 @@
   "sinkLocation": true,
   "invertReset": true,
   "maxGenerationThreads": 10,
-  "maxSutInstances": 4,
+  "maxSutInstances": 3,
   "maxOutputWaitTime": 5,
   "verifytgaTries": 3,
   "timeUnit": 200,
   "stepBounds": 5,
-  "simulateTime": false
+  "simulateTime": false,
+  "verdictFAIL_PRIMARY": true,
+  "verdictMUT_NO_DELAY": true,
+  "verdictPASS": false,
+  "verdictNO_RULE": false,
+  "verdictNON_DETERMINISM": false,
+  "verdictFAIL_NORMAL": true,
+  "verdictOUT_OF_BOUNDS": false,
+  "verdictMAX_WAIT": false
 }

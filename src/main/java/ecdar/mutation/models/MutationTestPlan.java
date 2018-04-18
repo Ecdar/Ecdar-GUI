@@ -89,7 +89,9 @@ public class MutationTestPlan extends HighLevelModelObject {
             shouldShowMap.put(verdict, new SimpleBooleanProperty(false));
         }
 
-
+        // Show failed test-cases as default
+        shouldShowMap.get(TestResult.Verdict.FAIL_NORMAL).set(true);
+        shouldShowMap.get(TestResult.Verdict.FAIL_PRIMARY).set(true);
     }
 
     /**
@@ -316,6 +318,9 @@ public class MutationTestPlan extends HighLevelModelObject {
         result.addProperty(TIME_UNIT, getTimeUnit());
         result.addProperty(STEP_BOUNDS, getStepBounds());
         result.addProperty(SIMULATE_TIME, isSimulateTime());
+
+        for (final TestResult.Verdict verdict : shouldShowMap.keySet())
+            result.addProperty(VERDICT_PREFIX + verdict.toString(), shouldShow(verdict));
 
         return result;
     }
