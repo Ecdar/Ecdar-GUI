@@ -3,7 +3,8 @@ package ecdar.sut;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Scanner;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class RealTimeTestHandler extends TestHandler {
 
@@ -18,8 +19,16 @@ public class RealTimeTestHandler extends TestHandler {
 
     @Override
     public void onStepDone(Runner startNewStep) throws InterruptedException, IOException {
-        Thread.sleep((long) timeUnit / 4);
-        startNewStep.run();
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    startNewStep.run();
+                } catch (IOException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, (long) timeUnit / 4);
     }
 
     @Override

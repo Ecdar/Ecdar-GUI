@@ -9,6 +9,9 @@ import ecdar.abstractions.Component;
 import ecdar.mutation.models.MutationTestCase;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.mutation.models.TestResult;
+import javafx.beans.property.SimpleListProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
@@ -19,6 +22,7 @@ import javafx.scene.text.TextFlow;
 import javafx.stage.FileChooser;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -62,32 +66,37 @@ public class MutationTestPlanController {
     public VBox resultsArea;
     public Label mutantsText;
     public Label testCasesText;
-    public Label passedText;
-    public Label inconclusiveText;
-    public Label failedText;
     public StackPane root;
     public JFXTextField verifytgaTriesField;
-    public VBox inconclusiveResults;
-    public VBox failedResults;
     public JFXTextField timeUnitField;
     public HBox timeUnitBox;
     public Label opsLabel;
     public Label advancedOptionsLabel;
     public Pane advancedOptions;
-    public HBox failedRegion;
-    public HBox inconclusiveRegion;
     public Label testTimeText;
     public HBox operatorsOuterRegion;
     public JFXTextField stepBoundsField;
-    public JFXButton failedTestButton;
-    public JFXButton inconclusiveTestButton;
     public JFXCheckBox simulateTimeCheckBox;
+    public JFXCheckBox passed;
+    public JFXCheckBox outOfBounds;
+    public JFXCheckBox maxWait;
+    public JFXCheckBox nonDeterminism;
+    public JFXCheckBox inc;
+    public JFXCheckBox noRule;
+    public JFXCheckBox mutNoDelay;
+    public VBox resultViews;
+    public JFXButton retestButton;
+    public JFXCheckBox failed;
+    public JFXCheckBox primaryFailed;
+    public JFXCheckBox normalFailed;
+    public VBox contentRegion;
 
 
     /* Mutation fields */
 
     private MutationTestPlan plan;
     private TestingHandler testingHandler;
+    public final ObservableList<TestResult> resultsToShow = new SimpleListProperty<>(FXCollections.observableArrayList());
 
 
     /* Properties */
@@ -158,25 +167,16 @@ public class MutationTestPlanController {
     }
 
     /**
-     * Triggered when pressed the inconclusive test button.
-     * Retests the inconclusive test-cases.
+     * Triggered when pressed the retest button.
+     * Retests the test-cases that are showing.
      */
-    public void onInconclusiveTestButtonPressed() {
+    public void onRetestButtonPressed() {
         synchronized (getPlan()) {
-            final List<MutationTestCase> cases = getPlan().getInconclusiveResults().stream().map(TestResult::getTestCase).collect(Collectors.toList());
-            getPlan().getInconclusiveResults().clear();
-            getTestingHandler().retest(cases);
-        }
-    }
+            final List<TestResult> results = new ArrayList<>(resultsToShow);
+            final List<MutationTestCase> cases = resultsToShow.stream().map(TestResult::getTestCase).collect(Collectors.toList());
 
-    /**
-     * Triggered when pressed the failed test button.
-     * Retests the failed test-cases.
-     */
-    public void onFailedTestButtonPressed() {
-        synchronized (getPlan()) {
-            final List<MutationTestCase> cases = getPlan().getFailedResults().stream().map(TestResult::getTestCase).collect(Collectors.toList());
-            getPlan().getFailedResults().clear();
+            results.forEach(result -> getPlan().removeResult(result));
+
             getTestingHandler().retest(cases);
         }
     }

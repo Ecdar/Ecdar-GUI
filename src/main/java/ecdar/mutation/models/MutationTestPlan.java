@@ -12,9 +12,7 @@ import javafx.collections.ObservableList;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -44,6 +42,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     private static final String TIME_UNIT = "timeUnit";
     private static final String STEP_BOUNDS = "stepBounds";
     private static final String SIMULATE_TIME = "simulateTime";
+    private static final String VERDICT_PREFIX = "verdict";
 
     // General fields
     private final ObjectProperty<Component> testModel = new SimpleObjectProperty<>(null);
@@ -62,19 +61,15 @@ public class MutationTestPlan extends HighLevelModelObject {
     private final IntegerProperty stepBounds = new SimpleIntegerProperty(100);
     private final BooleanProperty simulateTime = new SimpleBooleanProperty(false);
 
-    // Temporary values for displaying results of testing
+    // Temporary values for displaying resultViews of testing
     private final ObservableList<Text> progressTexts = FXCollections.observableArrayList();
     private final StringProperty mutantsText = new SimpleStringProperty("");
     private final StringProperty testCasesText = new SimpleStringProperty("");
     private final StringProperty testTimeText = new SimpleStringProperty("");
 
-    private final ListProperty<TestResult> passedResults = new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final ListProperty<TestResult> results = new SimpleListProperty<>(FXCollections.observableArrayList());
+    private final Map<TestResult.Verdict, BooleanProperty> shouldShowMap = new HashMap<>();
 
-    private final BooleanProperty showInconclusive = new SimpleBooleanProperty(false);
-    private final ListProperty<TestResult> inconclusiveResults = new SimpleListProperty<>(FXCollections.observableArrayList());
-
-    private final BooleanProperty showFailed = new SimpleBooleanProperty(false);
-    private final ListProperty<TestResult> failedResults = new SimpleListProperty<>(FXCollections.observableArrayList());
 
     // For exporting
     private final BooleanProperty angelicWhenExport = new SimpleBooleanProperty(false);
@@ -89,6 +84,14 @@ public class MutationTestPlan extends HighLevelModelObject {
     public MutationTestPlan() {
         generateName();
         operators.addAll(MutationOperator.getAllOperators());
+
+        for (final TestResult.Verdict verdict : TestResult.Verdict.values()) {
+            shouldShowMap.put(verdict, new SimpleBooleanProperty(false));
+        }
+
+        // Show failed test-cases as default
+        shouldShowMap.get(TestResult.Verdict.FAIL_NORMAL).set(true);
+        shouldShowMap.get(TestResult.Verdict.FAIL_PRIMARY).set(true);
     }
 
     /**
@@ -231,36 +234,8 @@ public class MutationTestPlan extends HighLevelModelObject {
         this.maxOutputWaitTime.set(outputWaitTime);
     }
 
-    public ObservableList<TestResult> getPassedResults() {
-        return passedResults.get();
-    }
-
-    public boolean getShowInconclusive() {
-        return showInconclusive.get();
-    }
-    public BooleanProperty getShowInconclusiveProperty() {
-        return showInconclusive;
-    }
-    public void setShowInconclusive(final boolean showInconclusive) {
-        this.showInconclusive.set(showInconclusive);
-    }
-
-    public ObservableList<TestResult> getInconclusiveResults() {
-        return inconclusiveResults.get();
-    }
-
-    public boolean isShowFailed() {
-        return showFailed.get();
-    }
-    public BooleanProperty getShowFailedProperty() {
-        return showFailed;
-    }
-    public void setShowFailed(final boolean showFailed) {
-        this.showFailed.set(showFailed);
-    }
-
-    public ObservableList<TestResult> getFailedResults() {
-        return failedResults.get();
+    public ObservableList<TestResult> getResults() {
+        return results.get();
     }
 
     public int getVerifytgaTries() {
@@ -344,6 +319,9 @@ public class MutationTestPlan extends HighLevelModelObject {
         result.addProperty(STEP_BOUNDS, getStepBounds());
         result.addProperty(SIMULATE_TIME, isSimulateTime());
 
+        for (final TestResult.Verdict verdict : shouldShowMap.keySet())
+            result.addProperty(VERDICT_PREFIX + verdict.toString(), shouldShow(verdict));
+
         return result;
     }
 
@@ -386,6 +364,11 @@ public class MutationTestPlan extends HighLevelModelObject {
 
         primitive = json.getAsJsonPrimitive(SIMULATE_TIME);
         if (primitive != null) setSimulateTime(primitive.getAsBoolean());
+
+        for (final TestResult.Verdict verdict : TestResult.Verdict.values()) {
+            primitive = json.getAsJsonPrimitive(VERDICT_PREFIX + verdict.toString());
+            shouldShowMap.put(verdict, new SimpleBooleanProperty(primitive != null && primitive.getAsBoolean()));
+        }
     }
 
 
@@ -416,15 +399,13 @@ public class MutationTestPlan extends HighLevelModelObject {
     }
 
     /**
-     * Clears the texts used to display results.
+     * Clears the texts used to display resultViews.
      */
     public void clearResults() {
         setMutantsText("");
         setTestCasesText("");
         setTestTimeText("");
-        getPassedResults().clear();
-        getInconclusiveResults().clear();
-        getFailedResults().clear();
+        getResults().clear();
     }
 
     /**
@@ -455,4 +436,62 @@ public class MutationTestPlan extends HighLevelModelObject {
                 getStatus().equals(MutationTestPlan.Status.ERROR);
     }
 
+    /**
+     * Adds a result.
+     * @param result the result to add
+     */
+    public void addResult(final TestResult result) {
+        getResults().add(result);
+    }
+
+    /**
+     * Gets the resultViews matching a specified verdict.
+     * @param verdict the verdict to filter with
+     * @return the matching resultViews
+     */
+    public List<TestResult> getResults(final TestResult.Verdict... verdict) {
+        return getResults().filtered(result -> Arrays.asList(verdict).contains(result.getVerdict()));
+    }
+
+    /**
+     * Gets the property for whether to show resultViews of some type of verdict.
+     * @param verdict the type of verdict to search for
+     * @return the property for whether to show the resultViews
+     */
+    public BooleanProperty getShouldShowProperty(final TestResult.Verdict verdict) {
+        return shouldShowMap.get(verdict);
+    }
+
+    /**
+     * Gets if we should show the results with a specified verdict.
+     * @param verdict the specified verdict
+     * @return true iff we should show the results
+     */
+    public boolean shouldShow(final TestResult.Verdict verdict) {
+        return getShouldShowProperty(verdict).get();
+    }
+
+    /**
+     * Gets the test results that should be shown to the user.
+     * @return the results to show
+     */
+    public List<TestResult> getResultsToShow() {
+        return getResults().filtered(result -> getVerdictsToShow().contains(result.getVerdict()));
+    }
+
+    /**
+     * Gets the test verdicts for which test results of those verdicts should be shown to the user.
+     * @return the verdicts to show
+     */
+    private List<TestResult.Verdict> getVerdictsToShow() {
+        return shouldShowMap.keySet().stream().filter(verdict -> shouldShowMap.get(verdict).get()).collect(Collectors.toList());
+    }
+
+    /**
+     * Removes a test result.
+     * @param result the result to remove
+     */
+    public synchronized void removeResult(final TestResult result) {
+        getResults().remove(result);
+    }
 }

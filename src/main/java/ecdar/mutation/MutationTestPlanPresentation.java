@@ -15,24 +15,20 @@ import ecdar.presentations.HighLevelModelPresentation;
 import javafx.application.Platform;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
-import javafx.scene.control.Control;
-import javafx.scene.control.Label;
-import javafx.scene.control.Separator;
-import javafx.scene.control.Tooltip;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
 import java.time.Duration;
 import java.util.*;
-import java.util.function.Consumer;
 
 /**
  * Presentation for a test plan with model-based mutation testing.
@@ -53,14 +49,8 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         initialize();
     }
 
-    /* Properties */
 
-    private MutationTestPlan getPlan() {
-        return controller.getPlan();
-    }
-
-
-    /* Other */
+    /* Static helpers */
 
     /**
      * Converts a duration to a human readable format, e.g. 0.293s.
@@ -75,6 +65,81 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
     }
 
     /**
+     * Gets a change listener of the test model that updates the mutants text for an operator.
+     * @param operator the operator
+     * @param mutantsText the mutants text
+     * @return the change listener
+     */
+    private static ChangeListener<Component> getMutantsTextUpdater(final MutationOperator operator, final Text mutantsText) {
+        return (observable, oldValue, newValue) -> {
+            if (newValue != null) mutantsText.setText(" - " +
+                    (operator.isUpperLimitExact() ? "" : "up to ") + operator.getUpperLimit(newValue) + " mutants");
+        };
+    }
+
+    /**
+     * Initializes a text field to enforce its values to be positive integers.
+     * While in focus, the text field can still have an empty value.
+     * Makes the field update when the property updates.
+     * @param field the text field
+     * @param property the property
+     */
+    private static void initializePositiveIntegerTextField(final JFXTextField field, final IntegerProperty property) {
+        // Set value initially
+        field.setText(String.valueOf(property.get()));
+
+        // Force the field to be empty positive integer
+        field.textProperty().addListener((observable, oldValue, newValue) -> {
+            String updateValue = newValue;
+
+            if (!updateValue.matches("\\d*")) updateValue = newValue.replaceAll("[^\\d]", "");
+            if (updateValue.equals("0")) updateValue = "1";
+
+            if (!updateValue.equals(newValue)) {
+                field.setText(updateValue);
+            }
+
+            // Update property when text field changes, if not empty
+            if (!updateValue.isEmpty() && !updateValue.equals(String.valueOf(property.get()))) property.set(Integer.parseInt(updateValue));
+        });
+
+        // If empty when leaving focus, set to "1"
+        field.focusedProperty().addListener(((observable, oldValue, newValue) -> {
+            if (!newValue && field.getText().isEmpty()) field.setText("1");
+        }));
+    }
+
+    /**
+     * Installs a tooltip on a control.
+     * The tooltip is shown without delay on mouse entered.
+     * The tooltip does not disappear after some time.
+     * @param control the control
+     * @param text the text of the tooltip
+     */
+    private static void installTooltip(final Control control, final String text) {
+        final Tooltip tooltip = new Tooltip(text);
+        tooltip.setPrefWidth(250);
+        tooltip.setWrapText(true);
+
+        // Show the tooltip at the bottom right of the control as to not trigger on mouse existed
+        control.setOnMouseEntered(event -> {
+            final Point2D point = control.localToScreen(control.getLayoutBounds().getMaxX(), control.getLayoutBounds().getMaxY());
+            tooltip.show(control, point.getX(), point.getY());
+        });
+        control.setOnMouseExited(event -> tooltip.hide());
+    }
+
+
+    /* Properties */
+
+    private MutationTestPlan getPlan() {
+        return controller.getPlan();
+    }
+
+
+    /* Other */
+
+    /**
      * Initializes this.
      */
     private void initialize() {
@@ -83,52 +148,170 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         initializeModelPicker();
         initializeOperators();
         initializeActionPicker();
-        initializeSutPath();
-        initializeEnablingTestButton();
 
-        initializeFormatPicker();
+        initializeTestUI();
+        initializeExportUI();
 
         initializeProgressAndResultsTexts();
         initializeTestResults();
 
-        initializePositiveIntegerTextField(controller.generationThreadsField, getPlan().getConcurrentGenerationsThreadsProperty());
-        initializePositiveIntegerTextField(controller.suvInstancesField, getPlan().getConcurrentSutInstancesProperty());
-        initializePositiveIntegerTextField(controller.outputWaitTimeField, getPlan().getOutputWaitTimeProperty());
-        initializePositiveIntegerTextField(controller.verifytgaTriesField, getPlan().getVerifytgaTriesProperty());
-        initializePositiveIntegerTextField(controller.timeUnitField, getPlan().getTimeUnitProperty());
-        initializePositiveIntegerTextField(controller.stepBoundsField, getPlan().getStepBoundsProperty());
+        initializeWidthAndHeight();
+
+        initializeFinalVerdictHandling();
+    }
+
+    /**
+     * Initializes handling of the status of the test plan.
+     */
+    private void InitializeStatusHandling() {
+        handleStatusUpdate(null, getPlan().getStatus());
+        getPlan().getStatusProperty().addListener(((observable, oldValue, newValue) -> handleStatusUpdate(oldValue, newValue)));
+    }
+
+    /**
+     * Handles an update of the status of the test plan.
+     * @param oldValue the old status
+     * @param newValue the new status
+     */
+    private void handleStatusUpdate(final MutationTestPlan.Status oldValue, final MutationTestPlan.Status newValue) {
+        switch (newValue) {
+            case IDLE:
+                VisibilityHelper.show(controller.testButton);
+                VisibilityHelper.hide(controller.stopButton);
+                for (final Region region : getRegionsToDisableWhileWorking()) region.setDisable(false);
+
+                if (oldValue != null && oldValue.equals(MutationTestPlan.Status.STOPPING))
+                    getPlan().writeProgress("Stopped");
+
+                break;
+            case WORKING:
+                VisibilityHelper.hide(controller.testButton);
+                VisibilityHelper.show(controller.stopButton);
+                controller.stopButton.setDisable(false);
+                for (final Region region : getRegionsToDisableWhileWorking()) region.setDisable(true);
+                break;
+            case STOPPING:
+            case ERROR:
+                controller.stopButton.setDisable(true);
+                break;
+        }
+    }
+
+    /**
+     * Initializes handling of the final verdict.
+     * The final verdict is the verdict of all test results combined.
+     */
+    private void initializeFinalVerdictHandling() {
+        updateDisplayFinalVerdict();
+        // Check whenever there is a new result
+        getPlan().getResults().addListener((ListChangeListener<TestResult>) change -> updateDisplayFinalVerdict());
+    }
+
+    /**
+     * Initializes UI for testing.
+     */
+    private void initializeTestUI() {
+        initializeSutPath();
+        initializeTimeOptions();
+        initializeAdvancedOptions();
+        initializeTestButton();
+    }
+
+    /**
+     * Initialize. UI for exporting mutants.
+     */
+    private void initializeExportUI() {
+        initializeFormatPicker();
+        controller.angelicBox.selectedProperty().bindBidirectional(getPlan().getAngelicWhenExportProperty());
+    }
+
+    /**
+     * Initializes the advanced options.
+     */
+    private void initializeAdvancedOptions() {
+        VisibilityHelper.initializeExpand(controller.advancedOptionsLabel, controller.advancedOptions);
 
         controller.demonicCheckBox.selectedProperty().bindBidirectional(getPlan().getDemonicProperty());
         installTooltip(controller.demonicCheckBox, "Use this, if the test model is not input-enabled, " +
                 "and you want to ignore mutants leading to these missing inputs. " +
                 "We apply angelic completion on the mutants.");
 
+        initializePositiveIntegerTextField(controller.generationThreadsField, getPlan().getConcurrentGenerationsThreadsProperty());
+        initializePositiveIntegerTextField(controller.suvInstancesField, getPlan().getConcurrentSutInstancesProperty());
+        initializePositiveIntegerTextField(controller.outputWaitTimeField, getPlan().getOutputWaitTimeProperty());
+        initializePositiveIntegerTextField(controller.verifytgaTriesField, getPlan().getVerifytgaTriesProperty());
+        initializePositiveIntegerTextField(controller.stepBoundsField, getPlan().getStepBoundsProperty());
+    }
+
+    /**
+     * Initializes the options for simulated/real-time testing and for the definition of a time unit.
+     */
+    private void initializeTimeOptions() {
         controller.simulateTimeCheckBox.selectedProperty().bindBidirectional(getPlan().getSimulateTimeProperty());
         installTooltip(controller.simulateTimeCheckBox, "Simulates time by passing delays as inputs \"Delay: n\", " +
-                "where n the simulated time to delay in ms." +
-                "The system under test must always output after a delay." +
-                "It you do no wish to trigger an output in your model, output \"null\", which we ignore.");
+                "where n the simulated time to delay in integer time units of the chosen model." +
+                "The system under test should simulate the delay, provide outputs (if the system should output), and then output \"Delay done\".");
 
+        initializePositiveIntegerTextField(controller.timeUnitField, getPlan().getTimeUnitProperty());
 
-        controller.angelicBox.selectedProperty().bindBidirectional(getPlan().getAngelicWhenExportProperty());
+        // Hide time unit field when simulating time
+        controller.simulateTimeCheckBox.selectedProperty().addListener((observable, oldValue, newValue) ->
+                VisibilityHelper.setVisibility(!newValue, controller.timeUnitBox)
+        );
+    }
 
+    /**
+     * Updates the view to display the final verdict.
+     * Makes the background green if the tests pass, red if failed, and transparent if still testing.
+     */
+    private void updateDisplayFinalVerdict() {
+        if (getPlan().getResults().isEmpty()) {
+            displayNoFinalVerdict();
+            return;
+        }
 
+        for (final TestResult result : getPlan().getResults()) {
+            if (result.isFail()) {
+                displayFailFinalVerdict();
+                return;
+            }
+        }
 
+        // If there is not more tests to do, display passed verdict
+        if (!controller.getTestingHandler().getJobsDriver().isJobsRemaining()) {
+            displayPassFinalVerdict();
+            return;
+        }
 
-        initializeWidthAndHeight();
+        displayNoFinalVerdict();
+    }
 
+    /**
+     * Makes the background transparent in order to display that there is no final verdict yet.
+     */
+    private void displayNoFinalVerdict() {
+        controller.contentRegion.setBackground(new Background(new BackgroundFill(Color.color(0, 0, 0, 0), CornerRadii.EMPTY, Insets.EMPTY)));
+    }
 
-        VisibilityHelper.initializeExpand(controller.opsLabel, controller.operatorsOuterRegion);
-        VisibilityHelper.initializeExpand(controller.advancedOptionsLabel, controller.advancedOptions);
+    /**
+     * Makes the background red in order to display that there is a failed test.
+     */
+    private void displayFailFinalVerdict() {
+        controller.contentRegion.setBackground(new Background(new BackgroundFill(Color.color(1, 0, 0, 0.1), CornerRadii.EMPTY, Insets.EMPTY)));
+    }
 
-
+    /**
+     * Makes the background green in order to display that the test are done and there is no failed tests.
+     */
+    private void displayPassFinalVerdict() {
+        controller.contentRegion.setBackground(new Background(new BackgroundFill(Color.color(0, 1, 0, 0.04), CornerRadii.EMPTY, Insets.EMPTY)));
     }
 
     /**
      * Initializes enabling and disabling of the test button.
      * The button is disabled when no mutation operators are selected.
      */
-    private void initializeEnablingTestButton() {
+    private void initializeTestButton() {
         final Runnable runnable = () -> {
             if (getPlan().getSelectedMutationOperators().isEmpty()) controller.testButton.setDisable(true);
             else controller.testButton.setDisable(false);
@@ -141,7 +324,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
     }
 
     /**
-     * Initializes UI elements for displaying progress and results.
+     * Initializes UI elements for displaying progress and resultViews.
      */
     private void initializeProgressAndResultsTexts() {
         // Show info when added
@@ -165,67 +348,100 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
     }
 
     /**
-     * Initializes test results.
+     * Initializes test resultViews.
      */
     private void initializeTestResults() {
-        controller.passedText.setText("Passed: " + getPlan().getPassedResults().size());
-        getPlan().getPassedResults().addListener((ListChangeListener<TestResult>) c -> {
-            while (c.next()) controller.passedText.setText("passed: " + c.getList().size());
+        controller.passed.selectedProperty().bindBidirectional(getPlan().getShouldShowProperty(TestResult.Verdict.PASS));
+
+        // Sync inconclusive overall checkbox with all its minor checkboxes
+        controller.inc.setOnAction(e -> {
+            final boolean isSelected = ((CheckBox)e.getSource()).isSelected();
+            Arrays.asList(TestResult.getIncVerdicts()).forEach(verdict ->
+                    getPlan().getShouldShowProperty(verdict).set(isSelected)
+            );
         });
+        updateIncCheck();
+        getPlan().getShouldShowProperty(TestResult.Verdict.OUT_OF_BOUNDS).addListener(((observable, oldValue, newValue) -> updateIncCheck()));
+        getPlan().getShouldShowProperty(TestResult.Verdict.MAX_WAIT).addListener(((observable, oldValue, newValue) -> updateIncCheck()));
+        getPlan().getShouldShowProperty(TestResult.Verdict.NON_DETERMINISM).addListener(((observable, oldValue, newValue) -> updateIncCheck()));
+        getPlan().getShouldShowProperty(TestResult.Verdict.NO_RULE).addListener(((observable, oldValue, newValue) -> updateIncCheck()));
+        getPlan().getShouldShowProperty(TestResult.Verdict.MUT_NO_DELAY).addListener(((observable, oldValue, newValue) -> updateIncCheck()));
 
-        initializeInconclusiveResults();
+        // Bind inconclusive checkboxes with model
+        controller.outOfBounds.selectedProperty().bindBidirectional(getPlan().getShouldShowProperty(TestResult.Verdict.OUT_OF_BOUNDS));
+        controller.maxWait.selectedProperty().bindBidirectional(getPlan().getShouldShowProperty(TestResult.Verdict.MAX_WAIT));
+        controller.nonDeterminism.selectedProperty().bindBidirectional(getPlan().getShouldShowProperty(TestResult.Verdict.NON_DETERMINISM));
+        controller.noRule.selectedProperty().bindBidirectional(getPlan().getShouldShowProperty(TestResult.Verdict.NO_RULE));
+        controller.mutNoDelay.selectedProperty().bindBidirectional(getPlan().getShouldShowProperty(TestResult.Verdict.MUT_NO_DELAY));
 
-        initializeFailedResults();
+        // Sync failed overall checkbox with all its minor checkboxes
+        controller.failed.setOnAction(e -> {
+            final boolean isSelected = ((CheckBox)e.getSource()).isSelected();
+            Arrays.asList(TestResult.getFailedVerdicts()).forEach(verdict ->
+                    getPlan().getShouldShowProperty(verdict).set(isSelected)
+            );
+        });
+        updateFailedCheck();
+        getPlan().getShouldShowProperty(TestResult.Verdict.FAIL_PRIMARY).addListener(((observable, oldValue, newValue) -> updateFailedCheck()));
+        getPlan().getShouldShowProperty(TestResult.Verdict.FAIL_NORMAL).addListener(((observable, oldValue, newValue) -> updateFailedCheck()));
+
+        // Bind failed checkboxes with model
+        controller.primaryFailed.selectedProperty().bindBidirectional(getPlan().getShouldShowProperty(TestResult.Verdict.FAIL_PRIMARY));
+        controller.normalFailed.selectedProperty().bindBidirectional(getPlan().getShouldShowProperty(TestResult.Verdict.FAIL_NORMAL));
+
+        updateResults();
+
+        // Update results to show when there are new results
+        getPlan().getResults().addListener((ListChangeListener<TestResult>) c -> updateResults());
+
+        // Update results when a should-show property is changed
+        Arrays.asList(TestResult.Verdict.values()).forEach(verdict ->
+                getPlan().getShouldShowProperty(verdict).addListener(((observable, oldValue, newValue) -> updateResults()))
+        );
+
+        initializeExpandableList(controller.resultsToShow, controller.resultViews.getChildren());
     }
 
     /**
-     * Initializes handling of inconclusive results.
-     * Expands/collapses results, when pressed on the text.
-     * Shows reset button only when there is something to retest.
-     * Makes each result expandable.
+     * Selects or deselects the check box for choosing to show/hide all inconclusive results according to the sub-inconclusive check boxes.
      */
-    private void initializeInconclusiveResults() {
-        VisibilityHelper.initializeExpand(getPlan().getShowInconclusiveProperty(), controller.inconclusiveText, controller.inconclusiveRegion);
-
-        final Consumer<List> consumer = list -> {
-            final int size = list.size();
-            controller.inconclusiveText.setText("Inconclusive: " + size);
-            if (size == 0) VisibilityHelper.hide(controller.inconclusiveTestButton);
-            else VisibilityHelper.show(controller.inconclusiveTestButton);
-        };
-
-        consumer.accept(getPlan().getInconclusiveResults());
-        getPlan().getInconclusiveResults().addListener((ListChangeListener<TestResult>) c -> consumer.accept(c.getList()));
-
-        initializeExpandableList(getPlan().getInconclusiveResults(), controller.inconclusiveResults.getChildren());
+    private void updateIncCheck() {
+        controller.inc.setSelected(Arrays.stream(TestResult.getIncVerdicts()).allMatch(verdict -> getPlan().shouldShow(verdict)));
     }
 
     /**
-     * Initializes handling of failed results.
-     * Expands/collapses results, when pressed on the text.
-     * Shows reset button only when there is something to retest.
-     * Makes each result expandable.
+     * Selects or deselects the check box for choosing to show/hide all failed results according to the sub-failed check boxes.
      */
-    private void initializeFailedResults() {
-        VisibilityHelper.initializeExpand(getPlan().getShowFailedProperty(), controller.failedText, controller.failedRegion);
-
-        final Consumer<List> consumer = list -> {
-            final int size = list.size();
-            controller.failedText.setText("Failed: " + size);
-            if (size == 0) VisibilityHelper.hide(controller.failedTestButton);
-            else VisibilityHelper.show(controller.failedTestButton);
-        };
-
-        consumer.accept(getPlan().getFailedResults());
-        getPlan().getFailedResults().addListener((ListChangeListener<TestResult>) c -> consumer.accept(c.getList()));
-
-        initializeExpandableList(getPlan().getFailedResults(), controller.failedResults.getChildren());
+    private void updateFailedCheck() {
+        controller.failed.setSelected(Arrays.stream(TestResult.getFailedVerdicts()).allMatch(verdict -> getPlan().shouldShow(verdict)));
     }
 
     /**
-     * Initializes handling of a list of test results.
+     * Updates the views for the test results.
+     */
+    private void updateResults() {
+        controller.passed.setText("Passed: " + getPlan().getResults(TestResult.Verdict.PASS).size());
+        controller.inc.setText("Inconclusive: " + getPlan().getResults(TestResult.getIncVerdicts()).size());
+        controller.outOfBounds.setText("Out of bounds: " + getPlan().getResults(TestResult.Verdict.OUT_OF_BOUNDS).size());
+        controller.maxWait.setText("Max waiting time exceeded: " + getPlan().getResults(TestResult.Verdict.MAX_WAIT).size());
+        controller.nonDeterminism.setText("Non-determinism violated: " + getPlan().getResults(TestResult.Verdict.NON_DETERMINISM).size());
+        controller.noRule.setText("No rule: " + getPlan().getResults(TestResult.Verdict.NO_RULE).size());
+        controller.mutNoDelay.setText("Mutant unable to delay: " + getPlan().getResults(TestResult.Verdict.MUT_NO_DELAY).size());
+        controller.failed.setText("Failed: " + getPlan().getResults(TestResult.getFailedVerdicts()).size());
+        controller.primaryFailed.setText("Primary: " + getPlan().getResults(TestResult.Verdict.FAIL_PRIMARY).size());
+        controller.normalFailed.setText("Other: " + getPlan().getResults(TestResult.Verdict.FAIL_NORMAL).size());
+
+        controller.resultsToShow.clear();
+        controller.resultsToShow.addAll(getPlan().getResultsToShow());
+
+        // Show retest button iff there are shown results
+        VisibilityHelper.setVisibility(!getPlan().getResultsToShow().isEmpty(), controller.retestButton);
+    }
+
+    /**
+     * Initializes handling of a list of test resultViews.
      * This method makes sure that the view list is adjusted when the model list changes.
-     * @param modelList the list of test results
+     * @param modelList the list of test resultViews
      * @param viewList the list of nodes to add and remove nodes from
      */
     private void initializeExpandableList(final ObservableList<TestResult> modelList, final List<Node> viewList) {
@@ -245,7 +461,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
 
     /**
      * Adds a test result to af view list.
-     * @param modelList the model list containing the test results
+     * @param modelList the model list containing the test resultViews
      * @param viewList the view list visible to the user
      * @param contentModelMap the map from models to views
      * @param testResult the test result to add
@@ -276,7 +492,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      * Constructs content for a test result.
      * This includes a label containing info, and a retest button.
      * @param testResult the test result
-     * @param resultList list of results to remove the test result from, when retesting
+     * @param resultList list of resultViews to remove the test result from, when retesting
      * @return the content
      */
     private Node makeResultContent(final TestResult testResult, final List<? extends TestResult> resultList) {
@@ -343,6 +559,10 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
             canvasHeight = newValue.doubleValue();
             updateHeight();
         });
+
+        // This somehow make the content not truncate
+        // https://stackoverflow.com/questions/33318661/javafx-alert-truncates-the-message
+        controller.contentRegion.setMinHeight(Region.USE_PREF_SIZE);
     }
 
     /**
@@ -369,6 +589,8 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      * Initializes the UI for selecting mutation operators.
      */
     private void initializeOperators() {
+        VisibilityHelper.initializeExpand(controller.opsLabel, controller.operatorsOuterRegion);
+
         getPlan().getOperators().forEach(operator -> {
             final JFXCheckBox checkBox = new JFXCheckBox(operator.getText());
             checkBox.selectedProperty().bindBidirectional(operator.getSelectedProperty());
@@ -384,56 +606,6 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
             getMutantsTextUpdater(operator, mutantsText).changed(null, null, getPlan().getTestModel());
             getPlan().getTestModelProperty().addListener(getMutantsTextUpdater(operator, mutantsText));
         });
-    }
-
-    /**
-     * Gets a change listener of the test model that updates the mutants text for an operator.
-     * @param operator the operator
-     * @param mutantsText the mutants text
-     * @return the change listener
-     */
-    private static ChangeListener<Component> getMutantsTextUpdater(final MutationOperator operator, final Text mutantsText) {
-        return (observable, oldValue, newValue) -> {
-            if (newValue != null) mutantsText.setText(" - " +
-                    (operator.isUpperLimitExact() ? "" : "up to ") + operator.getUpperLimit(newValue) + " mutants");
-        };
-    }
-
-    /**
-     * Initializes handling of the status of the test plan.
-     */
-    private void InitializeStatusHandling() {
-        handleStatusUpdate(null, getPlan().getStatus());
-        getPlan().getStatusProperty().addListener(((observable, oldValue, newValue) -> handleStatusUpdate(oldValue, newValue)));
-    }
-
-    /**
-     * Handles an update of the status of the test plan.
-     * @param oldValue the old status
-     * @param newValue the new status
-     */
-    private void handleStatusUpdate(final MutationTestPlan.Status oldValue, final MutationTestPlan.Status newValue) {
-        switch (newValue) {
-            case IDLE:
-                VisibilityHelper.show(controller.testButton);
-                VisibilityHelper.hide(controller.stopButton);
-                for (final Region region : getRegionsToDisableWhileWorking()) region.setDisable(false);
-
-                if (oldValue != null && oldValue.equals(MutationTestPlan.Status.STOPPING))
-                    getPlan().writeProgress("Stopped");
-
-                break;
-            case WORKING:
-                VisibilityHelper.hide(controller.testButton);
-                VisibilityHelper.show(controller.stopButton);
-                controller.stopButton.setDisable(false);
-                for (final Region region : getRegionsToDisableWhileWorking()) region.setDisable(true);
-                break;
-            case STOPPING:
-            case ERROR:
-                controller.stopButton.setDisable(true);
-                break;
-        }
     }
 
     /**
@@ -455,38 +627,6 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         regions.add(controller.simulateTimeCheckBox);
 
         return regions;
-    }
-
-    /**
-     * Initializes a text field to enforce its values to be positive integers.
-     * While in focus, the text field can still have an empty value.
-     * Makes the field update when the property updates.
-     * @param field the text field
-     * @param property the property
-     */
-    private static void initializePositiveIntegerTextField(final JFXTextField field, final IntegerProperty property) {
-        // Set value initially
-        field.setText(String.valueOf(property.get()));
-
-        // Force the field to be empty positive integer
-        field.textProperty().addListener((observable, oldValue, newValue) -> {
-            String updateValue = newValue;
-
-            if (!updateValue.matches("\\d*")) updateValue = newValue.replaceAll("[^\\d]", "");
-            if (updateValue.equals("0")) updateValue = "1";
-
-            if (!updateValue.equals(newValue)) {
-                field.setText(updateValue);
-            }
-
-            // Update property when text field changes, if not empty
-            if (!updateValue.isEmpty() && !updateValue.equals(String.valueOf(property.get()))) property.set(Integer.parseInt(updateValue));
-        });
-
-        // If empty when leaving focus, set to "1"
-        field.focusedProperty().addListener(((observable, oldValue, newValue) -> {
-            if (!newValue && field.getText().isEmpty()) field.setText("1");
-        }));
     }
 
     /**
@@ -534,26 +674,6 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         // Set action from model, or Test if not selected
         if (getPlan().getAction().equals("Export mutants")) controller.actionPicker.setValue(exportLabel);
         else controller.actionPicker.setValue(testLabel);
-    }
-
-    /**
-     * Installs a tooltip on a control.
-     * The tooltip is shown without delay on mouse entered.
-     * The tooltip does not disappear after some time.
-     * @param control the control
-     * @param text the text of the tooltip
-     */
-    private static void installTooltip(final Control control, final String text) {
-        final Tooltip tooltip = new Tooltip(text);
-        tooltip.setPrefWidth(250);
-        tooltip.setWrapText(true);
-
-        // Show the tooltip at the bottom right of the control as to not trigger on mouse existed
-        control.setOnMouseEntered(event -> {
-            final Point2D point = control.localToScreen(control.getLayoutBounds().getMaxX(), control.getLayoutBounds().getMaxY());
-            tooltip.show(control, point.getX(), point.getY());
-        });
-        control.setOnMouseExited(event -> tooltip.hide());
     }
 
     /**

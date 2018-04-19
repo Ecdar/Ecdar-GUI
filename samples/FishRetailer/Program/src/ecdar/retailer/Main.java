@@ -18,7 +18,7 @@ public class Main {
 
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        handler = TestHandler.createHandler(1000.0, true);
+        handler = TestHandler.createHandler(200.0, false);
 
         loc = 0;
         x = handler.resetTime();
@@ -39,7 +39,7 @@ public class Main {
         handler.onStepDone(Main::runStep);
     }
 
-    private static void update() throws IOException {
+    private static void update() {
         switch (loc) {
             case 0:
                 if (handler.inputReady()) {

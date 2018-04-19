@@ -40,12 +40,12 @@ public abstract class TestHandler {
                         try {
                             listener.run();
                         } catch (IOException | InterruptedException e) {
-                            write("Debug: Exception, " + e.getMessage());
+                            e.printStackTrace();
                         }
                     });
                 }
             } catch (IOException e) {
-                write("Debug: Exception, " + e.getMessage());
+                e.printStackTrace();
             }
         }).start();
     }
@@ -76,5 +76,11 @@ public abstract class TestHandler {
 
     public void write(String message) {
         System.out.println(message);
+    }
+
+    public void write(final String[] messages) {
+        for (String message : messages) {
+            write(message);
+        }
     }
 }
