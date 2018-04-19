@@ -289,7 +289,7 @@ public class TestDriver {
      * @return the test result
      */
     private TestResult makeResult(final TestResult.Verdict verdict, final String reason) {
-        return new TestResult(testCase, reason, testModelSimulation, mutantSimulation, verdict);
+        return new TestResult(testCase, reason, testModelSimulation, verdict);
     }
 
     /**
