@@ -5,9 +5,8 @@ import ecdar.mutation.MutationTestingException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -19,6 +18,12 @@ public class AsyncInputReader {
     private final List<String> lines = Collections.synchronizedList(new ArrayList<>());
     private IOException ioException;
     private MutationTestingException mutationException;
+
+    private final List<Runnable> tempListeners = new ArrayList<>(); // To be called a single time when a line appears
+
+    public synchronized void addTempListener(final Runnable runnable) {
+        tempListeners.add(runnable);
+    }
 
     /**
      * Constructs the reader and starts reading in another thread.
@@ -38,6 +43,14 @@ public class AsyncInputReader {
                     }
 
                     lines.add(line);
+
+                    // Call the listeners in a copy of them to avoid concurrency errors
+                    final List<Runnable> listeners;
+                    synchronized (this) {
+                        listeners = new ArrayList<>(tempListeners);
+                        tempListeners.clear();
+                    }
+                    listeners.forEach(Runnable::run);
                 }
             } catch (IOException e) {
                 ioException = e;

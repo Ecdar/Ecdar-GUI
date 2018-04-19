@@ -12,7 +12,7 @@ public abstract class TestHandler {
 
     final List<String> linesBuffer = new ArrayList<>();
 
-    final List<Runner> tempLinesListeners = new ArrayList<>(); // TO be called a single time when a line line appears
+    final List<Runner> tempLinesListeners = new ArrayList<>(); // To be called a single time when a line appears
 
     public static TestHandler createHandler(final double timeUnit, final boolean shouldSimulate) {
         if (shouldSimulate) return new SimulatedTimeTestHandler(timeUnit);

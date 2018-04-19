@@ -2,21 +2,26 @@ package ecdar.mutation;
 
 import ecdar.mutation.models.AsyncInputReader;
 import ecdar.mutation.models.MutationTestPlan;
+import ecdar.mutation.models.SingleRunnable;
 
 import java.io.IOException;
+import java.util.function.Consumer;
 
 /**
  * Handler for handling time during a mutation test.
  */
 public abstract class MutationTestTimeHandler {
     private final MutationTestPlan plan;
+    final Consumer<Exception> exceptionConsumer;
 
     /**
      * Constructs.
      * @param plan the test plan to base the test of
+     * @param exceptionConsumer
      */
-    public MutationTestTimeHandler(final MutationTestPlan plan) {
+    public MutationTestTimeHandler(final MutationTestPlan plan, Consumer<Exception> exceptionConsumer) {
         this.plan = plan;
+        this.exceptionConsumer = exceptionConsumer;
     }
 
     public MutationTestPlan getPlan() {
@@ -29,7 +34,7 @@ public abstract class MutationTestTimeHandler {
      * @throws IOException if an error occurs
      * @throws MutationTestingException if an error occurs
      */
-    abstract void sleep() throws InterruptedException, IOException, MutationTestingException;
+    abstract void sleep(final SingleRunnable runnable);
 
     /**
      * Handles what to do, when the test switches to another delay rule.
@@ -61,8 +66,9 @@ public abstract class MutationTestTimeHandler {
      * @param reader the reader for reading from the system under test
      * @return the new time handler
      */
-    public static MutationTestTimeHandler getHandler(final MutationTestPlan plan, final SutWriter writer, final AsyncInputReader reader) {
-        if (plan.isSimulateTime()) return new SimulatedTimeHandler(plan, writer, reader);
-        else return new RealTimeHandler(plan);
+    // TODO Make the if statement in caller instead, and remove this method
+    public static MutationTestTimeHandler getHandler(final MutationTestPlan plan, final Consumer<Exception> exceptionConsumer, final SutWriter writer, final AsyncInputReader reader) {
+        if (plan.isSimulateTime()) return new SimulatedTimeHandler(plan, exceptionConsumer, writer, reader);
+        else return new RealTimeHandler(plan, exceptionConsumer, reader);
     }
 }

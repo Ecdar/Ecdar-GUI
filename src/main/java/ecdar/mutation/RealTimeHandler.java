@@ -1,9 +1,15 @@
 package ecdar.mutation;
 
+import ecdar.mutation.models.AsyncInputReader;
 import ecdar.mutation.models.MutationTestPlan;
+import ecdar.mutation.models.SingleRunnable;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.function.Consumer;
 
 /**
  * Handler for handling time during a mutation test.
@@ -11,18 +17,28 @@ import java.time.Instant;
  */
 public class RealTimeHandler extends MutationTestTimeHandler {
     private Instant delayStart, lastTime;
+    private final AsyncInputReader reader;
 
     /**
      * Constructs.
      * @param plan the test plan to test with
      */
-    public RealTimeHandler(final MutationTestPlan plan) {
-        super(plan);
+    public RealTimeHandler(final MutationTestPlan plan,final Consumer<Exception> exceptionConsumer, final AsyncInputReader reader) {
+        super(plan, exceptionConsumer);
+        this.reader = reader;
     }
 
     @Override
-    void sleep() throws InterruptedException {
-        Thread.sleep(getPlan().getTimeUnit() / 4);
+    void sleep(final SingleRunnable runnable) {
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                runnable.run();
+
+            }
+        }, getPlan().getTimeUnit() / 4);
+
+        reader.addTempListener(runnable);
     }
 
     @Override
