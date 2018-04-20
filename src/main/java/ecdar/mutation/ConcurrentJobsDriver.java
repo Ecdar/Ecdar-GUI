@@ -88,8 +88,9 @@ public class ConcurrentJobsDriver {
         // while we have not reach the maximum allowed threads and there are still jobs to start
         while (getJobsRunning() < handler.getMaxConcurrentJobs() &&
                 jobsStarted < jobs.size()) {
-            jobs.get(jobsStarted).run();
+            final Runnable job = jobs.get(jobsStarted);
             jobsStarted++;
+            job.run();
         }
     }
 
