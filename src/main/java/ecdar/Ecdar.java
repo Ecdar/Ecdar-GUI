@@ -237,7 +237,7 @@ public class Ecdar extends Application {
         // This implicitly starts the fx-application thread
         // It prevents java.lang.RuntimeException: Internal graphics not initialized yet
         // https://stackoverflow.com/questions/27839441/internal-graphics-not-initialized-yet-javafx
-        new JFXPanel();
+        // new JFXPanel();
     }
 
     public static void initializeProjectFolder() throws IOException {
