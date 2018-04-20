@@ -36,7 +36,7 @@ public class RealTimeHandler extends MutationTestTimeHandler {
                 runnable.run();
 
             }
-        }, getPlan().getTimeUnit() / 4);
+        }, getPlan().getTimeUnit() / 2);
 
         reader.addTempListener(runnable);
     }
