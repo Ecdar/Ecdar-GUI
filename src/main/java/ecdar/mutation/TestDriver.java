@@ -70,8 +70,7 @@ public class TestDriver {
      * @return true iff should stop
      */
     private boolean shouldStop() {
-        return getPlan().getStatus().equals(MutationTestPlan.Status.STOPPING) ||
-                getPlan().getStatus().equals(MutationTestPlan.Status.ERROR);
+        return getPlan().shouldStop();
     }
 
     /**
@@ -106,7 +105,11 @@ public class TestDriver {
             return;
         }
 
-        if (shouldStop()) return;
+        if (shouldStop()) {
+            resultConsumer.accept(null);
+            tearDown();
+            return;
+        }
 
         step++;
 
@@ -164,6 +167,8 @@ public class TestDriver {
         Map<String, Double> clockValuations = getClockValuations();
 
         if (shouldStop()) {
+            resultConsumer.accept(null);
+            tearDown();
             return;
         }
 

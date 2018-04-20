@@ -121,8 +121,7 @@ public class TestingHandler implements ConcurrentJobsHandler {
 
     @Override
     public boolean shouldStop() {
-        return getPlan().getStatus().equals(MutationTestPlan.Status.STOPPING) ||
-                getPlan().getStatus().equals(MutationTestPlan.Status.ERROR);
+        return getPlan().shouldStop();
     }
 
     @Override
