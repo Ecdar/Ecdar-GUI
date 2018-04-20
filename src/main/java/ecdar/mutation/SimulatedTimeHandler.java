@@ -51,13 +51,11 @@ public class SimulatedTimeHandler extends MutationTestTimeHandler {
         delayTime ++;
         lastTime ++;
 
-        try {
-            reader.waitAndConsume("Delay done"); // Wait until SUT said it has simulated delay
-        } catch (InterruptedException | MutationTestingException e) {
-            exceptionConsumer.accept(e);
-        }
-
-        runnable.run();
+        final String DELAY_DONE = "Delay done";
+        reader.waitAndConsume(DELAY_DONE, runnable, () ->
+                exceptionConsumer.accept(new MutationTestingException("System under test did not respond with \"" +
+                        DELAY_DONE + "\" within 5 seconds"))
+        );
     }
 
     @Override

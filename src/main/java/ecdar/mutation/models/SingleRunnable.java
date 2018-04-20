@@ -11,8 +11,8 @@ public class SingleRunnable implements Runnable {
     @Override
     public synchronized void run() {
         if (isRun) return;
-
         isRun = true;
+
         runnable.run();
     }
 }

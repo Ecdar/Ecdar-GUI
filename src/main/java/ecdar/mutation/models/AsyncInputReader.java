@@ -42,15 +42,17 @@ public class AsyncInputReader {
                         continue;
                     }
 
-                    lines.add(line);
-
-                    // Call the listeners in a copy of them to avoid concurrency errors
-                    final List<Runnable> listeners;
                     synchronized (this) {
+                        lines.add(line);
+
+                        // Call the listeners in a copy of them to avoid concurrency errors
+                        final List<Runnable> listeners;
+
                         listeners = new ArrayList<>(tempListeners);
                         tempListeners.clear();
+
+                        listeners.forEach(Runnable::run);
                     }
-                    listeners.forEach(Runnable::run);
                 }
             } catch (IOException e) {
                 ioException = e;
@@ -110,19 +112,28 @@ public class AsyncInputReader {
      * It does not have to be the input in front.
      * Waits for about 5 seconds for the input to appear.
      * @param input the input to consume
-     * @throws InterruptedException if an error occurs
-     * @throws MutationTestingException if the input did not appear within 5 seconds
      */
-    public void waitAndConsume(final String input) throws InterruptedException, MutationTestingException {
-        for (int i = 0; i < 100; i++) {
-            if (lines.contains(input)) {
-                lines.remove(input);
-                return;
-            }
+    public void waitAndConsume(final String input, final Runnable onConsumed, final Runnable onTimeout) {
+        final SingleRunnableHandler runnableHandler = new SingleRunnableHandler();
 
-            Thread.sleep(50);
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                runnableHandler.run(onTimeout);
+            }
+        }, 5000);
+
+
+        waitAndConsumeWithoutTimeout(input, () -> runnableHandler.run(onConsumed));
+    }
+
+    private synchronized void waitAndConsumeWithoutTimeout(final String input, final Runnable onConsumed) {
+        if (lines.contains(input)) {
+            lines.remove(input);
+            onConsumed.run();
+            return;
         }
 
-        throw new MutationTestingException("System under test did not respond with \"" + input + "\" within 5 seconds");
+        addTempListener(() -> waitAndConsumeWithoutTimeout(input, onConsumed));
     }
 }

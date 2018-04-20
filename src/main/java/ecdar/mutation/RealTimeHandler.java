@@ -34,7 +34,6 @@ public class RealTimeHandler extends MutationTestTimeHandler {
             @Override
             public void run() {
                 runnable.run();
-
             }
         }, getPlan().getTimeUnit() / 2);
 
