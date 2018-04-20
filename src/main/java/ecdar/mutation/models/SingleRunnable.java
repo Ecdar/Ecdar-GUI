@@ -1,13 +1,17 @@
 package ecdar.mutation.models;
 
 /**
- * A runnable that only run a single time.
- * 
+ * An object that only runs a runnable a single time.
+ * If running more than once, the subsequent runs does nothing.
  */
 public class SingleRunnable implements Runnable {
     private boolean isRun = false;
     private final Runnable runnable;
 
+    /**
+     * Constructs this.
+     * @param runnable the runnable to run only once
+     */
     public SingleRunnable(final Runnable runnable) {
         this.runnable = runnable;
     }
