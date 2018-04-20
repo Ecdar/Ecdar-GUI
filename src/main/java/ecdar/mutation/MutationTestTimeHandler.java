@@ -4,7 +4,6 @@ import ecdar.mutation.models.AsyncInputReader;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.mutation.models.SingleRunnable;
 
-import java.io.IOException;
 import java.util.function.Consumer;
 
 /**
@@ -12,29 +11,43 @@ import java.util.function.Consumer;
  */
 public abstract class MutationTestTimeHandler {
     private final MutationTestPlan plan;
-    final Consumer<Exception> exceptionConsumer;
+    private final AsyncInputReader reader;
+    private final Consumer<Exception> exceptionConsumer;
 
     /**
-     * Constructs.
+     * Constructs this.
      * @param plan the test plan to base the test of
-     * @param exceptionConsumer
+     * @param exceptionConsumer consumer to be called if an exception happens
+     * @param reader the reader for reading inputs from the system under test
      */
-    public MutationTestTimeHandler(final MutationTestPlan plan, Consumer<Exception> exceptionConsumer) {
+    public MutationTestTimeHandler(final MutationTestPlan plan, final AsyncInputReader reader, final Consumer<Exception> exceptionConsumer) {
         this.plan = plan;
+        this.reader = reader;
         this.exceptionConsumer = exceptionConsumer;
     }
+
+
+    /* Properties */
 
     public MutationTestPlan getPlan() {
         return plan;
     }
 
+    public AsyncInputReader getReader() {
+        return reader;
+    }
+
+    public Consumer<Exception> getExceptionConsumer() {
+        return exceptionConsumer;
+    }
+
+    /* Other */
+
     /**
      * Sleeps for some time.
-     * @throws InterruptedException if an error occurs
-     * @throws IOException if an error occurs
-     * @throws MutationTestingException if an error occurs
+     * @param listener Listener to be called when done sleeping
      */
-    abstract void sleep(final SingleRunnable runnable);
+    abstract void sleep(final SingleRunnable listener);
 
     /**
      * Handles what to do, when the test switches to another delay rule.
@@ -58,17 +71,4 @@ public abstract class MutationTestTimeHandler {
      * @return the duration in time units
      */
     abstract double getTimeSinceLastTime();
-
-    /**
-     * Gets a new time handler.
-     * @param plan the test plan to test with
-     * @param writer the writer for writing to the system under test
-     * @param reader the reader for reading from the system under test
-     * @return the new time handler
-     */
-    // TODO Make the if statement in caller instead, and remove this method
-    public static MutationTestTimeHandler getHandler(final MutationTestPlan plan, final Consumer<Exception> exceptionConsumer, final SutWriter writer, final AsyncInputReader reader) {
-        if (plan.isSimulateTime()) return new SimulatedTimeHandler(plan, exceptionConsumer, writer, reader);
-        else return new RealTimeHandler(plan, exceptionConsumer, reader);
-    }
 }

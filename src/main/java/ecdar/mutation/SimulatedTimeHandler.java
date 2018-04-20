@@ -15,7 +15,6 @@ import java.util.function.Consumer;
  */
 public class SimulatedTimeHandler extends MutationTestTimeHandler {
     private final SutWriter writer;
-    private final AsyncInputReader reader;
 
 
     /**
@@ -29,31 +28,28 @@ public class SimulatedTimeHandler extends MutationTestTimeHandler {
     private int lastTime;
 
     /**
-     * Constructs.
-     * @param plan the test plan to test based of
+     * {@inheritDoc}
      * @param writer a writer for writing to the system under test
-     * @param reader the reader for reading inputs from the system under test
      */
     public SimulatedTimeHandler(final MutationTestPlan plan, final Consumer<Exception> exceptionConsumer, final SutWriter writer, final AsyncInputReader reader) {
-        super(plan, exceptionConsumer);
+        super(plan, reader, exceptionConsumer);
         this.writer = writer;
-        this.reader = reader;
     }
 
     @Override
-    void sleep(final SingleRunnable runnable) {
+    void sleep(final SingleRunnable listener) {
         try {
             writer.writeToSut("Delay: 1"); // Tell SUT to delay 1 time unit
-        } catch (IOException e) {
-            exceptionConsumer.accept(e);
+        } catch (final IOException e) {
+            getExceptionConsumer().accept(e);
         }
 
         delayTime ++;
         lastTime ++;
 
         final String DELAY_DONE = "Delay done";
-        reader.waitAndConsume(DELAY_DONE, runnable, () ->
-                exceptionConsumer.accept(new MutationTestingException("System under test did not respond with \"" +
+        getReader().consumeWithTimeout(DELAY_DONE, listener, () ->
+                getExceptionConsumer().accept(new MutationTestingException("System under test did not respond with \"" +
                         DELAY_DONE + "\" within 5 seconds"))
         );
     }

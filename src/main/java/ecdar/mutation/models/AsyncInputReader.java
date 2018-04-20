@@ -6,7 +6,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -21,8 +20,13 @@ public class AsyncInputReader {
 
     private final List<Runnable> tempListeners = new ArrayList<>(); // To be called a single time when a line appears
 
-    public synchronized void addTempListener(final Runnable runnable) {
-        tempListeners.add(runnable);
+    /**
+     * Adds a listener for the next reading.
+     * The listener is only called once.
+     * @param listener the listener to be called
+     */
+    public synchronized void addTempListener(final Runnable listener) {
+        tempListeners.add(listener);
     }
 
     /**
@@ -108,12 +112,14 @@ public class AsyncInputReader {
     }
 
     /**
-     * Consumes a specific input.
-     * It does not have to be the input in front.
-     * Waits for about 5 seconds for the input to appear.
+     * Consumes a specified input, but with some timeout.
+     * The specified input does not have to be the input in front.
+     * Waits for 5 seconds for the input to appear.
      * @param input the input to consume
+     * @param onConsumed listener to be called when input is consumed, if it was done before the timeout
+     * @param onTimeout listener to be called in 5 seconds, if the input was not consumed
      */
-    public void waitAndConsume(final String input, final Runnable onConsumed, final Runnable onTimeout) {
+    public void consumeWithTimeout(final String input, final Runnable onConsumed, final Runnable onTimeout) {
         final SingleRunnableHandler runnableHandler = new SingleRunnableHandler();
 
         new Timer().schedule(new TimerTask() {
@@ -127,6 +133,12 @@ public class AsyncInputReader {
         waitAndConsumeWithoutTimeout(input, () -> runnableHandler.run(onConsumed));
     }
 
+    /**
+     * Consumes a specified input.
+     * The specified input does not have to be the input in front.
+     * @param input the input to consume
+     * @param onConsumed listener to be called when input is consumed
+     */
     private synchronized void waitAndConsumeWithoutTimeout(final String input, final Runnable onConsumed) {
         if (lines.contains(input)) {
             lines.remove(input);

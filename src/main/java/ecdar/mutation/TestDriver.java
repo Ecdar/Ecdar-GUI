@@ -62,6 +62,10 @@ public class TestDriver {
         return getPlan().getTimeUnit();
     }
 
+    private NonRefinementStrategy getStrategy() {
+        return testCase.getStrategy();
+    }
+
 
     /* Other */
 
@@ -81,7 +85,7 @@ public class TestDriver {
         // Start process
         try {
             sut = Runtime.getRuntime().exec("java -jar " + Ecdar.projectDirectory.get() + File.separator + getPlan().getSutPath().replace("/", File.separator));
-        } catch (IOException e) {
+        } catch (final IOException e) {
             handleException(e);
             return;
         }
@@ -89,16 +93,18 @@ public class TestDriver {
         writer = new BufferedWriter(new OutputStreamWriter(sut.getOutputStream()));
         reader = new AsyncInputReader(sut);
 
-        timeHandler = MutationTestTimeHandler.getHandler(getPlan(), this::handleException, this::writeToSut, reader);
+        if (getPlan().shouldSimulateTime()) timeHandler = new SimulatedTimeHandler(getPlan(), this::handleException, this::writeToSut, reader);
+        else  timeHandler = new RealTimeHandler(getPlan(), this::handleException, reader);
+
         timeHandler.onTestStart();
 
         runStep();
     }
 
-    private NonRefinementStrategy getStrategy() {
-        return testCase.getStrategy();
-    }
-
+    /**
+     * Runs a step.
+     * Finds the satisfied rule, and performs testing with respect to it.
+     */
     private void runStep() {
         if (step >= getStepBounds()) {
             handIn(TestResult.Verdict.OUT_OF_BOUNDS, "Out of bounds.");
@@ -124,16 +130,20 @@ public class TestDriver {
         // if it is an input action perform input
         if (rule instanceof DelayRule || (rule instanceof ActionRule && ((ActionRule) rule).getStatus() == EdgeStatus.OUTPUT)) {
             runDelayRule(rule);
-        } else if (rule instanceof  ActionRule){
-            runInputRule(rule);
+        } else if (rule instanceof ActionRule){
+            runInputRule((ActionRule) rule);
         } else {
             handleException(new MutationTestingException("Rule " + rule + " is neither a delay nor an action rule."));
         }
 
     }
 
-    private void runInputRule(final StrategyRule rule) {
-        final String sync = ((ActionRule) rule).getSync();
+    /**
+     * Simulates an input and writes the input to the system under test.
+     * @param rule the input rule to use
+     */
+    private void runInputRule(final ActionRule rule) {
+        final String sync = rule.getSync();
         if (!testModelSimulation.isDeterministic(sync, EdgeStatus.INPUT)) {
             handIn(TestResult.Verdict.NON_DETERMINISM, "Non-deterministic choice for test model with input " + sync + ".");
         } else if (!mutantSimulation.isDeterministic(sync, EdgeStatus.INPUT)) {
@@ -144,28 +154,26 @@ public class TestDriver {
                 mutantSimulation.runInputAction(sync);
                 writeToSut(sync);
                 runStep();
-            } catch (MutationTestingException | IOException e) {
+            } catch (final MutationTestingException | IOException e) {
                 handleException(e);
             }
         }
     }
 
+    /**
+     * Delays and simulates the delay on the test model and the mutant and checks if the system under test made an output during the delay.
+     * @param rule the delay or output action rule
+     */
     private void runDelayRule(final StrategyRule rule) {
         timeHandler.onNewDelayRule();
         delay(rule);
     }
 
     /**
-     * Sleeps and simulates the delay on the two simulations and checks if the system under test made an output during the delay.
-     * @param rule strategy rule to check with. This methods sleeps only as long as this is satisfied.
-     * @return the test result (if this concludes the test), or null (if it does not)
-     * @throws MutationTestingException if an error related to mutation testing happens
-     * @throws IOException if an IO error happens
-     * @throws InterruptedException if an error happens when trying to sleep
+     * Delays and simulates the delay on the test model and the mutant and checks if the system under test made an output during the delay.
+     * @param rule strategy rule to check with. This methods delays only as long as this is satisfied.
      */
     private void delay(final StrategyRule rule) {
-        Map<String, Double> clockValuations = getClockValuations();
-
         if (shouldStop()) {
             resultConsumer.accept(null);
             tearDown();
@@ -205,7 +213,7 @@ public class TestDriver {
                 delay(rule);
                 return;
             }
-        } catch (IOException | MutationTestingException e) {
+        } catch (final IOException | MutationTestingException e) {
             handleException(e);
         }
 
@@ -220,6 +228,11 @@ public class TestDriver {
         }));
     }
 
+    /**
+     * Handles what to do if an exception occurs.
+     * If the test plan is still working, set it to the ERROR status and display the error to the user.
+     * @param exception the exception to handle
+     */
     private void handleException(final Exception exception) {
         synchronized (getPlan()) {
             if (getPlan().getStatus().equals(MutationTestPlan.Status.WORKING)) {
@@ -271,7 +284,6 @@ public class TestDriver {
     /**
      * Simulates an output on the test model and mutant model.
      * @param output the output to simulate
-     * @throws MutationTestingException if an exception occurred
      * @return the test result (if this concludes the test), or null (if it does not)
      */
     private TestResult simulateOutput(final String output) {
@@ -287,7 +299,7 @@ public class TestDriver {
             } else if (!mutantSimulation.runOutputAction(output)){
                 return makeResult(TestResult.Verdict.PASS, null);
             }
-        } catch (MutationTestingException e) {
+        } catch (final MutationTestingException e) {
             e.printStackTrace();
         }
         return null;
@@ -314,12 +326,19 @@ public class TestDriver {
         Platform.runLater(() -> getPlan().writeProgress(text));
     }
 
-
-
+    /**
+     * Hands in a test result.
+     * @param verdict the verdict of the result
+     * @param reason the reason for the verdict
+     */
     private void handIn(final TestResult.Verdict verdict, final String reason) {
         handIn(makeResult(verdict, reason));
     }
 
+    /**
+     * Hands in a test result.
+     * @param result the the result
+     */
     private void handIn(final TestResult result) {
         resultConsumer.accept(result);
         tearDown();

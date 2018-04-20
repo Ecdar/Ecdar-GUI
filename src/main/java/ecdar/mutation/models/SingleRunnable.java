@@ -1,5 +1,9 @@
 package ecdar.mutation.models;
 
+/**
+ * A runnable that only run a single time.
+ * 
+ */
 public class SingleRunnable implements Runnable {
     private boolean isRun = false;
     private final Runnable runnable;
