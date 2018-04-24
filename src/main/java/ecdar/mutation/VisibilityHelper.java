@@ -5,7 +5,10 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Region;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.SVGPath;
+import javafx.scene.text.Text;
 
 /**
  * Collection of helper methods to show, hide, expand, and collapse UI elements.
@@ -114,5 +117,39 @@ public class VisibilityHelper {
             show.set(!show.get());
             updateExpand(show.get(), label, region);
         });
+    }
+
+    public static void setPassedText(final int number, final Text text) {
+        text.setText(Integer.toString(number));
+        text.setFill(getPassedPaint(number));
+    }
+
+    public static void setIncText(final int number, final Text text) {
+        text.setText(Integer.toString(number));
+        text.setFill(getIncPaint(number));
+    }
+
+    public static void setFailedText(final int number, final Text text) {
+        text.setText(Integer.toString(number));
+        text.setFill(getFailedPaint(number));
+    }
+
+    public static Paint getPassedPaint(final int number) {
+        if (number == 0) return getDefaultPaint();
+        else return Color.GREEN;
+    }
+
+    public static Paint getIncPaint(final int number) {
+        if (number == 0) return getDefaultPaint();
+        else return Color.DARKORANGE;
+    }
+
+    public static Paint getFailedPaint(final int number) {
+        if (number == 0) return getDefaultPaint();
+        else return Color.RED;
+    }
+
+    public static Paint getDefaultPaint() {
+        return Color.web("#333333");
     }
 }

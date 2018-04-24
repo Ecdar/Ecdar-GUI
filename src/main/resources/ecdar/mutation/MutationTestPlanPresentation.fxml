@@ -4,6 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.TextFlow?>
+<?import javafx.scene.text.Text?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="StackPane"
@@ -108,41 +109,62 @@
                     <Label fx:id="testCasesText"/>
                     <Label fx:id="testTimeText"/>
 
-                    <VBox spacing="4">
-                        <JFXCheckBox fx:id="passed"/>
+                    <Label fx:id="selectVerdictsLabel" text="Select results to show" prefWidth="Infinity"/>
+                    <HBox fx:id="selectVerdictsOuterRegion" spacing="8">
+                        <Separator orientation="VERTICAL"/>
+                        <VBox fx:id="selectVerdictsInnerRegion" spacing="4">
+                            <HBox>
+                                <JFXCheckBox fx:id="passed" text="Passed: "/>
+                                <Text fx:id="passedNumber"/>
+                            </HBox>
 
-                        <JFXCheckBox fx:id="inc"/>
-                        <HBox>
-                            <padding><Insets left="28"/></padding>
-                            <JFXCheckBox fx:id="outOfBounds"/>
-                        </HBox>
-                        <HBox>
-                            <padding><Insets left="28"/></padding>
-                            <JFXCheckBox fx:id="maxWait"/>
-                        </HBox>
-                        <HBox>
-                            <padding><Insets left="28"/></padding>
-                            <JFXCheckBox fx:id="nonDeterminism"/>
-                        </HBox>
-                        <HBox>
-                            <padding><Insets left="28"/></padding>
-                            <JFXCheckBox fx:id="noRule"/>
-                        </HBox>
-                        <HBox>
-                            <padding><Insets left="28"/></padding>
-                            <JFXCheckBox fx:id="mutNoDelay"/>
-                        </HBox>
+                            <HBox>
+                                <JFXCheckBox fx:id="inc" text="Inconclusive: "/>
+                                <Text fx:id="incNumber"/>
+                            </HBox>
+                            <HBox>
+                                <padding><Insets left="28"/></padding>
+                                <JFXCheckBox fx:id="outOfBounds" text="Out of bounds: "/>
+                                <Text fx:id="outOfBoundsNumber"/>
+                            </HBox>
+                            <HBox>
+                                <padding><Insets left="28"/></padding>
+                                <JFXCheckBox fx:id="maxWait" text="Max waiting time exceeded: "/>
+                                <Text fx:id="maxWaitNumber"/>
+                            </HBox>
+                            <HBox>
+                                <padding><Insets left="28"/></padding>
+                                <JFXCheckBox fx:id="nonDeterminism" text="Non-determinism violated: "/>
+                                <Text fx:id="nonDeterminismNumber"/>
+                            </HBox>
+                            <HBox>
+                                <padding><Insets left="28"/></padding>
+                                <JFXCheckBox fx:id="noRule" text="No rule: "/>
+                                <Text fx:id="noRuleNumber"/>
+                            </HBox>
+                            <HBox>
+                                <padding><Insets left="28"/></padding>
+                                <JFXCheckBox fx:id="mutNoDelay" text="Mutant unable to delay: "/>
+                                <Text fx:id="mutNoDelayNumber"/>
+                            </HBox>
 
-                        <JFXCheckBox fx:id="failed"/>
-                        <HBox>
-                            <padding><Insets left="28"/></padding>
-                            <JFXCheckBox fx:id="primaryFailed"/>
-                        </HBox>
-                        <HBox>
-                            <padding><Insets left="28"/></padding>
-                            <JFXCheckBox fx:id="normalFailed"/>
-                        </HBox>
-                    </VBox>
+
+                            <HBox>
+                                <JFXCheckBox fx:id="failed" text="Failed: "/>
+                                <Text fx:id="failedNumber"/>
+                            </HBox>
+                            <HBox>
+                                <padding><Insets left="28"/></padding>
+                                <JFXCheckBox fx:id="primaryFailed" text="Primary: "/>
+                                <Text fx:id="primaryFailedNumber"/>
+                            </HBox>
+                            <HBox>
+                                <padding><Insets left="28"/></padding>
+                                <JFXCheckBox fx:id="normalFailed" text="Other: "/>
+                                <Text fx:id="normalFailedNumber"/>
+                            </HBox>
+                        </VBox>
+                    </HBox>
 
                     <JFXButton fx:id="retestButton" text="Retest Shown Results" prefWidth="170" managed="false" visible="false"
                                style="-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;"

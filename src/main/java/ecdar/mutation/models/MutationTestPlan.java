@@ -5,6 +5,7 @@ import com.google.gson.JsonPrimitive;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.HighLevelModelObject;
+import ecdar.mutation.VisibilityHelper;
 import ecdar.mutation.operators.MutationOperator;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
@@ -418,7 +419,7 @@ public class MutationTestPlan extends HighLevelModelObject {
      */
     public void writeProgress(final String message) {
         final Text text = new Text(message);
-        text.setFill(Color.web("#333333"));
+        text.setFill(VisibilityHelper.getDefaultPaint());
         writeProgress(text);
     }
 

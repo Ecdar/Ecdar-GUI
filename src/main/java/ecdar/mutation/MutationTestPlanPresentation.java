@@ -14,6 +14,7 @@ import ecdar.presentations.EcdarFXMLLoader;
 import ecdar.presentations.HighLevelModelPresentation;
 import javafx.application.Platform;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -350,6 +351,8 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      * Initializes test resultViews.
      */
     private void initializeTestResults() {
+        VisibilityHelper.initializeExpand(new SimpleBooleanProperty(true), controller.selectVerdictsLabel, controller.selectVerdictsOuterRegion);
+
         controller.passed.selectedProperty().bindBidirectional(getPlan().getShouldShowProperty(TestResult.Verdict.PASS));
 
         // Sync inconclusive overall checkbox with all its minor checkboxes
@@ -419,16 +422,18 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      * Updates the views for the test results.
      */
     private void updateResults() {
-        controller.passed.setText("Passed: " + getPlan().getResults(TestResult.Verdict.PASS).size());
-        controller.inc.setText("Inconclusive: " + getPlan().getResults(TestResult.getIncVerdicts()).size());
-        controller.outOfBounds.setText("Out of bounds: " + getPlan().getResults(TestResult.Verdict.OUT_OF_BOUNDS).size());
-        controller.maxWait.setText("Max waiting time exceeded: " + getPlan().getResults(TestResult.Verdict.MAX_WAIT).size());
-        controller.nonDeterminism.setText("Non-determinism violated: " + getPlan().getResults(TestResult.Verdict.NON_DETERMINISM).size());
-        controller.noRule.setText("No rule: " + getPlan().getResults(TestResult.Verdict.NO_RULE).size());
-        controller.mutNoDelay.setText("Mutant unable to delay: " + getPlan().getResults(TestResult.Verdict.MUT_NO_DELAY).size());
-        controller.failed.setText("Failed: " + getPlan().getResults(TestResult.getFailedVerdicts()).size());
-        controller.primaryFailed.setText("Primary: " + getPlan().getResults(TestResult.Verdict.FAIL_PRIMARY).size());
-        controller.normalFailed.setText("Other: " + getPlan().getResults(TestResult.Verdict.FAIL_NORMAL).size());
+        VisibilityHelper.setPassedText(getPlan().getResults(TestResult.Verdict.PASS).size(), controller.passedNumber);
+
+        VisibilityHelper.setIncText(getPlan().getResults(TestResult.getIncVerdicts()).size(), controller.incNumber);
+        VisibilityHelper.setIncText(getPlan().getResults(TestResult.Verdict.OUT_OF_BOUNDS).size(), controller.outOfBoundsNumber);
+        VisibilityHelper.setIncText(getPlan().getResults(TestResult.Verdict.MAX_WAIT).size(), controller.maxWaitNumber);
+        VisibilityHelper.setIncText(getPlan().getResults(TestResult.Verdict.NON_DETERMINISM).size(), controller.nonDeterminismNumber);
+        VisibilityHelper.setIncText(getPlan().getResults(TestResult.Verdict.NO_RULE).size(), controller.noRuleNumber);
+        VisibilityHelper.setIncText(getPlan().getResults(TestResult.Verdict.MUT_NO_DELAY).size(), controller.mutNoDelayNumber);
+
+        VisibilityHelper.setFailedText(getPlan().getResults(TestResult.getFailedVerdicts()).size(), controller.failedNumber);
+        VisibilityHelper.setFailedText(getPlan().getResults(TestResult.Verdict.FAIL_PRIMARY).size(), controller.primaryFailedNumber);
+        VisibilityHelper.setFailedText(getPlan().getResults(TestResult.Verdict.FAIL_NORMAL).size(), controller.normalFailedNumber);
 
         controller.resultsToShow.clear();
         controller.resultsToShow.addAll(getPlan().getResultsToShow());
