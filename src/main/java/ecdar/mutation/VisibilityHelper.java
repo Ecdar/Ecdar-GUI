@@ -1,5 +1,6 @@
 package ecdar.mutation;
 
+import ecdar.mutation.models.TestResult;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.Node;
@@ -7,8 +8,10 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
-import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Text;
+import org.kordamp.ikonli.javafx.FontIcon;
+
+import java.util.Arrays;
 
 /**
  * Collection of helper methods to show, hide, expand, and collapse UI elements.
@@ -50,22 +53,27 @@ public class VisibilityHelper {
     }
 
     /**
-     * Creates an arrow head path to draw expand and collapse graphics.
-     * From: http://tech.chitgoks.com/2013/05/19/how-to-create-a-listview-with-title-header-that-expands-collapses-in-java-fx/
-     * @param height height of the view it should match
-     * @param up true iff the arrow should point up
-     * @return the arrow head graphics
+     * Shows or hides some content and adjusts the graphic on the header with an arrow.
+     * @param shouldShow true iff should show
+     * @param header the header
+     * @param content the content
      */
-    public static SVGPath createArrowPath(final int height, final boolean up) {
-        final SVGPath svg = new SVGPath();
-        final int width = height / 4;
+    public static void updateExpand(final boolean shouldShow, final Label header, final Node content) {
+        if (shouldShow) {
+            header.setGraphic(getExpandLess());
+            show(content);
+        } else {
+            header.setGraphic(getExpandMore());
+            hide(content);
+        }
+    }
 
-        if (up)
-            svg.setContent("M" + width + " 0 L" + (width * 2) + " " + width + " L0 " + width + " Z");
-        else
-            svg.setContent("M0 0 L" + (width * 2) + " 0 L" + width + " " + width + " Z");
+    private static FontIcon getExpandLess() {
+        return new FontIcon("gmi-expand-less");
+    }
 
-        return svg;
+    private static FontIcon getExpandMore() {
+        return new FontIcon("gmi-expand-more");
     }
 
     /**
@@ -74,23 +82,25 @@ public class VisibilityHelper {
      * @param header the header
      * @param content the content
      */
-    public static void updateExpand(final boolean shouldShow, final Label header, final Node content) {
+    public static void updateExpand(final boolean shouldShow, final Label header, final Node content, final TestResult.Verdict verdict) {
         if (shouldShow) {
-            header.setGraphic(createArrowPath(true));
+            final FontIcon icon = getExpandLess();
+            icon.setIconColor(getColor(verdict));
+            header.setGraphic(icon);
             show(content);
         } else {
-            header.setGraphic(createArrowPath(false));
+            final FontIcon icon = new FontIcon("gmi-expand-more");
+            icon.setIconColor(getColor(verdict));
+            header.setGraphic(icon);
             hide(content);
         }
     }
 
-    /**
-     * Creates an arrow head path to draw expand and collapse graphics.
-     * @param up true iff the arrow should point up
-     * @return the arrow head graphics
-     */
-    public static SVGPath createArrowPath(final boolean up) {
-        return createArrowPath(ARROW_HEIGHT, up);
+    private static Paint getColor(final TestResult.Verdict verdict) {
+        if (verdict == TestResult.Verdict.PASS) return getPassedColor();
+        if (Arrays.stream(TestResult.getIncVerdicts()).anyMatch(v -> v == verdict)) return getIncColor();
+        if (Arrays.stream(TestResult.getFailedVerdicts()).anyMatch(v -> v == verdict)) return getFailedColor();
+        throw new IllegalArgumentException("Verdict " + verdict + " not expected");
     }
 
     /**
@@ -135,21 +145,33 @@ public class VisibilityHelper {
     }
 
     public static Paint getPassedPaint(final int number) {
-        if (number == 0) return getDefaultPaint();
+        if (number == 0) return getDefaultTextColor();
         else return Color.GREEN;
     }
 
+    private static Paint getPassedColor() {
+        return Color.GREEN;
+    }
+
     public static Paint getIncPaint(final int number) {
-        if (number == 0) return getDefaultPaint();
-        else return Color.DARKORANGE;
+        if (number == 0) return getDefaultTextColor();
+        else return getIncColor();
+    }
+
+    private static Paint getIncColor() {
+        return Color.DARKORANGE;
     }
 
     public static Paint getFailedPaint(final int number) {
-        if (number == 0) return getDefaultPaint();
+        if (number == 0) return getDefaultTextColor();
         else return Color.RED;
     }
 
-    public static Paint getDefaultPaint() {
+    private static Paint getFailedColor() {
+        return Color.RED;
+    }
+
+    public static Paint getDefaultTextColor() {
         return Color.web("#333333");
     }
 }

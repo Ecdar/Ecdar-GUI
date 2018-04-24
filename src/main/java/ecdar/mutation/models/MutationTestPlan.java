@@ -10,7 +10,6 @@ import ecdar.mutation.operators.MutationOperator;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
 import java.util.*;
@@ -419,7 +418,7 @@ public class MutationTestPlan extends HighLevelModelObject {
      */
     public void writeProgress(final String message) {
         final Text text = new Text(message);
-        text.setFill(VisibilityHelper.getDefaultPaint());
+        text.setFill(VisibilityHelper.getDefaultTextColor());
         writeProgress(text);
     }
 

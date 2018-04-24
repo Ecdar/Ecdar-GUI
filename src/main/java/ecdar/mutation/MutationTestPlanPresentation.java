@@ -26,6 +26,8 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import org.kordamp.ikonli.javafx.FontIcon;
+import org.kordamp.ikonli.javafx.Icon;
 
 import java.time.Duration;
 import java.util.*;
@@ -116,7 +118,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      * @param control the control
      * @param text the text of the tooltip
      */
-    private static void installTooltip(final Control control, final String text) {
+    private static void installTooltip(final Node control, final String text) {
         final Tooltip tooltip = new Tooltip(text);
         tooltip.setPrefWidth(250);
         tooltip.setWrapText(true);
@@ -482,11 +484,11 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         final VBox vBox = new VBox(header, content);
         contentModelMap.put(testResult, vBox);
 
-        VisibilityHelper.updateExpand(!testResult.isHidden(), titleLabel, content);
+        VisibilityHelper.updateExpand(!testResult.isHidden(), titleLabel, content, testResult.getVerdict());
 
         header.setOnMouseClicked(e -> {
             testResult.setHidden(!testResult.isHidden());
-            VisibilityHelper.updateExpand(!testResult.isHidden(), titleLabel, content);
+            VisibilityHelper.updateExpand(!testResult.isHidden(), titleLabel, content, testResult.getVerdict());
         });
 
         viewList.add(vBox);
