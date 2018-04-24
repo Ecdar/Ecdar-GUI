@@ -514,7 +514,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
             controller.getTestingHandler().retest(testResult.getTestCase());
         });
 
-        return new HBox(8, new Separator(Orientation.VERTICAL), new VBox(8, content, button));
+        return VisibilityHelper.expand(new VBox(8, content, button));
     }
 
     /**

@@ -20,6 +20,7 @@
             <VBox fx:id="modelDependentArea" spacing="16" managed="false" visible="false">
                 <Label fx:id="opsLabel" text="Select mutation operators" prefWidth="Infinity"/>
                 <HBox fx:id="operatorsOuterRegion" spacing="8">
+                    <padding><Insets left="5"/></padding>
                     <Separator orientation="VERTICAL"/>
                     <VBox fx:id="operatorsInnerRegion" spacing="4"/>
                 </HBox>
@@ -44,6 +45,7 @@
                         <Label fx:id="advancedOptionsLabel" text="Advanced Options" prefWidth="Infinity"/>
 
                         <HBox fx:id="advancedOptions" spacing="8">
+                            <padding><Insets left="5"/></padding>
                             <Separator orientation="VERTICAL"/>
                             <VBox spacing="16">
                                 <VBox fx:id="demonicArea">
@@ -111,6 +113,7 @@
 
                     <Label fx:id="selectVerdictsLabel" text="Select results to show" prefWidth="Infinity"/>
                     <HBox fx:id="selectVerdictsOuterRegion" spacing="8">
+                        <padding><Insets left="5"/></padding>
                         <Separator orientation="VERTICAL"/>
                         <VBox fx:id="selectVerdictsInnerRegion" spacing="4">
                             <HBox>

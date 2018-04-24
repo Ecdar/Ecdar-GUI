@@ -3,9 +3,14 @@ package ecdar.mutation;
 import ecdar.mutation.models.TestResult;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.control.Separator;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Text;
@@ -18,6 +23,7 @@ import java.util.Arrays;
  */
 public class VisibilityHelper {
     private final static int ARROW_HEIGHT = 19; // Height of view containing the arrow for expanding and collapsing views. For labels, this is 19
+    public static final int EXPAND_INSET = 5;
 
 
     /**
@@ -173,5 +179,11 @@ public class VisibilityHelper {
 
     public static Paint getDefaultTextColor() {
         return Color.web("#333333");
+    }
+
+    public static HBox expand(final Node content) {
+        final HBox hBox = new HBox(8, new Separator(Orientation.VERTICAL), content);
+        hBox.setPadding(new Insets(0, 0, 0, EXPAND_INSET));
+        return hBox;
     }
 }
