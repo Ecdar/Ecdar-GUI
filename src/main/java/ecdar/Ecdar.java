@@ -17,6 +17,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ListChangeListener;
+import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
@@ -38,9 +39,6 @@ import java.security.CodeSource;
 import java.util.Random;
 
 public class Ecdar extends Application {
-
-    public static String serverDirectory;
-    public static String debugDirectory;
     public static boolean serializationDone = false;
     private static Project project;
     private static EcdarPresentation presentation;
@@ -48,19 +46,17 @@ public class Ecdar extends Application {
     private static BooleanProperty isUICached = new SimpleBooleanProperty();
     private Stage debugStage;
 
-    {
+    /**
+     * Gets the absolute path to the server folder
+     * @return
+     */
+    public static String getServerPath() {
         try {
-            final String rootDirectory = getRootDirectory();
-            serverDirectory = rootDirectory + File.separator + "servers";
-            debugDirectory = rootDirectory + File.separator + "uppaal-debug";
-            forceCreateFolder(serverDirectory);
-            forceCreateFolder(debugDirectory);
+            return getRootDirectory() + File.separator + "servers";
         } catch (final URISyntaxException e) {
-            System.out.println("Could not create project directory!");
-            System.exit(1);
-        } catch (final IOException e) {
-            System.out.println("Could not create project directory!");
-            System.exit(2);
+            showToast("Could not fetch root directory.");
+            e.printStackTrace();
+            throw new RuntimeException("Could not create project directory", e);
         }
     }
 
@@ -237,6 +233,11 @@ public class Ecdar extends Application {
     public static void setUpForTest() {
         project = new Project();
         project.reset();
+
+        // This implicitly starts the fx-application thread
+        // It prevents java.lang.RuntimeException: Internal graphics not initialized yet
+        // https://stackoverflow.com/questions/27839441/internal-graphics-not-initialized-yet-javafx
+        // new JFXPanel();
     }
 
     public static void initializeProjectFolder() throws IOException {

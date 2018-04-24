@@ -1,8 +1,6 @@
 package ecdar.utility;
 
 import com.bpodgursky.jbool_expressions.*;
-import org.apache.regexp.RE;
-import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import java.util.*;

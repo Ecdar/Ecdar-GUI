@@ -27,6 +27,7 @@ public class TestDriver {
     private final SimpleComponentSimulation testModelSimulation, mutantSimulation;
     private BufferedWriter writer;
     private MutationTestTimeHandler timeHandler;
+    private int step = 0;
 
     /**
      * Constructor.
@@ -61,6 +62,10 @@ public class TestDriver {
         return getPlan().getTimeUnit();
     }
 
+    private NonRefinementStrategy getStrategy() {
+        return testCase.getStrategy();
+    }
+
 
     /* Other */
 
@@ -69,8 +74,7 @@ public class TestDriver {
      * @return true iff should stop
      */
     private boolean shouldStop() {
-        return getPlan().getStatus().equals(MutationTestPlan.Status.STOPPING) ||
-                getPlan().getStatus().equals(MutationTestPlan.Status.ERROR);
+        return getPlan().shouldStop();
     }
 
     /**
@@ -78,137 +82,174 @@ public class TestDriver {
      * When done, the result consumer is called.
      */
     public void start() {
-        new Thread(() -> {
-            TestResult result = null;
-
-            try {
-                result = test();
-            } catch (MutationTestingException | IOException | InterruptedException e) {
-                if (getPlan().getStatus().equals(MutationTestPlan.Status.WORKING)) {
-                    getPlan().setStatus(MutationTestPlan.Status.ERROR);
-                    Platform.runLater(() -> {
-                        final String errorMessage = "Error while running test-case " + testCase.getId() + ": " + e.getMessage();
-                        final Text text = new Text(errorMessage);
-                        text.setFill(Color.RED);
-                        writeProgress(text);
-                        Ecdar.showToast(errorMessage);
-                        e.printStackTrace();
-                    });
-                }
-            } finally {
-                resultConsumer.accept(result);
-                tearDown();
-            }
-        }).start();
-    }
-
-    /**
-     * tests.
-     * @return the test result, or null if stopped
-     * @throws IOException if an IO error happens
-     * @throws MutationTestingException if an error related to mutation testing happens
-     * @throws InterruptedException if an error happens when trying to sleep
-     */
-    private TestResult test() throws IOException, MutationTestingException, InterruptedException {
-        final NonRefinementStrategy strategy = testCase.getStrategy();
-
         // Start process
-        sut = Runtime.getRuntime().exec("java -jar " + Ecdar.projectDirectory.get() + File.separator + getPlan().getSutPath().replace("/", File.separator));
-        writer = new BufferedWriter(new OutputStreamWriter(sut.getOutputStream()));
-
-        reader = new AsyncInputReader(sut);
-
-        timeHandler = MutationTestTimeHandler.getHandler(getPlan(), this::writeToSut, reader);
-        timeHandler.onTestStart();
-
-        // Begin the new test
-        int step = 0;
-        while (step < getStepBounds()) {
-            // Get rule and check if its empty
-            final StrategyRule rule = strategy.getRule(testModelSimulation, mutantSimulation);
-            if (rule == null) {
-                return makeResult(TestResult.Verdict.NO_RULE, "No rule to perform.");
-            } else {
-                // Check if rule is an delay rule or output action rule, if it is either, perform delay,
-                // if it is an input action perform input
-                if (rule instanceof DelayRule || (rule instanceof ActionRule && ((ActionRule) rule).getStatus() == EdgeStatus.OUTPUT)) {
-                    final TestResult result = delay(rule);
-                    if (result != null) return result;
-                } else if (rule instanceof  ActionRule){
-                    final String sync = ((ActionRule) rule).getSync();
-                    if (!testModelSimulation.isDeterministic(sync, EdgeStatus.INPUT)) {
-                        return makeResult(TestResult.Verdict.NON_DETERMINISM, "Non-deterministic choice for test model with input " + sync + ".");
-                    } else if (!mutantSimulation.isDeterministic(sync, EdgeStatus.INPUT)) {
-                        return makeResult(TestResult.Verdict.NON_DETERMINISM, "Non-deterministic choice for mutant with input " + sync + ".");
-                    } else {
-                        testModelSimulation.runInputAction(sync);
-                        mutantSimulation.runInputAction(sync);
-                        writeToSut(sync);
-                    }
-                } else {
-                    throw new MutationTestingException("Rule " + rule + " is neither a delay nor an action rule.");
-                }
-            }
-
-            if (shouldStop()) return null;
-
-            step++;
+        try {
+            sut = Runtime.getRuntime().exec("java -jar " + Ecdar.projectDirectory.get() + File.separator + getPlan().getSutPath().replace("/", File.separator));
+        } catch (final IOException e) {
+            handleException(e);
+            return;
         }
 
-        // Finish test, we ran out of step bounds
-        return makeResult(TestResult.Verdict.OUT_OF_BOUNDS, "Out of bounds.");
+        writer = new BufferedWriter(new OutputStreamWriter(sut.getOutputStream()));
+        reader = new AsyncInputReader(sut);
+
+        if (getPlan().shouldSimulateTime()) timeHandler = new SimulatedTimeHandler(getPlan(), this::handleException, this::writeToSut, reader);
+        else  timeHandler = new RealTimeHandler(getPlan(), this::handleException, reader);
+
+        timeHandler.onTestStart();
+
+        runStep();
     }
 
     /**
-     * Sleeps and simulates the delay on the two simulations and checks if the system under test made an output during the delay.
-     * @param rule strategy rule to check with. This methods sleeps only as long as this is satisfied.
-     * @return the test result (if this concludes the test), or null (if it does not)
-     * @throws MutationTestingException if an error related to mutation testing happens
-     * @throws IOException if an IO error happens
-     * @throws InterruptedException if an error happens when trying to sleep
+     * Runs a step.
+     * Finds the satisfied rule, and performs testing with respect to it.
      */
-    private TestResult delay(final StrategyRule rule) throws MutationTestingException, InterruptedException, IOException {
-        timeHandler.onNewDelayRule();
-        Map<String, Double> clockValuations = getClockValuations();
+    private void runStep() {
+        if (step >= getStepBounds()) {
+            handIn(TestResult.Verdict.OUT_OF_BOUNDS, "Out of bounds.");
+            return;
+        }
 
-        // Keep delaying until the rule has been satisfied,
-        // Will return inside while loop if maximum wait time is exceeded or an output has been given
-        while ((rule.isSatisfied(clockValuations))) {
-            //Check if the maximum wait time has been exceeded, if it is, give inconclusive verdict
-            if (timeHandler.isMaxWaitTimeExceeded()) {
-                return makeResult(TestResult.Verdict.MAX_WAIT, "Maximum wait time reached without receiving an output.");
+        if (shouldStop()) {
+            resultConsumer.accept(null);
+            tearDown();
+            return;
+        }
+
+        step++;
+
+        // Get rule and check if its empty
+        final StrategyRule rule = getStrategy().getRule(testModelSimulation, mutantSimulation);
+        if (rule == null) {
+            handIn(TestResult.Verdict.NO_RULE, "No rule to perform.");
+            return;
+        }
+
+        // Check if rule is an delay rule or output action rule, if it is either, perform delay,
+        // if it is an input action perform input
+        if (rule instanceof DelayRule || (rule instanceof ActionRule && ((ActionRule) rule).getStatus() == EdgeStatus.OUTPUT)) {
+            runDelayRule(rule);
+        } else if (rule instanceof ActionRule){
+            runInputRule((ActionRule) rule);
+        } else {
+            handleException(new MutationTestingException("Rule " + rule + " is neither a delay nor an action rule."));
+        }
+
+    }
+
+    /**
+     * Simulates an input and writes the input to the system under test.
+     * @param rule the input rule to use
+     */
+    private void runInputRule(final ActionRule rule) {
+        final String sync = rule.getSync();
+        if (!testModelSimulation.isDeterministic(sync, EdgeStatus.INPUT)) {
+            handIn(TestResult.Verdict.NON_DETERMINISM, "Non-deterministic choice for test model with input " + sync + ".");
+        } else if (!mutantSimulation.isDeterministic(sync, EdgeStatus.INPUT)) {
+            handIn(TestResult.Verdict.NON_DETERMINISM, "Non-deterministic choice for mutant with input " + sync + ".");
+        } else {
+            try {
+                testModelSimulation.runInputAction(sync);
+                mutantSimulation.runInputAction(sync);
+                writeToSut(sync);
+                runStep();
+            } catch (final MutationTestingException | IOException e) {
+                handleException(e);
             }
+        }
+    }
 
+    /**
+     * Delays and simulates the delay on the test model and the mutant and checks if the system under test made an output during the delay.
+     * @param rule the delay or output action rule
+     */
+    private void runDelayRule(final StrategyRule rule) {
+        timeHandler.onNewDelayRule();
+        delay(rule);
+    }
+
+    /**
+     * Delays and simulates the delay on the test model and the mutant and checks if the system under test made an output during the delay.
+     * @param rule strategy rule to check with. This methods delays only as long as this is satisfied.
+     */
+    private void delay(final StrategyRule rule) {
+        if (shouldStop()) {
+            resultConsumer.accept(null);
+            tearDown();
+            return;
+        }
+
+        // If rule is no longer satisfied, run a new step
+        if (!rule.isSatisfied(getClockValuations())) {
+            runStep();
+            return;
+        }
+
+        // Check if the maximum wait time has been exceeded, if it is, give inconclusive verdict
+        if (timeHandler.isMaxWaitTimeExceeded()) {
+            handIn(TestResult.Verdict.MAX_WAIT, "Maximum wait time reached without receiving an output.");
+            return;
+        }
+
+        // If SUT has an output
+        try {
             if (reader.ready()) {
                 final String output = reader.consume();
 
                 final TestResult delayResult = simulateDelay();
-                if (delayResult != null) return delayResult;
+                if (delayResult != null) {
+                    handIn(delayResult);
+                    return;
+                }
 
                 final TestResult outputResult = simulateOutput(output);
-                if (outputResult != null) return outputResult;
-            } else {
-                sleep();
-                final TestResult result = simulateDelay();
-                if (result != null) return result;
+                if (outputResult != null) {
+                    handIn(outputResult);
+                    return;
+                }
+
+                // Output from SUT was OK, try delaying again
+                delay(rule);
+                return;
             }
-
-            if (shouldStop()) return null;
-
-            clockValuations = getClockValuations();
+        } catch (final IOException | MutationTestingException e) {
+            handleException(e);
         }
 
-        return null;
+        timeHandler.sleep(new SingleRunnable(() -> {
+            final TestResult delayResult = simulateDelay();
+            if (delayResult != null) {
+                handIn(delayResult);
+                return;
+            }
+
+            delay(rule);
+        }));
     }
 
     /**
-     * Sleeps for 1/4 of a time unit.
-     * @throws InterruptedException if an error occurs
-     * @throws IOException if an error occurs
-     * @throws MutationTestingException if an error occurs
+     * Handles what to do if an exception occurs.
+     * If the test plan is still working, set it to the ERROR status and display the error to the user.
+     * @param exception the exception to handle
      */
-    private void sleep() throws InterruptedException, IOException, MutationTestingException {
-        timeHandler.sleep();
+    private void handleException(final Exception exception) {
+        synchronized (getPlan()) {
+            if (getPlan().getStatus().equals(MutationTestPlan.Status.WORKING)) {
+                getPlan().setStatus(MutationTestPlan.Status.ERROR);
+                Platform.runLater(() -> {
+                    final String errorMessage = "Error while running test-case " + testCase.getId() + ": " + exception.getMessage();
+                    final Text text = new Text(errorMessage);
+                    text.setFill(Color.RED);
+                    writeProgress(text);
+                    Ecdar.showToast(errorMessage);
+                });
+            }
+        }
+
+        exception.printStackTrace();
+
+        tearDown();
     }
 
     /**
@@ -243,20 +284,23 @@ public class TestDriver {
     /**
      * Simulates an output on the test model and mutant model.
      * @param output the output to simulate
-     * @throws MutationTestingException if an exception occurred
      * @return the test result (if this concludes the test), or null (if it does not)
      */
-    private TestResult simulateOutput(final String output) throws MutationTestingException {
-        if (!testModelSimulation.isDeterministic(output, EdgeStatus.OUTPUT)) {
-            return makeResult(TestResult.Verdict.NON_DETERMINISM, "Non-deterministic choice for test model with output " + output + ".");
-        } else if (!mutantSimulation.isDeterministic(output, EdgeStatus.OUTPUT)) {
-            return makeResult(TestResult.Verdict.NON_DETERMINISM, "Non-deterministic choice with mutant output " + output + ".");
-        } else if (!testModelSimulation.runOutputAction(output)){
-            final String reason = "Failed simulating output " + output + " on test model.";
-            if (mutantSimulation.runOutputAction(output)) return makeResult(TestResult.Verdict.FAIL_PRIMARY, reason);
-            else return makeResult(TestResult.Verdict.FAIL_NORMAL, reason);
-        } else if (!mutantSimulation.runOutputAction(output)){
-            return makeResult(TestResult.Verdict.PASS, null);
+    private TestResult simulateOutput(final String output) {
+        try {
+            if (!testModelSimulation.isDeterministic(output, EdgeStatus.OUTPUT)) {
+                return makeResult(TestResult.Verdict.NON_DETERMINISM, "Non-deterministic choice for test model with output " + output + ".");
+            } else if (!mutantSimulation.isDeterministic(output, EdgeStatus.OUTPUT)) {
+                return makeResult(TestResult.Verdict.NON_DETERMINISM, "Non-deterministic choice with mutant output " + output + ".");
+            } else if (!testModelSimulation.runOutputAction(output)){
+                final String reason = "Failed simulating output " + output + " on test model.";
+                if (mutantSimulation.runOutputAction(output)) return makeResult(TestResult.Verdict.FAIL_PRIMARY, reason);
+                else return makeResult(TestResult.Verdict.FAIL_NORMAL, reason);
+            } else if (!mutantSimulation.runOutputAction(output)){
+                return makeResult(TestResult.Verdict.PASS, null);
+            }
+        } catch (final MutationTestingException e) {
+            e.printStackTrace();
         }
         return null;
     }
@@ -283,13 +327,31 @@ public class TestDriver {
     }
 
     /**
+     * Hands in a test result.
+     * @param verdict the verdict of the result
+     * @param reason the reason for the verdict
+     */
+    private void handIn(final TestResult.Verdict verdict, final String reason) {
+        handIn(makeResult(verdict, reason));
+    }
+
+    /**
+     * Hands in a test result.
+     * @param result the the result
+     */
+    private void handIn(final TestResult result) {
+        resultConsumer.accept(result);
+        tearDown();
+    }
+
+    /**
      * Constructs a test result.
      * @param verdict the verdict of the test
      * @param reason the reason for that verdict
      * @return the test result
      */
     private TestResult makeResult(final TestResult.Verdict verdict, final String reason) {
-        return new TestResult(testCase, reason, testModelSimulation, mutantSimulation, verdict);
+        return new TestResult(testCase, reason, testModelSimulation, verdict);
     }
 
     /**

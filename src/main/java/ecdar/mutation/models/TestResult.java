@@ -18,16 +18,13 @@ public class TestResult extends ExpandableContent {
      * @param testCase test-case used for getting the result
      * @param reason reason for the verdict
      * @param testModelSimulation test model simulation
-     * @param mutantSimulation mutant model simulation
      * @param verdict verdict of the test
      */
     public TestResult(final MutationTestCase testCase, final String reason,
                       final SimpleComponentSimulation testModelSimulation,
-                      final SimpleComponentSimulation mutantSimulation, final Verdict verdict) {
+                      final Verdict verdict) {
         super(testCase.getDescription(), "Id: " + testCase.getId() + "\n" +
                 "Reason: " + reason + "\n" +
-                "Test model is in location: " + testModelSimulation.getCurrentLocation().getId() + " with values: " + testModelSimulation.getAllValuations() + "\n" +
-                "Mutant is in location: " + mutantSimulation.getCurrentLocation().getId() + " with values: " + mutantSimulation.getAllValuations() + "\n" +
                 "Trace: " + String.join(" → ", testModelSimulation.getTrace()));
 
         this.verdict = verdict;

@@ -286,7 +286,11 @@ public class MutationTestPlan extends HighLevelModelObject {
         this.stepBounds.set(stepBounds);
     }
 
-    public boolean isSimulateTime() {
+    /**
+     * Gets if the test driver should simulate time or test using real-time.
+     * @return true iff the test driver should simulate time
+     */
+    public boolean shouldSimulateTime() {
         return simulateTime.get();
     }
     public BooleanProperty getSimulateTimeProperty() {
@@ -317,7 +321,7 @@ public class MutationTestPlan extends HighLevelModelObject {
         result.addProperty(VERIFYTGA_TRIES, getVerifytgaTries());
         result.addProperty(TIME_UNIT, getTimeUnit());
         result.addProperty(STEP_BOUNDS, getStepBounds());
-        result.addProperty(SIMULATE_TIME, isSimulateTime());
+        result.addProperty(SIMULATE_TIME, shouldSimulateTime());
 
         for (final TestResult.Verdict verdict : shouldShowMap.keySet())
             result.addProperty(VERDICT_PREFIX + verdict.toString(), shouldShow(verdict));

@@ -52,7 +52,6 @@ public class EcdarPresentation extends StackPane {
         initializeTopBar();
         initializeToolbar();
         initializeQueryDetailsDialog();
-        initializeGenerateUppaalModelButton();
         initializeColorSelector();
 
         initializeToggleQueryPaneFunctionality();
@@ -292,16 +291,6 @@ public class EcdarPresentation extends StackPane {
             if (SelectHelper.getSelectedElements().size() == 0) return;
             popup.show(controller.colorSelected, JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.RIGHT, -10, 15);
         });
-    }
-
-    private void initializeGenerateUppaalModelButton() {
-        final Color color = Color.GREY_BLUE;
-        final Color.Intensity colorIntensity = Color.Intensity.I800;
-
-        controller.generateUppaalModel.setMaskType(JFXRippler.RipplerMask.CIRCLE);
-        controller.generateUppaalModel.setRipplerFill(color.getTextColor(colorIntensity));
-
-        Tooltip.install(controller.generateUppaalModel, new Tooltip("Generate XML model"));
     }
 
     private void initializeSelectDependentToolbarButton(final JFXRippler button) {

@@ -1060,20 +1060,6 @@ public class EcdarController implements Initializable {
         }
     }
 
-    /**
-     * Generates an XML document based on all components in this project.
-     */
-    @FXML
-    private void generateXmlModelClicked() {
-        try {
-            UPPAALDriver.generateDebugUPPAALModel();
-            Ecdar.showToast("XML model stored.");
-        } catch (final BackendException | IOException e) {
-            Ecdar.showToast("Could not store XML debug model due to an error.");
-            e.printStackTrace();
-        }
-    }
-
     private void nudgeSelected(final NudgeDirection direction) {
         final List<SelectHelper.ItemSelectable> selectedElements = SelectHelper.getSelectedElements();
 

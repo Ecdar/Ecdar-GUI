@@ -2,34 +2,52 @@ package ecdar.mutation;
 
 import ecdar.mutation.models.AsyncInputReader;
 import ecdar.mutation.models.MutationTestPlan;
+import ecdar.mutation.models.SingleRunnable;
 
-import java.io.IOException;
+import java.util.function.Consumer;
 
 /**
  * Handler for handling time during a mutation test.
  */
 public abstract class MutationTestTimeHandler {
     private final MutationTestPlan plan;
+    private final AsyncInputReader reader;
+    private final Consumer<Exception> exceptionConsumer;
 
     /**
-     * Constructs.
+     * Constructs this.
      * @param plan the test plan to base the test of
+     * @param exceptionConsumer consumer to be called if an exception happens
+     * @param reader the reader for reading inputs from the system under test
      */
-    public MutationTestTimeHandler(final MutationTestPlan plan) {
+    public MutationTestTimeHandler(final MutationTestPlan plan, final AsyncInputReader reader, final Consumer<Exception> exceptionConsumer) {
         this.plan = plan;
+        this.reader = reader;
+        this.exceptionConsumer = exceptionConsumer;
     }
+
+
+    /* Properties */
 
     public MutationTestPlan getPlan() {
         return plan;
     }
 
+    public AsyncInputReader getReader() {
+        return reader;
+    }
+
+    public Consumer<Exception> getExceptionConsumer() {
+        return exceptionConsumer;
+    }
+
+    /* Other */
+
     /**
      * Sleeps for some time.
-     * @throws InterruptedException if an error occurs
-     * @throws IOException if an error occurs
-     * @throws MutationTestingException if an error occurs
+     * @param listener Listener to be called when done sleeping
      */
-    abstract void sleep() throws InterruptedException, IOException, MutationTestingException;
+    abstract void sleep(final SingleRunnable listener);
 
     /**
      * Handles what to do, when the test switches to another delay rule.
@@ -53,16 +71,4 @@ public abstract class MutationTestTimeHandler {
      * @return the duration in time units
      */
     abstract double getTimeSinceLastTime();
-
-    /**
-     * Gets a new time handler.
-     * @param plan the test plan to test with
-     * @param writer the writer for writing to the system under test
-     * @param reader the reader for reading from the system under test
-     * @return the new time handler
-     */
-    public static MutationTestTimeHandler getHandler(final MutationTestPlan plan, final SutWriter writer, final AsyncInputReader reader) {
-        if (plan.isSimulateTime()) return new SimulatedTimeHandler(plan, writer, reader);
-        else return new RealTimeHandler(plan);
-    }
 }
