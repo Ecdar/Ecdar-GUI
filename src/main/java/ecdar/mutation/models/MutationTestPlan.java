@@ -49,6 +49,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     private final StringProperty action = new SimpleStringProperty("");
     private final List<MutationOperator> operators = new ArrayList<>();
     private final ObjectProperty<Status> status = new SimpleObjectProperty<>(Status.IDLE);
+    private final DoubleProperty scrollValue = new SimpleDoubleProperty();
 
     // For testing
     private final StringProperty sutPath = new SimpleStringProperty("");
@@ -69,7 +70,6 @@ public class MutationTestPlan extends HighLevelModelObject {
 
     private final ListProperty<TestResult> results = new SimpleListProperty<>(FXCollections.observableArrayList());
     private final Map<TestResult.Verdict, BooleanProperty> shouldShowMap = new HashMap<>();
-
 
     // For exporting
     private final BooleanProperty angelicWhenExport = new SimpleBooleanProperty(false);
@@ -193,6 +193,16 @@ public class MutationTestPlan extends HighLevelModelObject {
     }
     public void setStatus(final Status value) {
         status.set(value);
+    }
+
+    public double getScrollValue() {
+        return scrollValue.get();
+    }
+    public DoubleProperty getScrollValueProperty() {
+        return scrollValue;
+    }
+    public void setScrollValue(final double scrollValue) {
+        this.scrollValue.set(scrollValue);
     }
 
     public List<MutationOperator> getOperators() {

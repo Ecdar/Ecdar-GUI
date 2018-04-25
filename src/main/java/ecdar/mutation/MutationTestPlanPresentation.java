@@ -159,6 +159,9 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         initializeWidthAndHeight();
 
         initializeFinalVerdictHandling();
+
+        // Remember how far the user has scrolled on the test plan
+        controller.scrollPane.vvalueProperty().bindBidirectional(getPlan().getScrollValueProperty());
     }
 
     /**
