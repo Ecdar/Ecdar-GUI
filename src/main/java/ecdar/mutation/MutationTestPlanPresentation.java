@@ -19,15 +19,14 @@ import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
-import javafx.geometry.Orientation;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
-import org.kordamp.ikonli.javafx.FontIcon;
-import org.kordamp.ikonli.javafx.Icon;
 
 import java.time.Duration;
 import java.util.*;
@@ -514,7 +513,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
             controller.getTestingHandler().retest(testResult.getTestCase());
         });
 
-        return VisibilityHelper.expand(new VBox(8, content, button));
+        return VisibilityHelper.surround(new VBox(8, content, button));
     }
 
     /**

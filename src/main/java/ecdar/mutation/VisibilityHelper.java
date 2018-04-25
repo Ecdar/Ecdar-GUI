@@ -10,7 +10,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Text;
@@ -22,9 +21,10 @@ import java.util.Arrays;
  * Collection of helper methods to show, hide, expand, and collapse UI elements.
  */
 public class VisibilityHelper {
-    private final static int ARROW_HEIGHT = 19; // Height of view containing the arrow for expanding and collapsing views. For labels, this is 19
     public static final int EXPAND_INSET = 5;
-
+    private static final Paint PASS_COLOR = Color.GREEN;
+    private static final Paint INC_COLOR = Color.DARKORANGE;
+    private static final Paint FAIL_COLOR = Color.RED;
 
     /**
      * Shows or hides som regions.
@@ -83,10 +83,11 @@ public class VisibilityHelper {
     }
 
     /**
-     * Shows or hides some content and adjusts the graphic on the header with an arrow.
+     * Shows or hides some test result content and adjusts the graphic on the header with an arrow.
      * @param shouldShow true iff should show
      * @param header the header
      * @param content the content
+     * @param verdict the verdict of the test result. This is used for applying the correct color on the arrow graphics
      */
     public static void updateExpand(final boolean shouldShow, final Label header, final Node content, final TestResult.Verdict verdict) {
         if (shouldShow) {
@@ -102,10 +103,15 @@ public class VisibilityHelper {
         }
     }
 
+    /**
+     * Gets the color that symbolises a specified verdict.
+     * @param verdict the verdict
+     * @return the color
+     */
     private static Paint getColor(final TestResult.Verdict verdict) {
-        if (verdict == TestResult.Verdict.PASS) return getPassedColor();
-        if (Arrays.stream(TestResult.getIncVerdicts()).anyMatch(v -> v == verdict)) return getIncColor();
-        if (Arrays.stream(TestResult.getFailedVerdicts()).anyMatch(v -> v == verdict)) return getFailedColor();
+        if (verdict == TestResult.Verdict.PASS) return PASS_COLOR;
+        if (Arrays.stream(TestResult.getIncVerdicts()).anyMatch(v -> v == verdict)) return INC_COLOR;
+        if (Arrays.stream(TestResult.getFailedVerdicts()).anyMatch(v -> v == verdict)) return FAIL_COLOR;
         throw new IllegalArgumentException("Verdict " + verdict + " not expected");
     }
 
@@ -135,53 +141,83 @@ public class VisibilityHelper {
         });
     }
 
+    /**
+     * Sets the text and fill (text color) of a text used for displaying the number of passed test-cases.
+     * @param number the number to display
+     * @param text the text to display
+     */
     public static void setPassedText(final int number, final Text text) {
         text.setText(Integer.toString(number));
-        text.setFill(getPassedPaint(number));
+        text.setFill(getPassedColor(number));
     }
 
+    /**
+     * Sets the text and fill (text color) of a text used for displaying the number of inconclusive test-cases.
+     * @param number the number to display
+     * @param text the text to display
+     */
     public static void setIncText(final int number, final Text text) {
         text.setText(Integer.toString(number));
-        text.setFill(getIncPaint(number));
+        text.setFill(getIncColor(number));
     }
 
+    /**
+     * Sets the text and fill (text color) of a text used for displaying the number of failed test-cases.
+     * @param number the number to display
+     * @param text the text to display
+     */
     public static void setFailedText(final int number, final Text text) {
         text.setText(Integer.toString(number));
-        text.setFill(getFailedPaint(number));
+        text.setFill(getFailedColor(number));
     }
 
-    public static Paint getPassedPaint(final int number) {
+    /**
+     * Gets the color to be used on a number that symbolises a passed test-case.
+     * If the number is 0, this method returns the default text color, as this means that there is no passed test-cases.
+     * @param number the number of passed test-cases to display
+     * @return the color to be used
+     */
+    public static Paint getPassedColor(final int number) {
         if (number == 0) return getDefaultTextColor();
-        else return Color.GREEN;
+        else return PASS_COLOR;
     }
 
-    private static Paint getPassedColor() {
-        return Color.GREEN;
-    }
-
-    public static Paint getIncPaint(final int number) {
+    /**
+     * Gets the color to be used on a number that symbolises an inconclusive test-case.
+     * If the number is 0, this method returns the default text color, as this means that there is no inconclusive test-cases.
+     * @param number the number of inconclusive test-cases to display
+     * @return the color to be used
+     */
+    public static Paint getIncColor(final int number) {
         if (number == 0) return getDefaultTextColor();
-        else return getIncColor();
+        else return INC_COLOR;
     }
 
-    private static Paint getIncColor() {
-        return Color.DARKORANGE;
-    }
-
-    public static Paint getFailedPaint(final int number) {
+    /**
+     * Gets the color to be used on a number that symbolises a failed test-case.
+     * If the number is 0, this method returns the default text color, as this means that there is no failed test-cases.
+     * @param number the number of failed test-cases to display
+     * @return the color to be used
+     */
+    public static Paint getFailedColor(final int number) {
         if (number == 0) return getDefaultTextColor();
-        else return Color.RED;
+        else return FAIL_COLOR;
     }
 
-    private static Paint getFailedColor() {
-        return Color.RED;
-    }
-
+    /**
+     * Gets the text color used by default be JavaFX.
+     * @return the text color
+     */
     public static Paint getDefaultTextColor() {
         return Color.web("#333333");
     }
 
-    public static HBox expand(final Node content) {
+    /**
+     * Surround with a vertical separator on the left.
+     * @param content the content to surround
+     * @return the HBox containing the separator and the content
+     */
+    public static HBox surround(final Node content) {
         final HBox hBox = new HBox(8, new Separator(Orientation.VERTICAL), content);
         hBox.setPadding(new Insets(0, 0, 0, EXPAND_INSET));
         return hBox;
