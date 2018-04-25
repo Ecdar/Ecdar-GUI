@@ -103,6 +103,12 @@ public class EcdarController implements Initializable {
     public MenuItem menuEditMoveUp;
     public MenuItem menuEditMoveRight;
     public MenuItem menuEditMoveDown;
+    public JFXButton testHelpAcceptButton;
+    public JFXDialog testHelpDialog;
+    public StackPane testHelpContainer;
+    public StackPane aboutContainer;
+    public JFXDialog aboutDialog;
+    public JFXButton aboutAcceptButton;
 
     private double expandHeight = 300;
 
@@ -142,6 +148,8 @@ public class EcdarController implements Initializable {
     public MenuItem menuBarFileExportAsPngNoBorder;
     public MenuItem menuBarOptionsCache;
     public MenuItem menuBarHelpHelp;
+    public MenuItem menuBarHelpAbout;
+    public MenuItem menuBarHelpTest;
 
     public JFXSnackbar snackbar;
     public HBox statusBar;
@@ -451,7 +459,26 @@ public class EcdarController implements Initializable {
 
         initializeUICacheMenuElement();
 
+        initializeHelpMenu();
+    }
+
+    private void initializeHelpMenu() {
         menuBarHelpHelp.setOnAction(event -> Ecdar.showHelp());
+
+        menuBarHelpTest.setOnAction(event -> {
+            testHelpContainer.setVisible(true);
+            testHelpDialog.show(testHelpContainer);
+        });
+        testHelpAcceptButton.setOnAction(event -> testHelpDialog.close());
+        testHelpDialog.setOnDialogClosed(event -> testHelpContainer.setVisible(false)); // hide container when dialog is fully closed
+
+        menuBarHelpAbout.setOnAction(event -> {
+            aboutContainer.setVisible(true);
+            aboutDialog.show(aboutContainer);
+        });
+        aboutAcceptButton.setOnAction(event -> aboutDialog.close());
+        aboutDialog.setOnDialogClosed(event -> aboutContainer.setVisible(false)); // hide container when dialog is fully closed
+
     }
 
     /**

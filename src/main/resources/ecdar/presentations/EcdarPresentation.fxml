@@ -8,6 +8,9 @@
 <?import javafx.scene.text.Text?>
 <?import org.kordamp.ikonli.javafx.*?>
 <?import ecdar.presentations.*?>
+<?import ecdar.Ecdar?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.TextFlow?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="StackPane"
@@ -211,9 +214,19 @@
                 </Menu>
 
                 <Menu text="Help">
-                    <MenuItem fx:id="menuBarHelpHelp" text="Help">
+                    <MenuItem fx:id="menuBarHelpHelp" text="Modelling Help">
                         <graphic>
                             <FontIcon iconLiteral="gmi-help" iconSize="24" fill="black"/>
+                        </graphic>
+                    </MenuItem>
+                    <MenuItem fx:id="menuBarHelpTest" text="Testing Help">
+                        <graphic>
+                            <FontIcon iconLiteral="gmi-help" iconSize="24" fill="black"/>
+                        </graphic>
+                    </MenuItem>
+                    <MenuItem fx:id="menuBarHelpAbout" text="About">
+                        <graphic>
+                            <FontIcon iconLiteral="gmi-info" iconSize="24" fill="black"/>
                         </graphic>
                     </MenuItem>
                 </Menu>
@@ -341,13 +354,13 @@
     </StackPane>
 
 
-    <!-- Dialog -->
+    <!-- Modelling help dialog -->
     <StackPane fx:id="dialogContainer" style="-fx-background-color: #0000007F;" visible="false">
         <JFXDialog fx:id="dialog">
 
             <VBox>
 
-                <!-- Will scale the dialod -->
+                <!-- Scale dialog -->
                 <Region minWidth="400"/>
 
                 <StackPane fx:id="modalBar" style="-fx-background-color: -blue-grey-800;">
@@ -440,6 +453,84 @@
 
             </VBox>
 
+        </JFXDialog>
+    </StackPane>
+
+    <!-- Mutation Testing help dialog -->
+    <StackPane fx:id="testHelpContainer" style="-fx-background-color: #0000007F;" visible="false">
+        <JFXDialog fx:id="testHelpDialog">
+            <JFXDialogLayout prefWidth="600">
+                <heading>
+                    <Label>Mutation Testing</Label>
+                </heading>
+                <body>
+                    <VBox spacing="4">
+                        <Label style="-fx-text-fill: black;-fx-font-size: 10pt;">
+                            Ecdar offers a simple way to test if a system conforms to a model.
+                            All you need is a jar file interfacing to your system, and an Ecdar model.
+                            To start testing, go to File → New Test Plan and follow the instructions.
+                        </Label>
+                        <TextFlow>
+                            <Text style="-fx-text-fill: black;-fx-font-size: 10pt;">
+                                The jar file should read synchronisation inputs and write synchronisation outputs using
+                                the standard I/O streams (System.in and System.out).
+                                Synchronisations are separated with a newline.
+                                For instance, the program could read an input with&#160;
+                            </Text>
+                            <Text style="-fx-text-fill: black;-fx-font-size: 10pt;-fx-font-family: monospace;">
+                                (new BufferedReader(new InputStreamReader(System.in))).readLine();
+                            </Text>
+                            <Text style="-fx-text-fill: black;-fx-font-size: 10pt;">
+                                &#160;and output&#160;
+                            </Text>
+                            <Text style="-fx-text-fill: black;-fx-font-size: 10pt;-fx-font-family: monospace;">
+                                cof
+                            </Text>
+                            <Text style="-fx-text-fill: black;-fx-font-size: 10pt;">
+                                &#160;with&#160;
+                            </Text>
+                            <Text style="-fx-text-fill: black;-fx-font-size: 10pt;-fx-font-family: monospace;">
+                                System.out.println("cof");
+                            </Text>
+                        </TextFlow>
+                        <Label style="-fx-text-fill: black;-fx-font-size: 10pt;">
+                            Testing supports both testing using real-time and simulated time (see the option in a test plan).
+                        </Label>
+                        <Label style="-fx-text-fill: black;-fx-font-size: 10pt;">
+                            Happy testing!
+                        </Label>
+                    </VBox>
+                </body>
+                <actions>
+                    <JFXButton fx:id="testHelpAcceptButton" styleClass="dialog-accept">CLOSE</JFXButton>
+                </actions>
+            </JFXDialogLayout>
+        </JFXDialog>
+    </StackPane>
+
+    <!-- Mutation Testing help dialog -->
+    <StackPane fx:id="aboutContainer" style="-fx-background-color: #0000007F;" visible="false">
+        <JFXDialog fx:id="aboutDialog">
+            <JFXDialogLayout>
+                <heading>
+                    <HBox>
+                        <Label>Ecdar&#160;</Label>
+                        <Label><Ecdar fx:constant="VERSION"/></Label>
+                    </HBox>
+                </heading>
+                <body>
+                    <VBox>
+                        <Label style="-fx-text-fill: black;-fx-font-size: 10pt;">Made by:</Label>
+                        <Label style="-fx-text-fill: black;-fx-font-size: 10pt;">Casper Møller Bartholomæussen</Label>
+                        <Label style="-fx-text-fill: black;-fx-font-size: 10pt;">Tobias Rosenkrantz Gundersen</Label>
+                        <Label style="-fx-text-fill: black;-fx-font-size: 10pt;">Rene Mejer Lauritsen</Label>
+                        <Label style="-fx-text-fill: black;-fx-font-size: 10pt;">Christian Ovesen</Label>
+                    </VBox>
+                </body>
+                <actions>
+                    <JFXButton fx:id="aboutAcceptButton" styleClass="dialog-accept">CLOSE</JFXButton>
+                </actions>
+            </JFXDialogLayout>
         </JFXDialog>
     </StackPane>
 </fx:root>
