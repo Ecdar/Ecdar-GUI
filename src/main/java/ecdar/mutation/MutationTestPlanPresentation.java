@@ -443,38 +443,39 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         // Show retest button iff there are shown results
         VisibilityHelper.setVisibility(!getPlan().getResultsToShow().isEmpty(), controller.retestButton);
     }
-
     /**
-     * Initializes handling of a list of test resultViews.
+     * Initializes handling of a list of test results.
      * This method makes sure that the view list is adjusted when the model list changes.
-     * @param modelList the list of test resultViews
+     * @param listToDisplay the list of test results to display
      * @param viewList the list of nodes to add and remove nodes from
      */
-    private void initializeExpandableList(final ObservableList<TestResult> modelList, final List<Node> viewList) {
+    private void initializeExpandableList(final ObservableList<TestResult> listToDisplay, final List<Node> viewList) {
         final Map<ExpandableContent, VBox> contentModelMap = new HashMap<>();
 
-        modelList.forEach(testCase -> addExpandableResultsToView(modelList, viewList, contentModelMap, testCase));
+        listToDisplay.forEach(testCase -> addExpandableResultsToView(listToDisplay, viewList, contentModelMap, testCase));
 
-        modelList.addListener((ListChangeListener<TestResult>) change -> {
+        listToDisplay.addListener((ListChangeListener<TestResult>) change -> {
             while (change.next()) {
                 change.getAddedSubList().forEach(testResult ->
-                        addExpandableResultsToView(modelList, viewList, contentModelMap, testResult));
+                        addExpandableResultsToView(listToDisplay, viewList, contentModelMap, testResult));
 
                 change.getRemoved().forEach(item -> viewList.remove(contentModelMap.get(item)));
             }
         });
     }
 
+
     /**
      * Adds a test result to af view list.
-     * @param modelList the model list containing the test resultViews
+     * @param modelList the model list containing the test results
      * @param viewList the view list visible to the user
      * @param contentModelMap the map from models to views
      * @param testResult the test result to add
      */
-    private void addExpandableResultsToView(final ObservableList<TestResult> modelList, final List<Node> viewList,
-                                            final Map<ExpandableContent, VBox> contentModelMap, final TestResult testResult) {
-
+    private void addExpandableResultsToView(final ObservableList<TestResult> modelList,
+                                            final List<Node> viewList,
+                                            final Map<ExpandableContent, VBox> contentModelMap,
+                                            final TestResult testResult) {
         final Label titleLabel = new Label();
 
         final HBox header = new HBox(16, titleLabel, testResult.getTitle());
@@ -498,7 +499,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      * Constructs content for a test result.
      * This includes a label containing info, and a retest button.
      * @param testResult the test result
-     * @param resultList list of resultViews to remove the test result from, when retesting
+     * @param resultList list of results to remove the test result from, when retesting
      * @return the content
      */
     private Node makeResultContent(final TestResult testResult, final List<? extends TestResult> resultList) {
@@ -506,15 +507,15 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         content.setWrapText(true);
 
         // Add a retest button
-        final JFXButton button = new JFXButton("Retest");
-        button.setPrefWidth(65);
-        button.setStyle("-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;");
-        button.setOnMousePressed(event -> {
-            resultList.remove(testResult);
+        final JFXButton retestButton = new JFXButton("Retest");
+        retestButton.setPrefWidth(65);
+        retestButton.setStyle("-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;");
+        retestButton.setOnMousePressed(event -> {
+            getPlan().getResults().remove(testResult);
             controller.getTestingHandler().retest(testResult.getTestCase());
         });
 
-        return VisibilityHelper.surround(new VBox(8, content, button));
+        return VisibilityHelper.surround(new VBox(8, content, retestButton));
     }
 
     /**
