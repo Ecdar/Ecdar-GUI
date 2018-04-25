@@ -452,12 +452,12 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
     private void initializeExpandableList(final ObservableList<TestResult> listToDisplay, final List<Node> viewList) {
         final Map<ExpandableContent, VBox> contentModelMap = new HashMap<>();
 
-        listToDisplay.forEach(testCase -> addExpandableResultsToView(listToDisplay, viewList, contentModelMap, testCase));
+        listToDisplay.forEach(testCase -> addExpandableResultsToView(viewList, contentModelMap, testCase));
 
         listToDisplay.addListener((ListChangeListener<TestResult>) change -> {
             while (change.next()) {
                 change.getAddedSubList().forEach(testResult ->
-                        addExpandableResultsToView(listToDisplay, viewList, contentModelMap, testResult));
+                        addExpandableResultsToView(viewList, contentModelMap, testResult));
 
                 change.getRemoved().forEach(item -> viewList.remove(contentModelMap.get(item)));
             }
@@ -467,20 +467,18 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
 
     /**
      * Adds a test result to af view list.
-     * @param modelList the model list containing the test results
      * @param viewList the view list visible to the user
      * @param contentModelMap the map from models to views
      * @param testResult the test result to add
      */
-    private void addExpandableResultsToView(final ObservableList<TestResult> modelList,
-                                            final List<Node> viewList,
+    private void addExpandableResultsToView(final List<Node> viewList,
                                             final Map<ExpandableContent, VBox> contentModelMap,
                                             final TestResult testResult) {
         final Label titleLabel = new Label();
 
         final HBox header = new HBox(16, titleLabel, testResult.getTitle());
 
-        final Node content = makeResultContent(testResult, modelList);
+        final Node content = makeResultContent(testResult);
 
         final VBox vBox = new VBox(header, content);
         contentModelMap.put(testResult, vBox);
@@ -499,10 +497,9 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      * Constructs content for a test result.
      * This includes a label containing info, and a retest button.
      * @param testResult the test result
-     * @param resultList list of results to remove the test result from, when retesting
      * @return the content
      */
-    private Node makeResultContent(final TestResult testResult, final List<? extends TestResult> resultList) {
+    private Node makeResultContent(final TestResult testResult) {
         final Label content = new Label(testResult.getContent());
         content.setWrapText(true);
 
