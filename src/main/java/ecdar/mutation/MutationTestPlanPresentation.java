@@ -256,6 +256,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         initializePositiveIntegerTextField(controller.timeUnitField, getPlan().getTimeUnitProperty());
 
         // Hide time unit field when simulating time
+        VisibilityHelper.setVisibility(!controller.simulateTimeCheckBox.isSelected(), controller.timeUnitBox);
         controller.simulateTimeCheckBox.selectedProperty().addListener((observable, oldValue, newValue) ->
                 VisibilityHelper.setVisibility(!newValue, controller.timeUnitBox)
         );
