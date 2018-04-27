@@ -494,7 +494,7 @@
                             </Text>
                         </TextFlow>
                         <Label style="-fx-text-fill: black;-fx-font-size: 10pt;">
-                            Testing supports both testing using real-time and simulated time (see the option in a test plan).
+                            Testing supports both testing using real-time and simulated time (For more information on how to set up your system to use simulated time, read the tooltip on simulated time in a test plan).
                         </Label>
                         <Label style="-fx-text-fill: black;-fx-font-size: 10pt;">
                             Happy testing!
