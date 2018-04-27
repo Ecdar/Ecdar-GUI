@@ -24,12 +24,12 @@
   "timeUnit": 200,
   "stepBounds": 5,
   "simulateTime": false,
-  "verdictOUT_OF_BOUNDS": false,
-  "verdictNON_DETERMINISM": false,
-  "verdictFAIL_NORMAL": true,
-  "verdictPASS": false,
-  "verdictNO_RULE": false,
-  "verdictFAIL_PRIMARY": true,
   "verdictMAX_WAIT": false,
-  "verdictMUT_NO_DELAY": false
+  "verdictMUT_NO_DELAY": false,
+  "verdictOUT_OF_BOUNDS": false,
+  "verdictFAIL_PRIMARY": true,
+  "verdictFAIL_NORMAL": true,
+  "verdictNON_DETERMINISM": false,
+  "verdictPASS": false,
+  "verdictNO_RULE": false
 }
