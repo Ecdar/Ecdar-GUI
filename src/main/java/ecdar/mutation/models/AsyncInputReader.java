@@ -19,7 +19,7 @@ public class AsyncInputReader {
     private MutationTestingException mutationException;
 
     private final List<Runnable> tempListeners = new ArrayList<>(); // To be called a single time when a line appears
-    private Process process;
+    private final Process process;
 
     /**
      * Adds a listener for the next reading.
@@ -132,7 +132,8 @@ public class AsyncInputReader {
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
-                runnableHandler.run(onTimeout);
+                if (!process.isAlive()) onConsumed.run();
+                else runnableHandler.run(onTimeout);
             }
         }, 5000);
 
