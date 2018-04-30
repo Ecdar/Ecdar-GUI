@@ -19,6 +19,7 @@ public class AsyncInputReader {
     private MutationTestingException mutationException;
 
     private final List<Runnable> tempListeners = new ArrayList<>(); // To be called a single time when a line appears
+    private Process process;
 
     /**
      * Adds a listener for the next reading.
@@ -34,6 +35,7 @@ public class AsyncInputReader {
      * @param process the process to read from
      */
     public AsyncInputReader(final Process process) {
+        this.process = process;
         // Read input stream
         new Thread(() -> {
             try (final BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
@@ -120,6 +122,11 @@ public class AsyncInputReader {
      * @param onTimeout listener to be called in 5 seconds, if the input was not consumed
      */
     public void consumeWithTimeout(final String input, final Runnable onConsumed, final Runnable onTimeout) {
+        if (!process.isAlive()) {
+            onConsumed.run();
+            return;
+        }
+
         final SingleRunnableHandler runnableHandler = new SingleRunnableHandler();
 
         new Timer().schedule(new TimerTask() {
