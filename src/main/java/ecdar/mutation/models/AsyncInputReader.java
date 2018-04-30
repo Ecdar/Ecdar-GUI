@@ -6,9 +6,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -22,8 +19,6 @@ public class AsyncInputReader {
     private MutationTestingException mutationException;
 
     private final List<Runnable> tempListeners = new ArrayList<>(); // To be called a single time when a line appears
-
-    private Process process;
 
     /**
      * Adds a listener for the next reading.
@@ -39,8 +34,6 @@ public class AsyncInputReader {
      * @param process the process to read from
      */
     public AsyncInputReader(final Process process) {
-        this.process = process;
-
         // Read input stream
         new Thread(() -> {
             try (final BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
@@ -127,14 +120,15 @@ public class AsyncInputReader {
      * @param onTimeout listener to be called in 5 seconds, if the input was not consumed
      */
     public void consumeWithTimeout(final String input, final Runnable onConsumed, final Runnable onTimeout) {
-        if (!process.isAlive()) onConsumed.run();
-
         final SingleRunnableHandler runnableHandler = new SingleRunnableHandler();
 
-        Executors.newScheduledThreadPool(1).schedule(() -> {
-            if (!process.isAlive()) onConsumed.run();
-            else runnableHandler.run(onTimeout);
-        }, 5, TimeUnit.SECONDS);
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                runnableHandler.run(onTimeout);
+            }
+        }, 5000);
+
 
         waitAndConsumeWithoutTimeout(input, () -> runnableHandler.run(onConsumed));
     }
