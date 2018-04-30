@@ -38,7 +38,7 @@
       "status": "INPUT",
       "select": "",
       "guard": "",
-      "update": "free\u003d1, x\u003d0",
+      "update": "x\u003d0, free\u003d1",
       "sync": "coin",
       "isLocked": false,
       "nails": [
@@ -63,7 +63,7 @@
       "targetLocation": "L0",
       "status": "OUTPUT",
       "select": "",
-      "guard": "free\u003d\u003d1 \u0026\u0026 x\u003e5",
+      "guard": "x\u003e5 \u0026\u0026 free\u003d\u003d1",
       "update": "free\u003d0",
       "sync": "garnish",
       "isLocked": false,

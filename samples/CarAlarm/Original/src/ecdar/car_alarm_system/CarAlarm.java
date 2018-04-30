@@ -92,6 +92,7 @@ public class CarAlarm {
                 nextLocation = L13();
                 break;
             case Done:
+                System.exit(0);
                 break;
             default:
                 throw new RuntimeException("Location " + nextLocation.toString() + " not expected");
