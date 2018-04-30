@@ -28,8 +28,6 @@ public class Main {
     }
 
     private static void runStep() throws IOException, InterruptedException {
-        if (loc < 0) throw new RuntimeException("Loc is " + loc);
-
         stepDone = false;
 
         while (!stepDone) {
@@ -62,6 +60,8 @@ public class Main {
                 } else stepDone = true;
 
                 break;
+            default:
+                System.exit(0);
         }
     }
 }
