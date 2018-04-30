@@ -18,6 +18,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.FileChooser;
 
@@ -90,6 +91,19 @@ public class MutationTestPlanController {
     public JFXCheckBox primaryFailed;
     public JFXCheckBox normalFailed;
     public VBox contentRegion;
+    public Label selectVerdictsLabel;
+    public HBox selectVerdictsOuterRegion;
+    public VBox selectVerdictsInnerRegion;
+    public Text passedNumber;
+    public Text outOfBoundsNumber;
+    public Text maxWaitNumber;
+    public Text nonDeterminismNumber;
+    public Text noRuleNumber;
+    public Text mutNoDelayNumber;
+    public Text normalFailedNumber;
+    public Text incNumber;
+    public Text failedNumber;
+    public Text primaryFailedNumber;
 
 
     /* Mutation fields */

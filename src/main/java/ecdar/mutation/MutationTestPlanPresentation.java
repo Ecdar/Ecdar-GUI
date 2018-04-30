@@ -14,14 +14,16 @@ import ecdar.presentations.EcdarFXMLLoader;
 import ecdar.presentations.HighLevelModelPresentation;
 import javafx.application.Platform;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
-import javafx.geometry.Orientation;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
@@ -115,7 +117,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      * @param control the control
      * @param text the text of the tooltip
      */
-    private static void installTooltip(final Control control, final String text) {
+    private static void installTooltip(final Node control, final String text) {
         final Tooltip tooltip = new Tooltip(text);
         tooltip.setPrefWidth(250);
         tooltip.setWrapText(true);
@@ -157,6 +159,9 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         initializeWidthAndHeight();
 
         initializeFinalVerdictHandling();
+
+        // Remember how far the user has scrolled on the test plan
+        controller.scrollPane.vvalueProperty().bindBidirectional(getPlan().getScrollValueProperty());
     }
 
     /**
@@ -254,6 +259,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         initializePositiveIntegerTextField(controller.timeUnitField, getPlan().getTimeUnitProperty());
 
         // Hide time unit field when simulating time
+        VisibilityHelper.setVisibility(!controller.simulateTimeCheckBox.isSelected(), controller.timeUnitBox);
         controller.simulateTimeCheckBox.selectedProperty().addListener((observable, oldValue, newValue) ->
                 VisibilityHelper.setVisibility(!newValue, controller.timeUnitBox)
         );
@@ -350,6 +356,8 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      * Initializes test resultViews.
      */
     private void initializeTestResults() {
+        VisibilityHelper.initializeExpand(new SimpleBooleanProperty(true), controller.selectVerdictsLabel, controller.selectVerdictsOuterRegion);
+
         controller.passed.selectedProperty().bindBidirectional(getPlan().getShouldShowProperty(TestResult.Verdict.PASS));
 
         // Sync inconclusive overall checkbox with all its minor checkboxes
@@ -419,16 +427,18 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      * Updates the views for the test results.
      */
     private void updateResults() {
-        controller.passed.setText("Passed: " + getPlan().getResults(TestResult.Verdict.PASS).size());
-        controller.inc.setText("Inconclusive: " + getPlan().getResults(TestResult.getIncVerdicts()).size());
-        controller.outOfBounds.setText("Out of bounds: " + getPlan().getResults(TestResult.Verdict.OUT_OF_BOUNDS).size());
-        controller.maxWait.setText("Max waiting time exceeded: " + getPlan().getResults(TestResult.Verdict.MAX_WAIT).size());
-        controller.nonDeterminism.setText("Non-determinism violated: " + getPlan().getResults(TestResult.Verdict.NON_DETERMINISM).size());
-        controller.noRule.setText("No rule: " + getPlan().getResults(TestResult.Verdict.NO_RULE).size());
-        controller.mutNoDelay.setText("Mutant unable to delay: " + getPlan().getResults(TestResult.Verdict.MUT_NO_DELAY).size());
-        controller.failed.setText("Failed: " + getPlan().getResults(TestResult.getFailedVerdicts()).size());
-        controller.primaryFailed.setText("Primary: " + getPlan().getResults(TestResult.Verdict.FAIL_PRIMARY).size());
-        controller.normalFailed.setText("Other: " + getPlan().getResults(TestResult.Verdict.FAIL_NORMAL).size());
+        VisibilityHelper.setPassedText(getPlan().getResults(TestResult.Verdict.PASS).size(), controller.passedNumber);
+
+        VisibilityHelper.setIncText(getPlan().getResults(TestResult.getIncVerdicts()).size(), controller.incNumber);
+        VisibilityHelper.setIncText(getPlan().getResults(TestResult.Verdict.OUT_OF_BOUNDS).size(), controller.outOfBoundsNumber);
+        VisibilityHelper.setIncText(getPlan().getResults(TestResult.Verdict.MAX_WAIT).size(), controller.maxWaitNumber);
+        VisibilityHelper.setIncText(getPlan().getResults(TestResult.Verdict.NON_DETERMINISM).size(), controller.nonDeterminismNumber);
+        VisibilityHelper.setIncText(getPlan().getResults(TestResult.Verdict.NO_RULE).size(), controller.noRuleNumber);
+        VisibilityHelper.setIncText(getPlan().getResults(TestResult.Verdict.MUT_NO_DELAY).size(), controller.mutNoDelayNumber);
+
+        VisibilityHelper.setFailedText(getPlan().getResults(TestResult.getFailedVerdicts()).size(), controller.failedNumber);
+        VisibilityHelper.setFailedText(getPlan().getResults(TestResult.Verdict.FAIL_PRIMARY).size(), controller.primaryFailedNumber);
+        VisibilityHelper.setFailedText(getPlan().getResults(TestResult.Verdict.FAIL_NORMAL).size(), controller.normalFailedNumber);
 
         controller.resultsToShow.clear();
         controller.resultsToShow.addAll(getPlan().getResultsToShow());
@@ -436,52 +446,51 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         // Show retest button iff there are shown results
         VisibilityHelper.setVisibility(!getPlan().getResultsToShow().isEmpty(), controller.retestButton);
     }
-
     /**
-     * Initializes handling of a list of test resultViews.
+     * Initializes handling of a list of test results.
      * This method makes sure that the view list is adjusted when the model list changes.
-     * @param modelList the list of test resultViews
+     * @param listToDisplay the list of test results to display
      * @param viewList the list of nodes to add and remove nodes from
      */
-    private void initializeExpandableList(final ObservableList<TestResult> modelList, final List<Node> viewList) {
+    private void initializeExpandableList(final ObservableList<TestResult> listToDisplay, final List<Node> viewList) {
         final Map<ExpandableContent, VBox> contentModelMap = new HashMap<>();
 
-        modelList.forEach(testCase -> addExpandableResultsToView(modelList, viewList, contentModelMap, testCase));
+        listToDisplay.forEach(testCase -> addExpandableResultsToView(viewList, contentModelMap, testCase));
 
-        modelList.addListener((ListChangeListener<TestResult>) change -> {
+        listToDisplay.addListener((ListChangeListener<TestResult>) change -> {
             while (change.next()) {
                 change.getAddedSubList().forEach(testResult ->
-                        addExpandableResultsToView(modelList, viewList, contentModelMap, testResult));
+                        addExpandableResultsToView(viewList, contentModelMap, testResult));
 
                 change.getRemoved().forEach(item -> viewList.remove(contentModelMap.get(item)));
             }
         });
     }
 
+
     /**
      * Adds a test result to af view list.
-     * @param modelList the model list containing the test resultViews
      * @param viewList the view list visible to the user
      * @param contentModelMap the map from models to views
      * @param testResult the test result to add
      */
-    private void addExpandableResultsToView(final ObservableList<TestResult> modelList, final List<Node> viewList,
-                                            final Map<ExpandableContent, VBox> contentModelMap, final TestResult testResult) {
-
+    private void addExpandableResultsToView(final List<Node> viewList,
+                                            final Map<ExpandableContent, VBox> contentModelMap,
+                                            final TestResult testResult) {
         final Label titleLabel = new Label();
 
         final HBox header = new HBox(16, titleLabel, testResult.getTitle());
 
-        final Node content = makeResultContent(testResult, modelList);
+        final Node content = makeResultContent(testResult);
 
         final VBox vBox = new VBox(header, content);
         contentModelMap.put(testResult, vBox);
 
-        VisibilityHelper.updateExpand(!testResult.isHidden(), titleLabel, content);
+        VisibilityHelper.updateExpand(!testResult.isHidden(), titleLabel, content, testResult.getVerdict());
 
         header.setOnMouseClicked(e -> {
             testResult.setHidden(!testResult.isHidden());
-            VisibilityHelper.updateExpand(!testResult.isHidden(), titleLabel, content);
+            VisibilityHelper.updateExpand(!testResult.isHidden(), titleLabel, content, testResult.getVerdict());
         });
 
         viewList.add(vBox);
@@ -491,23 +500,22 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      * Constructs content for a test result.
      * This includes a label containing info, and a retest button.
      * @param testResult the test result
-     * @param resultList list of resultViews to remove the test result from, when retesting
      * @return the content
      */
-    private Node makeResultContent(final TestResult testResult, final List<? extends TestResult> resultList) {
+    private Node makeResultContent(final TestResult testResult) {
         final Label content = new Label(testResult.getContent());
         content.setWrapText(true);
 
         // Add a retest button
-        final JFXButton button = new JFXButton("Retest");
-        button.setPrefWidth(65);
-        button.setStyle("-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;");
-        button.setOnMousePressed(event -> {
-            resultList.remove(testResult);
+        final JFXButton retestButton = new JFXButton("Retest");
+        retestButton.setPrefWidth(65);
+        retestButton.setStyle("-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;");
+        retestButton.setOnMousePressed(event -> {
+            getPlan().getResults().remove(testResult);
             controller.getTestingHandler().retest(testResult.getTestCase());
         });
 
-        return new HBox(8, new Separator(Orientation.VERTICAL), new VBox(8, content, button));
+        return VisibilityHelper.surround(new VBox(8, content, retestButton));
     }
 
     /**
