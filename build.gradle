@@ -25,18 +25,18 @@ repositories {
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.11'
-    compile 'com.jfoenix:jfoenix:1.11.1'
-    compile group: 'de.codecentric.centerdevice', name: 'javafxsvg', version: '1.0.0'
-    compile group: 'com.github.jiconfont', name: 'jiconfont-javafx', version: '1.0.0'
-    compile group: 'com.github.jiconfont', name: 'jiconfont-google_material_design_icons', version: '2.2.0.1'
-    compile 'org.kordamp.ikonli:ikonli-core:1.8.0'
-    compile 'org.kordamp.ikonli:ikonli-material-pack:1.8.0'
-    compile 'org.kordamp.ikonli:ikonli-javafx:1.8.0'
-    compile 'com.google.code.gson:gson:2.8.0'
-    compile 'org.springframework:spring-core:5.0.3.RELEASE' // Used for evaluating expressions
-    compile 'org.springframework:spring-expression:5.0.3.RELEASE' // Used for evaluating expressions
-    compile 'com.bpodgursky:jbool_expressions:1.13' // Used for converting boolean expressions to disjunctive normal form
-    compile group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.6.10'
-    compile fileTree(dir: 'src/libs', include: ['*.jar'])
+    testImplementation group: 'junit', name: 'junit', version: '4.11'
+    implementation 'com.jfoenix:jfoenix:1.11.1'
+    implementation group: 'de.codecentric.centerdevice', name: 'javafxsvg', version: '1.0.0'
+    implementation group: 'com.github.jiconfont', name: 'jiconfont-javafx', version: '1.0.0'
+    implementation group: 'com.github.jiconfont', name: 'jiconfont-google_material_design_icons', version: '2.2.0.1'
+    implementation  'org.kordamp.ikonli:ikonli-core:2.3.0'
+    implementation  'org.kordamp.ikonli:ikonli-material-pack:2.3.0'
+    implementation  'org.kordamp.ikonli:ikonli-javafx:2.3.0'
+    implementation 'com.google.code.gson:gson:2.8.0'
+    implementation 'org.springframework:spring-core:5.0.3.RELEASE' // Used for evaluating expressions
+    implementation 'org.springframework:spring-expression:5.0.3.RELEASE' // Used for evaluating expressions
+    implementation 'com.bpodgursky:jbool_expressions:1.13' // Used for converting boolean expressions to disjunctive normal form
+    implementation group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.6.10'
+    implementation fileTree(dir: 'src/libs', include: ['*.jar'])
 }
