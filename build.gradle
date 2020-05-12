@@ -8,7 +8,7 @@ plugins {
 
 javafx {
     version = JavaVersion.VERSION_11
-    modules = ['javafx.controls', 'javafx.fxml']
+    modules = ['javafx.controls', 'javafx.fxml', 'javafx.swing']
 }
 
 group 'ecdar'
@@ -32,20 +32,17 @@ task fatJar(type: Jar) {
 
 repositories {
     mavenCentral()
-    maven {
-        url "https://dl.bintray.com/aalmiray/kordamp"
-    }
 }
 
 dependencies {
     testImplementation group: 'junit', name: 'junit', version: '4.11'
-    implementation  'com.jfoenix:jfoenix:9.0.9'
+    implementation 'com.jfoenix:jfoenix:9.0.9'
     implementation group: 'de.codecentric.centerdevice', name: 'javafxsvg', version: '1.0.0'
     implementation group: 'com.github.jiconfont', name: 'jiconfont-javafx', version: '1.0.0'
     implementation group: 'com.github.jiconfont', name: 'jiconfont-google_material_design_icons', version: '2.2.0.1'
-    implementation  'org.kordamp.ikonli:ikonli-core:2.3.0'
-    implementation  'org.kordamp.ikonli:ikonli-material-pack:2.3.0'
-    implementation  'org.kordamp.ikonli:ikonli-javafx:2.3.0'
+    implementation 'org.kordamp.ikonli:ikonli-core:2.3.0'
+    implementation 'org.kordamp.ikonli:ikonli-material-pack:2.3.0'
+    implementation 'org.kordamp.ikonli:ikonli-javafx:2.3.0'
     implementation 'com.google.code.gson:gson:2.8.0'
     implementation 'org.springframework:spring-core:5.0.3.RELEASE' // Used for evaluating expressions
     implementation 'org.springframework:spring-expression:5.0.3.RELEASE' // Used for evaluating expressions
