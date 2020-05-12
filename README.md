@@ -1,5 +1,3 @@
-[![Build Status](https://travis-ci.com/tgunde13/Ecdar.svg?token=deyCDsqkwkcxRvqzTGxE&branch=master)](https://travis-ci.com/tgunde13/Ecdar)
-
 # Ecdar
 
 Made by
