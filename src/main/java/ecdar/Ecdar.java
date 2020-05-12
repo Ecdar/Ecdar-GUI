@@ -138,7 +138,8 @@ public class Ecdar extends Application {
         loadFonts();
 
         // Remove the classic decoration
-        stage.initStyle(StageStyle.UNIFIED);
+        // kyrke - 2020-04-17: Disabled due to bug https://bugs.openjdk.java.net/browse/JDK-8154847
+        //stage.initStyle(StageStyle.UNIFIED);
 
         // Make the view used for the application
         presentation = new EcdarPresentation();

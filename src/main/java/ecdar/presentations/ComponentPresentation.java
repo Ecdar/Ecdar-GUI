@@ -16,8 +16,8 @@ import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.layout.*;
 import javafx.scene.shape.*;
-import org.fxmisc.richtext.StyleSpans;
-import org.fxmisc.richtext.StyleSpansBuilder;
+import org.fxmisc.richtext.model.StyleSpans;
+import org.fxmisc.richtext.model.StyleSpansBuilder;
 
 import java.util.ArrayList;
 import java.util.Collection;

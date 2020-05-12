@@ -1,9 +1,22 @@
+
+
+plugins {
+    id 'java'
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.0.8'
+}
+
+javafx {
+    version = JavaVersion.VERSION_11
+    modules = ['javafx.controls', 'javafx.fxml']
+}
+
 group 'ecdar'
 version '2.1'
 
-apply plugin: 'java'
+mainClassName = 'ECDAR'
 
-sourceCompatibility = 1.8
+sourceCompatibility = JavaVersion.VERSION_11
 
 //create a single Jar with all dependencies
 task fatJar(type: Jar) {
@@ -26,7 +39,7 @@ repositories {
 
 dependencies {
     testImplementation group: 'junit', name: 'junit', version: '4.11'
-    implementation 'com.jfoenix:jfoenix:1.11.1'
+    implementation  'com.jfoenix:jfoenix:9.0.9'
     implementation group: 'de.codecentric.centerdevice', name: 'javafxsvg', version: '1.0.0'
     implementation group: 'com.github.jiconfont', name: 'jiconfont-javafx', version: '1.0.0'
     implementation group: 'com.github.jiconfont', name: 'jiconfont-google_material_design_icons', version: '2.2.0.1'
@@ -37,6 +50,6 @@ dependencies {
     implementation 'org.springframework:spring-core:5.0.3.RELEASE' // Used for evaluating expressions
     implementation 'org.springframework:spring-expression:5.0.3.RELEASE' // Used for evaluating expressions
     implementation 'com.bpodgursky:jbool_expressions:1.13' // Used for converting boolean expressions to disjunctive normal form
-    implementation group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.6.10'
+    implementation group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.10.5'
     implementation fileTree(dir: 'src/libs', include: ['*.jar'])
 }

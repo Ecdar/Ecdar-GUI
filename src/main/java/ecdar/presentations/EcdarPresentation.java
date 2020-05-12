@@ -26,6 +26,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Circle;
+import javafx.scene.text.Text;
 import javafx.util.Duration;
 import javafx.util.Pair;
 
@@ -83,8 +84,9 @@ public class EcdarPresentation extends StackPane {
         controller.snackbar = new JFXSnackbar(this);
         controller.snackbar.setPrefWidth(568);
 
-        final StackPane parentFix = (StackPane) controller.root.lookup(".jfx-snackbar-toast").getParent();
-        parentFix.setPadding(new Insets(14, 24, 14, 24));
+        //TODO: Disabled code it throws null-pointer excep on startup.
+//        final StackPane parentFix = (StackPane) controller.root.lookup(".jfx-snackbar-toast").getParent();
+//        parentFix.setPadding(new Insets(14, 24, 14, 24));
     }
 
     private void initializeMessageContainer() {
@@ -548,7 +550,8 @@ public class EcdarPresentation extends StackPane {
     }
 
     public void showSnackbarMessage(final String message) {
-        controller.snackbar.enqueue(new JFXSnackbar.SnackbarEvent(message));
+        Text content = new Text(message);
+        controller.snackbar.enqueue(new JFXSnackbar.SnackbarEvent(content, new Duration(3000)));
     }
 
     public void showHelp() {
