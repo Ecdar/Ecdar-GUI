@@ -5,7 +5,7 @@ import ecdar.abstractions.Component;
 import ecdar.abstractions.Project;
 import ecdar.abstractions.SimpleComponentsSystemDeclarations;
 import ecdar.backend.BackendException;
-import ecdar.backend.UPPAALDriver;
+import ecdar.backend.UPPAALDriverManager;
 import ecdar.mutation.models.MutationTestCase;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.mutation.models.NonRefinementStrategy;
@@ -83,7 +83,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
         finishedTestCases = Collections.synchronizedList(new ArrayList<>()); // use synchronized to be thread safe
 
         try {
-            queryFilePath = UPPAALDriver.storeQuery("refinement: " + MutationTestPlanController.MUTANT_NAME + "<=" + MutationTestPlanController.SPEC_NAME, "query");
+            queryFilePath = UPPAALDriverManager.getInstance().storeQuery("refinement: " + MutationTestPlanController.MUTANT_NAME + "<=" + MutationTestPlanController.SPEC_NAME, "query");
         } catch (final URISyntaxException | IOException e) {
             e.printStackTrace();
             Ecdar.showToast("Error: " + e.getMessage());
@@ -108,7 +108,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
     @Override
     public void onAllJobsSuccessfullyDone() {
         try {
-            FileUtils.cleanDirectory(new File(UPPAALDriver.getTempDirectoryAbsolutePath()));
+            FileUtils.cleanDirectory(new File(UPPAALDriverManager.getInstance().getTempDirectoryAbsolutePath()));
         } catch (final IOException | URISyntaxException e) {
             e.printStackTrace();
             Ecdar.showToast("Error: " + e.getMessage());
@@ -154,7 +154,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
                 // Store the project and the refinement query as backend XML
                 final String modelPath;
                 try {
-                    modelPath = UPPAALDriver.storeBackendModel(project, testCase.getId());
+                    modelPath = UPPAALDriverManager.getInstance().storeBackendModel(project, testCase.getId());
                 } catch (IOException | BackendException | URISyntaxException e) {
                     throw new MutationTestingException("Error while storing backend model", e);
                 }
@@ -232,7 +232,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
      */
     private Process startVerifytgaProcess(final String modelPath) throws IOException {
         // Run verifytga to check refinement and to fetch strategy if non-refinement
-        return new ProcessBuilder(UPPAALDriver.findVerifytgaAbsolutePath(), "-t0", modelPath, queryFilePath).start();
+        return new ProcessBuilder(UPPAALDriverManager.getInstance().getVerifytgaAbsolutePath(), "-t0", modelPath, queryFilePath).start();
     }
 
     /**
