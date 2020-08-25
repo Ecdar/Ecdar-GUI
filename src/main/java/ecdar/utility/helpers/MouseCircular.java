@@ -1,6 +1,7 @@
 package ecdar.utility.helpers;
 
 import ecdar.abstractions.Edge;
+import ecdar.abstractions.Location;
 import ecdar.controllers.EdgeController;
 import ecdar.controllers.LocationController;
 import ecdar.presentations.CanvasPresentation;
@@ -36,7 +37,9 @@ public class MouseCircular implements Circular {
 
         //Set the new source to the clicked circular
         EventHandler<MouseEvent> eventHandler = event -> {
-            edge.setSourceLocation(((EdgeController) SelectHelper.getSelectedElements().get(0)).getEdge().getSourceLocation());
+            if(SelectHelper.getSelectedElements().size() > 0) {
+                edge.setSourceLocation(((LocationController) SelectHelper.getSelectedElements().get(0)).getLocation());
+            }
         };
 
         //Set register the eventHandler

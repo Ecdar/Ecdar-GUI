@@ -658,7 +658,11 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                 final Edge newEdge;
 
                 //Create the new edge with the same source as the old edge
-                newEdge = new Edge(source, EdgeStatus.OUTPUT);
+                newEdge = new Edge(source, oldEdge.getStatus());
+
+                //Add the new edge and remove the old (needed on top of thee push to the undo an redo stack)
+                getComponent().addEdge(newEdge);
+                getComponent().removeEdge(oldEdge);
 
                 KeyboardTracker.registerKeybind(KeyboardTracker.ABANDON_EDGE, new Keybind(new KeyCodeCombination(KeyCode.ESCAPE), () -> {
                     getComponent().removeEdge(newEdge);
@@ -691,13 +695,17 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                 final Edge newEdge;
 
                 //Create the new edge with the same source as the old edge (is changed later)
-                newEdge = new Edge(source, EdgeStatus.OUTPUT);
+                newEdge = new Edge(source, oldEdge.getStatus());
 
                 //Set the source to a new MouseCircular, which will follow the mouse and handle setting the new source
                 newEdge.sourceCircularProperty().set(new MouseCircular(newEdge));
 
                 //Set the target to the same as the old edge
                 newEdge.setTargetLocation(target);
+
+                //Add the new edge and remove the old (needed on top of thee push to the undo an redo stack)
+                getComponent().addEdge(newEdge);
+                getComponent().removeEdge(oldEdge);
 
                 KeyboardTracker.registerKeybind(KeyboardTracker.ABANDON_EDGE, new Keybind(new KeyCodeCombination(KeyCode.ESCAPE), () -> {
                     getComponent().removeEdge(newEdge);
