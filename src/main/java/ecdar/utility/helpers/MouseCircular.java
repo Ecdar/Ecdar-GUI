@@ -42,7 +42,7 @@ public class MouseCircular implements Circular {
             List<Location> locations = component.getLocations();
             Location closestLoc = locations.get(0);
             for (Location loc : locations) {
-                if(Math.abs(loc.getY() - getY()) + Math.abs(loc.getX() - getX()) < Math.abs(closestLoc.getY() - getY()) + Math.abs(closestLoc.getX() - getX())){
+                if(Math.abs(loc.getY() - getY()) < radius.get() * 2 && Math.abs(loc.getX() - getX()) < radius.get() * 2 && Math.abs(loc.getY() - getY()) + Math.abs(loc.getX() - getX()) < Math.abs(closestLoc.getY() - getY()) + Math.abs(closestLoc.getX() - getX())){
                     closestLoc = loc;
                 }
             }

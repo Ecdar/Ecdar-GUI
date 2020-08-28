@@ -297,7 +297,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                     BindingHelper.bind(firstLink, simpleArrowHead, newEdge.getSourceCircular(), newEdge.getTargetCircular());
                 }
             } else {
-                BindingHelper.bind(firstLink, null, newEdge.getSourceCircular(), nails.get(0));
+                BindingHelper.bind(firstLink, simpleArrowHead, newEdge.getSourceCircular(), nails.get(0));
             }
 
             KeyboardTracker.unregisterKeybind(KeyboardTracker.ABANDON_EDGE);
