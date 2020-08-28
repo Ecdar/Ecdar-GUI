@@ -683,16 +683,17 @@ public class ComponentController extends ModelController implements Initializabl
 
 
         } else if (event.isSecondaryButtonDown()) {
-            dropDownMenuHelperCircle.setLayoutX(event.getX());
-            dropDownMenuHelperCircle.setLayoutY(event.getY());
-            DropDownMenu.x = event.getX();
-            DropDownMenu.y = event.getY();
+            dropDownMenuHelperCircle.setTranslateX(event.getX());
+            dropDownMenuHelperCircle.setTranslateY(event.getY());
+
+            double offsetX = -getComponent().getBox().getWidth() / 2;
+            double offsetY = -getComponent().getBox().getHeight() / 2;
 
             if (unfinishedEdge == null) {
-                contextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, 0, 0);
+                contextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, offsetX, offsetY);
             } else {
                 initializeFinishEdgeContextMenu(unfinishedEdge);
-                finishEdgeContextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, 0, 0);
+                finishEdgeContextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, offsetX, offsetY);
             }
         } else if(event.isPrimaryButtonDown()) {
             // We are drawing an edge
