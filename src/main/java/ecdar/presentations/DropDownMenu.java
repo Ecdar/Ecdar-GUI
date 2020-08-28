@@ -140,7 +140,8 @@ public class DropDownMenu extends JFXPopup {
      * @param initOffsetY Offset on the Y-axis of the view
      */
     public void show(final JFXPopup.PopupVPosition vAlign, final JFXPopup.PopupHPosition hAlign, final double initOffsetX, final double initOffsetY) {
-        this.isHidden.set(false);
+        super.show(this.source, vAlign, hAlign, initOffsetX, initOffsetY);
+        super.hide();
 
         //Check if the dropdown will appear outside the screen and change the offset accordingly
         double offsetX = initOffsetX;
@@ -164,6 +165,8 @@ public class DropDownMenu extends JFXPopup {
         //Set the x and y of the dropdown to ensure that locations etc. are added correctly
         x = this.source.getLayoutX() + finalOffsetX;
         y = this.source.getLayoutY() + finalOffsetY;
+
+        this.isHidden.set(false);
 
         Platform.runLater( () -> super.show(this.source, vAlign, hAlign, finalOffsetX, finalOffsetY));
     }
@@ -338,7 +341,7 @@ public class DropDownMenu extends JFXPopup {
     public void hide(){
         if (this.isShowing()) {
             this.isHidden.set(true);
-            super.hide();
+            Platform.runLater(super::hide);
         }
     }
 
