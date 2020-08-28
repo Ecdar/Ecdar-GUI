@@ -140,6 +140,7 @@ public class DropDownMenu extends JFXPopup {
      * @param initOffsetY Offset on the Y-axis of the view
      */
     public void show(final JFXPopup.PopupVPosition vAlign, final JFXPopup.PopupHPosition hAlign, final double initOffsetX, final double initOffsetY) {
+        //Needed to ensure correct placement of submenu
         super.show(this.source, vAlign, hAlign, initOffsetX, initOffsetY);
         super.hide();
 
