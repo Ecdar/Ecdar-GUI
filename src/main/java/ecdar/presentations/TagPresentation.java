@@ -172,36 +172,15 @@ public class TagPresentation extends StackPane {
         shape.setOnMouseReleased(event -> {
             if (wasDragged) {
                 // Add to undo redo stack
-                double currentX = getTranslateX();
-                double currentY = getTranslateY();
+                final double currentX = getTranslateX();
+                final double currentY = getTranslateY();
                 final double storePreviousX = previousX;
                 final double storePreviousY = previousY;
 
-                //Handle the horizontal placement of the tag
-                if(currentX + locationAware.getValue().getX() + textField.getWidth() > getComponent().getBox().getX() + getComponent().getBox().getWidth()) {
-                    System.out.println("Far right");
-                    currentX = getComponent().getBox().getX() + getComponent().getBox().getWidth() - locationAware.getValue().getX() - textField.getWidth();
-                } else if (currentX + locationAware.getValue().getX() < getComponent().getBox().getX()) {
-                    System.out.println("Far left");
-                    currentX = getComponent().getBox().getX() - locationAware.getValue().getX();
-                }
-
-                //Handle the vertical placement of the tag
-                if(currentY + locationAware.getValue().getY() + textField.getHeight() > getComponent().getBox().getY() + getComponent().getBox().getHeight()) {
-                    System.out.println("Far down");
-                    currentY = getComponent().getBox().getY() + getComponent().getBox().getHeight() - locationAware.getValue().getY() - textField.getHeight();
-                } else if (currentY + locationAware.getValue().getY() < getComponent().getBox().getY()) {
-                    System.out.println("Far up");
-                    currentY = getComponent().getBox().getY() - locationAware.getValue().getY();
-                }
-
-                double finalCurrentX = currentX;
-                double finalCurrentY = currentY;
-
                 UndoRedoStack.pushAndPerform(
                         () -> {
-                            setTranslateX(finalCurrentX);
-                            setTranslateY(finalCurrentY);
+                            setTranslateX(currentX);
+                            setTranslateY(currentY);
                         },
                         () -> {
                             setTranslateX(storePreviousX);
@@ -219,6 +198,20 @@ public class TagPresentation extends StackPane {
                 textField.requestFocus(); // This needs to be done twice because of reasons
             }
 
+
+            //Handle the horizontal placement of the tag
+            if(getTranslateX() + locationAware.getValue().getX() + textField.getWidth() * 2 > getComponent().getBox().getX() + getComponent().getBox().getWidth()) {
+                setTranslateX(getComponent().getBox().getX() + getComponent().getBox().getWidth() - locationAware.getValue().getX() - textField.getWidth() * 2);
+            } else if (getTranslateX() + locationAware.getValue().getX() < getComponent().getBox().getX()) {
+                setTranslateX(getComponent().getBox().getX() - locationAware.getValue().getX());
+            }
+
+            //Handle the vertical placement of the tag
+            if(getTranslateY() + locationAware.getValue().getY() + textField.getHeight() * 2 > getComponent().getBox().getY() + getComponent().getBox().getHeight()) {
+                setTranslateY(getComponent().getBox().getY() + getComponent().getBox().getHeight() - locationAware.getValue().getY() - textField.getHeight() * 2);
+            } else if (getTranslateY() + locationAware.getValue().getY() < getComponent().getBox().getY() + GRID_SIZE * 2) {
+                setTranslateY(getComponent().getBox().getY() - locationAware.getValue().getY() + GRID_SIZE * 2);
+            }
         });
 
         textField.focusedProperty().addListener((observable, oldValue, newValue) -> {
