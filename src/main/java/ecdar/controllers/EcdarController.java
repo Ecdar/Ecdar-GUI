@@ -12,6 +12,7 @@ import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
 import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.SelectHelper;
+import ecdar.utility.helpers.ZoomHelper;
 import ecdar.utility.keyboard.Keybind;
 import ecdar.utility.keyboard.KeyboardTracker;
 import ecdar.utility.keyboard.NudgeDirection;
@@ -109,6 +110,10 @@ public class EcdarController implements Initializable {
     public StackPane aboutContainer;
     public JFXDialog aboutDialog;
     public JFXButton aboutAcceptButton;
+    public JFXRippler zoomIn;
+    public JFXRippler zoomOut;
+    public JFXRippler zoomToFit;
+    public JFXRippler resetZoom;
 
     private double expandHeight = 300;
 
@@ -208,6 +213,8 @@ public class EcdarController implements Initializable {
         initializeMessages();
         initializeMenuBar();
         initializeReachabilityAnalysisThread();
+
+        ZoomHelper.setCanvas(canvas);
     }
 
     /**
@@ -1158,6 +1165,27 @@ public class EcdarController implements Initializable {
     private void redoClicked() {
         UndoRedoStack.redo();
     }
+
+    @FXML
+    private void zoomInClicked() {
+        ZoomHelper.zoomIn();
+    }
+
+    @FXML
+    private void zoomOutClicked() {
+        ZoomHelper.zoomOut();
+    }
+
+    @FXML
+    private void zoomToFitClicked() {
+        ZoomHelper.zoomToFit();
+    }
+
+    @FXML
+    private void resetZoomClicked() {
+        ZoomHelper.resetZoom();
+    }
+
 
     /**
      * Switch to input edge mode

@@ -3,6 +3,7 @@ package ecdar.presentations;
 import javafx.beans.binding.DoubleBinding;
 import javafx.scene.Parent;
 import javafx.scene.shape.Line;
+import javafx.stage.Screen;
 
 import java.util.ArrayList;
 
@@ -15,6 +16,12 @@ public class Grid extends Parent {
     private final ArrayList<Line> verticalLines = new ArrayList<>();
 
     public Grid(final int gridSize) {
+        //The screen size in GridSlices multiplied by 3 to ensure that the screen is still covered when zoomed out
+        int screenWidthInGridSlices = (int) (Screen.getPrimary().getBounds().getWidth() - (Screen.getPrimary().getBounds().getWidth() % gridSize)) * 3;
+        int screenHeightInGridSlices = (int) (Screen.getPrimary().getBounds().getHeight() - (Screen.getPrimary().getBounds().getHeight() % gridSize)) * 3;
+
+        setTranslateX(gridSize * 0.5);
+        setTranslateY(gridSize * 0.5);
 
         // When the scene changes (goes from null to something)
         sceneProperty().addListener((observable, oldScene, newScene) -> {
@@ -28,9 +35,9 @@ public class Grid extends Parent {
                 }
 
                 // Add new lines (to cover the screen, with 1 line in margin in both ends)
-                int i = -1;
-                while (i * gridSize - gridSize < newWidth.doubleValue()) {
-                    final Line line = new Line(i * gridSize, 200, i * gridSize, 300);
+                int i = -screenWidthInGridSlices;
+                while (i * gridSize - gridSize < screenWidthInGridSlices) {
+                    final Line line = new Line(i * gridSize, -screenHeightInGridSlices, i * gridSize, -screenHeightInGridSlices);
                     line.getStyleClass().add("grid-line");
 
                     final DoubleBinding parentXBinding = new DoubleBinding() {
@@ -65,9 +72,9 @@ public class Grid extends Parent {
                 }
 
                 // Add new lines (to cover the screen, with 1 line in margin in both ends)
-                int i = -1;
-                while (i * gridSize - gridSize < newHeight.doubleValue()) {
-                    final Line line = new Line(200, i * gridSize, 300, i * gridSize);
+                int i = -screenHeightInGridSlices;
+                while (i * gridSize - gridSize < screenHeightInGridSlices) {
+                    final Line line = new Line(-screenWidthInGridSlices, i * gridSize, screenWidthInGridSlices, i * gridSize);
                     line.getStyleClass().add("grid-line");
 
                     final DoubleBinding parentYBinding = new DoubleBinding() {
@@ -102,5 +109,16 @@ public class Grid extends Parent {
      */
     public static double snap(final double raw) {
         return Math.round(raw / GRID_SIZE) * GRID_SIZE;
+    }
+
+    public void handleTranslateX(double oldValue, double newValue, double scale) {
+        //Move the grid in the opposite direction of the canvas drag, to keep its location on screen
+        this.setTranslateX(this.getTranslateX() + (newValue - oldValue) / -scale);
+    }
+
+
+    public void handleTranslateY(double oldValue, double newValue, double scale) {
+        //Move the grid in the opposite direction of the canvas drag, to keep its location on screen
+        this.setTranslateY(this.getTranslateY() + (newValue - oldValue) / -scale);
     }
 }
