@@ -172,14 +172,36 @@ public class TagPresentation extends StackPane {
         shape.setOnMouseReleased(event -> {
             if (wasDragged) {
                 // Add to undo redo stack
-                final double currentX = getTranslateX();
-                final double currentY = getTranslateY();
+                double currentX = getTranslateX();
+                double currentY = getTranslateY();
                 final double storePreviousX = previousX;
                 final double storePreviousY = previousY;
+
+                //Handle the horizontal placement of the tag
+                if(currentX + locationAware.getValue().getX() + textField.getWidth() > getComponent().getBox().getX() + getComponent().getBox().getWidth()) {
+                    System.out.println("Far right");
+                    currentX = getComponent().getBox().getX() + getComponent().getBox().getWidth() - locationAware.getValue().getX() - textField.getWidth();
+                } else if (currentX + locationAware.getValue().getX() < getComponent().getBox().getX()) {
+                    System.out.println("Far left");
+                    currentX = getComponent().getBox().getX() - locationAware.getValue().getX();
+                }
+
+                //Handle the vertical placement of the tag
+                if(currentY + locationAware.getValue().getY() + textField.getHeight() > getComponent().getBox().getY() + getComponent().getBox().getHeight()) {
+                    System.out.println("Far down");
+                    currentY = getComponent().getBox().getY() + getComponent().getBox().getHeight() - locationAware.getValue().getY() - textField.getHeight();
+                } else if (currentY + locationAware.getValue().getY() < getComponent().getBox().getY()) {
+                    System.out.println("Far up");
+                    currentY = getComponent().getBox().getY() - locationAware.getValue().getY();
+                }
+
+                double finalCurrentX = currentX;
+                double finalCurrentY = currentY;
+
                 UndoRedoStack.pushAndPerform(
                         () -> {
-                            setTranslateX(currentX);
-                            setTranslateY(currentY);
+                            setTranslateX(finalCurrentX);
+                            setTranslateY(finalCurrentY);
                         },
                         () -> {
                             setTranslateX(storePreviousX);
