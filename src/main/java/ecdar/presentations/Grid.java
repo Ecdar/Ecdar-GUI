@@ -10,7 +10,7 @@ import java.util.ArrayList;
 public class Grid extends Parent {
     public static final int GRID_SIZE = 10;
     static final int CORNER_SIZE = 4 * Grid.GRID_SIZE;
-    public static final double TOOL_BAR_HEIGHT = CORNER_SIZE / 2;
+    public static final double TOOL_BAR_HEIGHT = CORNER_SIZE * 0.5;
 
     private final ArrayList<Line> horizontalLines = new ArrayList<>();
     private final ArrayList<Line> verticalLines = new ArrayList<>();
@@ -34,27 +34,11 @@ public class Grid extends Parent {
                     verticalLines.remove(removeLine);
                 }
 
-                // Add new lines (to cover the screen, with 1 line in margin in both ends)
+                // Add new lines to cover the screen, even when zoomed out
                 int i = -screenWidthInGridSlices;
                 while (i * gridSize - gridSize < screenWidthInGridSlices) {
-                    final Line line = new Line(i * gridSize, -screenHeightInGridSlices, i * gridSize, -screenHeightInGridSlices);
+                    Line line = new Line(i * gridSize, -screenHeightInGridSlices, i * gridSize, screenHeightInGridSlices);
                     line.getStyleClass().add("grid-line");
-
-                    final DoubleBinding parentXBinding = new DoubleBinding() {
-                        {
-                            super.bind(getParent().translateXProperty());
-                        }
-
-                        @Override
-                        protected double computeValue() {
-                            final int moveFactor = (int) (getParent().getTranslateX() / gridSize);
-                            return -1 * moveFactor * gridSize + 0.5 * gridSize;
-                        }
-                    };
-
-                    line.layoutXProperty().bind(parentXBinding);
-                    line.startYProperty().bind(getParent().layoutYProperty().subtract(getParent().translateYProperty()).subtract(50)); // the 50 is a fix
-                    line.endYProperty().bind(getParent().layoutYProperty().subtract(getParent().translateYProperty()).add(getScene().heightProperty()));
 
                     verticalLines.add(line);
                     i++;
@@ -71,27 +55,11 @@ public class Grid extends Parent {
                     horizontalLines.remove(removeLine);
                 }
 
-                // Add new lines (to cover the screen, with 1 line in margin in both ends)
+                // Add new lines to cover the screen, even when zoomed out
                 int i = -screenHeightInGridSlices;
                 while (i * gridSize - gridSize < screenHeightInGridSlices) {
-                    final Line line = new Line(-screenWidthInGridSlices, i * gridSize, screenWidthInGridSlices, i * gridSize);
+                    Line line = new Line(-screenWidthInGridSlices, i * gridSize, screenWidthInGridSlices, i * gridSize);
                     line.getStyleClass().add("grid-line");
-
-                    final DoubleBinding parentYBinding = new DoubleBinding() {
-                        {
-                            super.bind(getParent().translateYProperty());
-                        }
-
-                        @Override
-                        protected double computeValue() {
-                            final int moveFactor = (int) (getParent().getTranslateY() / gridSize);
-                            return -1 * moveFactor * gridSize + 0.5 * gridSize;
-                        }
-                    };
-
-                    line.layoutYProperty().bind(parentYBinding);
-                    line.startXProperty().bind(getParent().layoutXProperty().subtract(getParent().translateXProperty()));
-                    line.endXProperty().bind(getParent().layoutXProperty().subtract(getParent().translateXProperty()).add(getScene().widthProperty()));
 
                     horizontalLines.add(line);
                     i++;
