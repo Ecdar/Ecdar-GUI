@@ -49,6 +49,16 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
 
         initializeGrid();
 
+        // Center on the component
+        if(controller.getActiveComponentPresentation() != null){
+            setTranslateY(getHeight() / 2 - controller.getActiveComponentPresentation().getHeight() / 2);
+            setTranslateX(getWidth() / 2 - controller.getActiveComponentPresentation().getWidth() / 2);
+
+            // Move the component half a grid size to align it to the grid
+            controller.getActiveComponentPresentation().setLayoutX(Grid.GRID_SIZE * 0.5);
+            controller.getActiveComponentPresentation().setLayoutY(Grid.GRID_SIZE * 0.5);
+        }
+
         CanvasDragHelper.makeDraggable(this, mouseEvent -> mouseEvent.getButton().equals(MouseButton.SECONDARY));
     }
 

@@ -1,6 +1,5 @@
 package ecdar.presentations;
 
-import javafx.beans.binding.DoubleBinding;
 import javafx.scene.Parent;
 import javafx.scene.shape.Line;
 import javafx.stage.Screen;
