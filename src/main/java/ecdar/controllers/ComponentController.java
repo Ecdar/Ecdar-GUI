@@ -61,7 +61,6 @@ public class ComponentController extends ModelController implements Initializabl
     private MouseTracker mouseTracker;
     private DropDownMenu contextMenu;
     private DropDownMenu finishEdgeContextMenu;
-    private Circle dropDownMenuHelperCircle;
 
     public static boolean isPlacingLocation() {
         return placingLocation != null;
@@ -276,18 +275,12 @@ public class ComponentController extends ModelController implements Initializabl
     }
 
     private void initializeContextMenu() {
-        dropDownMenuHelperCircle = new Circle(5);
-        dropDownMenuHelperCircle.setOpacity(0);
-        dropDownMenuHelperCircle.setMouseTransparent(true);
-
-        root.getChildren().add(dropDownMenuHelperCircle);
-
         final Consumer<Component> initializeDropDownMenu = (component) -> {
             if (component == null) {
                 return;
             }
 
-            contextMenu = new DropDownMenu(dropDownMenuHelperCircle);
+            contextMenu = new DropDownMenu(root);
 
             contextMenu.addClickableListElement("Add Location", event -> {
                 contextMenu.hide();
@@ -407,7 +400,7 @@ public class ComponentController extends ModelController implements Initializabl
                 locationAware.yProperty().set(y);
             };
 
-            finishEdgeContextMenu = new DropDownMenu(dropDownMenuHelperCircle);
+            finishEdgeContextMenu = new DropDownMenu(root);
             finishEdgeContextMenu.addListElement("Finish edge in a:");
 
             finishEdgeContextMenu.addClickableListElement("Location", event -> {
@@ -683,16 +676,11 @@ public class ComponentController extends ModelController implements Initializabl
 
 
         } else if (event.isSecondaryButtonDown()) {
-            dropDownMenuHelperCircle.setLayoutX(event.getX());
-            dropDownMenuHelperCircle.setLayoutY(event.getY());
-            DropDownMenu.x = event.getX();
-            DropDownMenu.y = event.getY();
-
             if (unfinishedEdge == null) {
-                contextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, 0, 0);
+                contextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX(), event.getY());
             } else {
                 initializeFinishEdgeContextMenu(unfinishedEdge);
-                finishEdgeContextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, 0, 0);
+                finishEdgeContextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX(), event.getY());
             }
         } else if(event.isPrimaryButtonDown()) {
             // We are drawing an edge
