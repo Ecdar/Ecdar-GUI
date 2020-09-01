@@ -16,10 +16,8 @@ public class ZoomHelper {
     }
 
     public static void zoomIn() {
-        double newScale = canvasPresentation.getScaleX();
         double delta = 1.2;
-
-        newScale *= delta;
+        double newScale = canvasPresentation.getScaleX() * delta;
 
         //Limit for zooming in
         if(newScale > 8){
@@ -34,10 +32,8 @@ public class ZoomHelper {
     }
 
     public static void zoomOut() {
-        double newScale = canvasPresentation.getScaleX();
         double delta = 1.2;
-
-        newScale /= delta;
+        double newScale = canvasPresentation.getScaleX() / delta;
 
         //Limit for zooming out
         if(newScale < 0.4){
