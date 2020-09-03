@@ -67,15 +67,14 @@ public class ZoomHelper {
 
     private static void centerComponent(double newScale){
         //Center component
-        final double gridSize = Grid.GRID_SIZE * newScale;
         double xOffset = newScale * canvasPresentation.getWidth() * 1.0f / 2 - newScale * canvasPresentation.getController().getActiveComponentPresentation().getWidth() * 1.0f / 2;
-        double yOffset = newScale * canvasPresentation.getHeight() * 1.0f / 3 - newScale * (canvasPresentation.getController().getActiveComponentPresentation().getHeight() - newScale * 100) * 1.0f / 3; //The offset places the component a bit too high, so '-newScale * 100' is used to lower it a but
+        double yOffset = newScale * canvasPresentation.getHeight() * 1.0f / 3 - newScale * (canvasPresentation.getController().getActiveComponentPresentation().getHeight() - canvasPresentation.getHeight() / 4) * 1.0f / 3; //The offset places the component a bit too high, so 'canvasPresentation.getHeight() / 4' is used to lower it a but
 
-        canvasPresentation.setTranslateX(xOffset - (xOffset % gridSize) + gridSize * 0.5);
-        canvasPresentation.setTranslateY(yOffset - (yOffset % gridSize) + gridSize * 0.5);
+        canvasPresentation.setTranslateX(xOffset - (xOffset % Grid.GRID_SIZE) + Grid.GRID_SIZE * 0.5);
+        canvasPresentation.setTranslateY(yOffset - (yOffset % Grid.GRID_SIZE) + Grid.GRID_SIZE * 0.5);
 
         //Make sure the grid stays on screen
-        grid.setTranslateX(gridSize * 0.5);
-        grid.setTranslateY(gridSize * 0.5);
+        grid.setTranslateX(Grid.GRID_SIZE * 0.5);
+        grid.setTranslateY(Grid.GRID_SIZE * 0.5);
     }
 }
