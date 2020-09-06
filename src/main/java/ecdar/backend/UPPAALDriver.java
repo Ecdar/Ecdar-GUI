@@ -215,7 +215,6 @@ public class UPPAALDriver implements IUPPAALDriver {
                         releaseOSDependentEngine(engine);
                         engine = null;
                     }
-
                 }
             }
         };

@@ -35,6 +35,7 @@ repositories {
 }
 
 dependencies {
+    implementation fileTree(dir: 'src/libs', include: ['*.jar'])
     testImplementation group: 'junit', name: 'junit', version: '4.11'
     implementation 'com.jfoenix:jfoenix:9.0.9'
     implementation group: 'de.codecentric.centerdevice', name: 'javafxsvg', version: '1.0.0'
@@ -48,5 +49,4 @@ dependencies {
     implementation 'org.springframework:spring-expression:5.0.3.RELEASE' // Used for evaluating expressions
     implementation 'com.bpodgursky:jbool_expressions:1.13' // Used for converting boolean expressions to disjunctive normal form
     implementation group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.10.5'
-    implementation fileTree(dir: 'src/libs', include: ['*.jar'])
 }

@@ -447,10 +447,8 @@ public class EcdarController implements Initializable {
 
         UPPAALDriverManager.getServerFilePathProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue.equals("dummy")) {
-                System.out.println("Warning added");
                 CodeAnalysis.addMessage(null, uppalNotFoundMessage);
             } else {
-                System.out.println("Warning removed");
                 CodeAnalysis.removeMessage(null, uppalNotFoundMessage);
             }
         });
