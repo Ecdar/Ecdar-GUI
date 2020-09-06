@@ -90,8 +90,9 @@ public class Query implements Serializable {
     private Boolean forcedCancel = false;
 
     private void initializeRunQuery() {
-        IUPPAALDriver uppaalDriver = UPPAALDriverManager.getInstance();
         runQuery = (buildEcdarDocument) -> {
+            IUPPAALDriver uppaalDriver = UPPAALDriverManager.getInstance();
+
             setQueryState(QueryState.RUNNING);
 
             if (buildEcdarDocument) {
