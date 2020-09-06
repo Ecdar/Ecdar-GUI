@@ -135,7 +135,6 @@ public class TestDriver {
         } else {
             handleException(new MutationTestingException("Rule " + rule + " is neither a delay nor an action rule."));
         }
-
     }
 
     /**

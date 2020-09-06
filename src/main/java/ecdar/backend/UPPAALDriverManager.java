@@ -41,7 +41,7 @@ public final class UPPAALDriverManager {
 
     public static void setServerFilePath(String filePath) {
         //Set the instance to null to allow the correct UPPAALDriver to be instantiated
-        //Todo: Insert check to see if the new value points to a UPPAAL server file
+        //Todo: Insert check to see if the new value points to an accepted file
         instance = null;
 
         //Update uppaalFilePath and save the new value to preferences
@@ -59,7 +59,7 @@ public final class UPPAALDriverManager {
 
     public static void setVerifytgaFilePath(String filePath) {
         //Set the instance to null to allow the correct UPPAALDriver to be instantiated
-        //Todo: Insert check to see if the new value points to a UPPAAL server file
+        //Todo: Insert check to see if the new value points to an accepted file
         instance = null;
 
         //Update uppaalFilePath and save the new value to preferences
