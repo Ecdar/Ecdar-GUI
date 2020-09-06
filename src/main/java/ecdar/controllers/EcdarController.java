@@ -4,6 +4,7 @@ import ecdar.Debug;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
 import ecdar.backend.BackendException;
+import ecdar.backend.DummyUPPAALDriver;
 import ecdar.backend.UPPAALDriverManager;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.mutation.models.MutationTestPlan;
@@ -210,6 +211,7 @@ public class EcdarController implements Initializable {
         initializeMessages();
         initializeMenuBar();
         initializeReachabilityAnalysisThread();
+        initializeUppalFileNotFoundWarning();
     }
 
     /**
@@ -435,6 +437,21 @@ public class EcdarController implements Initializable {
                         }
                     });
                 }
+            }
+        });
+    }
+
+    private void initializeUppalFileNotFoundWarning() {
+        final CodeAnalysis.Message uppalNotFoundMessage = new CodeAnalysis.Message("Please set the UPPAAL server location through the 'Preferences' tab.\n" +
+                "Make sure to have UPPAAL installed. This can be done at uppaal.org", CodeAnalysis.MessageType.WARNING);
+
+        UPPAALDriverManager.getServerFilePathProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.equals("dummy")) {
+                System.out.println("Warning added");
+                CodeAnalysis.addMessage(null, uppalNotFoundMessage);
+            } else {
+                System.out.println("Warning removed");
+                CodeAnalysis.removeMessage(null, uppalNotFoundMessage);
             }
         });
     }

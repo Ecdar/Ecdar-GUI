@@ -1,10 +1,7 @@
 package ecdar.abstractions;
 
 import ecdar.Ecdar;
-import ecdar.backend.BackendException;
-import ecdar.backend.QueryListener;
-import ecdar.backend.UPPAALDriver;
-import ecdar.backend.UPPAALDriverManager;
+import ecdar.backend.*;
 import ecdar.controllers.EcdarController;
 import ecdar.utility.serialize.Serializable;
 import com.google.gson.JsonObject;
@@ -12,6 +9,7 @@ import com.uppaal.engine.Engine;
 import javafx.application.Platform;
 import javafx.beans.property.*;
 
+import java.io.File;
 import java.util.function.Consumer;
 
 public class Query implements Serializable {
@@ -92,12 +90,13 @@ public class Query implements Serializable {
     private Boolean forcedCancel = false;
 
     private void initializeRunQuery() {
+        IUPPAALDriver uppaalDriver = UPPAALDriverManager.getInstance();
         runQuery = (buildEcdarDocument) -> {
             setQueryState(QueryState.RUNNING);
 
             if (buildEcdarDocument) {
                 try {
-                    UPPAALDriverManager.getInstance().buildEcdarDocument();
+                    uppaalDriver.buildEcdarDocument();
                 } catch (final BackendException e) {
                     Ecdar.showToast("Could not build XML document. I got the error: " + e.getMessage());
                     e.printStackTrace();
@@ -105,7 +104,7 @@ public class Query implements Serializable {
                 }
             }
 
-            UPPAALDriverManager.getInstance().runQuery(getQuery(),
+            uppaalDriver.runQuery(getQuery(),
                     aBoolean -> {
                         if (aBoolean) {
                             setQueryState(QueryState.SUCCESSFUL);
