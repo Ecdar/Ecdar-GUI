@@ -198,7 +198,6 @@ public class TagPresentation extends StackPane {
                 textField.requestFocus(); // This needs to be done twice because of reasons
             }
 
-
             //Handle the horizontal placement of the tag
             if(getTranslateX() + locationAware.getValue().getX() + textField.getWidth() * 2 > getComponent().getBox().getX() + getComponent().getBox().getWidth()) {
                 setTranslateX(getComponent().getBox().getX() + getComponent().getBox().getWidth() - locationAware.getValue().getX() - textField.getWidth() * 2);
@@ -233,7 +232,6 @@ public class TagPresentation extends StackPane {
 
     public void bindToColor(final ObjectProperty<Color> color, final ObjectProperty<Color.Intensity> intensity, final boolean doColorBackground) {
         final BiConsumer<Color, Color.Intensity> recolor = (newColor, newIntensity) -> {
-
             final JFXTextField textField = (JFXTextField) lookup("#textField");
             textField.setUnFocusColor(TRANSPARENT);
             textField.setFocusColor(newColor.getColor(newIntensity));
@@ -248,7 +246,6 @@ public class TagPresentation extends StackPane {
             } else {
                 textField.setStyle("-fx-prompt-text-fill: rgba(0, 0, 0, 0.6);");
             }
-
         };
 
         color.addListener(observable -> recolor.accept(color.get(), intensity.get()));
@@ -259,7 +256,6 @@ public class TagPresentation extends StackPane {
 
     public void setAndBindString(final StringProperty string) {
         final JFXTextField textField = (JFXTextField) lookup("#textField");
-
         textField.textProperty().unbind();
         textField.setText(string.get());
         string.bind(textField.textProperty());
