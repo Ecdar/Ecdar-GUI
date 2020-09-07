@@ -208,6 +208,7 @@ public class CanvasDragHelper {
 
         final double[] previousXTranslation = {0d};
         final double[] previousYTranslation = {0d};
+
         final BooleanProperty presWasAllowed = new SimpleBooleanProperty(false);
         final BooleanProperty isBeingDragged = new SimpleBooleanProperty(false);
 

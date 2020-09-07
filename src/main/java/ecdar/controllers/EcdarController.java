@@ -1186,7 +1186,6 @@ public class EcdarController implements Initializable {
         ZoomHelper.resetZoom();
     }
 
-
     /**
      * Switch to input edge mode
      */

@@ -66,7 +66,6 @@ public class Grid extends Parent {
                 horizontalLines.forEach(line -> getChildren().add(line));
             });
         });
-
     }
 
     /**
@@ -82,7 +81,6 @@ public class Grid extends Parent {
         //Move the grid in the opposite direction of the canvas drag, to keep its location on screen
         this.setTranslateX(this.getTranslateX() + (newValue - oldValue) / -scale);
     }
-
 
     public void handleTranslateY(double oldValue, double newValue, double scale) {
         //Move the grid in the opposite direction of the canvas drag, to keep its location on screen
