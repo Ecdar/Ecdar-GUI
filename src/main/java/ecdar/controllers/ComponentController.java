@@ -678,8 +678,11 @@ public class ComponentController extends ModelController implements Initializabl
                         }
                     }
                     hit = false;
-
                 }
+                modelContainerLocation.getChildren().remove(newLocationPresentation);
+                locationPresentationMap.remove(newLocationPresentation.getController().locationProperty().getValue());
+                newComponent.getLocations().remove(newLocationPresentation.getController().getLocation());
+                Ecdar.showToast("Please select an empty space for the new location");
             };
 
             newLocationPresentation.layoutXProperty().addListener(locationPlacementChangedListener);
