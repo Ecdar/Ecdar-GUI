@@ -3,6 +3,7 @@ package ecdar.controllers;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
 import ecdar.backend.UPPAALDriver;
+import ecdar.backend.UPPAALDriverManager;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.presentations.*;
 import ecdar.utility.UndoRedoStack;
@@ -353,7 +354,7 @@ public class ComponentController extends ModelController implements Initializabl
             contextMenu.addClickableListElement("Contains deadlock?", event -> {
 
                 // Generate the query
-                final String deadlockQuery = UPPAALDriver.getExistDeadlockQuery(getComponent());
+                final String deadlockQuery = UPPAALDriverManager.getInstance().getExistDeadlockQuery(getComponent());
 
                 // Add proper comment
                 final String deadlockComment = "Does " + component.getName() + " contain a deadlock?";

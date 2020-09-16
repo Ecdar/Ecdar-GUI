@@ -1,6 +1,7 @@
 package ecdar.code_analysis;
 
 import ecdar.abstractions.Component;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -35,18 +36,24 @@ public class CodeAnalysis {
         if(!ENABLED) return;
 
         final ObservableList<Message> list = getWarnings(component);
+        final Runnable addMessage = () -> {
+            list.add(message);
+            warnings.add(message);
+        };
 
-        list.add(message);
-        warnings.add(message);
+        Platform.runLater(addMessage);
     }
 
     private static void removeFromWarnings(final Component component, final Message message) {
         if(!ENABLED) return;
 
         final ObservableList<Message> list = getWarnings(component);
+        final Runnable removeMessage = () -> {
+            list.remove(message);
+            warnings.remove(message);
+        };
 
-        list.remove(message);
-        warnings.remove(message);
+        Platform.runLater(removeMessage);
     }
 
     public static ObservableList<Message> getErrors(final Component component) {

@@ -3,6 +3,7 @@ package ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Project;
 import ecdar.backend.UPPAALDriver;
+import ecdar.backend.UPPAALDriverManager;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.controllers.CanvasController;
 import ecdar.controllers.EcdarController;
@@ -31,6 +32,7 @@ import javafx.stage.StageStyle;
 import jiconfont.icons.GoogleMaterialDesignIcons;
 import jiconfont.javafx.IconFontFX;
 import org.apache.commons.io.FileUtils;
+import java.util.prefs.Preferences;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,6 +41,7 @@ import java.security.CodeSource;
 import java.util.Random;
 
 public class Ecdar extends Application {
+    public static Preferences preferences = Preferences.userRoot().node("ECDAR");;
     public static final String VERSION = "2.1";
     public static boolean serializationDone = false;
     private static Project project;
@@ -221,7 +224,7 @@ public class Ecdar extends Application {
         }));
 
         stage.setOnCloseRequest(event -> {
-            UPPAALDriver.stopEngines();
+            UPPAALDriverManager.getInstance().stopEngines();
 
             Platform.exit();
             System.exit(0);
