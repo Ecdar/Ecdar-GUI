@@ -193,8 +193,6 @@ public class CanvasController implements Initializable {
         return activeComponentPresentation;
     }
 
-
-
     /**
      * Allows the user to turn the grid on/off.
      * If the user has currently chosen on, then this method also shows the grid.
