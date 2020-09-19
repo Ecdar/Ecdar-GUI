@@ -16,8 +16,8 @@ public class Grid extends Parent {
 
     public Grid(final int gridSize) {
         //The screen size in GridSlices multiplied by 3 to ensure that the screen is still covered when zoomed out
-        int screenWidthInGridSlices = (int) (Screen.getPrimary().getBounds().getWidth() - (Screen.getPrimary().getBounds().getWidth() % gridSize)) * 3;
-        int screenHeightInGridSlices = (int) (Screen.getPrimary().getBounds().getHeight() - (Screen.getPrimary().getBounds().getHeight() % gridSize)) * 3;
+        int screenWidthInGridSlices = (int) (Screen.getPrimary().getBounds().getWidth() - (Screen.getPrimary().getBounds().getWidth() % gridSize));
+        int screenHeightInGridSlices = (int) ((Screen.getPrimary().getBounds().getHeight() - (Screen.getPrimary().getBounds().getHeight() % gridSize)) * 1.2);
 
         setTranslateX(gridSize * 0.5);
         setTranslateY(gridSize * 0.5);
