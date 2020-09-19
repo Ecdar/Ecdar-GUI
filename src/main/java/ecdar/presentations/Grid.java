@@ -4,44 +4,36 @@ import javafx.scene.Parent;
 import javafx.scene.shape.Line;
 import javafx.stage.Screen;
 
-import java.util.ArrayList;
-
 public class Grid extends Parent {
     public static final int GRID_SIZE = 10;
     static final int CORNER_SIZE = 4 * Grid.GRID_SIZE;
     public static final double TOOL_BAR_HEIGHT = CORNER_SIZE * 0.5;
 
     public Grid(final int gridSize) {
-        //The screen size in GridSlices multiplied by 3 to ensure that the screen is still covered when zoomed out
-        int screenWidthInGridSlices = (int) (Screen.getPrimary().getBounds().getWidth() - (Screen.getPrimary().getBounds().getWidth() % gridSize));
-        int screenHeightInGridSlices = (int) ((Screen.getPrimary().getBounds().getHeight() - (Screen.getPrimary().getBounds().getHeight() % gridSize)) * 1.2);
+        //Get the screen size in GridSlices (height multiplied by 1.1 to ensure that the screen is still covered when zoomed out)
+        int screenWidth = (int) (Screen.getPrimary().getBounds().getWidth());
+        int screenHeight = (int) (Screen.getPrimary().getBounds().getHeight() * 1.1);
 
         setTranslateX(gridSize * 0.5);
         setTranslateY(gridSize * 0.5);
 
         // Add vertical lines to cover the screen, even when zoomed out
-        int i = -screenWidthInGridSlices;
-        ArrayList<Line> verticalLines = new ArrayList<>();
-        while (i * gridSize - gridSize < screenWidthInGridSlices) {
-            Line line = new Line(i * gridSize, -screenHeightInGridSlices, i * gridSize, screenHeightInGridSlices);
+        int i = (int) (-screenWidth / 1.3);
+        while (i * gridSize - gridSize < screenWidth) {
+            Line line = new Line(i * gridSize, -screenHeight / 1.3, i * gridSize, screenHeight);
             line.getStyleClass().add("grid-line");
-
-            verticalLines.add(line);
+            getChildren().add(line);
             i++;
         }
-        verticalLines.forEach(line -> getChildren().add(line));
 
         // Add horizontal lines to cover the screen, even when zoomed out
-        i = -screenHeightInGridSlices;
-        ArrayList<Line> horizontalLines = new ArrayList<>();
-        while (i * gridSize - gridSize < screenHeightInGridSlices) {
-            Line line = new Line(-screenWidthInGridSlices, i * gridSize, screenWidthInGridSlices, i * gridSize);
+        i = (int) (-screenHeight / 1.3);
+        while (i * gridSize - gridSize < screenHeight) {
+            Line line = new Line(-screenWidth / 1.3, i * gridSize, screenWidth, i * gridSize);
             line.getStyleClass().add("grid-line");
-
-            horizontalLines.add(line);
+            getChildren().add(line);
             i++;
         }
-        horizontalLines.forEach(line -> getChildren().add(line));
     }
 
     /**
