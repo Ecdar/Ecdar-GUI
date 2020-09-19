@@ -4,6 +4,8 @@ import javafx.scene.Parent;
 import javafx.scene.shape.Line;
 import javafx.stage.Screen;
 
+import java.util.ArrayList;
+
 public class Grid extends Parent {
     public static final int GRID_SIZE = 10;
     static final int CORNER_SIZE = 4 * Grid.GRID_SIZE;
@@ -19,19 +21,27 @@ public class Grid extends Parent {
 
         // Add vertical lines to cover the screen, even when zoomed out
         int i = -screenWidthInGridSlices;
+        ArrayList<Line> verticalLines = new ArrayList<>();
         while (i * gridSize - gridSize < screenWidthInGridSlices) {
             Line line = new Line(i * gridSize, -screenHeightInGridSlices, i * gridSize, screenHeightInGridSlices);
             line.getStyleClass().add("grid-line");
+
+            verticalLines.add(line);
             i++;
         }
+        verticalLines.forEach(line -> getChildren().add(line));
 
         // Add horizontal lines to cover the screen, even when zoomed out
         i = -screenHeightInGridSlices;
+        ArrayList<Line> horizontalLines = new ArrayList<>();
         while (i * gridSize - gridSize < screenHeightInGridSlices) {
             Line line = new Line(-screenWidthInGridSlices, i * gridSize, screenWidthInGridSlices, i * gridSize);
             line.getStyleClass().add("grid-line");
+
+            horizontalLines.add(line);
             i++;
         }
+        horizontalLines.forEach(line -> getChildren().add(line));
     }
 
     /**

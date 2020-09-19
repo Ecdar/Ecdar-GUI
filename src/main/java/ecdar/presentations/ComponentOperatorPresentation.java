@@ -15,8 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 
-import static ecdar.presentations.Grid.GRID_SIZE;
-
 /**
  * Presentation of a component operator
  */
