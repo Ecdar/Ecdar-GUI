@@ -11,9 +11,6 @@ public class Grid extends Parent {
     static final int CORNER_SIZE = 4 * Grid.GRID_SIZE;
     public static final double TOOL_BAR_HEIGHT = CORNER_SIZE * 0.5;
 
-    private final ArrayList<Line> horizontalLines = new ArrayList<>();
-    private final ArrayList<Line> verticalLines = new ArrayList<>();
-
     public Grid(final int gridSize) {
         //The screen size in GridSlices multiplied by 3 to ensure that the screen is still covered when zoomed out
         int screenWidthInGridSlices = (int) (Screen.getPrimary().getBounds().getWidth() - (Screen.getPrimary().getBounds().getWidth() % gridSize));
@@ -22,50 +19,29 @@ public class Grid extends Parent {
         setTranslateX(gridSize * 0.5);
         setTranslateY(gridSize * 0.5);
 
-        // When the scene changes (goes from null to something)
-        sceneProperty().addListener((observable, oldScene, newScene) -> {
-            // When the width of this scene is being updated
-            newScene.widthProperty().addListener((observable1, oldWidth, newWidth) -> {
-                // Remove old lines
-                while (!verticalLines.isEmpty()) {
-                    final Line removeLine = verticalLines.get(0);
-                    getChildren().remove(removeLine);
-                    verticalLines.remove(removeLine);
-                }
+        // Add vertical lines to cover the screen, even when zoomed out
+        int i = -screenWidthInGridSlices;
+        ArrayList<Line> verticalLines = new ArrayList<>();
+        while (i * gridSize - gridSize < screenWidthInGridSlices) {
+            Line line = new Line(i * gridSize, -screenHeightInGridSlices, i * gridSize, screenHeightInGridSlices);
+            line.getStyleClass().add("grid-line");
 
-                // Add new lines to cover the screen, even when zoomed out
-                int i = -screenWidthInGridSlices;
-                while (i * gridSize - gridSize < screenWidthInGridSlices) {
-                    Line line = new Line(i * gridSize, -screenHeightInGridSlices, i * gridSize, screenHeightInGridSlices);
-                    line.getStyleClass().add("grid-line");
+            verticalLines.add(line);
+            i++;
+        }
+        verticalLines.forEach(line -> getChildren().add(line));
 
-                    verticalLines.add(line);
-                    i++;
-                }
-                verticalLines.forEach(line -> getChildren().add(line));
-            });
+        // Add horizontal lines to cover the screen, even when zoomed out
+        i = -screenHeightInGridSlices;
+        ArrayList<Line> horizontalLines = new ArrayList<>();
+        while (i * gridSize - gridSize < screenHeightInGridSlices) {
+            Line line = new Line(-screenWidthInGridSlices, i * gridSize, screenWidthInGridSlices, i * gridSize);
+            line.getStyleClass().add("grid-line");
 
-            // When the height of this scene is being updated
-            newScene.heightProperty().addListener((observable1, oldHeight, newHeight) -> {
-                // Remove old lines
-                while (!horizontalLines.isEmpty()) {
-                    final Line removeLine = horizontalLines.get(0);
-                    getChildren().remove(removeLine);
-                    horizontalLines.remove(removeLine);
-                }
-
-                // Add new lines to cover the screen, even when zoomed out
-                int i = -screenHeightInGridSlices;
-                while (i * gridSize - gridSize < screenHeightInGridSlices) {
-                    Line line = new Line(-screenWidthInGridSlices, i * gridSize, screenWidthInGridSlices, i * gridSize);
-                    line.getStyleClass().add("grid-line");
-
-                    horizontalLines.add(line);
-                    i++;
-                }
-                horizontalLines.forEach(line -> getChildren().add(line));
-            });
-        });
+            horizontalLines.add(line);
+            i++;
+        }
+        horizontalLines.forEach(line -> getChildren().add(line));
     }
 
     /**
