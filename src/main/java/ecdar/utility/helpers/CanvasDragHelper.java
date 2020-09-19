@@ -1,6 +1,5 @@
 package ecdar.utility.helpers;
 
-import ecdar.controllers.EcdarController;
 import ecdar.presentations.CanvasPresentation;
 import ecdar.presentations.Grid;
 import ecdar.utility.UndoRedoStack;
