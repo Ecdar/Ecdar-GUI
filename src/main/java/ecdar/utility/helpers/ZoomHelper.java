@@ -6,6 +6,8 @@ import ecdar.presentations.Grid;
 public class ZoomHelper {
     private static CanvasPresentation canvasPresentation;
     private static Grid grid;
+    public static double minZoomFactor = 0.4;
+    public static double maxZoomFactor = 8;
 
     public static void setCanvas(CanvasPresentation newCanvasPresentation) {
         canvasPresentation = newCanvasPresentation;
@@ -20,7 +22,7 @@ public class ZoomHelper {
         double newScale = canvasPresentation.getScaleX() * delta;
 
         //Limit for zooming in
-        if(newScale > 8){
+        if(newScale > maxZoomFactor){
             return;
         }
 
@@ -36,7 +38,7 @@ public class ZoomHelper {
         double newScale = canvasPresentation.getScaleX() / delta;
 
         //Limit for zooming out
-        if(newScale < 0.4){
+        if(newScale < minZoomFactor){
             return;
         }
 

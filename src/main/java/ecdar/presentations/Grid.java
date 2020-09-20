@@ -1,5 +1,6 @@
 package ecdar.presentations;
 
+import ecdar.utility.helpers.ZoomHelper;
 import javafx.scene.Parent;
 import javafx.scene.shape.Line;
 import javafx.stage.Screen;
@@ -11,25 +12,25 @@ public class Grid extends Parent {
 
     public Grid(final int gridSize) {
         //Get the screen size in GridSlices (height multiplied by 1.1 to ensure that the screen is still covered when zoomed out)
-        int screenWidth = (int) (Screen.getPrimary().getBounds().getWidth());
-        int screenHeight = (int) (Screen.getPrimary().getBounds().getHeight() * 1.1);
+        int screenWidth = (int) (Screen.getPrimary().getBounds().getWidth() / ZoomHelper.minZoomFactor);
+        int screenHeight = (int) (Screen.getPrimary().getBounds().getHeight() / ZoomHelper.minZoomFactor);
 
         setTranslateX(gridSize * 0.5);
         setTranslateY(gridSize * 0.5);
 
         // Add vertical lines to cover the screen, even when zoomed out
-        int i = (int) (-screenWidth / 1.3);
+        int i = -screenWidth;
         while (i * gridSize - gridSize < screenWidth) {
-            Line line = new Line(i * gridSize, -screenHeight / 1.3, i * gridSize, screenHeight);
+            Line line = new Line(i * gridSize, -screenHeight, i * gridSize, screenHeight);
             line.getStyleClass().add("grid-line");
             getChildren().add(line);
             i++;
         }
 
         // Add horizontal lines to cover the screen, even when zoomed out
-        i = (int) (-screenHeight / 1.3);
+        i = -screenHeight;
         while (i * gridSize - gridSize < screenHeight) {
-            Line line = new Line(-screenWidth / 1.3, i * gridSize, screenWidth, i * gridSize);
+            Line line = new Line(-screenWidth, i * gridSize, screenWidth, i * gridSize);
             line.getStyleClass().add("grid-line");
             getChildren().add(line);
             i++;
