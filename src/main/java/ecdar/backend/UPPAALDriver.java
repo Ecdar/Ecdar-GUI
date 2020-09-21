@@ -23,13 +23,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class UPPAALDriver {
-
-    public static final int MAX_ENGINES = 10;
-    public static final Object engineLock = false; // Used to lock concurrent engine reference access
-    private static final String SERVER_NAME = "server";
-    private static final String VERIFYTGA_NAME = "verifytga";
-
+public class UPPAALDriver implements IUPPAALDriver {
     private static final String ECDAR_DEFAULT_OPTIONS = "order 0\n" +
             "order2 1\n" +
             "tigaOrder 0\n" +
@@ -41,10 +35,16 @@ public class UPPAALDriver {
             "reuse 0\n" +
             "tigaWarnIO 0";
 
-    private static final String TEMP_DIRECTORY = "temporary";
-    public static final String SERVERS_DIRECOTRY = "servers";
+    private final String TEMP_DIRECTORY = "temporary";
 
-    private static EcdarDocument ecdarDocument;
+    private EcdarDocument ecdarDocument;
+    private final File serverFile;
+    private final File verifytgaFile;
+
+    public UPPAALDriver(File serverFile, File verifytgaFile) {
+        this.serverFile = serverFile;
+        this.verifytgaFile = verifytgaFile;
+    }
 
     /**
      * Stores a project as a backend XML file in the "temporary" directory.
@@ -55,7 +55,7 @@ public class UPPAALDriver {
      * @throws IOException if an error occurs during storing of the file
      * @throws URISyntaxException if an error occurs when getting the URL of the root directory
      */
-    public static String storeBackendModel(final Project project, final String fileName) throws BackendException, IOException, URISyntaxException {
+    public String storeBackendModel(final Project project, final String fileName) throws BackendException, IOException, URISyntaxException {
         return storeBackendModel(project, TEMP_DIRECTORY, fileName);
     }
 
@@ -69,7 +69,7 @@ public class UPPAALDriver {
      * @throws IOException if an error occurs during storing of the file
      * @throws URISyntaxException if an error occurs when getting the URL of the root directory
      */
-    public static String storeBackendModel(final Project project, final String relativeDirectoryPath, final String fileName) throws BackendException, IOException, URISyntaxException {
+    public String storeBackendModel(final Project project, final String relativeDirectoryPath, final String fileName) throws BackendException, IOException, URISyntaxException {
         final String directoryPath = Ecdar.getRootDirectory() + File.separator + relativeDirectoryPath;
 
         FileUtils.forceMkdir(new File(directoryPath));
@@ -88,7 +88,7 @@ public class UPPAALDriver {
      * @throws URISyntaxException if an error occurs when getting the URL of the root directory
      * @throws IOException if an error occurs during storing of the file
      */
-    public static String storeQuery(final String query, final String fileName) throws URISyntaxException, IOException {
+    public String storeQuery(final String query, final String fileName) throws URISyntaxException, IOException {
         FileUtils.forceMkdir(new File(getTempDirectoryAbsolutePath()));
 
         final String path = getTempDirectoryAbsolutePath() + File.separator + fileName + ".q";
@@ -106,20 +106,20 @@ public class UPPAALDriver {
      * @return the path
      * @throws URISyntaxException if an error occurs when getting the URL of the root directory
      */
-    public static String getTempDirectoryAbsolutePath() throws URISyntaxException {
+    public String getTempDirectoryAbsolutePath() throws URISyntaxException {
         return Ecdar.getRootDirectory() + File.separator + TEMP_DIRECTORY;
     }
 
-    public static void buildEcdarDocument() throws BackendException {
+    public void buildEcdarDocument() throws BackendException {
         ecdarDocument = new EcdarDocument();
     }
 
-    public static Thread runQuery(final String query,
+    public Thread runQuery(final String query,
                                   final Consumer<Boolean> success,
                                   final Consumer<BackendException> failure) {
         return runQuery(query, success, failure, -1);
     }
-    public static Thread runQuery(final String query,
+    public Thread runQuery(final String query,
                                   final Consumer<Boolean> success,
                                   final Consumer<BackendException> failure,
                                   final long timeout) {
@@ -141,14 +141,14 @@ public class UPPAALDriver {
         return runQuery(query, success, failure, engineConsumer);
     }
 
-    public static Thread runQuery(final String query,
+    public Thread runQuery(final String query,
                                   final Consumer<Boolean> success,
                                   final Consumer<BackendException> failure,
                                   final Consumer<Engine> engineConsumer) {
         return runQuery(query, success, failure, engineConsumer, new QueryListener());
     }
 
-    public static Thread runQuery(final String query,
+    public Thread runQuery(final String query,
                                    final Consumer<Boolean> success,
                                    final Consumer<BackendException> failure,
                                    final Consumer<Engine> engineConsumer,
@@ -215,71 +215,16 @@ public class UPPAALDriver {
                         releaseOSDependentEngine(engine);
                         engine = null;
                     }
-
                 }
             }
         };
     }
 
-    private static final ArrayList<Engine> createdEngines = new ArrayList<>();
-    private static final ArrayList<Engine> availableEngines = new ArrayList<>();
+    private final ArrayList<Engine> createdEngines = new ArrayList<>();
+    private final ArrayList<Engine> availableEngines = new ArrayList<>();
 
-    /**
-     * Finds the right server files, based on the system os
-     * @return The server file
-     */
-    private static File findServerFile() {
-        final String os = System.getProperty("os.name");
-        final File file;
-
-        if (os.contains("Mac")) {
-            file = new File(Ecdar.getServerPath() + File.separator + "bin-MacOS" + File.separator + SERVER_NAME);
-        } else if (os.contains("Linux")) {
-            file = new File(Ecdar.getServerPath() + File.separator + "bin-Linux" + File.separator + SERVER_NAME);
-        } else {
-            file = new File(Ecdar.getServerPath() + File.separator + "bin-Win32" + File.separator + SERVER_NAME + ".exe");
-        }
-
-        return file;
-    }
-
-    /**
-     * Finds the right verifytga file path, based on the system os.
-     * The path is relative to the Ecdar program path.
-     * @return the verifytga relative path
-     */
-    public static String findVerifytgaRelativePath() {
-        final String os = System.getProperty("os.name");
-
-        if (os.contains("Mac")) {
-            return SERVERS_DIRECOTRY + File.separator + "bin-MacOS" + File.separator + VERIFYTGA_NAME;
-        } else if (os.contains("Linux")) {
-            return SERVERS_DIRECOTRY + File.separator + "bin-Linux" + File.separator + VERIFYTGA_NAME;
-        } else {
-            return SERVERS_DIRECOTRY + File.separator + "bin-Win32" + File.separator + VERIFYTGA_NAME + ".exe";
-        }
-    }
-
-    /**
-     * Finds the right verifytga file path, based on the system os.
-     * The path is absolute.
-     * @return the verifytga relative path
-     */
-    public static String findVerifytgaAbsolutePath() {
-        final String os = System.getProperty("os.name");
-
-        if (os.contains("Mac")) {
-            return Ecdar.getServerPath() + File.separator + "bin-MacOS" + File.separator + VERIFYTGA_NAME;
-        } else if (os.contains("Linux")) {
-            return Ecdar.getServerPath() + File.separator + "bin-Linux" + File.separator + VERIFYTGA_NAME;
-        } else {
-            return Ecdar.getServerPath() + File.separator + "bin-Win32" + File.separator + VERIFYTGA_NAME + ".exe";
-        }
-    }
-
-    private static Engine getAvailableEngineOrCreateNew() {
+    private Engine getAvailableEngineOrCreateNew() {
         if (availableEngines.size() == 0) {
-            final File serverFile = findServerFile();
             serverFile.setExecutable(true); // Allows us to use the server file
 
             // Check if the user copied the file correctly
@@ -299,7 +244,7 @@ public class UPPAALDriver {
         }
     }
 
-    private static Engine getOSDependentEngine() {
+    private Engine getOSDependentEngine() {
         synchronized (createdEngines) {
             if (!(createdEngines.size() >= MAX_ENGINES && availableEngines.size() == 0)) {
                 final Engine engine = getAvailableEngineOrCreateNew();
@@ -313,13 +258,13 @@ public class UPPAALDriver {
         return null;
     }
 
-    private static void releaseOSDependentEngine(final Engine engine) {
+    private void releaseOSDependentEngine(final Engine engine) {
         synchronized (createdEngines) {
             availableEngines.add(engine);
         }
     }
 
-    public static void stopEngines() {
+    public void stopEngines() {
         synchronized (createdEngines) {
             while (createdEngines.size() != 0) {
                 final Engine engine = createdEngines.get(0);
@@ -329,7 +274,7 @@ public class UPPAALDriver {
         }
     }
 
-    private static void storeUppaalFile(final Document uppaalDocument, final String fileName) throws IOException {
+    private void storeUppaalFile(final Document uppaalDocument, final String fileName) throws IOException {
         uppaalDocument.save(fileName);
     }
 
@@ -339,7 +284,7 @@ public class UPPAALDriver {
      * @param component The component where the location belong to / are placed
      * @return A reachability query string
      */
-    public static String getLocationReachableQuery(final Location location, final Component component) {
+    public String getLocationReachableQuery(final Location location, final Component component) {
         return "E<> " + component.getName() + "." + location.getId();
     }
 
@@ -348,7 +293,7 @@ public class UPPAALDriver {
      * @param component The component which should be checked for deadlocks
      * @return A deadlock query string
      */
-    public static String getExistDeadlockQuery(final Component component) {
+    public String getExistDeadlockQuery(final Component component) {
         // Get the names of the locations of this component. Used to produce the deadlock query
         final String templateName = component.getName();
         final List<String> locationNames = new ArrayList<>();
@@ -358,6 +303,10 @@ public class UPPAALDriver {
         }
 
         return "E<> (" + String.join(" || ", locationNames) + ") && deadlock";
+    }
+
+    public String getVerifytgaAbsolutePath() {
+        return verifytgaFile.getAbsolutePath();
     }
 
     public enum TraceType {

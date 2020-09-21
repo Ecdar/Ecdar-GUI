@@ -7,6 +7,7 @@ import ecdar.abstractions.Project;
 import ecdar.abstractions.SimpleComponentsSystemDeclarations;
 import ecdar.backend.BackendException;
 import ecdar.backend.UPPAALDriver;
+import ecdar.backend.UPPAALDriverManager;
 import ecdar.mutation.models.MutationTestCase;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.mutation.operators.MutationOperator;
@@ -142,7 +143,7 @@ class ExportHandler {
         mutant.updateIOList(); // Update io in order to get the right system declarations for the mutant
         project.setSystemDeclarations(new SimpleComponentsSystemDeclarations(mutant));
 
-        UPPAALDriver.storeBackendModel(project, "mutants" + File.separator + "xml", testCase.getId());
+        UPPAALDriverManager.getInstance().storeBackendModel(project, "mutants" + File.separator + "xml", testCase.getId());
     }
 
     /**

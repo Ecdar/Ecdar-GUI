@@ -14,14 +14,17 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import javafx.stage.Screen;
 import javafx.util.Duration;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import javax.swing.*;
+import java.util.Stack;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -137,8 +140,36 @@ public class DropDownMenu extends JFXPopup {
      * @param initOffsetY Offset on the Y-axis of the view
      */
     public void show(final JFXPopup.PopupVPosition vAlign, final JFXPopup.PopupHPosition hAlign, final double initOffsetX, final double initOffsetY) {
+        //Needed to ensure correct placement of submenu
+        super.show(this.source, vAlign, hAlign, initOffsetX, initOffsetY);
+        super.hide();
+
+        //Check if the dropdown will appear outside the screen and change the offset accordingly
+        double offsetX = initOffsetX;
+        double offsetY = initOffsetY;
+        double distEdgeX = Screen.getPrimary().getBounds().getWidth() - (this.getAnchorX() + offsetX);
+        double distEdgeY = Screen.getPrimary().getBounds().getHeight() - (this.getAnchorY() + offsetY);
+
+        //The additional 20 is added for margin
+        if(distEdgeX < dropDownMenuWidth.get() + 20){
+            offsetX -= (dropDownMenuWidth.get() + 20) - distEdgeX;
+        }
+
+        if(distEdgeY < list.getHeight() + 20){
+            offsetY -= (list.getHeight() + 20) - distEdgeY;
+        }
+
+        //Need final temporary variables for lambda
+        final double finalOffsetX = offsetX;
+        final double finalOffsetY = offsetY;
+
+        //Set the x and y of the dropdown to ensure that locations etc. are added correctly
+        x = this.source.getLayoutX() + finalOffsetX;
+        y = this.source.getLayoutY() + finalOffsetY;
+
         this.isHidden.set(false);
-        super.show(source, vAlign, hAlign, initOffsetX, initOffsetY);
+
+        Platform.runLater( () -> super.show(this.source, vAlign, hAlign, finalOffsetX, finalOffsetY));
     }
 
     /**
@@ -311,7 +342,7 @@ public class DropDownMenu extends JFXPopup {
     public void hide(){
         if (this.isShowing()) {
             this.isHidden.set(true);
-            super.hide();
+            Platform.runLater(super::hide);
         }
     }
 
@@ -342,7 +373,11 @@ public class DropDownMenu extends JFXPopup {
 
         final Runnable showSubMenu = () -> {
             if(subMenu.isHidden.get()) {
-                subMenu.show(PopupVPosition.TOP, PopupHPosition.LEFT, dropDownMenuWidth.get() + offsetX, offsetY);
+                if(Screen.getPrimary().getBounds().getWidth() - (super.getAnchorX() + dropDownMenuWidth.get()) < dropDownMenuWidth.get()){
+                    subMenu.show(PopupVPosition.TOP, PopupHPosition.LEFT, -(dropDownMenuWidth.get() + offsetX), offsetY);
+                } else {
+                    subMenu.show(PopupVPosition.TOP, PopupHPosition.LEFT, dropDownMenuWidth.get() + offsetX, offsetY);
+                }
             }
         };
 

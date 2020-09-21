@@ -4,7 +4,8 @@ import ecdar.Debug;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
 import ecdar.backend.BackendException;
-import ecdar.backend.UPPAALDriver;
+import ecdar.backend.DummyUPPAALDriver;
+import ecdar.backend.UPPAALDriverManager;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.presentations.*;
@@ -114,6 +115,8 @@ public class EcdarController implements Initializable {
     public JFXRippler zoomOut;
     public JFXRippler zoomToFit;
     public JFXRippler resetZoom;
+    public MenuItem menuBarOptionsServerLocation;
+    public MenuItem menuBarOptionsVerifytgaLocation;
 
     private double expandHeight = 300;
 
@@ -213,7 +216,8 @@ public class EcdarController implements Initializable {
         initializeMessages();
         initializeMenuBar();
         initializeReachabilityAnalysisThread();
-
+        initializeUppalFileNotFoundWarning();
+        
         ZoomHelper.setCanvas(canvas);
     }
 
@@ -361,7 +365,7 @@ public class EcdarController implements Initializable {
 
                 try {
                     // Make sure that the model is generated
-                    UPPAALDriver.buildEcdarDocument();
+                    UPPAALDriverManager.getInstance().buildEcdarDocument();
                 } catch (final BackendException e) {
                     // Something went wrong with creating the document
                     Ecdar.showToast("Could not build XML model. I got the error: " + e.getMessage());
@@ -383,8 +387,8 @@ public class EcdarController implements Initializable {
                         component.getLocations().forEach(location -> location.setReachability(Location.Reachability.EXCLUDED));
                     } else {
                         component.getLocations().forEach(location -> {
-                            final String locationReachableQuery = UPPAALDriver.getLocationReachableQuery(location, component);
-                            final Thread verifyThread = UPPAALDriver.runQuery(
+                            final String locationReachableQuery = UPPAALDriverManager.getInstance().getLocationReachableQuery(location, component);
+                            final Thread verifyThread = UPPAALDriverManager.getInstance().runQuery(
                                     locationReachableQuery,
                                     (result -> {
                                         if (result) {
@@ -440,6 +444,19 @@ public class EcdarController implements Initializable {
                         }
                     });
                 }
+            }
+        });
+    }
+
+    private void initializeUppalFileNotFoundWarning() {
+        final CodeAnalysis.Message uppalNotFoundMessage = new CodeAnalysis.Message("Please set the UPPAAL server location through the 'Preferences' tab.\n" +
+                "Make sure to have UPPAAL installed. This can be done at uppaal.org", CodeAnalysis.MessageType.WARNING);
+
+        UPPAALDriverManager.getServerFilePathProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.equals("dummy")) {
+                CodeAnalysis.addMessage(null, uppalNotFoundMessage);
+            } else {
+                CodeAnalysis.removeMessage(null, uppalNotFoundMessage);
             }
         });
     }
@@ -586,6 +603,46 @@ public class EcdarController implements Initializable {
                 } catch (final IOException e) {
                     e.printStackTrace();
                 }
+            }
+        });
+
+        menuBarOptionsServerLocation.setOnAction(event -> {
+            // Dialog title
+            final FileChooser filePicker = new FileChooser();
+            filePicker.setTitle("Choose UPPAAL server file");
+
+            // The initial location for the file choosing dialog
+            final File uppaalFile = new File(UPPAALDriverManager.getServerFilePath()).getAbsoluteFile().getParentFile();
+
+            // If the file does not exist, use a default location
+            if(uppaalFile.exists()) {
+                filePicker.setInitialDirectory(uppaalFile);
+            }
+
+            // Prompt the user to select the file (will halt the UI thread)
+            final File file = filePicker.showOpenDialog(root.getScene().getWindow());
+            if(file != null) {
+                UPPAALDriverManager.setServerFilePath(file.getAbsolutePath());
+            }
+        });
+
+        menuBarOptionsVerifytgaLocation.setOnAction(event -> {
+            // Dialog title
+            final FileChooser filePicker = new FileChooser();
+            filePicker.setTitle("Choose VerifyTGA file");
+
+            // The initial location for the file choosing dialog
+            final File verifytgaFile = new File(UPPAALDriverManager.getVerifytgaFilePath()).getAbsoluteFile().getParentFile();
+
+            // If the file does not exist, use a default location
+            if(verifytgaFile.exists()) {
+                filePicker.setInitialDirectory(verifytgaFile);
+            }
+
+            // Prompt the user to select the file (will halt the UI thread)
+            final File file = filePicker.showOpenDialog(root.getScene().getWindow());
+            if(file != null) {
+                UPPAALDriverManager.setVerifytgaFilePath(file.getAbsolutePath());
             }
         });
     }

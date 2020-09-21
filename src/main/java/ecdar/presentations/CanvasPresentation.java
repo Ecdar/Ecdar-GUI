@@ -99,7 +99,6 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
         grid.setOpacity(0);
     }
 
-
     /**
      * Updates if views should show an inset behind the error view.
      * @param shouldShow true iff views should show an inset

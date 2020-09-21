@@ -6,6 +6,7 @@
          type="Group"
          fx:controller="ecdar.controllers.EdgeController"
          onMousePressed="#edgePressed"
+         onDragDetected="#edgeDragged"
          onMouseEntered="#edgeEntered"
          onMouseExited="#edgeExited"
          mouseTransparent="true">

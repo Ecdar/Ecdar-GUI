@@ -248,6 +248,16 @@
                             <FontIcon iconLiteral="gmi-check" iconSize="24" fill="black"/>
                         </graphic>
                     </MenuItem>
+                    <MenuItem fx:id="menuBarOptionsServerLocation" text="Change Server Location">
+                        <graphic>
+                            <FontIcon iconLiteral="gmi-insert-drive-file" iconSize="24" fill="black"/>
+                        </graphic>
+                    </MenuItem>
+                    <MenuItem fx:id="menuBarOptionsVerifytgaLocation" text="Change VerifyTGA Location">
+                        <graphic>
+                            <FontIcon iconLiteral="gmi-insert-drive-file" iconSize="24" fill="black"/>
+                        </graphic>
+                    </MenuItem>
                 </Menu>
 
                 <Menu text="Help">

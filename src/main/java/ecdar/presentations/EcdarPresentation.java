@@ -1,5 +1,6 @@
 package ecdar.presentations;
 
+import com.jfoenix.controls.JFXSnackbarLayout;
 import ecdar.Ecdar;
 import ecdar.abstractions.Query;
 import ecdar.code_analysis.CodeAnalysis;
@@ -87,12 +88,9 @@ public class EcdarPresentation extends StackPane {
     }
 
     private void initializeSnackbar() {
-        controller.snackbar = new JFXSnackbar(this);
+        controller.snackbar = new JFXSnackbar(controller.root);
         controller.snackbar.setPrefWidth(568);
-
-        //TODO: Disabled code it throws null-pointer excep on startup.
-//        final StackPane parentFix = (StackPane) controller.root.lookup(".jfx-snackbar-toast").getParent();
-//        parentFix.setPadding(new Insets(14, 24, 14, 24));
+        controller.snackbar.autosize();
     }
 
     private void initializeMessageContainer() {
@@ -556,7 +554,7 @@ public class EcdarPresentation extends StackPane {
     }
 
     public void showSnackbarMessage(final String message) {
-        Text content = new Text(message);
+        JFXSnackbarLayout content = new JFXSnackbarLayout(message);
         controller.snackbar.enqueue(new JFXSnackbar.SnackbarEvent(content, new Duration(3000)));
     }
 
