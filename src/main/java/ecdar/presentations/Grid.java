@@ -28,13 +28,15 @@ public class Grid extends Parent {
         }
 
         // Add horizontal lines to cover the screen, even when zoomed out
-        i = -screenHeight;
+        i = (-screenHeight);
         while (i * gridSize - gridSize < screenHeight) {
             Line line = new Line(-screenWidth, i * gridSize, screenWidth, i * gridSize);
             line.getStyleClass().add("grid-line");
             getChildren().add(line);
             i++;
         }
+
+        System.out.println(getChildren().size());
     }
 
     /**
