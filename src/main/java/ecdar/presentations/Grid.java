@@ -19,18 +19,18 @@ public class Grid extends Parent {
         setTranslateY(gridSize * 0.5);
 
         // Add vertical lines to cover the screen, even when zoomed out
-        int i = -screenWidth;
-        while (i * gridSize - gridSize < screenWidth) {
-            Line line = new Line(i * gridSize, -screenHeight, i * gridSize, screenHeight);
+        int i = 0;
+        while (i * gridSize - gridSize < screenWidth * 0.5) {
+            Line line = new Line(i * gridSize, -screenHeight * 0.5, i * gridSize, screenHeight * 0.6);
             line.getStyleClass().add("grid-line");
             getChildren().add(line);
             i++;
         }
 
         // Add horizontal lines to cover the screen, even when zoomed out
-        i = -screenHeight;
-        while (i * gridSize - gridSize < screenHeight) {
-            Line line = new Line(-screenWidth, i * gridSize, screenWidth, i * gridSize);
+        i = 0;
+        while (i * gridSize - gridSize < screenHeight * 0.5) {
+            Line line = new Line(-screenWidth * 0.5, i * gridSize, screenWidth * 0.5, i * gridSize);
             line.getStyleClass().add("grid-line");
             getChildren().add(line);
             i++;
