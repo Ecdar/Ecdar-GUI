@@ -1,40 +1,65 @@
 package ecdar.presentations;
 
 import ecdar.utility.helpers.ZoomHelper;
+import javafx.application.Platform;
+import javafx.beans.binding.DoubleBinding;
 import javafx.scene.Parent;
 import javafx.scene.shape.Line;
-import javafx.stage.Screen;
+
+import javax.sound.midi.SysexMessage;
+import java.util.ArrayList;
 
 public class Grid extends Parent {
     public static final int GRID_SIZE = 10;
     static final int CORNER_SIZE = 4 * Grid.GRID_SIZE;
     public static final double TOOL_BAR_HEIGHT = CORNER_SIZE * 0.5;
+    private final ArrayList<Line> horizontalLines = new ArrayList<>();
+    private final ArrayList<Line> verticalLines = new ArrayList<>();
 
     public Grid(final int gridSize) {
-        //Get the screen size in GridSlices (height multiplied by 1.1 to ensure that the screen is still covered when zoomed out)
-        int screenWidth = (int) (Screen.getPrimary().getBounds().getWidth() / ZoomHelper.minZoomFactor);
-        int screenHeight = (int) (Screen.getPrimary().getBounds().getHeight() / ZoomHelper.minZoomFactor);
+        // When the scene changes (goes from null to something)
+        parentProperty().addListener((observable, oldParent, newParent) -> {
+            newParent.scaleXProperty().addListener((observableValue, oldScale, newScale) -> {
+                double newWidth = getParent().getLayoutBounds().getWidth() / newScale.doubleValue();
+                double newHeight = getParent().getLayoutBounds().getHeight() / newScale.doubleValue();
 
-        setTranslateX(gridSize * 0.5);
-        setTranslateY(gridSize * 0.5);
+                // Remove old lines
+                while (!verticalLines.isEmpty()) {
+                    final Line removeLine = verticalLines.get(0);
+                    getChildren().remove(removeLine);
+                    verticalLines.remove(removeLine);
+                }
 
-        // Add vertical lines to cover the screen, even when zoomed out
-        int i = 0;
-        while (i * gridSize - gridSize < screenWidth * 0.5) {
-            Line line = new Line(i * gridSize, -screenHeight * 0.5, i * gridSize, screenHeight * 0.6);
-            line.getStyleClass().add("grid-line");
-            getChildren().add(line);
-            i++;
-        }
+                // Add new lines (to cover the screen, with 1 line in margin in both ends)
+                int i = -1;
+                while (i * gridSize - gridSize < newWidth) {
+                    final Line line = new Line(i * gridSize, -1, i * gridSize, newHeight);
+                    line.getStyleClass().add("grid-line");
+                    verticalLines.add(line);
+                    i++;
+                }
+                verticalLines.forEach(line -> getChildren().add(line));
 
-        // Add horizontal lines to cover the screen, even when zoomed out
-        i = 0;
-        while (i * gridSize - gridSize < screenHeight * 0.5) {
-            Line line = new Line(-screenWidth * 0.5, i * gridSize, screenWidth * 0.5, i * gridSize);
-            line.getStyleClass().add("grid-line");
-            getChildren().add(line);
-            i++;
-        }
+                // Remove old lines
+                while (!horizontalLines.isEmpty()) {
+                    final Line removeLine = horizontalLines.get(0);
+                    getChildren().remove(removeLine);
+                    horizontalLines.remove(removeLine);
+                }
+
+                // Add new lines (to cover the screen, with 1 line in margin in both ends)
+                i = -1;
+                while (i * gridSize - gridSize < newHeight) {
+                    final Line line = new Line(-1, i * gridSize, newWidth, i * gridSize);
+                    line.getStyleClass().add("grid-line");
+                    horizontalLines.add(line);
+                    i++;
+                }
+                horizontalLines.forEach(line -> getChildren().add(line));
+                layoutXProperty().bind(getParent().layoutXProperty());
+                layoutYProperty().bind(getParent().layoutYProperty());
+            });
+        });
     }
 
     /**
