@@ -1,13 +1,8 @@
 package ecdar.presentations;
 
-import ecdar.utility.helpers.ZoomHelper;
-import javafx.application.Platform;
-import javafx.beans.binding.DoubleBinding;
 import javafx.scene.Parent;
-import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Line;
 
-import javax.sound.midi.SysexMessage;
 import java.util.ArrayList;
 
 public class Grid extends Parent {
@@ -18,9 +13,6 @@ public class Grid extends Parent {
     private final ArrayList<Line> verticalLines = new ArrayList<>();
 
     public Grid() {
-        setTranslateX(localToParent(getBoundsInParent()).getMinX() + GRID_SIZE * 0.5);
-        setTranslateY(localToParent(getBoundsInParent()).getMinY() + GRID_SIZE * 0.5);
-
         // When the scene changes (goes from null to something)
         sceneProperty().addListener((observable, oldScene, newScene) -> {
             // When the width of this scene is being updated
@@ -35,8 +27,12 @@ public class Grid extends Parent {
                 // Add new lines (to cover the screen, with 1 line in margin in both ends)
                 int i = -1;
                 while (i * GRID_SIZE - GRID_SIZE < newWidth.doubleValue()) {
-                    final Line line = new Line(i * GRID_SIZE, -1, i * GRID_SIZE, newScene.getHeight());
+                    final Line line = new Line(i * GRID_SIZE, 200, i * GRID_SIZE, 300);
                     line.getStyleClass().add("grid-line");
+
+                    line.startYProperty().bind(getParent().layoutYProperty().subtract(getParent().translateYProperty()).subtract(50)); // the 50 is a fix
+                    line.endYProperty().bind(getParent().layoutYProperty().subtract(getParent().translateYProperty()).add(getScene().heightProperty()));
+
                     verticalLines.add(line);
                     i++;
                 }
@@ -55,8 +51,12 @@ public class Grid extends Parent {
                 // Add new lines (to cover the screen, with 1 line in margin in both ends)
                 int i = -1;
                 while (i * GRID_SIZE - GRID_SIZE < newHeight.doubleValue()) {
-                    final Line line = new Line(-1, i * GRID_SIZE, newScene.getWidth(), i * GRID_SIZE);
+                    final Line line = new Line(200, i * GRID_SIZE, 300, i * GRID_SIZE);
                     line.getStyleClass().add("grid-line");
+
+                    line.startXProperty().bind(getParent().layoutXProperty().subtract(getParent().translateXProperty()));
+                    line.endXProperty().bind(getParent().layoutXProperty().subtract(getParent().translateXProperty()).add(getScene().widthProperty()));
+
                     horizontalLines.add(line);
                     i++;
                 }
