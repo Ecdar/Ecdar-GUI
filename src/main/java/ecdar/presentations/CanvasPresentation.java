@@ -30,7 +30,7 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
     // But that does not affect the gridUiOn field.
     private final BooleanProperty gridUiOn = new SimpleBooleanProperty(false);
 
-    private final Grid grid = new Grid(Grid.GRID_SIZE);
+    private final Grid grid = new Grid();
     private final CanvasController controller;
 
     public CanvasPresentation() {

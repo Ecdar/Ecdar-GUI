@@ -73,11 +73,7 @@ public class ZoomHelper {
         double xOffset = newScale * canvasPresentation.getWidth() * 1.0f / 2 - newScale * canvasPresentation.getController().getActiveComponentPresentation().getWidth() * 1.0f / 2;
         double yOffset = newScale * actualHeight * 1.0f / 3 - newScale * canvasPresentation.getController().getActiveComponentPresentation().getHeight() * 1.0f / 3 + Grid.TOOL_BAR_HEIGHT / (1.0f / 3); //The offset places the component a bit too high, so 'canvasPresentation.getHeight() / 4' is used to lower it a but
 
-        canvasPresentation.setTranslateX(xOffset - (xOffset % Grid.GRID_SIZE) + Grid.GRID_SIZE * 0.5);
-        canvasPresentation.setTranslateY(yOffset - (yOffset % Grid.GRID_SIZE) + Grid.GRID_SIZE * 0.5);
-
-        //Make sure the grid stays on screen
-        grid.setTranslateX(Grid.GRID_SIZE * 0.5);
-        grid.setTranslateY(Grid.GRID_SIZE * 0.5);
+        canvasPresentation.setTranslateX(xOffset - (xOffset % Grid.GRID_SIZE));
+        canvasPresentation.setTranslateY(yOffset - (yOffset % Grid.GRID_SIZE));
     }
 }
