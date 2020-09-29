@@ -14,10 +14,6 @@ public class Grid extends Parent {
     private final ArrayList<Line> verticalLines = new ArrayList<>();
 
     public Grid() {
-        //The screen size in GridSlices multiplied by 3 to ensure that the screen is still covered when zoomed out
-        int screenWidthInGridSlices = (int) (Screen.getPrimary().getBounds().getWidth() - (Screen.getPrimary().getBounds().getWidth() % GRID_SIZE));
-        int screenHeightInGridSlices = (int) (Screen.getPrimary().getBounds().getHeight() - (Screen.getPrimary().getBounds().getHeight() % GRID_SIZE));
-
         setTranslateX(GRID_SIZE * 0.5);
         setTranslateY(GRID_SIZE * 0.5);
 
@@ -32,13 +28,18 @@ public class Grid extends Parent {
                     verticalLines.remove(removeLine);
                 }
 
+                //The screen size in GridSlices multiplied by 3 to ensure that the screen is still covered when zoomed out
+                int screenWidth = (int) (Screen.getPrimary().getBounds().getWidth() - 0.5 * (Screen.getPrimary().getBounds().getWidth() % GRID_SIZE));
+                int screenHeight = (int) (Screen.getPrimary().getBounds().getHeight() - 0.5 * (Screen.getPrimary().getBounds().getHeight() % GRID_SIZE));
+
                 // Add new lines to cover the screen, even when zoomed out
-                int i = -screenWidthInGridSlices / 2;
-                while (i * GRID_SIZE - GRID_SIZE < screenWidthInGridSlices / 2) {
-                    Line line = new Line(i * GRID_SIZE, -screenHeightInGridSlices * 0.5, i * GRID_SIZE, screenHeightInGridSlices * 0.5);
+                int i = 0;
+                while (i < screenWidth / GRID_SIZE) {
+                    Line line = new Line(i * GRID_SIZE, 0, i * GRID_SIZE, screenHeight);
                     line.getStyleClass().add("grid-line");
-                    line.startYProperty().bind(newScene.heightProperty().divide(getParent().scaleYProperty()).multiply(-2));
-                    line.endYProperty().bind(newScene.heightProperty().divide(getParent().scaleYProperty()));
+
+                    line.startYProperty().bind(newScene.widthProperty().divide(getParent().scaleXProperty()).multiply(-1));
+                    line.endYProperty().bind(newScene.widthProperty().divide(getParent().scaleXProperty()));
 
                     verticalLines.add(line);
                     i++;
@@ -55,12 +56,17 @@ public class Grid extends Parent {
                     horizontalLines.remove(removeLine);
                 }
 
+                //The screen size in GridSlices multiplied by 3 to ensure that the screen is still covered when zoomed out
+                int screenWidth = (int) (Screen.getPrimary().getBounds().getWidth() - 0.5 * (Screen.getPrimary().getBounds().getWidth() % GRID_SIZE));
+                int screenHeight = (int) (Screen.getPrimary().getBounds().getHeight() - 0.5 * (Screen.getPrimary().getBounds().getHeight() % GRID_SIZE));
+
                 // Add new lines to cover the screen, even when zoomed out
-                int i = -screenHeightInGridSlices / 2;
-                while (i * GRID_SIZE - GRID_SIZE < screenHeightInGridSlices / 2) {
-                    Line line = new Line(-screenWidthInGridSlices * 0.5, i * GRID_SIZE, screenWidthInGridSlices * 0.5, i * GRID_SIZE);
+                int i = 0;
+                while (i < screenHeight / GRID_SIZE) {
+                    Line line = new Line(0, i * GRID_SIZE, screenWidth, i * GRID_SIZE);
                     line.getStyleClass().add("grid-line");
-                    line.startXProperty().bind(newScene.widthProperty().divide(getParent().scaleXProperty()).multiply(-2));
+
+                    line.startXProperty().bind(newScene.widthProperty().divide(getParent().scaleXProperty()).multiply(-1));
                     line.endXProperty().bind(newScene.widthProperty().divide(getParent().scaleXProperty()));
 
                     horizontalLines.add(line);
