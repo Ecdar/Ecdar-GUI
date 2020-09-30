@@ -29,8 +29,8 @@ public class Grid extends Parent {
                 }
 
                 //The screen size in GridSlices multiplied by 3 to ensure that the screen is still covered when zoomed out
-                int screenWidth = (int) (Screen.getPrimary().getBounds().getWidth() - 0.5 * (Screen.getPrimary().getBounds().getWidth() % GRID_SIZE));
-                int screenHeight = (int) (Screen.getPrimary().getBounds().getHeight() - 0.5 * (Screen.getPrimary().getBounds().getHeight() % GRID_SIZE));
+                int screenWidth = (int) ((Screen.getPrimary().getBounds().getWidth() - (Screen.getPrimary().getBounds().getWidth() % GRID_SIZE)) * 2);
+                int screenHeight = (int) ((Screen.getPrimary().getBounds().getHeight() - (Screen.getPrimary().getBounds().getHeight() % GRID_SIZE)) * 2);
 
                 // Add new lines to cover the screen, even when zoomed out
                 int i = 0;
@@ -38,8 +38,10 @@ public class Grid extends Parent {
                     Line line = new Line(i * GRID_SIZE, 0, i * GRID_SIZE, screenHeight);
                     line.getStyleClass().add("grid-line");
 
-                    line.startYProperty().bind(newScene.widthProperty().divide(getParent().scaleXProperty()).multiply(-1));
-                    line.endYProperty().bind(newScene.widthProperty().divide(getParent().scaleXProperty()));
+                    line.startXProperty().bind(newScene.widthProperty().add(i * GRID_SIZE).subtract(newScene.widthProperty().multiply(1.75)));
+                    line.endXProperty().bind(newScene.widthProperty().add(i * GRID_SIZE).subtract(newScene.widthProperty().multiply(1.75)));
+                    line.startYProperty().bind(newScene.heightProperty().divide(getParent().scaleYProperty()).multiply(-1).add(newScene.heightProperty().divide(2)));
+                    line.endYProperty().bind(newScene.heightProperty().divide(getParent().scaleYProperty()).add(newScene.heightProperty().divide(2)));
 
                     verticalLines.add(line);
                     i++;
@@ -57,8 +59,8 @@ public class Grid extends Parent {
                 }
 
                 //The screen size in GridSlices multiplied by 3 to ensure that the screen is still covered when zoomed out
-                int screenWidth = (int) (Screen.getPrimary().getBounds().getWidth() - 0.5 * (Screen.getPrimary().getBounds().getWidth() % GRID_SIZE));
-                int screenHeight = (int) (Screen.getPrimary().getBounds().getHeight() - 0.5 * (Screen.getPrimary().getBounds().getHeight() % GRID_SIZE));
+                int screenWidth = (int) ((Screen.getPrimary().getBounds().getWidth() - (Screen.getPrimary().getBounds().getWidth() % GRID_SIZE)) * 2);
+                int screenHeight = (int) ((Screen.getPrimary().getBounds().getHeight() - (Screen.getPrimary().getBounds().getHeight() % GRID_SIZE)) * 2);
 
                 // Add new lines to cover the screen, even when zoomed out
                 int i = 0;
@@ -66,8 +68,10 @@ public class Grid extends Parent {
                     Line line = new Line(0, i * GRID_SIZE, screenWidth, i * GRID_SIZE);
                     line.getStyleClass().add("grid-line");
 
-                    line.startXProperty().bind(newScene.widthProperty().divide(getParent().scaleXProperty()).multiply(-1));
-                    line.endXProperty().bind(newScene.widthProperty().divide(getParent().scaleXProperty()));
+                    line.startXProperty().bind(newScene.widthProperty().divide(getParent().scaleXProperty()).multiply(-1).add(newScene.widthProperty().divide(2)));
+                    line.endXProperty().bind(newScene.widthProperty().divide(getParent().scaleXProperty()).add(newScene.widthProperty().divide(2)));
+                    line.startYProperty().bind(newScene.heightProperty().add(i * GRID_SIZE).subtract(newScene.heightProperty().multiply(1.75)));
+                    line.endYProperty().bind(newScene.heightProperty().add(i * GRID_SIZE).subtract(newScene.heightProperty().multiply(1.75)));
 
                     horizontalLines.add(line);
                     i++;
