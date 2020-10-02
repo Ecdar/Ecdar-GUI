@@ -1,5 +1,7 @@
 package ecdar.presentations;
 
+import ecdar.controllers.CanvasController;
+import javafx.application.Platform;
 import javafx.scene.Parent;
 import javafx.scene.shape.Line;
 import javafx.stage.Screen;
@@ -19,8 +21,7 @@ public class Grid extends Parent {
 
         // When the scene changes (goes from null to something)
         sceneProperty().addListener((observable, oldScene, newScene) -> {
-            // When the width of this scene is being updated
-            newScene.widthProperty().addListener((observable1, oldWidth, newWidth) -> {
+            Platform.runLater(() -> {
                 // Remove old lines
                 while (!verticalLines.isEmpty()) {
                     final Line removeLine = verticalLines.get(0);
@@ -29,17 +30,15 @@ public class Grid extends Parent {
                 }
 
                 //The screen size in GridSlices multiplied by 3 to ensure that the screen is still covered when zoomed out
-                int screenWidth = (int) ((Screen.getPrimary().getBounds().getWidth() - (Screen.getPrimary().getBounds().getWidth() % GRID_SIZE)) * 2);
-                int screenHeight = (int) ((Screen.getPrimary().getBounds().getHeight() - (Screen.getPrimary().getBounds().getHeight() % GRID_SIZE)) * 2);
+                int screenWidth = (int) ((Screen.getPrimary().getBounds().getWidth() - (Screen.getPrimary().getBounds().getWidth() % GRID_SIZE)) * 3);
+                int screenHeight = (int) ((Screen.getPrimary().getBounds().getHeight() - (Screen.getPrimary().getBounds().getHeight() % GRID_SIZE)) * 3);
 
                 // Add new lines to cover the screen, even when zoomed out
-                int i = 0;
+                int i = -screenWidth;
                 while (i < screenWidth / GRID_SIZE) {
-                    Line line = new Line(i * GRID_SIZE, 0, i * GRID_SIZE, screenHeight);
+                    Line line = new Line(i * GRID_SIZE, -screenHeight, i * GRID_SIZE, screenHeight);
                     line.getStyleClass().add("grid-line");
 
-                    line.startXProperty().bind(newScene.widthProperty().add(i * GRID_SIZE).subtract(newScene.widthProperty().multiply(1.75)));
-                    line.endXProperty().bind(newScene.widthProperty().add(i * GRID_SIZE).subtract(newScene.widthProperty().multiply(1.75)));
                     line.startYProperty().bind(newScene.heightProperty().divide(getParent().scaleYProperty()).multiply(-1).add(newScene.heightProperty().divide(2)));
                     line.endYProperty().bind(newScene.heightProperty().divide(getParent().scaleYProperty()).add(newScene.heightProperty().divide(2)));
 
@@ -47,10 +46,7 @@ public class Grid extends Parent {
                     i++;
                 }
                 verticalLines.forEach(line -> getChildren().add(line));
-            });
 
-            // When the height of this scene is being updated
-            newScene.heightProperty().addListener((observable1, oldHeight, newHeight) -> {
                 // Remove old lines
                 while (!horizontalLines.isEmpty()) {
                     final Line removeLine = horizontalLines.get(0);
@@ -58,18 +54,12 @@ public class Grid extends Parent {
                     horizontalLines.remove(removeLine);
                 }
 
-                //The screen size in GridSlices multiplied by 3 to ensure that the screen is still covered when zoomed out
-                int screenWidth = (int) ((Screen.getPrimary().getBounds().getWidth() - (Screen.getPrimary().getBounds().getWidth() % GRID_SIZE)) * 2);
-                int screenHeight = (int) ((Screen.getPrimary().getBounds().getHeight() - (Screen.getPrimary().getBounds().getHeight() % GRID_SIZE)) * 2);
-
                 // Add new lines to cover the screen, even when zoomed out
-                int i = 0;
+                i = -screenHeight;
                 while (i < screenHeight / GRID_SIZE) {
-                    Line line = new Line(0, i * GRID_SIZE, screenWidth, i * GRID_SIZE);
+                    Line line = new Line(-screenWidth, i * GRID_SIZE, screenWidth, i * GRID_SIZE);
                     line.getStyleClass().add("grid-line");
 
-                    line.startXProperty().bind(newScene.widthProperty().divide(getParent().scaleXProperty()).multiply(-1).add(newScene.widthProperty().divide(2)));
-                    line.endXProperty().bind(newScene.widthProperty().divide(getParent().scaleXProperty()).add(newScene.widthProperty().divide(2)));
                     line.startYProperty().bind(newScene.heightProperty().add(i * GRID_SIZE).subtract(newScene.heightProperty().multiply(1.75)));
                     line.endYProperty().bind(newScene.heightProperty().add(i * GRID_SIZE).subtract(newScene.heightProperty().multiply(1.75)));
 
