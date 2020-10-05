@@ -50,8 +50,8 @@ public class Grid extends Parent {
     public void updateGrid(double scale, double width, double height) {
         Platform.runLater(() -> {
             //The screen size in GridSlices multiplied by 3 to ensure that the screen is still covered when zoomed out
-            int screenWidth = (int) (Screen.getPrimary().getBounds().getWidth() / scale - (Screen.getPrimary().getBounds().getWidth() % GRID_SIZE) + GRID_SIZE * 2 * scale);
-            int screenHeight = (int) (Screen.getPrimary().getBounds().getHeight() / scale - (Screen.getPrimary().getBounds().getHeight() % GRID_SIZE) + GRID_SIZE * 2 * scale);
+            int screenWidth = (int) ((Screen.getPrimary().getBounds().getWidth() / scale - ((Screen.getPrimary().getBounds().getWidth() / scale) % GRID_SIZE) + GRID_SIZE / 2));
+            int screenHeight = (int) ((Screen.getPrimary().getBounds().getHeight() / scale - ((Screen.getPrimary().getBounds().getHeight() / scale) % GRID_SIZE) + GRID_SIZE / 2));
 
             // Remove old lines
             while (!verticalLines.isEmpty()) {
@@ -60,9 +60,10 @@ public class Grid extends Parent {
                 verticalLines.remove(removeLine);
             }
             // Add new lines to cover the screen, even when zoomed out
-            int i = (int) (-GRID_SIZE * 2 * scale);
-            while (i < screenWidth / GRID_SIZE) {
-                Line line = new Line(i * GRID_SIZE, -screenHeight, i * GRID_SIZE, screenHeight);
+            int i = (int) (-GRID_SIZE * 10 * scale);
+            int numberOfLine = screenWidth / GRID_SIZE;
+            while (i < numberOfLine) {
+                Line line = new Line(i * GRID_SIZE, -numberOfLine, i * GRID_SIZE, screenHeight);
                 line.getStyleClass().add("grid-line");
 
                 verticalLines.add(line);
@@ -78,9 +79,10 @@ public class Grid extends Parent {
             }
 
             // Add new lines to cover the screen, even when zoomed out
-            i = 0;
-            while (i < screenHeight / GRID_SIZE) {
-                Line line = new Line(-screenWidth, i * GRID_SIZE, screenWidth, i * GRID_SIZE);
+            i = (int) (-GRID_SIZE * 10 * scale);
+            numberOfLine = screenHeight / GRID_SIZE;
+            while (i < numberOfLine) {
+                Line line = new Line(-numberOfLine, i * GRID_SIZE, screenWidth, i * GRID_SIZE);
                 line.getStyleClass().add("grid-line");
 
                 horizontalLines.add(line);
@@ -90,10 +92,10 @@ public class Grid extends Parent {
         });
 
         //Center the grid on the screen
-        double scaledCanvasHeight = (height / scale);
-        double scaledCanvasWidth = (width / scale);
+        double newHeight = (height / scale - (height / scale)) * 1.2;
+        double newWidth = (height / scale - (width / scale) / 1.1);
 
-        setTranslateY(height / 2 - (scaledCanvasHeight - (scaledCanvasHeight % Grid.GRID_SIZE) + Grid.GRID_SIZE * 0.5));
-        setTranslateX(width / 2 - (scaledCanvasWidth - (scaledCanvasWidth % Grid.GRID_SIZE) + Grid.GRID_SIZE * 0.5));
+        setTranslateX(newWidth - (newWidth % Grid.GRID_SIZE) + Grid.GRID_SIZE);
+        setTranslateY(newHeight - (newHeight % Grid.GRID_SIZE) + Grid.GRID_SIZE);
     }
 }
