@@ -1,11 +1,15 @@
 package ecdar.presentations;
 
+import ecdar.abstractions.Component;
+import ecdar.controllers.CanvasController;
+import ecdar.controllers.EcdarController;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.shape.Line;
 import javafx.stage.Screen;
+import org.apache.batik.gvt.CanvasGraphicsNode;
 
 import java.util.ArrayList;
 
@@ -47,10 +51,11 @@ public class Grid extends Parent {
         this.setTranslateY(this.getTranslateY() - (newValue - oldValue) / scale);
     }
 
-    public void updateGrid(double scale, double width, double height) {
-        //The screen size in GridSlices multiplied by 3 to ensure that the screen is still covered when zoomed out
-        int screenWidth = (int) Grid.snap(width / scale);
-        int screenHeight = (int) Grid.snap(height / scale);
+    public void updateGrid(double scale, double canvasWidth, double canvasHeight) {
+        // The given size of the canvas divided by the given scale
+        // Divided by 1.8 as the grid is drawn from the middle and to draw it slightly outside the screen
+        double screenWidth = (int) Grid.snap(canvasWidth / scale / 1.8);
+        double screenHeight = (int) Grid.snap(canvasHeight / scale / 1.8);
 
         Platform.runLater(() -> {
             // Remove old lines
@@ -60,16 +65,16 @@ public class Grid extends Parent {
                 verticalLines.remove(removeLine);
             }
             // Add new lines to cover the screen, even when zoomed out
-            int i = -GRID_SIZE;
-            int numberOfLine = screenWidth / GRID_SIZE;
+            int i = (int) -screenHeight / (GRID_SIZE / 2);
+            int numberOfLine = (int) screenWidth / GRID_SIZE;
             while (i < numberOfLine) {
-                Line line = new Line(i * GRID_SIZE, -GRID_SIZE, i * GRID_SIZE, screenHeight);
+                Line line = new Line(i * GRID_SIZE, -screenHeight, i * GRID_SIZE, screenHeight);
                 line.getStyleClass().add("grid-line");
 
                 verticalLines.add(line);
+                getChildren().add(line);
                 i++;
             }
-            verticalLines.forEach(line -> getChildren().add(line));
 
             // Remove old lines
             while (!horizontalLines.isEmpty()) {
@@ -79,22 +84,23 @@ public class Grid extends Parent {
             }
 
             // Add new lines to cover the screen, even when zoomed out
-            i = -GRID_SIZE;
-            numberOfLine = screenHeight / GRID_SIZE;
+            i = (int) -screenHeight / (GRID_SIZE / 2);
+            numberOfLine = (int) screenHeight / GRID_SIZE;
             while (i < numberOfLine) {
-                Line line = new Line(-GRID_SIZE, i * GRID_SIZE, screenWidth, i * GRID_SIZE);
+                Line line = new Line(-screenWidth, i * GRID_SIZE, screenWidth, i * GRID_SIZE);
                 line.getStyleClass().add("grid-line");
 
                 horizontalLines.add(line);
+                getChildren().add(line);
                 i++;
             }
-            horizontalLines.forEach(line -> getChildren().add(line));
         });
 
         System.out.println("v: " + this.verticalLines.size() + " h: " + this.horizontalLines.size());
 
-        //Center the grid on the screen
-        setTranslateX(Grid.snap(-(screenWidth / 4. + width / 3)) + GRID_SIZE * 0.5);
-        setTranslateY(Grid.snap(-(screenHeight / 4. + height / 3)) + GRID_SIZE * 0.5);
+        // Center the grid on the screen
+        // Using GRID_SIZE for small corrections as the grid is not directly centered on the screen
+        setTranslateX(Grid.snap(CanvasController.activeComponentPresentation.getWidth() / 2 - GRID_SIZE) + GRID_SIZE * 0.5);
+        setTranslateY(Grid.snap(CanvasController.activeComponentPresentation.getHeight() / 2 + TOOL_BAR_HEIGHT * 4) + GRID_SIZE * 0.5);
     }
 }

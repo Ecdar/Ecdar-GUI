@@ -1,5 +1,6 @@
 package ecdar.utility.helpers;
 
+import ecdar.controllers.CanvasController;
 import ecdar.presentations.CanvasPresentation;
 import ecdar.presentations.Grid;
 
@@ -7,10 +8,13 @@ public class ZoomHelper {
     private static CanvasPresentation canvasPresentation;
     private static Grid grid;
     public static double minZoomFactor = 0.4;
-    public static double maxZoomFactor = 8;
+    public static double maxZoomFactor = 4;
 
     public static void setCanvas(CanvasPresentation newCanvasPresentation) {
         canvasPresentation = newCanvasPresentation;
+
+        canvasPresentation.heightProperty().addListener((observable -> ZoomHelper.centerComponentAndUpdateGrid(canvasPresentation.scaleXProperty().doubleValue())));
+        canvasPresentation.widthProperty().addListener((observable -> ZoomHelper.centerComponentAndUpdateGrid(canvasPresentation.scaleXProperty().doubleValue())));
     }
 
     public static void setGrid(Grid newGrid) {
@@ -30,7 +34,7 @@ public class ZoomHelper {
         canvasPresentation.setScaleX(newScale);
         canvasPresentation.setScaleY(newScale);
 
-        centerComponent(newScale);
+        centerComponentAndUpdateGrid(newScale);
     }
 
     public static void zoomOut() {
@@ -46,7 +50,7 @@ public class ZoomHelper {
         canvasPresentation.setScaleX(newScale);
         canvasPresentation.setScaleY(newScale);
 
-        centerComponent(newScale);
+        centerComponentAndUpdateGrid(newScale);
     }
 
     public static void resetZoom() {
@@ -54,7 +58,7 @@ public class ZoomHelper {
         canvasPresentation.setScaleY(1);
 
         //Center component
-        centerComponent(1);
+        centerComponentAndUpdateGrid(1);
     }
 
     public static void zoomToFit() {
@@ -64,17 +68,18 @@ public class ZoomHelper {
         canvasPresentation.setScaleX(newScale);
         canvasPresentation.setScaleY(newScale);
 
-        centerComponent(newScale);
+        centerComponentAndUpdateGrid(newScale);
     }
 
-    private static void centerComponent(double newScale){
+    public static void centerComponentAndUpdateGrid(double newScale){
         //Center component
-        final double actualHeight = canvasPresentation.getHeight() - Grid.TOOL_BAR_HEIGHT;
-        double xOffset = newScale * canvasPresentation.getWidth() * 1.0f / 2 - newScale * canvasPresentation.getController().getActiveComponentPresentation().getWidth() * 1.0f / 2;
-        double yOffset = newScale * actualHeight * 1.0f / 3 - newScale * canvasPresentation.getController().getActiveComponentPresentation().getHeight() * 1.0f / 3 + Grid.TOOL_BAR_HEIGHT / (1.0f / 3); //The offset places the component a bit too high, so 'canvasPresentation.getHeight() / 4' is used to lower it a but
+        double xOffset = newScale * canvasPresentation.getWidth() * 1.0f / 2 - newScale * CanvasController.activeComponentPresentation.getWidth() * 1.0f / 2;
+        double yOffset = newScale * canvasPresentation.getHeight() * 1.0f / 3 - newScale * CanvasController.activeComponentPresentation.getHeight() * 1.0f / 3 + Grid.TOOL_BAR_HEIGHT / (1.0f / 3);
 
         canvasPresentation.setTranslateX(xOffset - (xOffset % Grid.GRID_SIZE));
         canvasPresentation.setTranslateY(yOffset - (yOffset % Grid.GRID_SIZE));
+
+        CanvasController.activeComponentPresentation.setTranslateY(yOffset / 2 - (yOffset / 2 % Grid.GRID_SIZE));
 
         grid.updateGrid(newScale, canvasPresentation.getWidth(), canvasPresentation.getHeight());
     }
