@@ -111,7 +111,7 @@ public class Grid extends Parent {
 
         // Center the grid on the screen
         // Using GRID_SIZE for small corrections as the grid is not directly centered on the screen
-        setTranslateX(Grid.snap(CanvasController.activeComponentPresentation.getWidth() / 2 - GRID_SIZE) + GRID_SIZE * 0.5);
-        setTranslateY(Grid.snap(CanvasController.activeComponentPresentation.getHeight() / 2 + TOOL_BAR_HEIGHT * 4) + GRID_SIZE * 0.5);
+        this.setTranslateX(Grid.snap(CanvasController.activeComponentPresentation.getWidth() / 2 - GRID_SIZE) + GRID_SIZE * 0.5);
+        this.setTranslateY(Grid.snap(CanvasController.activeComponentPresentation.getHeight() / 2 + TOOL_BAR_HEIGHT * 4) + GRID_SIZE * 0.5);
     }
 }
