@@ -79,8 +79,6 @@ public class ZoomHelper {
         canvasPresentation.setTranslateX(xOffset - (xOffset % Grid.GRID_SIZE));
         canvasPresentation.setTranslateY(yOffset - (yOffset % Grid.GRID_SIZE));
 
-        CanvasController.activeComponentPresentation.setTranslateY(yOffset / 2 - (yOffset / 2 % Grid.GRID_SIZE));
-
         grid.updateGrid(newScale, canvasPresentation.getWidth(), canvasPresentation.getHeight());
     }
 }
