@@ -1,15 +1,10 @@
 package ecdar.presentations;
 
-import ecdar.abstractions.Component;
 import ecdar.controllers.CanvasController;
-import ecdar.controllers.EcdarController;
 import javafx.application.Platform;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.shape.Line;
 import javafx.stage.Screen;
-import org.apache.batik.gvt.CanvasGraphicsNode;
 
 import java.util.ArrayList;
 
@@ -41,16 +36,34 @@ public class Grid extends Parent {
         return Math.round(raw / GRID_SIZE) * GRID_SIZE;
     }
 
+    /**
+     * Moved the grid in the opposite direction of the oldValue - newValue change in relation to the scale
+     * @param oldValue the start position of the translation
+     * @param newValue the end position of the translation
+     * @param scale the scale in which to move the grid
+     */
     public void handleTranslateX(double oldValue, double newValue, double scale) {
         //Move the grid in the opposite direction of the canvas drag, to keep its location on screen
         this.setTranslateX(this.getTranslateX() - (newValue - oldValue) / scale);
     }
 
+    /**
+     * Moved the grid in the opposite direction of the oldValue - newValue change in relation to the scale
+     * @param oldValue the start position of the translation
+     * @param newValue the end position of the translation
+     * @param scale the scale in which to move the grid
+     */
     public void handleTranslateY(double oldValue, double newValue, double scale) {
         //Move the grid in the opposite direction of the canvas drag, to keep its location on screen
         this.setTranslateY(this.getTranslateY() - (newValue - oldValue) / scale);
     }
 
+    /**
+     * Redraw the grid in center of the screen
+     * @param scale the scale in which to draw the grid
+     * @param canvasWidth the width of the current canvas
+     * @param canvasHeight the height of the current canvas
+     */
     public void updateGrid(double scale, double canvasWidth, double canvasHeight) {
         // The given size of the canvas divided by the given scale
         // Divided by 1.8 as the grid is drawn from the middle and to draw it slightly outside the screen
@@ -58,13 +71,13 @@ public class Grid extends Parent {
         double screenHeight = (int) Grid.snap(canvasHeight / scale / 1.8);
 
         Platform.runLater(() -> {
-            // Remove old lines
+            // Remove old vertical lines
             while (!verticalLines.isEmpty()) {
                 final Line removeLine = verticalLines.get(0);
                 getChildren().remove(removeLine);
                 verticalLines.remove(removeLine);
             }
-            // Add new lines to cover the screen, even when zoomed out
+            // Add new vertical lines to cover the screen at the current zoom level
             int i = (int) -screenHeight / (GRID_SIZE / 2);
             int numberOfLine = (int) screenWidth / GRID_SIZE;
             while (i < numberOfLine) {
@@ -76,14 +89,14 @@ public class Grid extends Parent {
                 i++;
             }
 
-            // Remove old lines
+            // Remove old horizontal lines
             while (!horizontalLines.isEmpty()) {
                 final Line removeLine = horizontalLines.get(0);
                 getChildren().remove(removeLine);
                 horizontalLines.remove(removeLine);
             }
 
-            // Add new lines to cover the screen, even when zoomed out
+            // Add new horizontal lines to cover the screen at the current zoom level
             i = (int) -screenHeight / (GRID_SIZE / 2);
             numberOfLine = (int) screenHeight / GRID_SIZE;
             while (i < numberOfLine) {
@@ -96,11 +109,9 @@ public class Grid extends Parent {
             }
         });
 
-        System.out.println("v: " + this.verticalLines.size() + " h: " + this.horizontalLines.size());
-
         // Center the grid on the screen
         // Using GRID_SIZE for small corrections as the grid is not directly centered on the screen
         setTranslateX(Grid.snap(CanvasController.activeComponentPresentation.getWidth() / 2 - GRID_SIZE) + GRID_SIZE * 0.5);
-        setTranslateY(Grid.snap(CanvasController.activeComponentPresentation.getHeight() / 2 + TOOL_BAR_HEIGHT) + GRID_SIZE * 0.5);
+        setTranslateY(Grid.snap(CanvasController.activeComponentPresentation.getHeight() / 2 + TOOL_BAR_HEIGHT * 4) + GRID_SIZE * 0.5);
     }
 }

@@ -10,6 +10,10 @@ public class ZoomHelper {
     public static double minZoomFactor = 0.4;
     public static double maxZoomFactor = 4;
 
+    /**
+     * Set the CanvasPresentation of the grid and add listeners for both the width and height of the new CanvasPresentation
+     * @param newCanvasPresentation the new CanvasPresentation
+     */
     public static void setCanvas(CanvasPresentation newCanvasPresentation) {
         canvasPresentation = newCanvasPresentation;
 
@@ -20,7 +24,9 @@ public class ZoomHelper {
     public static void setGrid(Grid newGrid) {
         grid = newGrid;
     }
-
+    /**
+     * Zoom in with a delta of 1.2
+     */
     public static void zoomIn() {
         double delta = 1.2;
         double newScale = canvasPresentation.getScaleX() * delta;
@@ -37,6 +43,9 @@ public class ZoomHelper {
         centerComponentAndUpdateGrid(newScale);
     }
 
+    /**
+     * Zoom out with a delta of 1.2
+     */
     public static void zoomOut() {
         double delta = 1.2;
         double newScale = canvasPresentation.getScaleX() / delta;
@@ -53,6 +62,9 @@ public class ZoomHelper {
         centerComponentAndUpdateGrid(newScale);
     }
 
+    /**
+     * Set the zoom level to 1
+     */
     public static void resetZoom() {
         canvasPresentation.setScaleX(1);
         canvasPresentation.setScaleY(1);
@@ -61,8 +73,11 @@ public class ZoomHelper {
         centerComponentAndUpdateGrid(1);
     }
 
+    /**
+     * Zoom in to fit the component on screen
+     */
     public static void zoomToFit() {
-        double newScale = Math.min(canvasPresentation.getWidth() / canvasPresentation.getController().getActiveComponentPresentation().getWidth() - 0.1, canvasPresentation.getHeight() / canvasPresentation.getController().getActiveComponentPresentation().getHeight() - 0.2); //0.1 for width and 0.2 for height added for margin
+        double newScale = Math.min(canvasPresentation.getWidth() / CanvasController.activeComponentPresentation.getWidth() - 0.1, canvasPresentation.getHeight() / CanvasController.activeComponentPresentation.getHeight() - 0.2); //0.1 for width and 0.2 for height added for margin
 
         //Scale canvas
         canvasPresentation.setScaleX(newScale);
@@ -71,13 +86,18 @@ public class ZoomHelper {
         centerComponentAndUpdateGrid(newScale);
     }
 
+    /**
+     * Method for centering the active component on screen and redrawing the grid to fill the screen
+     * @param newScale the scale in which to redraw the grid and place the component based on
+     */
     public static void centerComponentAndUpdateGrid(double newScale){
-        //Center component
+        //Calculate the new x and y offsets needed to center the component
         double xOffset = newScale * canvasPresentation.getWidth() * 1.0f / 2 - newScale * CanvasController.activeComponentPresentation.getWidth() * 1.0f / 2;
-        double yOffset = newScale * canvasPresentation.getHeight() * 1.0f / 3 - newScale * CanvasController.activeComponentPresentation.getHeight() * 1.0f / 3 + Grid.TOOL_BAR_HEIGHT / (1.0f / 3);
+        double yOffset = newScale * canvasPresentation.getHeight() * 1.0f / 3 - newScale * CanvasController.activeComponentPresentation.getHeight() * 1.0f / 3 + newScale * Grid.TOOL_BAR_HEIGHT * 1.0f / 3;
 
-        canvasPresentation.setTranslateX(xOffset - (xOffset % Grid.GRID_SIZE));
-        canvasPresentation.setTranslateY(yOffset - (yOffset % Grid.GRID_SIZE));
+        //Center the component based on the offsets
+        canvasPresentation.setTranslateX(Grid.snap(xOffset));
+        canvasPresentation.setTranslateY(Grid.snap(yOffset));
 
         grid.updateGrid(newScale, canvasPresentation.getWidth(), canvasPresentation.getHeight());
     }

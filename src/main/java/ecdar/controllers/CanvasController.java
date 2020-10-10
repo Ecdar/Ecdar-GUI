@@ -188,7 +188,7 @@ public class CanvasController implements Initializable {
      * This is null, if the declarations presentation is shown instead.
      * @return the active component presentation
      */
-    public ComponentPresentation getActiveComponentPresentation() {
+    ComponentPresentation getActiveComponentPresentation() {
         return activeComponentPresentation;
     }
 

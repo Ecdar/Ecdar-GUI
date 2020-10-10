@@ -62,7 +62,7 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
             else hideGrid();
         });
 
-        //When the translation coordinates are changed, make sure that it is handled for the grid as well
+        //When the translation coordinates are changed, make sure that it is handled for the grid as well, to ensure that the grid is still centered on screen
         this.translateXProperty().addListener(((observable, oldValue, newValue) -> grid.handleTranslateX(oldValue.doubleValue(), newValue.doubleValue(), this.scaleXProperty().doubleValue())));
         this.translateYProperty().addListener(((observable, oldValue, newValue) -> grid.handleTranslateY(oldValue.doubleValue(), newValue.doubleValue(), this.scaleYProperty().doubleValue())));
 
