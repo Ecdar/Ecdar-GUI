@@ -77,6 +77,7 @@ public class Grid extends Parent {
                 getChildren().remove(removeLine);
                 verticalLines.remove(removeLine);
             }
+
             // Add new vertical lines to cover the screen at the current zoom level
             int i = (int) -screenHeight / (GRID_SIZE / 2);
             int numberOfLine = (int) screenWidth / GRID_SIZE;

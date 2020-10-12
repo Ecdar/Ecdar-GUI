@@ -63,7 +63,7 @@ public class ZoomHelper {
     }
 
     /**
-     * Set the zoom level to 1
+     * Set the zoom multiplier to 1
      */
     public static void resetZoom() {
         canvasPresentation.setScaleX(1);
@@ -93,14 +93,15 @@ public class ZoomHelper {
     public static void centerComponentAndUpdateGrid(double newScale){
         // Check added to avoid NullPointerException
         if(CanvasController.activeComponentPresentation != null){
-            //Calculate the new x and y offsets needed to center the component
+            // Calculate the new x and y offsets needed to center the component
             double xOffset = newScale * canvasPresentation.getWidth() * 1.0f / 2 - newScale * CanvasController.activeComponentPresentation.getWidth() * 1.0f / 2;
             double yOffset = newScale * canvasPresentation.getHeight() * 1.0f / 3 - newScale * CanvasController.activeComponentPresentation.getHeight() * 1.0f / 3 + newScale * Grid.TOOL_BAR_HEIGHT * 1.0f / 3;
 
-            //Center the component based on the offsets
+            // Center the component based on the offsets
             canvasPresentation.setTranslateX(Grid.snap(xOffset));
             canvasPresentation.setTranslateY(Grid.snap(yOffset));
 
+            // Redraw the grid based on the new scale and canvas size
             grid.updateGrid(newScale, canvasPresentation.getWidth(), canvasPresentation.getHeight());
         }
     }
