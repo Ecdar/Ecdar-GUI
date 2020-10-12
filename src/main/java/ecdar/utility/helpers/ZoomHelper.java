@@ -91,14 +91,17 @@ public class ZoomHelper {
      * @param newScale the scale in which to redraw the grid and place the component based on
      */
     public static void centerComponentAndUpdateGrid(double newScale){
-        //Calculate the new x and y offsets needed to center the component
-        double xOffset = newScale * canvasPresentation.getWidth() * 1.0f / 2 - newScale * CanvasController.activeComponentPresentation.getWidth() * 1.0f / 2;
-        double yOffset = newScale * canvasPresentation.getHeight() * 1.0f / 3 - newScale * CanvasController.activeComponentPresentation.getHeight() * 1.0f / 3 + newScale * Grid.TOOL_BAR_HEIGHT * 1.0f / 3;
+        // Check added to avoid NullPointerException
+        if(CanvasController.activeComponentPresentation != null){
+            //Calculate the new x and y offsets needed to center the component
+            double xOffset = newScale * canvasPresentation.getWidth() * 1.0f / 2 - newScale * CanvasController.activeComponentPresentation.getWidth() * 1.0f / 2;
+            double yOffset = newScale * canvasPresentation.getHeight() * 1.0f / 3 - newScale * CanvasController.activeComponentPresentation.getHeight() * 1.0f / 3 + newScale * Grid.TOOL_BAR_HEIGHT * 1.0f / 3;
 
-        //Center the component based on the offsets
-        canvasPresentation.setTranslateX(Grid.snap(xOffset));
-        canvasPresentation.setTranslateY(Grid.snap(yOffset));
+            //Center the component based on the offsets
+            canvasPresentation.setTranslateX(Grid.snap(xOffset));
+            canvasPresentation.setTranslateY(Grid.snap(yOffset));
 
-        grid.updateGrid(newScale, canvasPresentation.getWidth(), canvasPresentation.getHeight());
+            grid.updateGrid(newScale, canvasPresentation.getWidth(), canvasPresentation.getHeight());
+        }
     }
 }
