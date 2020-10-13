@@ -66,7 +66,6 @@ public class Grid extends Parent {
      */
     public void updateGrid(double scale, double canvasWidth, double canvasHeight) {
         // The given size of the canvas divided by the given scale
-        // Divided by 1.8 as the grid is drawn from the middle and to draw it slightly outside the screen
         double screenWidth = (int) Grid.snap(canvasWidth / scale);
         double screenHeight = (int) Grid.snap(canvasHeight / scale);
 
