@@ -68,6 +68,12 @@ public class EcdarPresentation extends StackPane {
         initializeToolbarButton(controller.undo);
         initializeToolbarButton(controller.redo);
         initializeUndoRedoButtons();
+
+        initializeToolbarButton(controller.zoomIn);
+        initializeToolbarButton(controller.zoomOut);
+        initializeToolbarButton(controller.zoomToFit);
+        initializeToolbarButton(controller.resetZoom);
+
         initializeMessageContainer();
         initializeSnackbar();
 

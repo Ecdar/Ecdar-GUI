@@ -64,10 +64,11 @@ public class CanvasDragHelper {
             // The location of the mouse (added with the relative to the subject)
             double x = event.getX() + dragXOffset[0];
             double y = event.getY() + dragYOffset[0];
+            final double gridSize = Grid.GRID_SIZE * subject.getScaleX();
 
             // Make coordinates snap to the grip on the canvas
-            x -= x % Grid.GRID_SIZE - (Grid.GRID_SIZE / 2);
-            y -= y % Grid.GRID_SIZE - (Grid.GRID_SIZE / 2);
+            x -= x % gridSize - (gridSize * 0.5);
+            y -= y % gridSize - (gridSize * 0.5);
 
             // If the subject has its x stringBinder bound have a parent where we can get the xProperty as well
             if (subject.xProperty().isBound()) {
@@ -204,6 +205,7 @@ public class CanvasDragHelper {
 
         final double[] previousXTranslation = {0d};
         final double[] previousYTranslation = {0d};
+
         final BooleanProperty presWasAllowed = new SimpleBooleanProperty(false);
         final BooleanProperty isBeingDragged = new SimpleBooleanProperty(false);
 
@@ -226,15 +228,21 @@ public class CanvasDragHelper {
         mouseTracker.registerOnMouseDraggedEventHandler(event -> {
             if (!presWasAllowed.get() || !isBeingDragged.get()) return;
 
-            final double newX = previousXTranslation[0] + event.getScreenX() + dragXOffset[0];
-            final double newY = previousYTranslation[0] + event.getScreenY() + dragYOffset[0];
+            final double gridSize = Grid.GRID_SIZE * subject.getScaleX();
+
+            //Ensures that the subject is dragged at grid-sized intervals
+            final double dragDistanceX = event.getScreenX() + dragXOffset[0] - ((event.getScreenX() + dragXOffset[0]) % gridSize);
+            final double dragDistanceY = event.getScreenY() + dragYOffset[0] - ((event.getScreenY() + dragYOffset[0]) % gridSize);
+
+            final double newX = previousXTranslation[0] + dragDistanceX;
+            final double newY = previousYTranslation[0] + dragDistanceY;
 
             if (subject instanceof CanvasPresentation) {
                 subject.setTranslateX(newX);
                 subject.setTranslateY(newY);
             } else {
-                subject.xProperty().set(newX - (newX % Grid.GRID_SIZE) + Grid.GRID_SIZE * 0.5);
-                subject.yProperty().set(newY - (newY % Grid.GRID_SIZE) + Grid.GRID_SIZE * 0.5);
+                subject.xProperty().set(newX);
+                subject.yProperty().set(newY);
             }
 
             subject.setCursor(Cursor.MOVE);

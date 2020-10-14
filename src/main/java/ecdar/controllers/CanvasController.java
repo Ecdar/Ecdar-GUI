@@ -26,6 +26,7 @@ import static ecdar.presentations.Grid.GRID_SIZE;
 
 public class CanvasController implements Initializable {
     public final static double DECLARATION_Y_MARGIN = GRID_SIZE * 5.5;
+    public static ComponentPresentation activeComponentPresentation;
 
     public Pane root;
 
@@ -34,7 +35,6 @@ public class CanvasController implements Initializable {
 
     private static DoubleProperty width, height;
     private static BooleanProperty insetShouldShow;
-    private ComponentPresentation activeComponentPresentation;
 
     // This is whether to allow the user to turn on/off the grid.
     // While this is false, the grid is always hidden, no matter the user option.
@@ -111,7 +111,6 @@ public class CanvasController implements Initializable {
                 leaveTextAreas();
             }
         };
-
     }
 
     /**
@@ -192,8 +191,6 @@ public class CanvasController implements Initializable {
     ComponentPresentation getActiveComponentPresentation() {
         return activeComponentPresentation;
     }
-
-
 
     /**
      * Allows the user to turn the grid on/off.
