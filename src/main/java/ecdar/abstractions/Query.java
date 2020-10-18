@@ -105,7 +105,7 @@ public class Query implements Serializable {
                 }
             }
 
-            uppaalDriver.runQuery(getQuery(),
+            (new jECDARDriver()).runQuery(getQuery(),
                     aBoolean -> {
                         if (aBoolean) {
                             setQueryState(QueryState.SUCCESSFUL);
