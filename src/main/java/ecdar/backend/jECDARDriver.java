@@ -50,16 +50,16 @@ public class jECDARDriver {
                     }
                 });
 
-                ProcessBuilder pb = new ProcessBuilder();
-                pb.command("src/libs/j-Ecdar.jar", "-rq -json samples/json/CarAlarm/Model/ Specification: Alarm");
+                ProcessBuilder pb = new ProcessBuilder("src/libs/j-Ecdar.jar", "-help\n");
+                pb.inheritIO();
+                //-rq -json samples/json/CarAlarm/Model/ Specification: Alarm
                 var process = pb.start();
-
                 var reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
                 String line;
-
                 while ((line = reader.readLine()) != null) {
-                    final char result = line.charAt(0);
+                    System.out.println(line);
+                    /*final char result = line.charAt(0);
 
                     // Process the query result
                     if (result == 'T') {
@@ -70,11 +70,11 @@ public class jECDARDriver {
                         failure.accept(new BackendException.QueryErrorException("UPPAAL Engine was uncertain on the result"));
                     } else {
                         failure.accept(new BackendException.BadUPPAALQueryException("Unable to run query"));
-                    }
+                    }*/
                 }
 
-                var writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
-                 writer.write("-help");
+                reader.close();
+                process.destroy();
             } catch (IOException e) {
                 e.printStackTrace();
             }
