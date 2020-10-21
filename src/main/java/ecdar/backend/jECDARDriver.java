@@ -2,7 +2,6 @@ package ecdar.backend;
 
 import com.uppaal.engine.Engine;
 import com.uppaal.engine.Problem;
-import com.uppaal.model.system.UppaalSystem;
 import ecdar.code_analysis.CodeAnalysis;
 import javafx.application.Platform;
 
@@ -11,6 +10,25 @@ import java.util.Vector;
 import java.util.function.Consumer;
 
 public class jECDARDriver {
+
+    private Process jEcdarEngineInstance;
+    private final BufferedReader jEcdarReader;
+    private final BufferedWriter jEcdarWriter;
+
+    public jECDARDriver(){
+        ProcessBuilder pb = new ProcessBuilder("src/libs/j-Ecdar.jar");
+        pb.inheritIO();
+        //-rq -json samples/json/CarAlarm/Model/ Specification: Alarm
+        try {
+            jEcdarEngineInstance = pb.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        jEcdarReader = new BufferedReader(new InputStreamReader(jEcdarEngineInstance.getInputStream()));
+        jEcdarWriter = new BufferedWriter(new OutputStreamWriter(jEcdarEngineInstance.getOutputStream()));
+    }
+
     public Thread runQuery(final String query,
                            final Consumer<Boolean> success,
                            final Consumer<BackendException> failure,
@@ -18,18 +36,6 @@ public class jECDARDriver {
                            final QueryListener queryListener) {
         return new Thread(() -> {
             try {
-                /*ProcessBuilder pb = new ProcessBuilder("src/libs/j-Ecdar.jar", "-help");
-                Process process = pb.start();
-                try (var reader = new BufferedReader(
-                        new InputStreamReader(process.getInputStream()))) {
-
-                    String line;
-
-                    while ((line = reader.readLine()) != null) {
-                        System.out.println(line);
-                    }
-
-                }*/
                 // Create a list to store the problems of the query
                 final Vector<Problem> problems = new Vector<>();
 
@@ -50,14 +56,10 @@ public class jECDARDriver {
                     }
                 });
 
-                ProcessBuilder pb = new ProcessBuilder("src/libs/j-Ecdar.jar", "-help\n");
-                pb.inheritIO();
-                //-rq -json samples/json/CarAlarm/Model/ Specification: Alarm
-                var process = pb.start();
-                var reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                jEcdarWriter.write("-help\n");
 
                 String line;
-                while ((line = reader.readLine()) != null) {
+                while ((line = jEcdarReader.readLine()) != null && line.isEmpty()) {
                     System.out.println(line);
                     /*final char result = line.charAt(0);
 
@@ -72,9 +74,6 @@ public class jECDARDriver {
                         failure.accept(new BackendException.BadUPPAALQueryException("Unable to run query"));
                     }*/
                 }
-
-                reader.close();
-                process.destroy();
             } catch (IOException e) {
                 e.printStackTrace();
             }
