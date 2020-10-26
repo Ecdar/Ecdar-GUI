@@ -3,6 +3,7 @@ package ecdar.controllers;
 import ecdar.Debug;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
+import ecdar.backend.BackendDriverManager;
 import ecdar.backend.BackendException;
 import ecdar.backend.DummyUPPAALDriver;
 import ecdar.backend.UPPAALDriverManager;
@@ -216,7 +217,7 @@ public class EcdarController implements Initializable {
         initializeMessages();
         initializeMenuBar();
         initializeReachabilityAnalysisThread();
-        initializeUppalFileNotFoundWarning();
+        //initializeUppalFileNotFoundWarning();
         
         ZoomHelper.setCanvas(canvas);
     }
@@ -365,7 +366,7 @@ public class EcdarController implements Initializable {
 
                 try {
                     // Make sure that the model is generated
-                    UPPAALDriverManager.getInstance().buildEcdarDocument();
+                    BackendDriverManager.getInstance().buildEcdarDocument();
                 } catch (final BackendException e) {
                     // Something went wrong with creating the document
                     Ecdar.showToast("Could not build XML model. I got the error: " + e.getMessage());
@@ -387,8 +388,8 @@ public class EcdarController implements Initializable {
                         component.getLocations().forEach(location -> location.setReachability(Location.Reachability.EXCLUDED));
                     } else {
                         component.getLocations().forEach(location -> {
-                            final String locationReachableQuery = UPPAALDriverManager.getInstance().getLocationReachableQuery(location, component);
-                            final Thread verifyThread = UPPAALDriverManager.getInstance().runQuery(
+                            final String locationReachableQuery = BackendDriverManager.getInstance().getLocationReachableQuery(location, component);
+                            final Thread verifyThread = BackendDriverManager.getInstance().runQuery(
                                     locationReachableQuery,
                                     (result -> {
                                         if (result) {
@@ -405,9 +406,11 @@ public class EcdarController implements Initializable {
                                     2000
                             );
 
-                            verifyThread.setName(locationReachableQuery + " (" + verifyThread.getName() + ")");
-                            Debug.addThread(verifyThread);
-                            threads.add(verifyThread);
+                            if(verifyThread != null){
+                                verifyThread.setName(locationReachableQuery + " (" + verifyThread.getName() + ")");
+                                Debug.addThread(verifyThread);
+                                threads.add(verifyThread);
+                            }
                         });
                     }
                 });
@@ -448,6 +451,7 @@ public class EcdarController implements Initializable {
         });
     }
 
+    /*
     private void initializeUppalFileNotFoundWarning() {
         final CodeAnalysis.Message uppalNotFoundMessage = new CodeAnalysis.Message("Please set the UPPAAL server location through the 'Preferences' tab.\n" +
                 "Make sure to have UPPAAL installed. This can be done at uppaal.org", CodeAnalysis.MessageType.WARNING);
@@ -459,7 +463,7 @@ public class EcdarController implements Initializable {
                 CodeAnalysis.removeMessage(null, uppalNotFoundMessage);
             }
         });
-    }
+    }*/
 
     private void initializeMenuBar() {
         menuBar.setUseSystemMenuBar(true);
@@ -605,7 +609,7 @@ public class EcdarController implements Initializable {
                 }
             }
         });
-
+        /*
         menuBarOptionsServerLocation.setOnAction(event -> {
             // Dialog title
             final FileChooser filePicker = new FileChooser();
@@ -644,7 +648,7 @@ public class EcdarController implements Initializable {
             if(file != null) {
                 UPPAALDriverManager.setVerifytgaFilePath(file.getAbsolutePath());
             }
-        });
+        });*/
     }
 
     /**
