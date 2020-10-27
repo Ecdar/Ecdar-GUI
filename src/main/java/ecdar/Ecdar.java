@@ -2,8 +2,7 @@ package ecdar;
 
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Project;
-import ecdar.backend.UPPAALDriver;
-import ecdar.backend.UPPAALDriverManager;
+import ecdar.backend.BackendDriverManager;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.controllers.CanvasController;
 import ecdar.controllers.EcdarController;
@@ -224,7 +223,7 @@ public class Ecdar extends Application {
         }));
 
         stage.setOnCloseRequest(event -> {
-            UPPAALDriverManager.getInstance().stopEngines();
+            //BackendDriverManager.getInstance().stopEngines();
 
             Platform.exit();
             System.exit(0);

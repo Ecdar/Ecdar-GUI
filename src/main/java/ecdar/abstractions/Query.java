@@ -9,7 +9,6 @@ import com.uppaal.engine.Engine;
 import javafx.application.Platform;
 import javafx.beans.property.*;
 
-import java.io.File;
 import java.util.function.Consumer;
 
 public class Query implements Serializable {

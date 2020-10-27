@@ -4,6 +4,7 @@ import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Project;
 import ecdar.abstractions.SimpleComponentsSystemDeclarations;
+import ecdar.backend.BackendDriverManager;
 import ecdar.backend.BackendException;
 import ecdar.backend.UPPAALDriverManager;
 import ecdar.mutation.models.MutationTestCase;
@@ -50,10 +51,11 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
 
     /**
      * Constructs the handler.
-     * @param plan the test plan containing options for generation
-     * @param testModel the tet model to use
+     *
+     * @param plan               the test plan containing options for generation
+     * @param testModel          the tet model to use
      * @param potentialTestCases potential test-cases containing the mutants
-     * @param testCasesConsumer consumer to be called when all test-cases are generated
+     * @param testCasesConsumer  consumer to be called when all test-cases are generated
      */
     TestCaseGenerationHandler(final MutationTestPlan plan, final Component testModel, final List<MutationTestCase> potentialTestCases, final Consumer<List<MutationTestCase>> testCasesConsumer) {
         this.plan = plan;
@@ -83,7 +85,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
         finishedTestCases = Collections.synchronizedList(new ArrayList<>()); // use synchronized to be thread safe
 
         try {
-            queryFilePath = UPPAALDriverManager.getInstance().storeQuery("refinement: " + MutationTestPlanController.MUTANT_NAME + "<=" + MutationTestPlanController.SPEC_NAME, "query");
+            queryFilePath = BackendDriverManager.getInstance().storeQuery("refinement: " + MutationTestPlanController.MUTANT_NAME + "<=" + MutationTestPlanController.SPEC_NAME, "query");
         } catch (final URISyntaxException | IOException e) {
             e.printStackTrace();
             Ecdar.showToast("Error: " + e.getMessage());
@@ -104,11 +106,11 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
     public void onStopped() {
         Platform.runLater(() -> getPlan().setStatus(MutationTestPlan.Status.IDLE));
     }
-    
+
     @Override
     public void onAllJobsSuccessfullyDone() {
         try {
-            FileUtils.cleanDirectory(new File(UPPAALDriverManager.getInstance().getTempDirectoryAbsolutePath()));
+            FileUtils.cleanDirectory(new File(BackendDriverManager.getInstance().getTempDirectoryAbsolutePath()));
         } catch (final IOException | URISyntaxException e) {
             e.printStackTrace();
             Ecdar.showToast("Error: " + e.getMessage());
@@ -135,8 +137,9 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
 
     /**
      * Generates a test-case.
+     *
      * @param testCase potential test-case containing the test model, the mutant, and an id
-     * @param tries number of tries with empty response from verifytga before giving up
+     * @param tries    number of tries with empty response from verifytga before giving up
      */
     private void generateTestCase(final MutationTestCase testCase, final int tries) {
         final Component mutant = testCase.getMutant();
@@ -154,7 +157,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
                 // Store the project and the refinement query as backend XML
                 final String modelPath;
                 try {
-                    modelPath = UPPAALDriverManager.getInstance().storeBackendModel(project, testCase.getId());
+                    modelPath = BackendDriverManager.getInstance().storeBackendModel(project, testCase.getId());
                 } catch (IOException | BackendException | URISyntaxException e) {
                     throw new MutationTestingException("Error while storing backend model", e);
                 }
@@ -226,6 +229,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
 
     /**
      * Starts verifytga to fetch a strategy.
+     *
      * @param modelPath the path to the backend XML project containing the test model and the mutant
      * @return the started process, or null if an error occurs
      * @throws IOException if an IO error occurs
@@ -238,10 +242,11 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
     /**
      * Gets the lines from the input stream of verifytga.
      * If an error occurs, this method tells the user and signals this controller to stop.
+     *
      * @param process the process running verifytga
      * @return the input lines. Each line is without the newline character.
      * @throws MutationTestingException if verifytga has a non-empty error stream
-     * @throws IOException if an IO error occurs
+     * @throws IOException              if an IO error occurs
      */
     private static List<String> getVerifytgaInputLines(final Process process) throws MutationTestingException, IOException {
         final List<String> lines;
@@ -260,8 +265,9 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
      * The input stream must be completely read before calling this.
      * Otherwise, we risk getting stuck while reading the error stream.
      * If an error occurs, this method throws an exception
+     *
      * @param process process to check for
-     * @throws IOException if an I/O error occurs
+     * @throws IOException              if an I/O error occurs
      * @throws MutationTestingException if verifytga has a non-empty error stream
      */
     private static void checkVerifytgaErrorStream(final Process process) throws IOException, MutationTestingException {
@@ -279,7 +285,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
      * It updates UI labels to tell user about the progress.
      * Once all test-case generation attempts are done,
      * this method executes the test-cases (not done)
-     *
+     * <p>
      * This method should be called in a JavaFX thread, since it updates JavaFX elements.
      */
     private synchronized void onGenerationJobDone() {

@@ -102,7 +102,7 @@ public class jECDARDriver implements IBackendDriver {
                     }
                 });
 
-                jEcdarWriter.write("-rq -json" + Ecdar.projectDirectory.get() + query + "\n"); //-rq -json samples/CarAlarm/Model/ E\u003c\u003e Alarm.L11
+                jEcdarWriter.write("-rq -json" + Ecdar.projectDirectory.get() + " " + query + "\n"); //-rq -json samples/CarAlarm/Model/ E\u003c\u003e Alarm.L11
                 //jEcdarWriter.write("-rq -json samples/EcdarUniversity specification: Spec" + "\n");
                 jEcdarWriter.flush();
 
@@ -117,6 +117,7 @@ public class jECDARDriver implements IBackendDriver {
                     } else if (line.charAt(0) == 'M') {
                         failure.accept(new BackendException.QueryErrorException("UPPAAL Engine was uncertain on the result"));
                     } else {
+                        System.out.println(line);
                         failure.accept(new BackendException.BadUPPAALQueryException("Unable to run query"));
                     }
                 }
