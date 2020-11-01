@@ -4,6 +4,7 @@ import com.uppaal.engine.Engine;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Location;
 import ecdar.abstractions.Project;
+import ecdar.abstractions.Query;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -58,12 +59,6 @@ public interface IBackendDriver {
     Thread runQuery(final String query,
                     final Consumer<Boolean> success,
                     final Consumer<BackendException> failure,
-                    final Consumer<Engine> engineConsumer);
-
-    Thread runQuery(final String query,
-                    final Consumer<Boolean> success,
-                    final Consumer<BackendException> failure,
-                    final Consumer<Engine> engineConsumer,
                     final QueryListener queryListener);
 
     /**

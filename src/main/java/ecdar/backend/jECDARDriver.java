@@ -8,34 +8,26 @@ import ecdar.abstractions.Location;
 import ecdar.abstractions.Project;
 import ecdar.code_analysis.CodeAnalysis;
 import javafx.application.Platform;
+import org.apache.commons.io.FileUtils;
 
+import java.awt.desktop.SystemSleepEvent;
 import java.io.*;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Vector;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
 public class jECDARDriver implements IBackendDriver {
-
-    private Process jEcdarEngineInstance;
-    private final BufferedReader jEcdarReader;
-    private final BufferedWriter jEcdarWriter;
+    private final String TEMP_DIRECTORY = "temporary";
+    private EcdarDocument ecdarDocument;
+    private ReentrantLock jEcdarLock = new ReentrantLock(false);
 
     public jECDARDriver(){
-        ProcessBuilder pb = new ProcessBuilder("java", "-jar", "src/libs/j-Ecdar.jar");
-        pb.redirectErrorStream(true);
-        try {
-            jEcdarEngineInstance = pb.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        jEcdarReader = new BufferedReader(new InputStreamReader(jEcdarEngineInstance.getInputStream()));
-        jEcdarWriter = new BufferedWriter(new OutputStreamWriter(jEcdarEngineInstance.getOutputStream()));
     }
-
+    
     @Override
     public String storeBackendModel(Project project, String fileName) throws BackendException, IOException, URISyntaxException {
         return null;
@@ -48,16 +40,25 @@ public class jECDARDriver implements IBackendDriver {
 
     @Override
     public String storeQuery(String query, String fileName) throws URISyntaxException, IOException {
-        return null;
+        FileUtils.forceMkdir(new File(getTempDirectoryAbsolutePath()));
+
+        final String path = getTempDirectoryAbsolutePath() + File.separator + fileName + ".q";
+        Files.write(
+                Paths.get(path),
+                Collections.singletonList(query),
+                Charset.forName("UTF-8")
+        );
+
+        return path;
     }
 
     @Override
     public String getTempDirectoryAbsolutePath() throws URISyntaxException {
-        return null;
+        return Ecdar.getRootDirectory() + File.separator + TEMP_DIRECTORY;
     }
 
     public void buildEcdarDocument() throws BackendException {
-        EcdarDocument ecdarDocument = new EcdarDocument();
+        ecdarDocument = new EcdarDocument();
     }
 
     @Override
@@ -70,55 +71,60 @@ public class jECDARDriver implements IBackendDriver {
         return null;
     }
 
-    @Override
-    public Thread runQuery(String query, Consumer<Boolean> success, Consumer<BackendException> failure, Consumer<Engine> engineConsumer) {
-        return null;
-    }
-
-    public Thread runQuery(final String query,
+    synchronized public Thread runQuery(final String query,
                            final Consumer<Boolean> success,
                            final Consumer<BackendException> failure,
-                           final Consumer<Engine> engineConsumer,
                            final QueryListener queryListener) {
         return new Thread(() -> {
+            // Create a list to store the problems of the query
+            final Vector<Problem> problems = new Vector<>();
+
+            // Get the system, and fill the problems list if any
+            //final UppaalSystem system = engine.getSystem(ecdarDocument.toXmlDocument(), problems);
+
+            // Run on UI thread
+            Platform.runLater(() -> {
+                // Clear the UI for backend-errors
+                CodeAnalysis.clearBackendErrors();
+
+                // Check if there are any problems
+                if (!problems.isEmpty()) {
+                    problems.forEach(problem -> {
+                        System.out.println("problem: " + problem);
+                        CodeAnalysis.addBackendError(new CodeAnalysis.Message(problem.getMessage(), CodeAnalysis.MessageType.ERROR));
+                    });
+                }
+            });
+
+            ProcessBuilder pb = new ProcessBuilder("java", "-jar", "src/libs/j-Ecdar.jar");
+            pb.redirectErrorStream(true);
             try {
-                // Create a list to store the problems of the query
-                final Vector<Problem> problems = new Vector<>();
+                //Start the j-Ecdar process
+                Process jEcdarEngineInstance = pb.start();
 
-                // Get the system, and fill the problems list if any
-                //final UppaalSystem system = engine.getSystem(ecdarDocument.toXmlDocument(), problems);
+                //Communicate with the j-Ecdar process
+                try (
+                        var jEcdarReader = new BufferedReader(new InputStreamReader(jEcdarEngineInstance.getInputStream()));
+                        var jEcdarWriter = new BufferedWriter(new OutputStreamWriter(jEcdarEngineInstance.getOutputStream()));
+                ) {
+                    //Run the query with the j-Ecdar process
+                    jEcdarWriter.write("-rq -json " + Ecdar.projectDirectory.get() + " " + query.replaceAll("\\s", "") + "\n");
+                    jEcdarWriter.flush();
 
-                // Run on UI thread
-                Platform.runLater(() -> {
-                    // Clear the UI for backend-errors
-                    CodeAnalysis.clearBackendErrors();
-
-                    // Check if there is any problems
-                    if (!problems.isEmpty()) {
-                        problems.forEach(problem -> {
-                            System.out.println("problem: " + problem);
-                            CodeAnalysis.addBackendError(new CodeAnalysis.Message(problem.getMessage(), CodeAnalysis.MessageType.ERROR));
-                        });
-                    }
-                });
-
-                jEcdarWriter.write("-rq -json" + Ecdar.projectDirectory.get() + " " + query + "\n"); //-rq -json samples/CarAlarm/Model/ E\u003c\u003e Alarm.L11
-                //jEcdarWriter.write("-rq -json samples/EcdarUniversity specification: Spec" + "\n");
-                jEcdarWriter.flush();
-
-                String line;
-                while ((line = jEcdarReader.readLine()) != null) {
-
-                    // Process the query result
-                    if (line.equals("")) {
-                        success.accept(true);
-                    } else if (line.startsWith("Error")) {
-                        failure.accept(new BackendException.QueryErrorException(line));
-                    } else if (line.charAt(0) == 'M') {
-                        failure.accept(new BackendException.QueryErrorException("UPPAAL Engine was uncertain on the result"));
-                    } else {
-                        System.out.println(line);
-                        failure.accept(new BackendException.BadUPPAALQueryException("Unable to run query"));
+                    //Read the result of the query from the j-Ecdar process
+                    String line;
+                    while ((line = jEcdarReader.readLine()) != null) {
+                        // Process the query result
+                        if (line.equals("true") || line.equals("")) {
+                            success.accept(true);
+                        } else if (line.startsWith("Error")) {
+                            failure.accept(new BackendException.QueryErrorException(query + " gave " + line));
+                        } else if (line.equals("uncertain")/*ToDo: insert uncertain result case
+                         line.charAt(0) == 'M'*/) {
+                            failure.accept(new BackendException.QueryErrorException(query + ": the jECDAR Engine was uncertain on the result"));
+                        } else {
+                            failure.accept(new BackendException.BadUPPAALQueryException(query + " could not be run"));
+                        }
                     }
                 }
             } catch (IOException e) {

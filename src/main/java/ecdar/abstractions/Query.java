@@ -90,13 +90,11 @@ public class Query implements Serializable {
 
     private void initializeRunQuery() {
         runQuery = (buildEcdarDocument) -> {
-            jECDARDriver jEcdarDriver = new jECDARDriver();
-
             setQueryState(QueryState.RUNNING);
 
             if (buildEcdarDocument) {
                 try {
-                    jEcdarDriver.buildEcdarDocument();
+                    BackendDriverManager.getInstance().buildEcdarDocument();
                 } catch (final BackendException e) {
                     Ecdar.showToast("Could not build XML document. I got the error: " + e.getMessage());
                     e.printStackTrace();
@@ -104,7 +102,7 @@ public class Query implements Serializable {
                 }
             }
 
-            jEcdarDriver.runQuery(getQuery(),
+            BackendDriverManager.getInstance().runQuery(getQuery(),
                     aBoolean -> {
                         if (aBoolean) {
                             setQueryState(QueryState.SUCCESSFUL);
@@ -127,9 +125,6 @@ public class Query implements Serializable {
                                 }
                             }
                         }
-                    },
-                    eng -> {
-                        engine = eng;
                     },
                     new QueryListener(this)
             ).start();
@@ -166,7 +161,8 @@ public class Query implements Serializable {
     }
 
     public void cancel() {
-        /*if (getQueryState().equals(QueryState.RUNNING)) {
+        /*ToDo: Handle correctly
+        if (getQueryState().equals(QueryState.RUNNING)) {
             synchronized (UPPAALDriverManager.getInstance().engineLock) {
                 if (engine != null) {
                     forcedCancel = true;
