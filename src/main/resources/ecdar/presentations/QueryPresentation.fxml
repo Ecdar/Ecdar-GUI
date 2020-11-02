@@ -2,20 +2,30 @@
 <?import com.jfoenix.controls.*?>
 <?import javafx.scene.layout.*?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import java.lang.Double?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="AnchorPane">
+    <fx:define>
+        <!--Used for both the statusIndicator and the left anchor for elements to the right of the statusIndicator-->
+        <Double fx:id="STATUS_INDICATOR_WIDTH" fx:value="50"/>
+    </fx:define>
 
     <StackPane prefHeight="1" style="-fx-background-color:-grey-300;" AnchorPane.rightAnchor="0"
                AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0"/>
 
-    <StackPane id="stateIndicator" prefWidth="5" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
-               AnchorPane.leftAnchor="0"/>
+    <!--If this shows an error, ignore it... It is an IDE issue, not a code issue-->
+    <StackPane id="stateIndicator" prefWidth="${STATUS_INDICATOR_WIDTH - 5}" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
+               AnchorPane.leftAnchor="0">
+        <StackPane minWidth="40" maxWidth="40" minHeight="40" maxHeight="40">
+            <FontIcon id="statusIcon" iconLiteral="gmi-hourglass-full" iconSize="24" iconColor="white"/>
+        </StackPane>
+    </StackPane>
 
     <JFXTextField id="query" HBox.hgrow="ALWAYS"
                   AnchorPane.topAnchor="8"
                   AnchorPane.rightAnchor="128"
-                  AnchorPane.leftAnchor="8"
+                  AnchorPane.leftAnchor="$STATUS_INDICATOR_WIDTH"
                   style="-fx-unfocus-color:transparent;" styleClass="subhead"
                   promptText="Query"/>
 
@@ -23,7 +33,7 @@
                   AnchorPane.topAnchor="42"
                   AnchorPane.rightAnchor="128"
                   AnchorPane.bottomAnchor="8"
-                  AnchorPane.leftAnchor="8"
+                  AnchorPane.leftAnchor="$STATUS_INDICATOR_WIDTH"
                   style="-fx-unfocus-color:transparent;" styleClass="caption"
                   promptText="Comment"/>
 

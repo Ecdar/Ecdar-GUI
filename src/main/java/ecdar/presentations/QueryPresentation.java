@@ -147,6 +147,7 @@ public class QueryPresentation extends AnchorPane {
     private void initializeStateIndicator() {
         // Find the state indicator from the inflated xml
         final StackPane stateIndicator = (StackPane) lookup("#stateIndicator");
+        final FontIcon statusIcon = (FontIcon) stateIndicator.lookup("#statusIcon");
 
         // Delegate that based on a query state updates the color of the state indicator
         final Consumer<QueryState> updateColor = (queryState) -> {
@@ -163,6 +164,20 @@ public class QueryPresentation extends AnchorPane {
                         CornerRadii.EMPTY,
                         Insets.EMPTY)
                 ));
+            }
+
+            if(queryState.equals(QueryState.SUCCESSFUL)){
+                statusIcon.setIconLiteral("gmi-done");
+                statusIcon.setIconColor(new javafx.scene.paint.Color(1,1,1,1));
+            } else if(queryState.equals(QueryState.ERROR)) {
+                statusIcon.setIconLiteral("gmi-clear");
+                statusIcon.setIconColor(new javafx.scene.paint.Color(1,1,1,1));
+            } else if(queryState.equals(QueryState.SYNTAX_ERROR)){
+                statusIcon.setIconLiteral("gmi-report");
+                statusIcon.setIconColor(new javafx.scene.paint.Color(1,1,1,1));
+            } else {
+                statusIcon.setIconLiteral("gmi-hourglass-empty");
+                statusIcon.setIconColor(new javafx.scene.paint.Color(0,0,0,1));
             }
         };
 
