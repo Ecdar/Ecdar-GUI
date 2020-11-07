@@ -5,8 +5,6 @@ import ecdar.Ecdar;
 import ecdar.abstractions.*;
 import ecdar.backend.BackendDriverManager;
 import ecdar.backend.BackendException;
-import ecdar.backend.DummyUPPAALDriver;
-import ecdar.backend.UPPAALDriverManager;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.presentations.*;

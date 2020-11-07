@@ -6,6 +6,7 @@ import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Location;
 import ecdar.abstractions.Project;
+import ecdar.abstractions.QueryState;
 import ecdar.code_analysis.CodeAnalysis;
 import javafx.application.Platform;
 import org.apache.commons.io.FileUtils;
@@ -113,17 +114,25 @@ public class jECDARDriver implements IBackendDriver {
 
                     //Read the result of the query from the j-Ecdar process
                     String line;
+                    QueryState result = QueryState.RUNNING;
                     while ((line = jEcdarReader.readLine()) != null) {
                         // Process the query result
-                        if (line.equals("true") || line.equals("")) {
+                        if ((line.equals("true") || line.equals("")) && (result.getStatusCode() <= QueryState.SUCCESSFUL.getStatusCode())) {
+                            result = QueryState.SUCCESSFUL;
+                        } else if (line.equals("false") && (result.getStatusCode() <= QueryState.ERROR.getStatusCode())){
+                            result = QueryState.ERROR;
+                        } else if (result.getStatusCode() <= QueryState.UNKNOWN.getStatusCode()) {
+                            result = QueryState.UNKNOWN;
+                        }
+
+                        if (result.getStatusCode() == QueryState.SUCCESSFUL.getStatusCode()) {
                             success.accept(true);
-                        } else if (line.startsWith("Error")) {
-                            failure.accept(new BackendException.QueryErrorException(query + " gave " + line));
-                        } else if (line.equals("uncertain")/*ToDo: insert uncertain result case
-                         line.charAt(0) == 'M'*/) {
-                            failure.accept(new BackendException.QueryErrorException(query + ": the jECDAR Engine was uncertain on the result"));
+                        } else if (result.getStatusCode() == QueryState.ERROR.getStatusCode()){
+                            success.accept(false);
+                        } else if (result.getStatusCode() == QueryState.SYNTAX_ERROR.getStatusCode()) {
+                            failure.accept(new BackendException.QueryErrorException(line));
                         } else {
-                            failure.accept(new BackendException.BadUPPAALQueryException(query + " could not be run"));
+                            failure.accept(new BackendException.BadUPPAALQueryException(line));
                         }
                     }
                 }

@@ -6,7 +6,6 @@ import ecdar.abstractions.Project;
 import ecdar.abstractions.SimpleComponentsSystemDeclarations;
 import ecdar.backend.BackendDriverManager;
 import ecdar.backend.BackendException;
-import ecdar.backend.UPPAALDriverManager;
 import ecdar.mutation.models.MutationTestCase;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.mutation.models.NonRefinementStrategy;
@@ -152,7 +151,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
         mutant.updateIOList(); // Update io in order to get the right system declarations for the mutant
         project.setSystemDeclarations(new SimpleComponentsSystemDeclarations(testModel, mutant));
 
-        new Thread(() -> {
+        /*new Thread(() -> {
             try {
                 // Store the project and the refinement query as backend XML
                 final String modelPath;
@@ -224,7 +223,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
 
             // JavaFX elements cannot be updated in another thread, so make it run in a JavaFX thread at some point
             Platform.runLater(this::onGenerationJobDone);
-        }).start();
+        }).start();*/
     }
 
     /**
@@ -234,10 +233,10 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
      * @return the started process, or null if an error occurs
      * @throws IOException if an IO error occurs
      */
-    private Process startVerifytgaProcess(final String modelPath) throws IOException {
+    /*private Process startVerifytgaProcess(final String modelPath) throws IOException {
         // Run verifytga to check refinement and to fetch strategy if non-refinement
         return new ProcessBuilder(UPPAALDriverManager.getInstance().getVerifytgaAbsolutePath(), "-t0", modelPath, queryFilePath).start();
-    }
+    }*/
 
     /**
      * Gets the lines from the input stream of verifytga.

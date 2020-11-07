@@ -12,10 +12,12 @@ import com.jfoenix.controls.JFXTextField;
 import javafx.beans.binding.When;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import org.kordamp.ikonli.javafx.FontIcon;
 
+import java.util.ArrayList;
 import java.util.function.Consumer;
 
 import static javafx.scene.paint.Color.TRANSPARENT;
@@ -23,6 +25,7 @@ import static javafx.scene.paint.Color.TRANSPARENT;
 public class QueryPresentation extends AnchorPane {
 
     private final Query query;
+    private final Tooltip tooltip = new Tooltip();
     private JFXRippler actionButton;
 
     public QueryPresentation(final Query query) {
@@ -150,7 +153,9 @@ public class QueryPresentation extends AnchorPane {
         final FontIcon statusIcon = (FontIcon) stateIndicator.lookup("#statusIcon");
 
         // Delegate that based on a query state updates the color of the state indicator
-        final Consumer<QueryState> updateColor = (queryState) -> {
+        final Consumer<QueryState> updateStateIndicator = (queryState) -> {
+            this.tooltip.setText("");
+
             final Color color = queryState.getColor();
             final Color.Intensity colorIntensity = queryState.getColorIntensity();
 
@@ -166,25 +171,32 @@ public class QueryPresentation extends AnchorPane {
                 ));
             }
 
-            if(queryState.equals(QueryState.SUCCESSFUL)){
-                statusIcon.setIconLiteral("gmi-done");
-                statusIcon.setIconColor(new javafx.scene.paint.Color(1,1,1,1));
-            } else if(queryState.equals(QueryState.ERROR)) {
-                statusIcon.setIconLiteral("gmi-clear");
-                statusIcon.setIconColor(new javafx.scene.paint.Color(1,1,1,1));
-            } else if(queryState.equals(QueryState.SYNTAX_ERROR)){
-                statusIcon.setIconLiteral("gmi-report");
-                statusIcon.setIconColor(new javafx.scene.paint.Color(1,1,1,1));
-            } else {
-                statusIcon.setIconLiteral("gmi-hourglass-empty");
+            statusIcon.setIconColor(new javafx.scene.paint.Color(1,1,1,1));
+            statusIcon.setIconLiteral("gmi-" + queryState.getIconCode().toString().toLowerCase().replace('_', '-'));
+            if(queryState.equals(QueryState.RUNNING)) {
                 statusIcon.setIconColor(new javafx.scene.paint.Color(0,0,0,1));
+            }
+
+            System.out.println(queryState.getStatusCode());
+            if(queryState.getStatusCode() == 1) {
+                this.tooltip.setText("This query was a success!");
+            } else if (queryState.getStatusCode() == 2) {
+                this.tooltip.setText("This query failed");
+            } else if (queryState.getStatusCode() == 3) {
+                this.tooltip.setText("The backend was uncertain about the result of the query");
+            } else {
+                this.tooltip.setText(query.getCurrentErrors());
             }
         };
 
         // Update the initial color
-        updateColor.accept(query.getQueryState());
+        updateStateIndicator.accept(query.getQueryState());
 
         // Ensure that the color is updated when ever the query state is updated
-        query.queryStateProperty().addListener((observable, oldValue, newValue) -> updateColor.accept(newValue));
+        query.queryStateProperty().addListener((observable, oldValue, newValue) -> updateStateIndicator.accept(newValue));
+
+        query.errors().addListener((observable, oldValue, newValue) -> updateStateIndicator.accept(query.getQueryState()));
+
+        Tooltip.install(stateIndicator, this.tooltip);
     }
 }

@@ -20,7 +20,7 @@ public class Query implements Serializable {
     private final StringProperty query = new SimpleStringProperty("");
     private final StringProperty comment = new SimpleStringProperty("");
     private final SimpleBooleanProperty isPeriodic = new SimpleBooleanProperty(false);
-
+    private final StringProperty errors = new SimpleStringProperty("");
     private Consumer<Boolean> runQuery;
 
     public Query(final String query, final String comment, final QueryState queryState) {
@@ -73,6 +73,8 @@ public class Query implements Serializable {
         return comment;
     }
 
+    public StringProperty errors() { return errors; }
+
     public boolean isPeriodic() {
         return isPeriodic.get();
     }
@@ -102,6 +104,8 @@ public class Query implements Serializable {
                 }
             }
 
+            errors.set("");
+
             BackendDriverManager.getInstance().runQuery(getQuery(),
                     aBoolean -> {
                         if (aBoolean) {
@@ -115,6 +119,7 @@ public class Query implements Serializable {
                             setQueryState(QueryState.UNKNOWN);
                         } else {
                             setQueryState(QueryState.SYNTAX_ERROR);
+                            this.addCurrentError(e.getMessage());
                             final Throwable cause = e.getCause();
                             if (cause != null) {
                                 // We had trouble generating the model if we get a NullPointerException
@@ -171,5 +176,13 @@ public class Query implements Serializable {
             }
             setQueryState(QueryState.UNKNOWN);
         }*/
+    }
+
+    public void addCurrentError(String e) {
+        errors.set(errors.getValue() + e + "\n");
+    }
+
+    public String getCurrentErrors() {
+        return errors.getValue();
     }
 }
