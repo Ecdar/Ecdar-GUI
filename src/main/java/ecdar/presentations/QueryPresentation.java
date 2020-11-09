@@ -152,6 +152,19 @@ public class QueryPresentation extends AnchorPane {
         final StackPane stateIndicator = (StackPane) lookup("#stateIndicator");
         final FontIcon statusIcon = (FontIcon) stateIndicator.lookup("#statusIcon");
 
+        // Delegate that based on a query state updates tooltip of the query
+        final Consumer<QueryState> updateToolTip = (queryState) -> {
+            if (queryState.getStatusCode() == 1) {
+                this.tooltip.setText("This query was a success!");
+            } else if (queryState.getStatusCode() == 2) {
+                this.tooltip.setText("This query failed");
+            } else if (queryState.getStatusCode() == 3) {
+                this.tooltip.setText("The backend was uncertain about the result of the query");
+            } else {
+                this.tooltip.setText(query.getCurrentErrors());
+            }
+        };
+
         // Delegate that based on a query state updates the color of the state indicator
         final Consumer<QueryState> updateStateIndicator = (queryState) -> {
             this.tooltip.setText("");
@@ -173,20 +186,13 @@ public class QueryPresentation extends AnchorPane {
 
             statusIcon.setIconColor(new javafx.scene.paint.Color(1,1,1,1));
             statusIcon.setIconLiteral("gmi-" + queryState.getIconCode().toString().toLowerCase().replace('_', '-'));
+
             if(queryState.equals(QueryState.RUNNING)) {
                 statusIcon.setIconColor(new javafx.scene.paint.Color(0,0,0,1));
             }
 
-            System.out.println(queryState.getStatusCode());
-            if(queryState.getStatusCode() == 1) {
-                this.tooltip.setText("This query was a success!");
-            } else if (queryState.getStatusCode() == 2) {
-                this.tooltip.setText("This query failed");
-            } else if (queryState.getStatusCode() == 3) {
-                this.tooltip.setText("The backend was uncertain about the result of the query");
-            } else {
-                this.tooltip.setText(query.getCurrentErrors());
-            }
+            // The tooltip is updated here to handle all cases that are not syntax error
+            updateToolTip.accept(queryState);
         };
 
         // Update the initial color
@@ -195,7 +201,8 @@ public class QueryPresentation extends AnchorPane {
         // Ensure that the color is updated when ever the query state is updated
         query.queryStateProperty().addListener((observable, oldValue, newValue) -> updateStateIndicator.accept(newValue));
 
-        query.errors().addListener((observable, oldValue, newValue) -> updateStateIndicator.accept(query.getQueryState()));
+        // Ensure that the tooltip is updated when new errors are added
+        query.errors().addListener((observable, oldValue, newValue) -> updateToolTip.accept(query.getQueryState()));
 
         Tooltip.install(stateIndicator, this.tooltip);
     }

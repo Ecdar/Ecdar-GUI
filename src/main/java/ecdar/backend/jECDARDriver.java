@@ -1,6 +1,5 @@
 package ecdar.backend;
 
-import com.uppaal.engine.Engine;
 import com.uppaal.engine.Problem;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
@@ -11,7 +10,6 @@ import ecdar.code_analysis.CodeAnalysis;
 import javafx.application.Platform;
 import org.apache.commons.io.FileUtils;
 
-import java.awt.desktop.SystemSleepEvent;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
@@ -121,8 +119,8 @@ public class jECDARDriver implements IBackendDriver {
                             result = QueryState.SUCCESSFUL;
                         } else if (line.equals("false") && (result.getStatusCode() <= QueryState.ERROR.getStatusCode())){
                             result = QueryState.ERROR;
-                        } else if (result.getStatusCode() <= QueryState.UNKNOWN.getStatusCode()) {
-                            result = QueryState.UNKNOWN;
+                        } else if (result.getStatusCode() <= QueryState.SYNTAX_ERROR.getStatusCode()) {
+                            result = QueryState.SYNTAX_ERROR;
                         }
 
                         if (result.getStatusCode() == QueryState.SUCCESSFUL.getStatusCode()) {
@@ -132,7 +130,7 @@ public class jECDARDriver implements IBackendDriver {
                         } else if (result.getStatusCode() == QueryState.SYNTAX_ERROR.getStatusCode()) {
                             failure.accept(new BackendException.QueryErrorException(line));
                         } else {
-                            failure.accept(new BackendException.BadUPPAALQueryException(line));
+                            failure.accept(new BackendException.BadBackendQueryException(line));
                         }
                     }
                 }
