@@ -22,6 +22,7 @@ public class Query implements Serializable {
     private final SimpleBooleanProperty isPeriodic = new SimpleBooleanProperty(false);
     private final StringProperty errors = new SimpleStringProperty("");
     private Consumer<Boolean> runQuery;
+    private BackendThread backendThread;
 
     public Query(final String query, final String comment, final QueryState queryState) {
         this.query.set(query);
@@ -106,7 +107,7 @@ public class Query implements Serializable {
 
             errors.set("");
 
-            BackendDriverManager.getInstance().runQuery(getQuery(),
+            backendThread = BackendDriverManager.getInstance().runQuery(getQuery(),
                     aBoolean -> {
                         if (aBoolean) {
                             setQueryState(QueryState.SUCCESSFUL);
@@ -132,7 +133,9 @@ public class Query implements Serializable {
                         }
                     },
                     new QueryListener(this)
-            ).start();
+            );
+
+            backendThread.start();
         };
     }
 
@@ -166,16 +169,11 @@ public class Query implements Serializable {
     }
 
     public void cancel() {
-        /*ToDo: Handle correctly
         if (getQueryState().equals(QueryState.RUNNING)) {
-            synchronized (UPPAALDriverManager.getInstance().engineLock) {
-                if (engine != null) {
-                    forcedCancel = true;
-                    engine.cancel();
-                }
-            }
+            forcedCancel = true;
+            backendThread.hasBeenCanceled.set(true);
             setQueryState(QueryState.UNKNOWN);
-        }*/
+        }
     }
 
     public void addCurrentError(String e) {

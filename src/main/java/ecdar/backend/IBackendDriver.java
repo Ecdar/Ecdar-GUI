@@ -11,6 +11,8 @@ import java.net.URISyntaxException;
 import java.util.function.Consumer;
 
 public interface IBackendDriver {
+    String TEMP_DIRECTORY = "temporary";
+
     String storeBackendModel(final Project project, final String fileName) throws BackendException, IOException, URISyntaxException;
 
     /**
@@ -47,16 +49,16 @@ public interface IBackendDriver {
 
     void buildEcdarDocument() throws BackendException;
 
-    Thread runQuery(final String query,
+    BackendThread runQuery(final String query,
                     final Consumer<Boolean> success,
                     final Consumer<BackendException> failure);
 
-    Thread runQuery(final String query,
+    BackendThread runQuery(final String query,
                     final Consumer<Boolean> success,
                     final Consumer<BackendException> failure,
                     final long timeout);
 
-    Thread runQuery(final String query,
+    BackendThread runQuery(final String query,
                     final Consumer<Boolean> success,
                     final Consumer<BackendException> failure,
                     final QueryListener queryListener);

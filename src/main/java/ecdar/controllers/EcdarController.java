@@ -43,6 +43,7 @@ import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import javafx.util.Pair;
 import org.kordamp.ikonli.javafx.FontIcon;
+import org.kordamp.ikonli.material.Material;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -114,8 +115,10 @@ public class EcdarController implements Initializable {
     public JFXRippler zoomOut;
     public JFXRippler zoomToFit;
     public JFXRippler resetZoom;
-    public MenuItem menuBarOptionsServerLocation;
-    public MenuItem menuBarOptionsVerifytgaLocation;
+    public MenuItem menuBarOptionsjEcdar;
+    public FontIcon menuBarOptionsjEcdarIcon;
+    public MenuItem menuBarOptionsReveaal;
+    public FontIcon menuBarOptionsReveaalIcon;
 
     private double expandHeight = 300;
 
@@ -607,46 +610,20 @@ public class EcdarController implements Initializable {
                 }
             }
         });
-        /*
-        menuBarOptionsServerLocation.setOnAction(event -> {
-            // Dialog title
-            final FileChooser filePicker = new FileChooser();
-            filePicker.setTitle("Choose UPPAAL server file");
 
-            // The initial location for the file choosing dialog
-            final File uppaalFile = new File(UPPAALDriverManager.getServerFilePath()).getAbsoluteFile().getParentFile();
-
-            // If the file does not exist, use a default location
-            if(uppaalFile.exists()) {
-                filePicker.setInitialDirectory(uppaalFile);
-            }
-
-            // Prompt the user to select the file (will halt the UI thread)
-            final File file = filePicker.showOpenDialog(root.getScene().getWindow());
-            if(file != null) {
-                UPPAALDriverManager.setServerFilePath(file.getAbsolutePath());
-            }
+        menuBarOptionsjEcdar.setOnAction(event -> {
+            // Change the backend to j-Ecdar
+            BackendDriverManager.setCurrentBackend(BackendDriverManager.BackendNames.jEcdar);
+            menuBarOptionsReveaalIcon.setIconCode(Material.RADIO_BUTTON_UNCHECKED);
+            menuBarOptionsjEcdarIcon.setIconCode(Material.RADIO_BUTTON_CHECKED);
         });
 
-        menuBarOptionsVerifytgaLocation.setOnAction(event -> {
-            // Dialog title
-            final FileChooser filePicker = new FileChooser();
-            filePicker.setTitle("Choose VerifyTGA file");
-
-            // The initial location for the file choosing dialog
-            final File verifytgaFile = new File(UPPAALDriverManager.getVerifytgaFilePath()).getAbsoluteFile().getParentFile();
-
-            // If the file does not exist, use a default location
-            if(verifytgaFile.exists()) {
-                filePicker.setInitialDirectory(verifytgaFile);
-            }
-
-            // Prompt the user to select the file (will halt the UI thread)
-            final File file = filePicker.showOpenDialog(root.getScene().getWindow());
-            if(file != null) {
-                UPPAALDriverManager.setVerifytgaFilePath(file.getAbsolutePath());
-            }
-        });*/
+        menuBarOptionsReveaal.setOnAction(event -> {
+            // Change the backend to Reveaal
+            BackendDriverManager.setCurrentBackend(BackendDriverManager.BackendNames.Reveaal);
+            menuBarOptionsjEcdarIcon.setIconCode(Material.RADIO_BUTTON_UNCHECKED);
+            menuBarOptionsReveaalIcon.setIconCode(Material.RADIO_BUTTON_CHECKED);
+        });
     }
 
     /**

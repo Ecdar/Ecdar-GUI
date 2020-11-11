@@ -1,13 +1,9 @@
 package ecdar.backend;
 
-import com.uppaal.engine.Problem;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Location;
 import ecdar.abstractions.Project;
-import ecdar.abstractions.QueryState;
-import ecdar.code_analysis.CodeAnalysis;
-import javafx.application.Platform;
 import org.apache.commons.io.FileUtils;
 
 import java.io.*;
@@ -20,7 +16,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
 public class jECDARDriver implements IBackendDriver {
-    private final String TEMP_DIRECTORY = "temporary";
     private EcdarDocument ecdarDocument;
     private ReentrantLock jEcdarLock = new ReentrantLock(false);
 
@@ -61,83 +56,20 @@ public class jECDARDriver implements IBackendDriver {
     }
 
     @Override
-    public Thread runQuery(String query, Consumer<Boolean> success, Consumer<BackendException> failure) {
+    public BackendThread runQuery(String query, Consumer<Boolean> success, Consumer<BackendException> failure) {
         return null;
     }
 
     @Override
-    public Thread runQuery(String query, Consumer<Boolean> success, Consumer<BackendException> failure, long timeout) {
+    public BackendThread runQuery(String query, Consumer<Boolean> success, Consumer<BackendException> failure, long timeout) {
         return null;
     }
 
-    synchronized public Thread runQuery(final String query,
+    synchronized public BackendThread runQuery(final String query,
                            final Consumer<Boolean> success,
                            final Consumer<BackendException> failure,
                            final QueryListener queryListener) {
-        return new Thread(() -> {
-            // Create a list to store the problems of the query
-            final Vector<Problem> problems = new Vector<>();
-
-            // Get the system, and fill the problems list if any
-            //final UppaalSystem system = engine.getSystem(ecdarDocument.toXmlDocument(), problems);
-
-            // Run on UI thread
-            Platform.runLater(() -> {
-                // Clear the UI for backend-errors
-                CodeAnalysis.clearBackendErrors();
-
-                // Check if there are any problems
-                if (!problems.isEmpty()) {
-                    problems.forEach(problem -> {
-                        System.out.println("problem: " + problem);
-                        CodeAnalysis.addBackendError(new CodeAnalysis.Message(problem.getMessage(), CodeAnalysis.MessageType.ERROR));
-                    });
-                }
-            });
-
-            ProcessBuilder pb = new ProcessBuilder("java", "-jar", "src/libs/j-Ecdar.jar");
-            pb.redirectErrorStream(true);
-            try {
-                //Start the j-Ecdar process
-                Process jEcdarEngineInstance = pb.start();
-
-                //Communicate with the j-Ecdar process
-                try (
-                        var jEcdarReader = new BufferedReader(new InputStreamReader(jEcdarEngineInstance.getInputStream()));
-                        var jEcdarWriter = new BufferedWriter(new OutputStreamWriter(jEcdarEngineInstance.getOutputStream()));
-                ) {
-                    //Run the query with the j-Ecdar process
-                    jEcdarWriter.write("-rq -json " + Ecdar.projectDirectory.get() + " " + query.replaceAll("\\s", "") + "\n");
-                    jEcdarWriter.flush();
-
-                    //Read the result of the query from the j-Ecdar process
-                    String line;
-                    QueryState result = QueryState.RUNNING;
-                    while ((line = jEcdarReader.readLine()) != null) {
-                        // Process the query result
-                        if ((line.equals("true") || line.equals("")) && (result.getStatusCode() <= QueryState.SUCCESSFUL.getStatusCode())) {
-                            result = QueryState.SUCCESSFUL;
-                        } else if (line.equals("false") && (result.getStatusCode() <= QueryState.ERROR.getStatusCode())){
-                            result = QueryState.ERROR;
-                        } else if (result.getStatusCode() <= QueryState.SYNTAX_ERROR.getStatusCode()) {
-                            result = QueryState.SYNTAX_ERROR;
-                        }
-
-                        if (result.getStatusCode() == QueryState.SUCCESSFUL.getStatusCode()) {
-                            success.accept(true);
-                        } else if (result.getStatusCode() == QueryState.ERROR.getStatusCode()){
-                            success.accept(false);
-                        } else if (result.getStatusCode() == QueryState.SYNTAX_ERROR.getStatusCode()) {
-                            failure.accept(new BackendException.QueryErrorException(line));
-                        } else {
-                            failure.accept(new BackendException.BadBackendQueryException(line));
-                        }
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
+        return new jEcdarThread(query, success, failure, queryListener);
     }
 
     /**

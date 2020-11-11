@@ -129,8 +129,6 @@ public class QueryPresentation extends AnchorPane {
         actionButton.setMaskType(JFXRippler.RipplerMask.CIRCLE);
 
         actionButton.getChildren().get(0).setOnMousePressed(event -> {
-            query.setQueryState(QueryState.UNKNOWN);
-
             if (query.getQueryState().equals(QueryState.RUNNING)) {
                 query.cancel();
             } else {
@@ -156,10 +154,8 @@ public class QueryPresentation extends AnchorPane {
         final Consumer<QueryState> updateToolTip = (queryState) -> {
             if (queryState.getStatusCode() == 1) {
                 this.tooltip.setText("This query was a success!");
-            } else if (queryState.getStatusCode() == 2) {
-                this.tooltip.setText("This query failed");
             } else if (queryState.getStatusCode() == 3) {
-                this.tooltip.setText("The backend was uncertain about the result of the query");
+                this.tooltip.setText("The query has not been executed yet");
             } else {
                 this.tooltip.setText(query.getCurrentErrors());
             }
@@ -187,8 +183,8 @@ public class QueryPresentation extends AnchorPane {
             statusIcon.setIconColor(new javafx.scene.paint.Color(1,1,1,1));
             statusIcon.setIconLiteral("gmi-" + queryState.getIconCode().toString().toLowerCase().replace('_', '-'));
 
-            if(queryState.equals(QueryState.RUNNING)) {
-                statusIcon.setIconColor(new javafx.scene.paint.Color(0,0,0,1));
+            if(queryState.equals(QueryState.RUNNING) || queryState.equals(QueryState.UNKNOWN)) {
+                statusIcon.setIconColor(new javafx.scene.paint.Color(0.75,0.75,0.75,1));
             }
 
             // The tooltip is updated here to handle all cases that are not syntax error
