@@ -43,7 +43,7 @@
     <StackPane AnchorPane.topAnchor="0" AnchorPane.rightAnchor="16" minHeight="96"
                maxHeight="96">
         <HBox AnchorPane.topAnchor="0" alignment="CENTER" minHeight="96" maxHeight="96">
-            <JFXSpinner AnchorPane.topAnchor="0" id="progressIndicator" radius="20"/>
+            <JFXSpinner translateX="43" translateY="-1" AnchorPane.topAnchor="0" id="progressIndicator" radius="20"/>
 
             <JFXRippler AnchorPane.topAnchor="0" id="actionButton">
                 <StackPane minWidth="40" maxWidth="40" minHeight="40" maxHeight="40">
@@ -72,13 +72,14 @@
             </columnConstraints>
             <VBox alignment="CENTER" GridPane.columnIndex="0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
                   AnchorPane.topAnchor="256" AnchorPane.bottomAnchor="0.0">
-                <JFXCheckBox>Suppe 1</JFXCheckBox>
-
+                <!--This is were the inputs will go-->
+                <JFXCheckBox>TEST Input</JFXCheckBox>
             </VBox>
             <Separator orientation="VERTICAL" GridPane.columnIndex="1"/>
             <VBox alignment="CENTER" GridPane.columnIndex="2" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
                   AnchorPane.topAnchor="256" AnchorPane.bottomAnchor="0.0">
-                <JFXCheckBox>Suppe 2</JFXCheckBox>
+                <!--This is were the outputs will go-->
+                <JFXCheckBox>TEST Output</JFXCheckBox>
             </VBox>
         </GridPane>
     </TitledPane>
