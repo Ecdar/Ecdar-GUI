@@ -43,13 +43,15 @@
     <StackPane AnchorPane.topAnchor="0" AnchorPane.rightAnchor="16" minHeight="96"
                maxHeight="96">
         <HBox AnchorPane.topAnchor="0" alignment="CENTER" minHeight="96" maxHeight="96">
-            <JFXSpinner translateX="43" translateY="-1" AnchorPane.topAnchor="0" id="progressIndicator" radius="20"/>
+            <StackPane>
+                <JFXSpinner id="progressIndicator" radius="20"/>
 
-            <JFXRippler AnchorPane.topAnchor="0" id="actionButton">
-                <StackPane minWidth="40" maxWidth="40" minHeight="40" maxHeight="40">
-                    <FontIcon id="actionButtonIcon" iconLiteral="gmi-play-arrow" iconSize="24"/>
-                </StackPane>
-            </JFXRippler>
+                <JFXRippler id="actionButton">
+                    <StackPane minWidth="40" maxWidth="40" minHeight="40" maxHeight="40">
+                        <FontIcon id="actionButtonIcon" iconLiteral="gmi-play-arrow" iconSize="24"/>
+                    </StackPane>
+                </JFXRippler>
+            </StackPane>
 
             <Region minWidth="5"/>
 
