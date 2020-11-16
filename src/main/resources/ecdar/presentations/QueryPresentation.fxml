@@ -3,6 +3,8 @@
 <?import javafx.scene.layout.*?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 <?import java.lang.Double?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.control.Separator?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="AnchorPane">
@@ -12,56 +14,72 @@
     </fx:define>
 
     <StackPane prefHeight="1" style="-fx-background-color:-grey-300;" AnchorPane.rightAnchor="0"
-               AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0"/>
+               AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" minHeight="1" maxHeight="1"/>
 
     <!--If this shows an error, ignore it... It is an IDE issue, not a code issue-->
-    <StackPane id="stateIndicator" prefWidth="${STATUS_INDICATOR_WIDTH - 5}" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
-               AnchorPane.leftAnchor="0">
+    <StackPane id="stateIndicator" prefWidth="${STATUS_INDICATOR_WIDTH - 5}" AnchorPane.topAnchor="0"
+               AnchorPane.leftAnchor="0" minHeight="96" maxHeight="96">
         <StackPane minWidth="40" maxWidth="40" minHeight="40" maxHeight="40">
             <FontIcon id="statusIcon" iconLiteral="gmi-hourglass-full" iconSize="24" iconColor="white"/>
         </StackPane>
     </StackPane>
 
     <JFXTextField id="query" HBox.hgrow="ALWAYS"
-                  AnchorPane.topAnchor="8"
+                  AnchorPane.topAnchor="0"
                   AnchorPane.rightAnchor="128"
                   AnchorPane.leftAnchor="$STATUS_INDICATOR_WIDTH"
+                  minHeight="32" maxHeight="32"
                   style="-fx-unfocus-color:transparent;" styleClass="subhead"
                   promptText="Query"/>
 
     <JFXTextField id="comment" HBox.hgrow="ALWAYS"
                   AnchorPane.topAnchor="42"
                   AnchorPane.rightAnchor="128"
-                  AnchorPane.bottomAnchor="8"
                   AnchorPane.leftAnchor="$STATUS_INDICATOR_WIDTH"
+                  minHeight="32" maxHeight="32"
                   style="-fx-unfocus-color:transparent;" styleClass="caption"
                   promptText="Comment"/>
 
-    <StackPane AnchorPane.topAnchor="8" AnchorPane.rightAnchor="16" AnchorPane.bottomAnchor="8">
+    <StackPane AnchorPane.topAnchor="0" AnchorPane.rightAnchor="16" minHeight="96"
+               maxHeight="96">
+        <HBox AnchorPane.topAnchor="0" alignment="CENTER" minHeight="96" maxHeight="96">
+            <JFXSpinner AnchorPane.topAnchor="0" id="progressIndicator" radius="20"/>
 
-        <HBox>
-
-            <StackPane>
-                <JFXSpinner id="progressIndicator" radius="20"/>
-
-                <JFXRippler id="actionButton">
-                    <StackPane minWidth="40" maxWidth="40" minHeight="40" maxHeight="40">
-                        <FontIcon id="actionButtonIcon" iconLiteral="gmi-play-arrow" iconSize="24"/>
-                    </StackPane>
-                </JFXRippler>
-            </StackPane>
+            <JFXRippler AnchorPane.topAnchor="0" id="actionButton">
+                <StackPane minWidth="40" maxWidth="40" minHeight="40" maxHeight="40">
+                    <FontIcon id="actionButtonIcon" iconLiteral="gmi-play-arrow" iconSize="24"/>
+                </StackPane>
+            </JFXRippler>
 
             <Region minWidth="5"/>
 
-            <JFXRippler id="detailsButton">
+            <JFXRippler AnchorPane.topAnchor="0" id="detailsButton">
                 <StackPane minWidth="40" maxWidth="40" minHeight="40" maxHeight="40">
                     <FontIcon id="detailsButtonIcon" iconLiteral="gmi-more-vert" iconSize="24"/>
                 </StackPane>
             </JFXRippler>
-
         </HBox>
-
     </StackPane>
 
+    <TitledPane id="inputOutputPane" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="96"
+                AnchorPane.bottomAnchor="0.0" expanded="false" alignment="CENTER">
+        <GridPane AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="80"
+                  AnchorPane.bottomAnchor="0.0">
+            <columnConstraints>
+                <ColumnConstraints hgrow="ALWAYS" percentWidth="49.0"/>
+                <ColumnConstraints hgrow="ALWAYS" percentWidth="2.0"/>
+                <ColumnConstraints hgrow="ALWAYS" percentWidth="49.0"/>
+            </columnConstraints>
+            <VBox alignment="CENTER" GridPane.columnIndex="0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                  AnchorPane.topAnchor="256" AnchorPane.bottomAnchor="0.0">
+                <JFXCheckBox>Suppe 1</JFXCheckBox>
 
+            </VBox>
+            <Separator orientation="VERTICAL" GridPane.columnIndex="1"/>
+            <VBox alignment="CENTER" GridPane.columnIndex="2" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                  AnchorPane.topAnchor="256" AnchorPane.bottomAnchor="0.0">
+                <JFXCheckBox>Suppe 2</JFXCheckBox>
+            </VBox>
+        </GridPane>
+    </TitledPane>
 </fx:root>
