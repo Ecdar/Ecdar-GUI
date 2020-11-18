@@ -1,20 +1,24 @@
 package ecdar.presentations;
 
+import com.jfoenix.controls.*;
 import ecdar.Ecdar;
 import ecdar.abstractions.Query;
 import ecdar.abstractions.QueryState;
+import ecdar.backend.BackendDriverManager;
+import ecdar.backend.IBackendDriver;
+import ecdar.backend.ReveaalDriver;
 import ecdar.controllers.CanvasController;
 import ecdar.utility.colors.Color;
-import com.jfoenix.controls.JFXPopup;
-import com.jfoenix.controls.JFXRippler;
-import com.jfoenix.controls.JFXSpinner;
-import com.jfoenix.controls.JFXTextField;
+import javafx.application.Platform;
 import javafx.beans.binding.When;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
+import javafx.util.Pair;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.util.ArrayList;
@@ -38,6 +42,7 @@ public class QueryPresentation extends AnchorPane {
         initializeActionButton();
         initializeDetailsButton();
         initializeTextFields();
+        initializeInputOutputPane();
     }
 
     private void initializeTextFields() {
@@ -180,11 +185,11 @@ public class QueryPresentation extends AnchorPane {
                 ));
             }
 
-            statusIcon.setIconColor(new javafx.scene.paint.Color(1,1,1,1));
+            statusIcon.setIconColor(new javafx.scene.paint.Color(1, 1, 1, 1));
             statusIcon.setIconLiteral("gmi-" + queryState.getIconCode().toString().toLowerCase().replace('_', '-'));
 
-            if(queryState.equals(QueryState.RUNNING) || queryState.equals(QueryState.UNKNOWN)) {
-                statusIcon.setIconColor(new javafx.scene.paint.Color(0.75,0.75,0.75,1));
+            if (queryState.equals(QueryState.RUNNING) || queryState.equals(QueryState.UNKNOWN)) {
+                statusIcon.setIconColor(new javafx.scene.paint.Color(0.75, 0.75, 0.75, 1));
             }
 
             // The tooltip is updated here to handle all cases that are not syntax error
@@ -201,5 +206,64 @@ public class QueryPresentation extends AnchorPane {
         query.errors().addListener((observable, oldValue, newValue) -> updateToolTip.accept(query.getQueryState()));
 
         Tooltip.install(stateIndicator, this.tooltip);
+    }
+
+    public void initializeInputOutputPane() {
+        final Consumer<String> changeTitledPaneVisibility = (query) -> {
+            // Get related FXML nodes
+            final TitledPane inputOutputPane = (TitledPane) lookup("#inputOutputPane");
+            final VBox inputBox = (VBox) inputOutputPane.lookup("#inputBox");
+            final VBox outputBox = (VBox) inputOutputPane.lookup("#outputBox");
+            final IBackendDriver backendDriver;
+
+            // Check if the query is a refinement and that the engine is set to Reveaal
+            if (query.startsWith("refinement") && (backendDriver = BackendDriverManager.getInstance()) instanceof ReveaalDriver) {
+                //Get inputs and outputs
+                Pair<ArrayList<String>, ArrayList<String>> inputOutputs = ((ReveaalDriver) backendDriver).getInputOutputs(query);
+
+                // Clear inputs and outputs as checkboxes
+                inputBox.getChildren().clear();
+                outputBox.getChildren().clear();
+
+                Platform.runLater(() -> {
+                    // Make the input/output pane visible
+                    inputOutputPane.setVisible(true);
+                    inputOutputPane.setAnimated(true);
+
+                    // Add inputs as checkboxes
+                    for (String input : inputOutputs.getKey()) {
+                        JFXCheckBox checkBox = new JFXCheckBox(input);
+                        inputBox.getChildren().add(checkBox);
+                    }
+
+                    // Add outputs as checkboxes
+                    for (String output : inputOutputs.getValue()) {
+                        JFXCheckBox checkBox = new JFXCheckBox(output);
+                        outputBox.getChildren().add(checkBox);
+                    }
+                });
+
+            } else {
+                // Hide the input/output pane
+                Platform.runLater(() -> {
+                    inputOutputPane.setVisible(false);
+                    inputOutputPane.setAnimated(false);
+                    inputOutputPane.setExpanded(false);
+                });
+            }
+        };
+
+        Platform.runLater(() -> {
+            // Run the consumer to ensure that the input/output pane is displayed for existing refinement queries
+            changeTitledPaneVisibility.accept(query.getQuery());
+        });
+
+        // Make sure the input/output pane is updated whenever the query text field loses focus
+        final JFXTextField queryTextField = (JFXTextField) lookup("#query");
+        queryTextField.focusedProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue) {
+                changeTitledPaneVisibility.accept(query.getQuery());
+            }
+        });
     }
 }

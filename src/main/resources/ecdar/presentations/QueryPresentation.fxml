@@ -64,24 +64,24 @@
     </StackPane>
 
     <TitledPane id="inputOutputPane" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="96"
-                AnchorPane.bottomAnchor="0.0" expanded="false" alignment="CENTER">
+                AnchorPane.bottomAnchor="0.0" expanded="false" alignment="CENTER" visible="false">
         <GridPane AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="80"
                   AnchorPane.bottomAnchor="0.0">
             <columnConstraints>
-                <ColumnConstraints hgrow="ALWAYS" percentWidth="49.0"/>
-                <ColumnConstraints hgrow="ALWAYS" percentWidth="2.0"/>
-                <ColumnConstraints hgrow="ALWAYS" percentWidth="49.0"/>
+                <ColumnConstraints hgrow="ALWAYS" percentWidth="15.0"/>
+                <ColumnConstraints hgrow="ALWAYS" percentWidth="32.5"/>
+                <ColumnConstraints hgrow="ALWAYS" percentWidth="5.0"/>
+                <ColumnConstraints hgrow="ALWAYS" percentWidth="32.5"/>
+                <ColumnConstraints hgrow="ALWAYS" percentWidth="15.0"/>
             </columnConstraints>
-            <VBox alignment="CENTER" GridPane.columnIndex="0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                  AnchorPane.topAnchor="256" AnchorPane.bottomAnchor="0.0">
-                <!--This is were the inputs will go-->
-                <JFXCheckBox>TEST Input</JFXCheckBox>
+            <VBox id="inputBox" alignment="CENTER_LEFT" GridPane.columnIndex="1" AnchorPane.leftAnchor="0.0"
+                  AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="256" AnchorPane.bottomAnchor="0.0">
+                <!--Inputs go here-->
             </VBox>
-            <Separator orientation="VERTICAL" GridPane.columnIndex="1"/>
-            <VBox alignment="CENTER" GridPane.columnIndex="2" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                  AnchorPane.topAnchor="256" AnchorPane.bottomAnchor="0.0">
-                <!--This is were the outputs will go-->
-                <JFXCheckBox>TEST Output</JFXCheckBox>
+            <Separator orientation="VERTICAL" GridPane.columnIndex="2"/>
+            <VBox id="outputBox" alignment="CENTER_LEFT" GridPane.columnIndex="3" AnchorPane.leftAnchor="0.0"
+                  AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="256" AnchorPane.bottomAnchor="0.0">
+                <!--Outputs go here-->
             </VBox>
         </GridPane>
     </TitledPane>
