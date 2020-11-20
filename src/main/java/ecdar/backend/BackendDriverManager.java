@@ -1,8 +1,12 @@
 package ecdar.backend;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+
 public class BackendDriverManager {
     private static IBackendDriver instance = null;
     private static BackendNames currentBackend = BackendNames.jEcdar;
+    private static BooleanProperty supportsInputOutputParameters = new SimpleBooleanProperty();
 
     public static synchronized IBackendDriver getInstance() {
 
@@ -10,8 +14,10 @@ public class BackendDriverManager {
         if (instance == null) {
             if (currentBackend == BackendNames.jEcdar) {
                 instance = new jECDARDriver();
+                supportsInputOutputParameters.setValue(false);
             } else if (currentBackend == BackendNames.Reveaal) {
                 instance = new ReveaalDriver();
+                supportsInputOutputParameters.setValue(true);
             }
         }
 
@@ -30,5 +36,9 @@ public class BackendDriverManager {
         public String toString() {
             return "" + this.ordinal();
         }
+    }
+
+    public static BooleanProperty getSupportsInputOutputs() {
+        return supportsInputOutputParameters;
     }
 }

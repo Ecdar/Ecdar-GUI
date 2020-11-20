@@ -29,6 +29,8 @@ import static javafx.scene.paint.Color.TRANSPARENT;
 public class QueryPresentation extends AnchorPane {
 
     private final Query query;
+    private final ArrayList<String> inputs = new ArrayList<>();
+    private final ArrayList<String> outputs = new ArrayList<>();
     private final Tooltip tooltip = new Tooltip();
     private JFXRippler actionButton;
 
@@ -221,28 +223,41 @@ public class QueryPresentation extends AnchorPane {
                 //Get inputs and outputs
                 Pair<ArrayList<String>, ArrayList<String>> inputOutputs = ((ReveaalDriver) backendDriver).getInputOutputs(query);
 
-                // Clear inputs and outputs as checkboxes
-                inputBox.getChildren().clear();
-                outputBox.getChildren().clear();
-
+                // Remove checkboxes
                 Platform.runLater(() -> {
-                    // Make the input/output pane visible
-                    inputOutputPane.setVisible(true);
-                    inputOutputPane.setAnimated(true);
-
-                    // Add inputs as checkboxes
-                    for (String input : inputOutputs.getKey()) {
-                        JFXCheckBox checkBox = new JFXCheckBox(input);
-                        inputBox.getChildren().add(checkBox);
-                    }
-
-                    // Add outputs as checkboxes
-                    for (String output : inputOutputs.getValue()) {
-                        JFXCheckBox checkBox = new JFXCheckBox(output);
-                        outputBox.getChildren().add(checkBox);
-                    }
+                    inputBox.getChildren().clear();
+                    outputBox.getChildren().clear();
                 });
 
+                // Clear input and output lists
+                inputs.clear();
+                outputs.clear();
+
+                // Make the input/output pane visible
+                Platform.runLater(() -> {
+                    inputOutputPane.setVisible(true);
+                    inputOutputPane.setAnimated(true);
+                });
+
+                // Add inputs to list and as checkboxes in UI
+                for (String input : inputOutputs.getKey()) {
+                    Platform.runLater(() -> {
+                        JFXCheckBox checkBox = new JFXCheckBox(input);
+                        checkBox.setId(input);
+                        inputBox.getChildren().add(checkBox);
+                    });
+                    inputs.add(input);
+                }
+
+                // Add outputs to list and as checkboxes in UI
+                for (String output : inputOutputs.getValue()) {
+                    Platform.runLater(() -> {
+                        JFXCheckBox checkBox = new JFXCheckBox(output);
+                        checkBox.setId(output);
+                        outputBox.getChildren().add(checkBox);
+                    });
+                    outputs.add(output);
+                }
             } else {
                 // Hide the input/output pane
                 Platform.runLater(() -> {
@@ -253,10 +268,8 @@ public class QueryPresentation extends AnchorPane {
             }
         };
 
-        Platform.runLater(() -> {
-            // Run the consumer to ensure that the input/output pane is displayed for existing refinement queries
-            changeTitledPaneVisibility.accept(query.getQuery());
-        });
+        // Run the consumer to ensure that the input/output pane is displayed for existing refinement queries
+        changeTitledPaneVisibility.accept(query.getQuery());
 
         // Make sure the input/output pane is updated whenever the query text field loses focus
         final JFXTextField queryTextField = (JFXTextField) lookup("#query");
@@ -264,6 +277,11 @@ public class QueryPresentation extends AnchorPane {
             if (!newValue) {
                 changeTitledPaneVisibility.accept(query.getQuery());
             }
+        });
+
+        // Make sure the input/output pane is updated whenever the backend is changed
+        BackendDriverManager.getSupportsInputOutputs().addListener((observable, oldValue, newValue) -> {
+            changeTitledPaneVisibility.accept(query.getQuery());
         });
     }
 }
