@@ -13,7 +13,6 @@ import javafx.application.Platform;
 import javafx.beans.binding.When;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
@@ -22,17 +21,20 @@ import javafx.util.Pair;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
-import static javafx.scene.paint.Color.TRANSPARENT;
+import static javafx.scene.paint.Color.*;
 
 public class QueryPresentation extends AnchorPane {
 
     private final Query query;
-    private final ArrayList<String> inputs = new ArrayList<>();
-    private final ArrayList<String> outputs = new ArrayList<>();
+    private final Map<String, Boolean> inputs = new HashMap<>();
+    private final Map<String, Boolean> outputs = new HashMap<>();
     private final Tooltip tooltip = new Tooltip();
     private JFXRippler actionButton;
+    private JFXRippler updateInputOutputPaneButton;
 
     public QueryPresentation(final Query query) {
         new EcdarFXMLLoader().loadAndGetController("QueryPresentation.fxml", this);
@@ -139,7 +141,25 @@ public class QueryPresentation extends AnchorPane {
             if (query.getQueryState().equals(QueryState.RUNNING)) {
                 query.cancel();
             } else {
-                query.run();
+                if (inputs.isEmpty() && outputs.isEmpty()) {
+                    query.run();
+                } else {
+                    ArrayList<String> ins = new ArrayList<>();
+                    ArrayList<String> outs = new ArrayList<>();
+
+                    inputs.forEach((key, value) -> {
+                        if(value) {
+                            ins.add(key);
+                        }
+                    });
+                    outputs.forEach((key, value) -> {
+                        if(value) {
+                            outs.add(key);
+                        }
+                    });
+
+                    // ToDo: Execute query with inputs and outputs
+                }
             }
         });
     }
@@ -214,56 +234,47 @@ public class QueryPresentation extends AnchorPane {
         final Consumer<String> changeTitledPaneVisibility = (query) -> {
             // Get related FXML nodes
             final TitledPane inputOutputPane = (TitledPane) lookup("#inputOutputPane");
-            final VBox inputBox = (VBox) inputOutputPane.lookup("#inputBox");
-            final VBox outputBox = (VBox) inputOutputPane.lookup("#outputBox");
             final IBackendDriver backendDriver;
 
             // Check if the query is a refinement and that the engine is set to Reveaal
             if (query.startsWith("refinement") && (backendDriver = BackendDriverManager.getInstance()) instanceof ReveaalDriver) {
-                //Get inputs and outputs
-                Pair<ArrayList<String>, ArrayList<String>> inputOutputs = ((ReveaalDriver) backendDriver).getInputOutputs(query);
+                updateInputOutputPaneButton = (JFXRippler) inputOutputPane.lookup("#inputOutputPaneUpdateButton");
+                final FontIcon updateInputOutputPaneButtonIcon = (FontIcon) lookup("#inputOutputPaneUpdateButtonIcon");
+                updateInputOutputPaneButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I900));
 
-                // Remove checkboxes
-                Platform.runLater(() -> {
-                    inputBox.getChildren().clear();
-                    outputBox.getChildren().clear();
+                final JFXSpinner progressIndicator = (JFXSpinner) lookup("#inputOutputProgressIndicator");
+                progressIndicator.setVisible(false);
+
+                updateInputOutputPaneButton.setCursor(Cursor.HAND);
+                updateInputOutputPaneButton.setRipplerFill(Color.GREY.getColor(Color.Intensity.I500));
+
+                updateInputOutputPaneButton.setMaskType(JFXRippler.RipplerMask.CIRCLE);
+
+                updateInputOutputPaneButton.setOnMousePressed(event -> {
+                    progressIndicator.setVisible(true);
+                    updateInputOutputPaneButton.setDisable(true);
+                    updateInputOutputPaneButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I700));
+
+                    updateInputOutputs((ReveaalDriver) backendDriver);
+
+                    progressIndicator.setVisible(false);
+                    updateInputOutputPaneButton.setDisable(false);
+                    updateInputOutputPaneButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I900));
                 });
-
-                // Clear input and output lists
-                inputs.clear();
-                outputs.clear();
 
                 // Make the input/output pane visible
                 Platform.runLater(() -> {
                     inputOutputPane.setVisible(true);
                     inputOutputPane.setAnimated(true);
+                    inputOutputPane.setManaged(true);
                 });
-
-                // Add inputs to list and as checkboxes in UI
-                for (String input : inputOutputs.getKey()) {
-                    Platform.runLater(() -> {
-                        JFXCheckBox checkBox = new JFXCheckBox(input);
-                        checkBox.setId(input);
-                        inputBox.getChildren().add(checkBox);
-                    });
-                    inputs.add(input);
-                }
-
-                // Add outputs to list and as checkboxes in UI
-                for (String output : inputOutputs.getValue()) {
-                    Platform.runLater(() -> {
-                        JFXCheckBox checkBox = new JFXCheckBox(output);
-                        checkBox.setId(output);
-                        outputBox.getChildren().add(checkBox);
-                    });
-                    outputs.add(output);
-                }
             } else {
                 // Hide the input/output pane
                 Platform.runLater(() -> {
                     inputOutputPane.setVisible(false);
                     inputOutputPane.setAnimated(false);
                     inputOutputPane.setExpanded(false);
+                    inputOutputPane.setManaged(false);
                 });
             }
         };
@@ -272,16 +283,66 @@ public class QueryPresentation extends AnchorPane {
         changeTitledPaneVisibility.accept(query.getQuery());
 
         // Make sure the input/output pane is updated whenever the query text field loses focus
-        final JFXTextField queryTextField = (JFXTextField) lookup("#query");
+        /*final JFXTextField queryTextField = (JFXTextField) lookup("#query");
         queryTextField.focusedProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue) {
                 changeTitledPaneVisibility.accept(query.getQuery());
             }
-        });
+        });*/
 
         // Make sure the input/output pane is updated whenever the backend is changed
         BackendDriverManager.getSupportsInputOutputs().addListener((observable, oldValue, newValue) -> {
             changeTitledPaneVisibility.accept(query.getQuery());
         });
+    }
+
+    private void updateInputOutputs(ReveaalDriver backendDriver) {
+        final TitledPane inputOutputPane = (TitledPane) lookup("#inputOutputPane");
+        final VBox inputBox = (VBox) inputOutputPane.lookup("#inputBox");
+        final VBox outputBox = (VBox) inputOutputPane.lookup("#outputBox");
+
+        //Get inputs and outputs
+        Pair<ArrayList<String>, ArrayList<String>> inputOutputs = backendDriver.getInputOutputs(query.getQuery());
+        // Remove checkboxes
+        Platform.runLater(() -> {
+            inputBox.getChildren().clear();
+            outputBox.getChildren().clear();
+        });
+
+        // Clear input and output lists
+        inputs.clear();
+        outputs.clear();
+
+        final Consumer<Pair<String, Boolean>> updateInputState = (in) -> {
+            inputs.replace(in.getKey(), in.getValue());
+        };
+
+        final Consumer<Pair<String, Boolean>> updateOutputState = (out) -> {
+            inputs.replace(out.getKey(), out.getValue());
+        };
+
+        // Add inputs to list and as checkboxes in UI
+        for (String input : inputOutputs.getKey()) {
+            addInputOrOutput(updateInputState, inputBox, input, inputs);
+        }
+
+        // Add outputs to list and as checkboxes in UI
+        for (String output : inputOutputs.getValue()) {
+            addInputOrOutput(updateOutputState, outputBox, output, outputs);
+        }
+
+        inputOutputs.getValue().forEach(System.out::println);
+    }
+
+    private void addInputOrOutput(Consumer<Pair<String, Boolean>> updateInputOrOutputState, VBox inputOrOutputBox, String inputOrOutput, Map<String, Boolean> inputsOrOutputs) {
+        Platform.runLater(() -> {
+            JFXCheckBox checkBox = new JFXCheckBox(inputOrOutput);
+            checkBox.setSelected(true);
+            checkBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
+                updateInputOrOutputState.accept(new Pair<>(inputOrOutput, newValue));
+            });
+            inputOrOutputBox.getChildren().add(checkBox);
+        });
+        inputsOrOutputs.put(inputOrOutput, true);
     }
 }

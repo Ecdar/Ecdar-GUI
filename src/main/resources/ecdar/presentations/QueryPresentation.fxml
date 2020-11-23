@@ -25,7 +25,7 @@
     </StackPane>
 
     <JFXTextField id="query" HBox.hgrow="ALWAYS"
-                  AnchorPane.topAnchor="0"
+                  AnchorPane.topAnchor="4"
                   AnchorPane.rightAnchor="128"
                   AnchorPane.leftAnchor="$STATUS_INDICATOR_WIDTH"
                   minHeight="32" maxHeight="32"
@@ -65,22 +65,39 @@
 
     <TitledPane id="inputOutputPane" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="96"
                 AnchorPane.bottomAnchor="0.0" expanded="false" alignment="CENTER" visible="false">
-        <GridPane AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="80"
+        <GridPane AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"
                   AnchorPane.bottomAnchor="0.0">
+            <rowConstraints>
+                <RowConstraints vgrow="ALWAYS"/>
+                <RowConstraints vgrow="ALWAYS"/>
+            </rowConstraints>
             <columnConstraints>
-                <ColumnConstraints hgrow="ALWAYS" percentWidth="15.0"/>
-                <ColumnConstraints hgrow="ALWAYS" percentWidth="32.5"/>
-                <ColumnConstraints hgrow="ALWAYS" percentWidth="5.0"/>
-                <ColumnConstraints hgrow="ALWAYS" percentWidth="32.5"/>
-                <ColumnConstraints hgrow="ALWAYS" percentWidth="15.0"/>
+                <ColumnConstraints hgrow="ALWAYS" percentWidth="10.0"/>
+                <ColumnConstraints hgrow="ALWAYS" percentWidth="35.0"/>
+                <ColumnConstraints hgrow="ALWAYS" percentWidth="10.0" halignment="CENTER"/>
+                <ColumnConstraints hgrow="ALWAYS" percentWidth="35.0"/>
+                <ColumnConstraints hgrow="ALWAYS" percentWidth="10.0"/>
             </columnConstraints>
+
+            <StackPane GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="5">
+                <JFXSpinner id="inputOutputProgressIndicator" radius="20"/>
+
+                <JFXRippler id="inputOutputPaneUpdateButton">
+                    <StackPane minWidth="40" maxWidth="40" minHeight="40" maxHeight="40">
+                        <FontIcon id="inputOutputPaneUpdateButtonIcon" iconLiteral="gmi-autorenew" iconSize="24"/>
+                    </StackPane>
+                </JFXRippler>
+            </StackPane>
+
             <VBox id="inputBox" alignment="CENTER_LEFT" GridPane.columnIndex="1" AnchorPane.leftAnchor="0.0"
-                  AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="256" AnchorPane.bottomAnchor="0.0">
+                  AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="256" AnchorPane.bottomAnchor="0.0" spacing="8"
+                  GridPane.rowIndex="1">
                 <!--Inputs go here-->
             </VBox>
-            <Separator orientation="VERTICAL" GridPane.columnIndex="2"/>
+            <Separator orientation="VERTICAL" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
             <VBox id="outputBox" alignment="CENTER_LEFT" GridPane.columnIndex="3" AnchorPane.leftAnchor="0.0"
-                  AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="256" AnchorPane.bottomAnchor="0.0">
+                  AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="256" AnchorPane.bottomAnchor="0.0" spacing="8"
+                  GridPane.rowIndex="1">
                 <!--Outputs go here-->
             </VBox>
         </GridPane>
