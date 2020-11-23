@@ -5,6 +5,7 @@
 <?import java.lang.Double?>
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.control.Separator?>
+<?import javafx.scene.text.Text?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="AnchorPane">
@@ -65,18 +66,22 @@
 
     <TitledPane id="inputOutputPane" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="96"
                 AnchorPane.bottomAnchor="0.0" expanded="false" alignment="CENTER" visible="false">
+        <graphic>
+            <FontIcon id="inputOutputPaneExpandIcon" iconLiteral="gmi-keyboard-arrow-down"  iconSize="18"/>
+        </graphic>
         <GridPane AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"
                   AnchorPane.bottomAnchor="0.0">
             <rowConstraints>
                 <RowConstraints vgrow="ALWAYS"/>
                 <RowConstraints vgrow="ALWAYS"/>
+                <RowConstraints vgrow="ALWAYS"/>
             </rowConstraints>
             <columnConstraints>
-                <ColumnConstraints hgrow="ALWAYS" percentWidth="10.0"/>
-                <ColumnConstraints hgrow="ALWAYS" percentWidth="35.0"/>
+                <ColumnConstraints hgrow="ALWAYS" percentWidth="5.0"/>
+                <ColumnConstraints hgrow="NEVER" percentWidth="40.0" halignment="CENTER"/>
                 <ColumnConstraints hgrow="ALWAYS" percentWidth="10.0" halignment="CENTER"/>
-                <ColumnConstraints hgrow="ALWAYS" percentWidth="35.0"/>
-                <ColumnConstraints hgrow="ALWAYS" percentWidth="10.0"/>
+                <ColumnConstraints hgrow="NEVER" percentWidth="40.0" halignment="CENTER"/>
+                <ColumnConstraints hgrow="ALWAYS" percentWidth="5.0"/>
             </columnConstraints>
 
             <StackPane GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="5">
@@ -89,15 +94,29 @@
                 </JFXRippler>
             </StackPane>
 
+            <Separator orientation="VERTICAL" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+
+            <VBox GridPane.rowIndex="1" GridPane.columnIndex="1" AnchorPane.leftAnchor="0.0"
+                  AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="256" AnchorPane.bottomAnchor="0.0" alignment="CENTER">
+                <Text wrappingWidth="96" textAlignment="CENTER">Extra outputs on left side</Text>
+                <Separator minHeight="20" maxHeight="20"/>
+            </VBox>
             <VBox id="inputBox" alignment="CENTER_LEFT" GridPane.columnIndex="1" AnchorPane.leftAnchor="0.0"
                   AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="256" AnchorPane.bottomAnchor="0.0" spacing="8"
-                  GridPane.rowIndex="1">
+                  GridPane.rowIndex="2">
                 <!--Inputs go here-->
             </VBox>
-            <Separator orientation="VERTICAL" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+
+            <Separator orientation="VERTICAL" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
+
+            <VBox GridPane.rowIndex="1" GridPane.columnIndex="3" AnchorPane.leftAnchor="0.0"
+                  AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="256" AnchorPane.bottomAnchor="0.0" alignment="CENTER">
+                <Text wrappingWidth="96" textAlignment="CENTER">Extra inputs on right side</Text>
+                <Separator minHeight="20" maxHeight="20"/>
+            </VBox>
             <VBox id="outputBox" alignment="CENTER_LEFT" GridPane.columnIndex="3" AnchorPane.leftAnchor="0.0"
                   AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="256" AnchorPane.bottomAnchor="0.0" spacing="8"
-                  GridPane.rowIndex="1">
+                  GridPane.rowIndex="2">
                 <!--Outputs go here-->
             </VBox>
         </GridPane>

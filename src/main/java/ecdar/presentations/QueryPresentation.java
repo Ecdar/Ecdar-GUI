@@ -11,6 +11,7 @@ import ecdar.controllers.CanvasController;
 import ecdar.utility.colors.Color;
 import javafx.application.Platform;
 import javafx.beans.binding.When;
+import javafx.beans.property.BooleanProperty;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.control.TitledPane;
@@ -142,26 +143,50 @@ public class QueryPresentation extends AnchorPane {
                 query.cancel();
             } else {
                 if (inputs.isEmpty() && outputs.isEmpty()) {
+                    setExtraInputOutputsOnQuery(false);
                     query.run();
                 } else {
-                    ArrayList<String> ins = new ArrayList<>();
-                    ArrayList<String> outs = new ArrayList<>();
-
-                    inputs.forEach((key, value) -> {
-                        if(value) {
-                            ins.add(key);
-                        }
-                    });
-                    outputs.forEach((key, value) -> {
-                        if(value) {
-                            outs.add(key);
-                        }
-                    });
-
-                    // ToDo: Execute query with inputs and outputs
+                    setExtraInputOutputsOnQuery(true);
+                    query.run();
                 }
             }
         });
+    }
+
+    private void setExtraInputOutputsOnQuery(Boolean shouldQueryWithExtraInputOutputs) {
+        if(!shouldQueryWithExtraInputOutputs) {
+            query.setExtraInputOutputs(null);
+            return;
+        }
+
+        StringBuilder extraInputOutputs = new StringBuilder("\"");
+
+        outputs.forEach((key, value) -> {
+            if(value) {
+                extraInputOutputs.append(key);
+            }
+        });
+
+        if( extraInputOutputs.length() > 1 ) {
+            extraInputOutputs.setLength( extraInputOutputs.length() - 1 );
+        }
+
+        extraInputOutputs.append("\" \"");
+
+        inputs.forEach((key, value) -> {
+            if(value) {
+                extraInputOutputs.append(key);
+                extraInputOutputs.append(",");
+            }
+        });
+
+        if( extraInputOutputs.length() > 4 ) {
+            extraInputOutputs.setLength( extraInputOutputs.length() - 1 );
+        }
+
+        extraInputOutputs.append("\"");
+
+        query.setExtraInputOutputs(extraInputOutputs.toString());
     }
 
     private void initializeProgressIndicator() {
@@ -282,13 +307,24 @@ public class QueryPresentation extends AnchorPane {
         // Run the consumer to ensure that the input/output pane is displayed for existing refinement queries
         changeTitledPaneVisibility.accept(query.getQuery());
 
-        // Make sure the input/output pane is updated whenever the query text field loses focus
-        /*final JFXTextField queryTextField = (JFXTextField) lookup("#query");
+        // Bind the expand icon to the expand property of the pane
+        final TitledPane inputOutputPane = (TitledPane) lookup("#inputOutputPane");
+        inputOutputPane.expandedProperty().addListener((observable, oldValue, newValue) -> {
+            FontIcon expandIcon = (FontIcon) inputOutputPane.lookup("#inputOutputPaneExpandIcon");
+            if(!newValue) {
+                expandIcon.setIconLiteral("gmi-keyboard-arrow-down");
+            } else {
+                expandIcon.setIconLiteral("gmi-keyboard-arrow-up");
+            }
+        });
+
+        // Make sure the input/output pane is added whenever the query text field loses focus
+        final JFXTextField queryTextField = (JFXTextField) lookup("#query");
         queryTextField.focusedProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue) {
                 changeTitledPaneVisibility.accept(query.getQuery());
             }
-        });*/
+        });
 
         // Make sure the input/output pane is updated whenever the backend is changed
         BackendDriverManager.getSupportsInputOutputs().addListener((observable, oldValue, newValue) -> {
@@ -318,7 +354,7 @@ public class QueryPresentation extends AnchorPane {
         };
 
         final Consumer<Pair<String, Boolean>> updateOutputState = (out) -> {
-            inputs.replace(out.getKey(), out.getValue());
+            outputs.replace(out.getKey(), out.getValue());
         };
 
         // Add inputs to list and as checkboxes in UI
