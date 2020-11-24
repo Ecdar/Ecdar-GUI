@@ -11,7 +11,6 @@ import ecdar.controllers.CanvasController;
 import ecdar.utility.colors.Color;
 import javafx.application.Platform;
 import javafx.beans.binding.When;
-import javafx.beans.property.BooleanProperty;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.control.TitledPane;
@@ -34,8 +33,6 @@ public class QueryPresentation extends AnchorPane {
     private final Map<String, Boolean> inputs = new HashMap<>();
     private final Map<String, Boolean> outputs = new HashMap<>();
     private final Tooltip tooltip = new Tooltip();
-    private JFXRippler actionButton;
-    private JFXRippler updateInputOutputPaneButton;
 
     public QueryPresentation(final Query query) {
         new EcdarFXMLLoader().loadAndGetController("QueryPresentation.fxml", this);
@@ -111,7 +108,7 @@ public class QueryPresentation extends AnchorPane {
 
     private void initializeActionButton() {
         // Find the action icon
-        actionButton = (JFXRippler) lookup("#actionButton");
+        JFXRippler actionButton = (JFXRippler) lookup("#actionButton");
         final FontIcon actionButtonIcon = (FontIcon) lookup("#actionButtonIcon");
 
         actionButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I900));
@@ -223,7 +220,7 @@ public class QueryPresentation extends AnchorPane {
 
             // Check if the query is a refinement and that the engine is set to Reveaal
             if (query.startsWith("refinement") && (backendDriver = BackendDriverManager.getInstance()) instanceof ReveaalDriver) {
-                initiateUpdateInputOutputButton(inputOutputPane, (ReveaalDriver) backendDriver);
+                initiateRefreshInputOutputButton(inputOutputPane, (ReveaalDriver) backendDriver);
 
                 // Make the input/output pane visible
                 inputOutputPaneVisibility(true);
@@ -274,38 +271,41 @@ public class QueryPresentation extends AnchorPane {
         });
     }
 
-    private void initiateUpdateInputOutputButton(TitledPane inputOutputPane, ReveaalDriver backendDriver) {
-        updateInputOutputPaneButton = (JFXRippler) inputOutputPane.lookup("#inputOutputPaneUpdateButton");
-        final FontIcon updateInputOutputPaneButtonIcon = (FontIcon) lookup("#inputOutputPaneUpdateButtonIcon");
-        updateInputOutputPaneButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I900));
+    private void initiateRefreshInputOutputButton(TitledPane inputOutputPane, ReveaalDriver backendDriver) {
+        Platform.runLater(() -> {
+            final JFXRippler refreshInputOutputPaneButton = (JFXRippler) inputOutputPane.lookup("#inputOutputPaneUpdateButton");
+            final FontIcon refreshInputOutputPaneButtonIcon = (FontIcon) lookup("#inputOutputPaneUpdateButtonIcon");
 
-        final JFXSpinner progressIndicator = (JFXSpinner) lookup("#inputOutputProgressIndicator");
-        progressIndicator.setVisible(false);
-
-        updateInputOutputPaneButton.setCursor(Cursor.HAND);
-        updateInputOutputPaneButton.setRipplerFill(Color.GREY.getColor(Color.Intensity.I500));
-
-        updateInputOutputPaneButton.setMaskType(JFXRippler.RipplerMask.CIRCLE);
-
-        updateInputOutputPaneButton.setOnMousePressed(event -> {
-            progressIndicator.setVisible(true);
-            updateInputOutputPaneButton.setDisable(true);
-            updateInputOutputPaneButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I700));
-
-            updateInputOutputs(inputOutputPane, backendDriver);
-
+            final JFXSpinner progressIndicator = (JFXSpinner) lookup("#inputOutputProgressIndicator");
             progressIndicator.setVisible(false);
-            updateInputOutputPaneButton.setDisable(false);
-            updateInputOutputPaneButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I900));
-        });
 
-        // Install tooltip on refresh button
-        final Tooltip buttonTooltip = new Tooltip("Refresh inputs and outputs");
-        buttonTooltip.setWrapText(true);
-        Tooltip.install(updateInputOutputPaneButton, buttonTooltip);
+            // Set the initial state of the refresh button
+            refreshInputOutputPaneButton.setCursor(Cursor.HAND);
+            refreshInputOutputPaneButton.setRipplerFill(Color.GREY.getColor(Color.Intensity.I500));
+            refreshInputOutputPaneButton.setMaskType(JFXRippler.RipplerMask.CIRCLE);
+            refreshInputOutputPaneButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I900));
+
+            // Disable when clicked and enable when inputs and outputs have been updated
+            refreshInputOutputPaneButton.setOnMousePressed(event -> {
+                progressIndicator.setVisible(true);
+                refreshInputOutputPaneButton.setDisable(true);
+                refreshInputOutputPaneButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I700));
+
+                refreshInputOutputs(inputOutputPane, backendDriver);
+
+                progressIndicator.setVisible(false);
+                refreshInputOutputPaneButton.setDisable(false);
+                refreshInputOutputPaneButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I900));
+            });
+
+            // Install tooltip on refresh button
+            final Tooltip buttonTooltip = new Tooltip("Refresh inputs and outputs");
+            buttonTooltip.setWrapText(true);
+            Tooltip.install(refreshInputOutputPaneButton, buttonTooltip);
+        });
     }
 
-    private void updateInputOutputs(TitledPane inputOutputPane, ReveaalDriver backendDriver) {
+    private void refreshInputOutputs(TitledPane inputOutputPane, ReveaalDriver backendDriver) {
         final VBox inputBox = (VBox) inputOutputPane.lookup("#inputBox");
         final VBox outputBox = (VBox) inputOutputPane.lookup("#outputBox");
 
