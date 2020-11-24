@@ -100,9 +100,9 @@
                 <Text wrappingWidth="96" textAlignment="CENTER">Extra outputs on left side</Text>
                 <Separator minHeight="20" maxHeight="20"/>
             </VBox>
-            <VBox id="inputBox" GridPane.rowIndex="1" GridPane.columnIndex="1" alignment="CENTER_LEFT" AnchorPane.leftAnchor="0.0"
+            <VBox id="outputBox" GridPane.rowIndex="1" GridPane.columnIndex="1" alignment="CENTER_LEFT" AnchorPane.leftAnchor="0.0"
                   AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="256" AnchorPane.bottomAnchor="0.0" spacing="8">
-                <!--Inputs go here-->
+                <!--Outputs go here-->
             </VBox>
 
             <Separator orientation="VERTICAL" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
@@ -112,9 +112,9 @@
                 <Text wrappingWidth="96" textAlignment="CENTER">Extra inputs on right side</Text>
                 <Separator minHeight="20" maxHeight="20"/>
             </VBox>
-            <VBox id="outputBox" GridPane.rowIndex="1" GridPane.columnIndex="3" alignment="CENTER_LEFT" AnchorPane.leftAnchor="0.0"
+            <VBox id="inputBox" GridPane.rowIndex="1" GridPane.columnIndex="3" alignment="CENTER_LEFT" AnchorPane.leftAnchor="0.0"
                   AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="256" AnchorPane.bottomAnchor="0.0" spacing="8">
-                <!--Outputs go here-->
+                <!--Inputs go here-->
             </VBox>
         </GridPane>
     </TitledPane>

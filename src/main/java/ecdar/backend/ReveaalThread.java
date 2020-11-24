@@ -12,7 +12,7 @@ public class ReveaalThread extends BackendThread {
     }
 
     public void run() {
-        ProcessBuilder pb = new ProcessBuilder("src/Reveaal", Ecdar.projectDirectory.get(), query.replaceAll("\\s", "")); // Space added to signal EOI
+        ProcessBuilder pb = new ProcessBuilder("src/Reveaal", Ecdar.projectDirectory.get(), query); // Space added to signal EOI
         pb.redirectErrorStream(true);
         try {
             //Start the j-Ecdar process

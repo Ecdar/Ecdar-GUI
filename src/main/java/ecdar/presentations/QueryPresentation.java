@@ -322,6 +322,12 @@ public class QueryPresentation extends AnchorPane {
         inputs.clear();
         outputs.clear();
 
+        inputs.put("1", true);
+        inputs.put("2", true);
+        inputs.put("3", false);
+        inputs.put("4", true);
+        inputs.put("5", true);
+
         final Consumer<Pair<String, Boolean>> updateInputState = (in) -> {
             inputs.replace(in.getKey(), in.getValue());
         };
@@ -363,32 +369,28 @@ public class QueryPresentation extends AnchorPane {
 
         StringBuilder extraInputOutputs = new StringBuilder("\"");
 
-        outputs.forEach((key, value) -> {
-            if(value) {
-                extraInputOutputs.append(key);
-            }
-        });
-
-        if( extraInputOutputs.length() > 1 ) {
-            extraInputOutputs.setLength( extraInputOutputs.length() - 1 );
-        }
-
+        // Append outputs separated by commas
+        appendMapItems(extraInputOutputs, outputs);
         extraInputOutputs.append("\" \"");
 
-        inputs.forEach((key, value) -> {
-            if(value) {
+        // Append inputs separated by commas
+        appendMapItems(extraInputOutputs, inputs);
+        extraInputOutputs.append("\"");
+
+        query.setExtraInputOutputs(extraInputOutputs.toString());
+    }
+
+    private void appendMapItems(StringBuilder extraInputOutputs, Map<String, Boolean> map) {
+        map.forEach((key, value) -> {
+            if (value) {
                 extraInputOutputs.append(key);
                 extraInputOutputs.append(",");
             }
         });
 
-        if( extraInputOutputs.length() > 4 ) {
-            extraInputOutputs.setLength( extraInputOutputs.length() - 1 );
+        if (extraInputOutputs.lastIndexOf(",") + 1 == extraInputOutputs.length()) {
+            extraInputOutputs.setLength(extraInputOutputs.length() - 1);
         }
-
-        extraInputOutputs.append("\"");
-
-        query.setExtraInputOutputs(extraInputOutputs.toString());
     }
 
     private void runQuery() {
