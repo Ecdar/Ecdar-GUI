@@ -63,7 +63,7 @@ public class QueryPresentation extends AnchorPane {
 
         queryTextField.setOnKeyPressed(CanvasController.getLeaveTextAreaKeyHandler(keyEvent -> {
             if (keyEvent.getCode().equals(KeyCode.ENTER)) {
-                query.run();
+                runQuery();
             }
         }));
         commentTextField.setOnKeyPressed(CanvasController.getLeaveTextAreaKeyHandler());
@@ -142,51 +142,9 @@ public class QueryPresentation extends AnchorPane {
             if (query.getQueryState().equals(QueryState.RUNNING)) {
                 query.cancel();
             } else {
-                if (inputs.isEmpty() && outputs.isEmpty()) {
-                    setExtraInputOutputsOnQuery(false);
-                    query.run();
-                } else {
-                    setExtraInputOutputsOnQuery(true);
-                    query.run();
-                }
+                runQuery();
             }
         });
-    }
-
-    private void setExtraInputOutputsOnQuery(Boolean shouldQueryWithExtraInputOutputs) {
-        if(!shouldQueryWithExtraInputOutputs) {
-            query.setExtraInputOutputs(null);
-            return;
-        }
-
-        StringBuilder extraInputOutputs = new StringBuilder("\"");
-
-        outputs.forEach((key, value) -> {
-            if(value) {
-                extraInputOutputs.append(key);
-            }
-        });
-
-        if( extraInputOutputs.length() > 1 ) {
-            extraInputOutputs.setLength( extraInputOutputs.length() - 1 );
-        }
-
-        extraInputOutputs.append("\" \"");
-
-        inputs.forEach((key, value) -> {
-            if(value) {
-                extraInputOutputs.append(key);
-                extraInputOutputs.append(",");
-            }
-        });
-
-        if( extraInputOutputs.length() > 4 ) {
-            extraInputOutputs.setLength( extraInputOutputs.length() - 1 );
-        }
-
-        extraInputOutputs.append("\"");
-
-        query.setExtraInputOutputs(extraInputOutputs.toString());
     }
 
     private void initializeProgressIndicator() {
@@ -256,51 +214,22 @@ public class QueryPresentation extends AnchorPane {
     }
 
     public void initializeInputOutputPane() {
+        final TitledPane inputOutputPane = (TitledPane) lookup("#inputOutputPane");
+        inputOutputPane.setAnimated(true);
+
         final Consumer<String> changeTitledPaneVisibility = (query) -> {
             // Get related FXML nodes
-            final TitledPane inputOutputPane = (TitledPane) lookup("#inputOutputPane");
             final IBackendDriver backendDriver;
 
             // Check if the query is a refinement and that the engine is set to Reveaal
             if (query.startsWith("refinement") && (backendDriver = BackendDriverManager.getInstance()) instanceof ReveaalDriver) {
-                updateInputOutputPaneButton = (JFXRippler) inputOutputPane.lookup("#inputOutputPaneUpdateButton");
-                final FontIcon updateInputOutputPaneButtonIcon = (FontIcon) lookup("#inputOutputPaneUpdateButtonIcon");
-                updateInputOutputPaneButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I900));
-
-                final JFXSpinner progressIndicator = (JFXSpinner) lookup("#inputOutputProgressIndicator");
-                progressIndicator.setVisible(false);
-
-                updateInputOutputPaneButton.setCursor(Cursor.HAND);
-                updateInputOutputPaneButton.setRipplerFill(Color.GREY.getColor(Color.Intensity.I500));
-
-                updateInputOutputPaneButton.setMaskType(JFXRippler.RipplerMask.CIRCLE);
-
-                updateInputOutputPaneButton.setOnMousePressed(event -> {
-                    progressIndicator.setVisible(true);
-                    updateInputOutputPaneButton.setDisable(true);
-                    updateInputOutputPaneButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I700));
-
-                    updateInputOutputs((ReveaalDriver) backendDriver);
-
-                    progressIndicator.setVisible(false);
-                    updateInputOutputPaneButton.setDisable(false);
-                    updateInputOutputPaneButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I900));
-                });
+                initiateUpdateInputOutputButton(inputOutputPane, (ReveaalDriver) backendDriver);
 
                 // Make the input/output pane visible
-                Platform.runLater(() -> {
-                    inputOutputPane.setVisible(true);
-                    inputOutputPane.setAnimated(true);
-                    inputOutputPane.setManaged(true);
-                });
+                inputOutputPaneVisibility(true);
             } else {
                 // Hide the input/output pane
-                Platform.runLater(() -> {
-                    inputOutputPane.setVisible(false);
-                    inputOutputPane.setAnimated(false);
-                    inputOutputPane.setExpanded(false);
-                    inputOutputPane.setManaged(false);
-                });
+                inputOutputPaneVisibility(false);
             }
         };
 
@@ -308,7 +237,6 @@ public class QueryPresentation extends AnchorPane {
         changeTitledPaneVisibility.accept(query.getQuery());
 
         // Bind the expand icon to the expand property of the pane
-        final TitledPane inputOutputPane = (TitledPane) lookup("#inputOutputPane");
         inputOutputPane.expandedProperty().addListener((observable, oldValue, newValue) -> {
             FontIcon expandIcon = (FontIcon) inputOutputPane.lookup("#inputOutputPaneExpandIcon");
             if(!newValue) {
@@ -332,13 +260,58 @@ public class QueryPresentation extends AnchorPane {
         });
     }
 
-    private void updateInputOutputs(ReveaalDriver backendDriver) {
-        final TitledPane inputOutputPane = (TitledPane) lookup("#inputOutputPane");
+    private void inputOutputPaneVisibility(Boolean visibility) {
+        Platform.runLater(() -> {
+            final TitledPane inputOutputPane = (TitledPane) lookup("#inputOutputPane");
+
+            // Hide the inputOutputPane and collapse the space it would occupy
+            inputOutputPane.setVisible(visibility);
+            inputOutputPane.setManaged(visibility);
+
+            if (!visibility) {
+                inputOutputPane.setExpanded(false);
+            }
+        });
+    }
+
+    private void initiateUpdateInputOutputButton(TitledPane inputOutputPane, ReveaalDriver backendDriver) {
+        updateInputOutputPaneButton = (JFXRippler) inputOutputPane.lookup("#inputOutputPaneUpdateButton");
+        final FontIcon updateInputOutputPaneButtonIcon = (FontIcon) lookup("#inputOutputPaneUpdateButtonIcon");
+        updateInputOutputPaneButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I900));
+
+        final JFXSpinner progressIndicator = (JFXSpinner) lookup("#inputOutputProgressIndicator");
+        progressIndicator.setVisible(false);
+
+        updateInputOutputPaneButton.setCursor(Cursor.HAND);
+        updateInputOutputPaneButton.setRipplerFill(Color.GREY.getColor(Color.Intensity.I500));
+
+        updateInputOutputPaneButton.setMaskType(JFXRippler.RipplerMask.CIRCLE);
+
+        updateInputOutputPaneButton.setOnMousePressed(event -> {
+            progressIndicator.setVisible(true);
+            updateInputOutputPaneButton.setDisable(true);
+            updateInputOutputPaneButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I700));
+
+            updateInputOutputs(inputOutputPane, backendDriver);
+
+            progressIndicator.setVisible(false);
+            updateInputOutputPaneButton.setDisable(false);
+            updateInputOutputPaneButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I900));
+        });
+
+        // Install tooltip on refresh button
+        final Tooltip buttonTooltip = new Tooltip("Refresh inputs and outputs");
+        buttonTooltip.setWrapText(true);
+        Tooltip.install(updateInputOutputPaneButton, buttonTooltip);
+    }
+
+    private void updateInputOutputs(TitledPane inputOutputPane, ReveaalDriver backendDriver) {
         final VBox inputBox = (VBox) inputOutputPane.lookup("#inputBox");
         final VBox outputBox = (VBox) inputOutputPane.lookup("#outputBox");
 
         //Get inputs and outputs
         Pair<ArrayList<String>, ArrayList<String>> inputOutputs = backendDriver.getInputOutputs(query.getQuery());
+
         // Remove checkboxes
         Platform.runLater(() -> {
             inputBox.getChildren().clear();
@@ -380,5 +353,46 @@ public class QueryPresentation extends AnchorPane {
             inputOrOutputBox.getChildren().add(checkBox);
         });
         inputsOrOutputs.put(inputOrOutput, true);
+    }
+
+    private void setExtraInputOutputsOnQuery(Boolean shouldRunQueryWithExtraInputOutputs) {
+        if(!shouldRunQueryWithExtraInputOutputs) {
+            query.setExtraInputOutputs(null);
+            return;
+        }
+
+        StringBuilder extraInputOutputs = new StringBuilder("\"");
+
+        outputs.forEach((key, value) -> {
+            if(value) {
+                extraInputOutputs.append(key);
+            }
+        });
+
+        if( extraInputOutputs.length() > 1 ) {
+            extraInputOutputs.setLength( extraInputOutputs.length() - 1 );
+        }
+
+        extraInputOutputs.append("\" \"");
+
+        inputs.forEach((key, value) -> {
+            if(value) {
+                extraInputOutputs.append(key);
+                extraInputOutputs.append(",");
+            }
+        });
+
+        if( extraInputOutputs.length() > 4 ) {
+            extraInputOutputs.setLength( extraInputOutputs.length() - 1 );
+        }
+
+        extraInputOutputs.append("\"");
+
+        query.setExtraInputOutputs(extraInputOutputs.toString());
+    }
+
+    private void runQuery() {
+        setExtraInputOutputsOnQuery(!inputs.isEmpty() || !outputs.isEmpty());
+        query.run();
     }
 }
