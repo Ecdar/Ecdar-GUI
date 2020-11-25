@@ -6,7 +6,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 public class BackendDriverManager {
     private static IBackendDriver instance = null;
     private static BackendNames currentBackend = BackendNames.jEcdar;
-    private static BooleanProperty supportsInputOutputParameters = new SimpleBooleanProperty();
+    private static final BooleanProperty supportsInputOutputParameters = new SimpleBooleanProperty();
 
     public static synchronized IBackendDriver getInstance() {
 

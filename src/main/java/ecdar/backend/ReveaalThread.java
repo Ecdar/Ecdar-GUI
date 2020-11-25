@@ -12,7 +12,7 @@ public class ReveaalThread extends BackendThread {
     }
 
     public void run() {
-        ProcessBuilder pb = new ProcessBuilder("src/Reveaal", Ecdar.projectDirectory.get(), query); // Space added to signal EOI
+        ProcessBuilder pb = new ProcessBuilder("src/Reveaal", Ecdar.projectDirectory.get(), query);
         pb.redirectErrorStream(true);
         try {
             //Start the j-Ecdar process
@@ -22,7 +22,7 @@ public class ReveaalThread extends BackendThread {
             try (
                     var ReveaalReader = new BufferedReader(new InputStreamReader(ReveaalEngineInstance.getInputStream()));
             ) {
-                //Read the result of the query from the j-Ecdar process
+                //Read the result of the query from the Reveaal process
                 String line;
                 QueryState result = QueryState.RUNNING;
                 while ((line = ReveaalReader.readLine()) != null) {
@@ -46,15 +46,7 @@ public class ReveaalThread extends BackendThread {
                         result = QueryState.SYNTAX_ERROR;
                     }
 
-                    if (result.getStatusCode() == QueryState.SUCCESSFUL.getStatusCode()) {
-                        success.accept(true);
-                    } else if (result.getStatusCode() == QueryState.ERROR.getStatusCode()){
-                        success.accept(false);
-                    } else if (result.getStatusCode() == QueryState.SYNTAX_ERROR.getStatusCode()) {
-                        failure.accept(new BackendException.QueryErrorException(line));
-                    } else {
-                        failure.accept(new BackendException.BadBackendQueryException(line));
-                    }
+                    handleResult(result, line);
                 }
             }
         } catch (IOException e) {

@@ -31,7 +31,7 @@ public class jEcdarThread extends BackendThread {
                     var jEcdarWriter = new BufferedWriter(new OutputStreamWriter(jEcdarEngineInstance.getOutputStream()));
             ) {
                 //Run the query with the j-Ecdar process
-                jEcdarWriter.write("-rq -json " + Ecdar.projectDirectory.get() + " " + query.replaceAll("\\s", "") + "\n");
+                jEcdarWriter.write("-rq -json " + Ecdar.projectDirectory.get() + " " + query.replaceAll("\\s", "") + "\n"); // Newline added to signal EOI
                 jEcdarWriter.flush();
 
                 //Read the result of the query from the j-Ecdar process
@@ -52,16 +52,7 @@ public class jEcdarThread extends BackendThread {
                         result = QueryState.SYNTAX_ERROR;
                     }
 
-                    if (result.getStatusCode() == QueryState.SUCCESSFUL.getStatusCode()) {
-                        success.accept(true);
-                    } else if (result.getStatusCode() == QueryState.ERROR.getStatusCode()){
-                        success.accept(false);
-                    } else if (result.getStatusCode() == QueryState.SYNTAX_ERROR.getStatusCode()) {
-                        failure.accept(new BackendException.QueryErrorException(line));
-                    } else {
-                        failure.accept(new BackendException.BadBackendQueryException(line));
-                    }
-
+                    handleResult(result, line);
                 }
             }
         } catch (IOException e) {

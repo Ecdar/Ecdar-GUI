@@ -4,7 +4,6 @@ import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Location;
 import ecdar.abstractions.Project;
-import ecdar.abstractions.QueryState;
 import javafx.util.Pair;
 import org.apache.commons.io.FileUtils;
 
@@ -17,7 +16,6 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
@@ -93,7 +91,7 @@ public class ReveaalDriver implements IBackendDriver {
         // Pair is used as a tuple, not a key-value pair
         Pair<ArrayList<String>, ArrayList<String>> inputOutputs = new Pair<>(new ArrayList<>(), new ArrayList<>());
 
-        ProcessBuilder pb = new ProcessBuilder("src/Reveaal", "-c", Ecdar.projectDirectory.get(), query.replaceAll("\\s", "")); // Space added to signal EOI
+        ProcessBuilder pb = new ProcessBuilder("src/Reveaal", "-c", Ecdar.projectDirectory.get(), query.replaceAll("\\s", ""));
         pb.redirectErrorStream(true);
         try {
             //Start the j-Ecdar process

@@ -63,6 +63,7 @@ public class QueryPresentation extends AnchorPane {
                 runQuery();
             }
         }));
+
         commentTextField.setOnKeyPressed(CanvasController.getLeaveTextAreaKeyHandler());
     }
 
@@ -120,11 +121,10 @@ public class QueryPresentation extends AnchorPane {
         final Consumer<QueryState> updateIcon = (queryState) -> {
             if (queryState.equals(QueryState.RUNNING)) {
                 actionButtonIcon.setIconLiteral("gmi-stop");
-                actionButtonIcon.setIconSize(24);
             } else {
                 actionButtonIcon.setIconLiteral("gmi-play-arrow");
-                actionButtonIcon.setIconSize(24);
             }
+            actionButtonIcon.setIconSize(24);
         };
 
         // Update the icon initially
@@ -236,7 +236,7 @@ public class QueryPresentation extends AnchorPane {
         // Bind the expand icon to the expand property of the pane
         inputOutputPane.expandedProperty().addListener((observable, oldValue, newValue) -> {
             FontIcon expandIcon = (FontIcon) inputOutputPane.lookup("#inputOutputPaneExpandIcon");
-            if(!newValue) {
+            if (!newValue) {
                 expandIcon.setIconLiteral("gmi-keyboard-arrow-down");
             } else {
                 expandIcon.setIconLiteral("gmi-keyboard-arrow-up");
@@ -356,7 +356,7 @@ public class QueryPresentation extends AnchorPane {
     }
 
     private void setExtraInputOutputsOnQuery(Boolean shouldRunQueryWithExtraInputOutputs) {
-        if(!shouldRunQueryWithExtraInputOutputs) {
+        if (!shouldRunQueryWithExtraInputOutputs) {
             query.setExtraInputOutputs(null);
             return;
         }
