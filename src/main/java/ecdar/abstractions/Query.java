@@ -91,7 +91,11 @@ public class Query implements Serializable {
     }
 
     public void setExtraInputOutputs(String extraInputOutputs) {
-        this.extraInputOutputs = extraInputOutputs;
+        if (extraInputOutputs != null && extraInputOutputs.length() < 6) {
+            this.extraInputOutputs = null;
+        } else {
+            this.extraInputOutputs = extraInputOutputs;
+        }
     }
 
     private Engine engine = null;

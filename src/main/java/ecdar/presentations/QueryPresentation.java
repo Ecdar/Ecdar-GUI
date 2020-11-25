@@ -339,8 +339,6 @@ public class QueryPresentation extends AnchorPane {
         for (String output : inputOutputs.getValue()) {
             addInputOrOutput(updateOutputState, outputBox, output, outputs);
         }
-
-        inputOutputs.getValue().forEach(System.out::println);
     }
 
     private void addInputOrOutput(Consumer<Pair<String, Boolean>> updateInputOrOutputState, VBox inputOrOutputBox, String inputOrOutput, Map<String, Boolean> inputsOrOutputs) {

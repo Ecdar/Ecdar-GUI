@@ -15,10 +15,10 @@ public class ReveaalThread extends BackendThread {
         ProcessBuilder pb = new ProcessBuilder("src/Reveaal", Ecdar.projectDirectory.get(), query);
         pb.redirectErrorStream(true);
         try {
-            //Start the j-Ecdar process
+            //Start the Reveaal process
             Process ReveaalEngineInstance = pb.start();
 
-            //Communicate with the j-Ecdar process
+            //Communicate with the Reveaal process
             try (
                     var ReveaalReader = new BufferedReader(new InputStreamReader(ReveaalEngineInstance.getInputStream()));
             ) {
