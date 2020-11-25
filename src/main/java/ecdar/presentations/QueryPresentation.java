@@ -322,12 +322,6 @@ public class QueryPresentation extends AnchorPane {
         inputs.clear();
         outputs.clear();
 
-        inputs.put("1", true);
-        inputs.put("2", true);
-        inputs.put("3", false);
-        inputs.put("4", true);
-        inputs.put("5", true);
-
         final Consumer<Pair<String, Boolean>> updateInputState = (in) -> {
             inputs.replace(in.getKey(), in.getValue());
         };
