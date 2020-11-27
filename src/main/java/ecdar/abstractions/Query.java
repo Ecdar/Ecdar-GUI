@@ -9,6 +9,7 @@ import com.uppaal.engine.Engine;
 import javafx.application.Platform;
 import javafx.beans.property.*;
 
+import java.util.ArrayList;
 import java.util.function.Consumer;
 
 public class Query implements Serializable {
@@ -21,6 +22,7 @@ public class Query implements Serializable {
     private final StringProperty comment = new SimpleStringProperty("");
     private final SimpleBooleanProperty isPeriodic = new SimpleBooleanProperty(false);
     private final StringProperty errors = new SimpleStringProperty("");
+    private String extraInputOutputs;
     private Consumer<Boolean> runQuery;
     private BackendThread backendThread;
 
@@ -88,6 +90,14 @@ public class Query implements Serializable {
         this.isPeriodic.set(isPeriodic);
     }
 
+    public void setExtraInputOutputs(String extraInputOutputs) {
+        if (extraInputOutputs != null && extraInputOutputs.length() < 6) {
+            this.extraInputOutputs = null;
+        } else {
+            this.extraInputOutputs = extraInputOutputs;
+        }
+    }
+
     private Engine engine = null;
     private Boolean forcedCancel = false;
 
@@ -107,7 +117,7 @@ public class Query implements Serializable {
 
             errors.set("");
 
-            backendThread = BackendDriverManager.getInstance().runQuery(getQuery(),
+            backendThread = BackendDriverManager.getInstance().runQuery(getQuery().replaceAll("\\s", "") + (extraInputOutputs != null && BackendDriverManager.getInstance() instanceof ReveaalDriver ? " " + extraInputOutputs : ""),
                     aBoolean -> {
                         if (aBoolean) {
                             setQueryState(QueryState.SUCCESSFUL);
