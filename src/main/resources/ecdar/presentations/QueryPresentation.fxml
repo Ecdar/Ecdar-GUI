@@ -19,14 +19,14 @@
 
     <!--If this shows an error, ignore it... It is an IDE issue, not a code issue-->
     <StackPane id="stateIndicator" prefWidth="${STATUS_INDICATOR_WIDTH - 5}" AnchorPane.topAnchor="0"
-               AnchorPane.leftAnchor="0" minHeight="96" maxHeight="96">
+               AnchorPane.leftAnchor="0" minHeight="114" maxHeight="114">
         <StackPane minWidth="40" maxWidth="40" minHeight="40" maxHeight="40">
             <FontIcon id="statusIcon" iconLiteral="gmi-hourglass-full" iconSize="24" iconColor="white"/>
         </StackPane>
     </StackPane>
 
     <JFXTextField id="query" HBox.hgrow="ALWAYS"
-                  AnchorPane.topAnchor="4"
+                  AnchorPane.topAnchor="8"
                   AnchorPane.rightAnchor="128"
                   AnchorPane.leftAnchor="$STATUS_INDICATOR_WIDTH"
                   minHeight="32" maxHeight="32"
@@ -41,7 +41,7 @@
                   style="-fx-unfocus-color:transparent;" styleClass="caption"
                   promptText="Comment"/>
 
-    <StackPane AnchorPane.topAnchor="0" AnchorPane.rightAnchor="16" minHeight="96"
+    <StackPane AnchorPane.topAnchor="8" AnchorPane.rightAnchor="16" minHeight="96"
                maxHeight="96">
         <HBox AnchorPane.topAnchor="0" alignment="CENTER" minHeight="96" maxHeight="96">
             <StackPane>
