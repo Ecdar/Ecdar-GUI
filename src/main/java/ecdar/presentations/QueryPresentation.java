@@ -33,6 +33,7 @@ public class QueryPresentation extends AnchorPane {
     private final Map<String, Boolean> inputs = new HashMap<>();
     private final Map<String, Boolean> outputs = new HashMap<>();
     private final Tooltip tooltip = new Tooltip();
+    private JFXRippler actionButton;
 
     public QueryPresentation(final Query query) {
         new EcdarFXMLLoader().loadAndGetController("QueryPresentation.fxml", this);
@@ -109,7 +110,7 @@ public class QueryPresentation extends AnchorPane {
 
     private void initializeActionButton() {
         // Find the action icon
-        JFXRippler actionButton = (JFXRippler) lookup("#actionButton");
+        actionButton = (JFXRippler) lookup("#actionButton");
         final FontIcon actionButtonIcon = (FontIcon) lookup("#actionButtonIcon");
 
         actionButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I900));
@@ -210,7 +211,7 @@ public class QueryPresentation extends AnchorPane {
         Tooltip.install(stateIndicator, this.tooltip);
     }
 
-    public void initializeInputOutputPane() {
+    private void initializeInputOutputPane() {
         final TitledPane inputOutputPane = (TitledPane) lookup("#inputOutputPane");
         inputOutputPane.setAnimated(true);
 
@@ -265,6 +266,7 @@ public class QueryPresentation extends AnchorPane {
             inputOutputPane.setVisible(visibility);
             inputOutputPane.setManaged(visibility);
 
+            // Collapse the pane when visibility is false, but do not expand it when set to visible
             if (!visibility) {
                 inputOutputPane.setExpanded(false);
             }
@@ -285,17 +287,26 @@ public class QueryPresentation extends AnchorPane {
             refreshInputOutputPaneButton.setMaskType(JFXRippler.RipplerMask.CIRCLE);
             refreshInputOutputPaneButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I900));
 
-            // Disable when clicked and enable when inputs and outputs have been updated
             refreshInputOutputPaneButton.setOnMousePressed(event -> {
+                // Disable the button on click
                 progressIndicator.setVisible(true);
                 refreshInputOutputPaneButton.setDisable(true);
                 refreshInputOutputPaneButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I700));
 
                 refreshInputOutputs(inputOutputPane, backendDriver);
 
+                // Enable the button after inputs and outputs have been updated
                 progressIndicator.setVisible(false);
                 refreshInputOutputPaneButton.setDisable(false);
                 refreshInputOutputPaneButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I900));
+            });
+
+            // Get the inputs and outputs automatically, when executing the query
+            actionButton.setOnMousePressed(event -> {
+                // Check if both maps are empty, to avoid resetting the selected checkboxes when executing the query
+                if(inputs.isEmpty() && outputs.isEmpty()){
+                    refreshInputOutputs(inputOutputPane, backendDriver);
+                }
             });
 
             // Install tooltip on refresh button
