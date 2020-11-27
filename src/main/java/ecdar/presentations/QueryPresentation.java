@@ -216,7 +216,6 @@ public class QueryPresentation extends AnchorPane {
         inputOutputPane.setAnimated(true);
 
         final Consumer<String> changeTitledPaneVisibility = (query) -> {
-            // Get related FXML nodes
             final IBackendDriver backendDriver;
 
             // Check if the query is a refinement and that the engine is set to Reveaal
@@ -244,7 +243,7 @@ public class QueryPresentation extends AnchorPane {
             }
         });
 
-        // Make sure the input/output pane is added whenever the query text field loses focus
+        // Make sure the input/output pane state is updated whenever the query text field loses focus
         final JFXTextField queryTextField = (JFXTextField) lookup("#query");
         queryTextField.focusedProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue) {
@@ -252,8 +251,8 @@ public class QueryPresentation extends AnchorPane {
             }
         });
 
-        // Make sure the input/output pane is updated whenever the backend is changed
-        BackendDriverManager.getSupportsInputOutputs().addListener((observable, oldValue, newValue) -> {
+        // Make sure the input/output pane state is updated whenever the backend is changed
+        BackendDriverManager.backendSupportsInputOutputs().addListener((observable, oldValue, newValue) -> {
             changeTitledPaneVisibility.accept(query.getQuery());
         });
     }
@@ -262,11 +261,11 @@ public class QueryPresentation extends AnchorPane {
         Platform.runLater(() -> {
             final TitledPane inputOutputPane = (TitledPane) lookup("#inputOutputPane");
 
-            // Hide the inputOutputPane and collapse the space it would occupy
+            // Hide/show the inputOutputPane and remove/add the space it would occupy respectively
             inputOutputPane.setVisible(visibility);
             inputOutputPane.setManaged(visibility);
 
-            // Collapse the pane when visibility is false, but do not expand it when set to visible
+            // Set expand property only on visibility false to avoid auto expand
             if (!visibility) {
                 inputOutputPane.setExpanded(false);
             }
@@ -277,7 +276,6 @@ public class QueryPresentation extends AnchorPane {
         Platform.runLater(() -> {
             final JFXRippler refreshInputOutputPaneButton = (JFXRippler) inputOutputPane.lookup("#inputOutputPaneUpdateButton");
             final FontIcon refreshInputOutputPaneButtonIcon = (FontIcon) lookup("#inputOutputPaneUpdateButtonIcon");
-
             final JFXSpinner progressIndicator = (JFXSpinner) lookup("#inputOutputProgressIndicator");
             progressIndicator.setVisible(false);
 
@@ -301,7 +299,7 @@ public class QueryPresentation extends AnchorPane {
                 refreshInputOutputPaneButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I900));
             });
 
-            // Get the inputs and outputs automatically, when executing the query
+            // Get the inputs and outputs automatically, when executing a refinement query
             actionButton.setOnMousePressed(event -> {
                 // Check if both maps are empty, to avoid resetting the selected checkboxes when executing the query
                 if(inputs.isEmpty() && outputs.isEmpty()){
@@ -310,7 +308,7 @@ public class QueryPresentation extends AnchorPane {
             });
 
             // Install tooltip on refresh button
-            final Tooltip buttonTooltip = new Tooltip("Refresh inputs and outputs");
+            final Tooltip buttonTooltip = new Tooltip("Refresh inputs and outputs (resets selections)");
             buttonTooltip.setWrapText(true);
             Tooltip.install(refreshInputOutputPaneButton, buttonTooltip);
         });
@@ -333,13 +331,8 @@ public class QueryPresentation extends AnchorPane {
         inputs.clear();
         outputs.clear();
 
-        final Consumer<Pair<String, Boolean>> updateInputState = (in) -> {
-            inputs.replace(in.getKey(), in.getValue());
-        };
-
-        final Consumer<Pair<String, Boolean>> updateOutputState = (out) -> {
-            outputs.replace(out.getKey(), out.getValue());
-        };
+        final Consumer<Pair<String, Boolean>> updateInputState = (in) -> inputs.replace(in.getKey(), in.getValue());
+        final Consumer<Pair<String, Boolean>> updateOutputState = (out) -> outputs.replace(out.getKey(), out.getValue());
 
         // Add inputs to list and as checkboxes in UI
         for (String input : inputOutputs.getKey()) {
@@ -352,16 +345,20 @@ public class QueryPresentation extends AnchorPane {
         }
     }
 
-    private void addInputOrOutput(Consumer<Pair<String, Boolean>> updateInputOrOutputState, VBox inputOrOutputBox, String inputOrOutput, Map<String, Boolean> inputsOrOutputs) {
+    private void addInputOrOutput(Consumer<Pair<String, Boolean>> consumerToUpdateState, VBox associatedBox, String name, Map<String, Boolean> associatedList) {
+        JFXCheckBox checkBox = new JFXCheckBox(name);
+        checkBox.setSelected(true);
+
+        // Update the state of the input/output when the corresponding checkbox is checked/unchecked
+        checkBox.selectedProperty().addListener((observable, oldValue, newValue) -> consumerToUpdateState.accept(new Pair<>(name, newValue)));
+
         Platform.runLater(() -> {
-            JFXCheckBox checkBox = new JFXCheckBox(inputOrOutput);
-            checkBox.setSelected(true);
-            checkBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
-                updateInputOrOutputState.accept(new Pair<>(inputOrOutput, newValue));
-            });
-            inputOrOutputBox.getChildren().add(checkBox);
+            // Add checkbox to the scene
+            associatedBox.getChildren().add(checkBox);
         });
-        inputsOrOutputs.put(inputOrOutput, true);
+
+        // Add input/output to its respective list
+        associatedList.put(name, true);
     }
 
     private void setExtraInputOutputsOnQuery(Boolean shouldRunQueryWithExtraInputOutputs) {
@@ -370,29 +367,34 @@ public class QueryPresentation extends AnchorPane {
             return;
         }
 
+        // Create StringBuilder starting with a quotation mark to signal start of extra outputs
         StringBuilder extraInputOutputs = new StringBuilder("\"");
 
-        // Append outputs separated by commas
-        appendMapItems(extraInputOutputs, outputs);
+        // Append outputs, comma separated
+        appendMapItemsWithValueTrue(extraInputOutputs, outputs);
+
+        // Append quotation marks to signal end of outputs and start of inputs
         extraInputOutputs.append("\" \"");
 
-        // Append inputs separated by commas
-        appendMapItems(extraInputOutputs, inputs);
+        // Append inputs, comma separated
+        appendMapItemsWithValueTrue(extraInputOutputs, inputs);
+
+        // Append quotation mark to signal end of extra inputs
         extraInputOutputs.append("\"");
 
         query.setExtraInputOutputs(extraInputOutputs.toString());
     }
 
-    private void appendMapItems(StringBuilder extraInputOutputs, Map<String, Boolean> map) {
+    private void appendMapItemsWithValueTrue(StringBuilder stringBuilder, Map<String, Boolean> map) {
         map.forEach((key, value) -> {
             if (value) {
-                extraInputOutputs.append(key);
-                extraInputOutputs.append(",");
+                stringBuilder.append(key);
+                stringBuilder.append(",");
             }
         });
 
-        if (extraInputOutputs.lastIndexOf(",") + 1 == extraInputOutputs.length()) {
-            extraInputOutputs.setLength(extraInputOutputs.length() - 1);
+        if (stringBuilder.lastIndexOf(",") + 1 == stringBuilder.length()) {
+            stringBuilder.setLength(stringBuilder.length() - 1);
         }
     }
 

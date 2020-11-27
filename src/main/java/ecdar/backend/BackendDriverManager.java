@@ -38,7 +38,7 @@ public class BackendDriverManager {
         }
     }
 
-    public static BooleanProperty getSupportsInputOutputs() {
+    public static BooleanProperty backendSupportsInputOutputs() {
         return supportsInputOutputParameters;
     }
 }

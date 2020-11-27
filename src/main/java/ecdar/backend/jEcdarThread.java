@@ -1,13 +1,9 @@
 package ecdar.backend;
 
-import com.uppaal.engine.Problem;
 import ecdar.Ecdar;
 import ecdar.abstractions.QueryState;
-import ecdar.code_analysis.CodeAnalysis;
-import javafx.application.Platform;
 
 import java.io.*;
-import java.util.Vector;
 import java.util.function.Consumer;
 
 public class jEcdarThread extends BackendThread {
