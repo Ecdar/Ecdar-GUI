@@ -97,10 +97,10 @@
 
             <VBox GridPane.rowIndex="0" GridPane.columnIndex="1" AnchorPane.leftAnchor="0.0"
                   AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="256" AnchorPane.bottomAnchor="0.0" alignment="CENTER">
-                <Text wrappingWidth="96" textAlignment="CENTER">Extra outputs on left side</Text>
+                <Text wrappingWidth="112" textAlignment="CENTER">Ignored outputs on left side</Text>
                 <Separator minHeight="20" maxHeight="20"/>
             </VBox>
-            <VBox id="outputBox" GridPane.rowIndex="1" GridPane.columnIndex="1" alignment="CENTER_LEFT" AnchorPane.leftAnchor="0.0"
+            <VBox id="outputBox" GridPane.rowIndex="1" GridPane.columnIndex="1" AnchorPane.leftAnchor="0.0"
                   AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="256" AnchorPane.bottomAnchor="0.0" spacing="8">
                 <!--Outputs go here-->
             </VBox>
@@ -109,10 +109,10 @@
 
             <VBox GridPane.rowIndex="0" GridPane.columnIndex="3" AnchorPane.leftAnchor="0.0"
                   AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="256" AnchorPane.bottomAnchor="0.0" alignment="CENTER">
-                <Text wrappingWidth="96" textAlignment="CENTER">Extra inputs on right side</Text>
+                <Text wrappingWidth="112" textAlignment="CENTER">Ignored inputs on right side</Text>
                 <Separator minHeight="20" maxHeight="20"/>
             </VBox>
-            <VBox id="inputBox" GridPane.rowIndex="1" GridPane.columnIndex="3" alignment="CENTER_LEFT" AnchorPane.leftAnchor="0.0"
+            <VBox id="inputBox" GridPane.rowIndex="1" GridPane.columnIndex="3" AnchorPane.leftAnchor="0.0"
                   AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="256" AnchorPane.bottomAnchor="0.0" spacing="8">
                 <!--Inputs go here-->
             </VBox>

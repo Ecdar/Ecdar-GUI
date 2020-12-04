@@ -10,9 +10,14 @@ import ecdar.backend.ReveaalDriver;
 import ecdar.controllers.CanvasController;
 import ecdar.utility.colors.Color;
 import javafx.application.Platform;
+import javafx.beans.Observable;
 import javafx.beans.binding.When;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Cursor;
+import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
@@ -30,8 +35,8 @@ import static javafx.scene.paint.Color.*;
 public class QueryPresentation extends AnchorPane {
 
     private final Query query;
-    private final Map<String, Boolean> inputs = new HashMap<>();
-    private final Map<String, Boolean> outputs = new HashMap<>();
+    private final Map<String, Boolean> ignoredInputs = new HashMap<>();
+    private final Map<String, Boolean> ignoredOutputs = new HashMap<>();
     private final Tooltip tooltip = new Tooltip();
     private JFXRippler actionButton;
 
@@ -220,7 +225,7 @@ public class QueryPresentation extends AnchorPane {
 
             // Check if the query is a refinement and that the engine is set to Reveaal
             if (query.startsWith("refinement") && (backendDriver = BackendDriverManager.getInstance()) instanceof ReveaalDriver) {
-                initiateRefreshInputOutputButton(inputOutputPane, (ReveaalDriver) backendDriver);
+                initiateResetInputOutputButton(inputOutputPane, (ReveaalDriver) backendDriver);
 
                 // Make the input/output pane visible
                 inputOutputPaneVisibility(true);
@@ -272,112 +277,125 @@ public class QueryPresentation extends AnchorPane {
         });
     }
 
-    private void initiateRefreshInputOutputButton(TitledPane inputOutputPane, ReveaalDriver backendDriver) {
+    private void initiateResetInputOutputButton(TitledPane inputOutputPane, ReveaalDriver backendDriver) {
         Platform.runLater(() -> {
-            final JFXRippler refreshInputOutputPaneButton = (JFXRippler) inputOutputPane.lookup("#inputOutputPaneUpdateButton");
-            final FontIcon refreshInputOutputPaneButtonIcon = (FontIcon) lookup("#inputOutputPaneUpdateButtonIcon");
+            final JFXRippler resetInputOutputPaneButton = (JFXRippler) inputOutputPane.lookup("#inputOutputPaneUpdateButton");
+            final FontIcon resetInputOutputPaneButtonIcon = (FontIcon) lookup("#inputOutputPaneUpdateButtonIcon");
             final JFXSpinner progressIndicator = (JFXSpinner) lookup("#inputOutputProgressIndicator");
             progressIndicator.setVisible(false);
 
-            // Set the initial state of the refresh button
-            refreshInputOutputPaneButton.setCursor(Cursor.HAND);
-            refreshInputOutputPaneButton.setRipplerFill(Color.GREY.getColor(Color.Intensity.I500));
-            refreshInputOutputPaneButton.setMaskType(JFXRippler.RipplerMask.CIRCLE);
-            refreshInputOutputPaneButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I900));
+            // Set the initial state of the reset button
+            resetInputOutputPaneButton.setCursor(Cursor.HAND);
+            resetInputOutputPaneButton.setRipplerFill(Color.GREY.getColor(Color.Intensity.I500));
+            resetInputOutputPaneButton.setMaskType(JFXRippler.RipplerMask.CIRCLE);
+            resetInputOutputPaneButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I900));
 
-            refreshInputOutputPaneButton.setOnMousePressed(event -> {
+            resetInputOutputPaneButton.setOnMousePressed(event -> {
                 // Disable the button on click
                 progressIndicator.setVisible(true);
-                refreshInputOutputPaneButton.setDisable(true);
-                refreshInputOutputPaneButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I700));
+                resetInputOutputPaneButton.setDisable(true);
+                resetInputOutputPaneButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I700));
 
-                refreshInputOutputs(inputOutputPane, backendDriver);
+                updateInputOutputs(inputOutputPane, backendDriver, true);
 
                 // Enable the button after inputs and outputs have been updated
                 progressIndicator.setVisible(false);
-                refreshInputOutputPaneButton.setDisable(false);
-                refreshInputOutputPaneButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I900));
+                resetInputOutputPaneButton.setDisable(false);
+                resetInputOutputPaneButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I900));
             });
 
             // Get the inputs and outputs automatically, when executing a refinement query
             actionButton.setOnMousePressed(event -> {
-                // Check if both maps are empty, to avoid resetting the selected checkboxes when executing the query
-                if(inputs.isEmpty() && outputs.isEmpty()){
-                    refreshInputOutputs(inputOutputPane, backendDriver);
-                }
+                // Update the ignored inputs and outputs without clearing the lists
+                updateInputOutputs(inputOutputPane, backendDriver, false);
             });
 
             // Install tooltip on refresh button
             final Tooltip buttonTooltip = new Tooltip("Refresh inputs and outputs (resets selections)");
             buttonTooltip.setWrapText(true);
-            Tooltip.install(refreshInputOutputPaneButton, buttonTooltip);
+            Tooltip.install(resetInputOutputPaneButton, buttonTooltip);
         });
     }
 
-    private void refreshInputOutputs(TitledPane inputOutputPane, ReveaalDriver backendDriver) {
+    private void updateInputOutputs(TitledPane inputOutputPane, ReveaalDriver backendDriver, Boolean shouldResetSelections) {
         final VBox inputBox = (VBox) inputOutputPane.lookup("#inputBox");
         final VBox outputBox = (VBox) inputOutputPane.lookup("#outputBox");
 
-        //Get inputs and outputs
+        // Get inputs and outputs
         Pair<ArrayList<String>, ArrayList<String>> inputOutputs = backendDriver.getInputOutputs(query.getQuery());
 
-        // Remove checkboxes
-        Platform.runLater(() -> {
-            inputBox.getChildren().clear();
-            outputBox.getChildren().clear();
-        });
-
-        // Clear input and output lists
-        inputs.clear();
-        outputs.clear();
-
-        final Consumer<Pair<String, Boolean>> updateInputState = (in) -> inputs.replace(in.getKey(), in.getValue());
-        final Consumer<Pair<String, Boolean>> updateOutputState = (out) -> outputs.replace(out.getKey(), out.getValue());
+        // Reset selections for ignored inputs and outputs
+        if (shouldResetSelections) {
+            clearIgnoredInputsAndOutputs(inputBox, outputBox);
+        }
 
         // Add inputs to list and as checkboxes in UI
         for (String input : inputOutputs.getKey()) {
-            addInputOrOutput(updateInputState, inputBox, input, inputs);
+            if (!ignoredInputs.containsKey(input)){
+                addInputOrOutput(inputBox, input, ignoredInputs);
+            }
         }
 
         // Add outputs to list and as checkboxes in UI
         for (String output : inputOutputs.getValue()) {
-            addInputOrOutput(updateOutputState, outputBox, output, outputs);
+            if (!ignoredOutputs.containsKey(output)){
+                addInputOrOutput(outputBox, output, ignoredOutputs);
+            }
         }
     }
 
-    private void addInputOrOutput(Consumer<Pair<String, Boolean>> consumerToUpdateState, VBox associatedBox, String name, Map<String, Boolean> associatedList) {
-        JFXCheckBox checkBox = new JFXCheckBox(name);
-        checkBox.setSelected(true);
+    private void clearIgnoredInputsAndOutputs(VBox inputBox, VBox outputBox) {
+        ignoredInputs.clear();
+        ignoredOutputs.clear();
 
-        // Update the state of the input/output when the corresponding checkbox is checked/unchecked
-        checkBox.selectedProperty().addListener((observable, oldValue, newValue) -> consumerToUpdateState.accept(new Pair<>(name, newValue)));
+        Platform.runLater(() -> {
+            inputBox.getChildren().clear();
+            outputBox.getChildren().clear();
+        });
+    }
+
+    private void addInputOrOutput(VBox associatedBox, String name, Map<String, Boolean> associatedList) {
+        HBox sliderBox = new HBox();
+        sliderBox.setAlignment(Pos.CENTER_LEFT);
+
+        Label label = new Label(name);
+        label.setWrapText(true);
+
+        JFXToggleButton slider = new JFXToggleButton();
+        slider.setStyle("-jfx-toggle-color:#dddddd; -jfx-untoggle-color:#dddddd; -jfx-toggle-line-color:#" + Color.YELLOW.getColor(Color.Intensity.I700).toString().substring(2, 8) + ";-jfx-untoggle-line-color:#" + Color.GREY.getColor(Color.Intensity.I400).toString().substring(2, 8) + "; -fx-padding: 0 0 0 0;");
+        slider.setSelected(false);
+        slider.setOnMouseClicked((event) -> {
+            associatedList.replace(name, slider.isSelected());
+        });
+
+        sliderBox.getChildren().addAll(slider, label);
 
         Platform.runLater(() -> {
             // Add checkbox to the scene
-            associatedBox.getChildren().add(checkBox);
+            associatedBox.getChildren().add(sliderBox);
         });
 
         // Add input/output to its respective list
-        associatedList.put(name, true);
+        associatedList.put(name, false);
     }
 
-    private void setExtraInputOutputsOnQuery(Boolean shouldRunQueryWithExtraInputOutputs) {
+    private void setIgnoredInputOutputsOnQuery(Boolean shouldRunQueryWithExtraInputOutputs) {
         if (!shouldRunQueryWithExtraInputOutputs) {
             query.setExtraInputOutputs(null);
             return;
         }
 
         // Create StringBuilder starting with a quotation mark to signal start of extra outputs
-        StringBuilder extraInputOutputs = new StringBuilder("\"");
+        StringBuilder extraInputOutputs = new StringBuilder("--ignored_outputs=\"");
 
         // Append outputs, comma separated
-        appendMapItemsWithValueTrue(extraInputOutputs, outputs);
+        appendMapItemsWithValueTrue(extraInputOutputs, ignoredOutputs);
 
         // Append quotation marks to signal end of outputs and start of inputs
-        extraInputOutputs.append("\" \"");
+        extraInputOutputs.append("\" --ignored_inputs=\"");
 
         // Append inputs, comma separated
-        appendMapItemsWithValueTrue(extraInputOutputs, inputs);
+        appendMapItemsWithValueTrue(extraInputOutputs, ignoredInputs);
 
         // Append quotation mark to signal end of extra inputs
         extraInputOutputs.append("\"");
@@ -399,7 +417,7 @@ public class QueryPresentation extends AnchorPane {
     }
 
     private void runQuery() {
-        setExtraInputOutputsOnQuery(!inputs.isEmpty() || !outputs.isEmpty());
+        setIgnoredInputOutputsOnQuery(!ignoredInputs.isEmpty() || !ignoredOutputs.isEmpty());
         query.run();
     }
 }
