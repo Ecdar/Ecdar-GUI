@@ -9,20 +9,25 @@ import com.uppaal.engine.Engine;
 import javafx.application.Platform;
 import javafx.beans.property.*;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class Query implements Serializable {
     private static final String QUERY = "query";
     private static final String COMMENT = "comment";
     private static final String IS_PERIODIC = "isPeriodic";
+    private static final String IGNORED_INPUTS = "ignoredInputs";
+    private static final String IGNORED_OUTPUTS = "ignoredOutputs";
+
+    public final HashMap<String, Boolean> ignoredInputs = new HashMap<>();
+    public final HashMap<String, Boolean> ignoredOutputs = new HashMap<>();
 
     private final ObjectProperty<QueryState> queryState = new SimpleObjectProperty<>(QueryState.UNKNOWN);
     private final StringProperty query = new SimpleStringProperty("");
     private final StringProperty comment = new SimpleStringProperty("");
     private final SimpleBooleanProperty isPeriodic = new SimpleBooleanProperty(false);
     private final StringProperty errors = new SimpleStringProperty("");
-    private String extraInputOutputs;
     private Consumer<Boolean> runQuery;
     private BackendThread backendThread;
 
@@ -90,14 +95,6 @@ public class Query implements Serializable {
         this.isPeriodic.set(isPeriodic);
     }
 
-    public void setExtraInputOutputs(String extraInputOutputs) {
-        if (extraInputOutputs != null && extraInputOutputs.length() < 6) {
-            this.extraInputOutputs = null;
-        } else {
-            this.extraInputOutputs = extraInputOutputs;
-        }
-    }
-
     private Engine engine = null;
     private Boolean forcedCancel = false;
 
@@ -117,7 +114,7 @@ public class Query implements Serializable {
 
             errors.set("");
 
-            backendThread = BackendDriverManager.getInstance().runQuery(getQuery().replaceAll("\\s", "") + (extraInputOutputs != null && BackendDriverManager.getInstance() instanceof ReveaalDriver ? " " + extraInputOutputs : ""),
+            backendThread = BackendDriverManager.getInstance().runQuery(getQuery().replaceAll("\\s", "") + " " + getIgnoredInputOutputsOnQuery(),
                     aBoolean -> {
                         if (aBoolean) {
                             setQueryState(QueryState.SUCCESSFUL);
@@ -134,7 +131,7 @@ public class Query implements Serializable {
                             final Throwable cause = e.getCause();
                             if (cause != null) {
                                 // We had trouble generating the model if we get a NullPointerException
-                                if(cause instanceof NullPointerException) {
+                                if (cause instanceof NullPointerException) {
                                     setQueryState(QueryState.UNKNOWN);
                                 } else {
                                     Platform.runLater(() -> EcdarController.openQueryDialog(this, cause.toString()));
@@ -157,7 +154,18 @@ public class Query implements Serializable {
         result.addProperty(COMMENT, getComment());
         result.addProperty(IS_PERIODIC, isPeriodic());
 
+        result.add(IGNORED_INPUTS, getHashMapAsJsonObject(ignoredInputs));
+        result.add(IGNORED_OUTPUTS, getHashMapAsJsonObject(ignoredOutputs));
+
         return result;
+    }
+
+    private JsonObject getHashMapAsJsonObject(HashMap<String, Boolean> ignoredOutputs) {
+        JsonObject resultingJsonObject = new JsonObject();
+        for (Map.Entry<String, Boolean> currentPair : ignoredOutputs.entrySet()) {
+            resultingJsonObject.addProperty(currentPair.getKey(), currentPair.getValue());
+        }
+        return resultingJsonObject;
     }
 
     @Override
@@ -168,6 +176,18 @@ public class Query implements Serializable {
         if (json.has(IS_PERIODIC)) {
             setIsPeriodic(json.getAsJsonPrimitive(IS_PERIODIC).getAsBoolean());
         }
+
+        if (json.has(IGNORED_INPUTS)) {
+            deserializeJsonObjectToMap(json.getAsJsonObject(IGNORED_INPUTS), ignoredInputs);
+        }
+
+        if (json.has(IGNORED_OUTPUTS)) {
+            deserializeJsonObjectToMap(json.getAsJsonObject(IGNORED_OUTPUTS), ignoredOutputs);
+        }
+    }
+
+    private void deserializeJsonObjectToMap(JsonObject jsonObject, HashMap<String, Boolean> associatedMap) {
+        jsonObject.entrySet().forEach((entry) -> associatedMap.put(entry.getKey(), entry.getValue().getAsBoolean()));
     }
 
     public void run() {
@@ -192,5 +212,41 @@ public class Query implements Serializable {
 
     public String getCurrentErrors() {
         return errors.getValue();
+    }
+
+    private String getIgnoredInputOutputsOnQuery() {
+        if (!BackendDriverManager.backendSupportsInputOutputs().get() || (!ignoredInputs.containsValue(true) && !ignoredOutputs.containsValue(true))) {
+            return "";
+        }
+
+        // Create StringBuilder starting with a quotation mark to signal start of extra outputs
+        StringBuilder ignoredInputOutputsStringBuilder = new StringBuilder("--ignored_outputs=\"");
+
+        // Append outputs, comma separated
+        appendMapItemsWithValueTrue(ignoredInputOutputsStringBuilder, ignoredOutputs);
+
+        // Append quotation marks to signal end of outputs and start of inputs
+        ignoredInputOutputsStringBuilder.append("\" --ignored_inputs=\"");
+
+        // Append inputs, comma separated
+        appendMapItemsWithValueTrue(ignoredInputOutputsStringBuilder, ignoredInputs);
+
+        // Append quotation mark to signal end of extra inputs
+        ignoredInputOutputsStringBuilder.append("\"");
+
+        return ignoredInputOutputsStringBuilder.toString();
+    }
+
+    private void appendMapItemsWithValueTrue(StringBuilder stringBuilder, Map<String, Boolean> map) {
+        map.forEach((key, value) -> {
+            if (value) {
+                stringBuilder.append(key);
+                stringBuilder.append(",");
+            }
+        });
+
+        if (stringBuilder.lastIndexOf(",") + 1 == stringBuilder.length()) {
+            stringBuilder.setLength(stringBuilder.length() - 1);
+        }
     }
 }
