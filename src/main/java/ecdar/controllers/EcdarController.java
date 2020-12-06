@@ -77,7 +77,6 @@ public class EcdarController implements Initializable {
     public StackPane modalBar;
     public JFXTextField queryTextField;
     public JFXTextField commentTextField;
-    public JFXRippler generateUppaalModel;
     public JFXRippler colorSelected;
     public JFXRippler deleteSelected;
     public JFXRippler undo;
@@ -214,7 +213,6 @@ public class EcdarController implements Initializable {
         initializeMessages();
         initializeMenuBar();
         initializeReachabilityAnalysisThread();
-        //initializeUppalFileNotFoundWarning();
         
         ZoomHelper.setCanvas(canvas);
     }
@@ -447,20 +445,6 @@ public class EcdarController implements Initializable {
             }
         });
     }
-
-    /*
-    private void initializeUppalFileNotFoundWarning() {
-        final CodeAnalysis.Message uppalNotFoundMessage = new CodeAnalysis.Message("Please set the UPPAAL server location through the 'Preferences' tab.\n" +
-                "Make sure to have UPPAAL installed. This can be done at uppaal.org", CodeAnalysis.MessageType.WARNING);
-
-        UPPAALDriverManager.getServerFilePathProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue.equals("dummy")) {
-                CodeAnalysis.addMessage(null, uppalNotFoundMessage);
-            } else {
-                CodeAnalysis.removeMessage(null, uppalNotFoundMessage);
-            }
-        });
-    }*/
 
     private void initializeMenuBar() {
         menuBar.setUseSystemMenuBar(true);

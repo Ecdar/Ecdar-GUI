@@ -19,6 +19,7 @@ import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
+import javafx.scene.text.TextAlignment;
 import javafx.util.Pair;
 import org.kordamp.ikonli.javafx.FontIcon;
 
@@ -350,14 +351,35 @@ public class QueryPresentation extends AnchorPane {
         Label label = new Label(name);
         label.setWrapText(true);
 
+        // Initialize the toggle slider
         JFXToggleButton slider = new JFXToggleButton();
         slider.setStyle("-jfx-toggle-color:#dddddd; -jfx-untoggle-color:#dddddd; -jfx-toggle-line-color:#" + Color.YELLOW.getColor(Color.Intensity.I700).toString().substring(2, 8) + ";-jfx-untoggle-line-color:#" + Color.GREY.getColor(Color.Intensity.I400).toString().substring(2, 8) + "; -fx-padding: 0 0 0 0;");
         slider.setSelected(state);
+
+        // Add label beneath toggle slider to display state
+        Label stateLabel = new Label();
+        stateLabel.setText(state ? "Ignored" : "Included");
+        stateLabel.setTextAlignment(TextAlignment.CENTER);
+
+        // Enforce changes of the slider
         slider.setOnMouseClicked((event) -> {
             associatedMap.replace(name, slider.isSelected());
+            stateLabel.setText(slider.isSelected() ? "Ignored" : "Included");
         });
 
-        sliderBox.getChildren().addAll(slider, label);
+        // Add toggle slider and state label to VBox and set its width
+        VBox sliderAndStateLabel = new VBox();
+        sliderAndStateLabel.setMinWidth(64);
+        sliderAndStateLabel.setMaxWidth(64);
+        sliderAndStateLabel.setSpacing(-7.5);
+        sliderAndStateLabel.getChildren().addAll(slider, stateLabel);
+
+        // Horizontal space to ensure that the toggle slider and input/output label is not intertwined
+        Region horizontalSpace = new Region();
+        horizontalSpace.setMinWidth(16);
+        horizontalSpace.setMaxWidth(16);
+
+        sliderBox.getChildren().addAll(sliderAndStateLabel, horizontalSpace, label);
 
         Platform.runLater(() -> {
             // Add checkbox to the scene
