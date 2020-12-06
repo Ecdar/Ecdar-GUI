@@ -247,17 +247,6 @@
                             <FontIcon iconLiteral="gmi-check" iconSize="24" fill="black"/>
                         </graphic>
                     </MenuItem>
-                    <SeparatorMenuItem/>
-                    <MenuItem fx:id="menuBarOptionsjEcdar" text="Use the jEcdar Backend">
-                        <graphic>
-                            <FontIcon fx:id="menuBarOptionsjEcdarIcon" iconLiteral="gmi-radio-button-checked" iconSize="24" fill="black"/>
-                        </graphic>
-                    </MenuItem>
-                    <MenuItem fx:id="menuBarOptionsReveaal" text="Use the Reveaal Backend">
-                        <graphic>
-                            <FontIcon fx:id="menuBarOptionsReveaalIcon" iconLiteral="gmi-radio-button-unchecked" iconSize="24" fill="black"/>
-                        </graphic>
-                    </MenuItem>
                 </Menu>
 
                 <Menu text="Help">

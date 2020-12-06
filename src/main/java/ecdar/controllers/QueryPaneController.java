@@ -6,6 +6,7 @@ import ecdar.abstractions.Query;
 import ecdar.abstractions.QueryState;
 import ecdar.backend.BackendDriverManager;
 import ecdar.backend.BackendException;
+import ecdar.backend.ReveaalDriver;
 import ecdar.backend.jECDARDriver;
 import ecdar.presentations.QueryPresentation;
 import com.jfoenix.controls.JFXRippler;
@@ -79,7 +80,7 @@ public class QueryPaneController implements Initializable {
     }
 
     private void setSwapBackendButtonTooltipAndLabel() {
-        boolean isReveaal = BackendDriverManager.getInstance() instanceof jECDARDriver;
+        boolean isReveaal = BackendDriverManager.getInstance() instanceof ReveaalDriver;
 
         swapBackendButtonTooltip.setText("Switch to the " + (isReveaal ? "jEcdar" : "Reveaal") + " backend");
         currentBackendLabel.setText((isReveaal ? "Reveaal" : "jEcdar"));

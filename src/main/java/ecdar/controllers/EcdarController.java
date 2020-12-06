@@ -115,10 +115,6 @@ public class EcdarController implements Initializable {
     public JFXRippler zoomOut;
     public JFXRippler zoomToFit;
     public JFXRippler resetZoom;
-    public MenuItem menuBarOptionsjEcdar;
-    public FontIcon menuBarOptionsjEcdarIcon;
-    public MenuItem menuBarOptionsReveaal;
-    public FontIcon menuBarOptionsReveaalIcon;
 
     private double expandHeight = 300;
 
@@ -609,20 +605,6 @@ public class EcdarController implements Initializable {
                     e.printStackTrace();
                 }
             }
-        });
-
-        menuBarOptionsjEcdar.setOnAction(event -> {
-            // Change the backend to j-Ecdar
-            BackendDriverManager.setCurrentBackend(BackendDriverManager.BackendNames.jEcdar);
-            menuBarOptionsReveaalIcon.setIconCode(Material.RADIO_BUTTON_UNCHECKED);
-            menuBarOptionsjEcdarIcon.setIconCode(Material.RADIO_BUTTON_CHECKED);
-        });
-
-        menuBarOptionsReveaal.setOnAction(event -> {
-            // Change the backend to Reveaal
-            BackendDriverManager.setCurrentBackend(BackendDriverManager.BackendNames.Reveaal);
-            menuBarOptionsjEcdarIcon.setIconCode(Material.RADIO_BUTTON_UNCHECKED);
-            menuBarOptionsReveaalIcon.setIconCode(Material.RADIO_BUTTON_CHECKED);
         });
     }
 
