@@ -9,7 +9,6 @@
 <?import org.kordamp.ikonli.javafx.*?>
 <?import ecdar.presentations.*?>
 <?import ecdar.Ecdar?>
-<?import javafx.scene.text.Font?>
 <?import javafx.scene.text.TextFlow?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
@@ -83,7 +82,7 @@
 
                         <Region minWidth="8"/>
 
-                        <!-- RESET ZOOM -->
+                        <!-- ZOOM TO FIT -->
                         <JFXRippler fx:id="zoomToFit">
                             <StackPane minWidth="40" minHeight="40" onMouseClicked="#zoomToFitClicked">
                                 <FontIcon iconLiteral="gmi-zoom-out-map" iconSize="24" fill="white"/>
@@ -246,16 +245,6 @@
                     <MenuItem fx:id="menuBarOptionsCache" text="UI Cache">
                         <graphic>
                             <FontIcon iconLiteral="gmi-check" iconSize="24" fill="black"/>
-                        </graphic>
-                    </MenuItem>
-                    <MenuItem fx:id="menuBarOptionsServerLocation" text="Change Server Location">
-                        <graphic>
-                            <FontIcon iconLiteral="gmi-insert-drive-file" iconSize="24" fill="black"/>
-                        </graphic>
-                    </MenuItem>
-                    <MenuItem fx:id="menuBarOptionsVerifytgaLocation" text="Change VerifyTGA Location">
-                        <graphic>
-                            <FontIcon iconLiteral="gmi-insert-drive-file" iconSize="24" fill="black"/>
                         </graphic>
                     </MenuItem>
                 </Menu>

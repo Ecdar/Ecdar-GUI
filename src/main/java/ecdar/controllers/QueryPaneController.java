@@ -1,11 +1,13 @@
 package ecdar.controllers;
 
+import com.jfoenix.controls.JFXTooltip;
 import ecdar.Ecdar;
 import ecdar.abstractions.Query;
 import ecdar.abstractions.QueryState;
+import ecdar.backend.BackendDriverManager;
 import ecdar.backend.BackendException;
-import ecdar.backend.UPPAALDriver;
-import ecdar.backend.UPPAALDriverManager;
+import ecdar.backend.ReveaalDriver;
+import ecdar.backend.jECDARDriver;
 import ecdar.presentations.QueryPresentation;
 import com.jfoenix.controls.JFXRippler;
 import javafx.collections.ListChangeListener;
@@ -13,6 +15,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -32,7 +35,10 @@ public class QueryPaneController implements Initializable {
 
     public JFXRippler runAllQueriesButton;
     public JFXRippler clearAllQueriesButton;
+    public JFXRippler swapBackendButton;
+    public Tooltip swapBackendButtonTooltip;
     public JFXRippler addButton;
+    public Label currentBackendLabel;
 
     private Map<Query, QueryPresentation> queryPresentationMap = new HashMap<>();
 
@@ -56,6 +62,10 @@ public class QueryPaneController implements Initializable {
         for (final Query newQuery : Ecdar.getProject().getQueries()) {
             queriesList.getChildren().add(new QueryPresentation(newQuery));
         }
+
+        swapBackendButtonTooltip = new Tooltip();
+        setSwapBackendButtonTooltipAndLabel();
+        JFXTooltip.install(swapBackendButton, swapBackendButtonTooltip);
     }
 
     @FXML
@@ -64,9 +74,22 @@ public class QueryPaneController implements Initializable {
     }
 
     @FXML
+    private void swapBackendButtonClicked() {
+        BackendDriverManager.swapBackendDriver();
+        setSwapBackendButtonTooltipAndLabel();
+    }
+
+    private void setSwapBackendButtonTooltipAndLabel() {
+        boolean isReveaal = BackendDriverManager.getInstance() instanceof ReveaalDriver;
+
+        swapBackendButtonTooltip.setText("Switch to the " + (isReveaal ? "jEcdar" : "Reveaal") + " backend");
+        currentBackendLabel.setText((isReveaal ? "Reveaal" : "jEcdar"));
+    }
+
+    @FXML
     private void runAllQueriesButtonClicked() {
         try {
-            UPPAALDriverManager.getInstance().buildEcdarDocument();
+            BackendDriverManager.getInstance().buildEcdarDocument();
         } catch (final BackendException e) {
             Ecdar.showToast("Could not build XML model. I got the error: " + e.getMessage());
             return;

@@ -3,9 +3,8 @@ package ecdar.controllers;
 import ecdar.Debug;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
+import ecdar.backend.BackendDriverManager;
 import ecdar.backend.BackendException;
-import ecdar.backend.DummyUPPAALDriver;
-import ecdar.backend.UPPAALDriverManager;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.presentations.*;
@@ -44,6 +43,7 @@ import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import javafx.util.Pair;
 import org.kordamp.ikonli.javafx.FontIcon;
+import org.kordamp.ikonli.material.Material;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -77,7 +77,6 @@ public class EcdarController implements Initializable {
     public StackPane modalBar;
     public JFXTextField queryTextField;
     public JFXTextField commentTextField;
-    public JFXRippler generateUppaalModel;
     public JFXRippler colorSelected;
     public JFXRippler deleteSelected;
     public JFXRippler undo;
@@ -115,8 +114,6 @@ public class EcdarController implements Initializable {
     public JFXRippler zoomOut;
     public JFXRippler zoomToFit;
     public JFXRippler resetZoom;
-    public MenuItem menuBarOptionsServerLocation;
-    public MenuItem menuBarOptionsVerifytgaLocation;
 
     private double expandHeight = 300;
 
@@ -216,7 +213,6 @@ public class EcdarController implements Initializable {
         initializeMessages();
         initializeMenuBar();
         initializeReachabilityAnalysisThread();
-        initializeUppalFileNotFoundWarning();
         
         ZoomHelper.setCanvas(canvas);
     }
@@ -365,7 +361,7 @@ public class EcdarController implements Initializable {
 
                 try {
                     // Make sure that the model is generated
-                    UPPAALDriverManager.getInstance().buildEcdarDocument();
+                    BackendDriverManager.getInstance().buildEcdarDocument();
                 } catch (final BackendException e) {
                     // Something went wrong with creating the document
                     Ecdar.showToast("Could not build XML model. I got the error: " + e.getMessage());
@@ -387,8 +383,8 @@ public class EcdarController implements Initializable {
                         component.getLocations().forEach(location -> location.setReachability(Location.Reachability.EXCLUDED));
                     } else {
                         component.getLocations().forEach(location -> {
-                            final String locationReachableQuery = UPPAALDriverManager.getInstance().getLocationReachableQuery(location, component);
-                            final Thread verifyThread = UPPAALDriverManager.getInstance().runQuery(
+                            final String locationReachableQuery = BackendDriverManager.getInstance().getLocationReachableQuery(location, component);
+                            final Thread verifyThread = BackendDriverManager.getInstance().runQuery(
                                     locationReachableQuery,
                                     (result -> {
                                         if (result) {
@@ -405,9 +401,11 @@ public class EcdarController implements Initializable {
                                     2000
                             );
 
-                            verifyThread.setName(locationReachableQuery + " (" + verifyThread.getName() + ")");
-                            Debug.addThread(verifyThread);
-                            threads.add(verifyThread);
+                            if(verifyThread != null){
+                                verifyThread.setName(locationReachableQuery + " (" + verifyThread.getName() + ")");
+                                Debug.addThread(verifyThread);
+                                threads.add(verifyThread);
+                            }
                         });
                     }
                 });
@@ -444,19 +442,6 @@ public class EcdarController implements Initializable {
                         }
                     });
                 }
-            }
-        });
-    }
-
-    private void initializeUppalFileNotFoundWarning() {
-        final CodeAnalysis.Message uppalNotFoundMessage = new CodeAnalysis.Message("Please set the UPPAAL server location through the 'Preferences' tab.\n" +
-                "Make sure to have UPPAAL installed. This can be done at uppaal.org", CodeAnalysis.MessageType.WARNING);
-
-        UPPAALDriverManager.getServerFilePathProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue.equals("dummy")) {
-                CodeAnalysis.addMessage(null, uppalNotFoundMessage);
-            } else {
-                CodeAnalysis.removeMessage(null, uppalNotFoundMessage);
             }
         });
     }
@@ -603,46 +588,6 @@ public class EcdarController implements Initializable {
                 } catch (final IOException e) {
                     e.printStackTrace();
                 }
-            }
-        });
-
-        menuBarOptionsServerLocation.setOnAction(event -> {
-            // Dialog title
-            final FileChooser filePicker = new FileChooser();
-            filePicker.setTitle("Choose UPPAAL server file");
-
-            // The initial location for the file choosing dialog
-            final File uppaalFile = new File(UPPAALDriverManager.getServerFilePath()).getAbsoluteFile().getParentFile();
-
-            // If the file does not exist, use a default location
-            if(uppaalFile.exists()) {
-                filePicker.setInitialDirectory(uppaalFile);
-            }
-
-            // Prompt the user to select the file (will halt the UI thread)
-            final File file = filePicker.showOpenDialog(root.getScene().getWindow());
-            if(file != null) {
-                UPPAALDriverManager.setServerFilePath(file.getAbsolutePath());
-            }
-        });
-
-        menuBarOptionsVerifytgaLocation.setOnAction(event -> {
-            // Dialog title
-            final FileChooser filePicker = new FileChooser();
-            filePicker.setTitle("Choose VerifyTGA file");
-
-            // The initial location for the file choosing dialog
-            final File verifytgaFile = new File(UPPAALDriverManager.getVerifytgaFilePath()).getAbsoluteFile().getParentFile();
-
-            // If the file does not exist, use a default location
-            if(verifytgaFile.exists()) {
-                filePicker.setInitialDirectory(verifytgaFile);
-            }
-
-            // Prompt the user to select the file (will halt the UI thread)
-            final File file = filePicker.showOpenDialog(root.getScene().getWindow());
-            if(file != null) {
-                UPPAALDriverManager.setVerifytgaFilePath(file.getAbsolutePath());
             }
         });
     }

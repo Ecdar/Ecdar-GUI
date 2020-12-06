@@ -2,26 +2,41 @@
   {
     "query": "specification: (Administration || Machine || Researcher)",
     "comment": "",
-    "isPeriodic": false
+    "isPeriodic": false,
+    "ignoredInputs": {},
+    "ignoredOutputs": {}
   },
   {
     "query": "specification: Spec",
     "comment": "",
-    "isPeriodic": false
+    "isPeriodic": false,
+    "ignoredInputs": {},
+    "ignoredOutputs": {}
   },
   {
     "query": "consistency: (Administration || Machine || Researcher)",
     "comment": "",
-    "isPeriodic": false
+    "isPeriodic": false,
+    "ignoredInputs": {},
+    "ignoredOutputs": {}
   },
   {
     "query": "consistency: (Administration || Machine || Researcher : A[] not Researcher.Universal)",
     "comment": "",
-    "isPeriodic": false
+    "isPeriodic": false,
+    "ignoredInputs": {},
+    "ignoredOutputs": {}
   },
   {
     "query": "refinement: (Administration || Machine || Researcher) \u003c\u003d Spec",
     "comment": "",
-    "isPeriodic": false
+    "isPeriodic": false,
+    "ignoredInputs": {},
+    "ignoredOutputs": {
+      "tea": true,
+      "cof": false,
+      "pub": true,
+      "coin": false
+    }
   }
 ]

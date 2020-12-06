@@ -57,6 +57,9 @@ public class QueryPanePresentation extends StackPane {
                 new CornerRadii(100),
                 Insets.EMPTY)));
 
+        controller.swapBackendButton.setMaskType(JFXRippler.RipplerMask.CIRCLE);
+        controller.swapBackendButton.setRipplerFill(color.getTextColor(colorIntensity));
+
         controller.addButton.setMaskType(JFXRippler.RipplerMask.CIRCLE);
         controller.addButton.setRipplerFill(color.getTextColor(colorIntensity));
         Tooltip.install(controller.addButton, new Tooltip("Add query"));
