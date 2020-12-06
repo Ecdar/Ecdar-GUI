@@ -42,4 +42,12 @@ public class BackendDriverManager {
         // ToDo: Make BackendDriverNames parameter so that the query can have individual BackendDrivers
         return supportsInputOutputParameters;
     }
+
+    public static void swapBackendDriver() {
+        if(instance instanceof jECDARDriver) {
+            setCurrentBackend(BackendNames.Reveaal);
+        } else {
+            setCurrentBackend(BackendNames.jEcdar);
+        }
+    }
 }
