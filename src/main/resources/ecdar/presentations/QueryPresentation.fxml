@@ -6,6 +6,7 @@
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.text.Text?>
+<?import javafx.scene.control.Label?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="AnchorPane">
@@ -43,25 +44,39 @@
 
     <StackPane AnchorPane.topAnchor="8" AnchorPane.rightAnchor="16" minHeight="96"
                maxHeight="96">
-        <HBox AnchorPane.topAnchor="0" alignment="CENTER" minHeight="96" maxHeight="96">
-            <StackPane>
-                <JFXSpinner id="progressIndicator" radius="20"/>
+        <VBox minHeight="96" maxHeight="96">
 
-                <JFXRippler id="actionButton">
+            <Region minHeight="20"/>
+
+            <HBox AnchorPane.topAnchor="0" alignment="CENTER">
+                <StackPane>
+                    <JFXSpinner id="progressIndicator" radius="20"/>
+
+                    <JFXRippler id="actionButton">
+                        <StackPane minWidth="40" maxWidth="40" minHeight="40" maxHeight="40">
+                            <FontIcon id="actionButtonIcon" iconLiteral="gmi-play-arrow" iconSize="24"/>
+                        </StackPane>
+                    </JFXRippler>
+                </StackPane>
+
+                <Region minWidth="5"/>
+
+                <JFXRippler AnchorPane.topAnchor="0" id="detailsButton">
                     <StackPane minWidth="40" maxWidth="40" minHeight="40" maxHeight="40">
-                        <FontIcon id="actionButtonIcon" iconLiteral="gmi-play-arrow" iconSize="24"/>
+                        <FontIcon id="detailsButtonIcon" iconLiteral="gmi-more-vert" iconSize="24"/>
                     </StackPane>
                 </JFXRippler>
+            </HBox>
+            <StackPane AnchorPane.leftAnchor="144" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0">
+                <JFXRippler fx:id="swapBackendButton">
+                    <VBox alignment="CENTER">
+                        <!--onMouseClicked="#swapBackendButtonClicked"-->
+                        <Label fx:id="currentBackendLabel" textFill="black">jEcdar</Label>
+                        <FontIcon iconLiteral="gmi-swap-horiz" iconSize="18" fill="black"/>
+                    </VBox>
+                </JFXRippler>
             </StackPane>
-
-            <Region minWidth="5"/>
-
-            <JFXRippler AnchorPane.topAnchor="0" id="detailsButton">
-                <StackPane minWidth="40" maxWidth="40" minHeight="40" maxHeight="40">
-                    <FontIcon id="detailsButtonIcon" iconLiteral="gmi-more-vert" iconSize="24"/>
-                </StackPane>
-            </JFXRippler>
-        </HBox>
+        </VBox>
     </StackPane>
 
     <TitledPane id="inputOutputPane" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="96"
