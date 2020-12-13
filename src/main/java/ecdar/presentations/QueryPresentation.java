@@ -107,7 +107,7 @@ public class QueryPresentation extends AnchorPane {
             });
             detailsButton.getChildren().get(0).setOnMousePressed(event -> {
                 // Show the popup
-                dropDownMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.RIGHT, -15, 10);
+                dropDownMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.RIGHT, -24, 20);
             });
         });
     }
