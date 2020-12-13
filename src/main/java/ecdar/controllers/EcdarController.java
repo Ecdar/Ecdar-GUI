@@ -5,6 +5,7 @@ import ecdar.Ecdar;
 import ecdar.abstractions.*;
 import ecdar.backend.BackendDriverManager;
 import ecdar.backend.BackendException;
+import ecdar.backend.BackendHelper;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.presentations.*;
@@ -361,7 +362,7 @@ public class EcdarController implements Initializable {
 
                 try {
                     // Make sure that the model is generated
-                    BackendDriverManager.getInstance().buildEcdarDocument();
+                    BackendHelper.buildEcdarDocument();
                 } catch (final BackendException e) {
                     // Something went wrong with creating the document
                     Ecdar.showToast("Could not build XML model. I got the error: " + e.getMessage());

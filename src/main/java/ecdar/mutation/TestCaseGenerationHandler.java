@@ -6,6 +6,7 @@ import ecdar.abstractions.Project;
 import ecdar.abstractions.SimpleComponentsSystemDeclarations;
 import ecdar.backend.BackendDriverManager;
 import ecdar.backend.BackendException;
+import ecdar.backend.BackendHelper;
 import ecdar.mutation.models.MutationTestCase;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.mutation.models.NonRefinementStrategy;
@@ -84,7 +85,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
         finishedTestCases = Collections.synchronizedList(new ArrayList<>()); // use synchronized to be thread safe
 
         try {
-            queryFilePath = BackendDriverManager.getInstance().storeQuery("refinement: " + MutationTestPlanController.MUTANT_NAME + "<=" + MutationTestPlanController.SPEC_NAME, "query");
+            queryFilePath = BackendHelper.storeQuery("refinement: " + MutationTestPlanController.MUTANT_NAME + "<=" + MutationTestPlanController.SPEC_NAME, "query");
         } catch (final URISyntaxException | IOException e) {
             e.printStackTrace();
             Ecdar.showToast("Error: " + e.getMessage());
@@ -109,7 +110,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
     @Override
     public void onAllJobsSuccessfullyDone() {
         try {
-            FileUtils.cleanDirectory(new File(BackendDriverManager.getInstance().getTempDirectoryAbsolutePath()));
+            FileUtils.cleanDirectory(new File(BackendHelper.getTempDirectoryAbsolutePath()));
         } catch (final IOException | URISyntaxException e) {
             e.printStackTrace();
             Ecdar.showToast("Error: " + e.getMessage());

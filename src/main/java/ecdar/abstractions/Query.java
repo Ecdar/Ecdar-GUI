@@ -19,6 +19,7 @@ public class Query implements Serializable {
     private static final String IS_PERIODIC = "isPeriodic";
     private static final String IGNORED_INPUTS = "ignoredInputs";
     private static final String IGNORED_OUTPUTS = "ignoredOutputs";
+    private static final String BACKEND = "backend";
 
     public final HashMap<String, Boolean> ignoredInputs = new HashMap<>();
     public final HashMap<String, Boolean> ignoredOutputs = new HashMap<>();
@@ -28,13 +29,15 @@ public class Query implements Serializable {
     private final StringProperty comment = new SimpleStringProperty("");
     private final SimpleBooleanProperty isPeriodic = new SimpleBooleanProperty(false);
     private final StringProperty errors = new SimpleStringProperty("");
-    private Consumer<Boolean> runQuery;
+    private BackendHelper.BackendNames currentBackend;
     private BackendThread backendThread;
+    private Consumer<Boolean> runQuery;
 
     public Query(final String query, final String comment, final QueryState queryState) {
         this.query.set(query);
         this.comment.set(comment);
         this.queryState.set(queryState);
+        setCurrentBackend(BackendHelper.BackendNames.jEcdar);
 
         initializeRunQuery();
     }
@@ -95,6 +98,14 @@ public class Query implements Serializable {
         this.isPeriodic.set(isPeriodic);
     }
 
+    public BackendHelper.BackendNames getCurrentBackend() {
+        return currentBackend;
+    }
+
+    public void setCurrentBackend(BackendHelper.BackendNames currentBackend) {
+        this.currentBackend = currentBackend;
+    }
+
     private Engine engine = null;
     private Boolean forcedCancel = false;
 
@@ -104,7 +115,7 @@ public class Query implements Serializable {
 
             if (buildEcdarDocument) {
                 try {
-                    BackendDriverManager.getInstance().buildEcdarDocument();
+                    BackendHelper.buildEcdarDocument();
                 } catch (final BackendException e) {
                     Ecdar.showToast("Could not build XML document. I got the error: " + e.getMessage());
                     e.printStackTrace();
@@ -114,7 +125,7 @@ public class Query implements Serializable {
 
             errors.set("");
 
-            backendThread = BackendDriverManager.getInstance().runQuery(getQuery().replaceAll("\\s", "") + " " + getIgnoredInputOutputsOnQuery(),
+            backendThread = BackendDriverManager.getInstance(this.currentBackend).runQuery(getQuery().replaceAll("\\s", "") + " " + getIgnoredInputOutputsOnQuery(),
                     aBoolean -> {
                         if (aBoolean) {
                             setQueryState(QueryState.SUCCESSFUL);
@@ -157,6 +168,8 @@ public class Query implements Serializable {
         result.add(IGNORED_INPUTS, getHashMapAsJsonObject(ignoredInputs));
         result.add(IGNORED_OUTPUTS, getHashMapAsJsonObject(ignoredOutputs));
 
+        result.addProperty(BACKEND, currentBackend.toString());
+
         return result;
     }
 
@@ -183,6 +196,12 @@ public class Query implements Serializable {
 
         if (json.has(IGNORED_OUTPUTS)) {
             deserializeJsonObjectToMap(json.getAsJsonObject(IGNORED_OUTPUTS), ignoredOutputs);
+        }
+
+        if(json.has(BACKEND)) {
+            setCurrentBackend(json.getAsJsonPrimitive(BACKEND).getAsInt() == BackendHelper.BackendNames.jEcdar.ordinal() ? BackendHelper.BackendNames.jEcdar : BackendHelper.BackendNames.Reveaal);
+        } else {
+            setCurrentBackend(BackendHelper.BackendNames.jEcdar);
         }
     }
 
@@ -215,7 +234,7 @@ public class Query implements Serializable {
     }
 
     private String getIgnoredInputOutputsOnQuery() {
-        if (!BackendDriverManager.backendSupportsInputOutputs().get() || (!ignoredInputs.containsValue(true) && !ignoredOutputs.containsValue(true))) {
+        if (!BackendDriverManager.backendSupportsInputOutputs(this.currentBackend) || (!ignoredInputs.containsValue(true) && !ignoredOutputs.containsValue(true))) {
             return "";
         }
 

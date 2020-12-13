@@ -4,28 +4,32 @@
     "comment": "",
     "isPeriodic": false,
     "ignoredInputs": {},
-    "ignoredOutputs": {}
+    "ignoredOutputs": {},
+    "backend": "0"
   },
   {
     "query": "specification: Spec",
     "comment": "",
     "isPeriodic": false,
     "ignoredInputs": {},
-    "ignoredOutputs": {}
+    "ignoredOutputs": {},
+    "backend": "1"
   },
   {
     "query": "consistency: (Administration || Machine || Researcher)",
     "comment": "",
     "isPeriodic": false,
     "ignoredInputs": {},
-    "ignoredOutputs": {}
+    "ignoredOutputs": {},
+    "backend": "0"
   },
   {
     "query": "consistency: (Administration || Machine || Researcher : A[] not Researcher.Universal)",
     "comment": "",
     "isPeriodic": false,
     "ignoredInputs": {},
-    "ignoredOutputs": {}
+    "ignoredOutputs": {},
+    "backend": "1"
   },
   {
     "query": "refinement: (Administration || Machine || Researcher) \u003c\u003d Spec",
@@ -37,6 +41,7 @@
       "cof": false,
       "pub": true,
       "coin": false
-    }
+    },
+    "backend": "1"
   }
 ]

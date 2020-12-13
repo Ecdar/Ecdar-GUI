@@ -24,15 +24,6 @@
                        text="Queries"/>
             </StackPane>
 
-            <StackPane AnchorPane.leftAnchor="144" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0">
-                <JFXRippler fx:id="swapBackendButton">
-                    <VBox alignment="CENTER" minWidth="50" minHeight="50" onMouseClicked="#swapBackendButtonClicked">
-                        <FontIcon iconLiteral="gmi-swap-horiz" iconSize="18" fill="white"/>
-                        <Label fx:id="currentBackendLabel" textFill="white">jEcdar</Label>
-                    </VBox>
-                </JFXRippler>
-            </StackPane>
-
             <StackPane AnchorPane.rightAnchor="16" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0">
                 <HBox maxHeight="-Infinity">
 

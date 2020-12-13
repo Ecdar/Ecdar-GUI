@@ -1,60 +1,11 @@
 package ecdar.backend;
 
-import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Location;
-import ecdar.abstractions.Project;
-import org.apache.commons.io.FileUtils;
-
-import java.io.*;
-import java.net.URISyntaxException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
 public class jECDARDriver implements IBackendDriver {
-    private EcdarDocument ecdarDocument;
-    private ReentrantLock jEcdarLock = new ReentrantLock(false);
-
-    public jECDARDriver(){
-    }
-    
-    @Override
-    public String storeBackendModel(Project project, String fileName) throws BackendException, IOException, URISyntaxException {
-        return null;
-    }
-
-    @Override
-    public String storeBackendModel(Project project, String relativeDirectoryPath, String fileName) throws BackendException, IOException, URISyntaxException {
-        return null;
-    }
-
-    @Override
-    public String storeQuery(String query, String fileName) throws URISyntaxException, IOException {
-        FileUtils.forceMkdir(new File(getTempDirectoryAbsolutePath()));
-
-        final String path = getTempDirectoryAbsolutePath() + File.separator + fileName + ".q";
-        Files.write(
-                Paths.get(path),
-                Collections.singletonList(query),
-                Charset.forName("UTF-8")
-        );
-
-        return path;
-    }
-
-    @Override
-    public String getTempDirectoryAbsolutePath() throws URISyntaxException {
-        return Ecdar.getRootDirectory() + File.separator + TEMP_DIRECTORY;
-    }
-
-    public void buildEcdarDocument() throws BackendException {
-        ecdarDocument = new EcdarDocument();
-    }
-
     @Override
     public BackendThread runQuery(String query, Consumer<Boolean> success, Consumer<BackendException> failure) {
         return null;

@@ -46,7 +46,7 @@
                maxHeight="96">
         <VBox minHeight="96" maxHeight="96">
 
-            <Region minHeight="20"/>
+            <Region minHeight="10"/>
 
             <HBox AnchorPane.topAnchor="0" alignment="CENTER">
                 <StackPane>
@@ -69,17 +69,16 @@
             </HBox>
             <StackPane AnchorPane.leftAnchor="144" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0">
                 <JFXRippler fx:id="swapBackendButton">
-                    <VBox alignment="CENTER">
-                        <!--onMouseClicked="#swapBackendButtonClicked"-->
-                        <Label fx:id="currentBackendLabel" textFill="black">jEcdar</Label>
-                        <FontIcon iconLiteral="gmi-swap-horiz" iconSize="18" fill="black"/>
+                    <VBox alignment="CENTER" minWidth="40" minHeight="40">
+                        <FontIcon iconLiteral="gmi-swap-horiz" iconSize="18"/>
+                        <Label fx:id="currentBackendLabel"/>
                     </VBox>
                 </JFXRippler>
             </StackPane>
         </VBox>
     </StackPane>
 
-    <TitledPane id="inputOutputPane" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="96"
+    <TitledPane id="inputOutputPane" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="116"
                 AnchorPane.bottomAnchor="0.0" expanded="false" alignment="CENTER" visible="false">
         <graphic>
             <FontIcon id="inputOutputPaneExpandIcon" iconLiteral="gmi-keyboard-arrow-down"  iconSize="18"/>
