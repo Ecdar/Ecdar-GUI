@@ -2,6 +2,7 @@ package ecdar.backend;
 
 import ecdar.Ecdar;
 import ecdar.abstractions.Project;
+import ecdar.abstractions.Query;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -68,6 +69,10 @@ public final class BackendHelper {
 
     public static void buildEcdarDocument() throws BackendException {
         ecdarDocument = new EcdarDocument();
+    }
+
+    public static void stopEngines() {
+        Ecdar.getProject().getQueries().forEach(Query::cancel);
     }
 
     public enum BackendNames {
