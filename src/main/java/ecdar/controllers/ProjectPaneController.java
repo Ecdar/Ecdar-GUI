@@ -214,7 +214,7 @@ public class ProjectPaneController implements Initializable {
 
         moreInformation.setOnMousePressed((e) -> {
             e.consume();
-            moreInformationDropDown.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, 10, 10);
+            moreInformationDropDown.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, 20, 20);
         });
     }
 

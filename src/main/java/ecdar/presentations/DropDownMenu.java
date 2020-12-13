@@ -147,8 +147,8 @@ public class DropDownMenu extends JFXPopup {
         //Check if the dropdown will appear outside the screen and change the offset accordingly
         double offsetX = initOffsetX;
         double offsetY = initOffsetY;
-        double distEdgeX = Screen.getPrimary().getBounds().getWidth() - (this.getAnchorX() + offsetX);
-        double distEdgeY = Screen.getPrimary().getBounds().getHeight() - (this.getAnchorY() + offsetY);
+        double distEdgeX = Screen.getPrimary().getBounds().getWidth() - (source.getLayoutX() + offsetX);
+        double distEdgeY = Screen.getPrimary().getBounds().getHeight() - (source.getLayoutY() + offsetY);
 
         //The additional 20 is added for margin
         if(distEdgeX < dropDownMenuWidth.get() + 20){
