@@ -75,7 +75,7 @@ public final class BackendHelper {
 
         @Override
         public String toString() {
-            return "" + this.ordinal();
+            return this.ordinal() == 0 ? "jEcdar" : "Reveaal";
         }
     }
 }

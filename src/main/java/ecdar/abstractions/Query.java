@@ -168,7 +168,7 @@ public class Query implements Serializable {
         result.add(IGNORED_INPUTS, getHashMapAsJsonObject(ignoredInputs));
         result.add(IGNORED_OUTPUTS, getHashMapAsJsonObject(ignoredOutputs));
 
-        result.addProperty(BACKEND, currentBackend.toString());
+        result.addProperty(BACKEND, currentBackend.ordinal());
 
         return result;
     }
