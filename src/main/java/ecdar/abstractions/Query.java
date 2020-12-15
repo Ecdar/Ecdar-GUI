@@ -138,7 +138,7 @@ public class Query implements Serializable {
                             setQueryState(QueryState.UNKNOWN);
                         } else {
                             setQueryState(QueryState.SYNTAX_ERROR);
-                            this.addCurrentError(e.getMessage());
+                            this.addError(e.getMessage());
                             final Throwable cause = e.getCause();
                             if (cause != null) {
                                 // We had trouble generating the model if we get a NullPointerException
@@ -225,7 +225,7 @@ public class Query implements Serializable {
         }
     }
 
-    public void addCurrentError(String e) {
+    public void addError(String e) {
         errors.set(errors.getValue() + e + "\n");
     }
 
