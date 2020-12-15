@@ -44,7 +44,6 @@ import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import javafx.util.Pair;
 import org.kordamp.ikonli.javafx.FontIcon;
-import org.kordamp.ikonli.material.Material;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -385,7 +384,7 @@ public class EcdarController implements Initializable {
                     } else {
                         component.getLocations().forEach(location -> {
                             final String locationReachableQuery = BackendDriverManager.getInstance().getLocationReachableQuery(location, component);
-                            final Thread verifyThread = BackendDriverManager.getInstance().runQuery(
+                            final Thread verifyThread = BackendDriverManager.getInstance().getBackendThreadForQuery(
                                     locationReachableQuery,
                                     (result -> {
                                         if (result) {

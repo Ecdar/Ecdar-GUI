@@ -1,5 +1,6 @@
 package ecdar.backend;
 
+import com.uppaal.model.core2.Document;
 import ecdar.Ecdar;
 import ecdar.abstractions.Project;
 import ecdar.abstractions.Query;
@@ -17,7 +18,7 @@ public final class BackendHelper {
     final static String TEMP_DIRECTORY = "temporary";
     private static EcdarDocument ecdarDocument;
     public static String storeBackendModel(Project project, String fileName) throws BackendException, IOException, URISyntaxException {
-        return null;
+        return storeBackendModel(project, TEMP_DIRECTORY, fileName);
     }
 
     /**
@@ -32,7 +33,18 @@ public final class BackendHelper {
      * @throws URISyntaxException if an error occurs when getting the URL of the root directory
      */
     public static String storeBackendModel(Project project, String relativeDirectoryPath, String fileName) throws BackendException, IOException, URISyntaxException {
-        return null;
+        final String directoryPath = Ecdar.getRootDirectory() + File.separator + relativeDirectoryPath;
+
+        FileUtils.forceMkdir(new File(directoryPath));
+
+        final String path = directoryPath + File.separator + fileName + ".xml";
+        storeEcdarFile(new EcdarDocument(project).toXmlDocument(),  path);
+
+        return path;
+    }
+
+    private static void storeEcdarFile(final Document EcdarDocument, String path) throws IOException {
+        EcdarDocument.save(path);
     }
 
     /**

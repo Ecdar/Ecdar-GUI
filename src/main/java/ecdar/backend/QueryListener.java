@@ -25,10 +25,11 @@ public class QueryListener {
 
     }
 
-    /* ToDo: Handle without using UPPAAL SymbolicTransition
+    /*
     public void setTrace(char c, String s, Vector<SymbolicTransition> vector, int i) {
 
-    }*/
+    }
+    */
 
     public void setFeedback(final String s) {
         if (s.contains("inf") || s.contains("sup")) {

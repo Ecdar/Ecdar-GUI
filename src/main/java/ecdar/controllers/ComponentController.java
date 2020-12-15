@@ -788,7 +788,6 @@ public class ComponentController extends ModelController implements Initializabl
 
         final Transition rippleEffect = new Transition() {
             private final double maxRadius = Math.sqrt(Math.pow(getComponent().getBox().getWidth(), 2) + Math.pow(getComponent().getBox().getHeight(), 2));
-
             {
                 setCycleDuration(Duration.millis(500));
             }

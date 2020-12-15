@@ -6,19 +6,19 @@ import ecdar.abstractions.Location;
 import java.util.function.Consumer;
 
 public interface IBackendDriver {
-    BackendThread runQuery(final String query,
-                    final Consumer<Boolean> success,
-                    final Consumer<BackendException> failure);
+    BackendThread getBackendThreadForQuery(final String query,
+                                           final Consumer<Boolean> success,
+                                           final Consumer<BackendException> failure);
 
-    BackendThread runQuery(final String query,
-                    final Consumer<Boolean> success,
-                    final Consumer<BackendException> failure,
-                    final long timeout);
+    BackendThread getBackendThreadForQuery(final String query,
+                                           final Consumer<Boolean> success,
+                                           final Consumer<BackendException> failure,
+                                           final long timeout);
 
-    BackendThread runQuery(final String query,
-                    final Consumer<Boolean> success,
-                    final Consumer<BackendException> failure,
-                    final QueryListener queryListener);
+    BackendThread getBackendThreadForQuery(final String query,
+                                           final Consumer<Boolean> success,
+                                           final Consumer<BackendException> failure,
+                                           final QueryListener queryListener);
 
     /**
      * Generates a reachability query based on the given location and component
