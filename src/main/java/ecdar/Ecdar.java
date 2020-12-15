@@ -2,7 +2,6 @@ package ecdar;
 
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Project;
-import ecdar.backend.BackendDriverManager;
 import ecdar.backend.BackendHelper;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.controllers.CanvasController;
@@ -18,7 +17,6 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ListChangeListener;
-import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
@@ -28,7 +26,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import jiconfont.icons.GoogleMaterialDesignIcons;
 import jiconfont.javafx.IconFontFX;
 import org.apache.commons.io.FileUtils;
@@ -38,7 +35,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.CodeSource;
-import java.util.Random;
 
 public class Ecdar extends Application {
     public static Preferences preferences = Preferences.userRoot().node("ECDAR");;
@@ -224,7 +220,7 @@ public class Ecdar extends Application {
         }));
 
         stage.setOnCloseRequest(event -> {
-            BackendHelper.stopEngines();
+            BackendHelper.stopQueries();
 
             Platform.exit();
             System.exit(0);

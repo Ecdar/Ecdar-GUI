@@ -67,14 +67,25 @@ public final class BackendHelper {
         return Ecdar.getRootDirectory() + File.separator + TEMP_DIRECTORY;
     }
 
+    /**
+     * Build the Ecdar document to see if an exception is thrown.
+     *
+     * @throws BackendException if the document could not be built
+     */
     public static void buildEcdarDocument() throws BackendException {
         ecdarDocument = new EcdarDocument();
     }
 
-    public static void stopEngines() {
+    /**
+     * Stop all running queries.
+     */
+    public static void stopQueries() {
         Ecdar.getProject().getQueries().forEach(Query::cancel);
     }
 
+    /**
+     * Enum for the available backends. Used for saving and loading the queries.
+     */
     public enum BackendNames {
         jEcdar, Reveaal;
 
