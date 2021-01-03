@@ -4,7 +4,6 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 
 public class BackendDriverManager {
-    private static IBackendDriver instance = null;
     private static jECDARDriver jEcdarDriverInstance = null;
     private static ReveaalDriver reveaalDriverInstance = null;
     private static BackendHelper.BackendNames currentGeneralBackend = BackendHelper.BackendNames.jEcdar;
@@ -39,7 +38,7 @@ public class BackendDriverManager {
      * @return the jECDARDriver currently available
      */
     public static synchronized IBackendDriver getInstance() {
-        return getInstance(BackendHelper.BackendNames.jEcdar);
+        return getInstance(currentGeneralBackend);
     }
 
     /**
