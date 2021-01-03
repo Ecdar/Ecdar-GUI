@@ -243,7 +243,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         initializePositiveIntegerTextField(controller.generationThreadsField, getPlan().getConcurrentGenerationsThreadsProperty());
         initializePositiveIntegerTextField(controller.suvInstancesField, getPlan().getConcurrentSutInstancesProperty());
         initializePositiveIntegerTextField(controller.outputWaitTimeField, getPlan().getOutputWaitTimeProperty());
-        initializePositiveIntegerTextField(controller.verifytgaTriesField, getPlan().getVerifytgaTriesProperty());
+        initializePositiveIntegerTextField(controller.verifytgaTriesField, getPlan().getBackendTriesProperty());
         initializePositiveIntegerTextField(controller.stepBoundsField, getPlan().getStepBoundsProperty());
     }
 

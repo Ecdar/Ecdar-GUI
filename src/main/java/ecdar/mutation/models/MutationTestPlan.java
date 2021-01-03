@@ -38,7 +38,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     private static final String MAX_GENERATION_THREADS = "maxGenerationThreads";
     private static final String MAX_SUT_INSTANCES = "maxSutInstances";
     private static final String MAX_OUTPUT_WAIT_TIME = "maxOutputWaitTime";
-    private static final String VERIFYTGA_TRIES = "verifytgaTries";
+    private static final String BACKEND_TRIES = "backendTries";
     private static final String TIME_UNIT = "timeUnit";
     private static final String STEP_BOUNDS = "stepBounds";
     private static final String SIMULATE_TIME = "simulateTime";
@@ -57,7 +57,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     private final IntegerProperty concurrentGenerationThreads = new SimpleIntegerProperty(10);
     private final IntegerProperty concurrentSutInstances = new SimpleIntegerProperty(1);
     private final IntegerProperty maxOutputWaitTime = new SimpleIntegerProperty(5);
-    private final IntegerProperty verifytgaTries = new SimpleIntegerProperty(3);
+    private final IntegerProperty backendTries = new SimpleIntegerProperty(3);
     private final IntegerProperty timeUnit = new SimpleIntegerProperty(1000);
     private final IntegerProperty stepBounds = new SimpleIntegerProperty(100);
     private final BooleanProperty simulateTime = new SimpleBooleanProperty(false);
@@ -248,14 +248,14 @@ public class MutationTestPlan extends HighLevelModelObject {
         return results.get();
     }
 
-    public int getVerifytgaTries() {
-        return verifytgaTries.get();
+    public int getBackendTries() {
+        return backendTries.get();
     }
-    public IntegerProperty getVerifytgaTriesProperty() {
-        return verifytgaTries;
+    public IntegerProperty getBackendTriesProperty() {
+        return backendTries;
     }
-    public void setVerifytgaTries(final int verifytgaTries) {
-        this.verifytgaTries.set(verifytgaTries);
+    public void setBackendTries(final int backendTries) {
+        this.backendTries.set(backendTries);
     }
 
     /**
@@ -328,7 +328,7 @@ public class MutationTestPlan extends HighLevelModelObject {
         result.addProperty(MAX_GENERATION_THREADS, getConcurrentGenerationThreads());
         result.addProperty(MAX_SUT_INSTANCES, getConcurrentSutInstances());
         result.addProperty(MAX_OUTPUT_WAIT_TIME, getOutputWaitTime());
-        result.addProperty(VERIFYTGA_TRIES, getVerifytgaTries());
+        result.addProperty(BACKEND_TRIES, getBackendTries());
         result.addProperty(TIME_UNIT, getTimeUnit());
         result.addProperty(STEP_BOUNDS, getStepBounds());
         result.addProperty(SIMULATE_TIME, shouldSimulateTime());
@@ -367,8 +367,8 @@ public class MutationTestPlan extends HighLevelModelObject {
         primitive = json.getAsJsonPrimitive(MAX_OUTPUT_WAIT_TIME);
         if (primitive != null) setOutputWaitTime(primitive.getAsInt());
 
-        primitive = json.getAsJsonPrimitive(VERIFYTGA_TRIES);
-        if (primitive != null) setVerifytgaTries(primitive.getAsInt());
+        primitive = json.getAsJsonPrimitive(BACKEND_TRIES);
+        if (primitive != null) setBackendTries(primitive.getAsInt());
 
         primitive = json.getAsJsonPrimitive(TIME_UNIT);
         if (primitive != null) setTimeUnit(primitive.getAsInt());

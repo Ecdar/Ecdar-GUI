@@ -52,6 +52,11 @@ public class jECDARDriver implements IBackendDriver {
         return "E<> (" + String.join(" || ", locationNames) + ") && deadlock";
     }
 
+    public Process getJEcdarProcessForRefinementCheckAndStrategyIfNonRefinement(String pathToModel, String pathToQueryFile) {
+        // ToDo: Not yet implemented
+        return null;
+    }
+
     public enum TraceType {
         NONE, SOME, SHORTEST, FASTEST;
 
