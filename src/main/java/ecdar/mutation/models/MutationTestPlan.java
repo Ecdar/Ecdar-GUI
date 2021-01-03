@@ -57,7 +57,7 @@ public class MutationTestPlan extends HighLevelModelObject {
     private final IntegerProperty concurrentGenerationThreads = new SimpleIntegerProperty(10);
     private final IntegerProperty concurrentSutInstances = new SimpleIntegerProperty(1);
     private final IntegerProperty maxOutputWaitTime = new SimpleIntegerProperty(5);
-    private final IntegerProperty verifytgaTries = new SimpleIntegerProperty(3);
+    private final IntegerProperty backendTries = new SimpleIntegerProperty(3);
     private final IntegerProperty timeUnit = new SimpleIntegerProperty(1000);
     private final IntegerProperty stepBounds = new SimpleIntegerProperty(100);
     private final BooleanProperty simulateTime = new SimpleBooleanProperty(false);
@@ -249,13 +249,13 @@ public class MutationTestPlan extends HighLevelModelObject {
     }
 
     public int getBackendTries() {
-        return verifytgaTries.get();
+        return backendTries.get();
     }
-    public IntegerProperty getVerifytgaTriesProperty() {
-        return verifytgaTries;
+    public IntegerProperty getBackendTriesProperty() {
+        return backendTries;
     }
-    public void setVerifytgaTries(final int verifytgaTries) {
-        this.verifytgaTries.set(verifytgaTries);
+    public void setBackendTries(final int backendTries) {
+        this.backendTries.set(backendTries);
     }
 
     /**
@@ -368,7 +368,7 @@ public class MutationTestPlan extends HighLevelModelObject {
         if (primitive != null) setOutputWaitTime(primitive.getAsInt());
 
         primitive = json.getAsJsonPrimitive(BACKEND_TRIES);
-        if (primitive != null) setVerifytgaTries(primitive.getAsInt());
+        if (primitive != null) setBackendTries(primitive.getAsInt());
 
         primitive = json.getAsJsonPrimitive(TIME_UNIT);
         if (primitive != null) setTimeUnit(primitive.getAsInt());
