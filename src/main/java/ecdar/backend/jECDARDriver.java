@@ -23,6 +23,13 @@ public class jECDARDriver implements IBackendDriver {
         return new jEcdarThread(query, success, failure, queryListener);
     }
 
+    synchronized public BackendThread getBackendThreadForQuotionQuery(final String query,
+                                                               final Consumer<Boolean> success,
+                                                               final Consumer<BackendException> failure,
+                                                               final QueryListener queryListener) {
+        return new jEcdarQuotionThread(query, success, failure, queryListener);
+    }
+
     /**
      * Generates a reachability query based on the given location and component.
      *
