@@ -10,17 +10,17 @@ import java.io.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-public class jEcdarQuotionThread {
+public class jEcdarQuotientThread {
     public AtomicBoolean hasBeenCanceled = new AtomicBoolean();
     final String query;
     final Consumer<Boolean> success;
     final Consumer<BackendException> failure;
     final QueryListener queryListener;
 
-    public jEcdarQuotionThread(final String query,
-                               final Consumer<Boolean> success,
-                               final Consumer<BackendException> failure,
-                               final QueryListener queryListener) {
+    public jEcdarQuotientThread(final String query,
+                                final Consumer<Boolean> success,
+                                final Consumer<BackendException> failure,
+                                final QueryListener queryListener) {
         this.query = query;
         this.success = success;
         this.failure = failure;
