@@ -1,7 +1,9 @@
 package ecdar.backend;
 
+import com.google.gson.JsonObject;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Location;
+
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -26,8 +28,9 @@ public class jECDARDriver implements IBackendDriver {
     synchronized public jEcdarQuotientThread getBackendThreadForQuotientQuery(final String query,
                                                                               final Consumer<Boolean> success,
                                                                               final Consumer<BackendException> failure,
-                                                                              final QueryListener queryListener) {
-        return new jEcdarQuotientThread(query, success, failure, queryListener);
+                                                                              final QueryListener queryListener,
+                                                                              final JsonObject[] referenceToReturnedObject) {
+        return new jEcdarQuotientThread(query, success, failure, queryListener, referenceToReturnedObject);
     }
 
     /**

@@ -24,6 +24,7 @@ import javafx.scene.layout.*;
 import javafx.scene.text.TextAlignment;
 import javafx.util.Pair;
 import org.kordamp.ikonli.javafx.FontIcon;
+import org.kordamp.ikonli.material.Material;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -171,7 +172,11 @@ public class QueryPresentation extends AnchorPane {
             // Delegate that based on a query state updates tooltip of the query
             final Consumer<QueryState> updateToolTip = (queryState) -> {
                 if (queryState.getStatusCode() == 1) {
-                    this.tooltip.setText("This query was a success!");
+                    if(queryState.getIconCode().equals(Material.DONE)) {
+                        this.tooltip.setText("This query was a success!");
+                    } else {
+                        this.tooltip.setText("The component has been created (can be accessed in the project pane)");
+                    }
                 } else if (queryState.getStatusCode() == 3) {
                     this.tooltip.setText("The query has not been executed yet");
                 } else {

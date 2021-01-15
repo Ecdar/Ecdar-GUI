@@ -2,7 +2,9 @@ package ecdar.abstractions;
 
 import ecdar.Ecdar;
 import ecdar.backend.*;
+import ecdar.controllers.CanvasController;
 import ecdar.controllers.EcdarController;
+import ecdar.utility.UndoRedoStack;
 import ecdar.utility.serialize.Serializable;
 import com.google.gson.JsonObject;
 import com.uppaal.engine.Engine;
@@ -31,6 +33,7 @@ public class Query implements Serializable {
     private final StringProperty errors = new SimpleStringProperty("");
     private BackendHelper.BackendNames currentBackend;
     private BackendThread backendThread;
+    private JsonObject[] generatedComponent;
     private Consumer<Boolean> runQuery;
 
     public Query(final String query, final String comment, final QueryState queryState) {
@@ -125,6 +128,58 @@ public class Query implements Serializable {
 
             errors.set("");
 
+            setBackendThread();
+            backendThread.start();
+        };
+    }
+
+    private void setBackendThread() {
+        Consumer<BackendException> backendExceptionConsumer = e -> {
+            if (forcedCancel) {
+                setQueryState(QueryState.UNKNOWN);
+            } else {
+                setQueryState(QueryState.SYNTAX_ERROR);
+                this.addError(e.getMessage());
+                final Throwable cause = e.getCause();
+                if (cause != null) {
+                    // We had trouble generating the model if we get a NullPointerException
+                    if (cause instanceof NullPointerException) {
+                        setQueryState(QueryState.UNKNOWN);
+                    } else {
+                        Platform.runLater(() -> EcdarController.openQueryDialog(this, cause.toString()));
+                    }
+                }
+            }
+        };
+
+        if(query.get().startsWith("quotient")) {
+            backendThread = ((jECDARDriver) BackendDriverManager.getInstance(BackendHelper.BackendNames.jEcdar)).getBackendThreadForQuotientQuery(getQuery().replaceAll("\\s", "") + " " + getIgnoredInputOutputsOnQuery(),
+                    aBoolean -> {
+                        if (aBoolean) {
+                            setQueryState(QueryState.COMPONENT_GENERATED);
+
+                            Platform.runLater(() -> {
+                                final Component newComponent = new Component(generatedComponent[0]);
+
+                                UndoRedoStack.pushAndPerform(() -> { // Perform
+                                    Ecdar.getProject().getComponents().add(newComponent);
+                                }, () -> { // Undo
+                                    Ecdar.getProject().getComponents().remove(newComponent);
+                                }, "Created new component: " + newComponent.getName(), "add-circle");
+
+                                CanvasController.setActiveModel(newComponent);
+                            });
+                        } else {
+                            setQueryState(QueryState.ERROR);
+                        }
+                    },
+                    backendExceptionConsumer,
+                    new QueryListener(this),
+                    generatedComponent = new JsonObject[] {
+                            new JsonObject()
+                    }
+            );
+        } else {
             backendThread = BackendDriverManager.getInstance(this.currentBackend).getBackendThreadForQuery(getQuery().replaceAll("\\s", "") + " " + getIgnoredInputOutputsOnQuery(),
                     aBoolean -> {
                         if (aBoolean) {
@@ -133,28 +188,10 @@ public class Query implements Serializable {
                             setQueryState(QueryState.ERROR);
                         }
                     },
-                    e -> {
-                        if (forcedCancel) {
-                            setQueryState(QueryState.UNKNOWN);
-                        } else {
-                            setQueryState(QueryState.SYNTAX_ERROR);
-                            this.addError(e.getMessage());
-                            final Throwable cause = e.getCause();
-                            if (cause != null) {
-                                // We had trouble generating the model if we get a NullPointerException
-                                if (cause instanceof NullPointerException) {
-                                    setQueryState(QueryState.UNKNOWN);
-                                } else {
-                                    Platform.runLater(() -> EcdarController.openQueryDialog(this, cause.toString()));
-                                }
-                            }
-                        }
-                    },
+                    backendExceptionConsumer,
                     new QueryListener(this)
             );
-
-            backendThread.start();
-        };
+        }
     }
 
     @Override
