@@ -43,7 +43,7 @@ public class jEcdarQuotientThread extends BackendThread {
                 QueryState result = QueryState.RUNNING;
 
                 JsonObject returnedComponent = (JsonObject) parser.parse("{\n" +
-                        "  \"name\": \"Administration\",\n" +
+                        "  \"name\": \"[Temporary] Administration\",\n" +
                         "  \"declarations\": \"clock z;\",\n" +
                         "  \"locations\": [\n" +
                         "    {\n" +
@@ -329,9 +329,9 @@ public class jEcdarQuotientThread extends BackendThread {
                     final Component newComponent = new Component(returnedComponent);
 
                     UndoRedoStack.pushAndPerform(() -> { // Perform
-                        Ecdar.getProject().getComponents().add(newComponent);
+                        Ecdar.getProject().getTempComponents().add(newComponent);
                     }, () -> { // Undo
-                        Ecdar.getProject().getComponents().remove(newComponent);
+                        Ecdar.getProject().getTempComponents().remove(newComponent);
                     }, "Created new component: " + newComponent.getName(), "add-circle");
 
                     CanvasController.setActiveModel(newComponent);

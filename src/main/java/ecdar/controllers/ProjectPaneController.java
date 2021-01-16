@@ -16,6 +16,7 @@ import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
@@ -34,6 +35,7 @@ public class ProjectPaneController implements Initializable {
     public Label toolbarTitle;
     public ScrollPane scrollPane;
     public VBox filesList;
+    public VBox tempFilesList;
     public JFXRippler createComponent;
     public JFXRippler createSystem;
 
@@ -52,6 +54,7 @@ public class ProjectPaneController implements Initializable {
             event.consume();
             CanvasController.setActiveModel(Ecdar.getProject().getGlobalDeclarations());
         });
+
         filesList.getChildren().add(globalDclPresentation);
 
         // Bind system declarations and add mouse event
@@ -60,6 +63,7 @@ public class ProjectPaneController implements Initializable {
             event.consume();
             CanvasController.setActiveModel(Ecdar.getProject().getSystemDeclarations());
         });
+
         filesList.getChildren().add(systemDclPresentation);
 
         Ecdar.getProject().getComponents().addListener(new ListChangeListener<Component>() {
@@ -68,6 +72,19 @@ public class ProjectPaneController implements Initializable {
                 while (c.next()) {
                     c.getAddedSubList().forEach(o -> handleAddedModel(o));
                     c.getRemoved().forEach(o -> handleRemovedModel(o));
+
+                    // Sort the children alphabetically
+                    sortPresentations();
+                }
+            }
+        });
+
+        Ecdar.getProject().getTempComponents().addListener(new ListChangeListener<Component>() {
+            @Override
+            public void onChanged(final Change<? extends Component> c) {
+                while (c.next()) {
+                    c.getAddedSubList().forEach(o -> handleAddedTempModel(o));
+                    c.getRemoved().forEach(o -> handleRemoveTempModel(o));
 
                     // Sort the children alphabetically
                     sortPresentations();
@@ -87,7 +104,6 @@ public class ProjectPaneController implements Initializable {
                 sortPresentations();
             }
         });
-
 
         initializeMutationTestPlanHandling();
     }
@@ -174,6 +190,21 @@ public class ProjectPaneController implements Initializable {
                 }, "Deleted component " + model.getName(), "delete");
                 moreInformationDropDown.hide();
             });
+
+            if(filePresentation.getModel().getName().startsWith("[Temporary]")) {
+                moreInformationDropDown.addClickableListElement("Add as component", event -> {
+                    UndoRedoStack.pushAndPerform(() -> { // Perform
+                        Ecdar.getProject().getTempComponents().remove(model);
+                        model.setName(model.getName().replace("[Temporary]", ""));
+                        Ecdar.getProject().getComponents().add((Component) model);
+                    }, () -> { // Undo
+                        Ecdar.getProject().getComponents().remove(model);
+                        model.setName("[Temporary]" + model.getName());
+                        Ecdar.getProject().getTempComponents().add((Component) model);
+                    }, "Add component " + model.getName(), "add");
+                    moreInformationDropDown.hide();
+                });
+            }
         }
 
         // Delete button for systems
@@ -247,16 +278,48 @@ public class ProjectPaneController implements Initializable {
         model.nameProperty().addListener(obs -> sortPresentations());
     }
 
+    private void handleAddedTempModel(final HighLevelModelObject model) {
+        final FilePresentation filePresentation = new FilePresentation(model);
+
+        initializeMoreInformationDropDown(filePresentation);
+
+        tempFilesList.getChildren().add(filePresentation);
+        modelPresentationMap.put(model, filePresentation);
+
+        // Open the component if the presentation is pressed
+        filePresentation.setOnMousePressed(event -> {
+            event.consume();
+            CanvasController.setActiveModel(model);
+        });
+        model.nameProperty().addListener(obs -> sortPresentations());
+    }
+
     private void handleRemovedModel(final HighLevelModelObject model) {
         filesList.getChildren().remove(modelPresentationMap.get(model));
         modelPresentationMap.remove(model);
-
 
         // If we remove the model active on the canvas
         if (CanvasController.getActiveModel() == model) {
             if (Ecdar.getProject().getComponents().size() > 0) {
                 // Find the first available component and show it instead of the removed one
                 final Component component = Ecdar.getProject().getComponents().get(0);
+                CanvasController.setActiveModel(component);
+            } else {
+                // Show no components (since there are none in the project)
+                CanvasController.setActiveModel(null);
+            }
+        }
+    }
+
+    private void handleRemoveTempModel(final HighLevelModelObject model) {
+        tempFilesList.getChildren().remove(modelPresentationMap.get(model));
+        modelPresentationMap.remove(model);
+
+        // If we remove the model active on the canvas
+        if (CanvasController.getActiveModel() == model) {
+            if (Ecdar.getProject().getTempComponents().size() > 0) {
+                // Find the first available component and show it instead of the removed one
+                final Component component = Ecdar.getProject().getTempComponents().get(0);
                 CanvasController.setActiveModel(component);
             } else {
                 // Show no components (since there are none in the project)

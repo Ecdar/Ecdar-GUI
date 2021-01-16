@@ -44,6 +44,11 @@ public class ProjectPanePresentation extends StackPane {
                 CornerRadii.EMPTY,
                 Insets.EMPTY
         )));
+        controller.tempFilesList.setBackground(new Background(new BackgroundFill(
+                Color.GREY.getColor(Color.Intensity.I200),
+                CornerRadii.EMPTY,
+                Insets.EMPTY
+        )));
     }
 
     private void initializeToolbar() {

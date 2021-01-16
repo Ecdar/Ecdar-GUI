@@ -5,6 +5,7 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.control.Separator?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="StackPane"
@@ -56,8 +57,14 @@
                     AnchorPane.rightAnchor="0"
                     styleClass="edge-to-edge" >
 
-            <VBox fx:id="filesList">
-                <!-- Files goes here -->
+            <VBox>
+                <VBox fx:id="filesList">
+                    <!-- Files goes here -->
+                </VBox>
+                <Separator/>
+                <VBox fx:id="tempFilesList">
+                    <!-- Temporary files goes here -->
+                </VBox>
             </VBox>
 
         </ScrollPane>
