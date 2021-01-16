@@ -2,9 +2,7 @@ package ecdar.abstractions;
 
 import ecdar.Ecdar;
 import ecdar.backend.*;
-import ecdar.controllers.CanvasController;
 import ecdar.controllers.EcdarController;
-import ecdar.utility.UndoRedoStack;
 import ecdar.utility.serialize.Serializable;
 import com.google.gson.JsonObject;
 import com.uppaal.engine.Engine;
@@ -33,7 +31,6 @@ public class Query implements Serializable {
     private final StringProperty errors = new SimpleStringProperty("");
     private BackendHelper.BackendNames currentBackend;
     private BackendThread backendThread;
-    private JsonObject[] generatedComponent;
     private Consumer<Boolean> runQuery;
 
     public Query(final String query, final String comment, final QueryState queryState) {
@@ -157,27 +154,12 @@ public class Query implements Serializable {
                     aBoolean -> {
                         if (aBoolean) {
                             setQueryState(QueryState.COMPONENT_GENERATED);
-
-                            Platform.runLater(() -> {
-                                final Component newComponent = new Component(generatedComponent[0]);
-
-                                UndoRedoStack.pushAndPerform(() -> { // Perform
-                                    Ecdar.getProject().getComponents().add(newComponent);
-                                }, () -> { // Undo
-                                    Ecdar.getProject().getComponents().remove(newComponent);
-                                }, "Created new component: " + newComponent.getName(), "add-circle");
-
-                                CanvasController.setActiveModel(newComponent);
-                            });
                         } else {
                             setQueryState(QueryState.ERROR);
                         }
                     },
                     backendExceptionConsumer,
-                    new QueryListener(this),
-                    generatedComponent = new JsonObject[] {
-                            new JsonObject()
-                    }
+                    new QueryListener(this)
             );
         } else {
             backendThread = BackendDriverManager.getInstance(this.currentBackend).getBackendThreadForQuery(getQuery().replaceAll("\\s", "") + " " + getIgnoredInputOutputsOnQuery(),

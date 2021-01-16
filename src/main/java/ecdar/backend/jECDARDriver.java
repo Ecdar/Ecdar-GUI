@@ -28,9 +28,8 @@ public class jECDARDriver implements IBackendDriver {
     synchronized public jEcdarQuotientThread getBackendThreadForQuotientQuery(final String query,
                                                                               final Consumer<Boolean> success,
                                                                               final Consumer<BackendException> failure,
-                                                                              final QueryListener queryListener,
-                                                                              final JsonObject[] referenceToReturnedObject) {
-        return new jEcdarQuotientThread(query, success, failure, queryListener, referenceToReturnedObject);
+                                                                              final QueryListener queryListener) {
+        return new jEcdarQuotientThread(query, success, failure, queryListener);
     }
 
     /**

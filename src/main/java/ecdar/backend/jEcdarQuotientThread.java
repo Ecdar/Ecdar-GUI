@@ -3,22 +3,21 @@ package ecdar.backend;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import ecdar.Ecdar;
+import ecdar.abstractions.Component;
 import ecdar.abstractions.QueryState;
-import org.json.simple.parser.ParseException;
+import ecdar.controllers.CanvasController;
+import ecdar.utility.UndoRedoStack;
+import javafx.application.Platform;
 
 import java.io.*;
 import java.util.function.Consumer;
 
 public class jEcdarQuotientThread extends BackendThread {
-    final JsonObject[] referenceToReturnedObject;
-
     public jEcdarQuotientThread(final String query,
                                 final Consumer<Boolean> success,
                                 final Consumer<BackendException> failure,
-                                final QueryListener queryListener,
-                                final JsonObject[] referenceToReturnedObject) {
+                                final QueryListener queryListener) {
         super(query, success, failure, queryListener);
-        this.referenceToReturnedObject = referenceToReturnedObject;
     }
 
     public void run() {
@@ -43,7 +42,7 @@ public class jEcdarQuotientThread extends BackendThread {
                 StringBuilder combinedLines = new StringBuilder();
                 QueryState result = QueryState.RUNNING;
 
-                referenceToReturnedObject[0] = (JsonObject) parser.parse("{\n" +
+                JsonObject returnedComponent = (JsonObject) parser.parse("{\n" +
                         "  \"name\": \"Administration\",\n" +
                         "  \"declarations\": \"clock z;\",\n" +
                         "  \"locations\": [\n" +
@@ -325,6 +324,19 @@ public class jEcdarQuotientThread extends BackendThread {
                         "  \"color\": \"5\",\n" +
                         "  \"includeInPeriodicCheck\": false\n" +
                         "}");
+
+                Platform.runLater(() -> {
+                    final Component newComponent = new Component(returnedComponent);
+
+                    UndoRedoStack.pushAndPerform(() -> { // Perform
+                        Ecdar.getProject().getComponents().add(newComponent);
+                    }, () -> { // Undo
+                        Ecdar.getProject().getComponents().remove(newComponent);
+                    }, "Created new component: " + newComponent.getName(), "add-circle");
+
+                    CanvasController.setActiveModel(newComponent);
+                });
+
                 handleResult(QueryState.SUCCESSFUL, "");
 
                 /*
