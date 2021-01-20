@@ -3,9 +3,7 @@ package ecdar.controllers;
 import ecdar.Ecdar;
 import ecdar.abstractions.Query;
 import ecdar.abstractions.QueryState;
-import ecdar.backend.BackendException;
-import ecdar.backend.UPPAALDriver;
-import ecdar.backend.UPPAALDriverManager;
+import ecdar.backend.*;
 import ecdar.presentations.QueryPresentation;
 import com.jfoenix.controls.JFXRippler;
 import javafx.collections.ListChangeListener;
@@ -66,7 +64,7 @@ public class QueryPaneController implements Initializable {
     @FXML
     private void runAllQueriesButtonClicked() {
         try {
-            UPPAALDriverManager.getInstance().buildEcdarDocument();
+            BackendHelper.buildEcdarDocument();
         } catch (final BackendException e) {
             Ecdar.showToast("Could not build XML model. I got the error: " + e.getMessage());
             return;

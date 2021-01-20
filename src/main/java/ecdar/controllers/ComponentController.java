@@ -2,8 +2,7 @@ package ecdar.controllers;
 
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
-import ecdar.backend.UPPAALDriver;
-import ecdar.backend.UPPAALDriverManager;
+import ecdar.backend.BackendDriverManager;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.presentations.*;
 import ecdar.utility.UndoRedoStack;
@@ -74,8 +73,8 @@ public class ComponentController extends ModelController implements Initializabl
         declarationTextArea.setParagraphGraphicFactory(LineNumberFactory.get(declarationTextArea));
 
         component.addListener((obs, oldComponent, newComponent) -> {
-            inputSignatureContainer.heightProperty().addListener((change) -> updateMaxHeight() );
-            outputSignatureContainer.heightProperty().addListener((change) -> updateMaxHeight() );
+            inputSignatureContainer.heightProperty().addListener((change) -> updateMaxHeight());
+            outputSignatureContainer.heightProperty().addListener((change) -> updateMaxHeight());
 
             // Bind the declarations of the abstraction the the view
             declarationTextArea.replaceText(0, declarationTextArea.getLength(), newComponent.getDeclarationsText());
@@ -93,7 +92,7 @@ public class ComponentController extends ModelController implements Initializabl
                 while (matcher.find()) {
                     final String clockStrings[] = matcher.group("CLOCKS").split(",");
                     for (String clockString : clockStrings) {
-                        clocks.add(clockString.replaceAll("\\s",""));
+                        clocks.add(clockString.replaceAll("\\s", ""));
                     }
                 }
 
@@ -141,14 +140,14 @@ public class ComponentController extends ModelController implements Initializabl
         newComponent.getOutputStrings().addListener((ListChangeListener<String>) c -> {
             // By clearing the container we don't have to fiddle with which elements are removed and added
             outputSignatureContainer.getChildren().clear();
-            while (c.next()){
+            while (c.next()) {
                 c.getAddedSubList().forEach((channel) -> insertSignatureArrow(channel, EdgeStatus.OUTPUT));
             }
         });
 
         newComponent.getInputStrings().addListener((ListChangeListener<String>) c -> {
             inputSignatureContainer.getChildren().clear();
-            while (c.next()){
+            while (c.next()) {
                 c.getAddedSubList().forEach((channel) -> insertSignatureArrow(channel, EdgeStatus.INPUT));
             }
         });
@@ -161,7 +160,7 @@ public class ComponentController extends ModelController implements Initializabl
      */
     private void insertSignatureArrow(final String channel, final EdgeStatus status) {
         SignatureArrow newArrow = new SignatureArrow(channel, status, component.get());
-        if(status == EdgeStatus.INPUT) {
+        if (status == EdgeStatus.INPUT) {
             inputSignatureContainer.getChildren().add(newArrow);
         } else {
             outputSignatureContainer.getChildren().add(newArrow);
@@ -177,7 +176,7 @@ public class ComponentController extends ModelController implements Initializabl
         // If input/outputsignature container is taller than the current component height
         // we update the component's height to be as tall as the container
         double maxHeight = findMaxHeight();
-        if(maxHeight > component.get().getBox().getHeight()) {
+        if (maxHeight > component.get().getBox().getHeight()) {
             component.get().getBox().getHeightProperty().set(maxHeight);
         }
     }
@@ -352,7 +351,7 @@ public class ComponentController extends ModelController implements Initializabl
             contextMenu.addClickableListElement("Contains deadlock?", event -> {
 
                 // Generate the query
-                final String deadlockQuery = UPPAALDriverManager.getInstance().getExistDeadlockQuery(getComponent());
+                final String deadlockQuery = BackendDriverManager.getInstance().getExistDeadlockQuery(getComponent());
 
                 // Add proper comment
                 final String deadlockComment = "Does " + component.getName() + " contain a deadlock?";
@@ -524,8 +523,8 @@ public class ComponentController extends ModelController implements Initializabl
                         latestHitUp = 0;
 
                 //Check to see if the location is placed on top of the initial location
-                if(Math.abs(initialLocationX - (newLocationPresentation.getLayoutX())) < offset &&
-                        Math.abs(initialLocationY - (newLocationPresentation.getLayoutY())) < offset){
+                if (Math.abs(initialLocationX - (newLocationPresentation.getLayoutX())) < offset &&
+                        Math.abs(initialLocationY - (newLocationPresentation.getLayoutY())) < offset) {
                     hit = true;
                     latestHitRight = initialLocationX;
                     latestHitDown = initialLocationY;
@@ -560,20 +559,20 @@ public class ComponentController extends ModelController implements Initializabl
                 }
 
                 //If the location is not placed on top of any other locations, do not do anything
-                if(!hit) {
+                if (!hit) {
                     return;
                 }
                 hit = false;
 
                 //Find an unoccupied space for the location
-                for(int i = 1; i < component.get().getBox().getWidth() / offset; i++){
+                for (int i = 1; i < component.get().getBox().getWidth() / offset; i++) {
 
                     //Check to see, if the location can be placed to the right of the existing locations
-                    if(componentBounds.trimX(latestHitRight + offset) == latestHitRight + offset) {
+                    if (componentBounds.trimX(latestHitRight + offset) == latestHitRight + offset) {
 
                         //Check if the location would be placed on the final location
-                        if(Math.abs(finalLocationX - (latestHitRight + offset)) < offset &&
-                                Math.abs(finalLocationY - (newLocationPresentation.getLayoutY())) < offset){
+                        if (Math.abs(finalLocationX - (latestHitRight + offset)) < offset &&
+                                Math.abs(finalLocationY - (newLocationPresentation.getLayoutY())) < offset) {
                             hit = true;
                             latestHitRight = finalLocationX;
                         } else {
@@ -588,7 +587,7 @@ public class ComponentController extends ModelController implements Initializabl
                             }
                         }
 
-                        if(!hit) {
+                        if (!hit) {
                             newLocationPresentation.setLayoutX(latestHitRight + offset);
                             return;
                         }
@@ -596,11 +595,11 @@ public class ComponentController extends ModelController implements Initializabl
                     hit = false;
 
                     //Check to see, if the location can be placed below the existing locations
-                    if(componentBounds.trimY(latestHitDown + offset) == latestHitDown + offset) {
+                    if (componentBounds.trimY(latestHitDown + offset) == latestHitDown + offset) {
 
                         //Check if the location would be placed on the final location
-                        if(Math.abs(finalLocationX - (newLocationPresentation.getLayoutX())) < offset &&
-                                Math.abs(finalLocationY - (latestHitDown + offset)) < offset){
+                        if (Math.abs(finalLocationX - (newLocationPresentation.getLayoutX())) < offset &&
+                                Math.abs(finalLocationY - (latestHitDown + offset)) < offset) {
                             hit = true;
                             latestHitDown = finalLocationY;
                         } else {
@@ -614,7 +613,7 @@ public class ComponentController extends ModelController implements Initializabl
                                 }
                             }
                         }
-                        if(!hit) {
+                        if (!hit) {
                             newLocationPresentation.setLayoutY(latestHitDown + offset);
                             return;
                         }
@@ -622,11 +621,11 @@ public class ComponentController extends ModelController implements Initializabl
                     hit = false;
 
                     //Check to see, if the location can be placed to the left of the existing locations
-                    if(componentBounds.trimX(latestHitLeft - offset) == latestHitLeft - offset) {
+                    if (componentBounds.trimX(latestHitLeft - offset) == latestHitLeft - offset) {
 
                         //Check if the location would be placed on the initial location
-                        if(Math.abs(initialLocationX - (latestHitLeft - offset)) < offset &&
-                                Math.abs(initialLocationY - (newLocationPresentation.getLayoutY())) < offset){
+                        if (Math.abs(initialLocationX - (latestHitLeft - offset)) < offset &&
+                                Math.abs(initialLocationY - (newLocationPresentation.getLayoutY())) < offset) {
                             hit = true;
                             latestHitLeft = initialLocationX;
                         } else {
@@ -640,7 +639,7 @@ public class ComponentController extends ModelController implements Initializabl
                                 }
                             }
                         }
-                        if(!hit) {
+                        if (!hit) {
                             newLocationPresentation.setLayoutX(latestHitLeft - offset);
                             return;
                         }
@@ -648,11 +647,11 @@ public class ComponentController extends ModelController implements Initializabl
                     hit = false;
 
                     //Check to see, if the location can be placed above the existing locations
-                    if(componentBounds.trimY(latestHitUp - offset) == latestHitUp - offset) {
+                    if (componentBounds.trimY(latestHitUp - offset) == latestHitUp - offset) {
 
                         //Check if the location would be placed on the initial location
-                        if(Math.abs(initialLocationX - (newLocationPresentation.getLayoutX())) < offset &&
-                                Math.abs(initialLocationY - (latestHitUp - offset)) < offset){
+                        if (Math.abs(initialLocationX - (newLocationPresentation.getLayoutX())) < offset &&
+                                Math.abs(initialLocationY - (latestHitUp - offset)) < offset) {
                             hit = true;
                             latestHitUp = initialLocationY;
                         } else {
@@ -666,7 +665,7 @@ public class ComponentController extends ModelController implements Initializabl
                                 }
                             }
                         }
-                        if(!hit) {
+                        if (!hit) {
                             newLocationPresentation.setLayoutY(latestHitUp - offset);
                             return;
                         }
@@ -695,7 +694,7 @@ public class ComponentController extends ModelController implements Initializabl
             }
         };
 
-        if(locationListChangeListenerMap.containsKey(newComponent)) {
+        if (locationListChangeListenerMap.containsKey(newComponent)) {
             newComponent.getLocations().removeListener(locationListChangeListenerMap.get(newComponent));
         }
         final ListChangeListener<Location> locationListChangeListener = c -> {
@@ -869,7 +868,7 @@ public class ComponentController extends ModelController implements Initializabl
                 initializeFinishEdgeContextMenu(unfinishedEdge);
                 finishEdgeContextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX(), event.getY());
             }
-        } else if(event.isPrimaryButtonDown()) {
+        } else if (event.isPrimaryButtonDown()) {
             // We are drawing an edge
             if (unfinishedEdge != null) {
                 // Calculate the position for the new nail (based on the component position and the canvas mouse tracker)
@@ -890,6 +889,7 @@ public class ComponentController extends ModelController implements Initializabl
             }
         }
     }
+
     public MouseTracker getMouseTracker() {
         return mouseTracker;
     }

@@ -9,12 +9,12 @@ public class BackendException extends Exception {
         super(message, cause);
     }
 
-    public static class BadUPPAALQueryException extends BackendException {
-        public BadUPPAALQueryException(final String s) {
+    public static class BadBackendQueryException extends BackendException {
+        public BadBackendQueryException(final String s) {
             super(s);
         }
 
-        public BadUPPAALQueryException(final String s, final Exception cause) {
+        public BadBackendQueryException(final String s, final Exception cause) {
             super(s, cause);
         }
     }

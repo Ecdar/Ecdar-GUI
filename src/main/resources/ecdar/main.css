@@ -213,3 +213,23 @@
 .jfx-snackbar-action {
 	-fx-text-fill: WHITE;
 }
+
+.titled-pane > .title {
+	-fx-background-color: TRANSPARENT;
+	-fx-border-style: HIDDEN HIDDEN SOLID HIDDEN;
+	-fx-border-color: -divider-color;
+	-fx-pref-height: 30;
+}
+
+.titled-pane > .title > .arrow-button .arrow{
+	-fx-background-color: TRANSPARENT;
+	-fx-border-color: TRANSPARENT;
+	-fx-padding: 0 0 0 -10;
+}
+
+.titled-pane > .content
+{
+	-fx-background-color: TRANSPARENT;
+	-fx-padding: 0 -1 -1 -1 ;
+	-fx-background-insets: 0 0 0 0;
+}
