@@ -43,7 +43,7 @@ public class jEcdarQuotientThread extends BackendThread {
                 QueryState result = QueryState.RUNNING;
 
                 JsonObject returnedComponent = (JsonObject) parser.parse("{\n" +
-                        "  \"name\": \"[Temporary] Administration\",\n" +
+                        "  \"name\": \"Administration\",\n" +
                         "  \"declarations\": \"clock z;\",\n" +
                         "  \"locations\": [\n" +
                         "    {\n" +
@@ -327,6 +327,7 @@ public class jEcdarQuotientThread extends BackendThread {
 
                 Platform.runLater(() -> {
                     final Component newComponent = new Component(returnedComponent);
+                    newComponent.setTemporary(true);
 
                     UndoRedoStack.pushAndPerform(() -> { // Perform
                         Ecdar.getProject().getTempComponents().add(newComponent);

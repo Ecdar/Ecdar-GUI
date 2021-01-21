@@ -108,6 +108,7 @@ public class FilePresentation extends AnchorPane {
             }
             setCursor(Cursor.HAND);
         });
+
         setOnMouseExited(event -> {
             if(CanvasController.getActiveModel().equals(model.get())) {
                 setBackground.accept(color, colorIntensity.next(1));
