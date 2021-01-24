@@ -23,6 +23,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import org.kordamp.ikonli.javafx.FontIcon;
+import org.kordamp.ikonli.material.Material;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -38,7 +40,9 @@ public class ProjectPaneController implements Initializable {
     public VBox tempFilesList;
     public JFXRippler createComponent;
     public JFXRippler createSystem;
+    public JFXRippler generatedComponentsVisibilityButton;
 
+    public FontIcon generatedComponentsVisibilityButtonIcon;
     public ImageView createComponentImage;
     public StackPane createComponentPane;
     public ImageView createSystemImage;
@@ -329,6 +333,22 @@ public class ProjectPaneController implements Initializable {
         }, "Created new system: " + newSystem.getName(), "add-circle");
 
         CanvasController.setActiveModel(newSystem);
+    }
+
+    /**
+     * Method for hiding/showing generated components
+     */
+    @FXML
+    private void setGeneratedComponentsVisibilityButtonClicked() {
+        if(generatedComponentsVisibilityButtonIcon.getIconCode() == Material.EXPAND_MORE) {
+            generatedComponentsVisibilityButtonIcon.setIconCode(Material.EXPAND_LESS);
+            this.tempFilesList.setVisible(true);
+            this.tempFilesList.setManaged(true);
+        } else {
+            generatedComponentsVisibilityButtonIcon.setIconCode(Material.EXPAND_MORE);
+            this.tempFilesList.setVisible(false);
+            this.tempFilesList.setManaged(false);
+        }
     }
 
 }

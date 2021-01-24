@@ -6,6 +6,9 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.control.Separator?>
+<?import javafx.scene.text.Text?>
+<?import javafx.geometry.Insets?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="StackPane"
@@ -61,7 +64,22 @@
                 <VBox fx:id="filesList">
                     <!-- Files goes here -->
                 </VBox>
-                <Separator/>
+
+                    <HBox styleClass="separator" alignment="CENTER_LEFT">
+                        <padding>
+                            <Insets top="5" bottom="5" left="20" right="20"/>
+                        </padding>
+                        <Text>
+                            Generated Components
+                        </Text>
+                        <Region minWidth="60" maxWidth="60"/>
+                        <JFXRippler fx:id="generatedComponentsVisibilityButton">
+                            <StackPane minWidth="40" maxWidth="40" minHeight="40" maxHeight="40" onMouseClicked="#setGeneratedComponentsVisibilityButtonClicked">
+                                <FontIcon fx:id="generatedComponentsVisibilityButtonIcon" iconLiteral="gmi-expand-less" iconSize="24"/>
+                            </StackPane>
+                        </JFXRippler>
+                    </HBox>
+
                 <VBox fx:id="tempFilesList">
                     <!-- Temporary files goes here -->
                 </VBox>
