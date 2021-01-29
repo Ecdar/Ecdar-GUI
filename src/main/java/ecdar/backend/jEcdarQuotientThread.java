@@ -8,8 +8,10 @@ import ecdar.abstractions.QueryState;
 import ecdar.controllers.CanvasController;
 import ecdar.utility.UndoRedoStack;
 import javafx.application.Platform;
+import javafx.collections.ObservableList;
 
 import java.io.*;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public class jEcdarQuotientThread extends BackendThread {
@@ -325,19 +327,7 @@ public class jEcdarQuotientThread extends BackendThread {
                         "  \"includeInPeriodicCheck\": false\n" +
                         "}");
 
-                Platform.runLater(() -> {
-                    final Component newComponent = new Component(returnedComponent);
-                    newComponent.setTemporary(true);
-
-                    UndoRedoStack.pushAndPerform(() -> { // Perform
-                        Ecdar.getProject().getTempComponents().add(newComponent);
-                    }, () -> { // Undo
-                        Ecdar.getProject().getTempComponents().remove(newComponent);
-                    }, "Created new component: " + newComponent.getName(), "add-circle");
-
-                    CanvasController.setActiveModel(newComponent);
-                });
-
+                addGeneratedComponent(new Component(returnedComponent));
                 handleResult(QueryState.SUCCESSFUL, "");
 
                 /*
@@ -373,5 +363,44 @@ public class jEcdarQuotientThread extends BackendThread {
     private void cancel(Process jEcdarEngineInstance) {
         jEcdarEngineInstance.destroy();
         failure.accept(new BackendException.QueryErrorException("Canceled"));
+    }
+
+    private void addGeneratedComponent(Component newComponent){
+        Platform.runLater(() -> {
+            newComponent.setTemporary(true);
+
+            ObservableList<Component> listOfGeneratedComponents = Ecdar.getProject().getTempComponents();
+            Component matchedComponent = null;
+
+            for(Component currentGeneratedComponent : listOfGeneratedComponents) {
+                int comparisonOfNames = currentGeneratedComponent.getName().compareTo(newComponent.getName());
+
+                if(comparisonOfNames == 0) {
+                    matchedComponent = currentGeneratedComponent;
+                    break;
+                } else if(comparisonOfNames < 0) {
+                    break;
+                }
+            }
+
+            if(matchedComponent == null) {
+                UndoRedoStack.pushAndPerform(() -> { // Perform
+                    Ecdar.getProject().getTempComponents().add(newComponent);
+                }, () -> { // Undo
+                    Ecdar.getProject().getTempComponents().remove(newComponent);
+                }, "Created new component: " + newComponent.getName(), "add-circle");
+            } else {
+                Component finalMatchedComponent = matchedComponent;
+                UndoRedoStack.pushAndPerform(() -> { // Perform
+                    Ecdar.getProject().getTempComponents().remove(finalMatchedComponent);
+                    Ecdar.getProject().getTempComponents().add(newComponent);
+                }, () -> { // Undo
+                    Ecdar.getProject().getTempComponents().remove(newComponent);
+                    Ecdar.getProject().getTempComponents().add(finalMatchedComponent);
+                }, "Created new component: " + newComponent.getName(), "add-circle");
+            }
+
+            CanvasController.setActiveModel(newComponent);
+        });
     }
 }

@@ -233,7 +233,7 @@
 	-fx-padding: 0 -1 -1 -1 ;
 	-fx-background-insets: 0 0 0 0;
 }
-.separator {
+.generatedComponents {
 	-fx-border-color: -divider-color;
 	-fx-border-style: HIDDEN HIDDEN SOLID HIDDEN;
 	-fx-border-width: 3;

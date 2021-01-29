@@ -180,27 +180,47 @@ public class ProjectPaneController implements Initializable {
         // Delete button for components
         if (model instanceof Component) {
             moreInformationDropDown.addSpacerElement();
-            moreInformationDropDown.addClickableListElement("Delete", event -> {
-                UndoRedoStack.pushAndPerform(() -> { // Perform
-                    Ecdar.getProject().getComponents().remove(model);
-                }, () -> { // Undo
-                    Ecdar.getProject().getComponents().add((Component) model);
-                }, "Deleted component " + model.getName(), "delete");
-                moreInformationDropDown.hide();
-            });
+
+            if(filePresentation.getModel().isTemporary()) {
+                moreInformationDropDown.addClickableListElement("Delete", event -> {
+                    UndoRedoStack.pushAndPerform(() -> { // Perform
+                        Ecdar.getProject().getTempComponents().remove(model);
+                    }, () -> { // Undo
+                        Ecdar.getProject().getTempComponents().add((Component) model);
+                    }, "Deleted component " + model.getName(), "delete");
+                    moreInformationDropDown.hide();
+                });
+            } else {
+                moreInformationDropDown.addClickableListElement("Delete", event -> {
+                    UndoRedoStack.pushAndPerform(() -> { // Perform
+                        Ecdar.getProject().getComponents().remove(model);
+                    }, () -> { // Undo
+                        Ecdar.getProject().getComponents().add((Component) model);
+                    }, "Deleted component " + model.getName(), "delete");
+                    moreInformationDropDown.hide();
+                });
+            }
 
             if(filePresentation.getModel().isTemporary()) {
                 moreInformationDropDown.addClickableListElement("Add as component", event -> {
-                    UndoRedoStack.pushAndPerform(() -> { // Perform
-                        Ecdar.getProject().getTempComponents().remove(model);
-                        model.setTemporary(false);
-                        Ecdar.getProject().getComponents().add((Component) model);
-                    }, () -> { // Undo
-                        Ecdar.getProject().getComponents().remove(model);
-                        model.setTemporary(true);
-                        Ecdar.getProject().getTempComponents().add((Component) model);
-                    }, "Add component " + model.getName(), "add");
-                    moreInformationDropDown.hide();
+                    String originalModalName = model.getName();
+                    for(int i = 2; i < 100; i++){
+                        if(Ecdar.getProject().getComponents().stream().noneMatch(component -> component.getName().equals(model.getName()))){
+                            UndoRedoStack.pushAndPerform(() -> { // Perform
+                                Ecdar.getProject().getTempComponents().remove(model);
+                                model.setTemporary(false);
+                                Ecdar.getProject().getComponents().add((Component) model);
+                            }, () -> { // Undo
+                                Ecdar.getProject().getComponents().remove(model);
+                                model.setTemporary(true);
+                                Ecdar.getProject().getTempComponents().add((Component) model);
+                            }, "Add component " + model.getName(), "add");
+                            moreInformationDropDown.hide();
+                            break;
+                        } else {
+                            model.setName(originalModalName + " #" + i);
+                        }
+                    }
                 });
             }
         }

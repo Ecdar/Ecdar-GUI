@@ -65,7 +65,7 @@
                     <!-- Files goes here -->
                 </VBox>
 
-                    <HBox styleClass="separator" alignment="CENTER_LEFT">
+                    <HBox styleClass="generatedComponents" alignment="CENTER_LEFT">
                         <padding>
                             <Insets top="5" bottom="5" left="20" right="20"/>
                         </padding>
