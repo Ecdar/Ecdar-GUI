@@ -38,6 +38,7 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
@@ -170,6 +171,7 @@ public class EcdarController implements Initializable {
     private static JFXDialog _queryDialog;
     private static Text _queryTextResult;
     private static Text _queryTextQuery;
+    private static final Text temporaryComponentWatermark = new Text("Temporary component");
 
     private double tabPanePreviousY = 0;
     public boolean shouldISkipOpeningTheMessagesContainer = true;
@@ -182,6 +184,10 @@ public class EcdarController implements Initializable {
 
     public static EdgeStatus getGlobalEdgeStatus() {
         return globalEdgeStatus.get();
+    }
+
+    public static void setTemporaryComponentWatermarkVisibility(boolean visibility) {
+        temporaryComponentWatermark.setVisible(visibility);
     }
 
     @Override
@@ -207,6 +213,7 @@ public class EcdarController implements Initializable {
 
         initializeEdgeStatusHandling();
 
+        intitializeTemporaryComponentWatermark();
         initializeKeybindings();
         initializeTabPane();
         initializeStatusBar();
@@ -215,6 +222,18 @@ public class EcdarController implements Initializable {
         initializeReachabilityAnalysisThread();
         
         ZoomHelper.setCanvas(canvas);
+    }
+
+    /**
+     * Initializes the watermark for temporary/generated components
+     */
+    private void intitializeTemporaryComponentWatermark() {
+        temporaryComponentWatermark.getStyleClass().add("display4");
+        temporaryComponentWatermark.setOpacity(0.1);
+        temporaryComponentWatermark.setRotate(-45);
+        temporaryComponentWatermark.setDisable(true);
+        temporaryComponentWatermark.setVisible(false);
+        root.getChildren().add(temporaryComponentWatermark);
     }
 
     /**
