@@ -42,8 +42,8 @@ public class ProjectPaneController implements Initializable {
     public JFXRippler createComponent;
     public JFXRippler createSystem;
     public JFXRippler generatedComponentsVisibilityButton;
-
     public FontIcon generatedComponentsVisibilityButtonIcon;
+
     public ImageView createComponentImage;
     public StackPane createComponentPane;
     public ImageView createSystemImage;
@@ -182,16 +182,7 @@ public class ProjectPaneController implements Initializable {
         if (model instanceof Component) {
             moreInformationDropDown.addSpacerElement();
 
-            if(filePresentation.getModel().isTemporary()) {
-                moreInformationDropDown.addClickableListElement("Delete", event -> {
-                    UndoRedoStack.pushAndPerform(() -> { // Perform
-                        Ecdar.getProject().getTempComponents().remove(model);
-                    }, () -> { // Undo
-                        Ecdar.getProject().getTempComponents().add((Component) model);
-                    }, "Deleted component " + model.getName(), "delete");
-                    moreInformationDropDown.hide();
-                });
-            } else {
+            if(!filePresentation.getModel().isTemporary()) {
                 moreInformationDropDown.addClickableListElement("Delete", event -> {
                     UndoRedoStack.pushAndPerform(() -> { // Perform
                         Ecdar.getProject().getComponents().remove(model);
@@ -200,9 +191,16 @@ public class ProjectPaneController implements Initializable {
                     }, "Deleted component " + model.getName(), "delete");
                     moreInformationDropDown.hide();
                 });
-            }
+            } else {
+                moreInformationDropDown.addClickableListElement("Delete", event -> {
+                    UndoRedoStack.pushAndPerform(() -> { // Perform
+                        Ecdar.getProject().getTempComponents().remove(model);
+                    }, () -> { // Undo
+                        Ecdar.getProject().getTempComponents().add((Component) model);
+                    }, "Deleted component " + model.getName(), "delete");
+                    moreInformationDropDown.hide();
+                });
 
-            if(filePresentation.getModel().isTemporary()) {
                 moreInformationDropDown.addClickableListElement("Add as component", event -> {
                     String originalModalName = model.getName();
                     for(int i = 2; i < 100; i++){
