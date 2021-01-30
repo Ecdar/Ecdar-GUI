@@ -210,6 +210,7 @@ public class ProjectPaneController implements Initializable {
                                 Ecdar.getProject().getTempComponents().remove(model);
                                 model.setTemporary(false);
                                 Ecdar.getProject().getComponents().add((Component) model);
+                                CanvasController.setActiveModel(model);
                             }, () -> { // Undo
                                 Ecdar.getProject().getComponents().remove(model);
                                 model.setTemporary(true);
