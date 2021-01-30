@@ -240,7 +240,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
     private Process startProcessToFetchStrategy(final String modelPath) throws IOException {
         // Run backend to check refinement and to fetch strategy if non-refinement
         return ((jECDARDriver) BackendDriverManager.getInstance(BackendHelper.BackendNames.jEcdar))
-                .getJEcdarProcessForRefinementCheckAndStrategyIfNonRefinement(modelPath, queryFilePath);
+                .getJEcdarProcessForRefinementCheckAndStrategyIfNoRefinementExists(modelPath, queryFilePath);
     }
 
     /**
