@@ -20,6 +20,7 @@ public class ProjectPanePresentation extends StackPane {
         initializeRightBorder();
         initializeBackground();
         initializeToolbar();
+        initializeGeneratedComponentDivider();
         initializeToolbarButton(controller.createComponent);
         initializeToolbarButton(controller.createSystem);
         initializeAddModelIcons();
@@ -66,6 +67,24 @@ public class ProjectPanePresentation extends StackPane {
 
         // Set the elevation of the toolbar
         controller.toolbar.setEffect(DropShadowHelper.generateElevationShadow(8));
+    }
+
+    private void initializeGeneratedComponentDivider() {
+        final Color color = Color.GREY_BLUE;
+        final Color.Intensity colorIntensity = Color.Intensity.I600;
+
+        // Set the background of the divider
+        controller.generatedComponentsDivider.setBackground(new Background(new BackgroundFill(
+                color.getColor(colorIntensity),
+                CornerRadii.EMPTY,
+                Insets.EMPTY)));
+
+        // Set the font color of elements in the divider
+        controller.generatedComponentsDividerText.setTextFill(color.getTextColor(colorIntensity));
+        controller.generatedComponentsVisibilityButtonIcon.setIconColor(color.getTextColor(colorIntensity));
+
+        // Set the elevation of the divider
+        controller.generatedComponentsDivider.setEffect(DropShadowHelper.generateElevationShadow(4));
     }
 
     private void initializeToolbarButton(final JFXRippler button) {
