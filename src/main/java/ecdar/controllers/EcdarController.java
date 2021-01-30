@@ -38,7 +38,6 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;

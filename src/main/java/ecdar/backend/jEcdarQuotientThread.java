@@ -11,7 +11,6 @@ import javafx.application.Platform;
 import javafx.collections.ObservableList;
 
 import java.io.*;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 public class jEcdarQuotientThread extends BackendThread {
