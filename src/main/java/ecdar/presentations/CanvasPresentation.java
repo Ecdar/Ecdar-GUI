@@ -1,12 +1,9 @@
 package ecdar.presentations;
 
-import com.jfoenix.controls.JFXRippler;
 import ecdar.controllers.CanvasController;
 import ecdar.utility.UndoRedoStack;
-import ecdar.utility.colors.Color;
 import ecdar.utility.helpers.CanvasDragHelper;
 import ecdar.utility.helpers.MouseTrackable;
-import ecdar.utility.helpers.ZoomHelper;
 import ecdar.utility.keyboard.Keybind;
 import ecdar.utility.keyboard.KeyboardTracker;
 import ecdar.utility.mouse.MouseTracker;
@@ -14,7 +11,6 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.geometry.Insets;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
@@ -38,15 +34,23 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
 
     public CanvasPresentation() {
         mouseTracker = new MouseTracker(this);
+        controller = new EcdarFXMLLoader().loadAndGetController("CanvasPresentation.fxml", this);
 
+        //Add keybindings for zoom functionality
+        KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_IN, new Keybind(new KeyCodeCombination(KeyCode.PLUS, KeyCombination.SHORTCUT_DOWN), controller.zoomHelper::zoomIn));
+        KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_OUT, new Keybind(new KeyCodeCombination(KeyCode.MINUS, KeyCombination.SHORTCUT_DOWN), controller.zoomHelper::zoomOut));
+        KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_TO_FIT, new Keybind(new KeyCodeCombination(KeyCode.EQUALS, KeyCombination.SHORTCUT_DOWN), controller.zoomHelper::zoomToFit));
+        KeyboardTracker.registerKeybind(KeyboardTracker.RESET_ZOOM, new Keybind(new KeyCodeCombination(KeyCode.DIGIT0, KeyCombination.SHORTCUT_DOWN), controller.zoomHelper::resetZoom));
         KeyboardTracker.registerKeybind(KeyboardTracker.UNDO, new Keybind(new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN), UndoRedoStack::undo));
         KeyboardTracker.registerKeybind(KeyboardTracker.REDO, new Keybind(new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN), UndoRedoStack::redo));
 
-        controller = new EcdarFXMLLoader().loadAndGetController("CanvasPresentation.fxml", this);
 
         initializeGrid();
 
         CanvasDragHelper.makeDraggable(this, mouseEvent -> mouseEvent.getButton().equals(MouseButton.SECONDARY));
+
+        controller.zoomHelper.setGrid(this.grid);
+        controller.zoomHelper.setCanvas(this);
     }
 
     private void initializeGrid() {
@@ -129,9 +133,5 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
 
     public CanvasController getController() {
         return controller;
-    }
-
-    public Grid getGrid() {
-        return this.grid;
     }
 }

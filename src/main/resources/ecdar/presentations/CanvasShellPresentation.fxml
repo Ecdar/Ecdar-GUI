@@ -1,23 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<?import com.jfoenix.controls.JFXRippler?>
-<?import org.kordamp.ikonli.javafx.FontIcon?>
-<?import ecdar.presentations.CanvasPresentation?>
+        <?import com.jfoenix.controls.JFXRippler?>
+        <?import org.kordamp.ikonli.javafx.FontIcon?>
+        <?import ecdar.presentations.CanvasPresentation?>
 <fx:root xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-      type="Pane"
+      type="StackPane"
       fx:id="root"
       fx:controller="ecdar.controllers.CanvasShellController">
+    <CanvasPresentation fx:id="canvasPresentation"/>
     <StackPane fx:id="toolbar"
-               StackPane.alignment="TOP_CENTER"
-               minHeight="56" maxHeight="56">
-        <HBox style="-fx-padding: 0 16 0 16;">
+               StackPane.alignment="TOP_LEFT"
+               minHeight="56" maxHeight="56" maxWidth="224" translateY="48">
+        <HBox style="-fx-padding: 0 16 0 16;" alignment="CENTER">
             <!-- ZOOM IN -->
             <JFXRippler fx:id="zoomIn">
                 <StackPane minWidth="40" minHeight="40" onMouseClicked="#zoomInClicked">
@@ -53,5 +50,4 @@
             </JFXRippler>
         </HBox>
     </StackPane>
-    <CanvasPresentation fx:id="canvasPresentation"/>
 </fx:root>

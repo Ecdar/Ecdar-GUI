@@ -24,6 +24,7 @@ public class ZoomHelper {
     public void setGrid(Grid newGrid) {
         grid = newGrid;
     }
+
     /**
      * Zoom in with a delta of 1.2
      */

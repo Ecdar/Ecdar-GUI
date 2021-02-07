@@ -8,6 +8,7 @@ import ecdar.mutation.models.MutationTestPlan;
 import ecdar.mutation.MutationTestPlanPresentation;
 import ecdar.presentations.*;
 import ecdar.utility.helpers.SelectHelper;
+import ecdar.utility.helpers.ZoomHelper;
 import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.event.EventHandler;
@@ -30,6 +31,7 @@ public class CanvasController implements Initializable {
 
     public Pane root;
 
+    public final ZoomHelper zoomHelper = new ZoomHelper();
     private final static ObjectProperty<HighLevelModelObject> activeModel = new SimpleObjectProperty<>(null);
     private final static HashMap<HighLevelModelObject, Pair<Double, Double>> ModelObjectTranslateMap = new HashMap<>();
 

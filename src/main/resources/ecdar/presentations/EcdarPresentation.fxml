@@ -21,9 +21,9 @@
 
         <center>
             <StackPane>
-                <StackPane fx:id="canvasPane">
-                    <!-- Canvases go here -->
-                </StackPane>
+                <CanvasShellPresentation fx:id="canvasPane">
+                        <!-- Canvases go here -->
+                </CanvasShellPresentation>
 
                 <StackPane fx:id="toolbar"
                            StackPane.alignment="TOP_CENTER"

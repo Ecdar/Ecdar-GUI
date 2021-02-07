@@ -108,7 +108,7 @@ public class EcdarController implements Initializable {
     public StackPane aboutContainer;
     public JFXDialog aboutDialog;
     public JFXButton aboutAcceptButton;
-    public StackPane canvasPane;
+    public CanvasShellPresentation canvasPane;
 
     private double expandHeight = 300;
 
@@ -205,7 +205,6 @@ public class EcdarController implements Initializable {
         initializeTabPane();
         initializeStatusBar();
         initializeMessages();
-        initializeCanvasPane();
         initializeMenuBar();
         initializeReachabilityAnalysisThread();
     }
@@ -453,7 +452,7 @@ public class EcdarController implements Initializable {
 
         initializeNewMutationTestObjectMenuItem();
 
-        initializeFileExportAsPng(((CanvasShellPresentation) canvasPane.getChildren().get(0)).getController().canvasPresentation);
+        initializeFileExportAsPng(canvasPane.getController().canvasPresentation);
 
         initializeEditMenu();
 
@@ -1068,11 +1067,6 @@ public class EcdarController implements Initializable {
         } else {
             expandMessagesContainer.play();
         }
-    }
-
-    private void initializeCanvasPane() {
-        CanvasShellPresentation newCanvasShell = new CanvasShellPresentation();
-        canvasPane.getChildren().add(newCanvasShell);
     }
 
     /**

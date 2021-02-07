@@ -20,35 +20,30 @@ public class CanvasShellController implements Initializable {
     public JFXRippler zoomToFit;
     public JFXRippler resetZoom;
 
-    public final ZoomHelper zoomHelper = new ZoomHelper();
-
     public CanvasPresentation canvasPresentation;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        canvasPresentation = new CanvasPresentation();
-        zoomHelper.setCanvas(this.canvasPresentation);
-        zoomHelper.setGrid(this.canvasPresentation.getGrid());
         //ToDo: bind width and height of canvasPresentation to the width and height of this
     }
 
     @FXML
     private void zoomInClicked() {
-        zoomHelper.zoomIn();
+        canvasPresentation.getController().zoomHelper.zoomIn();
     }
 
     @FXML
     private void zoomOutClicked() {
-        zoomHelper.zoomOut();
+        canvasPresentation.getController().zoomHelper.zoomOut();
     }
 
     @FXML
     private void zoomToFitClicked() {
-        zoomHelper.zoomToFit();
+        canvasPresentation.getController().zoomHelper.zoomToFit();
     }
 
     @FXML
     private void resetZoomClicked() {
-        zoomHelper.resetZoom();
+        canvasPresentation.getController().zoomHelper.resetZoom();
     }
 }
