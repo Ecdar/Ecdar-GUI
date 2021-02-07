@@ -21,7 +21,9 @@
 
         <center>
             <StackPane>
-                <CanvasPresentation fx:id="canvas"/>
+                <StackPane fx:id="canvasPane">
+                    <!-- Canvases go here -->
+                </StackPane>
 
                 <StackPane fx:id="toolbar"
                            StackPane.alignment="TOP_CENTER"
@@ -61,43 +63,6 @@
                                        onMouseClicked="#switchToOutputClicked"
                                        styleClass="button" style="-fx-padding: 2 4 2 4"/>
                         </HBox>
-
-                        <Region minWidth="64"/>
-
-                        <!-- ZOOM IN -->
-                        <JFXRippler fx:id="zoomIn">
-                            <StackPane minWidth="40" minHeight="40" onMouseClicked="#zoomInClicked">
-                                <FontIcon iconLiteral="gmi-zoom-in" iconSize="24" fill="white"/>
-                            </StackPane>
-                        </JFXRippler>
-
-                        <Region minWidth="8"/>
-
-                        <!-- ZOOM IN -->
-                        <JFXRippler fx:id="zoomOut">
-                            <StackPane minWidth="40" minHeight="40" onMouseClicked="#zoomOutClicked">
-                                <FontIcon iconLiteral="gmi-zoom-out" iconSize="24" fill="white"/>
-                            </StackPane>
-                        </JFXRippler>
-
-                        <Region minWidth="8"/>
-
-                        <!-- ZOOM TO FIT -->
-                        <JFXRippler fx:id="zoomToFit">
-                            <StackPane minWidth="40" minHeight="40" onMouseClicked="#zoomToFitClicked">
-                                <FontIcon iconLiteral="gmi-zoom-out-map" iconSize="24" fill="white"/>
-                            </StackPane>
-                        </JFXRippler>
-
-                        <Region minWidth="8"/>
-
-                        <!-- RESET ZOOM -->
-                        <JFXRippler fx:id="resetZoom">
-                            <StackPane minWidth="40" minHeight="40" onMouseClicked="#resetZoomClicked">
-                                <FontIcon iconLiteral="gmi-crop-original" iconSize="24" fill="white"/>
-                            </StackPane>
-                        </JFXRippler>
-
 
                         <Region HBox.hgrow="ALWAYS" />
 

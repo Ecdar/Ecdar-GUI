@@ -13,7 +13,6 @@ import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
 import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.SelectHelper;
-import ecdar.utility.helpers.ZoomHelper;
 import ecdar.utility.keyboard.Keybind;
 import ecdar.utility.keyboard.KeyboardTracker;
 import ecdar.utility.keyboard.NudgeDirection;
@@ -71,7 +70,6 @@ public class EcdarController implements Initializable {
     public StackPane toolbar;
     public Label queryPaneFillerElement;
     public Label filePaneFillerElement;
-    public CanvasPresentation canvas;
     public StackPane dialogContainer;
     public JFXDialog dialog;
     public StackPane modalBar;
@@ -110,10 +108,7 @@ public class EcdarController implements Initializable {
     public StackPane aboutContainer;
     public JFXDialog aboutDialog;
     public JFXButton aboutAcceptButton;
-    public JFXRippler zoomIn;
-    public JFXRippler zoomOut;
-    public JFXRippler zoomToFit;
-    public JFXRippler resetZoom;
+    public StackPane canvasPane;
 
     private double expandHeight = 300;
 
@@ -186,7 +181,6 @@ public class EcdarController implements Initializable {
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
-
         dialog.setDialogContainer(dialogContainer);
         dialogContainer.opacityProperty().bind(dialog.getChildren().get(0).scaleXProperty());
         dialog.setOnDialogClosed(event -> dialogContainer.setVisible(false));
@@ -211,10 +205,9 @@ public class EcdarController implements Initializable {
         initializeTabPane();
         initializeStatusBar();
         initializeMessages();
+        initializeCanvasPane();
         initializeMenuBar();
         initializeReachabilityAnalysisThread();
-        
-        ZoomHelper.setCanvas(canvas);
     }
 
     /**
@@ -460,7 +453,7 @@ public class EcdarController implements Initializable {
 
         initializeNewMutationTestObjectMenuItem();
 
-        initializeFileExportAsPng();
+        initializeFileExportAsPng(((CanvasShellPresentation) canvasPane.getChildren().get(0)).getController().canvasPresentation);
 
         initializeEditMenu();
 
@@ -704,7 +697,7 @@ public class EcdarController implements Initializable {
     /**
      * Initializes button for exporting as png.
      */
-    private void initializeFileExportAsPng() {
+    private void initializeFileExportAsPng(CanvasPresentation canvas) {
         menuBarFileExportAsPng.setAccelerator(new KeyCodeCombination(KeyCode.L, KeyCombination.SHORTCUT_DOWN));
         menuBarFileExportAsPng.setOnAction(event -> {
             // If there is no active component or system
@@ -719,7 +712,7 @@ public class EcdarController implements Initializable {
                 presentation.getController().toggleDeclarationButton.setVisible(false);
             }
 
-            final WritableImage image = takeSnapshot();
+            final WritableImage image = takeSnapshot(canvas);
 
             // If there was an active component, show the button again
             if (presentation != null) {
@@ -739,7 +732,7 @@ public class EcdarController implements Initializable {
             }
 
             presentation.getController().hideBorderAndBackground();
-            final WritableImage image = takeSnapshot();
+            final WritableImage image = takeSnapshot(canvas);
             presentation.getController().showBorderAndBackground();
 
             CropAndExportImage(image);
@@ -751,11 +744,11 @@ public class EcdarController implements Initializable {
      * The grid is put into its original state afterwards.
      * @return the snapshot
      */
-    private WritableImage takeSnapshot() {
+    private WritableImage takeSnapshot(CanvasPresentation canvas) {
         final WritableImage image;
 
         canvas.getController().disallowGrid();
-        image = scaleAndTakeSnapshot();
+        image = scaleAndTakeSnapshot(canvas);
         canvas.getController().allowGrid();
 
         return image;
@@ -766,7 +759,7 @@ public class EcdarController implements Initializable {
      * Then take snapshot and zoom to times 1 again.
      * @return the snapshot
      */
-    private WritableImage scaleAndTakeSnapshot() {
+    private WritableImage scaleAndTakeSnapshot(CanvasPresentation canvas) {
         final WritableImage image;
         canvas.setScaleX(4.0);
         canvas.setScaleY(4.0);
@@ -1077,6 +1070,11 @@ public class EcdarController implements Initializable {
         }
     }
 
+    private void initializeCanvasPane() {
+        CanvasShellPresentation newCanvasShell = new CanvasShellPresentation();
+        canvasPane.getChildren().add(newCanvasShell);
+    }
+
     /**
      * This method is used as a central place to decide whether the tabPane is opened or closed
      * @param height the value used to set the height of the tabPane
@@ -1166,26 +1164,6 @@ public class EcdarController implements Initializable {
     @FXML
     private void redoClicked() {
         UndoRedoStack.redo();
-    }
-
-    @FXML
-    private void zoomInClicked() {
-        ZoomHelper.zoomIn();
-    }
-
-    @FXML
-    private void zoomOutClicked() {
-        ZoomHelper.zoomOut();
-    }
-
-    @FXML
-    private void zoomToFitClicked() {
-        ZoomHelper.zoomToFit();
-    }
-
-    @FXML
-    private void resetZoomClicked() {
-        ZoomHelper.resetZoom();
     }
 
     /**

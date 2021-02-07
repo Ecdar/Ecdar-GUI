@@ -21,13 +21,13 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Circle;
-import javafx.scene.text.Text;
 import javafx.util.Duration;
 import javafx.util.Pair;
 
@@ -68,11 +68,6 @@ public class EcdarPresentation extends StackPane {
         initializeToolbarButton(controller.undo);
         initializeToolbarButton(controller.redo);
         initializeUndoRedoButtons();
-
-        initializeToolbarButton(controller.zoomIn);
-        initializeToolbarButton(controller.zoomOut);
-        initializeToolbarButton(controller.zoomToFit);
-        initializeToolbarButton(controller.resetZoom);
 
         initializeMessageContainer();
         initializeSnackbar();
@@ -550,7 +545,19 @@ public class EcdarPresentation extends StackPane {
      * @return A Boolean Property that is true if the grid has been turned on and false if it is off
      */
     public BooleanProperty toggleGrid(){
-        return controller.canvas.toggleGridUi();
+        BooleanProperty gridState = new SimpleBooleanProperty(true);
+
+        if(controller.canvasPane.getChildren().get(0) instanceof CanvasShellPresentation) {
+            // The canvasPane contains a single CanvasPresentation
+            gridState = ((CanvasShellPresentation) controller.canvasPane.getChildren().get(0)).getController().canvasPresentation.toggleGridUi();
+        } else {
+            // The canvasPane contains a GridPane with multiple CanvasPresentations
+            for (Node canvasShell : ((GridPane) controller.canvasPane.getChildren().get(0)).getChildren()) {
+                gridState = ((CanvasShellPresentation) canvasShell).getController().canvasPresentation.toggleGridUi();
+            }
+        }
+
+        return gridState;
     }
 
     public void showSnackbarMessage(final String message) {
