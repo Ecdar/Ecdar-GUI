@@ -4,6 +4,7 @@ import ecdar.controllers.CanvasController;
 import javafx.application.Platform;
 import javafx.scene.Parent;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Screen;
 
 import java.util.ArrayList;
@@ -107,6 +108,8 @@ public class Grid extends Parent {
                 getChildren().add(line);
                 i++;
             }
+
+            setClip(new Rectangle(screenWidth, screenHeight));
         });
 
         // Check added to avoid NullPointerException

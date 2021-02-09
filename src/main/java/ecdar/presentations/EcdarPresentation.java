@@ -547,8 +547,6 @@ public class EcdarPresentation extends StackPane {
     public BooleanProperty toggleGrid(){
         BooleanProperty gridState = new SimpleBooleanProperty(true);
 
-        gridState = ((CanvasPresentation) controller.canvasPane.getChildren().get(0)).toggleGridUi();
-        /* ToDo: handle
         if(controller.canvasPane.getChildren().get(0) instanceof CanvasShellPresentation) {
             // The canvasPane contains a single CanvasPresentation
             gridState = ((CanvasShellPresentation) controller.canvasPane.getChildren().get(0)).getController().canvasPresentation.toggleGridUi();
@@ -557,7 +555,7 @@ public class EcdarPresentation extends StackPane {
             for (Node canvasShell : ((GridPane) controller.canvasPane.getChildren().get(0)).getChildren()) {
                 gridState = ((CanvasShellPresentation) canvasShell).getController().canvasPresentation.toggleGridUi();
             }
-        }*/
+        }
 
         return gridState;
     }

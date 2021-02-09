@@ -30,6 +30,7 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
@@ -108,7 +109,7 @@ public class EcdarController implements Initializable {
     public StackPane aboutContainer;
     public JFXDialog aboutDialog;
     public JFXButton aboutAcceptButton;
-    public CanvasShellPresentation canvasPane;
+    public StackPane canvasPane;
 
     private double expandHeight = 300;
 
@@ -207,6 +208,8 @@ public class EcdarController implements Initializable {
         initializeMessages();
         initializeMenuBar();
         initializeReachabilityAnalysisThread();
+
+        initializeCanvasPane();
     }
 
     /**
@@ -452,7 +455,7 @@ public class EcdarController implements Initializable {
 
         initializeNewMutationTestObjectMenuItem();
 
-        initializeFileExportAsPng(canvasPane.getController().canvasPresentation);
+        initializeFileExportAsPng(getCanvasPresentation());
 
         initializeEditMenu();
 
@@ -461,6 +464,16 @@ public class EcdarController implements Initializable {
         initializeUICacheMenuElement();
 
         initializeHelpMenu();
+    }
+
+    private CanvasPresentation getCanvasPresentation() {
+        return new CanvasPresentation();
+        /*Node firstChild = canvasPane.getChildren().get(0);
+        if(firstChild instanceof GridPane) {
+            return ((CanvasShellPresentation) ((GridPane) firstChild).getChildren().get(0)).getController().canvasPresentation;
+        } else {
+            return ((CanvasShellPresentation) firstChild).getController().canvasPresentation;
+        }*/
     }
 
     private void initializeHelpMenu() {
@@ -736,6 +749,30 @@ public class EcdarController implements Initializable {
 
             CropAndExportImage(image);
         });
+    }
+
+    private void initializeCanvasPane() {
+        ColumnConstraints col1 = new ColumnConstraints();
+        col1.setHgrow( Priority.NEVER );
+
+        ColumnConstraints col2 = new ColumnConstraints();
+        col2.setHgrow( Priority.NEVER );
+
+        GridPane canvasGrid = new GridPane();
+        canvasGrid.addColumn(0);
+        canvasGrid.addColumn(1);
+        canvasGrid.addRow(0);
+        canvasGrid.addRow(1);
+
+        canvasGrid.setGridLinesVisible(true);
+        canvasGrid.getColumnConstraints().addAll(col1, col2);
+
+        canvasGrid.add(new CanvasShellPresentation(), 0, 0);
+        canvasGrid.add(new CanvasShellPresentation(), 0, 1);
+        canvasGrid.add(new CanvasShellPresentation(), 1, 0);
+        canvasGrid.add(new CanvasShellPresentation(), 1, 1);
+
+        canvasPane.getChildren().add(canvasGrid);
     }
 
     /**

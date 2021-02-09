@@ -16,6 +16,7 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
+import javafx.scene.shape.Rectangle;
 
 public class CanvasPresentation extends Pane implements MouseTrackable {
     public static MouseTracker mouseTracker;
@@ -55,6 +56,7 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
 
     private void initializeGrid() {
         getChildren().add(grid);
+        grid.setClip(new Rectangle(1000, 1000));
         grid.toBack();
         gridUiOn.setValue(true);
 
