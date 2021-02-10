@@ -600,13 +600,17 @@ public class Component extends HighLevelModelObject implements Boxed {
 
         box.setProperties(json);
 
-        final EnabledColor enabledColor = EnabledColor.fromIdentifier(json.getAsJsonPrimitive(COLOR).getAsString());
+        final EnabledColor enabledColor = (json.has(COLOR) ? EnabledColor.fromIdentifier(json.getAsJsonPrimitive(COLOR).getAsString()) : null);
         if (enabledColor != null) {
             setColorIntensity(enabledColor.intensity);
             setColor(enabledColor.color);
         }
 
-        setIncludeInPeriodicCheck(json.getAsJsonPrimitive(INCLUDE_IN_PERIODIC_CHECK).getAsBoolean());
+        if(json.has(INCLUDE_IN_PERIODIC_CHECK)) {
+            setIncludeInPeriodicCheck(json.getAsJsonPrimitive(INCLUDE_IN_PERIODIC_CHECK).getAsBoolean());
+        } else {
+            setIncludeInPeriodicCheck(false);
+        }
     }
 
     /**
