@@ -110,7 +110,7 @@ public class EcdarController implements Initializable {
     public JFXDialog aboutDialog;
     public JFXButton aboutAcceptButton;
     public StackPane canvasPane;
-    public static CanvasPresentation activeCanvasPresentation = new CanvasPresentation();
+    public static CanvasPresentation activeCanvasPresentation;
 
     private double expandHeight = 300;
 
@@ -170,6 +170,10 @@ public class EcdarController implements Initializable {
 
     private double tabPanePreviousY = 0;
     public boolean shouldISkipOpeningTheMessagesContainer = true;
+
+    public EcdarController() {
+        activeCanvasPresentation = new CanvasPresentation();
+    }
 
     public static void runReachabilityAnalysis() {
         if (!reachabilityServiceEnabled) return;
@@ -748,18 +752,30 @@ public class EcdarController implements Initializable {
     }
 
     private void initializeCanvasPane() {
-        TilePane canvasGrid = new TilePane();
+        GridPane canvasGrid = new GridPane();
 
-        canvasGrid.getChildren().add(new CanvasShellPresentation());
-        canvasGrid.getChildren().add(new CanvasShellPresentation());
-        canvasGrid.getChildren().add(new CanvasShellPresentation());
-        canvasGrid.getChildren().add(new CanvasShellPresentation());
+        canvasGrid.addColumn(0);
+        canvasGrid.addColumn(1);
+        canvasGrid.addRow(0);
+        canvasGrid.addRow(1);
 
-        canvasGrid.setPrefColumns(2);
-        canvasGrid.setPrefRows(2);
-        canvasGrid.setTileAlignment(Pos.TOP_LEFT);
+        ColumnConstraints col1 = new ColumnConstraints();
+        col1.setPercentWidth(50);
 
-        this.activeCanvasPresentation = ((CanvasShellPresentation) canvasGrid.getChildren().get(0)).getController().canvasPresentation;
+        RowConstraints row1 = new RowConstraints();
+        row1.setPercentHeight(50);
+
+        canvasGrid.getColumnConstraints().add(col1);
+        canvasGrid.getColumnConstraints().add(col1);
+        canvasGrid.getRowConstraints().add(row1);
+        canvasGrid.getRowConstraints().add(row1);
+
+        canvasGrid.add(new CanvasShellPresentation(), 0, 0);
+        canvasGrid.add(new CanvasShellPresentation(), 0, 1);
+        canvasGrid.add(new CanvasShellPresentation(), 1, 0);
+        canvasGrid.add(new CanvasShellPresentation(), 1, 1);
+
+        activeCanvasPresentation = ((CanvasShellPresentation) canvasGrid.getChildren().get(0)).getController().canvasPresentation;
 
         canvasPane.getChildren().add(canvasGrid);
     }
