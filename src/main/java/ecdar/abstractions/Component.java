@@ -600,6 +600,11 @@ public class Component extends HighLevelModelObject implements Boxed {
 
         box.setProperties(json);
 
+        if (box.getWidth() == 0 && box.getHeight() == 0) {
+            box.setWidth(locations.stream().max(Comparator.comparingDouble(Location::getX)).get().getX() + Grid.GRID_SIZE * 10);
+            box.setHeight(locations.stream().max(Comparator.comparingDouble(Location::getY)).get().getY() + Grid.GRID_SIZE * 10);
+        }
+
         final EnabledColor enabledColor = (json.has(COLOR) ? EnabledColor.fromIdentifier(json.getAsJsonPrimitive(COLOR).getAsString()) : null);
         if (enabledColor != null) {
             setColorIntensity(enabledColor.intensity);

@@ -92,7 +92,12 @@ public class Box {
             setY(5);
         }
 
-        setWidth(json.getAsJsonPrimitive(WIDTH).getAsDouble());
-        setHeight(json.getAsJsonPrimitive(HEIGHT).getAsDouble());
+        if(json.has(WIDTH) && json.has(HEIGHT)) {
+            setWidth(json.getAsJsonPrimitive(WIDTH).getAsDouble());
+            setHeight(json.getAsJsonPrimitive(HEIGHT).getAsDouble());
+        } else {
+            setWidth(0);
+            setHeight(0);
+        }
     }
 }
