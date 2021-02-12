@@ -30,7 +30,7 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
-import javafx.scene.Node;
+import javafx.geometry.Pos;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
@@ -110,6 +110,7 @@ public class EcdarController implements Initializable {
     public JFXDialog aboutDialog;
     public JFXButton aboutAcceptButton;
     public StackPane canvasPane;
+    public static CanvasPresentation activeCanvasPresentation = new CanvasPresentation();
 
     private double expandHeight = 300;
 
@@ -200,6 +201,8 @@ public class EcdarController implements Initializable {
             queryDialogContainer.setMouseTransparent(false);
         });
 
+        initializeCanvasPane();
+
         initializeEdgeStatusHandling();
 
         initializeKeybindings();
@@ -209,7 +212,6 @@ public class EcdarController implements Initializable {
         initializeMenuBar();
         initializeReachabilityAnalysisThread();
 
-        initializeCanvasPane();
     }
 
     /**
@@ -231,7 +233,7 @@ public class EcdarController implements Initializable {
                 Ecdar.getProject().getComponents().remove(newComponent);
             }, "Created new component: " + newComponent.getName(), "add-circle");
 
-            CanvasController.setActiveModel(newComponent);
+            activeCanvasPresentation.getController().setActiveModel(newComponent);
         });
         KeyboardTracker.registerKeybind(KeyboardTracker.CREATE_COMPONENT, binding);
 
@@ -455,7 +457,7 @@ public class EcdarController implements Initializable {
 
         initializeNewMutationTestObjectMenuItem();
 
-        initializeFileExportAsPng(getCanvasPresentation());
+        initializeFileExportAsPng(getActiveCanvasPresentation());
 
         initializeEditMenu();
 
@@ -466,14 +468,8 @@ public class EcdarController implements Initializable {
         initializeHelpMenu();
     }
 
-    private CanvasPresentation getCanvasPresentation() {
-        return new CanvasPresentation();
-        /*Node firstChild = canvasPane.getChildren().get(0);
-        if(firstChild instanceof GridPane) {
-            return ((CanvasShellPresentation) ((GridPane) firstChild).getChildren().get(0)).getController().canvasPresentation;
-        } else {
-            return ((CanvasShellPresentation) firstChild).getController().canvasPresentation;
-        }*/
+    private CanvasPresentation getActiveCanvasPresentation() {
+        return this.activeCanvasPresentation;
     }
 
     private void initializeHelpMenu() {
@@ -508,7 +504,7 @@ public class EcdarController implements Initializable {
     private void initializeEditMenu() {
         menuEditMoveLeft.setAccelerator(new KeyCodeCombination(KeyCode.LEFT, KeyCombination.CONTROL_DOWN));
         menuEditMoveLeft.setOnAction(event -> {
-            final HighLevelModelObject activeModel = CanvasController.getActiveModel();
+            final HighLevelModelObject activeModel = activeCanvasPresentation.getController().getActiveModel();
 
             if (activeModel instanceof Component) ((Component) activeModel).moveAllNodesLeft();
             else Ecdar.showToast("This can only be performed on components.");
@@ -516,7 +512,7 @@ public class EcdarController implements Initializable {
 
         menuEditMoveRight.setAccelerator(new KeyCodeCombination(KeyCode.RIGHT, KeyCombination.CONTROL_DOWN));
         menuEditMoveRight.setOnAction(event -> {
-            final HighLevelModelObject activeModel = CanvasController.getActiveModel();
+            final HighLevelModelObject activeModel = activeCanvasPresentation.getController().getActiveModel();
 
             if (activeModel instanceof Component) ((Component) activeModel).moveAllNodesRight();
             else Ecdar.showToast("This can only be performed on components.");
@@ -524,7 +520,7 @@ public class EcdarController implements Initializable {
 
         menuEditMoveUp.setAccelerator(new KeyCodeCombination(KeyCode.UP, KeyCombination.CONTROL_DOWN));
         menuEditMoveUp.setOnAction(event -> {
-            final HighLevelModelObject activeModel = CanvasController.getActiveModel();
+            final HighLevelModelObject activeModel = activeCanvasPresentation.getController().getActiveModel();
 
             if (activeModel instanceof Component) ((Component) activeModel).moveAllNodesUp();
             else Ecdar.showToast("This can only be performed on components.");
@@ -532,7 +528,7 @@ public class EcdarController implements Initializable {
 
         menuEditMoveDown.setAccelerator(new KeyCodeCombination(KeyCode.DOWN, KeyCombination.CONTROL_DOWN));
         menuEditMoveDown.setOnAction(event -> {
-            final HighLevelModelObject activeModel = CanvasController.getActiveModel();
+            final HighLevelModelObject activeModel = activeCanvasPresentation.getController().getActiveModel();
 
             if (activeModel instanceof Component) ((Component) activeModel).moveAllNodesDown();
             else Ecdar.showToast("This can only be performed on components.");
@@ -681,7 +677,7 @@ public class EcdarController implements Initializable {
 
             UndoRedoStack.pushAndPerform(() -> { // Perform
                 Ecdar.getProject().getTestPlans().add(newPlan);
-                CanvasController.setActiveModel(newPlan);
+                activeCanvasPresentation.getController().setActiveModel(newPlan);
             }, () -> { // Undo
                 Ecdar.getProject().getTestPlans().remove(newPlan);
             }, "Created new mutation test plan", "");
@@ -699,7 +695,7 @@ public class EcdarController implements Initializable {
         Ecdar.projectDirectory.set(null);
 
         Ecdar.getProject().reset();
-        CanvasController.setActiveModel(Ecdar.getProject().getComponents().get(0));
+        activeCanvasPresentation.getController().setActiveModel(Ecdar.getProject().getComponents().get(0));
 
         UndoRedoStack.clear();
 
@@ -713,7 +709,7 @@ public class EcdarController implements Initializable {
         menuBarFileExportAsPng.setAccelerator(new KeyCodeCombination(KeyCode.L, KeyCombination.SHORTCUT_DOWN));
         menuBarFileExportAsPng.setOnAction(event -> {
             // If there is no active component or system
-            if (!(CanvasController.getActiveModel() instanceof Component || CanvasController.getActiveModel() instanceof EcdarSystem)) {
+            if (!(activeCanvasPresentation.getController().getActiveModel() instanceof Component || activeCanvasPresentation.getController().getActiveModel() instanceof EcdarSystem)) {
                 Ecdar.showToast("No component or system to export.");
                 return;
             }
@@ -752,25 +748,18 @@ public class EcdarController implements Initializable {
     }
 
     private void initializeCanvasPane() {
-        ColumnConstraints col1 = new ColumnConstraints();
-        col1.setHgrow( Priority.NEVER );
+        TilePane canvasGrid = new TilePane();
 
-        ColumnConstraints col2 = new ColumnConstraints();
-        col2.setHgrow( Priority.NEVER );
+        canvasGrid.getChildren().add(new CanvasShellPresentation());
+        canvasGrid.getChildren().add(new CanvasShellPresentation());
+        canvasGrid.getChildren().add(new CanvasShellPresentation());
+        canvasGrid.getChildren().add(new CanvasShellPresentation());
 
-        GridPane canvasGrid = new GridPane();
-        canvasGrid.addColumn(0);
-        canvasGrid.addColumn(1);
-        canvasGrid.addRow(0);
-        canvasGrid.addRow(1);
+        canvasGrid.setPrefColumns(2);
+        canvasGrid.setPrefRows(2);
+        canvasGrid.setTileAlignment(Pos.TOP_LEFT);
 
-        canvasGrid.setGridLinesVisible(true);
-        canvasGrid.getColumnConstraints().addAll(col1, col2);
-
-        canvasGrid.add(new CanvasShellPresentation(), 0, 0);
-        canvasGrid.add(new CanvasShellPresentation(), 0, 1);
-        canvasGrid.add(new CanvasShellPresentation(), 1, 0);
-        canvasGrid.add(new CanvasShellPresentation(), 1, 1);
+        this.activeCanvasPresentation = ((CanvasShellPresentation) canvasGrid.getChildren().get(0)).getController().canvasPresentation;
 
         canvasPane.getChildren().add(canvasGrid);
     }
@@ -810,7 +799,7 @@ public class EcdarController implements Initializable {
      * @param image the image
      */
     private void CropAndExportImage(final WritableImage image) {
-        final String name = CanvasController.getActiveModel().getName();
+        final String name = activeCanvasPresentation.getController().getActiveModel().getName();
 
         final FileChooser filePicker = new FileChooser();
         filePicker.setTitle("Export png");

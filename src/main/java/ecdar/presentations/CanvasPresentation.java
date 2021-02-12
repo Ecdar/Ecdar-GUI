@@ -1,6 +1,7 @@
 package ecdar.presentations;
 
 import ecdar.controllers.CanvasController;
+import ecdar.controllers.EcdarController;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.helpers.CanvasDragHelper;
 import ecdar.utility.helpers.MouseTrackable;
@@ -36,15 +37,6 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
     public CanvasPresentation() {
         mouseTracker = new MouseTracker(this);
         controller = new EcdarFXMLLoader().loadAndGetController("CanvasPresentation.fxml", this);
-
-        //Add keybindings for zoom functionality
-        KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_IN, new Keybind(new KeyCodeCombination(KeyCode.PLUS, KeyCombination.SHORTCUT_DOWN), controller.zoomHelper::zoomIn));
-        KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_OUT, new Keybind(new KeyCodeCombination(KeyCode.MINUS, KeyCombination.SHORTCUT_DOWN), controller.zoomHelper::zoomOut));
-        KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_TO_FIT, new Keybind(new KeyCodeCombination(KeyCode.EQUALS, KeyCombination.SHORTCUT_DOWN), controller.zoomHelper::zoomToFit));
-        KeyboardTracker.registerKeybind(KeyboardTracker.RESET_ZOOM, new Keybind(new KeyCodeCombination(KeyCode.DIGIT0, KeyCombination.SHORTCUT_DOWN), controller.zoomHelper::resetZoom));
-        KeyboardTracker.registerKeybind(KeyboardTracker.UNDO, new Keybind(new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN), UndoRedoStack::undo));
-        KeyboardTracker.registerKeybind(KeyboardTracker.REDO, new Keybind(new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN), UndoRedoStack::redo));
-
 
         initializeGrid();
 
@@ -105,7 +97,7 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
      * @param shouldShow true iff views should show an inset
      */
     public static void showBottomInset(final Boolean shouldShow) {
-        CanvasController.updateOffset(shouldShow);
+        EcdarController.activeCanvasPresentation.getController().updateOffset(shouldShow);
     }
 
     @Override

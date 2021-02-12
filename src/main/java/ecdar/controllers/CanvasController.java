@@ -26,35 +26,36 @@ import java.util.function.Consumer;
 import static ecdar.presentations.Grid.GRID_SIZE;
 
 public class CanvasController implements Initializable {
-    public final static double DECLARATION_Y_MARGIN = GRID_SIZE * 5.5;
-    public static ComponentPresentation activeComponentPresentation;
+    public final double DECLARATION_Y_MARGIN = GRID_SIZE * 5.5;
+    public ComponentPresentation activeComponentPresentation;
 
     public Pane root;
 
     public final ZoomHelper zoomHelper = new ZoomHelper();
-    private final static ObjectProperty<HighLevelModelObject> activeModel = new SimpleObjectProperty<>(null);
-    private final static HashMap<HighLevelModelObject, Pair<Double, Double>> ModelObjectTranslateMap = new HashMap<>();
 
-    private static DoubleProperty width, height;
-    private static BooleanProperty insetShouldShow;
+    private final ObjectProperty<HighLevelModelObject> activeModel = new SimpleObjectProperty<>(null);
+    private final HashMap<HighLevelModelObject, Pair<Double, Double>> ModelObjectTranslateMap = new HashMap<>();
+
+    private DoubleProperty width, height;
+    private BooleanProperty insetShouldShow;
 
     // This is whether to allow the user to turn on/off the grid.
     // While this is false, the grid is always hidden, no matter the user option.
     private BooleanProperty allowGrid = new SimpleBooleanProperty(true);
 
-    public static DoubleProperty getWidthProperty() {
+    public DoubleProperty getWidthProperty() {
         return width;
     }
 
-    public static DoubleProperty getHeightProperty() {
+    public DoubleProperty getHeightProperty() {
         return height;
     }
 
-    public static BooleanProperty getInsetShouldShow() {
+    public BooleanProperty getInsetShouldShow() {
         return insetShouldShow;
     }
 
-    public static HighLevelModelObject getActiveModel() {
+    public HighLevelModelObject getActiveModel() {
         return activeModel.get();
     }
 
@@ -62,32 +63,32 @@ public class CanvasController implements Initializable {
      * Sets the given model as the one to be active, e.g. to be shown on the screen.
      * @param model the given model
      */
-    public static void setActiveModel(final HighLevelModelObject model) {
-        CanvasController.activeModel.set(model);
-        Platform.runLater(CanvasController::leaveTextAreas);
+    public void setActiveModel(final HighLevelModelObject model) {
+        activeModel.set(model);
+        Platform.runLater(EcdarController.activeCanvasPresentation.getController()::leaveTextAreas);
     }
 
-    public static ObjectProperty<HighLevelModelObject> activeComponentProperty() {
+    public ObjectProperty<HighLevelModelObject> activeComponentProperty() {
         return activeModel;
     }
 
-    public static void leaveTextAreas() {
+    public void leaveTextAreas() {
         leaveTextAreas.run();
     }
 
-    public static EventHandler<KeyEvent> getLeaveTextAreaKeyHandler() {
+    public EventHandler<KeyEvent> getLeaveTextAreaKeyHandler() {
         return getLeaveTextAreaKeyHandler(keyEvent -> {});
     }
 
-    public static EventHandler<KeyEvent> getLeaveTextAreaKeyHandler(final Consumer<KeyEvent> afterEnter) {
+    public EventHandler<KeyEvent> getLeaveTextAreaKeyHandler(final Consumer<KeyEvent> afterEnter) {
         return (keyEvent) -> {
             leaveOnEnterPressed.accept(keyEvent);
             afterEnter.accept(keyEvent);
         };
     }
 
-    private static Consumer<KeyEvent> leaveOnEnterPressed;
-    private static Runnable leaveTextAreas;
+    private Consumer<KeyEvent> leaveOnEnterPressed;
+    private Runnable leaveTextAreas;
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
@@ -181,7 +182,7 @@ public class CanvasController implements Initializable {
      * Whether views should have an offset is based on the configuration of the error view.
      * @param shouldHave true iff views should have an offset
      */
-    public static void updateOffset(final Boolean shouldHave) {
+    public void updateOffset(final Boolean shouldHave) {
         insetShouldShow.set(shouldHave);
     }
 

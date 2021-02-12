@@ -50,7 +50,7 @@ public class ProjectPaneController implements Initializable {
         final FilePresentation globalDclPresentation = new FilePresentation(Ecdar.getProject().getGlobalDeclarations());
         globalDclPresentation.setOnMousePressed(event -> {
             event.consume();
-            CanvasController.setActiveModel(Ecdar.getProject().getGlobalDeclarations());
+            EcdarController.activeCanvasPresentation.getController().setActiveModel(Ecdar.getProject().getGlobalDeclarations());
         });
         filesList.getChildren().add(globalDclPresentation);
 
@@ -58,7 +58,7 @@ public class ProjectPaneController implements Initializable {
         final FilePresentation systemDclPresentation = new FilePresentation(Ecdar.getProject().getSystemDeclarations());
         systemDclPresentation.setOnMousePressed(event -> {
             event.consume();
-            CanvasController.setActiveModel(Ecdar.getProject().getSystemDeclarations());
+            EcdarController.activeCanvasPresentation.getController().setActiveModel(Ecdar.getProject().getSystemDeclarations());
         });
         filesList.getChildren().add(systemDclPresentation);
 
@@ -242,7 +242,7 @@ public class ProjectPaneController implements Initializable {
         // Open the component if the presentation is pressed
         filePresentation.setOnMousePressed(event -> {
             event.consume();
-            CanvasController.setActiveModel(model);
+            EcdarController.activeCanvasPresentation.getController().setActiveModel(model);
         });
         model.nameProperty().addListener(obs -> sortPresentations());
     }
@@ -253,14 +253,14 @@ public class ProjectPaneController implements Initializable {
 
 
         // If we remove the model active on the canvas
-        if (CanvasController.getActiveModel() == model) {
+        if (EcdarController.activeCanvasPresentation.getController().getActiveModel() == model) {
             if (Ecdar.getProject().getComponents().size() > 0) {
                 // Find the first available component and show it instead of the removed one
                 final Component component = Ecdar.getProject().getComponents().get(0);
-                CanvasController.setActiveModel(component);
+                EcdarController.activeCanvasPresentation.getController().setActiveModel(component);
             } else {
                 // Show no components (since there are none in the project)
-                CanvasController.setActiveModel(null);
+                EcdarController.activeCanvasPresentation.getController().setActiveModel(null);
             }
         }
     }
@@ -278,7 +278,7 @@ public class ProjectPaneController implements Initializable {
             Ecdar.getProject().getComponents().remove(newComponent);
         }, "Created new component: " + newComponent.getName(), "add-circle");
 
-        CanvasController.setActiveModel(newComponent);
+        EcdarController.activeCanvasPresentation.getController().setActiveModel(newComponent);
     }
 
     /**
@@ -294,7 +294,7 @@ public class ProjectPaneController implements Initializable {
             Ecdar.getProject().getSystemsProperty().remove(newSystem);
         }, "Created new system: " + newSystem.getName(), "add-circle");
 
-        CanvasController.setActiveModel(newSystem);
+        EcdarController.activeCanvasPresentation.getController().setActiveModel(newSystem);
     }
 
 }

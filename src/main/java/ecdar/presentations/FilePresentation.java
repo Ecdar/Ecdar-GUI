@@ -5,6 +5,7 @@ import ecdar.abstractions.Component;
 import ecdar.abstractions.EcdarSystem;
 import ecdar.abstractions.HighLevelModelObject;
 import ecdar.controllers.CanvasController;
+import ecdar.controllers.EcdarController;
 import ecdar.controllers.FileController;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.utility.colors.Color;
@@ -101,7 +102,7 @@ public class FilePresentation extends AnchorPane {
 
         // Update the background when hovered
         setOnMouseEntered(event -> {
-            if(CanvasController.getActiveModel().equals(model.get())) {
+            if(EcdarController.activeCanvasPresentation.getController().getActiveModel().equals(model.get())) {
                 setBackground.accept(color, colorIntensity.next(2));
             } else {
                 setBackground.accept(color, colorIntensity.next());
@@ -109,7 +110,7 @@ public class FilePresentation extends AnchorPane {
             setCursor(Cursor.HAND);
         });
         setOnMouseExited(event -> {
-            if(CanvasController.getActiveModel().equals(model.get())) {
+            if(EcdarController.activeCanvasPresentation.getController().getActiveModel().equals(model.get())) {
                 setBackground.accept(color, colorIntensity.next(1));
             } else {
                 setBackground.accept(color, colorIntensity);
@@ -117,7 +118,7 @@ public class FilePresentation extends AnchorPane {
             setCursor(Cursor.DEFAULT);
         });
 
-        CanvasController.activeComponentProperty().addListener((obs, oldActiveComponent, newActiveComponent) -> {
+        EcdarController.activeCanvasPresentation.getController().activeComponentProperty().addListener((obs, oldActiveComponent, newActiveComponent) -> {
             if (newActiveComponent == null) return;
 
 

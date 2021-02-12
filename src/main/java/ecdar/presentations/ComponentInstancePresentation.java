@@ -3,6 +3,7 @@ package ecdar.presentations;
 import ecdar.abstractions.*;
 import ecdar.controllers.CanvasController;
 import ecdar.controllers.ComponentInstanceController;
+import ecdar.controllers.EcdarController;
 import ecdar.utility.colors.Color;
 import ecdar.utility.helpers.ItemDragHelper;
 import ecdar.utility.helpers.SelectHelper;
@@ -125,7 +126,7 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
 
         // Center the text vertically and aff a left padding of CORNER_SIZE
         controller.identifier.setPadding(new Insets(2, 0, 0, Grid.CORNER_SIZE));
-        controller.identifier.setOnKeyPressed(CanvasController.getLeaveTextAreaKeyHandler());
+        controller.identifier.setOnKeyPressed(EcdarController.activeCanvasPresentation.getController().getLeaveTextAreaKeyHandler());
 
         controller.originalComponentLabel.setPadding(new Insets(0, 5, 0, 15));
         controller.originalComponentLabel.textProperty().bind(instance.getComponent().nameProperty());

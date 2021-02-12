@@ -2,6 +2,7 @@ package ecdar.utility.helpers;
 
 import ecdar.abstractions.Component;
 import ecdar.controllers.CanvasController;
+import ecdar.controllers.EcdarController;
 import ecdar.presentations.CanvasPresentation;
 import ecdar.presentations.ComponentPresentation;
 import ecdar.utility.UndoRedoStack;
@@ -114,8 +115,8 @@ public class ItemDragHelper {
 
             final DragBounds dragBounds = getDragBounds.get();
 
-            final double newX = CanvasPresentation.mouseTracker.getGridX() - ((Boxed) CanvasController.getActiveModel()).getBox().getX();
-            final double newY = CanvasPresentation.mouseTracker.getGridY() - ((Boxed) CanvasController.getActiveModel()).getBox().getY();
+            final double newX = CanvasPresentation.mouseTracker.getGridX() - ((Boxed) EcdarController.activeCanvasPresentation.getController().getActiveModel()).getBox().getX();
+            final double newY = CanvasPresentation.mouseTracker.getGridY() - ((Boxed) EcdarController.activeCanvasPresentation.getController().getActiveModel()).getBox().getY();
 
             final double unRoundedX = dragBounds.trimX(newX - xDiff.get());
             final double unRoundedY = dragBounds.trimY(newY - yDiff.get());

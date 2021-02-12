@@ -1,6 +1,7 @@
 package ecdar.presentations;
 
 import ecdar.controllers.CanvasController;
+import ecdar.controllers.EcdarController;
 import javafx.application.Platform;
 import javafx.scene.Parent;
 import javafx.scene.shape.Line;
@@ -113,11 +114,11 @@ public class Grid extends Parent {
         });
 
         // Check added to avoid NullPointerException
-        if(CanvasController.activeComponentPresentation != null) {
+        if(EcdarController.activeCanvasPresentation.getController().activeComponentPresentation != null) {
             // Center the grid on the screen
             // Using GRID_SIZE for small corrections as the grid is not directly centered on the screen
-            this.setTranslateX(Grid.snap(CanvasController.activeComponentPresentation.getWidth() / 2 - GRID_SIZE) + GRID_SIZE * 0.5);
-            this.setTranslateY(Grid.snap(CanvasController.activeComponentPresentation.getHeight() / 2 + TOOL_BAR_HEIGHT * 4) + GRID_SIZE * 0.5);
+            this.setTranslateX(Grid.snap(EcdarController.activeCanvasPresentation.getController().activeComponentPresentation.getWidth() / 2 - GRID_SIZE) + GRID_SIZE * 0.5);
+            this.setTranslateY(Grid.snap(EcdarController.activeCanvasPresentation.getController().activeComponentPresentation.getHeight() / 2 + TOOL_BAR_HEIGHT * 4) + GRID_SIZE * 0.5);
         }
     }
 }

@@ -21,7 +21,7 @@
 
         <center>
             <StackPane>
-                <StackPane fx:id="canvasPane" minWidth="1000" maxWidth="1000" minHeight="1000" maxHeight="1000">
+                <StackPane fx:id="canvasPane">
                         <!-- Canvases go here -->
                 </StackPane>
 

@@ -7,6 +7,7 @@ import ecdar.abstractions.Location;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.code_analysis.Nearable;
 import ecdar.controllers.CanvasController;
+import ecdar.controllers.EcdarController;
 import ecdar.utility.helpers.SelectHelper;
 import javafx.beans.InvalidationListener;
 import javafx.collections.FXCollections;
@@ -81,9 +82,9 @@ public class MessagePresentation extends HBox {
                             }
 
                             if (openComponent[0] != null) {
-                                if (!CanvasController.getActiveModel().equals(openComponent[0])) {
+                                if (!EcdarController.activeCanvasPresentation.getController().getActiveModel().equals(openComponent[0])) {
                                     SelectHelper.elementsToBeSelected = FXCollections.observableArrayList();
-                                    CanvasController.setActiveModel(openComponent[0]);
+                                    EcdarController.activeCanvasPresentation.getController().setActiveModel(openComponent[0]);
                                 }
 
                                 SelectHelper.clearSelectedElements();

@@ -12,6 +12,8 @@ import ecdar.utility.helpers.SelectHelper;
 import com.jfoenix.controls.JFXPopup;
 import com.jfoenix.controls.JFXRippler;
 import com.jfoenix.controls.JFXSnackbar;
+import ecdar.utility.keyboard.Keybind;
+import ecdar.utility.keyboard.KeyboardTracker;
 import javafx.animation.*;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -26,6 +28,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Circle;
 import javafx.util.Duration;
@@ -80,6 +85,14 @@ public class EcdarPresentation extends StackPane {
             ranInitialToggle.set(true);
         });
         initializeHelpImages();
+
+        //ToDo: Check if this works
+        KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_IN, new Keybind(new KeyCodeCombination(KeyCode.PLUS, KeyCombination.SHORTCUT_DOWN), controller.activeCanvasPresentation.getController().zoomHelper::zoomIn));
+        KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_OUT, new Keybind(new KeyCodeCombination(KeyCode.MINUS, KeyCombination.SHORTCUT_DOWN), controller.activeCanvasPresentation.getController().zoomHelper::zoomOut));
+        KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_TO_FIT, new Keybind(new KeyCodeCombination(KeyCode.EQUALS, KeyCombination.SHORTCUT_DOWN), controller.activeCanvasPresentation.getController().zoomHelper::zoomToFit));
+        KeyboardTracker.registerKeybind(KeyboardTracker.RESET_ZOOM, new Keybind(new KeyCodeCombination(KeyCode.DIGIT0, KeyCombination.SHORTCUT_DOWN), controller.activeCanvasPresentation.getController().zoomHelper::resetZoom));
+        KeyboardTracker.registerKeybind(KeyboardTracker.UNDO, new Keybind(new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN), UndoRedoStack::undo));
+        KeyboardTracker.registerKeybind(KeyboardTracker.REDO, new Keybind(new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN), UndoRedoStack::redo));
     }
 
     private void initializeSnackbar() {
@@ -545,19 +558,7 @@ public class EcdarPresentation extends StackPane {
      * @return A Boolean Property that is true if the grid has been turned on and false if it is off
      */
     public BooleanProperty toggleGrid(){
-        BooleanProperty gridState = new SimpleBooleanProperty(true);
-
-        if(controller.canvasPane.getChildren().get(0) instanceof CanvasShellPresentation) {
-            // The canvasPane contains a single CanvasPresentation
-            gridState = ((CanvasShellPresentation) controller.canvasPane.getChildren().get(0)).getController().canvasPresentation.toggleGridUi();
-        } else {
-            // The canvasPane contains a GridPane with multiple CanvasPresentations
-            for (Node canvasShell : ((GridPane) controller.canvasPane.getChildren().get(0)).getChildren()) {
-                gridState = ((CanvasShellPresentation) canvasShell).getController().canvasPresentation.toggleGridUi();
-            }
-        }
-
-        return gridState;
+        return controller.activeCanvasPresentation.toggleGridUi();
     }
 
     public void showSnackbarMessage(final String message) {

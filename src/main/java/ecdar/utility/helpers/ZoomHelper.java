@@ -1,6 +1,7 @@
 package ecdar.utility.helpers;
 
 import ecdar.controllers.CanvasController;
+import ecdar.controllers.EcdarController;
 import ecdar.presentations.CanvasPresentation;
 import ecdar.presentations.Grid;
 
@@ -78,7 +79,7 @@ public class ZoomHelper {
      * Zoom in to fit the component on screen
      */
     public void zoomToFit() {
-        double newScale = Math.min(canvasPresentation.getWidth() / CanvasController.activeComponentPresentation.getWidth() - 0.1, canvasPresentation.getHeight() / CanvasController.activeComponentPresentation.getHeight() - 0.2); //0.1 for width and 0.2 for height added for margin
+        double newScale = Math.min(canvasPresentation.getWidth() / EcdarController.activeCanvasPresentation.getController().activeComponentPresentation.getWidth() - 0.1, canvasPresentation.getHeight() / EcdarController.activeCanvasPresentation.getController().activeComponentPresentation.getHeight() - 0.2); //0.1 for width and 0.2 for height added for margin
 
         //Scale canvas
         canvasPresentation.setScaleX(newScale);
@@ -93,10 +94,10 @@ public class ZoomHelper {
      */
     public void centerComponentAndUpdateGrid(double newScale){
         // Check added to avoid NullPointerException
-        if(CanvasController.activeComponentPresentation != null){
+        if(EcdarController.activeCanvasPresentation.getController().activeComponentPresentation != null){
             // Calculate the new x and y offsets needed to center the component
-            double xOffset = newScale * canvasPresentation.getWidth() * 1.0f / 2 - newScale * CanvasController.activeComponentPresentation.getWidth() * 1.0f / 2;
-            double yOffset = newScale * canvasPresentation.getHeight() * 1.0f / 3 - newScale * CanvasController.activeComponentPresentation.getHeight() * 1.0f / 3 + newScale * Grid.TOOL_BAR_HEIGHT * 1.0f / 3;
+            double xOffset = newScale * canvasPresentation.getWidth() * 1.0f / 2 - newScale * EcdarController.activeCanvasPresentation.getController().activeComponentPresentation.getWidth() * 1.0f / 2;
+            double yOffset = newScale * canvasPresentation.getHeight() * 1.0f / 3 - newScale * EcdarController.activeCanvasPresentation.getController().activeComponentPresentation.getHeight() * 1.0f / 3 + newScale * Grid.TOOL_BAR_HEIGHT * 1.0f / 3;
 
             // Center the component based on the offsets
             canvasPresentation.setTranslateX(Grid.snap(xOffset));
