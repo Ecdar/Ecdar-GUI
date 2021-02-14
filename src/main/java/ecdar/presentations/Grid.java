@@ -66,8 +66,8 @@ public class Grid extends Parent {
      */
     public void updateGrid(double scale) {
         // The given size of the canvas divided by the given scale
-        double screenWidth = (int) Grid.snap(((CanvasShellPresentation) getParent().getParent()).getWidth() / scale);
-        double screenHeight = (int) Grid.snap(((CanvasShellPresentation) getParent().getParent()).getHeight() / scale);
+        double screenWidth = (int) Grid.snap(((CanvasShellPresentation) getParent().getParent()).getWidth() / scale * 4);
+        double screenHeight = (int) Grid.snap(((CanvasShellPresentation) getParent().getParent()).getHeight() / scale * 4);
 
         Platform.runLater(() -> {
             // Remove old vertical lines
@@ -78,7 +78,7 @@ public class Grid extends Parent {
             }
 
             // Add new vertical lines to cover the screen at the current zoom level
-            int i = (int) -screenHeight / (GRID_SIZE / 2);
+            int i = (int) -screenHeight / (GRID_SIZE * 4);
             int numberOfLine = (int) screenWidth / GRID_SIZE;
             while (i < numberOfLine) {
                 Line line = new Line(i * GRID_SIZE, -screenHeight, i * GRID_SIZE, screenHeight);
@@ -97,7 +97,7 @@ public class Grid extends Parent {
             }
 
             // Add new horizontal lines to cover the screen at the current zoom level
-            i = (int) -screenHeight / (GRID_SIZE / 2);
+            i = (int) -screenHeight / (GRID_SIZE * 4);
             numberOfLine = (int) screenHeight / GRID_SIZE;
             while (i < numberOfLine) {
                 Line line = new Line(-screenWidth, i * GRID_SIZE, screenWidth, i * GRID_SIZE);
