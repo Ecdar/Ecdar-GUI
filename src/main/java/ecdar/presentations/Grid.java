@@ -23,9 +23,9 @@ public class Grid extends Parent {
 
         // When the scene changes (goes from null to something) set update the grid
         sceneProperty().addListener((observable, oldValue, newValue) -> {
-            updateGrid(1, Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
-            newValue.widthProperty().addListener((observable1 -> this.updateGrid(getParent().getScaleX(), getParent().getLayoutBounds().getWidth(), getParent().getLayoutBounds().getHeight())));
-            newValue.heightProperty().addListener((observable1 -> this.updateGrid(getParent().getScaleY(), getParent().getLayoutBounds().getWidth(), getParent().getLayoutBounds().getHeight())));
+            updateGrid(1);
+            newValue.widthProperty().addListener((observable1 -> this.updateGrid(getParent().getScaleX())));
+            newValue.heightProperty().addListener((observable1 -> this.updateGrid(getParent().getScaleY())));
         });
     }
 
@@ -63,13 +63,11 @@ public class Grid extends Parent {
     /**
      * Redraw the grid in center of the screen
      * @param scale the scale in which to draw the grid
-     * @param canvasWidth the width of the current canvas
-     * @param canvasHeight the height of the current canvas
      */
-    public void updateGrid(double scale, double canvasWidth, double canvasHeight) {
+    public void updateGrid(double scale) {
         // The given size of the canvas divided by the given scale
-        double screenWidth = (int) Grid.snap(canvasWidth / scale);
-        double screenHeight = (int) Grid.snap(canvasHeight / scale);
+        double screenWidth = (int) Grid.snap(((CanvasShellPresentation) getParent().getParent()).getWidth() / scale);
+        double screenHeight = (int) Grid.snap(((CanvasShellPresentation) getParent().getParent()).getHeight() / scale);
 
         Platform.runLater(() -> {
             // Remove old vertical lines
@@ -109,16 +107,6 @@ public class Grid extends Parent {
                 getChildren().add(line);
                 i++;
             }
-
-            setClip(new Rectangle(screenWidth, screenHeight));
         });
-
-        // Check added to avoid NullPointerException
-        if(EcdarController.activeCanvasPresentation.getController().activeComponentPresentation != null) {
-            // Center the grid on the screen
-            // Using GRID_SIZE for small corrections as the grid is not directly centered on the screen
-            this.setTranslateX(Grid.snap(EcdarController.activeCanvasPresentation.getController().activeComponentPresentation.getWidth() / 2 - GRID_SIZE) + GRID_SIZE * 0.5);
-            this.setTranslateY(Grid.snap(EcdarController.activeCanvasPresentation.getController().activeComponentPresentation.getHeight() / 2 + TOOL_BAR_HEIGHT * 4) + GRID_SIZE * 0.5);
-        }
     }
 }

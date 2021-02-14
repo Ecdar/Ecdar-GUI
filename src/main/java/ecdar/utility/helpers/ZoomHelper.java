@@ -1,8 +1,8 @@
 package ecdar.utility.helpers;
 
-import ecdar.controllers.CanvasController;
 import ecdar.controllers.EcdarController;
 import ecdar.presentations.CanvasPresentation;
+import ecdar.presentations.CanvasShellPresentation;
 import ecdar.presentations.Grid;
 
 public class ZoomHelper {
@@ -104,7 +104,7 @@ public class ZoomHelper {
             canvasPresentation.setTranslateY(Grid.snap(yOffset));
 
             // Redraw the grid based on the new scale and canvas size
-            grid.updateGrid(newScale, canvasPresentation.getWidth(), canvasPresentation.getHeight());
+            grid.updateGrid(newScale);
         }
     }
 }

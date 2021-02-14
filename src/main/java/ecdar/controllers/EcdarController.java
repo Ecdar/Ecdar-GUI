@@ -31,12 +31,14 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
@@ -770,10 +772,23 @@ public class EcdarController implements Initializable {
         canvasGrid.getRowConstraints().add(row1);
         canvasGrid.getRowConstraints().add(row1);
 
-        canvasGrid.add(new CanvasShellPresentation(), 0, 0);
-        canvasGrid.add(new CanvasShellPresentation(), 0, 1);
-        canvasGrid.add(new CanvasShellPresentation(), 1, 0);
-        canvasGrid.add(new CanvasShellPresentation(), 1, 1);
+        CanvasShellPresentation canvasShellPresentation = new CanvasShellPresentation();
+        canvasShellPresentation.setBorder(new Border(new BorderStroke(Color.GREY.getColor(Color.Intensity.I500), BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderStroke.THIN)));
+        canvasShellPresentation.getController().toolbar.setTranslateY(48);
+        canvasGrid.add(canvasShellPresentation, 0, 0);
+
+        canvasShellPresentation = new CanvasShellPresentation();
+        canvasShellPresentation.setBorder(new Border(new BorderStroke(Color.GREY.getColor(Color.Intensity.I500), BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderStroke.THIN)));
+        canvasShellPresentation.getController().toolbar.setTranslateY(48);
+        canvasGrid.add(canvasShellPresentation, 1, 0);
+
+        canvasShellPresentation = new CanvasShellPresentation();
+        canvasShellPresentation.setBorder(new Border(new BorderStroke(Color.GREY.getColor(Color.Intensity.I500), BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderStroke.THIN)));
+        canvasGrid.add(canvasShellPresentation, 0, 1);
+
+        canvasShellPresentation = new CanvasShellPresentation();
+        canvasShellPresentation.setBorder(new Border(new BorderStroke(Color.GREY.getColor(Color.Intensity.I500), BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderStroke.THIN)));
+        canvasGrid.add(canvasShellPresentation, 1, 1);
 
         activeCanvasPresentation = ((CanvasShellPresentation) canvasGrid.getChildren().get(0)).getController().canvasPresentation;
 

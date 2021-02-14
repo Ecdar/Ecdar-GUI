@@ -8,6 +8,7 @@ import ecdar.utility.helpers.MouseTrackable;
 import ecdar.utility.keyboard.Keybind;
 import ecdar.utility.keyboard.KeyboardTracker;
 import ecdar.utility.mouse.MouseTracker;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -48,7 +49,6 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
 
     private void initializeGrid() {
         getChildren().add(grid);
-        grid.setClip(new Rectangle(1000, 1000));
         grid.toBack();
         gridUiOn.setValue(true);
 

@@ -3,8 +3,10 @@ package ecdar.presentations;
 import com.jfoenix.controls.JFXRippler;
 import ecdar.controllers.CanvasShellController;
 import ecdar.utility.colors.Color;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.layout.*;
+import javafx.scene.shape.Rectangle;
 
 public class CanvasShellPresentation extends StackPane {
     private final CanvasShellController controller;
@@ -30,6 +32,9 @@ public class CanvasShellPresentation extends StackPane {
         initializeToolbarButton(controller.zoomOut);
         initializeToolbarButton(controller.zoomToFit);
         initializeToolbarButton(controller.resetZoom);
+
+        widthProperty().addListener((width) -> setClipForChildren());
+        heightProperty().addListener((height) -> setClipForChildren());
     }
 
     private void initializeToolbarButton(final JFXRippler button) {
@@ -43,5 +48,9 @@ public class CanvasShellPresentation extends StackPane {
 
     public CanvasShellController getController() {
         return controller;
+    }
+
+    private void setClipForChildren() {
+        Platform.runLater(() -> setClip(new Rectangle(getWidth(), getHeight())));
     }
 }
