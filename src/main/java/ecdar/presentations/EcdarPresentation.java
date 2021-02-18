@@ -86,11 +86,10 @@ public class EcdarPresentation extends StackPane {
         });
         initializeHelpImages();
 
-        //ToDo: Check if this works
-        KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_IN, new Keybind(new KeyCodeCombination(KeyCode.PLUS, KeyCombination.SHORTCUT_DOWN), controller.activeCanvasPresentation.getController().zoomHelper::zoomIn));
-        KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_OUT, new Keybind(new KeyCodeCombination(KeyCode.MINUS, KeyCombination.SHORTCUT_DOWN), controller.activeCanvasPresentation.getController().zoomHelper::zoomOut));
-        KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_TO_FIT, new Keybind(new KeyCodeCombination(KeyCode.EQUALS, KeyCombination.SHORTCUT_DOWN), controller.activeCanvasPresentation.getController().zoomHelper::zoomToFit));
-        KeyboardTracker.registerKeybind(KeyboardTracker.RESET_ZOOM, new Keybind(new KeyCodeCombination(KeyCode.DIGIT0, KeyCombination.SHORTCUT_DOWN), controller.activeCanvasPresentation.getController().zoomHelper::resetZoom));
+        KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_IN, new Keybind(new KeyCodeCombination(KeyCode.PLUS, KeyCombination.SHORTCUT_DOWN), () -> EcdarController.getActiveCanvasPresentation().getController().zoomHelper.zoomIn()));
+        KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_OUT, new Keybind(new KeyCodeCombination(KeyCode.MINUS, KeyCombination.SHORTCUT_DOWN), () -> EcdarController.getActiveCanvasPresentation().getController().zoomHelper.zoomOut()));
+        KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_TO_FIT, new Keybind(new KeyCodeCombination(KeyCode.EQUALS, KeyCombination.SHORTCUT_DOWN), () -> EcdarController.getActiveCanvasPresentation().getController().zoomHelper.zoomToFit()));
+        KeyboardTracker.registerKeybind(KeyboardTracker.RESET_ZOOM, new Keybind(new KeyCodeCombination(KeyCode.DIGIT0, KeyCombination.SHORTCUT_DOWN), () -> EcdarController.getActiveCanvasPresentation().getController().zoomHelper.resetZoom()));
         KeyboardTracker.registerKeybind(KeyboardTracker.UNDO, new Keybind(new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN), UndoRedoStack::undo));
         KeyboardTracker.registerKeybind(KeyboardTracker.REDO, new Keybind(new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN), UndoRedoStack::redo));
     }
@@ -558,7 +557,7 @@ public class EcdarPresentation extends StackPane {
      * @return A Boolean Property that is true if the grid has been turned on and false if it is off
      */
     public BooleanProperty toggleGrid(){
-        return controller.activeCanvasPresentation.toggleGridUi();
+        return EcdarController.getActiveCanvasPresentation().toggleGridUi();
     }
 
     public void showSnackbarMessage(final String message) {
@@ -569,5 +568,9 @@ public class EcdarPresentation extends StackPane {
     public void showHelp() {
         controller.dialogContainer.setVisible(true);
         controller.dialog.show(controller.dialogContainer);
+    }
+
+    public EcdarController getController() {
+        return controller;
     }
 }

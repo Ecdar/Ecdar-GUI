@@ -95,7 +95,7 @@ public class TextFlowBuilder {
             }
 
             SelectHelper.elementsToBeSelected = FXCollections.observableArrayList();
-            EcdarController.activeCanvasPresentation.getController().setActiveModel(component);
+            EcdarController.getActiveCanvasPresentation().getController().setActiveModel(component);
 
             // Use a list, since there could be multiple locations (e.i. Universal locations)
             final List<Location> locations = component.getLocations().filtered(loc -> loc.getId().equals(locationId));

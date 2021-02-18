@@ -82,9 +82,9 @@ public class MessagePresentation extends HBox {
                             }
 
                             if (openComponent[0] != null) {
-                                if (!EcdarController.activeCanvasPresentation.getController().getActiveModel().equals(openComponent[0])) {
+                                if (!EcdarController.getActiveCanvasPresentation().getController().getActiveModel().equals(openComponent[0])) {
                                     SelectHelper.elementsToBeSelected = FXCollections.observableArrayList();
-                                    EcdarController.activeCanvasPresentation.getController().setActiveModel(openComponent[0]);
+                                    EcdarController.getActiveCanvasPresentation().getController().setActiveModel(openComponent[0]);
                                 }
 
                                 SelectHelper.clearSelectedElements();

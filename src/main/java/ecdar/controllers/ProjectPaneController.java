@@ -16,6 +16,7 @@ import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
@@ -50,7 +51,7 @@ public class ProjectPaneController implements Initializable {
         final FilePresentation globalDclPresentation = new FilePresentation(Ecdar.getProject().getGlobalDeclarations());
         globalDclPresentation.setOnMousePressed(event -> {
             event.consume();
-            EcdarController.activeCanvasPresentation.getController().setActiveModel(Ecdar.getProject().getGlobalDeclarations());
+            EcdarController.getActiveCanvasPresentation().getController().setActiveModel(Ecdar.getProject().getGlobalDeclarations());
         });
         filesList.getChildren().add(globalDclPresentation);
 
@@ -58,7 +59,7 @@ public class ProjectPaneController implements Initializable {
         final FilePresentation systemDclPresentation = new FilePresentation(Ecdar.getProject().getSystemDeclarations());
         systemDclPresentation.setOnMousePressed(event -> {
             event.consume();
-            EcdarController.activeCanvasPresentation.getController().setActiveModel(Ecdar.getProject().getSystemDeclarations());
+            EcdarController.getActiveCanvasPresentation().getController().setActiveModel(Ecdar.getProject().getSystemDeclarations());
         });
         filesList.getChildren().add(systemDclPresentation);
 
@@ -87,7 +88,6 @@ public class ProjectPaneController implements Initializable {
                 sortPresentations();
             }
         });
-
 
         initializeMutationTestPlanHandling();
     }
@@ -242,7 +242,8 @@ public class ProjectPaneController implements Initializable {
         // Open the component if the presentation is pressed
         filePresentation.setOnMousePressed(event -> {
             event.consume();
-            EcdarController.activeCanvasPresentation.getController().setActiveModel(model);
+            EcdarController.getActiveCanvasPresentation().getController().setActiveModel(model);
+            updateColorsOnFilePresentations();
         });
         model.nameProperty().addListener(obs -> sortPresentations());
     }
@@ -253,14 +254,26 @@ public class ProjectPaneController implements Initializable {
 
 
         // If we remove the model active on the canvas
-        if (EcdarController.activeCanvasPresentation.getController().getActiveModel() == model) {
+        if (EcdarController.getActiveCanvasPresentation().getController().getActiveModel() == model) {
             if (Ecdar.getProject().getComponents().size() > 0) {
                 // Find the first available component and show it instead of the removed one
                 final Component component = Ecdar.getProject().getComponents().get(0);
-                EcdarController.activeCanvasPresentation.getController().setActiveModel(component);
+                EcdarController.getActiveCanvasPresentation().getController().setActiveModel(component);
+                updateColorsOnFilePresentations();
             } else {
                 // Show no components (since there are none in the project)
-                EcdarController.activeCanvasPresentation.getController().setActiveModel(null);
+                EcdarController.getActiveCanvasPresentation().getController().setActiveModel(null);
+            }
+        }
+    }
+
+    /**
+     * Update the color of all FilePresentations to display currently active components
+     */
+    public void updateColorsOnFilePresentations() {
+        for (Node child : filesList.getChildren()) {
+            if (child instanceof FilePresentation) {
+                ((FilePresentation) child).updateColors();
             }
         }
     }
@@ -278,7 +291,8 @@ public class ProjectPaneController implements Initializable {
             Ecdar.getProject().getComponents().remove(newComponent);
         }, "Created new component: " + newComponent.getName(), "add-circle");
 
-        EcdarController.activeCanvasPresentation.getController().setActiveModel(newComponent);
+        EcdarController.getActiveCanvasPresentation().getController().setActiveModel(newComponent);
+        updateColorsOnFilePresentations();
     }
 
     /**
@@ -294,7 +308,6 @@ public class ProjectPaneController implements Initializable {
             Ecdar.getProject().getSystemsProperty().remove(newSystem);
         }, "Created new system: " + newSystem.getName(), "add-circle");
 
-        EcdarController.activeCanvasPresentation.getController().setActiveModel(newSystem);
+        EcdarController.getActiveCanvasPresentation().getController().setActiveModel(newSystem);
     }
-
 }

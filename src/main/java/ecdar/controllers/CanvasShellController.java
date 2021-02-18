@@ -2,9 +2,9 @@ package ecdar.controllers;
 
 import com.jfoenix.controls.JFXRippler;
 import ecdar.presentations.CanvasPresentation;
-import ecdar.utility.helpers.ZoomHelper;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 
@@ -24,7 +24,7 @@ public class CanvasShellController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        //ToDo: bind width and height of canvasPresentation to the width and height of this
+        root.addEventFilter(MouseEvent.MOUSE_ENTERED, event -> EcdarController.setActiveCanvasPresentation(this.canvasPresentation));
     }
 
     @FXML

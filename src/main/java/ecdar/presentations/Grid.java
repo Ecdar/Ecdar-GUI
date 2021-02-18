@@ -23,9 +23,13 @@ public class Grid extends Parent {
 
         // When the scene changes (goes from null to something) set update the grid
         sceneProperty().addListener((observable, oldValue, newValue) -> {
-            updateGrid(1);
-            newValue.widthProperty().addListener((observable1 -> this.updateGrid(getParent().getScaleX())));
-            newValue.heightProperty().addListener((observable1 -> this.updateGrid(getParent().getScaleY())));
+            if(newValue != null) {
+                updateGrid(1);
+                Platform.runLater(() -> {
+                    newValue.widthProperty().addListener((observable1 -> this.updateGrid(getParent().getScaleX())));
+                    newValue.heightProperty().addListener((observable1 -> this.updateGrid(getParent().getScaleY())));
+                });
+            }
         });
     }
 

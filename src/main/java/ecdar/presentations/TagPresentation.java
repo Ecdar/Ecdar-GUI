@@ -58,7 +58,7 @@ public class TagPresentation extends StackPane {
         textFieldFocusProperty().addListener((observable, oldValue, newValue) -> {
             if(!hadInitialFocus && newValue) {
                 hadInitialFocus = true;
-                EcdarController.activeCanvasPresentation.getController().leaveTextAreas();
+                EcdarController.getActiveCanvasPresentation().getController().leaveTextAreas();
             }
         });
     }
@@ -224,7 +224,7 @@ public class TagPresentation extends StackPane {
         });
 
         // When enter or escape is pressed release focus
-        textField.setOnKeyPressed(EcdarController.activeCanvasPresentation.getController().getLeaveTextAreaKeyHandler());
+        textField.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
     }
 
     public void bindToColor(final ObjectProperty<Color> color, final ObjectProperty<Color.Intensity> intensity) {

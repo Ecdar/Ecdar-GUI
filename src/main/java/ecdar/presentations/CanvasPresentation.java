@@ -97,7 +97,7 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
      * @param shouldShow true iff views should show an inset
      */
     public static void showBottomInset(final Boolean shouldShow) {
-        EcdarController.activeCanvasPresentation.getController().updateOffset(shouldShow);
+        EcdarController.getActiveCanvasPresentation().getController().updateOffset(shouldShow);
     }
 
     @Override

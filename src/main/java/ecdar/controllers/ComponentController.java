@@ -824,7 +824,7 @@ public class ComponentController extends ModelController implements Initializabl
     @FXML
     private void modelContainerPressed(final MouseEvent event) {
         event.consume();
-        EcdarController.activeCanvasPresentation.getController().leaveTextAreas();
+        EcdarController.getActiveCanvasPresentation().getController().leaveTextAreas();
 
         final Edge unfinishedEdge = getComponent().getUnfinishedEdge();
 

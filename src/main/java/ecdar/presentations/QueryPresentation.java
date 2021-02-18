@@ -66,13 +66,13 @@ public class QueryPresentation extends AnchorPane {
             query.commentProperty().bind(commentTextField.textProperty());
 
 
-            queryTextField.setOnKeyPressed(EcdarController.activeCanvasPresentation.getController().getLeaveTextAreaKeyHandler(keyEvent -> {
+            queryTextField.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler(keyEvent -> {
                 if (keyEvent.getCode().equals(KeyCode.ENTER)) {
                     runQuery();
                 }
             }));
 
-            commentTextField.setOnKeyPressed(EcdarController.activeCanvasPresentation.getController().getLeaveTextAreaKeyHandler());
+            commentTextField.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
         });
     }
 

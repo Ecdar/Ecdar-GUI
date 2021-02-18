@@ -204,6 +204,14 @@
                             <FontIcon iconLiteral="gmi-check" iconSize="24" fill="black"/>
                         </graphic>
                     </MenuItem>
+
+                    <SeparatorMenuItem/>
+
+                    <MenuItem fx:id="menuBarViewCanvasSplit" text="Split canvas">
+                        <graphic>
+                            <FontIcon iconLiteral="gmi-border-all" iconSize="24" fill="black"/>
+                        </graphic>
+                    </MenuItem>
                 </Menu>
 
                 <Menu text="Options">

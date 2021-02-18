@@ -102,7 +102,7 @@ public class MessageCollectionPresentation extends VBox {
         };
 
         final EventHandler<MouseEvent> onMousePressed = event -> {
-            EcdarController.activeCanvasPresentation.getController().setActiveModel(component);
+            EcdarController.getActiveCanvasPresentation().getController().setActiveModel(component);
         };
 
         headline.setOnMouseEntered(onMouseEntered);

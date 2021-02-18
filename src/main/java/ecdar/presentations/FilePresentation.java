@@ -4,8 +4,6 @@ import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.EcdarSystem;
 import ecdar.abstractions.HighLevelModelObject;
-import ecdar.controllers.CanvasController;
-import ecdar.controllers.EcdarController;
 import ecdar.controllers.FileController;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.utility.colors.Color;
@@ -13,12 +11,15 @@ import com.jfoenix.controls.JFXRippler;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Circle;
 import org.kordamp.ikonli.javafx.FontIcon;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiConsumer;
 
 public class FilePresentation extends AnchorPane {
@@ -102,7 +103,9 @@ public class FilePresentation extends AnchorPane {
 
         // Update the background when hovered
         setOnMouseEntered(event -> {
-            if(EcdarController.activeCanvasPresentation.getController().getActiveModel().equals(model.get())) {
+            ArrayList<HighLevelModelObject> activeComponents = getActiveComponents();
+
+            if(activeComponents.contains(model.get())) {
                 setBackground.accept(color, colorIntensity.next(2));
             } else {
                 setBackground.accept(color, colorIntensity.next());
@@ -110,7 +113,9 @@ public class FilePresentation extends AnchorPane {
             setCursor(Cursor.HAND);
         });
         setOnMouseExited(event -> {
-            if(EcdarController.activeCanvasPresentation.getController().getActiveModel().equals(model.get())) {
+            ArrayList<HighLevelModelObject> activeComponents = getActiveComponents();
+
+            if(activeComponents.contains(model.get())) {
                 setBackground.accept(color, colorIntensity.next(1));
             } else {
                 setBackground.accept(color, colorIntensity);
@@ -118,19 +123,23 @@ public class FilePresentation extends AnchorPane {
             setCursor(Cursor.DEFAULT);
         });
 
-        EcdarController.activeCanvasPresentation.getController().activeComponentProperty().addListener((obs, oldActiveComponent, newActiveComponent) -> {
-            if (newActiveComponent == null) return;
-
-
-            if (newActiveComponent.equals(model.get())) {
-                setBackground.accept(color, colorIntensity.next(2));
-            } else {
-                setBackground.accept(color, colorIntensity);
-            }
-        });
-
         // Update the background initially
         setBackground.accept(color, colorIntensity);
+    }
+
+    private ArrayList<HighLevelModelObject> getActiveComponents() {
+        ArrayList<HighLevelModelObject> components = new ArrayList<>();
+
+        Node canvasPaneFirstChild = Ecdar.getPresentation().getController().canvasPane.getChildren().get(0);
+        if(canvasPaneFirstChild instanceof GridPane) {
+            for (Node child : ((GridPane) canvasPaneFirstChild).getChildren()) {
+                components.add(((CanvasShellPresentation) child).getController().canvasPresentation.getController().getActiveModel());
+            }
+        } else {
+            components.add(((CanvasShellPresentation) canvasPaneFirstChild).getController().canvasPresentation.getController().getActiveModel());
+        }
+
+        return components;
     }
 
     /**
@@ -151,5 +160,40 @@ public class FilePresentation extends AnchorPane {
 
     public HighLevelModelObject getModel() {
         return model.get();
+    }
+
+    /**
+     * Updates the color of the FilePresentation based on whether the component is aactive or not
+     */
+    public void updateColors() {
+        final FontIcon moreInformationIcon = (FontIcon) lookup("#moreInformationIcon");
+
+        final Color color = Color.GREY_BLUE;
+        final Color.Intensity colorIntensity = Color.Intensity.I50;
+
+        final BiConsumer<Color, Color.Intensity> setBackground = (newColor, newIntensity) -> {
+            setBackground(new Background(new BackgroundFill(
+                    newColor.getColor(newIntensity),
+                    CornerRadii.EMPTY,
+                    Insets.EMPTY
+            )));
+
+            setBorder(new Border(new BorderStroke(
+                    newColor.getColor(newIntensity.next(2)),
+                    BorderStrokeStyle.SOLID,
+                    CornerRadii.EMPTY,
+                    new BorderWidths(0, 0, 1, 0)
+            )));
+
+            moreInformationIcon.setFill(newColor.getColor(newIntensity.next(5)));
+        };
+
+        final List<HighLevelModelObject> activeComponents = getActiveComponents();
+
+        if (activeComponents.contains(model.get())) {
+            setBackground.accept(color, colorIntensity.next(1));
+        } else {
+            setBackground.accept(color, colorIntensity);
+        }
     }
 }

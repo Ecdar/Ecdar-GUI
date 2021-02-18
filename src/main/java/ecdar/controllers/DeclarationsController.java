@@ -41,20 +41,20 @@ public class DeclarationsController implements Initializable {
      */
     private void initializeWidthAndHeight() {
         // Fetch width and height of canvas and update
-        root.setMinWidth(EcdarController.activeCanvasPresentation.getController().getWidthProperty().doubleValue());
-        canvasHeight = EcdarController.activeCanvasPresentation.getController().getHeightProperty().doubleValue();
-        updateOffset(EcdarController.activeCanvasPresentation.getController().getInsetShouldShow().get());
+        root.setMinWidth(EcdarController.getActiveCanvasPresentation().getController().getWidthProperty().doubleValue());
+        canvasHeight = EcdarController.getActiveCanvasPresentation().getController().getHeightProperty().doubleValue();
+        updateOffset(EcdarController.getActiveCanvasPresentation().getController().getInsetShouldShow().get());
         updateHeight();
 
-        EcdarController.activeCanvasPresentation.getController().getWidthProperty().addListener((observable, oldValue, newValue) -> {
+        EcdarController.getActiveCanvasPresentation().getController().getWidthProperty().addListener((observable, oldValue, newValue) -> {
             root.setMinWidth(newValue.doubleValue());
             root.setMaxWidth(newValue.doubleValue());
         });
-        EcdarController.activeCanvasPresentation.getController().getHeightProperty().addListener((observable, oldValue, newValue) -> {
+        EcdarController.getActiveCanvasPresentation().getController().getHeightProperty().addListener((observable, oldValue, newValue) -> {
             canvasHeight = newValue.doubleValue();
             updateHeight();
         });
-        EcdarController.activeCanvasPresentation.getController().getInsetShouldShow().addListener((observable, oldValue, newValue) -> {
+        EcdarController.getActiveCanvasPresentation().getController().getInsetShouldShow().addListener((observable, oldValue, newValue) -> {
             updateOffset(newValue);
             updateHeight();
         });
@@ -102,7 +102,7 @@ public class DeclarationsController implements Initializable {
      * Updates the height of the view.
      */
     private void updateHeight() {
-        final double value = canvasHeight - EcdarController.activeCanvasPresentation.getController().DECLARATION_Y_MARGIN - offSet;
+        final double value = canvasHeight - EcdarController.getActiveCanvasPresentation().getController().DECLARATION_Y_MARGIN - offSet;
 
         root.setMinHeight(value);
         root.setMaxHeight(value);
