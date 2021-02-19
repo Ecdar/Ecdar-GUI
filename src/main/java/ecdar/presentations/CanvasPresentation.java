@@ -5,6 +5,7 @@ import ecdar.controllers.EcdarController;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.helpers.CanvasDragHelper;
 import ecdar.utility.helpers.MouseTrackable;
+import ecdar.utility.helpers.SelectHelper;
 import ecdar.utility.keyboard.Keybind;
 import ecdar.utility.keyboard.KeyboardTracker;
 import ecdar.utility.mouse.MouseTracker;
@@ -21,7 +22,7 @@ import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
 
 public class CanvasPresentation extends Pane implements MouseTrackable {
-    public static MouseTracker mouseTracker;
+    public MouseTracker mouseTracker;
 
     private final DoubleProperty x = new SimpleDoubleProperty(0);
     private final DoubleProperty y = new SimpleDoubleProperty(0);
@@ -45,6 +46,11 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
 
         controller.zoomHelper.setGrid(this.grid);
         controller.zoomHelper.setCanvas(this);
+
+        mouseTracker.registerOnMousePressedEventHandler(event -> {
+            // Deselect all elements
+            SelectHelper.clearSelectedElements();
+        });
     }
 
     private void initializeGrid() {

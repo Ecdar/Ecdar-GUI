@@ -100,11 +100,6 @@ public class CanvasController implements Initializable {
         root.widthProperty().addListener((observable, oldValue, newValue) -> width.setValue(newValue));
         root.heightProperty().addListener((observable, oldValue, newValue) -> height.setValue(newValue));
 
-        CanvasPresentation.mouseTracker.registerOnMousePressedEventHandler(event -> {
-            // Deselect all elements
-            SelectHelper.clearSelectedElements();
-        });
-
         activeModel.addListener((obs, oldModel, newModel) -> onActiveModelChanged(oldModel, newModel));
 
         leaveTextAreas = () -> root.requestFocus();

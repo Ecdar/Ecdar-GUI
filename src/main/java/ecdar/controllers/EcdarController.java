@@ -171,11 +171,7 @@ public class EcdarController implements Initializable {
     private double tabPanePreviousY = 0;
     public boolean shouldISkipOpeningTheMessagesContainer = true;
 
-    private static final ObjectProperty<CanvasPresentation> activeCanvasPresentation = new SimpleObjectProperty<>();
-
-    public EcdarController() {
-        activeCanvasPresentation.set(new CanvasPresentation());
-    }
+    private static final ObjectProperty<CanvasPresentation> activeCanvasPresentation = new SimpleObjectProperty<>(new CanvasPresentation());
 
     public static void runReachabilityAnalysis() {
         if (!reachabilityServiceEnabled) return;

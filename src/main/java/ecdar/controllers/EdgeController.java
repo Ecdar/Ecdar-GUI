@@ -446,13 +446,13 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                             dropDownMenu.hide();
                         });
 
-                        DropDownMenu.x = CanvasPresentation.mouseTracker.getGridX();
-                        DropDownMenu.y = CanvasPresentation.mouseTracker.getGridY();
+                        DropDownMenu.x = EcdarController.getActiveCanvasPresentation().mouseTracker.getGridX();
+                        DropDownMenu.y = EcdarController.getActiveCanvasPresentation().mouseTracker.getGridY();
                         dropDownMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX(), event.getY());
 
                     } else if ((event.isShiftDown() && event.isPrimaryButtonDown()) || event.isMiddleButtonDown()) {
-                        final double nailX = CanvasPresentation.mouseTracker.gridXProperty().subtract(getComponent().getBox().getXProperty()).doubleValue();
-                        final double nailY = CanvasPresentation.mouseTracker.gridYProperty().subtract(getComponent().getBox().getYProperty()).doubleValue();
+                        final double nailX = EcdarController.getActiveCanvasPresentation().mouseTracker.gridXProperty().subtract(getComponent().getBox().getXProperty()).doubleValue();
+                        final double nailY = EcdarController.getActiveCanvasPresentation().mouseTracker.gridYProperty().subtract(getComponent().getBox().getYProperty()).doubleValue();
 
                         final Nail newNail = new Nail(nailX, nailY);
 

@@ -24,7 +24,7 @@ public class CanvasShellController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        root.addEventFilter(MouseEvent.MOUSE_ENTERED, event -> EcdarController.setActiveCanvasPresentation(this.canvasPresentation));
+        root.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> EcdarController.setActiveCanvasPresentation(this.canvasPresentation));
     }
 
     @FXML

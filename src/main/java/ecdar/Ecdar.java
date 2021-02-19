@@ -4,7 +4,6 @@ import ecdar.abstractions.Component;
 import ecdar.abstractions.Project;
 import ecdar.backend.BackendHelper;
 import ecdar.code_analysis.CodeAnalysis;
-import ecdar.controllers.CanvasController;
 import ecdar.controllers.EcdarController;
 import ecdar.presentations.BackgroundThreadPresentation;
 import ecdar.presentations.EcdarPresentation;
