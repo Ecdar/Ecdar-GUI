@@ -285,11 +285,11 @@ public class ComponentController extends ModelController implements Initializabl
                 final Location newLocation = new Location();
                 newLocation.initialize();
 
-                double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
+                double x = DropDownMenu.x / EcdarController.getActiveCanvasPresentation().getScaleX() - LocationPresentation.RADIUS / 2;
                 x = Grid.snap(x);
                 newLocation.setX(x);
 
-                double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
+                double y = DropDownMenu.y / EcdarController.getActiveCanvasPresentation().getScaleY() - LocationPresentation.RADIUS / 2;
                 y = Grid.snap(y);
                 newLocation.setY(y);
 
@@ -863,10 +863,10 @@ public class ComponentController extends ModelController implements Initializabl
 
         } else if (event.isSecondaryButtonDown()) {
             if (unfinishedEdge == null) {
-                contextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX(), event.getY());
+                contextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX() * EcdarController.getActiveCanvasPresentation().getScaleX(), event.getY() * EcdarController.getActiveCanvasPresentation().getScaleY());
             } else {
                 initializeFinishEdgeContextMenu(unfinishedEdge);
-                finishEdgeContextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX(), event.getY());
+                finishEdgeContextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX() * EcdarController.getActiveCanvasPresentation().getScaleX(), event.getY() * EcdarController.getActiveCanvasPresentation().getScaleY());
             }
         } else if (event.isPrimaryButtonDown()) {
             // We are drawing an edge
