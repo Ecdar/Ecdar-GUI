@@ -26,6 +26,7 @@ public class FilePresentation extends AnchorPane {
     private final SimpleObjectProperty<HighLevelModelObject> model = new SimpleObjectProperty<>(null);
 
     private final FileController controller;
+    private boolean isActive = false;
 
     public FilePresentation(final HighLevelModelObject model) {
         controller = new EcdarFXMLLoader().loadAndGetController("FilePresentation.fxml", this);
@@ -103,9 +104,7 @@ public class FilePresentation extends AnchorPane {
 
         // Update the background when hovered
         setOnMouseEntered(event -> {
-            ArrayList<HighLevelModelObject> activeComponents = getActiveComponents();
-
-            if(activeComponents.contains(model.get())) {
+            if(isActive) {
                 setBackground.accept(color, colorIntensity.next(2));
             } else {
                 setBackground.accept(color, colorIntensity.next());
@@ -113,9 +112,7 @@ public class FilePresentation extends AnchorPane {
             setCursor(Cursor.HAND);
         });
         setOnMouseExited(event -> {
-            ArrayList<HighLevelModelObject> activeComponents = getActiveComponents();
-
-            if(activeComponents.contains(model.get())) {
+            if(isActive) {
                 setBackground.accept(color, colorIntensity.next(1));
             } else {
                 setBackground.accept(color, colorIntensity);
@@ -189,11 +186,16 @@ public class FilePresentation extends AnchorPane {
         };
 
         final List<HighLevelModelObject> activeComponents = getActiveComponents();
+        setActive(activeComponents.contains(model.get()));
 
-        if (activeComponents.contains(model.get())) {
+        if (isActive) {
             setBackground.accept(color, colorIntensity.next(1));
         } else {
             setBackground.accept(color, colorIntensity);
         }
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
     }
 }

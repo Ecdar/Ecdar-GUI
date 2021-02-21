@@ -577,9 +577,6 @@ public class EcdarController implements Initializable {
                 menuBarViewCanvasSplit.setText("Merge canvases");
             }
         });
-        Ecdar.getProject().getComponents().addListener((ListChangeListener.Change<? extends Component> listener) -> {
-            menuBarViewCanvasSplit.setDisable(listener.getList().size() < 4);
-        });
     }
 
     /**
@@ -820,7 +817,7 @@ public class EcdarController implements Initializable {
         canvasGrid.getRowConstraints().add(row1);
 
         ObservableList<Component> components = Ecdar.getProject().getComponents();
-        int currentCompNum = 0;
+        int currentCompNum = 0, numComponents = components.size();
 
         // Add the canvasShellPresentation at the top-left
         CanvasShellPresentation canvasShellPresentation = initializeNewCanvasShellPresentation();
@@ -835,18 +832,19 @@ public class EcdarController implements Initializable {
         canvasGrid.add(canvasShellPresentation, 1, 0);
 
         // Update the startIndex for the next canvasShellPresentation
-        for (int i = 0; i < components.size(); i++)
-            if (canvasShellPresentation.getController().canvasPresentation.getController().getActiveModel().equals(components.get(i))) {
+        for (int i = 0; i < numComponents; i++) {
+            if (canvasShellPresentation.getController().canvasPresentation.getController().getActiveModel() != null && canvasShellPresentation.getController().canvasPresentation.getController().getActiveModel().equals(components.get(i))) {
                 currentCompNum = i + 1;
             }
+        }
 
         // Add the canvasShellPresentation at the bottom-left
         canvasShellPresentation = initializeNewCanvasShellPresentationWithActiveComponent(components, currentCompNum);
         canvasGrid.add(canvasShellPresentation, 0, 1);
 
         // Update the startIndex for the next canvasShellPresentation
-        for (int i = 0; i < components.size(); i++)
-            if (canvasShellPresentation.getController().canvasPresentation.getController().getActiveModel().equals(components.get(i))) {
+        for (int i = 0; i < numComponents; i++)
+            if (canvasShellPresentation.getController().canvasPresentation.getController().getActiveModel() != null && canvasShellPresentation.getController().canvasPresentation.getController().getActiveModel().equals(components.get(i))) {
                 currentCompNum = i + 1;
             }
 
@@ -869,7 +867,8 @@ public class EcdarController implements Initializable {
         CanvasShellPresentation canvasShellPresentation = initializeNewCanvasShellPresentation();
 
         int numComponents = components.size();
-        for(int currentCompNum = startIndex; currentCompNum <= numComponents; currentCompNum++){
+        canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(null);
+        for(int currentCompNum = startIndex; currentCompNum < numComponents; currentCompNum++){
             if(getActiveCanvasPresentation().getController().getActiveModel() != components.get(currentCompNum)) {
                 canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(components.get(currentCompNum));
                 break;
