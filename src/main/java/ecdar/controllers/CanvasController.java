@@ -7,7 +7,6 @@ import ecdar.abstractions.EcdarSystem;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.mutation.MutationTestPlanPresentation;
 import ecdar.presentations.*;
-import ecdar.utility.helpers.SelectHelper;
 import ecdar.utility.helpers.ZoomHelper;
 import javafx.application.Platform;
 import javafx.beans.property.*;

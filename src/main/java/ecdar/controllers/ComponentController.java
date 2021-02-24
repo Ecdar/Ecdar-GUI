@@ -694,9 +694,6 @@ public class ComponentController extends ModelController implements Initializabl
             }
         };
 
-        if (locationListChangeListenerMap.containsKey(newComponent)) {
-            newComponent.getLocations().removeListener(locationListChangeListenerMap.get(newComponent));
-        }
         final ListChangeListener<Location> locationListChangeListener = c -> {
             if (c.next()) {
                 // Locations are added to the component
@@ -722,7 +719,10 @@ public class ComponentController extends ModelController implements Initializabl
             }
         };
         newComponent.getLocations().addListener(locationListChangeListener);
-        locationListChangeListenerMap.put(newComponent, locationListChangeListener);
+
+        if (!locationListChangeListenerMap.containsKey(newComponent)) {
+            locationListChangeListenerMap.put(newComponent, locationListChangeListener);
+        }
 
         newComponent.getLocations().forEach(handleAddedLocation);
     }
