@@ -79,6 +79,10 @@ public class ZoomHelper {
      * Zoom in to fit the component on screen
      */
     public void zoomToFit() {
+        if(EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation == null) {
+            resetZoom();
+            return;
+        }
         double newScale = Math.min(canvasPresentation.getWidth() / EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation.getWidth() - 0.1, canvasPresentation.getHeight() / EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation.getHeight() - 0.2); //0.1 for width and 0.2 for height added for margin
 
         //Scale canvas
