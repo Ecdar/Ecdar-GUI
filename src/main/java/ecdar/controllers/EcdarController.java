@@ -459,7 +459,7 @@ public class EcdarController implements Initializable {
 
         initializeNewMutationTestObjectMenuItem();
 
-        initializeFileExportAsPng(getActiveCanvasPresentation());
+        initializeFileExportAsPng();
 
         initializeEditMenu();
 
@@ -723,7 +723,7 @@ public class EcdarController implements Initializable {
     /**
      * Initializes button for exporting as png.
      */
-    private void initializeFileExportAsPng(CanvasPresentation canvas) {
+    private void initializeFileExportAsPng() {
         menuBarFileExportAsPng.setAccelerator(new KeyCodeCombination(KeyCode.L, KeyCombination.SHORTCUT_DOWN));
         menuBarFileExportAsPng.setOnAction(event -> {
             // If there is no active component or system
@@ -731,6 +731,8 @@ public class EcdarController implements Initializable {
                 Ecdar.showToast("No component or system to export.");
                 return;
             }
+
+            CanvasPresentation canvas = getActiveCanvasPresentation();
 
             // If there was an active component, hide button for toggling declarations
             final ComponentPresentation presentation = canvas.getController().getActiveComponentPresentation();
@@ -749,6 +751,8 @@ public class EcdarController implements Initializable {
         });
 
         menuBarFileExportAsPngNoBorder.setOnAction(event -> {
+            CanvasPresentation canvas = getActiveCanvasPresentation();
+
             final ComponentPresentation presentation = canvas.getController().getActiveComponentPresentation();
 
             //If there is no active component
@@ -910,11 +914,12 @@ public class EcdarController implements Initializable {
      */
     private WritableImage scaleAndTakeSnapshot(CanvasPresentation canvas) {
         final WritableImage image;
-        canvas.setScaleX(4.0);
-        canvas.setScaleY(4.0);
+        Double zoomLevel = canvas.getController().zoomHelper.getZoomLevel();
+        canvas.getController().zoomHelper.zoomToFit();
+
         image = canvas.snapshot(new SnapshotParameters(), null);
-        canvas.setScaleX(1.0);
-        canvas.setScaleY(1.0);
+
+        canvas.getController().zoomHelper.setZoomLevel(zoomLevel);
         return image;
     }
 
@@ -927,7 +932,7 @@ public class EcdarController implements Initializable {
 
         final FileChooser filePicker = new FileChooser();
         filePicker.setTitle("Export png");
-        filePicker.setInitialFileName(name);
+        filePicker.setInitialFileName(name + ".png");
 
         // Set initial directory to project directory (if saved) or user.home (otherwise)
         String directory = Ecdar.projectDirectory.get();

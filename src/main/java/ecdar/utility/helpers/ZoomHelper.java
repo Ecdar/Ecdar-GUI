@@ -2,7 +2,6 @@ package ecdar.utility.helpers;
 
 import ecdar.controllers.EcdarController;
 import ecdar.presentations.CanvasPresentation;
-import ecdar.presentations.CanvasShellPresentation;
 import ecdar.presentations.Grid;
 
 public class ZoomHelper {
@@ -20,6 +19,16 @@ public class ZoomHelper {
 
         canvasPresentation.heightProperty().addListener((observable -> centerComponentAndUpdateGrid(canvasPresentation.scaleXProperty().doubleValue())));
         canvasPresentation.widthProperty().addListener((observable -> centerComponentAndUpdateGrid(canvasPresentation.scaleXProperty().doubleValue())));
+    }
+
+    public Double getZoomLevel() {
+        return canvasPresentation.getScaleX();
+    }
+
+    public void setZoomLevel(Double zoomLevel) {
+        canvasPresentation.setScaleX(zoomLevel);
+        canvasPresentation.setScaleY(zoomLevel);
+        centerComponentAndUpdateGrid(zoomLevel);
     }
 
     public void setGrid(Grid newGrid) {
@@ -96,7 +105,7 @@ public class ZoomHelper {
      * Method for centering the active component on screen and redrawing the grid to fill the screen
      * @param newScale the scale in which to redraw the grid and place the component based on
      */
-    public void centerComponentAndUpdateGrid(double newScale){
+    private void centerComponentAndUpdateGrid(double newScale){
         // Check added to avoid NullPointerException
         if(EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation != null){
             // Calculate the new x and y offsets needed to center the component
