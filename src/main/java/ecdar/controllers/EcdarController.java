@@ -833,6 +833,7 @@ public class EcdarController implements Initializable {
         // Add the canvasShellPresentation at the top-right
         canvasShellPresentation = initializeNewCanvasShellPresentationWithActiveComponent(components, currentCompNum);
         canvasShellPresentation.getController().toolbar.setTranslateY(48);
+        canvasShellPresentation.setOpacity(0.75);
         canvasGrid.add(canvasShellPresentation, 1, 0);
 
         // Update the startIndex for the next canvasShellPresentation
@@ -844,6 +845,7 @@ public class EcdarController implements Initializable {
 
         // Add the canvasShellPresentation at the bottom-left
         canvasShellPresentation = initializeNewCanvasShellPresentationWithActiveComponent(components, currentCompNum);
+        canvasShellPresentation.setOpacity(0.75);
         canvasGrid.add(canvasShellPresentation, 0, 1);
 
         // Update the startIndex for the next canvasShellPresentation
@@ -854,6 +856,7 @@ public class EcdarController implements Initializable {
 
         // Add the canvasShellPresentation at the bottom-right
         canvasShellPresentation = initializeNewCanvasShellPresentationWithActiveComponent(components, currentCompNum);
+        canvasShellPresentation.setOpacity(0.75);
         canvasGrid.add(canvasShellPresentation, 1, 1);
 
         canvasPane.getChildren().add(canvasGrid);

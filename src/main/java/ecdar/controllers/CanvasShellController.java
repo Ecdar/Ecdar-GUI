@@ -1,6 +1,7 @@
 package ecdar.controllers;
 
 import com.jfoenix.controls.JFXRippler;
+import ecdar.Ecdar;
 import ecdar.presentations.CanvasPresentation;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -23,9 +24,7 @@ public class CanvasShellController implements Initializable {
     public CanvasPresentation canvasPresentation;
 
     @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        root.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> EcdarController.setActiveCanvasPresentation(this.canvasPresentation));
-    }
+    public void initialize(URL location, ResourceBundle resources) {}
 
     @FXML
     private void zoomInClicked() {
