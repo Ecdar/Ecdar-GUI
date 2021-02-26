@@ -55,7 +55,6 @@ public class jEcdarQuotientThread extends BackendThread {
                         "      \"urgency\": \"NORMAL\",\n" +
                         "      \"x\": 130.0,\n" +
                         "      \"y\": 100.0,\n" +
-                        "      \"color\": \"5\",\n" +
                         "      \"nicknameX\": 30.0,\n" +
                         "      \"nicknameY\": -10.0,\n" +
                         "      \"invariantX\": 30.0,\n" +
@@ -69,7 +68,6 @@ public class jEcdarQuotientThread extends BackendThread {
                         "      \"urgency\": \"NORMAL\",\n" +
                         "      \"x\": 310.0,\n" +
                         "      \"y\": 100.0,\n" +
-                        "      \"color\": \"5\",\n" +
                         "      \"nicknameX\": 30.0,\n" +
                         "      \"nicknameY\": -10.0,\n" +
                         "      \"invariantX\": 50.0,\n" +
@@ -83,7 +81,6 @@ public class jEcdarQuotientThread extends BackendThread {
                         "      \"urgency\": \"NORMAL\",\n" +
                         "      \"x\": 310.0,\n" +
                         "      \"y\": 300.0,\n" +
-                        "      \"color\": \"5\",\n" +
                         "      \"nicknameX\": 30.0,\n" +
                         "      \"nicknameY\": -10.0,\n" +
                         "      \"invariantX\": 30.0,\n" +
@@ -97,7 +94,6 @@ public class jEcdarQuotientThread extends BackendThread {
                         "      \"urgency\": \"NORMAL\",\n" +
                         "      \"x\": 130.0,\n" +
                         "      \"y\": 300.0,\n" +
-                        "      \"color\": \"5\",\n" +
                         "      \"nicknameX\": 30.0,\n" +
                         "      \"nicknameY\": -10.0,\n" +
                         "      \"invariantX\": 20.0,\n" +
@@ -322,7 +318,6 @@ public class jEcdarQuotientThread extends BackendThread {
                         "  \"y\": 5.0,\n" +
                         "  \"width\": 450.0,\n" +
                         "  \"height\": 400.0,\n" +
-                        "  \"color\": \"5\",\n" +
                         "  \"includeInPeriodicCheck\": false\n" +
                         "}");
 

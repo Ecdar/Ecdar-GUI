@@ -609,6 +609,12 @@ public class Component extends HighLevelModelObject implements Boxed {
         if (enabledColor != null) {
             setColorIntensity(enabledColor.intensity);
             setColor(enabledColor.color);
+        } else {
+            setRandomColor();
+            for(Location loc : locations) {
+                loc.setColor(this.getColor());
+                loc.setColorIntensity(this.getColorIntensity());
+            }
         }
 
         if(json.has(INCLUDE_IN_PERIODIC_CHECK)) {
