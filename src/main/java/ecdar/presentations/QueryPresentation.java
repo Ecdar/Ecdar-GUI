@@ -2,16 +2,19 @@ package ecdar.presentations;
 
 import com.jfoenix.controls.*;
 import ecdar.Ecdar;
-import ecdar.abstractions.Query;
-import ecdar.abstractions.QueryState;
+import ecdar.abstractions.*;
 import ecdar.backend.BackendDriverManager;
 import ecdar.backend.BackendHelper;
 import ecdar.backend.IBackendDriver;
 import ecdar.backend.ReveaalDriver;
 import ecdar.controllers.CanvasController;
+import ecdar.controllers.QueryController;
+import ecdar.mutation.models.MutationTestPlan;
+import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
 import javafx.application.Platform;
 import javafx.beans.binding.When;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
@@ -33,16 +36,16 @@ import static javafx.scene.paint.Color.*;
 
 public class QueryPresentation extends AnchorPane {
 
-    private final Query query;
     private final Tooltip tooltip = new Tooltip();
     private JFXRippler actionButton;
     private Tooltip swapBackendButtonTooltip;
     private Label currentBackendLabel;
 
-    public QueryPresentation(final Query query) {
-        new EcdarFXMLLoader().loadAndGetController("QueryPresentation.fxml", this);
+    private final QueryController controller;
 
-        this.query = query;
+    public QueryPresentation(final Query query) {
+        controller = new EcdarFXMLLoader().loadAndGetController("QueryPresentation.fxml", this);
+        controller.setQuery(query);
 
         initializeStateIndicator();
         initializeProgressIndicator();
@@ -58,11 +61,11 @@ public class QueryPresentation extends AnchorPane {
             final JFXTextField queryTextField = (JFXTextField) lookup("#query");
             final JFXTextField commentTextField = (JFXTextField) lookup("#comment");
 
-            queryTextField.setText(query.getQuery());
-            commentTextField.setText(query.getComment());
+            queryTextField.setText(controller.getQuery().getQuery());
+            commentTextField.setText(controller.getQuery().getComment());
 
-            query.queryProperty().bind(queryTextField.textProperty());
-            query.commentProperty().bind(commentTextField.textProperty());
+            controller.getQuery().queryProperty().bind(queryTextField.textProperty());
+            controller.getQuery().commentProperty().bind(commentTextField.textProperty());
 
 
             queryTextField.setOnKeyPressed(CanvasController.getLeaveTextAreaKeyHandler(keyEvent -> {
@@ -88,21 +91,21 @@ public class QueryPresentation extends AnchorPane {
 
             final DropDownMenu dropDownMenu = new DropDownMenu(detailsButton);
 
-            dropDownMenu.addToggleableListElement("Run Periodically", query.isPeriodicProperty(), event -> {
+            dropDownMenu.addToggleableListElement("Run Periodically", controller.getQuery().isPeriodicProperty(), event -> {
                 // Toggle the property
-                query.setIsPeriodic(!query.isPeriodic());
+                controller.getQuery().setIsPeriodic(!controller.getQuery().isPeriodic());
                 dropDownMenu.hide();
             });
             dropDownMenu.addSpacerElement();
             dropDownMenu.addClickableListElement("Clear Status", event -> {
                 // Clear the state
-                query.setQueryState(QueryState.UNKNOWN);
+                controller.getQuery().setQueryState(QueryState.UNKNOWN);
                 dropDownMenu.hide();
             });
             dropDownMenu.addSpacerElement();
             dropDownMenu.addClickableListElement("Delete", event -> {
                 // Remove the query
-                Ecdar.getProject().getQueries().remove(query);
+                Ecdar.getProject().getQueries().remove(controller.getQuery());
                 dropDownMenu.hide();
             });
             detailsButton.getChildren().get(0).setOnMousePressed(event -> {
@@ -134,16 +137,16 @@ public class QueryPresentation extends AnchorPane {
             };
 
             // Update the icon initially
-            updateIcon.accept(query.getQueryState());
+            updateIcon.accept(controller.getQuery().getQueryState());
 
             // Update the icon when ever the query state is updated
-            query.queryStateProperty().addListener((observable, oldValue, newValue) -> updateIcon.accept(newValue));
+            controller.getQuery().queryStateProperty().addListener((observable, oldValue, newValue) -> updateIcon.accept(newValue));
 
             actionButton.setMaskType(JFXRippler.RipplerMask.CIRCLE);
 
             actionButton.getChildren().get(0).setOnMousePressed(event -> {
-                if (query.getQueryState().equals(QueryState.RUNNING)) {
-                    query.cancel();
+                if (controller.getQuery().getQueryState().equals(QueryState.RUNNING)) {
+                    controller.getQuery().cancel();
                 } else {
                     runQuery();
                 }
@@ -157,7 +160,7 @@ public class QueryPresentation extends AnchorPane {
             final JFXSpinner progressIndicator = (JFXSpinner) lookup("#progressIndicator");
 
             // If the query is running show the indicator, otherwise hide it
-            progressIndicator.visibleProperty().bind(new When(query.queryStateProperty().isEqualTo(QueryState.RUNNING)).then(true).otherwise(false));
+            progressIndicator.visibleProperty().bind(new When(controller.getQuery().queryStateProperty().isEqualTo(QueryState.RUNNING)).then(true).otherwise(false));
         });
     }
 
@@ -174,7 +177,7 @@ public class QueryPresentation extends AnchorPane {
                 } else if (queryState.getStatusCode() == 3) {
                     this.tooltip.setText("The query has not been executed yet");
                 } else {
-                    this.tooltip.setText(query.getCurrentErrors());
+                    this.tooltip.setText(controller.getQuery().getCurrentErrors());
                 }
             };
 
@@ -209,13 +212,13 @@ public class QueryPresentation extends AnchorPane {
             };
 
             // Update the initial color
-            updateStateIndicator.accept(query.getQueryState());
+            updateStateIndicator.accept(controller.getQuery().getQueryState());
 
             // Ensure that the color is updated when ever the query state is updated
-            query.queryStateProperty().addListener((observable, oldValue, newValue) -> updateStateIndicator.accept(newValue));
+            controller.getQuery().queryStateProperty().addListener((observable, oldValue, newValue) -> updateStateIndicator.accept(newValue));
 
             // Ensure that the tooltip is updated when new errors are added
-            query.errors().addListener((observable, oldValue, newValue) -> updateToolTip.accept(query.getQueryState()));
+            controller.getQuery().errors().addListener((observable, oldValue, newValue) -> updateToolTip.accept(controller.getQuery().getQueryState()));
 
             Tooltip.install(stateIndicator, this.tooltip);
         });
@@ -229,7 +232,7 @@ public class QueryPresentation extends AnchorPane {
             final Consumer<String> changeTitledPaneVisibility = (queryString) -> updateTitlePaneVisibility(inputOutputPane, queryString);
 
             // Run the consumer to ensure that the input/output pane is displayed for existing refinement queries
-            changeTitledPaneVisibility.accept(query.getQuery());
+            changeTitledPaneVisibility.accept(controller.getQuery().getQuery());
 
             // Bind the expand icon to the expand property of the pane
             inputOutputPane.expandedProperty().addListener((observable, oldValue, newValue) -> {
@@ -245,12 +248,12 @@ public class QueryPresentation extends AnchorPane {
             final JFXTextField queryTextField = (JFXTextField) lookup("#query");
             queryTextField.focusedProperty().addListener((observable, oldValue, newValue) -> {
                 if (!newValue) {
-                    changeTitledPaneVisibility.accept(query.getQuery());
+                    changeTitledPaneVisibility.accept(controller.getQuery().getQuery());
                 }
             });
 
             // Change visibility of input/output Pane when backend is changed for the query
-            lookup("#swapBackendButton").setOnMousePressed(event -> changeTitledPaneVisibility.accept(query.getQuery()));
+            lookup("#swapBackendButton").setOnMousePressed(event -> changeTitledPaneVisibility.accept(controller.getQuery().getQuery()));
 
             Platform.runLater(() -> addIgnoredInputOutputsFromQuery(inputOutputPane));
         });
@@ -318,19 +321,19 @@ public class QueryPresentation extends AnchorPane {
             swapBackendButton.setOnMousePressed(event -> {
                 // Set the backend to the one not currently used and update GUI
                 final BackendHelper.BackendNames newBackend;
-                if (this.query.getCurrentBackend().equals(BackendHelper.BackendNames.jEcdar)) {
+                if (this.controller.getQuery().getCurrentBackend().equals(BackendHelper.BackendNames.jEcdar)) {
                     newBackend = BackendHelper.BackendNames.Reveaal;
                 } else {
                     newBackend = BackendHelper.BackendNames.jEcdar;
                 }
 
-                this.query.setCurrentBackend(newBackend);
+                this.controller.getQuery().setCurrentBackend(newBackend);
                 setSwapBackendTooltipAndLabel(newBackend);
-                updateTitlePaneVisibility(inputOutputPane, query.getQuery());
+                updateTitlePaneVisibility(inputOutputPane, controller.getQuery().getQuery());
             });
 
             swapBackendButtonTooltip = new Tooltip();
-            setSwapBackendTooltipAndLabel(this.query.getCurrentBackend());
+            setSwapBackendTooltipAndLabel(this.controller.getQuery().getCurrentBackend());
             JFXTooltip.install(swapBackendButton, swapBackendButtonTooltip);
         });
     }
@@ -339,7 +342,7 @@ public class QueryPresentation extends AnchorPane {
         final IBackendDriver backendDriver;
 
         // Check if the query is a refinement and that the engine is set to Reveaal
-        if (queryString.startsWith("refinement") && (backendDriver = BackendDriverManager.getInstance(this.query.getCurrentBackend())) instanceof ReveaalDriver) {
+        if (queryString.startsWith("refinement") && (backendDriver = BackendDriverManager.getInstance(this.controller.getQuery().getCurrentBackend())) instanceof ReveaalDriver) {
             initiateResetInputOutputButton(inputOutputPane, (ReveaalDriver) backendDriver);
 
             // Make the input/output pane visible
@@ -355,20 +358,20 @@ public class QueryPresentation extends AnchorPane {
         final VBox outputBox = (VBox) inputOutputPane.lookup("#outputBox");
 
         // Get inputs and outputs
-        Pair<ArrayList<String>, ArrayList<String>> inputOutputs = backendDriver.getInputOutputs(query.getQuery());
+        Pair<ArrayList<String>, ArrayList<String>> inputOutputs = backendDriver.getInputOutputs(controller.getQuery().getQuery());
 
         if (shouldResetSelections) {
             // Reset selections for ignored inputs and outputs
             clearIgnoredInputsAndOutputs(inputBox, outputBox);
         }
 
-        addNewElementsToMap(inputOutputs.getKey(), query.ignoredInputs, inputBox);
-        addNewElementsToMap(inputOutputs.getValue(), query.ignoredOutputs, outputBox);
+        addNewElementsToMap(inputOutputs.getKey(), controller.getQuery().ignoredInputs, inputBox);
+        addNewElementsToMap(inputOutputs.getValue(), controller.getQuery().ignoredOutputs, outputBox);
     }
 
     private void clearIgnoredInputsAndOutputs(VBox inputBox, VBox outputBox) {
-        query.ignoredInputs.clear();
-        query.ignoredOutputs.clear();
+        controller.getQuery().ignoredInputs.clear();
+        controller.getQuery().ignoredOutputs.clear();
 
         Platform.runLater(() -> {
             inputBox.getChildren().clear();
@@ -449,13 +452,13 @@ public class QueryPresentation extends AnchorPane {
         final VBox outputBox = (VBox) inputOutputPane.lookup("#outputBox");
 
         // Add inputs as toggles in the GUI
-        for (Map.Entry<String, Boolean> entry : query.ignoredInputs.entrySet()) {
-            addInputOrOutput(entry.getKey(), entry.getValue(), query.ignoredInputs, inputBox);
+        for (Map.Entry<String, Boolean> entry : controller.getQuery().ignoredInputs.entrySet()) {
+            addInputOrOutput(entry.getKey(), entry.getValue(), controller.getQuery().ignoredInputs, inputBox);
         }
 
         // Add outputs as toggles in the GUI
-        for (Map.Entry<String, Boolean> entry : query.ignoredOutputs.entrySet()) {
-            addInputOrOutput(entry.getKey(), entry.getValue(), query.ignoredOutputs, outputBox);
+        for (Map.Entry<String, Boolean> entry : controller.getQuery().ignoredOutputs.entrySet()) {
+            addInputOrOutput(entry.getKey(), entry.getValue(), controller.getQuery().ignoredOutputs, outputBox);
         }
     }
 
@@ -472,6 +475,6 @@ public class QueryPresentation extends AnchorPane {
     }
 
     private void runQuery() {
-        query.run();
+        controller.getQuery().run();
     }
 }

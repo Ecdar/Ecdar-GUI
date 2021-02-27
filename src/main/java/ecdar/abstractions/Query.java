@@ -32,6 +32,7 @@ public class Query implements Serializable {
     private BackendHelper.BackendNames currentBackend;
     private BackendThread backendThread;
     private Consumer<Boolean> runQuery;
+    private QueryType type;
 
     public Query(final String query, final String comment, final QueryState queryState) {
         this.query.set(query);
@@ -104,6 +105,14 @@ public class Query implements Serializable {
 
     public void setCurrentBackend(BackendHelper.BackendNames currentBackend) {
         this.currentBackend = currentBackend;
+    }
+
+    public void setType(QueryType type) {
+        this.type = type;
+    }
+
+    public QueryType getType() {
+        return this.type;
     }
 
     private Engine engine = null;
