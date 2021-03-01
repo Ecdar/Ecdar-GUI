@@ -27,7 +27,7 @@ import java.util.function.BiConsumer;
 public class QueryController implements Initializable {
     public JFXRippler moreInformation;
     private Query query;
-    private final Map<QueryType, SimpleBooleanProperty> queryTypeListElementActivations = new HashMap<>();
+    private final Map<QueryType, SimpleBooleanProperty> queryTypeListElementsSelectedState = new HashMap<>();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -63,7 +63,7 @@ public class QueryController implements Initializable {
 
         final DropDownMenu moreInformationDropDown = new DropDownMenu(moreInformation);
 
-        moreInformationDropDown.addListElement("Query type");
+        moreInformationDropDown.addListElement("Query Type");
 
         addQueryTypeListElement(QueryType.REFINEMENT, moreInformationDropDown);
         addQueryTypeListElement(QueryType.QUOTIENT, moreInformationDropDown);
@@ -81,46 +81,47 @@ public class QueryController implements Initializable {
     }
 
     private void addQueryTypeListElement(final QueryType type, final DropDownMenu dropDownMenu) {
+        // Create the list element
         HBox listElement = new HBox();
         listElement.setAlignment(Pos.CENTER_LEFT);
-        listElement.setBorder(new Border(new BorderStroke(Color.GREY.getColor(Color.Intensity.I300), Color.GREY.getColor(Color.Intensity.I300), Color.GREY.getColor(Color.Intensity.I300), Color.GREY.getColor(Color.Intensity.I300),
+        listElement.setBorder(new Border(new BorderStroke(Color.GREY.getColor(Color.Intensity.I500), null, null, null,
                 BorderStrokeStyle.SOLID, BorderStrokeStyle.NONE, BorderStrokeStyle.NONE, BorderStrokeStyle.NONE,
                 CornerRadii.EMPTY, BorderStroke.THIN, Insets.EMPTY)));
 
         SimpleBooleanProperty selected = new SimpleBooleanProperty(false);
 
-        queryTypeListElementActivations.put(type, selected);
+        queryTypeListElementsSelectedState.put(type, selected);
 
-        listElement.backgroundProperty().bind(Bindings.when(selected)
-                .then(new Background(new BackgroundFill(Color.GREY.getColor(Color.Intensity.I300), CornerRadii.EMPTY, Insets.EMPTY)))
-                .otherwise(new Background(new BackgroundFill(Color.GREY.getColor(Color.Intensity.I50), CornerRadii.EMPTY, Insets.EMPTY))));
-
+        // Handle element pressed
         listElement.setOnMousePressed(event -> {
             query.setType(type);
             dropDownMenu.hide();
-            for(Map.Entry<QueryType, SimpleBooleanProperty> pair : queryTypeListElementActivations.entrySet()) {
+            for(Map.Entry<QueryType, SimpleBooleanProperty> pair : queryTypeListElementsSelectedState.entrySet()) {
                 pair.getValue().set(pair.getKey().equals(type));
             }
         });
 
+        // Add the symbol of the query type
         StackPane symbol = new StackPane();
         symbol.setMinWidth(64);
         symbol.setMaxWidth(64);
-        symbol.setBorder(new Border(new BorderStroke(Color.GREY.getColor(Color.Intensity.I300), Color.GREY.getColor(Color.Intensity.I300), Color.GREY.getColor(Color.Intensity.I300), Color.GREY.getColor(Color.Intensity.I300),
+        symbol.setBorder(new Border(new BorderStroke(null, Color.GREY.getColor(Color.Intensity.I500), null, null,
                 BorderStrokeStyle.NONE, BorderStrokeStyle.SOLID, BorderStrokeStyle.NONE, BorderStrokeStyle.NONE,
                 CornerRadii.EMPTY, BorderStroke.THIN, Insets.EMPTY)));
         symbol.setPadding(new Insets(10));
         symbol.getChildren().add(new Text(type.getSymbol()));
         listElement.getChildren().add(symbol);
 
+        // Add the name of the query type
         StackPane name = new StackPane();
         name.setPadding(new Insets(10));
         name.prefWidthProperty().bind(listElement.widthProperty());
         name.getChildren().add(new Text(type.getQueryName()));
         listElement.getChildren().add(name);
 
+        // Handle background color
         final Color color = Color.GREY;
-        final Color.Intensity colorIntensity = Color.Intensity.I100;
+        final Color.Intensity colorIntensity = Color.Intensity.I50;
 
         final BiConsumer<Color, Color.Intensity> setBackground = (newColor, newIntensity) -> {
             symbol.setBackground(new Background(new BackgroundFill(
@@ -139,20 +140,25 @@ public class QueryController implements Initializable {
         // Update the background when hovered
         listElement.setOnMouseEntered(event -> {
             if(selected.get()) {
-                setBackground.accept(color, colorIntensity.next(2));
+                setBackground.accept(color, colorIntensity.next(4));
             } else {
-                setBackground.accept(color, colorIntensity.next());
+                setBackground.accept(color, colorIntensity.next(1));
             }
             listElement.setCursor(Cursor.HAND);
         });
+
         listElement.setOnMouseExited(event -> {
             if(selected.get()) {
-                setBackground.accept(color, colorIntensity.next(1));
+                setBackground.accept(color, colorIntensity.next(3));
             } else {
                 setBackground.accept(color, colorIntensity);
             }
             listElement.setCursor(Cursor.DEFAULT);
         });
+
+        listElement.backgroundProperty().bind(Bindings.when(selected)
+                .then(new Background(new BackgroundFill(color.getColor(colorIntensity.next(3)), CornerRadii.EMPTY, Insets.EMPTY)))
+                .otherwise(new Background(new BackgroundFill(color.getColor(colorIntensity), CornerRadii.EMPTY, Insets.EMPTY))));
 
         dropDownMenu.addCustomElement(listElement);
     }
