@@ -1,7 +1,7 @@
 package ecdar.abstractions;
 
 public enum QueryType {
-    REFINEMENT("refinment", "<="),
+    REFINEMENT("refinement", "<="),
     QUOTIENT("quotient", "\\"),
     SPECIFICATION("specification", "Spec"),
     IMPLEMENTATION("implementation", "Imp"),

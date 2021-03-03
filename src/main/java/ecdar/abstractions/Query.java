@@ -29,10 +29,10 @@ public class Query implements Serializable {
     private final StringProperty comment = new SimpleStringProperty("");
     private final SimpleBooleanProperty isPeriodic = new SimpleBooleanProperty(false);
     private final StringProperty errors = new SimpleStringProperty("");
+    private final ObjectProperty<QueryType> type = new SimpleObjectProperty<>();
     private BackendHelper.BackendNames currentBackend;
     private BackendThread backendThread;
     private Consumer<Boolean> runQuery;
-    private QueryType type;
 
     public Query(final String query, final String comment, final QueryState queryState) {
         this.query.set(query);
@@ -108,10 +108,14 @@ public class Query implements Serializable {
     }
 
     public void setType(QueryType type) {
-        this.type = type;
+        this.type.set(type);
     }
 
     public QueryType getType() {
+        return this.type.get();
+    }
+
+    public ObjectProperty<QueryType> getTypeProperty() {
         return this.type;
     }
 
@@ -134,7 +138,7 @@ public class Query implements Serializable {
 
             errors.set("");
 
-            backendThread = BackendDriverManager.getInstance(this.currentBackend).getBackendThreadForQuery(getQuery().replaceAll("\\s", "") + " " + getIgnoredInputOutputsOnQuery(),
+            backendThread = BackendDriverManager.getInstance(this.currentBackend).getBackendThreadForQuery(getType().getQueryName() + ": " + getQuery().replaceAll("\\s", "") + " " + getIgnoredInputOutputsOnQuery(),
                     aBoolean -> {
                         if (aBoolean) {
                             setQueryState(QueryState.SUCCESSFUL);

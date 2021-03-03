@@ -26,12 +26,14 @@ import java.util.function.BiConsumer;
 
 public class QueryController implements Initializable {
     public JFXRippler moreInformation;
+    public JFXRippler actionButton;
     private Query query;
     private final Map<QueryType, SimpleBooleanProperty> queryTypeListElementsSelectedState = new HashMap<>();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         initializeMoreInformationButton();
+        initializeActionButton();
 
         Platform.runLater(() -> {
             FontIcon moreInformationIcon = (FontIcon) moreInformation.lookup("#moreInformationIcon");
@@ -49,6 +51,12 @@ public class QueryController implements Initializable {
 
     public void setQuery(Query query) {
         this.query = query;
+        this.query.getTypeProperty().addListener(((observable, oldValue, newValue) -> {
+            if(newValue != null) {
+                actionButton.setDisable(false);
+                ((FontIcon) actionButton.lookup("#actionButtonIcon")).setIconColor(Color.GREY.getColor(Color.Intensity.I900));
+            }
+        }));
     }
 
     public Query getQuery() {
@@ -161,5 +169,9 @@ public class QueryController implements Initializable {
                 .otherwise(new Background(new BackgroundFill(color.getColor(colorIntensity), CornerRadii.EMPTY, Insets.EMPTY))));
 
         dropDownMenu.addCustomElement(listElement);
+    }
+
+    private void initializeActionButton() {
+        actionButton.setDisable(true);
     }
 }

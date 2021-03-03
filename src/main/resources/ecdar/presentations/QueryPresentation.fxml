@@ -57,7 +57,7 @@
                 <StackPane>
                     <JFXSpinner id="progressIndicator" radius="20"/>
 
-                    <JFXRippler id="actionButton">
+                    <JFXRippler fx:id="actionButton">
                         <StackPane minWidth="40" maxWidth="40" minHeight="40" maxHeight="40">
                             <FontIcon id="actionButtonIcon" iconLiteral="gmi-play-arrow" iconSize="24"/>
                         </StackPane>

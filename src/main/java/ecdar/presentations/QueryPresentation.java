@@ -118,10 +118,10 @@ public class QueryPresentation extends AnchorPane {
     private void initializeActionButton() {
         Platform.runLater(() -> {
             // Find the action icon
-            actionButton = (JFXRippler) lookup("#actionButton");
+            actionButton = controller.actionButton;
             final FontIcon actionButtonIcon = (FontIcon) lookup("#actionButtonIcon");
 
-            actionButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I900));
+            actionButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I500));
 
             actionButton.setCursor(Cursor.HAND);
             actionButton.setRipplerFill(Color.GREY.getColor(Color.Intensity.I500));
