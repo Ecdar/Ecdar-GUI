@@ -88,7 +88,7 @@ public class QueryController implements Initializable {
 
         moreInformation.setOnMousePressed((e) -> {
             e.consume();
-            moreInformationDropDown.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, 20, 20);
+            moreInformationDropDown.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, 32, 60);
         });
     }
 
