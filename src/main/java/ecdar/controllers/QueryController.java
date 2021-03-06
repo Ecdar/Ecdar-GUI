@@ -27,12 +27,13 @@ import java.util.function.BiConsumer;
 public class QueryController implements Initializable {
     public JFXRippler moreInformation;
     public JFXRippler actionButton;
+    public Text queryTypeSymbol;
     private Query query;
     private final Map<QueryType, SimpleBooleanProperty> queryTypeListElementsSelectedState = new HashMap<>();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        initializeMoreInformationButton();
+        initializeMoreInformationButtonAndQueryTypeSymbol();
         initializeActionButton();
 
         Platform.runLater(() -> {
@@ -40,12 +41,15 @@ public class QueryController implements Initializable {
             query.queryStateProperty().addListener(((observable, oldValue, newValue) -> {
                 if(newValue == QueryState.UNKNOWN) {
                     moreInformationIcon.setIconColor(new javafx.scene.paint.Color(0.75, 0.75, 0.75, 1));
+                    queryTypeSymbol.setFill(new javafx.scene.paint.Color(0.75, 0.75, 0.75, 1));
                 } else {
                     moreInformationIcon.setIconColor(new javafx.scene.paint.Color(1, 1, 1, 1));
+                    queryTypeSymbol.setFill(new javafx.scene.paint.Color(1, 1, 1, 1));
                 }
             }));
 
             moreInformationIcon.setIconColor(new javafx.scene.paint.Color(0.75, 0.75, 0.75, 1));
+            queryTypeSymbol.setFill(new javafx.scene.paint.Color(0.75, 0.75, 0.75, 1));
         });
     }
 
@@ -63,7 +67,7 @@ public class QueryController implements Initializable {
         return query;
     }
 
-    private void initializeMoreInformationButton() {
+    private void initializeMoreInformationButtonAndQueryTypeSymbol() {
         moreInformation.setVisible(true);
         moreInformation.setMaskType(JFXRippler.RipplerMask.CIRCLE);
         moreInformation.setPosition(JFXRippler.RipplerPos.BACK);
@@ -107,6 +111,7 @@ public class QueryController implements Initializable {
             for(Map.Entry<QueryType, SimpleBooleanProperty> pair : queryTypeListElementsSelectedState.entrySet()) {
                 pair.getValue().set(pair.getKey().equals(type));
             }
+            queryTypeSymbol.setText(type.getSymbol());
         });
 
         // Add the symbol of the query type

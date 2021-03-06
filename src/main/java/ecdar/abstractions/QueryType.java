@@ -5,8 +5,8 @@ public enum QueryType {
     QUOTIENT("quotient", "\\"),
     SPECIFICATION("specification", "Spec"),
     IMPLEMENTATION("implementation", "Imp"),
-    LOCAL_CONSISTENCY("local-consistency", "l-Con"),
-    GLOBAL_CONSISTENCY("global-consistency", "g-Con"),
+    LOCAL_CONSISTENCY("local-consistency", "lCon"),
+    GLOBAL_CONSISTENCY("global-consistency", "gCon"),
     BISIM_MIN("bisim", "bsim"),
     GET_NEW_COMPONENT("get-new-component", "get");
 

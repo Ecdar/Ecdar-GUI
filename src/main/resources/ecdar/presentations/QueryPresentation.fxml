@@ -24,11 +24,16 @@
         <StackPane minWidth="40" maxWidth="40" minHeight="40" maxHeight="40">
             <FontIcon id="statusIcon" iconLiteral="gmi-hourglass-full" iconSize="24" iconColor="white"/>
         </StackPane>
-        <JFXRippler fx:id="moreInformation">
-            <StackPane minWidth="40" minHeight="40">
-                <FontIcon id="moreInformationIcon" iconLiteral="gmi-more-vert" iconSize="24" fill="white" translateX="16" translateY="-40"/>
+        <HBox translateY="-40">
+            <StackPane>
+                <Text fx:id="queryTypeSymbol" text="None" fill="white" wrappingWidth="32" style="-fx-font-size: 12; -fx-text-alignment: center;"/>
             </StackPane>
-        </JFXRippler>
+            <JFXRippler fx:id="moreInformation">
+                <StackPane>
+                    <FontIcon id="moreInformationIcon" iconLiteral="gmi-more-vert" iconSize="18" fill="white"/>
+                </StackPane>
+            </JFXRippler>
+        </HBox>
     </StackPane>
 
     <JFXTextField id="query" HBox.hgrow="ALWAYS"
