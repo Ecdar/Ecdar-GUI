@@ -9,12 +9,9 @@ import ecdar.backend.IBackendDriver;
 import ecdar.backend.ReveaalDriver;
 import ecdar.controllers.CanvasController;
 import ecdar.controllers.QueryController;
-import ecdar.mutation.models.MutationTestPlan;
-import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
 import javafx.application.Platform;
 import javafx.beans.binding.When;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
@@ -37,7 +34,6 @@ import static javafx.scene.paint.Color.*;
 public class QueryPresentation extends AnchorPane {
 
     private final Tooltip tooltip = new Tooltip();
-    private JFXRippler actionButton;
     private Tooltip swapBackendButtonTooltip;
     private Label currentBackendLabel;
 
@@ -118,13 +114,12 @@ public class QueryPresentation extends AnchorPane {
     private void initializeActionButton() {
         Platform.runLater(() -> {
             // Find the action icon
-            actionButton = controller.actionButton;
             final FontIcon actionButtonIcon = (FontIcon) lookup("#actionButtonIcon");
 
             actionButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I500));
 
-            actionButton.setCursor(Cursor.HAND);
-            actionButton.setRipplerFill(Color.GREY.getColor(Color.Intensity.I500));
+            controller.actionButton.setCursor(Cursor.HAND);
+            controller.actionButton.setRipplerFill(Color.GREY.getColor(Color.Intensity.I500));
 
             // Delegate that based on the query state updated the action icon
             final Consumer<QueryState> updateIcon = (queryState) -> {
@@ -142,9 +137,9 @@ public class QueryPresentation extends AnchorPane {
             // Update the icon when ever the query state is updated
             controller.getQuery().queryStateProperty().addListener((observable, oldValue, newValue) -> updateIcon.accept(newValue));
 
-            actionButton.setMaskType(JFXRippler.RipplerMask.CIRCLE);
+            controller.actionButton.setMaskType(JFXRippler.RipplerMask.CIRCLE);
 
-            actionButton.getChildren().get(0).setOnMousePressed(event -> {
+            controller.actionButton.getChildren().get(0).setOnMousePressed(event -> {
                 if (controller.getQuery().getQueryState().equals(QueryState.RUNNING)) {
                     controller.getQuery().cancel();
                 } else {
@@ -169,6 +164,7 @@ public class QueryPresentation extends AnchorPane {
             // Find the state indicator from the inflated xml
             final StackPane stateIndicator = (StackPane) lookup("#stateIndicator");
             final FontIcon statusIcon = (FontIcon) stateIndicator.lookup("#statusIcon");
+            final FontIcon queryTypeExpandIcon = (FontIcon) stateIndicator.lookup("#queryTypeExpandIcon");
 
             // Delegate that based on a query state updates tooltip of the query
             final Consumer<QueryState> updateToolTip = (queryState) -> {
@@ -200,11 +196,10 @@ public class QueryPresentation extends AnchorPane {
                     ));
                 }
 
-                statusIcon.setIconColor(new javafx.scene.paint.Color(1, 1, 1, 1));
-                statusIcon.setIconLiteral("gmi-" + queryState.getIconCode().toString().toLowerCase().replace('_', '-'));
+                setStatusIndicatorContentColor(new javafx.scene.paint.Color(1, 1, 1, 1), statusIcon, queryTypeExpandIcon, queryState);
 
                 if (queryState.equals(QueryState.RUNNING) || queryState.equals(QueryState.UNKNOWN)) {
-                    statusIcon.setIconColor(new javafx.scene.paint.Color(0.75, 0.75, 0.75, 1));
+                    setStatusIndicatorContentColor(new javafx.scene.paint.Color(0.75, 0.75, 0.75, 1), statusIcon, queryTypeExpandIcon, null);
                 }
 
                 // The tooltip is updated here to handle all cases that are not syntax error
@@ -220,8 +215,19 @@ public class QueryPresentation extends AnchorPane {
             // Ensure that the tooltip is updated when new errors are added
             controller.getQuery().errors().addListener((observable, oldValue, newValue) -> updateToolTip.accept(controller.getQuery().getQueryState()));
 
-            Tooltip.install(stateIndicator, this.tooltip);
+            // Installing the tooltip on the statusIcon itself scales the tooltip unexpectedly, hence its parent StackPane is used
+            Tooltip.install(statusIcon.getParent(), this.tooltip);
         });
+    }
+
+    private void setStatusIndicatorContentColor(javafx.scene.paint.Color color, FontIcon statusIcon, FontIcon queryTypeExpandIcon, QueryState queryState) {
+        statusIcon.setIconColor(color);
+        controller.queryTypeSymbol.setFill(color);
+        queryTypeExpandIcon.setIconColor(color);
+
+        if(queryState != null) {
+            statusIcon.setIconLiteral("gmi-" + queryState.getIconCode().toString().toLowerCase().replace('_', '-'));
+        }
     }
 
     private void initializeInputOutputPaneAndAddIgnoredInputOutputs() {
@@ -266,7 +272,7 @@ public class QueryPresentation extends AnchorPane {
             initializeResetInputOutputPaneButton(inputOutputPane, backendDriver, resetInputOutputPaneButton);
 
             // Get the inputs and outputs automatically, when executing a refinement query
-            actionButton.setOnMousePressed(event -> {
+            controller.actionButton.setOnMousePressed(event -> {
                 // Update the ignored inputs and outputs without clearing the lists
                 updateInputOutputs(inputOutputPane, backendDriver, false);
             });
