@@ -12,6 +12,7 @@ import ecdar.controllers.QueryController;
 import ecdar.utility.colors.Color;
 import javafx.application.Platform;
 import javafx.beans.binding.When;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
@@ -27,6 +28,7 @@ import org.kordamp.ikonli.javafx.FontIcon;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import static javafx.scene.paint.Color.*;
@@ -50,6 +52,7 @@ public class QueryPresentation extends AnchorPane {
         initializeTextFields();
         initializeInputOutputPaneAndAddIgnoredInputOutputs();
         initializeSwapBackendButton();
+        initializeMoreInformationButtonAndQueryTypeSymbol();
     }
 
     private void initializeTextFields() {
@@ -199,7 +202,7 @@ public class QueryPresentation extends AnchorPane {
                 setStatusIndicatorContentColor(new javafx.scene.paint.Color(1, 1, 1, 1), statusIcon, queryTypeExpandIcon, queryState);
 
                 if (queryState.equals(QueryState.RUNNING) || queryState.equals(QueryState.UNKNOWN)) {
-                    setStatusIndicatorContentColor(new javafx.scene.paint.Color(0.75, 0.75, 0.75, 1), statusIcon, queryTypeExpandIcon, null);
+                    setStatusIndicatorContentColor(Color.GREY.getColor(Color.Intensity.I700), statusIcon, queryTypeExpandIcon, null);
                 }
 
                 // The tooltip is updated here to handle all cases that are not syntax error
@@ -217,6 +220,8 @@ public class QueryPresentation extends AnchorPane {
 
             // Installing the tooltip on the statusIcon itself scales the tooltip unexpectedly, hence its parent StackPane is used
             Tooltip.install(statusIcon.getParent(), this.tooltip);
+
+            controller.queryTypeSymbol.setText(controller.getQuery() != null && controller.getQuery().getType() != null ? controller.getQuery().getType().getSymbol() : "---");
         });
     }
 
@@ -478,6 +483,52 @@ public class QueryPresentation extends AnchorPane {
 
         swapBackendButtonTooltip.setText("Switch to the " + (isReveaal ? "jEcdar" : "Reveaal") + " backend");
         currentBackendLabel.setText((isReveaal ? "Reveaal" : "jEcdar"));
+    }
+
+    private void initializeMoreInformationButtonAndQueryTypeSymbol() {
+        Platform.runLater(() -> {
+            controller.queryTypeExpand.setVisible(true);
+            controller.queryTypeExpand.setMaskType(JFXRippler.RipplerMask.RECT);
+            controller.queryTypeExpand.setPosition(JFXRippler.RipplerPos.BACK);
+            controller.queryTypeExpand.setRipplerFill(Color.GREY_BLUE.getColor(Color.Intensity.I500));
+
+            final DropDownMenu queryTypeDropDown = new DropDownMenu(controller.queryTypeExpand);
+
+            queryTypeDropDown.addListElement("Query Type");
+            QueryType[] queryTypes = QueryType.values();
+            for (QueryType type : queryTypes) {
+                addQueryTypeListElement(type, queryTypeDropDown);
+            }
+
+            controller.queryTypeExpand.setOnMousePressed((e) -> {
+                e.consume();
+                queryTypeDropDown.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, 16, 64);
+            });
+
+            controller.queryTypeSymbol.setText(controller.getQuery() != null && controller.getQuery().getType() != null ? controller.getQuery().getType().getSymbol() : "---");
+        });
+    }
+
+    private void addQueryTypeListElement(final QueryType type, final DropDownMenu dropDownMenu) {
+        MenuElement listElement = new MenuElement(type.getQueryName() + " [" + type.getSymbol() + "]", "gmi-done", mouseEvent -> {
+            controller.getQuery().setType(type);
+            controller.queryTypeSymbol.setText(type.getSymbol());
+            dropDownMenu.hide();
+
+            Set<Map.Entry<QueryType, SimpleBooleanProperty>> queryTypesSelected = controller.getQueryTypeListElementsSelectedState().entrySet();
+
+            // Reflect the selection on the dropdown menu
+            for(Map.Entry<QueryType, SimpleBooleanProperty> pair : queryTypesSelected) {
+                pair.getValue().set(pair.getKey().equals(type));
+            }
+        });
+
+        // Add boolean to the element to handle selection
+        SimpleBooleanProperty selected = new SimpleBooleanProperty(controller.getQuery().getType() != null && controller.getQuery().getType().getSymbol().equals(type.getSymbol()));
+        controller.getQueryTypeListElementsSelectedState().put(type, selected);
+        listElement.setToggleable(selected);
+
+        dropDownMenu.addMenuElement(listElement);
     }
 
     private void runQuery() {

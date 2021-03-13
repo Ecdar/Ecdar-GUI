@@ -30,7 +30,6 @@ public class QueryController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        initializeMoreInformationButtonAndQueryTypeSymbol();
         initializeActionButton();
 
         Platform.runLater(() -> {
@@ -61,47 +60,11 @@ public class QueryController implements Initializable {
         return query;
     }
 
-    private void initializeMoreInformationButtonAndQueryTypeSymbol() {
-        queryTypeExpand.setVisible(true);
-        queryTypeExpand.setMaskType(JFXRippler.RipplerMask.RECT);
-        queryTypeExpand.setPosition(JFXRippler.RipplerPos.BACK);
-        queryTypeExpand.setRipplerFill(Color.GREY_BLUE.getColor(Color.Intensity.I500));
-
-        final DropDownMenu queryTypeDropDown = new DropDownMenu(queryTypeExpand);
-
-        queryTypeDropDown.addListElement("Query Type");
-        QueryType[] queryTypes = QueryType.values();
-        for (QueryType type : queryTypes) {
-            addQueryTypeListElement(type, queryTypeDropDown);
-        }
-
-        queryTypeExpand.setOnMousePressed((e) -> {
-            e.consume();
-            queryTypeDropDown.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, 16, 64);
-        });
-    }
-
-    private void addQueryTypeListElement(final QueryType type, final DropDownMenu dropDownMenu) {
-        MenuElement listElement = new MenuElement(type.getQueryName() + " [" + type.getSymbol() + "]", "gmi-done", mouseEvent -> {
-            query.setType(type);
-            queryTypeSymbol.setText(type.getSymbol());
-            dropDownMenu.hide();
-
-            // Reflect the selection on the dropdown menu
-            for(Map.Entry<QueryType, SimpleBooleanProperty> pair : queryTypeListElementsSelectedState.entrySet()) {
-                pair.getValue().set(pair.getKey().equals(type));
-            }
-        });
-
-        // Add boolean to the element to handle selection
-        SimpleBooleanProperty selected = new SimpleBooleanProperty(false);
-        queryTypeListElementsSelectedState.put(type, selected);
-        listElement.setToggleable(selected);
-
-        dropDownMenu.addMenuElement(listElement);
-    }
-
     private void initializeActionButton() {
         actionButton.setDisable(true);
+    }
+
+    public Map<QueryType, SimpleBooleanProperty> getQueryTypeListElementsSelectedState() {
+        return queryTypeListElementsSelectedState;
     }
 }

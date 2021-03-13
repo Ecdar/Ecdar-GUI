@@ -24,15 +24,15 @@
         <JFXRippler fx:id="queryTypeExpand" maxHeight="20">
             <HBox translateY="40" alignment="CENTER_RIGHT">
                 <StackPane alignment="CENTER_LEFT">
-                    <Text fx:id="queryTypeSymbol" text="---" fill="white" style="-fx-font-size: 11; -fx-text-alignment: left;"/>
+                    <Text fx:id="queryTypeSymbol" style="-fx-font-size: 11; -fx-text-alignment: left;"/>
                 </StackPane>
                 <StackPane minWidth="15" maxWidth="15">
-                    <FontIcon id="queryTypeExpandIcon" iconLiteral="gmi-expand-more" iconSize="18" fill="white"/>
+                    <FontIcon id="queryTypeExpandIcon" iconLiteral="gmi-expand-more" iconSize="18"/>
                 </StackPane>
             </HBox>
         </JFXRippler>
         <StackPane minWidth="40" maxWidth="40" minHeight="40" maxHeight="40">
-            <FontIcon id="statusIcon" iconLiteral="gmi-hourglass-full" iconSize="24" iconColor="white"/>
+            <FontIcon id="statusIcon" iconLiteral="gmi-hourglass-full" iconSize="24"/>
         </StackPane>
     </StackPane>
 

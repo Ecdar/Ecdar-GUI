@@ -174,7 +174,7 @@ public class Query implements Serializable {
     public JsonObject serialize() {
         final JsonObject result = new JsonObject();
 
-        result.addProperty(QUERY, getQuery());
+        result.addProperty(QUERY, getType().getQueryName() + ": " + getQuery());
         result.addProperty(COMMENT, getComment());
         result.addProperty(IS_PERIODIC, isPeriodic());
 
@@ -196,7 +196,16 @@ public class Query implements Serializable {
 
     @Override
     public void deserialize(final JsonObject json) {
-        setQuery(json.getAsJsonPrimitive(QUERY).getAsString());
+        String query = json.getAsJsonPrimitive(QUERY).getAsString();
+
+        if(query.contains(":")) {
+            String[] queryFieldFromJSON = json.getAsJsonPrimitive(QUERY).getAsString().split(": ");
+            setType(QueryType.fromString(queryFieldFromJSON[0]));
+            setQuery(queryFieldFromJSON[1]);
+        } else {
+            setQuery(query);
+        }
+
         setComment(json.getAsJsonPrimitive(COMMENT).getAsString());
 
         if (json.has(IS_PERIODIC)) {
