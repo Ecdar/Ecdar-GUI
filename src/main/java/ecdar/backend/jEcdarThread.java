@@ -27,7 +27,7 @@ public class jEcdarThread extends BackendThread {
                     var jEcdarWriter = new BufferedWriter(new OutputStreamWriter(jEcdarEngineInstance.getOutputStream()));
             ) {
                 //Run the query with the j-Ecdar process
-                jEcdarWriter.write("-rq -json " + Ecdar.projectDirectory.get() + " " + query.replaceAll("\\s", "") + "\n"); // Newline added to signal EOI
+                jEcdarWriter.write("-inputFolder " + Ecdar.projectDirectory.get() + " -get " + query + "\n"); // Newline added to signal EOI
                 jEcdarWriter.flush();
 
                 //Read the result of the query from the j-Ecdar process
@@ -39,8 +39,10 @@ public class jEcdarThread extends BackendThread {
                         return;
                     }
 
+                    System.out.println(line);
+
                     // Process the query result
-                    if ((line.equals("true") || line.equals("")) && (result.getStatusCode() <= QueryState.SUCCESSFUL.getStatusCode())) {
+                    if ((line.equals("true")) && (result.getStatusCode() <= QueryState.SUCCESSFUL.getStatusCode())) {
                         result = QueryState.SUCCESSFUL;
                     } else if (line.equals("false") && (result.getStatusCode() <= QueryState.ERROR.getStatusCode())){
                         result = QueryState.ERROR;
