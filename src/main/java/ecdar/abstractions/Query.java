@@ -162,7 +162,7 @@ public class Query implements Serializable {
                     new QueryListener(this)
             );
         } else {
-            backendThread = BackendDriverManager.getInstance(this.currentBackend).getBackendThreadForQuery(getQuery().replaceAll("\\s", "") + " " + getIgnoredInputOutputsOnQuery(),
+            backendThread = BackendDriverManager.getInstance(this.currentBackend).getBackendThreadForQuery(getQuery(),
                     aBoolean -> {
                         if (aBoolean) {
                             setQueryState(QueryState.SUCCESSFUL);
