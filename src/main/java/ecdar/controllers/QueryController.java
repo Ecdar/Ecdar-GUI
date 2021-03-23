@@ -1,12 +1,8 @@
 package ecdar.controllers;
 
-import com.jfoenix.controls.JFXPopup;
 import com.jfoenix.controls.JFXRippler;
-import com.jfoenix.controls.JFXTooltip;
 import ecdar.abstractions.Query;
 import ecdar.abstractions.QueryType;
-import ecdar.presentations.DropDownMenu;
-import ecdar.presentations.MenuElement;
 import ecdar.utility.colors.Color;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -31,10 +27,6 @@ public class QueryController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         initializeActionButton();
-
-        Platform.runLater(() -> {
-            Tooltip.install(actionButton.getParent(), noQueryTypeSatTooltip);
-        });
     }
 
     public void setQuery(Query query) {
@@ -61,7 +53,13 @@ public class QueryController implements Initializable {
     }
 
     private void initializeActionButton() {
-        actionButton.setDisable(true);
+        Platform.runLater(() -> {
+            if (query.getType() == null) {
+                actionButton.setDisable(true);
+                ((FontIcon) actionButton.lookup("#actionButtonIcon")).setIconColor(Color.GREY.getColor(Color.Intensity.I500));
+                Tooltip.install(actionButton.getParent(), noQueryTypeSatTooltip);
+            }
+        });
     }
 
     public Map<QueryType, SimpleBooleanProperty> getQueryTypeListElementsSelectedState() {
