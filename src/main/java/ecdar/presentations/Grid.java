@@ -1,9 +1,11 @@
 package ecdar.presentations;
 
 import ecdar.controllers.CanvasController;
+import ecdar.controllers.EcdarController;
 import javafx.application.Platform;
 import javafx.scene.Parent;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Screen;
 
 import java.util.ArrayList;
@@ -21,9 +23,13 @@ public class Grid extends Parent {
 
         // When the scene changes (goes from null to something) set update the grid
         sceneProperty().addListener((observable, oldValue, newValue) -> {
-            updateGrid(1, Screen.getPrimary().getBounds().getWidth(), Screen.getPrimary().getBounds().getHeight());
-            newValue.widthProperty().addListener((observable1 -> this.updateGrid(getParent().getScaleX(), getParent().getLayoutBounds().getWidth(), getParent().getLayoutBounds().getHeight())));
-            newValue.heightProperty().addListener((observable1 -> this.updateGrid(getParent().getScaleY(), getParent().getLayoutBounds().getWidth(), getParent().getLayoutBounds().getHeight())));
+            if(newValue != null) {
+                updateGrid(1);
+                Platform.runLater(() -> {
+                    newValue.widthProperty().addListener((observable1 -> this.updateGrid(getParent().getScaleX())));
+                    newValue.heightProperty().addListener((observable1 -> this.updateGrid(getParent().getScaleY())));
+                });
+            }
         });
     }
 
@@ -61,13 +67,11 @@ public class Grid extends Parent {
     /**
      * Redraw the grid in center of the screen
      * @param scale the scale in which to draw the grid
-     * @param canvasWidth the width of the current canvas
-     * @param canvasHeight the height of the current canvas
      */
-    public void updateGrid(double scale, double canvasWidth, double canvasHeight) {
+    public void updateGrid(double scale) {
         // The given size of the canvas divided by the given scale
-        double screenWidth = (int) Grid.snap(canvasWidth / scale);
-        double screenHeight = (int) Grid.snap(canvasHeight / scale);
+        double screenWidth = (int) Grid.snap(((CanvasShellPresentation) getParent().getParent()).getWidth() / scale * 4);
+        double screenHeight = (int) Grid.snap(((CanvasShellPresentation) getParent().getParent()).getHeight() / scale * 4);
 
         Platform.runLater(() -> {
             // Remove old vertical lines
@@ -78,7 +82,7 @@ public class Grid extends Parent {
             }
 
             // Add new vertical lines to cover the screen at the current zoom level
-            int i = (int) -screenHeight / (GRID_SIZE / 2);
+            int i = (int) -screenHeight / (GRID_SIZE * 4);
             int numberOfLine = (int) screenWidth / GRID_SIZE;
             while (i < numberOfLine) {
                 Line line = new Line(i * GRID_SIZE, -screenHeight, i * GRID_SIZE, screenHeight);
@@ -97,7 +101,7 @@ public class Grid extends Parent {
             }
 
             // Add new horizontal lines to cover the screen at the current zoom level
-            i = (int) -screenHeight / (GRID_SIZE / 2);
+            i = (int) -screenHeight / (GRID_SIZE * 4);
             numberOfLine = (int) screenHeight / GRID_SIZE;
             while (i < numberOfLine) {
                 Line line = new Line(-screenWidth, i * GRID_SIZE, screenWidth, i * GRID_SIZE);
@@ -108,13 +112,5 @@ public class Grid extends Parent {
                 i++;
             }
         });
-
-        // Check added to avoid NullPointerException
-        if(CanvasController.activeComponentPresentation != null) {
-            // Center the grid on the screen
-            // Using GRID_SIZE for small corrections as the grid is not directly centered on the screen
-            this.setTranslateX(Grid.snap(CanvasController.activeComponentPresentation.getWidth() / 2 - GRID_SIZE) + GRID_SIZE * 0.5);
-            this.setTranslateY(Grid.snap(CanvasController.activeComponentPresentation.getHeight() / 2 + TOOL_BAR_HEIGHT * 4) + GRID_SIZE * 0.5);
-        }
     }
 }
