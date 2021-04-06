@@ -5,5 +5,4 @@
          type="Pane"
          fx:id="root"
          fx:controller="ecdar.controllers.CanvasController">
-
 </fx:root>

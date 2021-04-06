@@ -2,6 +2,7 @@ package ecdar.presentations;
 
 import ecdar.abstractions.Component;
 import ecdar.controllers.CanvasController;
+import ecdar.controllers.EcdarController;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
 import ecdar.utility.helpers.LocationAware;
@@ -57,7 +58,7 @@ public class TagPresentation extends StackPane {
         textFieldFocusProperty().addListener((observable, oldValue, newValue) -> {
             if(!hadInitialFocus && newValue) {
                 hadInitialFocus = true;
-                CanvasController.leaveTextAreas();
+                EcdarController.getActiveCanvasPresentation().getController().leaveTextAreas();
             }
         });
     }
@@ -159,10 +160,10 @@ public class TagPresentation extends StackPane {
         shape.setOnMouseDragged(event -> {
             event.consume();
 
-            final double newX = CanvasPresentation.mouseTracker.gridXProperty().subtract(getComponent().getBox().getXProperty()).subtract(getLocationAware().xProperty()).doubleValue() - getMinWidth() / 2;
+            final double newX = EcdarController.getActiveCanvasPresentation().mouseTracker.gridXProperty().subtract(getComponent().getBox().getXProperty()).subtract(getLocationAware().xProperty()).doubleValue() - getMinWidth() / 2;
             setTranslateX(newX);
 
-            final double newY = CanvasPresentation.mouseTracker.gridYProperty().subtract(getComponent().getBox().getYProperty()).subtract(getLocationAware().yProperty()).doubleValue() - getHeight() / 2;
+            final double newY = EcdarController.getActiveCanvasPresentation().mouseTracker.gridYProperty().subtract(getComponent().getBox().getYProperty()).subtract(getLocationAware().yProperty()).doubleValue() - getHeight() / 2;
             setTranslateY(newY - 2);
 
             // Tell the mouse release action that we can store an update
@@ -223,7 +224,7 @@ public class TagPresentation extends StackPane {
         });
 
         // When enter or escape is pressed release focus
-        textField.setOnKeyPressed(CanvasController.getLeaveTextAreaKeyHandler());
+        textField.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
     }
 
     public void bindToColor(final ObjectProperty<Color> color, final ObjectProperty<Color.Intensity> intensity) {

@@ -9,6 +9,7 @@ import ecdar.backend.IBackendDriver;
 import ecdar.backend.ReveaalDriver;
 import ecdar.controllers.CanvasController;
 import ecdar.controllers.QueryController;
+import ecdar.controllers.EcdarController;
 import ecdar.utility.colors.Color;
 import javafx.application.Platform;
 import javafx.beans.binding.When;
@@ -67,13 +68,13 @@ public class QueryPresentation extends AnchorPane {
             controller.getQuery().commentProperty().bind(commentTextField.textProperty());
 
 
-            queryTextField.setOnKeyPressed(CanvasController.getLeaveTextAreaKeyHandler(keyEvent -> {
+            queryTextField.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler(keyEvent -> {
                 if (keyEvent.getCode().equals(KeyCode.ENTER)) {
                     runQuery();
                 }
             }));
 
-            commentTextField.setOnKeyPressed(CanvasController.getLeaveTextAreaKeyHandler());
+            commentTextField.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
         });
     }
 

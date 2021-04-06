@@ -1,13 +1,15 @@
 package ecdar.presentations;
 
 import ecdar.controllers.CanvasController;
+import ecdar.controllers.EcdarController;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.helpers.CanvasDragHelper;
 import ecdar.utility.helpers.MouseTrackable;
-import ecdar.utility.helpers.ZoomHelper;
+import ecdar.utility.helpers.SelectHelper;
 import ecdar.utility.keyboard.Keybind;
 import ecdar.utility.keyboard.KeyboardTracker;
 import ecdar.utility.mouse.MouseTracker;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -17,9 +19,10 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
+import javafx.scene.shape.Rectangle;
 
 public class CanvasPresentation extends Pane implements MouseTrackable {
-    public static MouseTracker mouseTracker;
+    public MouseTracker mouseTracker;
 
     private final DoubleProperty x = new SimpleDoubleProperty(0);
     private final DoubleProperty y = new SimpleDoubleProperty(0);
@@ -35,21 +38,19 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
 
     public CanvasPresentation() {
         mouseTracker = new MouseTracker(this);
-
-        KeyboardTracker.registerKeybind(KeyboardTracker.UNDO, new Keybind(new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN), UndoRedoStack::undo));
-        KeyboardTracker.registerKeybind(KeyboardTracker.REDO, new Keybind(new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN), UndoRedoStack::redo));
-
-        //Add keybindings for zoom functionality
-        KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_IN, new Keybind(new KeyCodeCombination(KeyCode.PLUS, KeyCombination.SHORTCUT_DOWN), ZoomHelper::zoomIn));
-        KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_OUT, new Keybind(new KeyCodeCombination(KeyCode.MINUS, KeyCombination.SHORTCUT_DOWN), ZoomHelper::zoomOut));
-        KeyboardTracker.registerKeybind(KeyboardTracker.RESET_ZOOM, new Keybind(new KeyCodeCombination(KeyCode.DIGIT0, KeyCombination.SHORTCUT_DOWN), ZoomHelper::resetZoom));
-        KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_TO_FIT, new Keybind(new KeyCodeCombination(KeyCode.EQUALS, KeyCombination.SHORTCUT_DOWN), ZoomHelper::zoomToFit));
-
         controller = new EcdarFXMLLoader().loadAndGetController("CanvasPresentation.fxml", this);
 
         initializeGrid();
 
         CanvasDragHelper.makeDraggable(this, mouseEvent -> mouseEvent.getButton().equals(MouseButton.SECONDARY));
+
+        controller.zoomHelper.setGrid(this.grid);
+        controller.zoomHelper.setCanvas(this);
+
+        mouseTracker.registerOnMousePressedEventHandler(event -> {
+            // Deselect all elements
+            SelectHelper.clearSelectedElements();
+        });
     }
 
     private void initializeGrid() {
@@ -65,8 +66,6 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
         //When the translation coordinates are changed, make sure that it is handled for the grid as well, to ensure that the grid is still centered on screen
         this.translateXProperty().addListener(((observable, oldValue, newValue) -> grid.handleTranslateX(oldValue.doubleValue(), newValue.doubleValue(), this.scaleXProperty().doubleValue())));
         this.translateYProperty().addListener(((observable, oldValue, newValue) -> grid.handleTranslateY(oldValue.doubleValue(), newValue.doubleValue(), this.scaleYProperty().doubleValue())));
-
-        ZoomHelper.setGrid(grid);
     }
 
     /**
@@ -104,7 +103,7 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
      * @param shouldShow true iff views should show an inset
      */
     public static void showBottomInset(final Boolean shouldShow) {
-        CanvasController.updateOffset(shouldShow);
+        EcdarController.getActiveCanvasPresentation().getController().updateOffset(shouldShow);
     }
 
     @Override
