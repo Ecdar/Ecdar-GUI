@@ -15,7 +15,7 @@ public class jEcdarThread extends BackendThread {
     }
 
     public void run() {
-        ProcessBuilder pb = new ProcessBuilder("java", "-jar", "src/libs/j-Ecdar.jar", "-inputFolder " + Ecdar.projectDirectory.get() + " -get " + query + "\n");
+        ProcessBuilder pb = new ProcessBuilder("java", "-jar", "src/libs/j-Ecdar.jar", "-inputFolder " + Ecdar.projectDirectory.get(), "-getNewComponent " + query);
         pb.redirectErrorStream(true);
         try {
             Process jEcdarEngineInstance = pb.start();
