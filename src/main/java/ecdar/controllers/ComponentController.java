@@ -285,11 +285,11 @@ public class ComponentController extends ModelController implements Initializabl
                 final Location newLocation = new Location();
                 newLocation.initialize();
 
-                double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
+                double x = DropDownMenu.x / EcdarController.getActiveCanvasPresentation().getScaleX() - LocationPresentation.RADIUS / 2;
                 x = Grid.snap(x);
                 newLocation.setX(x);
 
-                double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
+                double y = DropDownMenu.y / EcdarController.getActiveCanvasPresentation().getScaleY() - LocationPresentation.RADIUS / 2;
                 y = Grid.snap(y);
                 newLocation.setY(y);
 
@@ -694,9 +694,6 @@ public class ComponentController extends ModelController implements Initializabl
             }
         };
 
-        if (locationListChangeListenerMap.containsKey(newComponent)) {
-            newComponent.getLocations().removeListener(locationListChangeListenerMap.get(newComponent));
-        }
         final ListChangeListener<Location> locationListChangeListener = c -> {
             if (c.next()) {
                 // Locations are added to the component
@@ -722,7 +719,10 @@ public class ComponentController extends ModelController implements Initializabl
             }
         };
         newComponent.getLocations().addListener(locationListChangeListener);
-        locationListChangeListenerMap.put(newComponent, locationListChangeListener);
+
+        if (!locationListChangeListenerMap.containsKey(newComponent)) {
+            locationListChangeListenerMap.put(newComponent, locationListChangeListener);
+        }
 
         newComponent.getLocations().forEach(handleAddedLocation);
     }
@@ -824,7 +824,7 @@ public class ComponentController extends ModelController implements Initializabl
     @FXML
     private void modelContainerPressed(final MouseEvent event) {
         event.consume();
-        CanvasController.leaveTextAreas();
+        EcdarController.getActiveCanvasPresentation().getController().leaveTextAreas();
 
         final Edge unfinishedEdge = getComponent().getUnfinishedEdge();
 
@@ -863,17 +863,17 @@ public class ComponentController extends ModelController implements Initializabl
 
         } else if (event.isSecondaryButtonDown()) {
             if (unfinishedEdge == null) {
-                contextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX(), event.getY());
+                contextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX() * EcdarController.getActiveCanvasPresentation().getScaleX(), event.getY() * EcdarController.getActiveCanvasPresentation().getScaleY());
             } else {
                 initializeFinishEdgeContextMenu(unfinishedEdge);
-                finishEdgeContextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX(), event.getY());
+                finishEdgeContextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX() * EcdarController.getActiveCanvasPresentation().getScaleX(), event.getY() * EcdarController.getActiveCanvasPresentation().getScaleY());
             }
         } else if (event.isPrimaryButtonDown()) {
             // We are drawing an edge
             if (unfinishedEdge != null) {
                 // Calculate the position for the new nail (based on the component position and the canvas mouse tracker)
-                final DoubleBinding x = CanvasPresentation.mouseTracker.gridXProperty().subtract(getComponent().getBox().getXProperty());
-                final DoubleBinding y = CanvasPresentation.mouseTracker.gridYProperty().subtract(getComponent().getBox().getYProperty());
+                final DoubleBinding x = EcdarController.getActiveCanvasPresentation().mouseTracker.gridXProperty().subtract(getComponent().getBox().getXProperty());
+                final DoubleBinding y = EcdarController.getActiveCanvasPresentation().mouseTracker.gridYProperty().subtract(getComponent().getBox().getYProperty());
 
                 // Create the abstraction for the new nail and add it to the unfinished edge
                 final Nail newNail = new Nail(x, y);

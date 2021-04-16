@@ -1,5 +1,6 @@
 package ecdar.utility.helpers;
 
+import ecdar.controllers.EcdarController;
 import ecdar.model_canvas.arrow_heads.ArrowHead;
 import ecdar.model_canvas.arrow_heads.ChannelReceiverArrowHead;
 import ecdar.model_canvas.arrow_heads.ChannelSenderArrowHead;
@@ -25,8 +26,8 @@ public class BindingHelper {
     }
 
     public static void bind(final Circular subject, final ObservableDoubleValue x, final ObservableDoubleValue y) {
-        subject.xProperty().bind(CanvasPresentation.mouseTracker.gridXProperty().subtract(x));
-        subject.yProperty().bind(CanvasPresentation.mouseTracker.gridYProperty().subtract(y));
+        subject.xProperty().bind(EcdarController.getActiveCanvasPresentation().mouseTracker.gridXProperty().subtract(x));
+        subject.yProperty().bind(EcdarController.getActiveCanvasPresentation().mouseTracker.gridYProperty().subtract(y));
     }
 
     public static void bind(final Link lineSubject, final ArrowHead arrowHeadSubject, final Circular source, final Circular target) {
@@ -65,7 +66,7 @@ public class BindingHelper {
 
     public static void bind(final Link subject, final Circular source, final ObservableDoubleValue x, final ObservableDoubleValue y) {
         // Calculate the bindings (so that the line will be based on the circle circumference instead of in its center)
-        final LineBinding lineBinding = LineBinding.getCircularBindings(source, CanvasPresentation.mouseTracker, x, y);
+        final LineBinding lineBinding = LineBinding.getCircularBindings(source, EcdarController.getActiveCanvasPresentation().mouseTracker, x, y);
 
         // Bind the subjects properties accordingly to our calculations
         subject.startXProperty().bind(lineBinding.startX);
@@ -132,7 +133,7 @@ public class BindingHelper {
 
     public static void bind(final ArrowHead subject, final Circular source, final ObservableDoubleValue x, final ObservableDoubleValue y) {
         // Calculate the bindings (so that the line will be based on the circle circumference instead of in its center)
-        final LineBinding lineBinding = LineBinding.getCircularBindings(source, CanvasPresentation.mouseTracker, x, y);
+        final LineBinding lineBinding = LineBinding.getCircularBindings(source, EcdarController.getActiveCanvasPresentation().mouseTracker, x, y);
 
         ObservableDoubleValue startX = lineBinding.startX;
         ObservableDoubleValue startY = lineBinding.startY;
