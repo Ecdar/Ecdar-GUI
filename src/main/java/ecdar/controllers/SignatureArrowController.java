@@ -63,7 +63,7 @@ public class SignatureArrowController {
     private List<Edge> findEdgesForSync() {
         List<Edge> matchingEdges = new ArrayList<>();
 
-        component.get().getEdges().forEach((edge) -> {
+        component.get().getSubEdges().forEach((edge) -> {
             final String edgeSync = edge.getSync();
             final EdgeStatus edgeStatus = edge.ioStatus.get();
 

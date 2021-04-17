@@ -2,14 +2,11 @@ package ecdar.presentations;
 
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Location;
-import ecdar.controllers.CanvasController;
 import ecdar.controllers.EcdarController;
 import ecdar.controllers.LocationController;
 import ecdar.utility.colors.Color;
 import ecdar.utility.helpers.BindingHelper;
-import ecdar.utility.helpers.MouseTrackable;
 import ecdar.utility.helpers.SelectHelper;
-import ecdar.utility.mouse.MouseTracker;
 import javafx.animation.*;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.*;
@@ -20,6 +17,7 @@ import javafx.scene.shape.*;
 import javafx.util.Duration;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -211,8 +209,8 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
             controller.invariantTag.bindToColor(location.colorProperty(), location.colorIntensityProperty(), false);
 
             // Update the invariant
-            controller.nicknameTag.setAndBindString(location.nicknameProperty());
-            controller.invariantTag.setAndBindString(location.invariantProperty());
+            controller.nicknameTag.setAndBindStringList(Collections.singletonList(location.nicknameProperty()));
+            controller.invariantTag.setAndBindStringList(Collections.singletonList(location.invariantProperty()));
 
             // Update the placeholder
             controller.nicknameTag.setPlaceholder("No name");

@@ -29,8 +29,8 @@ public class ChangeGuardConstantOperator extends MutationOperator {
         final List<MutationTestCase> cases = new ArrayList<>();
 
         // For all edges in the original component
-        for (int edgeIndex = 0; edgeIndex < original.getEdges().size(); edgeIndex++) {
-            final Edge originalEdge = original.getEdges().get(edgeIndex);
+        for (int edgeIndex = 0; edgeIndex < original.getSubEdges().size(); edgeIndex++) {
+            final Edge originalEdge = original.getSubEdges().get(edgeIndex);
 
             // Ignore if locked (e.g. if edge on the Inconsistent or Universal locations)
             if (originalEdge.getIsLocked().get()) continue;
@@ -42,7 +42,7 @@ public class ChangeGuardConstantOperator extends MutationOperator {
             while (matcher.find()) {
                 {
                     final Component mutant = original.cloneForVerification();
-                    final Edge mutantEdge = mutant.getEdges().get(edgeIndex);
+                    final Edge mutantEdge = mutant.getSubEdges().get(edgeIndex);
                     final int newNumber = Integer.parseInt(matcher.group(1)) + 1;
 
                     mutantEdge.setGuard(originalGuard.substring(0, matcher.start()) + newNumber + originalGuard.substring(matcher.end()));
@@ -55,7 +55,7 @@ public class ChangeGuardConstantOperator extends MutationOperator {
                     ));
                 } {
                     final Component mutant = original.cloneForVerification();
-                    final Edge mutantEdge = mutant.getEdges().get(edgeIndex);
+                    final Edge mutantEdge = mutant.getSubEdges().get(edgeIndex);
                     final int newNumber = Integer.parseInt(matcher.group(1)) -1;
 
                     mutantEdge.setGuard(originalGuard.substring(0, matcher.start()) + newNumber + originalGuard.substring(matcher.end()));
@@ -85,8 +85,8 @@ public class ChangeGuardConstantOperator extends MutationOperator {
         int count = 0;
 
         // For all edges in the original component
-        for (int edgeIndex = 0; edgeIndex < original.getEdges().size(); edgeIndex++) {
-            final Edge originalEdge = original.getEdges().get(edgeIndex);
+        for (int edgeIndex = 0; edgeIndex < original.getSubEdges().size(); edgeIndex++) {
+            final Edge originalEdge = original.getSubEdges().get(edgeIndex);
 
             // Ignore if locked (e.g. if edge on the Inconsistent or Universal locations)
             if (originalEdge.getIsLocked().get()) continue;

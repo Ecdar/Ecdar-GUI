@@ -27,8 +27,8 @@ public class ChangeActionInputsOperator extends ChangeActionOperator {
         final List<MutationTestCase> cases = new ArrayList<>();
 
         // For all edges in the original component
-        for (int edgeIndex = 0; edgeIndex < original.getEdges().size(); edgeIndex++) {
-            final Edge originalEdge = original.getEdges().get(edgeIndex);
+        for (int edgeIndex = 0; edgeIndex < original.getSubEdges().size(); edgeIndex++) {
+            final Edge originalEdge = original.getSubEdges().get(edgeIndex);
 
             // Ignore if locked (e.g. if edge on the Inconsistent or Universal locations)
             if (originalEdge.getIsLocked().get()) continue;

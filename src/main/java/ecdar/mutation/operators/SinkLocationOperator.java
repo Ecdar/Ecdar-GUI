@@ -30,8 +30,8 @@ public class SinkLocationOperator extends MutationOperator {
         final List<MutationTestCase> mutants = new ArrayList<>();
 
         // For all edges in the original component
-        for (int edgeIndex = 0; edgeIndex < original.getEdges().size(); edgeIndex++) {
-            final Edge originalEdge = original.getEdges().get(edgeIndex);
+        for (int edgeIndex = 0; edgeIndex < original.getSubEdges().size(); edgeIndex++) {
+            final Edge originalEdge = original.getSubEdges().get(edgeIndex);
 
             // Ignore if locked (e.g. if edge on the Inconsistent or Universal locations)
             if (originalEdge.getIsLocked().get()) continue;
@@ -39,7 +39,7 @@ public class SinkLocationOperator extends MutationOperator {
             final Component mutant = original.cloneForVerification();
 
             // Mutate
-            final Edge mutantEdge = mutant.getEdges().get(edgeIndex);
+            final Edge mutantEdge = mutant.getSubEdges().get(edgeIndex);
             mutantEdge.setTargetLocation(addSinkLocation(mutant));
 
             mutants.add(new MutationTestCase(original, mutant,

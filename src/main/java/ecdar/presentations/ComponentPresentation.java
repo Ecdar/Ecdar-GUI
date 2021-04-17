@@ -234,7 +234,7 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
             minWidth = Math.max(minWidth, location.getX() + GRID_SIZE * 2);
         }
 
-        for (final Edge edge : component.getEdges()) {
+        for (final Edge edge : component.getSubEdges()) {
             for (final Nail nail : edge.getNails()) {
                 minWidth = Math.max(minWidth, nail.getX() + GRID_SIZE);
             }
@@ -257,7 +257,7 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
             minHeight = Math.max(minHeight, location.getY() + GRID_SIZE * 2);
         }
 
-        for (final Edge edge : component.getEdges()) {
+        for (final Edge edge : component.getSubEdges()) {
             for (final Nail nail : edge.getNails()) {
                 minHeight = Math.max(minHeight, nail.getY() + GRID_SIZE);
             }

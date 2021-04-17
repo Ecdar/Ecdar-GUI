@@ -1,9 +1,6 @@
 package ecdar.presentations;
 
-import ecdar.abstractions.Component;
-import ecdar.abstractions.Edge;
-import ecdar.abstractions.EdgeStatus;
-import ecdar.abstractions.Nail;
+import ecdar.abstractions.*;
 import ecdar.controllers.EdgeController;
 import ecdar.controllers.NailController;
 import ecdar.utility.colors.Color;
@@ -18,6 +15,7 @@ import javafx.scene.Group;
 import javafx.scene.control.Label;
 import javafx.scene.shape.Line;
 
+import java.util.Collections;
 import java.util.function.Consumer;
 
 import static javafx.util.Duration.millis;
@@ -30,7 +28,7 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
     private final NailController controller;
     private final Timeline shakeAnimation = new Timeline();
 
-    public NailPresentation(final Nail nail, final Edge edge, final Component component, final EdgeController edgeController) {
+    public NailPresentation(final Nail nail, final DisplayableEdge edge, final Component component, final EdgeController edgeController) {
         controller = new EcdarFXMLLoader().loadAndGetController("NailPresentation.fxml", this);
 
         // Bind the component with the one of the controller
@@ -104,24 +102,24 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
                     propertyLabel.setText(":");
                     propertyLabel.setTranslateX(-3);
                     propertyLabel.setTranslateY(-8);
-                    propertyTag.setAndBindString(controller.getEdge().selectProperty());
+                    propertyTag.setAndBindStringList(Collections.singletonList(controller.getEdge().selectProperty()));
                 } else if(propertyType.equals(Edge.PropertyType.GUARD)) {
                     propertyTag.setPlaceholder("Guard");
                     propertyLabel.setText("<");
                     propertyLabel.setTranslateX(-3);
                     propertyLabel.setTranslateY(-7);
-                    propertyTag.setAndBindString(controller.getEdge().guardProperty());
+                    propertyTag.setAndBindStringList(Collections.singletonList(controller.getEdge().guardProperty()));
                 } else if(propertyType.equals(Edge.PropertyType.SYNCHRONIZATION)) {
                     updateSyncLabel(propertyTag);
                     propertyLabel.setTranslateX(-3);
                     propertyLabel.setTranslateY(-7);
-                    propertyTag.setAndBindString(controller.getEdge().syncProperty());
+                    // ToDo: Handle propertyTag.setAndBindStringList(controller.getEdge().syncProperty());
                 } else if(propertyType.equals(Edge.PropertyType.UPDATE)) {
                     propertyTag.setPlaceholder("Update");
                     propertyLabel.setText("=");
                     propertyLabel.setTranslateX(-3);
                     propertyLabel.setTranslateY(-7);
-                    propertyTag.setAndBindString(controller.getEdge().updateProperty());
+                    propertyTag.setAndBindStringList(Collections.singletonList(controller.getEdge().updateProperty()));
                 }
 
                 //Disable the ability to edit the tag if the nails edge is locked

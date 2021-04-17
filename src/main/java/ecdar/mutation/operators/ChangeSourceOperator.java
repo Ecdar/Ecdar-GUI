@@ -29,8 +29,8 @@ class ChangeSourceOperator extends MutationOperator {
         final List<MutationTestCase> cases = new ArrayList<>();
 
         // For all edges in the original component
-        for (int edgeIndex = 0; edgeIndex < original.getEdges().size(); edgeIndex++) {
-            final Edge originalEdge = original.getEdges().get(edgeIndex);
+        for (int edgeIndex = 0; edgeIndex < original.getSubEdges().size(); edgeIndex++) {
+            final Edge originalEdge = original.getSubEdges().get(edgeIndex);
 
             // Ignore if locked (e.g. if edge on the Inconsistent or Universal locations)
             if (originalEdge.getIsLocked().get()) continue;
@@ -49,7 +49,7 @@ class ChangeSourceOperator extends MutationOperator {
                 final Component mutant = original.cloneForVerification();
 
                 // Mutate
-                final Edge mutantEdge = mutant.getEdges().get(edgeIndex);
+                final Edge mutantEdge = mutant.getSubEdges().get(edgeIndex);
                 final String newLocId = originalLocation.getId();
                 mutantEdge.setSourceLocation(mutant.findLocation(newLocId));
 

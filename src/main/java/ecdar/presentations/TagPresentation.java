@@ -21,6 +21,7 @@ import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 
+import java.util.List;
 import java.util.function.BiConsumer;
 
 import static ecdar.presentations.Grid.GRID_SIZE;
@@ -255,11 +256,14 @@ public class TagPresentation extends StackPane {
         recolor.accept(color.get(), intensity.get());
     }
 
-    public void setAndBindString(final StringProperty string) {
+    public void setAndBindStringList(final List<StringProperty> stringList) {
         final JFXTextField textField = (JFXTextField) lookup("#textField");
-        textField.textProperty().unbind();
-        textField.setText(string.get());
-        string.bind(textField.textProperty());
+
+        for (StringProperty stringProperty : stringList) {
+            textField.textProperty().unbind();
+            textField.setText(stringProperty.get());
+            stringProperty.bind(textField.textProperty());
+        }
     }
 
     public void setPlaceholder(final String placeholder) {

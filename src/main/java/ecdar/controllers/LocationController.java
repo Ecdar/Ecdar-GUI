@@ -214,7 +214,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
             final Component component = getComponent();
             final Location location = getLocation();
 
-            final List<Edge> relatedEdges = component.getRelatedEdges(location);
+            final List<DisplayableEdge> relatedEdges = component.getRelatedEdges(location);
 
             UndoRedoStack.pushAndPerform(() -> { // Perform
                 // Remove the location

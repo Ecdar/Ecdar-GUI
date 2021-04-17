@@ -40,7 +40,7 @@ import static ecdar.presentations.Grid.GRID_SIZE;
 
 public class EdgeController implements Initializable, SelectHelper.ItemSelectable, Highlightable {
     private final ObservableList<Link> links = FXCollections.observableArrayList();
-    private final ObjectProperty<Edge> edge = new SimpleObjectProperty<>();
+    private final ObjectProperty<DisplayableEdge> edge = new SimpleObjectProperty<>();
     private final ObjectProperty<Component> component = new SimpleObjectProperty<>();
     private final SimpleArrowHead simpleArrowHead = new SimpleArrowHead();
     private final SimpleBooleanProperty isHoveringEdge = new SimpleBooleanProperty(false);
@@ -130,7 +130,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
         });
     }
 
-    private ChangeListener<Component> getComponentChangeListener(final Edge newEdge) {
+    private ChangeListener<Component> getComponentChangeListener(final DisplayableEdge newEdge) {
         return (obsComponent, oldComponent, newComponent) -> {
             // Draw new edge from a location
             if (newEdge.getNails().isEmpty() && newEdge.getTargetCircular() == null) {
@@ -178,7 +178,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
         };
     }
 
-    private ListChangeListener<Nail> getNailsChangeListener(final Edge newEdge, final Component newComponent) {
+    private ListChangeListener<Nail> getNailsChangeListener(final DisplayableEdge newEdge, final Component newComponent) {
         return change -> {
             while (change.next()) {
                 // There were added some nails
@@ -274,7 +274,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
         };
     }
 
-    private ChangeListener<Circular> getNewSourceCircularListener(final Edge newEdge) {
+    private ChangeListener<Circular> getNewSourceCircularListener(final DisplayableEdge newEdge) {
         // When the source location is set, finish drawing the edge
         return (obsSourceLocation, oldSourceCircular, newSourceCircular) -> {
             // If the nails list is empty, directly connect the source and target locations
@@ -307,7 +307,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
         };
     }
 
-    private ChangeListener<Circular> getNewTargetCircularListener(final Edge newEdge) {
+    private ChangeListener<Circular> getNewTargetCircularListener(final DisplayableEdge newEdge) {
         // When the target location is set, finish drawing the edge
         return (obsTargetLocation, oldTargetCircular, newTargetCircular) -> {
             // If the nails list is empty, directly connect the source and target locations
@@ -554,15 +554,15 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
         });
     }
 
-    public Edge getEdge() {
+    public DisplayableEdge getEdge() {
         return edge.get();
     }
 
-    public void setEdge(final Edge edge) {
+    public void setEdge(final DisplayableEdge edge) {
         this.edge.set(edge);
     }
 
-    public ObjectProperty<Edge> edgeProperty() {
+    public ObjectProperty<DisplayableEdge> edgeProperty() {
         return edge;
     }
 
@@ -609,7 +609,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
     public void edgeDragged(final MouseEvent event){
         //Check if the edge is selected to ensure that the drag is not targeting a select, guard, update, or sync node
         if(SelectHelper.getSelectedElements().get(0) == this){
-            Edge oldEdge = edge.get();
+            DisplayableEdge oldEdge = edge.get();
             Location source, target;
 
             //Get the coordinates of the source of the original edge
@@ -686,7 +686,13 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                 newEdge.selectProperty().set(edge.get().getSelect());
                 newEdge.guardProperty().set(edge.get().getGuard());
                 newEdge.updateProperty().set(edge.get().getUpdate());
-                newEdge.syncProperty().set(edge.get().getSync());
+
+                if(edge.getValue() instanceof Edge) {
+                    newEdge.syncProperty().set(((Edge) edge.get()).getSync());
+                } else {
+                    //ToDo: Handle setting synchronization on GroupedEdge
+                }
+
                 for (Nail n : edge.get().getNails()) {
                     newEdge.addNail(n);
                 }
@@ -729,7 +735,13 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                 newEdge.selectProperty().set(edge.get().getSelect());
                 newEdge.guardProperty().set(edge.get().getGuard());
                 newEdge.updateProperty().set(edge.get().getUpdate());
-                newEdge.syncProperty().set(edge.get().getSync());
+
+                if(edge.getValue() instanceof Edge) {
+                    newEdge.syncProperty().set(((Edge) edge.get()).getSync());
+                } else {
+                    //ToDo: Handle setting synchronization on GroupedEdge
+                }
+
                 for (Nail n : edge.get().getNails()) {
                     newEdge.addNail(n);
                 }
@@ -739,7 +751,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
 
     @Override
     public void color(final Color color, final Color.Intensity intensity) {
-        final Edge edge = getEdge();
+        final DisplayableEdge edge = getEdge();
 
         // Set the color of the edge
         edge.setColorIntensity(intensity);

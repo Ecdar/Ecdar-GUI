@@ -43,7 +43,7 @@ public class ComponentController extends ModelController implements Initializabl
     private static final Map<Component, Boolean> errorsAndWarningsInitialized = new HashMap<>();
     private static Location placingLocation = null;
     private final ObjectProperty<Component> component = new SimpleObjectProperty<>(null);
-    private final Map<Edge, EdgePresentation> edgePresentationMap = new HashMap<>();
+    private final Map<DisplayableEdge, EdgePresentation> edgePresentationMap = new HashMap<>();
     private final Map<Location, LocationPresentation> locationPresentationMap = new HashMap<>();
 
     public StyleClassedTextArea declarationTextArea;
@@ -203,7 +203,7 @@ public class ComponentController extends ModelController implements Initializabl
             if (!getComponent().getAllButInitialLocations().contains(location))
                 return true; // Do now show messages for locations not in the set of locations
 
-            for (final Edge edge : getComponent().getEdges()) {
+            for (final Edge edge : getComponent().getSubEdges()) {
                 final Location targetLocation = edge.getTargetLocation();
                 if (targetLocation != null && targetLocation.equals(location)) return true;
             }
@@ -252,9 +252,9 @@ public class ComponentController extends ModelController implements Initializabl
         checkLocations.accept(component);
 
         // Check location whenever we get new edges
-        component.getEdges().addListener(new ListChangeListener<Edge>() {
+        component.getEdges().addListener(new ListChangeListener<DisplayableEdge>() {
             @Override
-            public void onChanged(final Change<? extends Edge> c) {
+            public void onChanged(final Change<? extends DisplayableEdge> c) {
                 while (c.next()) {
                     checkLocations.accept(component);
                 }
@@ -728,7 +728,7 @@ public class ComponentController extends ModelController implements Initializabl
     }
 
     private void initializeEdgeHandling(final Component newComponent) {
-        final Consumer<Edge> handleAddedEdge = edge -> {
+        final Consumer<DisplayableEdge> handleAddedEdge = edge -> {
             final EdgePresentation edgePresentation = new EdgePresentation(edge, newComponent);
             edgePresentationMap.put(edge, edgePresentation);
             modelContainerEdge.getChildren().add(edgePresentation);
@@ -746,9 +746,9 @@ public class ComponentController extends ModelController implements Initializabl
         };
 
         // React on addition of edges to the component
-        newComponent.getEdges().addListener(new ListChangeListener<Edge>() {
+        newComponent.getEdges().addListener(new ListChangeListener<DisplayableEdge>() {
             @Override
-            public void onChanged(final Change<? extends Edge> c) {
+            public void onChanged(final Change<? extends DisplayableEdge> c) {
                 if (c.next()) {
                     // Edges are added to the component
                     c.getAddedSubList().forEach(handleAddedEdge);
