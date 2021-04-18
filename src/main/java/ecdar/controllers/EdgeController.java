@@ -488,6 +488,26 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
         }).setDisableable(getEdge().getIsLocked());
     }
 
+    public MenuElement getMakeGroupedEdgeMenuElement(DropDownMenu dropDownMenu) {
+        // Switch between input and output edge
+        final String text;
+        if (getEdge() instanceof Edge) {
+            text = "Make multi-sync edge";
+        } else {
+            text = "Split into single-sync edges";
+        }
+
+        return new MenuElement(text, mouseEvent -> {
+            UndoRedoStack.pushAndPerform(
+                    () -> switchEdgeStatus(),
+                    () -> switchEdgeStatus(),
+                    "Switch single-/multi-sync status of edge",
+                    "switch"
+            );
+            dropDownMenu.hide();
+        }).setDisableable(getEdge().getIsLocked());
+    }
+
     private void switchEdgeStatus() {
         getEdge().switchStatus();
 

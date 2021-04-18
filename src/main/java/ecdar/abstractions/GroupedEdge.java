@@ -1,13 +1,20 @@
 package ecdar.abstractions;
 
+import ecdar.Ecdar;
 import ecdar.controllers.EcdarController;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class GroupedEdge extends DisplayableEdge {
+    private static final String ID = "id";
+    private static final String GROUPED_EDGE = "GE";
+
     private final ArrayList<Edge> edges = new ArrayList<>();
+    private final StringProperty id = new SimpleStringProperty("");
 
     public GroupedEdge(Edge edge) {
         edges.add(edge);
@@ -59,6 +66,34 @@ public class GroupedEdge extends DisplayableEdge {
         return syncs;
     }
 
+    public String getId() {
+        return id.get();
+    }
+
+    /**
+     * Generate and sets a unique id for this location
+     */
+    private void setId() {
+        for(int counter = 0; ; counter++) {
+            if(!Ecdar.getProject().getLocationIds().contains(String.valueOf(counter))){
+                id.set(GROUPED_EDGE + counter);
+                return;
+            }
+        }
+    }
+
+    /**
+     * Sets a specific id for this location
+     * @param string id to set
+     */
+    public void setId(final String string){
+        id.set(string);
+    }
+
+    public StringProperty idProperty() {
+        return id;
+    }
+
     public void addSync(final String sync) {
         // Initialize edge with new sync
         Edge edge = new Edge(getSourceLocation(), getStatus());
@@ -71,6 +106,7 @@ public class GroupedEdge extends DisplayableEdge {
         edge.setIsLocked(this.getIsLocked().getValue());
         edge.setIsHighlighted(this.getIsHighlighted());
         edge.setSync(sync);
+        edge.setGroup(this.getId());
 
         this.edges.add(edge);
     }
@@ -107,11 +143,5 @@ public class GroupedEdge extends DisplayableEdge {
             updateProperty().unbind();
             setUpdate(newProperty.get(0));
         }
-    }
-
-    private void bindReachabilityAnalysis() {
-        selectProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
-        guardProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
-        updateProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
     }
 }

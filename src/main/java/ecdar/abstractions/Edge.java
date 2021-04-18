@@ -1,6 +1,7 @@
 package ecdar.abstractions;
 
 import com.google.gson.JsonPrimitive;
+import ecdar.Ecdar;
 import ecdar.controllers.EcdarController;
 import ecdar.utility.serialize.Serializable;
 import com.google.gson.JsonArray;
@@ -12,6 +13,8 @@ import java.util.List;
 
 public class Edge extends DisplayableEdge implements Serializable {
 
+    private static final String ID = "id";
+    private static final String GROUP = "group";
     private static final String SOURCE_LOCATION = "sourceLocation";
     private static final String TARGET_LOCATION = "targetLocation";
     private static final String SELECT = "select";
@@ -21,8 +24,12 @@ public class Edge extends DisplayableEdge implements Serializable {
     private static final String NAILS = "nails";
     private static final String STATUS = "status";
     private static final String IS_LOCKED = "isLocked";
+    public static final String EDGE = "E";
+    static final int ID_LETTER_LENGTH = 1;
 
     private final StringProperty sync = new SimpleStringProperty("");
+    private final StringProperty id = new SimpleStringProperty("");
+    private final StringProperty group = new SimpleStringProperty("");
 
     public Edge(final Location sourceLocation, final EdgeStatus status) {
         setSourceLocation(sourceLocation);
@@ -34,6 +41,14 @@ public class Edge extends DisplayableEdge implements Serializable {
     public Edge(final JsonObject jsonObject, final Component component) {
         deserialize(jsonObject, component);
         bindReachabilityAnalysis();
+    }
+
+    /**
+     * Generates an id for this, and binds reachability analysis.
+     */
+    public void initialize() {
+        setId();
+        System.out.println(getId());
     }
 
     public String getSync() {
@@ -54,6 +69,42 @@ public class Edge extends DisplayableEdge implements Serializable {
      */
     public String getSyncWithSymbol() {
         return sync.get() + (ioStatus.get().equals(EdgeStatus.INPUT) ? "?" : "!");
+    }
+
+    public String getId() {
+        return id.get();
+    }
+
+    /**
+     * Generate and sets a unique id for this location
+     */
+    private void setId() {
+        for(int counter = 0; ; counter++) {
+            if(!Ecdar.getProject().getLocationIds().contains(String.valueOf(counter))){
+                id.set(EDGE + counter);
+                return;
+            }
+        }
+    }
+
+    /**
+     * Sets a specific id for this location
+     * @param string id to set
+     */
+    public void setId(final String string){
+        id.set(string);
+    }
+
+    public StringProperty idProperty() {
+        return id;
+    }
+
+    public String getGroup(){
+        return group.get();
+    }
+
+    public void setGroup(final String string){
+        group.set(string);
     }
 
     /**
@@ -132,6 +183,9 @@ public class Edge extends DisplayableEdge implements Serializable {
     @Override
     public JsonObject serialize() {
         final JsonObject result = new JsonObject();
+
+        result.addProperty(ID, getId());
+        result.addProperty(GROUP, getGroup());
 
         result.addProperty(SOURCE_LOCATION, getSourceLocation().getId());
         result.addProperty(TARGET_LOCATION, getTargetLocation().getId());
