@@ -1,7 +1,6 @@
 package ecdar.presentations;
 
 import ecdar.abstractions.Component;
-import ecdar.controllers.CanvasController;
 import ecdar.controllers.EcdarController;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
@@ -21,7 +20,6 @@ import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 
-import java.util.List;
 import java.util.function.BiConsumer;
 
 import static ecdar.presentations.Grid.GRID_SIZE;
@@ -54,7 +52,6 @@ public class TagPresentation extends StackPane {
     }
 
     private void initializeTextFocusHandler() {
-
         // When a label is loaded do not request focus initially
         textFieldFocusProperty().addListener((observable, oldValue, newValue) -> {
             if(!hadInitialFocus && newValue) {
@@ -68,7 +65,7 @@ public class TagPresentation extends StackPane {
         mouseTransparentProperty().bind(opacityProperty().isEqualTo(0, 0.00f));
     }
 
-    private void initializeTextAid() {
+    protected void initializeTextAid() {
         final JFXTextField textField = (JFXTextField) lookup("#textField");
 
         textField.textProperty().addListener((obs, oldText, newText) -> {
@@ -158,7 +155,7 @@ public class TagPresentation extends StackPane {
             previousY = getTranslateY();
         });
 
-        shape.setOnMouseDragged(event -> {
+        this.setOnMouseDragged(event -> {
             event.consume();
 
             final double newX = EcdarController.getActiveCanvasPresentation().mouseTracker.gridXProperty().subtract(getComponent().getBox().getXProperty()).subtract(getLocationAware().xProperty()).doubleValue() - getMinWidth() / 2;
@@ -256,14 +253,11 @@ public class TagPresentation extends StackPane {
         recolor.accept(color.get(), intensity.get());
     }
 
-    public void setAndBindStringList(final List<StringProperty> stringList) {
+    public void setAndBindString(final StringProperty stringProperty) {
         final JFXTextField textField = (JFXTextField) lookup("#textField");
-
-        for (StringProperty stringProperty : stringList) {
-            textField.textProperty().unbind();
-            textField.setText(stringProperty.get());
-            stringProperty.bind(textField.textProperty());
-        }
+        textField.textProperty().unbind();
+        textField.setText(stringProperty.get());
+        stringProperty.bind(textField.textProperty());
     }
 
     public void setPlaceholder(final String placeholder) {

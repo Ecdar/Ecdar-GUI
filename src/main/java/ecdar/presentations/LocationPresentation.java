@@ -209,8 +209,8 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
             controller.invariantTag.bindToColor(location.colorProperty(), location.colorIntensityProperty(), false);
 
             // Update the invariant
-            controller.nicknameTag.setAndBindStringList(Collections.singletonList(location.nicknameProperty()));
-            controller.invariantTag.setAndBindStringList(Collections.singletonList(location.invariantProperty()));
+            controller.nicknameTag.setAndBindString(location.nicknameProperty());
+            controller.invariantTag.setAndBindString(location.invariantProperty());
 
             // Update the placeholder
             controller.nicknameTag.setPlaceholder("No name");

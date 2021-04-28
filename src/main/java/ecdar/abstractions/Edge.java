@@ -224,6 +224,17 @@ public class Edge extends DisplayableEdge implements Serializable {
 
         ioStatus = new SimpleObjectProperty<>(EdgeStatus.valueOf(json.getAsJsonPrimitive(STATUS).getAsString()));
 
+        final JsonPrimitive IDJson = json.getAsJsonPrimitive(ID);
+        if (IDJson != null) setId(IDJson.getAsString());
+        else setId();
+
+        final JsonPrimitive groupJson = json.getAsJsonPrimitive(GROUP);
+        if (groupJson != null) {
+            setGroup(groupJson.getAsString());
+            // ToDo NIELS: Generate the groupedEdge
+        }
+        else setGroup("");
+
         setSelect(json.getAsJsonPrimitive(SELECT).getAsString());
         setGuard(json.getAsJsonPrimitive(GUARD).getAsString());
         setUpdate(json.getAsJsonPrimitive(UPDATE).getAsString());

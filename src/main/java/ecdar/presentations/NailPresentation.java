@@ -11,11 +11,11 @@ import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.control.Label;
 import javafx.scene.shape.Line;
 
-import java.util.Collections;
 import java.util.function.Consumer;
 
 import static javafx.util.Duration.millis;
@@ -42,10 +42,22 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
 
         controller.setEdgeController(edgeController);
 
-        initializeNailCircleColor();
-        initializePropertyTag();
-        initializeRadius();
-        initializeShakeAnimation();
+        Platform.runLater(() -> {
+            if (controller.getNail().getPropertyType() == DisplayableEdge.PropertyType.SYNCHRONIZATION && edgeController.getEdge() instanceof GroupedEdge) {
+                controller.propertyTag = new MultiSyncTagPresentation();
+            } else {
+                controller.propertyTag = new TagPresentation();
+            }
+
+            controller.propertyTag.setTranslateX(10);
+            controller.propertyTag.setTranslateY(-10);
+            this.getChildren().add(1, controller.propertyTag);
+
+            initializeNailCircleColor();
+            initializePropertyTag();
+            initializeRadius();
+            initializeShakeAnimation();
+        });
     }
 
     private void initializeRadius() {
@@ -64,17 +76,9 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
     }
 
     private void initializePropertyTag() {
-
         final TagPresentation propertyTag = controller.propertyTag;
         final Line propertyTagLine = controller.propertyTagLine;
-        propertyTag.setComponent(controller.getComponent());
-        propertyTag.setLocationAware(controller.getNail());
-
-        // Bind the line to the tag
-        BindingHelper.bind(propertyTagLine, propertyTag);
-
-        // Bind the color of the tag to the color of the component
-        propertyTag.bindToColor(controller.getComponent().colorProperty(), controller.getComponent().colorIntensityProperty());
+        setPropertyTagComponentAndLocationAware(propertyTag, propertyTagLine);
 
         // Updates visibility and placeholder of the tag depending on the type of nail
         final Consumer<Edge.PropertyType> updatePropertyType = (propertyType) -> {
@@ -102,24 +106,28 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
                     propertyLabel.setText(":");
                     propertyLabel.setTranslateX(-3);
                     propertyLabel.setTranslateY(-8);
-                    propertyTag.setAndBindStringList(Collections.singletonList(controller.getEdge().selectProperty()));
+                    propertyTag.setAndBindString(controller.getEdge().selectProperty());
                 } else if(propertyType.equals(Edge.PropertyType.GUARD)) {
                     propertyTag.setPlaceholder("Guard");
                     propertyLabel.setText("<");
                     propertyLabel.setTranslateX(-3);
                     propertyLabel.setTranslateY(-7);
-                    propertyTag.setAndBindStringList(Collections.singletonList(controller.getEdge().guardProperty()));
+                    propertyTag.setAndBindString(controller.getEdge().guardProperty());
                 } else if(propertyType.equals(Edge.PropertyType.SYNCHRONIZATION)) {
                     updateSyncLabel(propertyTag);
                     propertyLabel.setTranslateX(-3);
                     propertyLabel.setTranslateY(-7);
-                    // ToDo: Handle propertyTag.setAndBindStringList(controller.getEdge().syncProperty());
+                    if (controller.getEdge() instanceof Edge)
+                        propertyTag.setAndBindString(((Edge) controller.getEdge()).syncProperty());
+                    else {
+                        ((MultiSyncTagPresentation) propertyTag).setAndBindStringList(((GroupedEdge) controller.getEdge()).getSyncProperties());
+                    }
                 } else if(propertyType.equals(Edge.PropertyType.UPDATE)) {
                     propertyTag.setPlaceholder("Update");
                     propertyLabel.setText("=");
                     propertyLabel.setTranslateX(-3);
                     propertyLabel.setTranslateY(-7);
-                    propertyTag.setAndBindStringList(Collections.singletonList(controller.getEdge().updateProperty()));
+                    propertyTag.setAndBindString(controller.getEdge().updateProperty());
                 }
 
                 //Disable the ability to edit the tag if the nails edge is locked
@@ -145,6 +153,17 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
 
         // Update the tag initially
         updatePropertyType.accept(controller.getNail().getPropertyType());
+    }
+
+    private void setPropertyTagComponentAndLocationAware(TagPresentation propertyTag, Line propertyTagLine) {
+        propertyTag.setComponent(controller.getComponent());
+        propertyTag.setLocationAware(controller.getNail());
+
+        // Bind the line to the tag
+        BindingHelper.bind(propertyTagLine, propertyTag);
+
+        // Bind the color of the tag to the color of the component
+        propertyTag.bindToColor(controller.getComponent().colorProperty(), controller.getComponent().colorIntensityProperty());
     }
 
     /**
@@ -235,6 +254,10 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
         controller.nailCircle.setStroke(color.getColor(intensity.next(2)));
     }
 
+    public NailController getController() {
+        return controller;
+    }
+
     /***
      * Highlights the nail
      */
@@ -249,6 +272,5 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
     @Override
     public void unhighlight() {
         this.deselect();
-
     }
 }

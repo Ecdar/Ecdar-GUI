@@ -498,9 +498,25 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
         }
 
         return new MenuElement(text, mouseEvent -> {
+            DisplayableEdge tempEdge = getEdge();
+
+            Nail syncNail = getEdge().getNails().stream().filter((nail) -> nail.getPropertyType() == DisplayableEdge.PropertyType.SYNCHRONIZATION).findFirst().get();
+            TagPresentation tempTagPresentation = nailNailPresentationMap.get(syncNail).getController().propertyTag;
+
             UndoRedoStack.pushAndPerform(
-                    () -> switchEdgeStatus(),
-                    () -> switchEdgeStatus(),
+                    () -> {
+                        if (getEdge() instanceof Edge) {
+                            component.get().removeEdge(tempEdge);
+                            setEdge(new GroupedEdge((Edge) tempEdge));
+                            component.get().addEdge(getEdge());
+                        }
+                    },
+                    () -> {
+                        DisplayableEdge edge = getEdge();
+                        component.get().removeEdge(edge);
+                        setEdge(((GroupedEdge) edge).getEdges().get(0));
+                        component.get().addEdge(tempEdge);
+                    },
                     "Switch single-/multi-sync status of edge",
                     "switch"
             );
@@ -710,7 +726,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                 if(edge.getValue() instanceof Edge) {
                     newEdge.syncProperty().set(((Edge) edge.get()).getSync());
                 } else {
-                    //ToDo: Handle setting synchronization on GroupedEdge
+                    //ToDo NIELS: Handle setting synchronization on GroupedEdge
                 }
 
                 for (Nail n : edge.get().getNails()) {
@@ -759,7 +775,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                 if(edge.getValue() instanceof Edge) {
                     newEdge.syncProperty().set(((Edge) edge.get()).getSync());
                 } else {
-                    //ToDo: Handle setting synchronization on GroupedEdge
+                    //ToDo NIELS: Handle setting synchronization on GroupedEdge
                 }
 
                 for (Nail n : edge.get().getNails()) {

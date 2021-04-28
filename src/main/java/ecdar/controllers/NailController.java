@@ -2,10 +2,7 @@ package ecdar.controllers;
 
 import ecdar.Debug;
 import ecdar.Ecdar;
-import ecdar.abstractions.Component;
-import ecdar.abstractions.DisplayableEdge;
-import ecdar.abstractions.Edge;
-import ecdar.abstractions.Nail;
+import ecdar.abstractions.*;
 import ecdar.presentations.*;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
@@ -14,6 +11,7 @@ import ecdar.utility.helpers.SelectHelper;
 import ecdar.utility.keyboard.NudgeDirection;
 import ecdar.utility.keyboard.Nudgeable;
 import com.jfoenix.controls.JFXPopup;
+import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -82,11 +80,16 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
         this.edgeController = controller;
     }
 
+    public EdgeController getEdgeController() {
+        return this.edgeController;
+    }
+
     private void showContextMenu() {
         final DropDownMenu contextMenu = new DropDownMenu(root);
 
         if (getNail().getPropertyType().equals(Edge.PropertyType.SYNCHRONIZATION)) {
             contextMenu.addMenuElement(edgeController.getChangeStatusMenuElement(contextMenu));
+            contextMenu.addMenuElement(edgeController.getMakeGroupedEdgeMenuElement(contextMenu));
         } else {
             // Only delete option if not sync nail
             contextMenu.addClickableAndDisableableListElement("Delete", getEdge().getIsLocked(), (mouseEvent -> {

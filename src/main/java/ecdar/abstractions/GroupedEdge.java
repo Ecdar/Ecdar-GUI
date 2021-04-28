@@ -2,6 +2,8 @@ package ecdar.abstractions;
 
 import ecdar.Ecdar;
 import ecdar.controllers.EcdarController;
+import ecdar.presentations.Grid;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
@@ -18,17 +20,27 @@ public class GroupedEdge extends DisplayableEdge {
 
     public GroupedEdge(Edge edge) {
         edges.add(edge);
+        ioStatus = new SimpleObjectProperty<>(edge.ioStatus.get());
         initializeFromEdge(edge);
 
+        double centerBetweenSourceAndTargetX = (edge.getSourceLocation().getX() + edge.getTargetLocation().getX()) / 2;
+        double centerBetweenSourceAndTargetY = (edge.getSourceLocation().getY() + edge.getTargetLocation().getY()) / 2;
+
+        // ToDo NIELS: Add nails on the edge
         //Add guard nail
-        Nail nail = new Nail(-10, -10);
-        nail.setPropertyType(Edge.PropertyType.GUARD);
+//        nail = new Nail(Grid.snap(centerBetweenSourceAndTargetX) - Grid.GRID_SIZE * 2, Grid.snap(centerBetweenSourceAndTargetY) - Grid.GRID_SIZE * 2);
+//        nail.setPropertyType(Edge.PropertyType.GUARD);
+//        addNail(nail);
+
+        // Add sync nail
+        Nail nail = new Nail(Grid.snap(centerBetweenSourceAndTargetX), Grid.snap(centerBetweenSourceAndTargetY));
+        nail.setPropertyType(Edge.PropertyType.SYNCHRONIZATION);
         addNail(nail);
 
         // Add update nail
-        nail = new Nail(10, 10);
-        nail.setPropertyType(Edge.PropertyType.UPDATE);
-        addNail(nail);
+//        nail = new Nail(Grid.snap(centerBetweenSourceAndTargetX) + Grid.GRID_SIZE * 2, Grid.snap(centerBetweenSourceAndTargetY) + Grid.GRID_SIZE * 2);
+//        nail.setPropertyType(Edge.PropertyType.UPDATE);
+//        addNail(nail);
     }
 
     private void initializeFromEdge(Edge edge) {
@@ -138,10 +150,20 @@ public class GroupedEdge extends DisplayableEdge {
             guardProperty().unbind();
             setGuard(newProperty.get(0));
         } else if (propertyType.equals(PropertyType.SYNCHRONIZATION)) {
-            // ToDo: Handle synchronization property
+            // ToDo NIELS: Handle synchronization property
         } else if (propertyType.equals(PropertyType.UPDATE)) {
             updateProperty().unbind();
             setUpdate(newProperty.get(0));
         }
+    }
+
+    public List<StringProperty> getSyncProperties() {
+        List<StringProperty> syncProperties = new ArrayList<>();
+
+        for (Edge edge : edges) {
+            syncProperties.add(edge.syncProperty());
+        }
+
+        return syncProperties;
     }
 }
