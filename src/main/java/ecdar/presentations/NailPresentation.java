@@ -43,8 +43,17 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
         controller.setEdgeController(edgeController);
 
         Platform.runLater(() -> {
-            if (controller.getNail().getPropertyType() == DisplayableEdge.PropertyType.SYNCHRONIZATION && edgeController.getEdge() instanceof GroupedEdge) {
+            if (controller.getNail().getPropertyType() == DisplayableEdge.PropertyType.SYNCHRONIZATION && edge instanceof GroupedEdge) {
                 controller.propertyTag = new MultiSyncTagPresentation();
+
+                TagPresentation tagPresentation = getController().propertyTag;
+                if (tagPresentation instanceof MultiSyncTagPresentation) {
+                    ((MultiSyncTagPresentation) tagPresentation).getController().addSyncBtn.setOnMouseClicked((event) -> {
+                        ((GroupedEdge) edge).addSync();
+                        ((MultiSyncTagPresentation) tagPresentation).setAndBindStringList(((GroupedEdge) edge).getSyncProperties());
+                        updateSyncLabel(tagPresentation);
+                    });
+                }
             } else {
                 controller.propertyTag = new TagPresentation();
             }
@@ -121,6 +130,7 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
                         propertyTag.setAndBindString(((Edge) controller.getEdge()).syncProperty());
                     else {
                         ((MultiSyncTagPresentation) propertyTag).setAndBindStringList(((GroupedEdge) controller.getEdge()).getSyncProperties());
+                        updateSyncLabel(propertyTag);
                     }
                 } else if(propertyType.equals(Edge.PropertyType.UPDATE)) {
                     propertyTag.setPlaceholder("Update");

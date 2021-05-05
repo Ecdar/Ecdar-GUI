@@ -27,20 +27,20 @@ import static javafx.scene.paint.Color.TRANSPARENT;
 
 public class TagPresentation extends StackPane {
 
-    private final static Color backgroundColor = Color.GREY;
-    private final static Color.Intensity backgroundColorIntensity = Color.Intensity.I50;
+    final static Color backgroundColor = Color.GREY;
+    final static Color.Intensity backgroundColorIntensity = Color.Intensity.I50;
 
-    private final ObjectProperty<Component> component = new SimpleObjectProperty<>(null);
-    private final ObjectProperty<LocationAware> locationAware = new SimpleObjectProperty<>(null);
+    final ObjectProperty<Component> component = new SimpleObjectProperty<>(null);
+    final ObjectProperty<LocationAware> locationAware = new SimpleObjectProperty<>(null);
 
-    private LineTo l2;
-    private LineTo l3;
-    private double previousX;
-    private double previousY;
-    private boolean wasDragged;
-    private boolean hadInitialFocus = false;
+    LineTo l2;
+    LineTo l3;
+    double previousX;
+    double previousY;
+    boolean wasDragged;
+    boolean hadInitialFocus = false;
 
-    private static double TAG_HEIGHT = 1.6 * GRID_SIZE;
+    static double TAG_HEIGHT = 1.6 * GRID_SIZE;
 
     public TagPresentation() {
         new EcdarFXMLLoader().loadAndGetController("TagPresentation.fxml", this);
@@ -51,21 +51,23 @@ public class TagPresentation extends StackPane {
         initializeTextFocusHandler();
     }
 
-    private void initializeTextFocusHandler() {
-        // When a label is loaded do not request focus initially
-        textFieldFocusProperty().addListener((observable, oldValue, newValue) -> {
-            if(!hadInitialFocus && newValue) {
-                hadInitialFocus = true;
-                EcdarController.getActiveCanvasPresentation().getController().leaveTextAreas();
-            }
+    void initializeTextFocusHandler() {
+        Platform.runLater(() -> {
+            // When a label is loaded do not request focus initially
+            textFieldFocusProperty().addListener((observable, oldValue, newValue) -> {
+                if(!hadInitialFocus && newValue) {
+                    hadInitialFocus = true;
+                    EcdarController.getActiveCanvasPresentation().getController().leaveTextAreas();
+                }
+            });
         });
     }
 
-    private void initializeMouseTransparency() {
+    void initializeMouseTransparency() {
         mouseTransparentProperty().bind(opacityProperty().isEqualTo(0, 0.00f));
     }
 
-    protected void initializeTextAid() {
+    void initializeTextAid() {
         final JFXTextField textField = (JFXTextField) lookup("#textField");
 
         textField.textProperty().addListener((obs, oldText, newText) -> {
@@ -76,7 +78,7 @@ public class TagPresentation extends StackPane {
         });
     }
 
-    private void initializeLabel() {
+    void initializeLabel() {
         final Label label = (Label) lookup("#label");
         final JFXTextField textField = (JFXTextField) lookup("#textField");
         final Path shape = (Path) lookup("#shape");
@@ -125,11 +127,9 @@ public class TagPresentation extends StackPane {
         });
 
         label.textProperty().bind(new When(textField.textProperty().isNotEmpty()).then(textField.textProperty()).otherwise(textField.promptTextProperty()));
-
-
     }
 
-    private void initializeShape() {
+    void initializeShape() {
         final int WIDTH = 5000;
         final double HEIGHT = TAG_HEIGHT;
 

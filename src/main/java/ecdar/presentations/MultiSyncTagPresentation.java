@@ -1,8 +1,7 @@
 package ecdar.presentations;
 
-import com.jfoenix.controls.JFXScrollPane;
 import com.jfoenix.controls.JFXTextField;
-import ecdar.controllers.EcdarController;
+import ecdar.controllers.MultiSyncTagController;
 import javafx.application.Platform;
 import javafx.beans.binding.When;
 import javafx.beans.property.*;
@@ -11,12 +10,9 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.scene.shape.LineTo;
-import javafx.scene.shape.Path;
-import javafx.scene.shape.StrokeType;
+import javafx.scene.text.TextAlignment;
 
 import java.util.List;
 
@@ -24,38 +20,49 @@ import static ecdar.presentations.Grid.GRID_SIZE;
 
 public class MultiSyncTagPresentation extends TagPresentation {
 
-    private final JFXScrollPane textFieldList;
-    private LineTo l2;
-    private LineTo l3;
+    private final MultiSyncTagController controller;
+    private final LineTo l2;
+    private final LineTo l3;
     private boolean hadInitialFocus = false;
 
-    private static double TAG_HEIGHT = 1.6 * GRID_SIZE;
+    private static final double TAG_HEIGHT = 1.6 * GRID_SIZE;
 
     public MultiSyncTagPresentation() {
-        new EcdarFXMLLoader().loadAndGetController("MultiSyncTagPresentation.fxml", this);
+        controller = new EcdarFXMLLoader().loadAndGetController("MultiSyncTagPresentation.fxml", this);
 
-        textFieldList = (JFXScrollPane) this.lookup("#textFieldScrollPane");
-        ((StackPane) textFieldList.getChildren().get(1)).setMinHeight(((JFXTextField) lookup("#textField")).getHeight() + 20);
-        ((StackPane) textFieldList.getChildren().get(1)).setPrefHeight(((JFXTextField) lookup("#textField")).getHeight() + 20);
+        l2 = new LineTo(0, 0);
+        l3 = new LineTo(0, TAG_HEIGHT);
 
-        // addSyncTextField();
+        initializeShape();
+        initializeLabel();
+        initializeMouseTransparency();
+        // initializeTextFocusHandler();
+
+        setMaxWidth(200);
     }
 
-    private void addSyncTextField() {
+    private JFXTextField addSyncTextField() {
         final Label label = new Label();
         final JFXTextField textField = new JFXTextField();
-        final Path shape = new Path();
+
+        label.getStyleClass().add("sub-caption");
+        label.setAlignment(Pos.CENTER_LEFT);
+        label.setTextAlignment(TextAlignment.LEFT);
+        label.setVisible(false);
+
+        textField.getStyleClass().add("sub-caption");
+        textField.setAlignment(Pos.CENTER_LEFT);
 
         final Insets insets = new Insets(0,2,0,2);
         textField.setPadding(insets);
         label.setPadding(insets);
 
-        final int padding = 0;
+        final int padding = 5;
 
         label.layoutBoundsProperty().addListener((obs, oldBounds, newBounds) -> {
-            double newWidth = Math.max(newBounds.getWidth(), 10);
-            final double res = GRID_SIZE * 2 - (newWidth % (GRID_SIZE * 2));
-            newWidth += res;
+            double newWidth = Math.max(newBounds.getWidth(), 60);
+            final double resWidth = GRID_SIZE * 2 - (newWidth % (GRID_SIZE * 2));
+            newWidth += resWidth;
 
             textField.setMinWidth(newWidth);
             textField.setMaxWidth(newWidth);
@@ -66,78 +73,77 @@ public class MultiSyncTagPresentation extends TagPresentation {
             setMinWidth(newWidth + padding);
             setMaxWidth(newWidth + padding);
 
-            textField.setMinHeight(TAG_HEIGHT);
-            textField.setMaxHeight(TAG_HEIGHT);
-
             textField.focusedProperty().addListener((observable, oldFocused, newFocused) -> {
                 if (newFocused) {
-                    shape.setTranslateY(2);
                     textField.setTranslateY(2);
                 }
             });
 
             if (getWidth() >= 1000) {
-                setWidth(newWidth);
-                setHeight(TAG_HEIGHT);
-                shape.setTranslateY(-1);
+                setWidth(newWidth);;
                 textField.setTranslateY(-1);
             }
 
             // Fixes the jumping of the shape when the text field is empty
             if (textField.getText().isEmpty()) {
-                shape.setLayoutX(0);
             }
         });
 
         label.textProperty().bind(new When(textField.textProperty().isNotEmpty()).then(textField.textProperty()).otherwise(textField.promptTextProperty()));
+
+        StackPane container = new StackPane();
+        container.getChildren().add(label);
+        container.getChildren().add(textField);
+        container.setAlignment(Pos.TOP_LEFT);
+
+        controller.syncList.getChildren().add(container);
+
+        return textField;
     }
 
     public void setAndBindStringList(final List<StringProperty> stringList) {
         Platform.runLater(() -> {
-            int i = 1;
+            clearTextFields();
+
             for (StringProperty stringProperty : stringList) {
-                StackPane textFieldContainer = new StackPane();
-                textFieldContainer.setAlignment(Pos.CENTER_LEFT);
-
-                Path path = new Path();
-                path.setId("shape" + i);
-                path.setStrokeType(StrokeType.INSIDE);
-
-                Label label = new Label();
-                label.setId("label" + i);
-                label.getStyleClass().add("sub-caption");
-                label.setVisible(false);
-
-                final JFXTextField textField = new JFXTextField();
-                textField.setId("textField" + i);
-                textField.setAlignment(Pos.CENTER_LEFT);
-                textField.getStyleClass().add("sub-caption");
-                textField.setMouseTransparent(true);
-
+                JFXTextField textField = addSyncTextField();
                 textField.textProperty().unbind();
                 textField.setText(stringProperty.get());
                 stringProperty.bind(textField.textProperty());
-
-                textFieldContainer.getChildren().addAll(path, label, textField);
-
-                textFieldList
-                        .getChildren()
-                        .add(textFieldContainer);
-                i++;
             }
         });
+
+        if (getHeight() > TAG_HEIGHT * 10) {
+            double newHeight = TAG_HEIGHT * 10;
+            final double resHeight = GRID_SIZE * 2 - (newHeight % (GRID_SIZE * 2));
+            newHeight += resHeight;
+
+            l2.setY(newHeight);
+            l3.setY(newHeight);
+
+            setMinHeight(newHeight);
+            setMaxHeight(newHeight);
+        }
+    }
+
+    private void clearTextFields() {
+        controller.syncList.getChildren().clear();
     }
 
     @Override
     public void setPlaceholder(final String placeholder) {
-        List<Node> textFieldContainers = ((VBox) ((ScrollPane) textFieldList.getChildren().get(0)).getContent()).getChildren();
+        List<Node> textFieldContainers = controller.syncList.getChildren();
 
         for (Node child : textFieldContainers) {
-            if(!((StackPane) child).getChildren().isEmpty()) {
-                JFXTextField textField = (JFXTextField) ((StackPane) child).getChildren().get(2);
+            if (child instanceof StackPane && !((StackPane) child).getChildren().isEmpty()) {
+                JFXTextField textField = (JFXTextField) ((StackPane) child).getChildren().get(1);
                 textField.setPromptText(placeholder);
             }
         }
+    }
+
+    public MultiSyncTagController getController() {
+        return controller;
     }
 
     @Override
@@ -154,15 +160,15 @@ public class MultiSyncTagPresentation extends TagPresentation {
 
     @Override
     public ObservableBooleanValue textFieldFocusProperty() {
-        // ToDo: Handle
-        final JFXTextField textField = (JFXTextField) lookup("#textField");
-        return textField.focusedProperty();
+        return controller.textFieldFocus;
     }
 
     @Override
     public void setDisabledText(boolean bool){
-        // ToDo: Handle
-        final JFXTextField textField = (JFXTextField) lookup("#textField");
-        textField.setDisable(true);
+        for (Node child : controller.syncList.getChildren()) {
+            if (child instanceof StackPane && !((StackPane) child).getChildren().isEmpty()) {
+                ((StackPane) child).getChildren().get(1).setDisable(true);
+            }
+        }
     }
 }

@@ -106,18 +106,15 @@ public class GroupedEdge extends DisplayableEdge {
         return id;
     }
 
-    public void addSync(final String sync) {
+    public void addSync() {
         // Initialize edge with new sync
         Edge edge = new Edge(getSourceLocation(), getStatus());
         edge.setTargetLocation(this.getTargetLocation());
         edge.setGuard(this.getGuard());
         edge.setUpdate(this.getGuard());
-        edge.setColor(this.getColor());
-        edge.setColorIntensity(this.getColorIntensity());
         edge.setProperty(Edge.PropertyType.SELECTION, Collections.singletonList(this.getSelect()));
         edge.setIsLocked(this.getIsLocked().getValue());
         edge.setIsHighlighted(this.getIsHighlighted());
-        edge.setSync(sync);
         edge.setGroup(this.getId());
 
         this.edges.add(edge);

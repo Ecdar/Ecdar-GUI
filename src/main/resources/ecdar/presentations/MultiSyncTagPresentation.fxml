@@ -4,30 +4,26 @@
 <?import com.jfoenix.controls.JFXTextField?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.shape.Path?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Button?>
+<?import com.jfoenix.controls.JFXButton?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
-         type="StackPane">
-    <JFXScrollPane id="textFieldScrollPane" visible="false">
-        <StackPane visible="false">
-            <Path id="shape" StackPane.alignment="CENTER_LEFT" strokeType="INSIDE" visible="false"/>
-
-            <Label id="label" styleClass="sub-caption" StackPane.alignment="CENTER_LEFT" visible="false"/>
-
-            <JFXTextField id="textField" styleClass="sub-caption" StackPane.alignment="CENTER_LEFT" mouseTransparent="true"/>
-        </StackPane>
-        <StackPane>
-            <Path id="shape1" StackPane.alignment="CENTER_LEFT" strokeType="INSIDE" visible="false"/>
-
-            <Label id="label1" styleClass="sub-caption" StackPane.alignment="CENTER_LEFT" visible="false"/>
-
-            <JFXTextField id="textField1" styleClass="sub-caption" StackPane.alignment="CENTER_LEFT" mouseTransparent="true"/>
-        </StackPane>
-        <StackPane>
-            <Path id="shape2" StackPane.alignment="CENTER_LEFT" strokeType="INSIDE" visible="false"/>
-
-            <Label id="label2" styleClass="sub-caption" StackPane.alignment="CENTER_LEFT" visible="false"/>
-
-            <JFXTextField id="textField2" styleClass="sub-caption" StackPane.alignment="CENTER_LEFT" mouseTransparent="true"/>
-        </StackPane>
-    </JFXScrollPane>
+         type="StackPane"
+         fx:controller="ecdar.controllers.MultiSyncTagController">
+    <VBox alignment="BOTTOM_CENTER">
+        <ScrollPane id="scrollPane"
+                    fitToWidth="true"
+                    fitToHeight="true"
+                    hbarPolicy="NEVER"
+                    AnchorPane.topAnchor="0"
+                    AnchorPane.bottomAnchor="0"
+                    AnchorPane.leftAnchor="0"
+                    AnchorPane.rightAnchor="0"
+                    styleClass="scroll-pane">
+            <VBox fx:id="syncList">
+            </VBox>
+        </ScrollPane>
+        <JFXButton fx:id="addSyncBtn" text="Add sync" prefWidth="Infinity"/>
+    </VBox>
 </fx:root>

@@ -11,7 +11,6 @@ import ecdar.utility.helpers.SelectHelper;
 import ecdar.utility.keyboard.NudgeDirection;
 import ecdar.utility.keyboard.Nudgeable;
 import com.jfoenix.controls.JFXPopup;
-import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
