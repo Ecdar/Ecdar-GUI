@@ -1,20 +1,27 @@
 package ecdar.presentations;
 
 import com.jfoenix.controls.JFXTextField;
+import com.uppaal.model.system.concrete.ConcreteTransitionRecord;
 import ecdar.controllers.MultiSyncTagController;
 import javafx.application.Platform;
 import javafx.beans.binding.When;
 import javafx.beans.property.*;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableBooleanValue;
+import javafx.beans.value.ObservableValue;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.LineTo;
 import javafx.scene.text.TextAlignment;
 
 import java.util.List;
+import java.util.Stack;
 
 import static ecdar.presentations.Grid.GRID_SIZE;
 
@@ -36,9 +43,21 @@ public class MultiSyncTagPresentation extends TagPresentation {
         initializeShape();
         initializeLabel();
         initializeMouseTransparency();
-        // initializeTextFocusHandler();
+        //ToDo NIELS: initializeTextFocusHandler();
 
-        setMaxWidth(200);
+        controller.syncList.setPadding(new Insets(0, 0, 10, 0));
+        controller.syncList.setMinWidth(5000);
+
+        // Disable horizontal scroll
+        // ToDo NIELS: Set border to enable drag
+        lookup("#scrollPane").addEventFilter(ScrollEvent.SCROLL,new EventHandler<ScrollEvent>() {
+            @Override
+            public void handle(ScrollEvent event) {
+                if (event.getDeltaX() != 0) {
+                    event.consume();
+                }
+            }
+        });
     }
 
     private JFXTextField addSyncTextField() {
@@ -64,9 +83,6 @@ public class MultiSyncTagPresentation extends TagPresentation {
             final double resWidth = GRID_SIZE * 2 - (newWidth % (GRID_SIZE * 2));
             newWidth += resWidth;
 
-            textField.setMinWidth(newWidth);
-            textField.setMaxWidth(newWidth);
-
             l2.setX(newWidth + padding);
             l3.setX(newWidth + padding);
 
@@ -86,6 +102,7 @@ public class MultiSyncTagPresentation extends TagPresentation {
 
             // Fixes the jumping of the shape when the text field is empty
             if (textField.getText().isEmpty()) {
+                setWidth(-1);
             }
         });
 

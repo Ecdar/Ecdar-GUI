@@ -130,7 +130,7 @@ public class TagPresentation extends StackPane {
     }
 
     void initializeShape() {
-        final int WIDTH = 5000;
+        final int WIDTH = 0;
         final double HEIGHT = TAG_HEIGHT;
 
         final Path shape = (Path) lookup("#shape");
