@@ -6,8 +6,10 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableBooleanValue;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import jdk.swing.interop.SwingInterOpUtils;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -16,6 +18,14 @@ public class MultiSyncTagController implements Initializable {
 
     public VBox syncList;
     public JFXButton addSyncBtn;
+    public BorderPane topbar;
+    public BorderPane frame;
+
+    @Override
+    public void initialize(final URL location, final ResourceBundle resources) {
+
+    }
+
     public ObservableBooleanValue textFieldFocus = new ObservableBooleanValue() {
         @Override
         public boolean get() {
@@ -62,9 +72,4 @@ public class MultiSyncTagController implements Initializable {
 
         }
     };
-
-    @Override
-    public void initialize(final URL location, final ResourceBundle resources) {
-
-    }
 }

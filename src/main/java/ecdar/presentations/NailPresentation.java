@@ -59,8 +59,8 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
             }
 
             controller.propertyTag.setTranslateX(10);
-            controller.propertyTag.setTranslateY(-10);
-            this.getChildren().add(1, controller.propertyTag);
+            controller.propertyTag.setTranslateY(-controller.propertyTag.getHeight());
+            this.getChildren().add(controller.propertyTag);
 
             initializeNailCircleColor();
             initializePropertyTag();
@@ -70,7 +70,6 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
     }
 
     private void initializeRadius() {
-
         final Consumer<Edge.PropertyType> radiusUpdater = (propertyType) -> {
             if(!propertyType.equals(Edge.PropertyType.NONE)) {
                 controller.getNail().setRadius(NailPresentation.HOVERED_RADIUS);

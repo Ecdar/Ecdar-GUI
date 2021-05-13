@@ -3,13 +3,31 @@
 <?import javafx.scene.shape.Path?>
 <?import javafx.scene.control.ScrollPane?>
 <?import com.jfoenix.controls.JFXButton?>
+<?import javafx.scene.text.Text?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import com.jfoenix.controls.JFXRippler?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import org.fxmisc.richtext.StyleClassedTextArea?>
+<?import javafx.geometry.Insets?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="StackPane"
          fx:controller="ecdar.controllers.MultiSyncTagController">
-    <Path id="shape" StackPane.alignment="CENTER_LEFT" strokeType="INSIDE"/>
-
     <VBox alignment="BOTTOM_CENTER">
+        <BorderPane fx:id="frame" pickOnBounds="false">
+            <top>
+                <BorderPane fx:id="topbar">
+                    <center>
+                        <HBox>
+                            <StackPane>
+                                <padding><Insets top="5" right="5" bottom="5" left="5"/></padding>
+                                <Text styleClass="sub-caption" fill="WHITE" text="Multi-edge"/>
+                            </StackPane>
+                        </HBox>
+                    </center>
+                </BorderPane>
+            </top>
+        </BorderPane>
         <ScrollPane id="scrollPane"
                     fitToWidth="true"
                     fitToHeight="true"
@@ -19,7 +37,7 @@
                     AnchorPane.leftAnchor="0"
                     AnchorPane.rightAnchor="0"
                     styleClass="scroll-pane">
-            <VBox fx:id="syncList">
+            <VBox fx:id="syncList" spacing="5">
             </VBox>
         </ScrollPane>
         <JFXButton fx:id="addSyncBtn" text="Add sync" prefWidth="Infinity"/>

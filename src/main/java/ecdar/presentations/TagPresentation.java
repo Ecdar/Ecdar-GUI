@@ -26,7 +26,6 @@ import static ecdar.presentations.Grid.GRID_SIZE;
 import static javafx.scene.paint.Color.TRANSPARENT;
 
 public class TagPresentation extends StackPane {
-
     final static Color backgroundColor = Color.GREY;
     final static Color.Intensity backgroundColorIntensity = Color.Intensity.I50;
 
@@ -67,9 +66,7 @@ public class TagPresentation extends StackPane {
         mouseTransparentProperty().bind(opacityProperty().isEqualTo(0, 0.00f));
     }
 
-    void initializeTextAid() {
-        final JFXTextField textField = (JFXTextField) lookup("#textField");
-
+    void initializeTextAid(JFXTextField textField) {
         textField.textProperty().addListener((obs, oldText, newText) -> {
             if (newText.contains(" ")) {
                 final String updatedString = newText.replace(" ", "_");
@@ -78,59 +75,8 @@ public class TagPresentation extends StackPane {
         });
     }
 
-    void initializeLabel() {
-        final Label label = (Label) lookup("#label");
-        final JFXTextField textField = (JFXTextField) lookup("#textField");
-        final Path shape = (Path) lookup("#shape");
-
-        final Insets insets = new Insets(0,2,0,2);
-        textField.setPadding(insets);
-        label.setPadding(insets);
-
-        final int padding = 0;
-
-        label.layoutBoundsProperty().addListener((obs, oldBounds, newBounds) -> {
-            double newWidth = Math.max(newBounds.getWidth(), 10);
-            final double res = GRID_SIZE * 2 - (newWidth % (GRID_SIZE * 2));
-            newWidth += res;
-
-            textField.setMinWidth(newWidth);
-            textField.setMaxWidth(newWidth);
-
-            l2.setX(newWidth + padding);
-            l3.setX(newWidth + padding);
-
-            setMinWidth(newWidth + padding);
-            setMaxWidth(newWidth + padding);
-
-            textField.setMinHeight(TAG_HEIGHT);
-            textField.setMaxHeight(TAG_HEIGHT);
-
-            textField.focusedProperty().addListener((observable, oldFocused, newFocused) -> {
-                if (newFocused) {
-                    shape.setTranslateY(2);
-                    textField.setTranslateY(2);
-                }
-            });
-
-            if (getWidth() >= 1000) {
-                setWidth(newWidth);
-                setHeight(TAG_HEIGHT);
-                shape.setTranslateY(-1);
-                textField.setTranslateY(-1);
-            }
-
-            // Fixes the jumping of the shape when the text field is empty
-            if (textField.getText().isEmpty()) {
-                shape.setLayoutX(0);
-            }
-        });
-
-        label.textProperty().bind(new When(textField.textProperty().isNotEmpty()).then(textField.textProperty()).otherwise(textField.promptTextProperty()));
-    }
-
-    void initializeShape() {
-        final int WIDTH = 0;
+    private void initializeShape() {
+        final int WIDTH = 5000;
         final double HEIGHT = TAG_HEIGHT;
 
         final Path shape = (Path) lookup("#shape");
@@ -225,6 +171,57 @@ public class TagPresentation extends StackPane {
         textField.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
     }
 
+    void initializeLabel() {
+        final Label label = (Label) lookup("#label");
+        final JFXTextField textField = (JFXTextField) lookup("#textField");
+        final Path shape = (Path) lookup("#shape");
+
+        final Insets insets = new Insets(0,2,0,2);
+        textField.setPadding(insets);
+        label.setPadding(insets);
+
+        final int padding = 0;
+
+        label.layoutBoundsProperty().addListener((obs, oldBounds, newBounds) -> {
+            double newWidth = Math.max(newBounds.getWidth(), 10);
+            final double res = GRID_SIZE * 2 - (newWidth % (GRID_SIZE * 2));
+            newWidth += res;
+
+            textField.setMinWidth(newWidth);
+            textField.setMaxWidth(newWidth);
+
+            l2.setX(newWidth + padding);
+            l3.setX(newWidth + padding);
+
+            setMinWidth(newWidth + padding);
+            setMaxWidth(newWidth + padding);
+
+            textField.setMinHeight(TAG_HEIGHT);
+            textField.setMaxHeight(TAG_HEIGHT);
+
+            textField.focusedProperty().addListener((observable, oldFocused, newFocused) -> {
+                if (newFocused) {
+                    shape.setTranslateY(2);
+                    textField.setTranslateY(2);
+                }
+            });
+
+            if (getWidth() >= 1000) {
+                setWidth(newWidth);
+                setHeight(TAG_HEIGHT);
+                shape.setTranslateY(-1);
+                textField.setTranslateY(-1);
+            }
+
+            // Fixes the jumping of the shape when the text field is empty
+            if (textField.getText().isEmpty()) {
+                shape.setLayoutX(0);
+            }
+        });
+
+        label.textProperty().bind(new When(textField.textProperty().isNotEmpty()).then(textField.textProperty()).otherwise(textField.promptTextProperty()));
+    }
+
     public void bindToColor(final ObjectProperty<Color> color, final ObjectProperty<Color.Intensity> intensity) {
         bindToColor(color, intensity, false);
     }
@@ -266,7 +263,7 @@ public class TagPresentation extends StackPane {
     }
 
     public void replaceSpace() {
-        initializeTextAid();
+        initializeTextAid((JFXTextField) lookup("#textField"));
     }
 
     public void requestTextFieldFocus() {

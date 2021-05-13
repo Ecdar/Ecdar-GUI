@@ -498,6 +498,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
 
         return new MenuElement(text, mouseEvent -> {
             DisplayableEdge tempEdge = getEdge();
+            // ToDo NIELS: Handle changing back
 
             Nail syncNail = getEdge().getNails().stream().filter((nail) -> nail.getPropertyType() == DisplayableEdge.PropertyType.SYNCHRONIZATION).findFirst().get();
             TagPresentation tempTagPresentation = nailNailPresentationMap.get(syncNail).getController().propertyTag;
@@ -642,7 +643,8 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
     }
 
     public void edgeDragged(final MouseEvent event){
-        //Check if the edge is selected to ensure that the drag is not targeting a select, guard, update, or sync node
+        // Check if the edge is selected to ensure that the drag is not targeting a select, guard, update, or sync node
+        // ToDo NIELS: Below line gives OutOfIndex when multisynctag is dragged
         if(SelectHelper.getSelectedElements().get(0) == this){
             DisplayableEdge oldEdge = edge.get();
             Location source, target;

@@ -1,7 +1,6 @@
 package ecdar.abstractions;
 
 import ecdar.Ecdar;
-import ecdar.controllers.EcdarController;
 import ecdar.presentations.Grid;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -13,7 +12,7 @@ import java.util.List;
 
 public class GroupedEdge extends DisplayableEdge {
     private static final String ID = "id";
-    private static final String GROUPED_EDGE = "GE";
+    private static final String EDGE_GROUP = "edge_group";
 
     private final ArrayList<Edge> edges = new ArrayList<>();
     private final StringProperty id = new SimpleStringProperty("");
@@ -88,7 +87,7 @@ public class GroupedEdge extends DisplayableEdge {
     private void setId() {
         for(int counter = 0; ; counter++) {
             if(!Ecdar.getProject().getLocationIds().contains(String.valueOf(counter))){
-                id.set(GROUPED_EDGE + counter);
+                id.set(EDGE_GROUP + counter);
                 return;
             }
         }

@@ -189,7 +189,6 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
     }
 
     private void initializeMouseControls() {
-
         root.addEventHandler(MouseEvent.MOUSE_PRESSED, event -> {
             event.consume();
             if (event.isShortcutDown()) {
