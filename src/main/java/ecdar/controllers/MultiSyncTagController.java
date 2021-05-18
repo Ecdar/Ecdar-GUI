@@ -9,7 +9,6 @@ import javafx.scene.Node;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import jdk.swing.interop.SwingInterOpUtils;
 
 import java.net.URL;
 import java.util.ResourceBundle;

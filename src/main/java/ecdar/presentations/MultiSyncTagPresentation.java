@@ -7,9 +7,7 @@ import ecdar.utility.UndoRedoStack;
 import javafx.application.Platform;
 import javafx.beans.binding.When;
 import javafx.beans.property.*;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableBooleanValue;
-import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -22,7 +20,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 import static ecdar.presentations.Grid.GRID_SIZE;
@@ -243,6 +240,7 @@ public class MultiSyncTagPresentation extends TagPresentation {
                 textField.setTranslateY(2);
             } else {
                 textField.setTranslateY(0);
+                EcdarController.getActiveCanvasPresentation().getController().leaveTextAreas();
             }
         });
 

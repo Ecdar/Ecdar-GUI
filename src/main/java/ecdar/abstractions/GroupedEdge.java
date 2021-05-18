@@ -2,9 +2,10 @@ package ecdar.abstractions;
 
 import ecdar.Ecdar;
 import ecdar.presentations.Grid;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
+import javafx.beans.value.ObservableBooleanValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,7 +15,7 @@ public class GroupedEdge extends DisplayableEdge {
     private static final String ID = "id";
     private static final String EDGE_GROUP = "edge_group";
 
-    private final ArrayList<Edge> edges = new ArrayList<>();
+    private final ObservableList<Edge> edges = FXCollections.observableList(new ArrayList<>());
     private final StringProperty id = new SimpleStringProperty("");
 
     public GroupedEdge(Edge edge) {
@@ -55,6 +56,7 @@ public class GroupedEdge extends DisplayableEdge {
         setStatus(edge.getStatus());
     }
 
+    // ToDo: Delete if unnecessary
     public boolean addEdgeToGroup(Edge newEdge) {
         if(newEdge.getGuard().equals(this.edges.get(0).getGuard()) && newEdge.getUpdate().equals(this.edges.get(0).getUpdate())) {
             return edges.add(newEdge);
@@ -63,7 +65,7 @@ public class GroupedEdge extends DisplayableEdge {
         }
     }
 
-    public ArrayList<Edge> getEdges() {
+    public ObservableList<Edge> getEdges() {
         return edges;
     }
 

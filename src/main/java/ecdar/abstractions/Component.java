@@ -352,6 +352,24 @@ public class Component extends HighLevelModelObject implements Boxed {
             while(c.next()) {
                 for (final DisplayableEdge e : c.getAddedSubList()) {
                     getEdgeOrSubEdges(e).forEach(edge -> addSyncListener(listener, edge));
+
+                    if (e instanceof GroupedEdge) {
+                        ((GroupedEdge) e).getEdges().addListener((ListChangeListener<DisplayableEdge>) change -> {
+                            while(change.next()) {
+                                updateIOList();
+                                for (final DisplayableEdge addedEdge : change.getAddedSubList()) {
+                                    getEdgeOrSubEdges(addedEdge).forEach(edge -> addSyncListener(listener, edge));
+                                }
+
+                                for (final DisplayableEdge addedEdge : change.getRemoved()) {
+                                    getEdgeOrSubEdges(addedEdge).forEach(edge -> {
+                                        edge.syncProperty().removeListener(listener);
+                                        edge.ioStatus.removeListener(listener);
+                                    });
+                                }
+                            }
+                        });
+                    }
                 }
 
                 for (final DisplayableEdge e : c.getRemoved()) {
