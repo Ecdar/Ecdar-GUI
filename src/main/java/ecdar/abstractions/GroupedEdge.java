@@ -56,7 +56,7 @@ public class GroupedEdge extends DisplayableEdge {
         setStatus(edge.getStatus());
     }
 
-    // ToDo: Delete if unnecessary
+    // ToDo NIELS: Delete if unnecessary
     public boolean addEdgeToGroup(Edge newEdge) {
         if(newEdge.getGuard().equals(this.edges.get(0).getGuard()) && newEdge.getUpdate().equals(this.edges.get(0).getUpdate())) {
             return edges.add(newEdge);

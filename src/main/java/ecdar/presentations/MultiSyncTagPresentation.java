@@ -82,6 +82,8 @@ public class MultiSyncTagPresentation extends TagPresentation {
         controller.frame.setOnMouseDragged(event -> {
             event.consume();
 
+            //ToDo NIELS: The position is relative to the nail, which means that the nail position must be included in the calculation, if the tag is to be kept within the component
+
             final double newX = EcdarController.getActiveCanvasPresentation().mouseTracker.gridXProperty().subtract(getComponent().getBox().getXProperty()).subtract(getLocationAware().xProperty()).subtract(getWidth() / 2).doubleValue();
             setTranslateX(newX);
 

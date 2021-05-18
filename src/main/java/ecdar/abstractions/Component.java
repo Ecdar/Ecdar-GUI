@@ -643,7 +643,7 @@ public class Component extends HighLevelModelObject implements Boxed {
         });
 
         json.getAsJsonArray(EDGES).forEach(jsonElement -> {
-            // ToDo: Handle Grouped edges at deserialization
+            // ToDo NIELS: Handle Grouped edges at deserialization
             final Edge newEdge = new Edge((JsonObject) jsonElement, this);
             edges.add(newEdge);
         });
