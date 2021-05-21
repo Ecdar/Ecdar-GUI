@@ -44,15 +44,11 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
 
         Platform.runLater(() -> {
             if (controller.getNail().getPropertyType() == DisplayableEdge.PropertyType.SYNCHRONIZATION && edge instanceof GroupedEdge) {
-                controller.propertyTag = new MultiSyncTagPresentation();
+                controller.propertyTag = new MultiSyncTagPresentation(edge);
 
                 TagPresentation tagPresentation = getController().propertyTag;
                 if (tagPresentation instanceof MultiSyncTagPresentation) {
-                    ((MultiSyncTagPresentation) tagPresentation).getController().addSyncBtn.setOnMouseClicked((event) -> {
-                        ((GroupedEdge) edge).addSync();
-                        ((MultiSyncTagPresentation) tagPresentation).setAndBindStringList(((GroupedEdge) edge).getSyncProperties());
-                        updateSyncLabel(tagPresentation);
-                    });
+                    ((MultiSyncTagPresentation) tagPresentation).setAndBindStringList(((GroupedEdge) edge).getSyncProperties(), () -> updateSyncLabel(tagPresentation), true);
                 }
             } else {
                 controller.propertyTag = new TagPresentation();
@@ -128,8 +124,7 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
                     if (controller.getEdge() instanceof Edge)
                         propertyTag.setAndBindString(((Edge) controller.getEdge()).syncProperty());
                     else {
-                        ((MultiSyncTagPresentation) propertyTag).setAndBindStringList(((GroupedEdge) controller.getEdge()).getSyncProperties());
-                        updateSyncLabel(propertyTag);
+                        ((MultiSyncTagPresentation) propertyTag).setAndBindStringList(((GroupedEdge) controller.getEdge()).getSyncProperties(), () -> updateSyncLabel(propertyTag), true);
                     }
                 } else if(propertyType.equals(Edge.PropertyType.UPDATE)) {
                     propertyTag.setPlaceholder("Update");

@@ -35,6 +35,5 @@
             <VBox fx:id="syncList" spacing="5">
             </VBox>
         </ScrollPane>
-        <JFXButton fx:id="addSyncBtn" text="Add sync" prefWidth="Infinity"/>
     </VBox>
 </fx:root>

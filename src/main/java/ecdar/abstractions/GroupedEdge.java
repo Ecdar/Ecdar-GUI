@@ -107,7 +107,7 @@ public class GroupedEdge extends DisplayableEdge {
         return id;
     }
 
-    public void addSync() {
+    public Edge addSync() {
         // Initialize edge with new sync
         Edge edge = new Edge(getSourceLocation(), getStatus());
         edge.setTargetLocation(this.getTargetLocation());
@@ -119,6 +119,7 @@ public class GroupedEdge extends DisplayableEdge {
         edge.setGroup(this.getId());
 
         this.edges.add(edge);
+        return edge;
     }
 
     public List<String> getProperty(final Edge.PropertyType propertyType) {
