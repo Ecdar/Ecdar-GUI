@@ -16,6 +16,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.*;
@@ -38,7 +39,6 @@ public class MultiSyncTagPresentation extends TagPresentation {
 
     public MultiSyncTagPresentation(DisplayableEdge edge) {
         updateTopBorder();
-        initializeLabel();
         initializeMouseTransparency();
         initializeTextFocusHandler();
 
@@ -91,8 +91,6 @@ public class MultiSyncTagPresentation extends TagPresentation {
         controller.frame.setOnMouseDragged(event -> {
             event.consume();
 
-            //ToDo NIELS: The position is relative to the nail, which means that the nail position must be included in the calculation, if the tag is to be kept within the component
-
             final double newX = EcdarController.getActiveCanvasPresentation().mouseTracker.gridXProperty().subtract(getComponent().getBox().getXProperty()).subtract(getLocationAware().xProperty()).subtract(getWidth() / 2).doubleValue();
             setTranslateX(newX);
 
@@ -127,6 +125,8 @@ public class MultiSyncTagPresentation extends TagPresentation {
                 // Reset the was dragged boolean
                 wasDragged = false;
             }
+
+            Platform.runLater(this::ensureTagIsWithinComponent);
         });
 
         // When enter or escape is pressed release focus
@@ -135,6 +135,29 @@ public class MultiSyncTagPresentation extends TagPresentation {
                 this.placeEmptySyncBelowCurrent(textField);
             }
         })));
+    }
+
+    private void ensureTagIsWithinComponent() {
+        // Added to avoid null pointer when first sync is added
+        if (controller.syncList == null || controller.syncList.getParent() == null || controller.syncList.getParent().getParent() == null) {
+            return;
+        }
+
+        //Handle the horizontal placement of the tag
+        double syncListWidth = ((ScrollPane) controller.syncList.getParent().getParent().getParent()).getViewportBounds().getWidth();
+        if(getTranslateX() + locationAware.getValue().getX() + syncListWidth + GRID_SIZE * 2 > getComponent().getBox().getX() + getComponent().getBox().getWidth()) {
+            setTranslateX(Grid.snap(getComponent().getBox().getX() + getComponent().getBox().getWidth() - locationAware.getValue().getX() - syncListWidth - GRID_SIZE * 2));
+        } else if (getTranslateX() + locationAware.getValue().getX() < getComponent().getBox().getX()) {
+            setTranslateX(Grid.snap(getComponent().getBox().getX() - locationAware.getValue().getX()));
+        }
+
+        //Handle the vertical placement of the tag
+        double syncListHeight = ((ScrollPane) controller.syncList.getParent().getParent().getParent()).getViewportBounds().getHeight();
+        if(getTranslateY() + locationAware.getValue().getY() + syncListHeight + TAG_HEIGHT * 3 > getComponent().getBox().getY() + getComponent().getBox().getHeight()) {
+            setTranslateY(Grid.snap(getComponent().getBox().getY() + getComponent().getBox().getHeight() - locationAware.getValue().getY() - (syncListHeight + TAG_HEIGHT * 3)));
+        } else if (getTranslateY() + locationAware.getValue().getY() < getComponent().getBox().getY() + GRID_SIZE * 2) {
+            setTranslateY(Grid.snap(getComponent().getBox().getY() - locationAware.getValue().getY() + GRID_SIZE * 2));
+        }
     }
 
     @Override
@@ -239,6 +262,7 @@ public class MultiSyncTagPresentation extends TagPresentation {
             if (label.equals(widestLabel) && newWidth + padding > widthNeededForSyncs) {
                 setMinWidth(newWidth + padding);
                 setMaxWidth(newWidth + padding);
+                Platform.runLater(this::ensureTagIsWithinComponent);
             }
 
             if (getWidth() >= 1000) {
@@ -280,6 +304,8 @@ public class MultiSyncTagPresentation extends TagPresentation {
         container.setAlignment(Pos.TOP_LEFT);
 
         controller.syncList.getChildren().add(container);
+
+        Platform.runLater(this::ensureTagIsWithinComponent);
 
         return textField;
     }
