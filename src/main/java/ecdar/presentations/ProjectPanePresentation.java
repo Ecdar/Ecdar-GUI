@@ -126,4 +126,7 @@ public class ProjectPanePresentation extends StackPane {
         )));
     }
 
+    public ProjectPaneController getController() {
+        return controller;
+    }
 }

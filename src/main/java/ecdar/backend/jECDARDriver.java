@@ -60,10 +60,10 @@ public class jECDARDriver implements IBackendDriver {
 
         return "E<> (" + String.join(" || ", locationNames) + ") && deadlock";
     }
-
-    public Process getJEcdarProcessForRefinementCheckAndStrategyIfNoRefinementExists(String pathToModel, String pathToQueryFile) {
+    
+    public Process getJEcdarProcessForRefinementCheckAndStrategyIfNoRefinementExists(String pathToModel, String pathToQueryFile) throws BackendException {
         // ToDo: Not yet implemented
-        return null;
+        throw new BackendException("Not implemented");
     }
 
     public enum TraceType {

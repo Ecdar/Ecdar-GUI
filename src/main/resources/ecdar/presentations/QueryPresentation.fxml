@@ -9,7 +9,7 @@
 <?import javafx.scene.control.Label?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
-         type="AnchorPane">
+         type="AnchorPane" fx:controller="ecdar.controllers.QueryController">
     <fx:define>
         <!--Used for both the statusIndicator and the left anchor for elements to the right of the statusIndicator-->
         <Double fx:id="STATUS_INDICATOR_WIDTH" fx:value="50"/>
@@ -21,8 +21,18 @@
     <!--If this shows an error, ignore it... It is an IDE issue, not a code issue-->
     <StackPane id="stateIndicator" prefWidth="${STATUS_INDICATOR_WIDTH - 5}" AnchorPane.topAnchor="0"
                AnchorPane.leftAnchor="0" minHeight="114" maxHeight="114">
+        <JFXRippler fx:id="queryTypeExpand" maxHeight="20">
+            <HBox translateY="40" alignment="CENTER_RIGHT">
+                <StackPane alignment="CENTER_LEFT">
+                    <Text fx:id="queryTypeSymbol" style="-fx-font-size: 11; -fx-text-alignment: left;"/>
+                </StackPane>
+                <StackPane minWidth="15" maxWidth="15">
+                    <FontIcon id="queryTypeExpandIcon" iconLiteral="gmi-expand-more" iconSize="18"/>
+                </StackPane>
+            </HBox>
+        </JFXRippler>
         <StackPane minWidth="40" maxWidth="40" minHeight="40" maxHeight="40">
-            <FontIcon id="statusIcon" iconLiteral="gmi-hourglass-full" iconSize="24" iconColor="white"/>
+            <FontIcon id="statusIcon" iconLiteral="gmi-hourglass-full" iconSize="24"/>
         </StackPane>
     </StackPane>
 
@@ -52,7 +62,7 @@
                 <StackPane>
                     <JFXSpinner id="progressIndicator" radius="20"/>
 
-                    <JFXRippler id="actionButton">
+                    <JFXRippler fx:id="actionButton">
                         <StackPane minWidth="40" maxWidth="40" minHeight="40" maxHeight="40">
                             <FontIcon id="actionButtonIcon" iconLiteral="gmi-play-arrow" iconSize="24"/>
                         </StackPane>
@@ -68,10 +78,10 @@
                 </JFXRippler>
             </HBox>
             <StackPane AnchorPane.leftAnchor="144" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0">
-                <JFXRippler fx:id="swapBackendButton">
+                <JFXRippler id="swapBackendButton">
                     <VBox alignment="CENTER" minWidth="40" minHeight="40">
                         <FontIcon iconLiteral="gmi-swap-horiz" iconSize="18"/>
-                        <Label fx:id="currentBackendLabel"/>
+                        <Label id="currentBackendLabel"/>
                     </VBox>
                 </JFXRippler>
             </StackPane>

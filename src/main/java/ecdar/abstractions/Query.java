@@ -29,6 +29,7 @@ public class Query implements Serializable {
     private final StringProperty comment = new SimpleStringProperty("");
     private final SimpleBooleanProperty isPeriodic = new SimpleBooleanProperty(false);
     private final StringProperty errors = new SimpleStringProperty("");
+    private final ObjectProperty<QueryType> type = new SimpleObjectProperty<>();
     private BackendHelper.BackendNames currentBackend;
     private BackendThread backendThread;
     private Consumer<Boolean> runQuery;
@@ -106,6 +107,18 @@ public class Query implements Serializable {
         this.currentBackend = currentBackend;
     }
 
+    public void setType(QueryType type) {
+        this.type.set(type);
+    }
+
+    public QueryType getType() {
+        return this.type.get();
+    }
+
+    public ObjectProperty<QueryType> getTypeProperty() {
+        return this.type;
+    }
+
     private Engine engine = null;
     private Boolean forcedCancel = false;
 
@@ -150,7 +163,7 @@ public class Query implements Serializable {
         };
 
         if(query.get().startsWith("quotient")) {
-            backendThread = ((jECDARDriver) BackendDriverManager.getInstance(BackendHelper.BackendNames.jEcdar)).getBackendThreadForQuotientQuery(getQuery().replaceAll("\\s", "") + " " + getIgnoredInputOutputsOnQuery(),
+            backendThread = BackendDriverManager.getInstance(this.currentBackend).getBackendThreadForQuery(getType().getQueryName() + ": " + getQuery().replaceAll("\\s", "") + " " + getIgnoredInputOutputsOnQuery(),
                     aBoolean -> {
                         if (aBoolean) {
                             setQueryState(QueryState.COMPONENT_GENERATED);
@@ -180,7 +193,7 @@ public class Query implements Serializable {
     public JsonObject serialize() {
         final JsonObject result = new JsonObject();
 
-        result.addProperty(QUERY, getQuery());
+        result.addProperty(QUERY, getType().getQueryName() + ": " + getQuery());
         result.addProperty(COMMENT, getComment());
         result.addProperty(IS_PERIODIC, isPeriodic());
 
@@ -202,7 +215,16 @@ public class Query implements Serializable {
 
     @Override
     public void deserialize(final JsonObject json) {
-        setQuery(json.getAsJsonPrimitive(QUERY).getAsString());
+        String query = json.getAsJsonPrimitive(QUERY).getAsString();
+
+        if(query.contains(":")) {
+            String[] queryFieldFromJSON = json.getAsJsonPrimitive(QUERY).getAsString().split(": ");
+            setType(QueryType.fromString(queryFieldFromJSON[0]));
+            setQuery(queryFieldFromJSON[1]);
+        } else {
+            setQuery(query);
+        }
+
         setComment(json.getAsJsonPrimitive(COMMENT).getAsString());
 
         if (json.has(IS_PERIODIC)) {

@@ -6,6 +6,7 @@ import com.jfoenix.controls.JFXTextField;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.controllers.CanvasController;
+import ecdar.controllers.EcdarController;
 import ecdar.mutation.models.ExpandableContent;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.mutation.models.TestResult;
@@ -550,19 +551,19 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      * Initializes width and height of the text editor field, such that it fills up the whole canvas.
      */
     private void initializeWidthAndHeight() {
-        controller.scrollPane.setPrefWidth(CanvasController.getWidthProperty().doubleValue());
-        CanvasController.getWidthProperty().addListener((observable, oldValue, newValue) ->
+        controller.scrollPane.setPrefWidth(EcdarController.getActiveCanvasPresentation().getController().getWidthProperty().doubleValue());
+        EcdarController.getActiveCanvasPresentation().getController().getWidthProperty().addListener((observable, oldValue, newValue) ->
                 controller.scrollPane.setPrefWidth(newValue.doubleValue()));
 
-        updateOffset(CanvasController.getInsetShouldShow().get());
-        CanvasController.getInsetShouldShow().addListener((observable, oldValue, newValue) -> {
+        updateOffset(EcdarController.getActiveCanvasPresentation().getController().getInsetShouldShow().get());
+        EcdarController.getActiveCanvasPresentation().getController().getInsetShouldShow().addListener((observable, oldValue, newValue) -> {
             updateOffset(newValue);
             updateHeight();
         });
 
-        canvasHeight = CanvasController.getHeightProperty().doubleValue();
+        canvasHeight = EcdarController.getActiveCanvasPresentation().getController().getHeightProperty().doubleValue();
         updateHeight();
-        CanvasController.getHeightProperty().addListener((observable, oldValue, newValue) -> {
+        EcdarController.getActiveCanvasPresentation().getController().getHeightProperty().addListener((observable, oldValue, newValue) -> {
             canvasHeight = newValue.doubleValue();
             updateHeight();
         });
@@ -589,7 +590,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      * Updates the height of the view.
      */
     private void updateHeight() {
-        controller.scrollPane.setPrefHeight(canvasHeight - CanvasController.DECLARATION_Y_MARGIN - offSet);
+        controller.scrollPane.setPrefHeight(canvasHeight - EcdarController.getActiveCanvasPresentation().getController().DECLARATION_Y_MARGIN - offSet);
     }
 
     /**

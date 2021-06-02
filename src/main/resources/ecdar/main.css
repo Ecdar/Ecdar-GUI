@@ -227,8 +227,7 @@
 	-fx-padding: 0 0 0 -10;
 }
 
-.titled-pane > .content
-{
+.titled-pane > .content {
 	-fx-background-color: TRANSPARENT;
 	-fx-padding: 0 -1 -1 -1 ;
 	-fx-background-insets: 0 0 0 0;

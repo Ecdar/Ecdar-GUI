@@ -4,7 +4,6 @@ import ecdar.abstractions.Component;
 import ecdar.abstractions.Project;
 import ecdar.backend.BackendHelper;
 import ecdar.code_analysis.CodeAnalysis;
-import ecdar.controllers.CanvasController;
 import ecdar.controllers.EcdarController;
 import ecdar.presentations.BackgroundThreadPresentation;
 import ecdar.presentations.EcdarPresentation;
@@ -44,6 +43,7 @@ public class Ecdar extends Application {
     private static EcdarPresentation presentation;
     public static SimpleStringProperty projectDirectory = new SimpleStringProperty();
     private static BooleanProperty isUICached = new SimpleBooleanProperty();
+    private static final BooleanProperty isSplit = new SimpleBooleanProperty(true); //Set to true to ensure correct behaviour at first toggle.
     private Stage debugStage;
 
     /**
@@ -83,6 +83,10 @@ public class Ecdar extends Application {
         return project;
     }
 
+    public static EcdarPresentation getPresentation() {
+        return presentation;
+    }
+
     public static void showToast(final String message) {
         presentation.showSnackbarMessage(message);
     }
@@ -117,6 +121,16 @@ public class Ecdar extends Application {
      */
     public static BooleanProperty toggleGrid() {
         return presentation.toggleGrid();
+    }
+
+    /**
+     * Toggles whether to canvas is split or single.
+     * @return the property specifying whether the canvas is split
+     */
+    public static BooleanProperty toggleCanvasSplit() {
+        isSplit.set(!isSplit.get());
+
+        return isSplit;
     }
 
     private void forceCreateFolder(final String directoryPath) throws IOException {
@@ -179,7 +193,7 @@ public class Ecdar extends Application {
         stage.show();
 
         project.reset();
-        CanvasController.setActiveModel(Ecdar.getProject().getComponents().get(0));
+        EcdarController.getActiveCanvasPresentation().getController().setActiveModel(Ecdar.getProject().getComponents().get(0));
 
         EcdarController.reachabilityServiceEnabled = true;
 
@@ -269,12 +283,12 @@ public class Ecdar extends Application {
             if (initialShownComponent == null) {
                 initialShownComponent = component;
             }
-            CanvasController.setActiveModel(component);
+            EcdarController.getActiveCanvasPresentation().getController().setActiveModel(component);
         }
 
         // If we found a component set that as active
         if (initialShownComponent != null) {
-            CanvasController.setActiveModel(initialShownComponent);
+            EcdarController.getActiveCanvasPresentation().getController().setActiveModel(initialShownComponent);
         }
         serializationDone = true;
     }

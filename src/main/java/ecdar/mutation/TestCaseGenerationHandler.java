@@ -206,7 +206,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
                 testCase.setStrategy(new NonRefinementStrategy(lines.subList(strategyIndex + 2, lines.size())));
 
                 finishedTestCases.add(testCase);
-            } catch (MutationTestingException | IOException e) {
+            } catch (MutationTestingException | IOException | BackendException e) {
                 e.printStackTrace();
 
                 // Only show error if the process is not already being stopped
@@ -235,9 +235,9 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
      *
      * @param modelPath the path to the backend XML project containing the test model and the mutant
      * @return the started process, or null if an error occurs
-     * @throws IOException if an IO error occurs
+     * @throws BackendException if the backend encounters an error
      */
-    private Process startProcessToFetchStrategy(final String modelPath) throws IOException {
+    private Process startProcessToFetchStrategy(final String modelPath) throws BackendException {
         // Run backend to check refinement and to fetch strategy if non-refinement
         return ((jECDARDriver) BackendDriverManager.getInstance(BackendHelper.BackendNames.jEcdar))
                 .getJEcdarProcessForRefinementCheckAndStrategyIfNoRefinementExists(modelPath, queryFilePath);

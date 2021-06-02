@@ -3,6 +3,7 @@ package ecdar.presentations;
 import ecdar.abstractions.Box;
 import ecdar.abstractions.HighLevelModelObject;
 import ecdar.controllers.CanvasController;
+import ecdar.controllers.EcdarController;
 import ecdar.controllers.ModelController;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
@@ -80,7 +81,7 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
 
         // Center the text vertically and aff a left padding of CORNER_SIZE
         controller.name.setPadding(new Insets(2, 0, 0, Grid.CORNER_SIZE));
-        controller.name.setOnKeyPressed(CanvasController.getLeaveTextAreaKeyHandler());
+        controller.name.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
     }
 
     /**

@@ -6,6 +6,7 @@ import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.QueryState;
 import ecdar.controllers.CanvasController;
+import ecdar.controllers.EcdarController;
 import ecdar.utility.UndoRedoStack;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
@@ -394,7 +395,7 @@ public class jEcdarQuotientThread extends BackendThread {
                 }, "Created new component: " + newComponent.getName(), "add-circle");
             }
 
-            CanvasController.setActiveModel(newComponent);
+            EcdarController.getActiveCanvasPresentation().getController().setActiveModel(newComponent);
         });
     }
 }
