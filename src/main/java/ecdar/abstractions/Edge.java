@@ -28,7 +28,6 @@ public class Edge extends DisplayableEdge implements Serializable {
     static final int ID_LETTER_LENGTH = 1;
 
     private final StringProperty sync = new SimpleStringProperty("");
-    private final StringProperty id = new SimpleStringProperty("");
     private final StringProperty group = new SimpleStringProperty("");
 
     public Edge(final Location sourceLocation, final EdgeStatus status) {
@@ -69,34 +68,6 @@ public class Edge extends DisplayableEdge implements Serializable {
      */
     public String getSyncWithSymbol() {
         return sync.get() + (ioStatus.get().equals(EdgeStatus.INPUT) ? "?" : "!");
-    }
-
-    public String getId() {
-        return id.get();
-    }
-
-    /**
-     * Generate and sets a unique id for this location
-     */
-    private void setId() {
-        for(int counter = 0; ; counter++) {
-            if(!Ecdar.getProject().getLocationIds().contains(String.valueOf(counter))){
-                id.set(EDGE + counter);
-                return;
-            }
-        }
-    }
-
-    /**
-     * Sets a specific id for this location
-     * @param string id to set
-     */
-    public void setId(final String string){
-        id.set(string);
-    }
-
-    public StringProperty idProperty() {
-        return id;
     }
 
     public String getGroup(){
@@ -231,7 +202,6 @@ public class Edge extends DisplayableEdge implements Serializable {
         final JsonPrimitive groupJson = json.getAsJsonPrimitive(GROUP);
         if (groupJson != null) {
             setGroup(groupJson.getAsString());
-            // ToDo NIELS: Generate the groupedEdge
         }
         else setGroup("");
 

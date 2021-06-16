@@ -1,6 +1,8 @@
 package ecdar.controllers;
 
 import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXTextField;
+import ecdar.abstractions.Edge;
 import javafx.beans.InvalidationListener;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableBooleanValue;
@@ -22,6 +24,10 @@ public class MultiSyncTagController implements Initializable {
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
 
+    }
+
+    public void removeSyncTextfieldOfEdge(Edge newEdge) {
+        syncList.getChildren().removeIf(node -> ((JFXTextField) ((StackPane) node).getChildren().get(1)).getText().equals(newEdge.getSync()));
     }
 
     public ObservableBooleanValue textFieldFocus = new ObservableBooleanValue() {

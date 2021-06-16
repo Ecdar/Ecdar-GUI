@@ -44,7 +44,7 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
 
         Platform.runLater(() -> {
             if (controller.getNail().getPropertyType() == DisplayableEdge.PropertyType.SYNCHRONIZATION && edge instanceof GroupedEdge) {
-                controller.propertyTag = new MultiSyncTagPresentation(edge);
+                controller.propertyTag = new MultiSyncTagPresentation((GroupedEdge) edge);
 
                 TagPresentation tagPresentation = getController().propertyTag;
                 if (tagPresentation instanceof MultiSyncTagPresentation) {

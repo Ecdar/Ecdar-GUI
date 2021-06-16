@@ -1,5 +1,6 @@
 package ecdar.abstractions;
 
+import ecdar.Ecdar;
 import ecdar.code_analysis.Nearable;
 import ecdar.presentations.Grid;
 import ecdar.utility.colors.Color;
@@ -11,6 +12,7 @@ import javafx.collections.ObservableList;
 import java.util.List;
 
 public abstract class DisplayableEdge implements Nearable {
+    private final StringProperty id = new SimpleStringProperty("");
     // Defines if this is an input or an output edge
     public ObjectProperty<EdgeStatus> ioStatus;
 
@@ -269,6 +271,34 @@ public abstract class DisplayableEdge implements Nearable {
     public BooleanProperty getIsLocked(){return isLocked; }
 
     public void setIsLocked(boolean bool){isLocked.setValue(bool); }
+
+    public String getId() {
+        return id.get();
+    }
+
+    /**
+     * Generate and sets a unique id for this location
+     */
+    protected void setId() {
+        for(int counter = 0; ; counter++) {
+            if(!Ecdar.getProject().getLocationIds().contains(String.valueOf(counter))){
+                id.set(Edge.EDGE + counter);
+                return;
+            }
+        }
+    }
+
+    /**
+     * Sets a specific id for this location
+     * @param string id to set
+     */
+    public void setId(final String string){
+        id.set(string);
+    }
+
+    public StringProperty idProperty() {
+        return id;
+    }
 
     public abstract List<String> getProperty(final PropertyType propertyType);
 

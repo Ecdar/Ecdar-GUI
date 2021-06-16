@@ -1,7 +1,7 @@
 package ecdar.presentations;
 
 import com.jfoenix.controls.JFXTextField;
-import ecdar.abstractions.DisplayableEdge;
+import ecdar.abstractions.Edge;
 import ecdar.abstractions.GroupedEdge;
 import ecdar.controllers.EcdarController;
 import ecdar.controllers.MultiSyncTagController;
@@ -10,6 +10,7 @@ import javafx.application.Platform;
 import javafx.beans.binding.When;
 import javafx.beans.property.*;
 import javafx.beans.value.ObservableBooleanValue;
+import javafx.collections.ListChangeListener;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -26,18 +27,19 @@ import javafx.scene.text.TextAlignment;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Stack;
+import java.util.function.BiConsumer;
 
 import static ecdar.presentations.Grid.GRID_SIZE;
 
 public class MultiSyncTagPresentation extends TagPresentation {
-
     private MultiSyncTagController controller;
     private String placeholder = "";
     private Label widestLabel;
-    private DisplayableEdge edge;
+    private final GroupedEdge edge;
     private double widthNeededForSyncs = 60;
 
-    public MultiSyncTagPresentation(DisplayableEdge edge) {
+    public MultiSyncTagPresentation(GroupedEdge edge) {
         updateTopBorder();
         initializeMouseTransparency();
         initializeTextFocusHandler();
@@ -56,6 +58,40 @@ public class MultiSyncTagPresentation extends TagPresentation {
                 if (event.getDeltaX() != 0) {
                     event.consume();
                 }
+            }
+        });
+
+        edge.getEdges().addListener((ListChangeListener<Edge>) change -> {
+            while (change.next()) {
+                if (change.wasRemoved()) {
+                    for (int i = 1; i < controller.syncList.getChildren().size(); i++) {
+                        if (((JFXTextField) ((StackPane) controller.syncList.getChildren().get(i)).getChildren().get(1))
+                                .getText()
+                                .equals(change.getRemoved().get(0).getSync())) {
+                                controller.syncList.getChildren().remove(i-1);
+                                break;
+                        }
+                    }
+                }
+            }
+        });
+
+        controller.syncList.getChildren().addListener((ListChangeListener<? super Node>) change -> {
+            boolean foundEmptySync = false;
+            ArrayList<Node> childrenToDelete = new ArrayList<>();
+
+            for (Node node : controller.syncList.getChildren()) {
+                if (((JFXTextField) ((StackPane) node).getChildren().get(1)).getText().isEmpty()) {
+                    if (!foundEmptySync) {
+                        foundEmptySync = true;
+                    } else {
+                        childrenToDelete.add(node);
+                    }
+                }
+            }
+
+            if(!childrenToDelete.isEmpty()) {
+                controller.syncList.getChildren().removeAll(childrenToDelete);
             }
         });
     }
@@ -137,29 +173,6 @@ public class MultiSyncTagPresentation extends TagPresentation {
         })));
     }
 
-    private void ensureTagIsWithinComponent() {
-        // Added to avoid null pointer when first sync is added
-        if (controller.syncList == null || controller.syncList.getParent() == null || controller.syncList.getParent().getParent() == null) {
-            return;
-        }
-
-        //Handle the horizontal placement of the tag
-        double syncListWidth = ((ScrollPane) controller.syncList.getParent().getParent().getParent()).getViewportBounds().getWidth();
-        if(getTranslateX() + locationAware.getValue().getX() + syncListWidth + GRID_SIZE * 2 > getComponent().getBox().getX() + getComponent().getBox().getWidth()) {
-            setTranslateX(Grid.snap(getComponent().getBox().getX() + getComponent().getBox().getWidth() - locationAware.getValue().getX() - syncListWidth - GRID_SIZE * 2));
-        } else if (getTranslateX() + locationAware.getValue().getX() < getComponent().getBox().getX()) {
-            setTranslateX(Grid.snap(getComponent().getBox().getX() - locationAware.getValue().getX()));
-        }
-
-        //Handle the vertical placement of the tag
-        double syncListHeight = ((ScrollPane) controller.syncList.getParent().getParent().getParent()).getViewportBounds().getHeight();
-        if(getTranslateY() + locationAware.getValue().getY() + syncListHeight + TAG_HEIGHT * 3 > getComponent().getBox().getY() + getComponent().getBox().getHeight()) {
-            setTranslateY(Grid.snap(getComponent().getBox().getY() + getComponent().getBox().getHeight() - locationAware.getValue().getY() - (syncListHeight + TAG_HEIGHT * 3)));
-        } else if (getTranslateY() + locationAware.getValue().getY() < getComponent().getBox().getY() + GRID_SIZE * 2) {
-            setTranslateY(Grid.snap(getComponent().getBox().getY() - locationAware.getValue().getY() + GRID_SIZE * 2));
-        }
-    }
-
     @Override
     public void setPlaceholder(final String placeholder) {
         this.placeholder = placeholder;
@@ -184,9 +197,14 @@ public class MultiSyncTagPresentation extends TagPresentation {
 
     @Override
     public void requestTextFieldFocus() {
-        // ToDO NIELS: Handle
-        final JFXTextField textField = (JFXTextField) lookup("#textField");
-        Platform.runLater(textField::requestFocus);
+        for (int j = 0; j < controller.syncList.getChildren().size(); j++) {
+            JFXTextField emptyTextField = (JFXTextField) ((StackPane) controller.syncList.getChildren().get(j)).getChildren().get(1);
+
+            if (emptyTextField.getText().isEmpty()) {
+                Platform.runLater(emptyTextField::requestFocus);
+                return;
+            }
+        }
     }
 
     @Override
@@ -211,6 +229,7 @@ public class MultiSyncTagPresentation extends TagPresentation {
         Platform.runLater(() -> {
             if (shouldClearTextFields) {
                 clearTextFields();
+                // edge.getEdges().remove(1, edge.getEdges().size()-1);
             }
 
             for (StringProperty stringProperty : stringList) {
@@ -262,11 +281,15 @@ public class MultiSyncTagPresentation extends TagPresentation {
             if (label.equals(widestLabel) && newWidth + padding > widthNeededForSyncs) {
                 setMinWidth(newWidth + padding);
                 setMaxWidth(newWidth + padding);
+
+                controller.syncList.setMinWidth(newWidth + padding);
+                controller.syncList.setMaxWidth(newWidth + padding);
+
                 Platform.runLater(this::ensureTagIsWithinComponent);
             }
 
             if (getWidth() >= 1000) {
-                setWidth(newWidth);;
+                setWidth(newWidth);
                 textField.setTranslateY(-1);
             }
 
@@ -293,8 +316,24 @@ public class MultiSyncTagPresentation extends TagPresentation {
             if (newValue.isEmpty()) {
                 this.removeEmptySync(textField);
             } else if (oldValue.isEmpty()) {
-                addNewSyncHandler.run();
-                setAndBindStringList(Collections.singletonList((((GroupedEdge) edge).addSync()).syncProperty()), addNewSyncHandler, false);
+                Edge newEdge = edge.getBaseSubEdge();
+                UndoRedoStack.pushAndPerform(
+                        () -> {
+                            addNewSyncHandler.run();
+                            setAndBindStringList(Collections.singletonList((newEdge).syncProperty()), addNewSyncHandler, false);
+                            this.edge.addEdgeToGroup(newEdge);
+                        },
+                        () -> {
+                            // The added edge will always be without a sync (empty text field), so we want to delete the edge added just before it
+                            if (this.edge.getEdges().contains(newEdge)) {
+                                Edge previouslyAddedEdge = this.edge.getEdges().get(this.edge.getEdges().indexOf(newEdge) - 1);
+                                controller.removeSyncTextfieldOfEdge(previouslyAddedEdge);
+                                this.edge.getEdges().remove(previouslyAddedEdge);
+                            }
+                        },
+                        String.format("New sync added to multi-sync edge"),
+                        "list_alt"
+                );
             }
         });
 
@@ -310,6 +349,29 @@ public class MultiSyncTagPresentation extends TagPresentation {
         return textField;
     }
 
+    private void ensureTagIsWithinComponent() {
+        // Added to avoid null pointer when first sync is added
+        if (controller.syncList == null || controller.syncList.getParent() == null || controller.syncList.getParent().getParent() == null) {
+            return;
+        }
+
+        //Handle the horizontal placement of the tag
+        double syncListWidth = ((ScrollPane) controller.syncList.getParent().getParent().getParent()).getViewportBounds().getWidth();
+        if(getTranslateX() + locationAware.getValue().getX() + syncListWidth + GRID_SIZE * 2 > getComponent().getBox().getX() + getComponent().getBox().getWidth()) {
+            setTranslateX(Grid.snap(getComponent().getBox().getX() + getComponent().getBox().getWidth() - locationAware.getValue().getX() - syncListWidth - GRID_SIZE * 2));
+        } else if (getTranslateX() + locationAware.getValue().getX() < getComponent().getBox().getX()) {
+            setTranslateX(Grid.snap(getComponent().getBox().getX() - locationAware.getValue().getX()));
+        }
+
+        //Handle the vertical placement of the tag
+        double syncListHeight = ((ScrollPane) controller.syncList.getParent().getParent().getParent()).getViewportBounds().getHeight();
+        if(getTranslateY() + locationAware.getValue().getY() + syncListHeight + TAG_HEIGHT * 3 > getComponent().getBox().getY() + getComponent().getBox().getHeight()) {
+            setTranslateY(Grid.snap(getComponent().getBox().getY() + getComponent().getBox().getHeight() - locationAware.getValue().getY() - (syncListHeight + TAG_HEIGHT * 3)));
+        } else if (getTranslateY() + locationAware.getValue().getY() < getComponent().getBox().getY() + GRID_SIZE * 2) {
+            setTranslateY(Grid.snap(getComponent().getBox().getY() - locationAware.getValue().getY() + GRID_SIZE * 2));
+        }
+    }
+
     private void removeEmptySync(JFXTextField changedTextField) {
         for (int i = 0; i < controller.syncList.getChildren().size(); i++) {
             JFXTextField currentTextField = (JFXTextField) ((StackPane) controller.syncList.getChildren().get(i)).getChildren().get(1);
@@ -318,6 +380,24 @@ public class MultiSyncTagPresentation extends TagPresentation {
                 controller.syncList.getChildren().remove(i);
                 break;
             }
+        }
+
+        // Without updating the height, l2 and l3, a weird shape is drawn above the tag and drag is misplaced
+        if (((ScrollPane) controller.syncList
+                .getParent()
+                .getParent()
+                .getParent())
+                .getViewportBounds()
+                .getHeight() > TAG_HEIGHT * 10) {
+            double newHeight = TAG_HEIGHT * 10;
+            final double resHeight = GRID_SIZE * 2 - (newHeight % (GRID_SIZE * 2));
+            newHeight += resHeight;
+
+            l2.setY(newHeight);
+            l3.setY(newHeight);
+
+            setMinHeight(newHeight);
+            setMaxHeight(newHeight);
         }
     }
 
@@ -336,7 +416,7 @@ public class MultiSyncTagPresentation extends TagPresentation {
                         Node emptyTextFieldContainer = controller.syncList.getChildren().get(j);
                         controller.syncList.getChildren().remove(j);
                         controller.syncList.getChildren().add(i+1, emptyTextFieldContainer);
-                        ((StackPane) emptyTextFieldContainer).getChildren().get(1).requestFocus();
+                        emptyTextField.requestFocus();
                         break;
                     }
                 }

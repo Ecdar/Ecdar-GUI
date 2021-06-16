@@ -3,7 +3,6 @@ package ecdar.abstractions;
 import ecdar.Ecdar;
 import ecdar.presentations.Grid;
 import javafx.beans.property.*;
-import javafx.beans.value.ObservableBooleanValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -23,24 +22,7 @@ public class GroupedEdge extends DisplayableEdge {
         ioStatus = new SimpleObjectProperty<>(edge.ioStatus.get());
         initializeFromEdge(edge);
 
-        double centerBetweenSourceAndTargetX = (edge.getSourceLocation().getX() + edge.getTargetLocation().getX()) / 2;
-        double centerBetweenSourceAndTargetY = (edge.getSourceLocation().getY() + edge.getTargetLocation().getY()) / 2;
-
-        // ToDo NIELS: Add nails on the edge
-        //Add guard nail
-//        nail = new Nail(Grid.snap(centerBetweenSourceAndTargetX) - Grid.GRID_SIZE * 2, Grid.snap(centerBetweenSourceAndTargetY) - Grid.GRID_SIZE * 2);
-//        nail.setPropertyType(Edge.PropertyType.GUARD);
-//        addNail(nail);
-
-        // Add sync nail
-        Nail nail = new Nail(Grid.snap(centerBetweenSourceAndTargetX), Grid.snap(centerBetweenSourceAndTargetY));
-        nail.setPropertyType(Edge.PropertyType.SYNCHRONIZATION);
-        addNail(nail);
-
-        // Add update nail
-//        nail = new Nail(Grid.snap(centerBetweenSourceAndTargetX) + Grid.GRID_SIZE * 2, Grid.snap(centerBetweenSourceAndTargetY) + Grid.GRID_SIZE * 2);
-//        nail.setPropertyType(Edge.PropertyType.UPDATE);
-//        addNail(nail);
+        edge.getNails().forEach(this::addNail);
     }
 
     private void initializeFromEdge(Edge edge) {
@@ -56,7 +38,6 @@ public class GroupedEdge extends DisplayableEdge {
         setStatus(edge.getStatus());
     }
 
-    // ToDo NIELS: Delete if unnecessary
     public boolean addEdgeToGroup(Edge newEdge) {
         if(newEdge.getGuard().equals(this.edges.get(0).getGuard()) && newEdge.getUpdate().equals(this.edges.get(0).getUpdate())) {
             return edges.add(newEdge);
@@ -86,7 +67,7 @@ public class GroupedEdge extends DisplayableEdge {
     /**
      * Generate and sets a unique id for this location
      */
-    private void setId() {
+    protected void setId() {
         for(int counter = 0; ; counter++) {
             if(!Ecdar.getProject().getLocationIds().contains(String.valueOf(counter))){
                 id.set(EDGE_GROUP + counter);
@@ -107,9 +88,10 @@ public class GroupedEdge extends DisplayableEdge {
         return id;
     }
 
-    public Edge addSync() {
-        // Initialize edge with new sync
+    public Edge getBaseSubEdge() {
         Edge edge = new Edge(getSourceLocation(), getStatus());
+
+        // Initialize edge with new sync
         edge.setTargetLocation(this.getTargetLocation());
         edge.setGuard(this.getGuard());
         edge.setUpdate(this.getGuard());
@@ -118,7 +100,6 @@ public class GroupedEdge extends DisplayableEdge {
         edge.setIsHighlighted(this.getIsHighlighted());
         edge.setGroup(this.getId());
 
-        this.edges.add(edge);
         return edge;
     }
 

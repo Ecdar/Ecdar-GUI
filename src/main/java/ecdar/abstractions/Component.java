@@ -643,9 +643,36 @@ public class Component extends HighLevelModelObject implements Boxed {
         });
 
         json.getAsJsonArray(EDGES).forEach(jsonElement -> {
-            // ToDo NIELS: Handle Grouped edges at deserialization
+            JsonObject edgeObject = (JsonObject) jsonElement;
             final Edge newEdge = new Edge((JsonObject) jsonElement, this);
-            edges.add(newEdge);
+
+            if (edgeObject.has("group")) {
+                String edgeGroup = edgeObject.getAsJsonPrimitive("group").getAsString();
+
+                GroupedEdge groupedEdge = null;
+                for (DisplayableEdge edge : edges) {
+                    if (edge instanceof GroupedEdge && edge.getId().equals(edgeGroup)) {
+                        groupedEdge = ((GroupedEdge) edge);
+                        break;
+                    }
+                }
+
+                if (groupedEdge == null) {
+                    GroupedEdge newGroupedEdge = new GroupedEdge(newEdge);
+                    newGroupedEdge.setId(edgeGroup);
+
+                    edges.add(newGroupedEdge);
+                } else {
+                    boolean hasSameGuardAndUpdate = groupedEdge.addEdgeToGroup(newEdge);
+                    if (!hasSameGuardAndUpdate) {
+                        // ToDo NIELS: Somehow an edge with different guard and/or update was given the same group id
+                    }
+                }
+
+            } else {
+                edges.add(newEdge);
+            }
+
         });
 
         setDescription(json.getAsJsonPrimitive(DESCRIPTION).getAsString());
