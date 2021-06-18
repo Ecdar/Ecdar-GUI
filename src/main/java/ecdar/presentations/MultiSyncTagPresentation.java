@@ -27,8 +27,6 @@ import javafx.scene.text.TextAlignment;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Stack;
-import java.util.function.BiConsumer;
 
 import static ecdar.presentations.Grid.GRID_SIZE;
 
@@ -233,9 +231,8 @@ public class MultiSyncTagPresentation extends TagPresentation {
             }
 
             for (StringProperty stringProperty : stringList) {
-                JFXTextField textField = addSyncTextField(addNewSyncHandler);
+                JFXTextField textField = addSyncTextField(addNewSyncHandler, stringProperty.get());
                 textField.textProperty().unbind();
-                textField.setText(stringProperty.get());
                 stringProperty.bind(textField.textProperty());
             }
         });
@@ -253,25 +250,76 @@ public class MultiSyncTagPresentation extends TagPresentation {
         }
     }
 
-    private JFXTextField addSyncTextField(Runnable addNewSyncHandler) {
-        final Label label = new Label();
-        final JFXTextField textField = new JFXTextField();
+    private JFXTextField addSyncTextField(Runnable addNewSyncHandler, String initialText) {
+        final Insets insets = new Insets(0,2,0,2);
 
+        final JFXTextField textField = initializeTextFieldForSync(insets, addNewSyncHandler, initialText);
+        final Label label = initializeLabelForSync(insets, textField);
+
+        addSyncToGUI(textField, label);
+
+        Platform.runLater(this::ensureTagIsWithinComponent);
+
+        return textField;
+    }
+
+    private JFXTextField initializeTextFieldForSync(Insets insets, Runnable addNewSyncHandler, String initialText) {
+        final JFXTextField textField = new JFXTextField(initialText);
+        textField.getStyleClass().add("sub-caption");
+        textField.setAlignment(Pos.CENTER_LEFT);
+        textField.setPadding(insets);
+
+        // Add/remove empty sync as needed
+        textField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.isEmpty()) {
+                this.removeEmptySync(textField);
+            } else if (oldValue.isEmpty()) {
+                addNewSyncHandler.run();
+                Edge newEdge = edge.getBaseSubEdge();
+                UndoRedoStack.pushAndPerform(
+                        () -> {
+                            setAndBindStringList(Collections.singletonList((newEdge).syncProperty()), addNewSyncHandler, false);
+                            this.edge.addEdgeToGroup(newEdge);
+                        },
+                        () -> {
+                            // The added edge will always be without a sync (empty text field), so we want to delete the edge added just before it
+                            if (this.edge.getEdges().contains(newEdge)) {
+                                Edge previouslyAddedEdge = this.edge.getEdges().get(this.edge.getEdges().indexOf(newEdge) - 1);
+                                controller.removeSyncTextfieldOfEdge(previouslyAddedEdge);
+                                this.edge.getEdges().remove(previouslyAddedEdge);
+                            }
+                        },
+                        "New sync added to multi-sync edge",
+                        "list_alt"
+                );
+            }
+        });
+
+        // Visualize active text field by offsetting the text field
+        textField.focusedProperty().addListener((observable, oldFocused, newFocused) -> {
+            if (newFocused) {
+                textField.setTranslateY(2);
+            } else {
+                textField.setTranslateY(0);
+                EcdarController.getActiveCanvasPresentation().getController().leaveTextAreas();
+            }
+        });
+
+        textField.setPromptText(this.placeholder);
+
+        return textField;
+    }
+
+    private Label initializeLabelForSync(Insets insets, JFXTextField textField) {
+        final Label label = new Label();
         label.getStyleClass().add("sub-caption");
         label.setAlignment(Pos.CENTER_LEFT);
         label.setTextAlignment(TextAlignment.LEFT);
         label.setVisible(false);
-
-        textField.getStyleClass().add("sub-caption");
-        textField.setAlignment(Pos.CENTER_LEFT);
-
-        final Insets insets = new Insets(0,2,0,2);
-        textField.setPadding(insets);
         label.setPadding(insets);
 
-        final int padding = 5;
-
         label.layoutBoundsProperty().addListener((obs, oldBounds, newBounds) -> {
+            final int padding = 5;
             double newWidth = Math.max(newBounds.getWidth(), 60);
             final double resWidth = GRID_SIZE * 2 - (newWidth % (GRID_SIZE * 2));
             newWidth += resWidth;
@@ -299,54 +347,18 @@ public class MultiSyncTagPresentation extends TagPresentation {
             }
         });
 
-        textField.focusedProperty().addListener((observable, oldFocused, newFocused) -> {
-            if (newFocused) {
-                textField.setTranslateY(2);
-            } else {
-                textField.setTranslateY(0);
-                EcdarController.getActiveCanvasPresentation().getController().leaveTextAreas();
-            }
-        });
-
-        textField.setPromptText(this.placeholder);
-
         label.textProperty().bind(new When(textField.textProperty().isNotEmpty()).then(textField.textProperty()).otherwise(textField.promptTextProperty()));
 
-        textField.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue.isEmpty()) {
-                this.removeEmptySync(textField);
-            } else if (oldValue.isEmpty()) {
-                Edge newEdge = edge.getBaseSubEdge();
-                UndoRedoStack.pushAndPerform(
-                        () -> {
-                            addNewSyncHandler.run();
-                            setAndBindStringList(Collections.singletonList((newEdge).syncProperty()), addNewSyncHandler, false);
-                            this.edge.addEdgeToGroup(newEdge);
-                        },
-                        () -> {
-                            // The added edge will always be without a sync (empty text field), so we want to delete the edge added just before it
-                            if (this.edge.getEdges().contains(newEdge)) {
-                                Edge previouslyAddedEdge = this.edge.getEdges().get(this.edge.getEdges().indexOf(newEdge) - 1);
-                                controller.removeSyncTextfieldOfEdge(previouslyAddedEdge);
-                                this.edge.getEdges().remove(previouslyAddedEdge);
-                            }
-                        },
-                        String.format("New sync added to multi-sync edge"),
-                        "list_alt"
-                );
-            }
-        });
+        return label;
+    }
 
+    private void addSyncToGUI(JFXTextField textField, Label label) {
         StackPane container = new StackPane();
         container.getChildren().add(label);
         container.getChildren().add(textField);
         container.setAlignment(Pos.TOP_LEFT);
 
         controller.syncList.getChildren().add(container);
-
-        Platform.runLater(this::ensureTagIsWithinComponent);
-
-        return textField;
     }
 
     private void ensureTagIsWithinComponent() {

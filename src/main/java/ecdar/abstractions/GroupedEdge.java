@@ -2,6 +2,7 @@ package ecdar.abstractions;
 
 import ecdar.Ecdar;
 import ecdar.presentations.Grid;
+import ecdar.utility.UndoRedoStack;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -9,6 +10,8 @@ import javafx.collections.ObservableList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Stack;
+import java.util.function.BiConsumer;
 
 public class GroupedEdge extends DisplayableEdge {
     private static final String ID = "id";
@@ -23,6 +26,16 @@ public class GroupedEdge extends DisplayableEdge {
         initializeFromEdge(edge);
 
         edge.getNails().forEach(this::addNail);
+
+        // ToDo NIELS: REMOVE!!!
+        UndoRedoStack.setDebugRunnable(new BiConsumer<Stack<UndoRedoStack.Command>, Stack<UndoRedoStack.Command>>() {
+            @Override
+            public void accept(Stack<UndoRedoStack.Command> commands, Stack<UndoRedoStack.Command> commands2) {
+                System.out.println();
+                System.out.println(commands.size());
+                System.out.println(commands2.size());
+            }
+        });
     }
 
     private void initializeFromEdge(Edge edge) {
