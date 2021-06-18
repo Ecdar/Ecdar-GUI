@@ -7,6 +7,8 @@ import ecdar.presentations.Grid;
 public class ZoomHelper {
     private CanvasPresentation canvasPresentation;
     private Grid grid;
+    private boolean active = true;
+
     public double minZoomFactor = 0.4;
     public double maxZoomFactor = 4;
 
@@ -26,9 +28,11 @@ public class ZoomHelper {
     }
 
     public void setZoomLevel(Double zoomLevel) {
-        canvasPresentation.setScaleX(zoomLevel);
-        canvasPresentation.setScaleY(zoomLevel);
-        centerComponentAndUpdateGrid(zoomLevel);
+        if (active) {
+            canvasPresentation.setScaleX(zoomLevel);
+            canvasPresentation.setScaleY(zoomLevel);
+            centerComponentAndUpdateGrid(zoomLevel);
+        }
     }
 
     public void setGrid(Grid newGrid) {
@@ -39,66 +43,81 @@ public class ZoomHelper {
      * Zoom in with a delta of 1.2
      */
     public void zoomIn() {
-        double delta = 1.2;
-        double newScale = canvasPresentation.getScaleX() * delta;
+        if (active) {
+            double delta = 1.2;
+            double newScale = canvasPresentation.getScaleX() * delta;
 
-        //Limit for zooming in
-        if(newScale > maxZoomFactor){
-            return;
+            //Limit for zooming in
+            if (newScale > maxZoomFactor) {
+                return;
+            }
+
+            //Scale canvas
+            canvasPresentation.setScaleX(newScale);
+            canvasPresentation.setScaleY(newScale);
+
+            centerComponentAndUpdateGrid(newScale);
         }
-
-        //Scale canvas
-        canvasPresentation.setScaleX(newScale);
-        canvasPresentation.setScaleY(newScale);
-
-        centerComponentAndUpdateGrid(newScale);
     }
 
     /**
      * Zoom out with a delta of 1.2
      */
     public void zoomOut() {
-        double delta = 1.2;
-        double newScale = canvasPresentation.getScaleX() / delta;
+        if (active) {
+            double delta = 1.2;
+            double newScale = canvasPresentation.getScaleX() / delta;
 
-        //Limit for zooming out
-        if(newScale < minZoomFactor){
-            return;
+            //Limit for zooming out
+            if (newScale < minZoomFactor) {
+                return;
+            }
+
+            //Scale canvas
+            canvasPresentation.setScaleX(newScale);
+            canvasPresentation.setScaleY(newScale);
+
+            centerComponentAndUpdateGrid(newScale);
         }
-
-        //Scale canvas
-        canvasPresentation.setScaleX(newScale);
-        canvasPresentation.setScaleY(newScale);
-
-        centerComponentAndUpdateGrid(newScale);
     }
 
     /**
      * Set the zoom multiplier to 1
      */
     public void resetZoom() {
-        canvasPresentation.setScaleX(1);
-        canvasPresentation.setScaleY(1);
+        if (active) {
+            canvasPresentation.setScaleX(1);
+            canvasPresentation.setScaleY(1);
 
-        //Center component
-        centerComponentAndUpdateGrid(1);
+            //Center component
+            centerComponentAndUpdateGrid(1);
+        }
     }
 
     /**
      * Zoom in to fit the component on screen
      */
     public void zoomToFit() {
-        if(EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation == null) {
-            resetZoom();
-            return;
+        if (active) {
+            if (EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation == null) {
+                resetZoom();
+                return;
+            }
+            double newScale = Math.min(canvasPresentation.getWidth() / EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation.getWidth() - 0.1, canvasPresentation.getHeight() / EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation.getHeight() - 0.2); //0.1 for width and 0.2 for height added for margin
+
+            //Scale canvas
+            canvasPresentation.setScaleX(newScale);
+            canvasPresentation.setScaleY(newScale);
+
+            centerComponentAndUpdateGrid(newScale);
         }
-        double newScale = Math.min(canvasPresentation.getWidth() / EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation.getWidth() - 0.1, canvasPresentation.getHeight() / EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation.getHeight() - 0.2); //0.1 for width and 0.2 for height added for margin
+    }
 
-        //Scale canvas
-        canvasPresentation.setScaleX(newScale);
-        canvasPresentation.setScaleY(newScale);
-
-        centerComponentAndUpdateGrid(newScale);
+    /**
+     * Set zoom as active/disabled
+     */
+    public void setActive(boolean activeState) {
+        this.active = activeState;
     }
 
     /**
