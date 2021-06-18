@@ -227,7 +227,6 @@ public class MultiSyncTagPresentation extends TagPresentation {
         Platform.runLater(() -> {
             if (shouldClearTextFields) {
                 clearTextFields();
-                // edge.getEdges().remove(1, edge.getEdges().size()-1);
             }
 
             for (StringProperty stringProperty : stringList) {
@@ -269,6 +268,11 @@ public class MultiSyncTagPresentation extends TagPresentation {
         textField.setAlignment(Pos.CENTER_LEFT);
         textField.setPadding(insets);
 
+        // To ensure that an empty sync text field is added on redo
+        if (!initialText.isEmpty()) {
+            setAndBindStringList(Collections.singletonList(edge.getBaseSubEdge().syncProperty()), addNewSyncHandler, false);
+        }
+
         // Add/remove empty sync as needed
         textField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue.isEmpty()) {
@@ -278,14 +282,14 @@ public class MultiSyncTagPresentation extends TagPresentation {
                 Edge newEdge = edge.getBaseSubEdge();
                 UndoRedoStack.pushAndPerform(
                         () -> {
-                            setAndBindStringList(Collections.singletonList((newEdge).syncProperty()), addNewSyncHandler, false);
+                            setAndBindStringList(Collections.singletonList(newEdge.syncProperty()), addNewSyncHandler, false);
                             this.edge.addEdgeToGroup(newEdge);
                         },
                         () -> {
                             // The added edge will always be without a sync (empty text field), so we want to delete the edge added just before it
                             if (this.edge.getEdges().contains(newEdge)) {
                                 Edge previouslyAddedEdge = this.edge.getEdges().get(this.edge.getEdges().indexOf(newEdge) - 1);
-                                controller.removeSyncTextfieldOfEdge(previouslyAddedEdge);
+                                controller.removeSyncTextFieldOfEdge(previouslyAddedEdge);
                                 this.edge.getEdges().remove(previouslyAddedEdge);
                             }
                         },
