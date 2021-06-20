@@ -1,19 +1,17 @@
 package ecdar.presentations;
 
 import com.jfoenix.controls.JFXTextField;
+import ecdar.abstractions.DisplayableEdge;
 import ecdar.abstractions.Edge;
 import ecdar.abstractions.GroupedEdge;
 import ecdar.controllers.EcdarController;
 import ecdar.controllers.MultiSyncTagController;
 import ecdar.utility.UndoRedoStack;
 import javafx.application.Platform;
-import javafx.beans.binding.When;
 import javafx.beans.property.*;
 import javafx.beans.value.ObservableBooleanValue;
 import javafx.collections.ListChangeListener;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -22,83 +20,145 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.text.TextAlignment;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static ecdar.presentations.Grid.GRID_SIZE;
 
 public class MultiSyncTagPresentation extends TagPresentation {
-    private MultiSyncTagController controller;
+    private final MultiSyncTagController controller;
     private String placeholder = "";
     private Label widestLabel;
     private final GroupedEdge edge;
     private double widthNeededForSyncs = 60;
 
-    public MultiSyncTagPresentation(GroupedEdge edge) {
-        updateTopBorder();
-        initializeMouseTransparency();
-        initializeTextFocusHandler();
-
-        widthProperty().addListener((observable) -> updateTopBorder());
-        heightProperty().addListener((observable) -> updateTopBorder());
-
-        controller.syncList.setPadding(new Insets(0, 0, 10, 0));
+    public MultiSyncTagPresentation(GroupedEdge edge, Runnable updateIOStatusOfSubEdges) {
+        this.controller = new EcdarFXMLLoader().loadAndGetController("MultiSyncTagPresentation.fxml", this);
 
         this.edge = edge;
+        edge.ioStatus.addListener((observable) -> updateIOStatusOfSubEdges.run());
 
-        // Disable horizontal scroll
-        lookup("#scrollPane").addEventFilter(ScrollEvent.SCROLL,new EventHandler<ScrollEvent>() {
-            @Override
-            public void handle(ScrollEvent event) {
+        Platform.runLater(() -> {
+            updateTopBorder();
+            initializeMouseTransparency();
+            initializeTextFocusHandler();
+
+            widthProperty().addListener((observable) -> updateTopBorder());
+            heightProperty().addListener((observable) -> updateTopBorder());
+
+            controller.syncList.setPadding(new Insets(0, 0, 10, 0));
+
+            // Disable horizontal scroll
+            lookup("#scrollPane").addEventFilter(ScrollEvent.SCROLL, event -> {
                 if (event.getDeltaX() != 0) {
                     event.consume();
                 }
-            }
+            });
         });
 
         edge.getEdges().addListener((ListChangeListener<Edge>) change -> {
             while (change.next()) {
                 if (change.wasRemoved()) {
-                    for (int i = 1; i < controller.syncList.getChildren().size(); i++) {
-                        if (((JFXTextField) ((StackPane) controller.syncList.getChildren().get(i)).getChildren().get(1))
-                                .getText()
-                                .equals(change.getRemoved().get(0).getSync())) {
-                                controller.syncList.getChildren().remove(i-1);
-                                break;
-                        }
-                    }
+                    change.getRemoved().forEach(this::removeSyncTextField);
                 }
+
+                if (change.wasAdded()) {
+                    change.getAddedSubList().forEach(addedEdge -> {
+                        addSyncTextField(addedEdge.syncProperty());
+                    });
+                }
+            }
+
+            // Handle height
+            if (getHeight() > TAG_HEIGHT * 10) {
+                double newHeight = TAG_HEIGHT * 10;
+                final double resHeight = GRID_SIZE * 2 - (newHeight % (GRID_SIZE * 2));
+                newHeight += resHeight;
+
+                l2.setY(newHeight);
+                l3.setY(newHeight);
+
+                setMinHeight(newHeight);
+                setMaxHeight(newHeight);
             }
         });
 
-        controller.syncList.getChildren().addListener((ListChangeListener<? super Node>) change -> {
-            boolean foundEmptySync = false;
-            ArrayList<Node> childrenToDelete = new ArrayList<>();
+        addSyncTextField(edge.getEdges().get(0).syncProperty());
+    }
 
-            for (Node node : controller.syncList.getChildren()) {
-                if (((JFXTextField) ((StackPane) node).getChildren().get(1)).getText().isEmpty()) {
-                    if (!foundEmptySync) {
-                        foundEmptySync = true;
-                    } else {
-                        childrenToDelete.add(node);
-                    }
+    @Override
+    public void setPlaceholder(final String placeholder) {
+        this.placeholder = placeholder;
+        List<Node> syncTextFields = controller.syncList.getChildren();
+
+        for (Node child : syncTextFields) {
+            ((SyncTextFieldPresentation) child).setPlaceholder(placeholder);
+        }
+    }
+
+    @Override
+    public void replaceSpace() {
+        for (Node child : controller.syncList.getChildren()) {
+            initializeTextAid(((SyncTextFieldPresentation) child).getController().textField);
+        }
+    }
+
+    @Override
+    public void requestTextFieldFocus() {
+        Platform.runLater(() -> {
+            for (int j = 0; j < controller.syncList.getChildren().size(); j++) {
+                JFXTextField emptyTextField = ((SyncTextFieldPresentation) controller.syncList.getChildren().get(j)).getController().textField;
+
+                if (emptyTextField.getText().isEmpty()) {
+                    Platform.runLater(emptyTextField::requestFocus);
+                    return;
                 }
-            }
-
-            if(!childrenToDelete.isEmpty()) {
-                controller.syncList.getChildren().removeAll(childrenToDelete);
             }
         });
     }
 
+    @Override
+    public ObservableBooleanValue textFieldFocusProperty() {
+        return controller.textFieldFocus;
+    }
+
+    @Override
+    public void setDisabledText(boolean bool){
+        for (Node child : controller.syncList.getChildren()) {
+            ((SyncTextFieldPresentation) child).getController().textField.setDisable(true);
+        }
+    }
+
+    public MultiSyncTagController getController() {
+        return controller;
+    }
+
+    public void addEdge(DisplayableEdge newEdge) {
+        if (newEdge instanceof Edge) {
+            this.edge.getEdges().add((Edge) newEdge);
+        } else if (newEdge instanceof GroupedEdge) {
+            ((GroupedEdge) newEdge).getEdges().forEach((subEdgeOfNewEdge) -> {
+                this.edge.getEdges().add(subEdgeOfNewEdge);
+            });
+        }
+    }
+
     private void updateTopBorder() {
-        if (controller == null) {
-            this.controller = new EcdarFXMLLoader().loadAndGetController("MultiSyncTagPresentation.fxml", this);
+        updateColorAndMouseShape();
+        updateMouseInteractions();
+
+        // When enter or escape is pressed release focus
+        for (Node child : controller.syncList.getChildren()) {
+            ((SyncTextFieldPresentation) child).getController().textField.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler((keyEvent) -> {
+                if (!((SyncTextFieldPresentation) child).getController().textField.getText().isEmpty() && keyEvent.getCode().equals(KeyCode.ENTER)) {
+                    this.placeEmptySyncBelowCurrent(((SyncTextFieldPresentation) child).getController().textField);
+                }
+            }));
         }
 
+    }
+
+    private void updateColorAndMouseShape() {
         EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation.getController().getComponent().colorProperty().addListener((observable, oldValue, newValue) -> {
             controller.frame.setBackground(new Background(new BackgroundFill(newValue.getColor(
                     EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation.getController().getComponent().getColorIntensity()), new CornerRadii(0), Insets.EMPTY)));
@@ -106,17 +166,13 @@ public class MultiSyncTagPresentation extends TagPresentation {
 
         Color color = EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation.getController().getComponent().getColor().getColor(
                 EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation.getController().getComponent().getColorIntensity());
+
         controller.frame.setBackground(new Background(new BackgroundFill(color, new CornerRadii(0), Insets.EMPTY)));
 
-        final List<JFXTextField> textFields = new ArrayList<>();
-        for (Node child : controller.syncList.getChildren()) {
-            if (child instanceof StackPane && !((StackPane) child).getChildren().isEmpty()) {
-                textFields.add((JFXTextField) ((StackPane) child).getChildren().get(1));
-            }
-        }
-
         controller.frame.setCursor(Cursor.OPEN_HAND);
+    }
 
+    private void updateMouseInteractions() {
         controller.frame.setOnMousePressed(event -> {
             previousX = getTranslateX();
             previousY = getTranslateY();
@@ -162,167 +218,57 @@ public class MultiSyncTagPresentation extends TagPresentation {
 
             Platform.runLater(this::ensureTagIsWithinComponent);
         });
-
-        // When enter or escape is pressed release focus
-        textFields.forEach(textField -> textField.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler((keyEvent) -> {
-            if (!textField.getText().isEmpty() && keyEvent.getCode().equals(KeyCode.ENTER)) {
-                this.placeEmptySyncBelowCurrent(textField);
-            }
-        })));
     }
 
-    @Override
-    public void setPlaceholder(final String placeholder) {
-        this.placeholder = placeholder;
-        List<Node> textFieldContainers = controller.syncList.getChildren();
+    private void removeSyncTextField(Edge removedEdge) {
+        SyncTextFieldPresentation syncTextFieldToDelete = null;
 
-        for (Node child : textFieldContainers) {
-            if (child instanceof StackPane && !((StackPane) child).getChildren().isEmpty()) {
-                JFXTextField textField = (JFXTextField) ((StackPane) child).getChildren().get(1);
-                textField.setPromptText(placeholder);
+        for(int i = 0; i < controller.syncList.getChildren().size(); i++) {
+            if(((SyncTextFieldPresentation) controller.syncList.getChildren().get(i)).getController().textField.getText().equals(removedEdge.getSync())) {
+                syncTextFieldToDelete = ((SyncTextFieldPresentation) controller.syncList.getChildren().get(i));
+                break;
             }
         }
+
+        controller.syncList.getChildren().remove(syncTextFieldToDelete);
     }
 
-    @Override
-    public void replaceSpace() {
-        for (Node child : controller.syncList.getChildren()) {
-            if (child instanceof StackPane && !((StackPane) child).getChildren().isEmpty()) {
-                initializeTextAid((JFXTextField) ((StackPane) child).getChildren().get(1));
-            }
-        }
-    }
+    private void addSyncTextField(StringProperty edgeSyncTextProperty) {
+        final SyncTextFieldPresentation syncTextFieldPresentation = new SyncTextFieldPresentation(placeholder, edgeSyncTextProperty);
 
-    @Override
-    public void requestTextFieldFocus() {
-        for (int j = 0; j < controller.syncList.getChildren().size(); j++) {
-            JFXTextField emptyTextField = (JFXTextField) ((StackPane) controller.syncList.getChildren().get(j)).getChildren().get(1);
+        controller.syncList.getChildren().add(syncTextFieldPresentation);
 
-            if (emptyTextField.getText().isEmpty()) {
-                Platform.runLater(emptyTextField::requestFocus);
-                return;
-            }
-        }
-    }
-
-    @Override
-    public ObservableBooleanValue textFieldFocusProperty() {
-        return controller.textFieldFocus;
-    }
-
-    @Override
-    public void setDisabledText(boolean bool){
-        for (Node child : controller.syncList.getChildren()) {
-            if (child instanceof StackPane && !((StackPane) child).getChildren().isEmpty()) {
-                ((StackPane) child).getChildren().get(1).setDisable(true);
-            }
-        }
-    }
-
-    public MultiSyncTagController getController() {
-        return controller;
-    }
-
-    public void setAndBindStringList(final List<StringProperty> stringList, Runnable addNewSyncHandler, boolean shouldClearTextFields) {
         Platform.runLater(() -> {
-            if (shouldClearTextFields) {
-                clearTextFields();
-            }
+            initializeTextFieldForSync(syncTextFieldPresentation);
+            initializeLabelForSync(syncTextFieldPresentation);
 
-            for (StringProperty stringProperty : stringList) {
-                JFXTextField textField = addSyncTextField(addNewSyncHandler, stringProperty.get());
-                textField.textProperty().unbind();
-                stringProperty.bind(textField.textProperty());
-            }
+            ensureTagIsWithinComponent();
         });
-
-        if (getHeight() > TAG_HEIGHT * 10) {
-            double newHeight = TAG_HEIGHT * 10;
-            final double resHeight = GRID_SIZE * 2 - (newHeight % (GRID_SIZE * 2));
-            newHeight += resHeight;
-
-            l2.setY(newHeight);
-            l3.setY(newHeight);
-
-            setMinHeight(newHeight);
-            setMaxHeight(newHeight);
-        }
     }
 
-    private JFXTextField addSyncTextField(Runnable addNewSyncHandler, String initialText) {
-        final Insets insets = new Insets(0,2,0,2);
-
-        final JFXTextField textField = initializeTextFieldForSync(insets, addNewSyncHandler, initialText);
-        final Label label = initializeLabelForSync(insets, textField);
-
-        addSyncToGUI(textField, label);
-
-        Platform.runLater(this::ensureTagIsWithinComponent);
-
-        return textField;
-    }
-
-    private JFXTextField initializeTextFieldForSync(Insets insets, Runnable addNewSyncHandler, String initialText) {
-        final JFXTextField textField = new JFXTextField(initialText);
-        textField.getStyleClass().add("sub-caption");
-        textField.setAlignment(Pos.CENTER_LEFT);
-        textField.setPadding(insets);
-
-        // To ensure that an empty sync text field is added on redo
-        if (!initialText.isEmpty()) {
-            setAndBindStringList(Collections.singletonList(edge.getBaseSubEdge().syncProperty()), addNewSyncHandler, false);
-        }
-
+    private void initializeTextFieldForSync(SyncTextFieldPresentation syncTextField) {
         // Add/remove empty sync as needed
-        textField.textProperty().addListener((observable, oldValue, newValue) -> {
+        syncTextField.getController().textField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue.isEmpty()) {
-                this.removeEmptySync(textField);
+                this.removeEmptySync(syncTextField.getController().textField);
             } else if (oldValue.isEmpty()) {
-                addNewSyncHandler.run();
                 Edge newEdge = edge.getBaseSubEdge();
                 UndoRedoStack.pushAndPerform(
                         () -> {
-                            setAndBindStringList(Collections.singletonList(newEdge.syncProperty()), addNewSyncHandler, false);
                             this.edge.addEdgeToGroup(newEdge);
                         },
                         () -> {
-                            // The added edge will always be without a sync (empty text field), so we want to delete the edge added just before it
-                            if (this.edge.getEdges().contains(newEdge)) {
-                                Edge previouslyAddedEdge = this.edge.getEdges().get(this.edge.getEdges().indexOf(newEdge) - 1);
-                                controller.removeSyncTextFieldOfEdge(previouslyAddedEdge);
-                                this.edge.getEdges().remove(previouslyAddedEdge);
-                            }
+                            this.edge.getEdges().remove(newEdge);
                         },
                         "New sync added to multi-sync edge",
                         "list_alt"
                 );
             }
         });
-
-        // Visualize active text field by offsetting the text field
-        textField.focusedProperty().addListener((observable, oldFocused, newFocused) -> {
-            if (newFocused) {
-                textField.setTranslateY(2);
-            } else {
-                textField.setTranslateY(0);
-                EcdarController.getActiveCanvasPresentation().getController().leaveTextAreas();
-            }
-        });
-
-        textField.setPromptText(this.placeholder);
-
-        return textField;
     }
 
-    private Label initializeLabelForSync(Insets insets, JFXTextField textField) {
-        final Label label = new Label();
-        label.getStyleClass().add("sub-caption");
-        label.setAlignment(Pos.CENTER_LEFT);
-        label.setTextAlignment(TextAlignment.LEFT);
-        label.setVisible(false);
-        label.setPadding(insets);
-
-        label.layoutBoundsProperty().addListener((obs, oldBounds, newBounds) -> {
+    private void initializeLabelForSync(SyncTextFieldPresentation syncTextField) {
+        syncTextField.getController().label.layoutBoundsProperty().addListener((obs, oldBounds, newBounds) -> {
             final int padding = 5;
             double newWidth = Math.max(newBounds.getWidth(), 60);
             final double resWidth = GRID_SIZE * 2 - (newWidth % (GRID_SIZE * 2));
@@ -330,7 +276,7 @@ public class MultiSyncTagPresentation extends TagPresentation {
 
             this.updateNeededWidth();
 
-            if (label.equals(widestLabel) && newWidth + padding > widthNeededForSyncs) {
+            if (syncTextField.getController().label.equals(widestLabel) && newWidth + padding > widthNeededForSyncs) {
                 setMinWidth(newWidth + padding);
                 setMaxWidth(newWidth + padding);
 
@@ -342,27 +288,14 @@ public class MultiSyncTagPresentation extends TagPresentation {
 
             if (getWidth() >= 1000) {
                 setWidth(newWidth);
-                textField.setTranslateY(-1);
+                syncTextField.getController().textField.setTranslateY(-1);
             }
 
             // Fixes the jumping of the shape when the text field is empty
-            if (textField.getText().isEmpty()) {
+            if (syncTextField.getController().textField.getText().isEmpty()) {
                 setWidth(-1);
             }
         });
-
-        label.textProperty().bind(new When(textField.textProperty().isNotEmpty()).then(textField.textProperty()).otherwise(textField.promptTextProperty()));
-
-        return label;
-    }
-
-    private void addSyncToGUI(JFXTextField textField, Label label) {
-        StackPane container = new StackPane();
-        container.getChildren().add(label);
-        container.getChildren().add(textField);
-        container.setAlignment(Pos.TOP_LEFT);
-
-        controller.syncList.getChildren().add(container);
     }
 
     private void ensureTagIsWithinComponent() {
@@ -390,7 +323,7 @@ public class MultiSyncTagPresentation extends TagPresentation {
 
     private void removeEmptySync(JFXTextField changedTextField) {
         for (int i = 0; i < controller.syncList.getChildren().size(); i++) {
-            JFXTextField currentTextField = (JFXTextField) ((StackPane) controller.syncList.getChildren().get(i)).getChildren().get(1);
+            JFXTextField currentTextField = ((SyncTextFieldPresentation) controller.syncList.getChildren().get(i)).getController().textField;
 
             if (!changedTextField.equals(currentTextField) && currentTextField.getText().isEmpty()) {
                 controller.syncList.getChildren().remove(i);
@@ -420,18 +353,18 @@ public class MultiSyncTagPresentation extends TagPresentation {
     private void placeEmptySyncBelowCurrent(JFXTextField currentTextField) {
         // Find index of currentTextField
         for (int i = 0; i < controller.syncList.getChildren().size(); i++) {
-            JFXTextField child = (JFXTextField) ((StackPane) controller.syncList.getChildren().get(i)).getChildren().get(1);
+            JFXTextField child = ((SyncTextFieldPresentation) controller.syncList.getChildren().get(i)).getController().textField;
 
             if (child.equals(currentTextField)) {
                 // Find empty TextField
                 for (int j = 0; j < controller.syncList.getChildren().size(); j++) {
-                    JFXTextField emptyTextField = (JFXTextField) ((StackPane) controller.syncList.getChildren().get(j)).getChildren().get(1);
+                    JFXTextField emptyTextField = ((SyncTextFieldPresentation) controller.syncList.getChildren().get(j)).getController().textField;
 
                     if (emptyTextField.getText().isEmpty()) {
                         // Move empty sync below left sync and request focus
-                        Node emptyTextFieldContainer = controller.syncList.getChildren().get(j);
+                        Node emptySyncTextField = controller.syncList.getChildren().get(j);
                         controller.syncList.getChildren().remove(j);
-                        controller.syncList.getChildren().add(i+1, emptyTextFieldContainer);
+                        controller.syncList.getChildren().add(i+1, emptySyncTextField);
                         emptyTextField.requestFocus();
                         break;
                     }
@@ -445,7 +378,7 @@ public class MultiSyncTagPresentation extends TagPresentation {
     private void updateNeededWidth() {
         double neededLengthForTextField = 0;
         for (Node child : controller.syncList.getChildren()) {
-            Label currentLabel = ((Label) ((StackPane) child).getChildren().get(0));
+            Label currentLabel = ((SyncTextFieldPresentation) child).getController().label;
 
             if (currentLabel.getWidth() > neededLengthForTextField) {
                 neededLengthForTextField = currentLabel.getWidth();
@@ -454,9 +387,5 @@ public class MultiSyncTagPresentation extends TagPresentation {
         }
 
         widthNeededForSyncs = neededLengthForTextField;
-    }
-
-    private void clearTextFields() {
-        controller.syncList.getChildren().clear();
     }
 }

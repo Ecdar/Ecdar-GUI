@@ -1,7 +1,6 @@
 package ecdar.controllers;
 
-import com.jfoenix.controls.JFXTextField;
-import ecdar.abstractions.Edge;
+import ecdar.presentations.SyncTextFieldPresentation;
 import javafx.beans.InvalidationListener;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableBooleanValue;
@@ -25,15 +24,11 @@ public class MultiSyncTagController implements Initializable {
 
     }
 
-    public void removeSyncTextFieldOfEdge(Edge newEdge) {
-        syncList.getChildren().removeIf(node -> ((JFXTextField) ((StackPane) node).getChildren().get(1)).getText().equals(newEdge.getSync()));
-    }
-
     public ObservableBooleanValue textFieldFocus = new ObservableBooleanValue() {
         @Override
         public boolean get() {
             for (Node child : syncList.getChildren()) {
-                if (child instanceof StackPane && ((StackPane) child).getChildren().get(2).isFocused()) {
+                if (child instanceof StackPane && ((SyncTextFieldPresentation) child).getController().textField.isFocused()) {
                     return true;
                 }
             }
@@ -45,7 +40,7 @@ public class MultiSyncTagController implements Initializable {
         public void addListener(ChangeListener<? super Boolean> listener) {
             for (Node child : syncList.getChildren()) {
                 if (child instanceof StackPane) {
-                    ((StackPane) child).getChildren().get(2).focusedProperty().addListener(listener);
+                    ((SyncTextFieldPresentation) child).getController().textField.focusedProperty().addListener(listener);
                 }
             }
         }
@@ -58,7 +53,7 @@ public class MultiSyncTagController implements Initializable {
         @Override
         public Boolean getValue() {
             for (Node child : syncList.getChildren()) {
-                if (child instanceof StackPane && ((StackPane) child).getChildren().get(2).isFocused()) {
+                if (child instanceof StackPane && ((SyncTextFieldPresentation) child).getController().textField.isFocused()) {
                     return true;
                 }
             }

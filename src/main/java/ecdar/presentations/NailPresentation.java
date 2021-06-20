@@ -44,12 +44,9 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
 
         Platform.runLater(() -> {
             if (controller.getNail().getPropertyType() == DisplayableEdge.PropertyType.SYNCHRONIZATION && edge instanceof GroupedEdge) {
-                controller.propertyTag = new MultiSyncTagPresentation((GroupedEdge) edge);
-
                 TagPresentation tagPresentation = getController().propertyTag;
-                if (tagPresentation instanceof MultiSyncTagPresentation) {
-                    ((MultiSyncTagPresentation) tagPresentation).setAndBindStringList(((GroupedEdge) edge).getSyncProperties(), () -> updateSyncLabel(tagPresentation), true);
-                }
+
+                controller.propertyTag = new MultiSyncTagPresentation((GroupedEdge) edge, () -> updateSyncLabel(tagPresentation));
             } else {
                 controller.propertyTag = new TagPresentation();
             }
@@ -123,9 +120,6 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
                     propertyLabel.setTranslateY(-7);
                     if (controller.getEdge() instanceof Edge)
                         propertyTag.setAndBindString(((Edge) controller.getEdge()).syncProperty());
-                    else {
-                        ((MultiSyncTagPresentation) propertyTag).setAndBindStringList(((GroupedEdge) controller.getEdge()).getSyncProperties(), () -> updateSyncLabel(propertyTag), true);
-                    }
                 } else if(propertyType.equals(Edge.PropertyType.UPDATE)) {
                     propertyTag.setPlaceholder("Update");
                     propertyLabel.setText("=");
@@ -140,7 +134,6 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
                 }
 
                 propertyTag.requestTextFieldFocus();
-                propertyTag.requestTextFieldFocus(); // Requesting it twice is needed for some reason
             }
         };
 
