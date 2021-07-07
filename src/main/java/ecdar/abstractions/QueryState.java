@@ -7,6 +7,7 @@ import org.kordamp.ikonli.material.Material;
 public enum QueryState {
     RUNNING(Color.GREY_BLUE, Color.Intensity.I600, Material.HOURGLASS_EMPTY, 0),
     SUCCESSFUL(Color.GREEN, Color.Intensity.I700, Material.DONE, 1),
+    COMPONENT_GENERATED(Color.GREEN, Color.Intensity.I700, Material.BUILD, 1),
     ERROR(Color.RED, Color.Intensity.I700, Material.CLEAR, 2),
     UNKNOWN(Color.GREY, Color.Intensity.I600, Material.HELP, 3),
     SYNTAX_ERROR(Color.YELLOW, Color.Intensity.I700, Material.WARNING, 4);

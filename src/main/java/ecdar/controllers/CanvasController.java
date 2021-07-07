@@ -157,6 +157,8 @@ public class CanvasController implements Initializable {
             throw new IllegalStateException("Type of object is not supported.");
         }
 
+        EcdarController.setTemporaryComponentWatermarkVisibility(newObject.isTemporary());
+
         root.requestFocus();
     }
 

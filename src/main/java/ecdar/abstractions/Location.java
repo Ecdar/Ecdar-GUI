@@ -420,16 +420,27 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
         setX(json.getAsJsonPrimitive(X).getAsDouble());
         setY(json.getAsJsonPrimitive(Y).getAsDouble());
 
-        final EnabledColor enabledColor = EnabledColor.fromIdentifier(json.getAsJsonPrimitive(COLOR).getAsString());
+        final EnabledColor enabledColor = (json.has(COLOR) ? EnabledColor.fromIdentifier(json.getAsJsonPrimitive(COLOR).getAsString()) : null);
         if (enabledColor != null) {
             setColorIntensity(enabledColor.intensity);
             setColor(enabledColor.color);
         }
 
-        setNicknameX(json.getAsJsonPrimitive(NICKNAME_X).getAsDouble());
-        setNicknameY(json.getAsJsonPrimitive(NICKNAME_Y).getAsDouble());
-        setInvariantX(json.getAsJsonPrimitive(INVARIANT_X).getAsDouble());
-        setInvariantY(json.getAsJsonPrimitive(INVARIANT_Y).getAsDouble());
+        if(json.has(NICKNAME_X) && json.has(NICKNAME_Y)) {
+            setNicknameX(json.getAsJsonPrimitive(NICKNAME_X).getAsDouble());
+            setNicknameY(json.getAsJsonPrimitive(NICKNAME_Y).getAsDouble());
+        } else {
+            setNicknameX(0);
+            setNicknameY(20);
+        }
+
+        if(json.has(INVARIANT_X) && json.has(INVARIANT_Y)) {
+            setInvariantX(json.getAsJsonPrimitive(INVARIANT_X).getAsDouble());
+            setInvariantY(json.getAsJsonPrimitive(INVARIANT_Y).getAsDouble());
+        } else {
+            setInvariantX(0);
+            setInvariantY(40);
+        }
     }
 
     @Override

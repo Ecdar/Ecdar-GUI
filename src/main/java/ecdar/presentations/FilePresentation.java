@@ -111,6 +111,7 @@ public class FilePresentation extends AnchorPane {
             }
             setCursor(Cursor.HAND);
         });
+
         setOnMouseExited(event -> {
             if(isActive) {
                 setBackground.accept(color, colorIntensity.next(1));

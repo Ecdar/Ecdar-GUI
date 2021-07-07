@@ -15,21 +15,14 @@ public class jEcdarThread extends BackendThread {
     }
 
     public void run() {
-        ProcessBuilder pb = new ProcessBuilder("java", "-jar", "src/libs/j-Ecdar.jar");
+        ProcessBuilder pb = new ProcessBuilder("java", "-jar", "src/libs/j-Ecdar.jar", "-inputFolder " + Ecdar.projectDirectory.get(), "-getNewComponent " + query);
         pb.redirectErrorStream(true);
         try {
-            //Start the j-Ecdar process
             Process jEcdarEngineInstance = pb.start();
 
-            //Communicate with the j-Ecdar process
             try (
                     var jEcdarReader = new BufferedReader(new InputStreamReader(jEcdarEngineInstance.getInputStream()));
-                    var jEcdarWriter = new BufferedWriter(new OutputStreamWriter(jEcdarEngineInstance.getOutputStream()));
             ) {
-                //Run the query with the j-Ecdar process
-                jEcdarWriter.write("-rq -json " + Ecdar.projectDirectory.get() + " " + query.replaceAll("\\s", "") + "\n"); // Newline added to signal EOI
-                jEcdarWriter.flush();
-
                 //Read the result of the query from the j-Ecdar process
                 String line;
                 QueryState result = QueryState.RUNNING;
@@ -39,8 +32,10 @@ public class jEcdarThread extends BackendThread {
                         return;
                     }
 
+                    System.out.println(line);
+
                     // Process the query result
-                    if ((line.equals("true") || line.equals("")) && (result.getStatusCode() <= QueryState.SUCCESSFUL.getStatusCode())) {
+                    if ((line.equals("true")) && (result.getStatusCode() <= QueryState.SUCCESSFUL.getStatusCode())) {
                         result = QueryState.SUCCESSFUL;
                     } else if (line.equals("false") && (result.getStatusCode() <= QueryState.ERROR.getStatusCode())){
                         result = QueryState.ERROR;

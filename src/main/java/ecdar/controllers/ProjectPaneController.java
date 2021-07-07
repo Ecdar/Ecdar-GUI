@@ -23,6 +23,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import org.kordamp.ikonli.javafx.FontIcon;
+import org.kordamp.ikonli.material.Material;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -33,10 +35,15 @@ public class ProjectPaneController implements Initializable {
     public StackPane root;
     public AnchorPane toolbar;
     public Label toolbarTitle;
+    public AnchorPane generatedComponentsDivider;
+    public Label generatedComponentsDividerText;
     public ScrollPane scrollPane;
     public VBox filesList;
+    public VBox tempFilesList;
     public JFXRippler createComponent;
     public JFXRippler createSystem;
+    public JFXRippler generatedComponentsVisibilityButton;
+    public FontIcon generatedComponentsVisibilityButtonIcon;
 
     public ImageView createComponentImage;
     public StackPane createComponentPane;
@@ -53,6 +60,7 @@ public class ProjectPaneController implements Initializable {
             event.consume();
             EcdarController.getActiveCanvasPresentation().getController().setActiveModel(Ecdar.getProject().getGlobalDeclarations());
         });
+
         filesList.getChildren().add(globalDclPresentation);
 
         // Bind system declarations and add mouse event
@@ -61,18 +69,26 @@ public class ProjectPaneController implements Initializable {
             event.consume();
             EcdarController.getActiveCanvasPresentation().getController().setActiveModel(Ecdar.getProject().getSystemDeclarations());
         });
+
         filesList.getChildren().add(systemDclPresentation);
 
-        Ecdar.getProject().getComponents().addListener(new ListChangeListener<Component>() {
-            @Override
-            public void onChanged(final Change<? extends Component> c) {
-                while (c.next()) {
-                    c.getAddedSubList().forEach(o -> handleAddedModel(o));
-                    c.getRemoved().forEach(o -> handleRemovedModel(o));
+        Ecdar.getProject().getComponents().addListener((ListChangeListener<Component>) c -> {
+            while (c.next()) {
+                c.getAddedSubList().forEach(this::handleAddedModel);
+                c.getRemoved().forEach(this::handleRemovedModel);
 
-                    // Sort the children alphabetically
-                    sortPresentations();
-                }
+                // Sort the children alphabetically
+                sortPresentations();
+            }
+        });
+
+        Ecdar.getProject().getTempComponents().addListener((ListChangeListener<Component>) c -> {
+            while (c.next()) {
+                c.getAddedSubList().forEach(this::handleAddedModel);
+                c.getRemoved().forEach(this::handleRemovedModel);
+
+                // Sort the children alphabetically
+                sortPresentations();
             }
         });
 
@@ -166,14 +182,48 @@ public class ProjectPaneController implements Initializable {
         // Delete button for components
         if (model instanceof Component) {
             moreInformationDropDown.addSpacerElement();
-            moreInformationDropDown.addClickableListElement("Delete", event -> {
-                UndoRedoStack.pushAndPerform(() -> { // Perform
-                    Ecdar.getProject().getComponents().remove(model);
-                }, () -> { // Undo
-                    Ecdar.getProject().getComponents().add((Component) model);
-                }, "Deleted component " + model.getName(), "delete");
-                moreInformationDropDown.hide();
-            });
+
+            if(!filePresentation.getModel().isTemporary()) {
+                moreInformationDropDown.addClickableListElement("Delete", event -> {
+                    UndoRedoStack.pushAndPerform(() -> { // Perform
+                        Ecdar.getProject().getComponents().remove(model);
+                    }, () -> { // Undo
+                        Ecdar.getProject().getComponents().add((Component) model);
+                    }, "Deleted component " + model.getName(), "delete");
+                    moreInformationDropDown.hide();
+                });
+            } else {
+                moreInformationDropDown.addClickableListElement("Delete", event -> {
+                    UndoRedoStack.pushAndPerform(() -> { // Perform
+                        Ecdar.getProject().getTempComponents().remove(model);
+                    }, () -> { // Undo
+                        Ecdar.getProject().getTempComponents().add((Component) model);
+                    }, "Deleted component " + model.getName(), "delete");
+                    moreInformationDropDown.hide();
+                });
+
+                moreInformationDropDown.addClickableListElement("Add as component", event -> {
+                    String originalModalName = model.getName();
+                    for(int i = 2; i < 100; i++){
+                        if(Ecdar.getProject().getComponents().stream().noneMatch(component -> component.getName().equals(model.getName()))){
+                            UndoRedoStack.pushAndPerform(() -> { // Perform
+                                Ecdar.getProject().getTempComponents().remove(model);
+                                model.setTemporary(false);
+                                Ecdar.getProject().getComponents().add((Component) model);
+                                EcdarController.getActiveCanvasPresentation().getController().setActiveModel(model);
+                            }, () -> { // Undo
+                                Ecdar.getProject().getComponents().remove(model);
+                                model.setTemporary(true);
+                                Ecdar.getProject().getTempComponents().add((Component) model);
+                            }, "Add component " + model.getName(), "add");
+                            moreInformationDropDown.hide();
+                            break;
+                        } else {
+                            model.setName(originalModalName + " #" + i);
+                        }
+                    }
+                });
+            }
         }
 
         // Delete button for systems
@@ -236,7 +286,12 @@ public class ProjectPaneController implements Initializable {
 
         initializeMoreInformationDropDown(filePresentation);
 
-        filesList.getChildren().add(filePresentation);
+        if(model.isTemporary()) {
+            tempFilesList.getChildren().add(filePresentation);
+        } else {
+            filesList.getChildren().add(filePresentation);
+        }
+
         modelPresentationMap.put(model, filePresentation);
 
         // Open the component if the presentation is pressed
@@ -249,10 +304,6 @@ public class ProjectPaneController implements Initializable {
     }
 
     private void handleRemovedModel(final HighLevelModelObject model) {
-        filesList.getChildren().remove(modelPresentationMap.get(model));
-        modelPresentationMap.remove(model);
-
-
         // If we remove the model active on the canvas
         if (EcdarController.getActiveCanvasPresentation().getController().getActiveModel() == model) {
             if (Ecdar.getProject().getComponents().size() > 0) {
@@ -276,6 +327,14 @@ public class ProjectPaneController implements Initializable {
                 ((FilePresentation) child).updateColors();
             }
         }
+
+        if(EcdarController.getActiveCanvasPresentation().getController().getActiveModel().isTemporary()) {
+            tempFilesList.getChildren().remove(modelPresentationMap.get(EcdarController.getActiveCanvasPresentation().getController().getActiveModel()));
+        } else {
+            filesList.getChildren().remove(modelPresentationMap.get(EcdarController.getActiveCanvasPresentation().getController().getActiveModel()));
+        }
+
+        modelPresentationMap.remove(EcdarController.getActiveCanvasPresentation().getController().getActiveModel());
     }
 
     /**
@@ -309,5 +368,21 @@ public class ProjectPaneController implements Initializable {
         }, "Created new system: " + newSystem.getName(), "add-circle");
 
         EcdarController.getActiveCanvasPresentation().getController().setActiveModel(newSystem);
+    }
+
+    /**
+     * Method for hiding/showing generated components
+     */
+    @FXML
+    private void setGeneratedComponentsVisibilityButtonClicked() {
+        if(generatedComponentsVisibilityButtonIcon.getIconCode() == Material.EXPAND_MORE) {
+            generatedComponentsVisibilityButtonIcon.setIconCode(Material.EXPAND_LESS);
+            this.tempFilesList.setVisible(true);
+            this.tempFilesList.setManaged(true);
+        } else {
+            generatedComponentsVisibilityButtonIcon.setIconCode(Material.EXPAND_MORE);
+            this.tempFilesList.setVisible(false);
+            this.tempFilesList.setManaged(false);
+        }
     }
 }

@@ -21,10 +21,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.text.TextAlignment;
 import javafx.util.Pair;
 import org.kordamp.ikonli.javafx.FontIcon;
+import org.kordamp.ikonli.material.Material;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -175,7 +177,11 @@ public class QueryPresentation extends AnchorPane {
             // Delegate that based on a query state updates tooltip of the query
             final Consumer<QueryState> updateToolTip = (queryState) -> {
                 if (queryState.getStatusCode() == 1) {
-                    this.tooltip.setText("This query was a success!");
+                    if(queryState.getIconCode().equals(Material.DONE)) {
+                        this.tooltip.setText("This query was a success!");
+                    } else {
+                        this.tooltip.setText("The component has been created (can be accessed in the project pane)");
+                    }
                 } else if (queryState.getStatusCode() == 3) {
                     this.tooltip.setText("The query has not been executed yet");
                 } else {
@@ -333,6 +339,10 @@ public class QueryPresentation extends AnchorPane {
             swapBackendButton.setRipplerFill(Color.GREY.getColor(Color.Intensity.I500));
             swapBackendButton.setMaskType(JFXRippler.RipplerMask.CIRCLE);
             swapBackendButton.setOnMousePressed(event -> {
+                if(!swapBackendButton.disabledProperty().get()){
+                    return;
+                }
+
                 // Set the backend to the one not currently used and update GUI
                 final BackendHelper.BackendNames newBackend;
                 if (this.controller.getQuery().getCurrentBackend().equals(BackendHelper.BackendNames.jEcdar)) {
@@ -349,6 +359,17 @@ public class QueryPresentation extends AnchorPane {
             swapBackendButtonTooltip = new Tooltip();
             setSwapBackendTooltipAndLabel(this.controller.getQuery().getCurrentBackend());
             JFXTooltip.install(swapBackendButton, swapBackendButtonTooltip);
+
+            lookup("#query").focusedProperty().addListener((observable, oldVal, newVal) -> {
+                if(!newVal && controller.getQuery().getQuery().startsWith("quotient")) {
+                    controller.getQuery().setCurrentBackend(BackendHelper.BackendNames.jEcdar);
+                    setSwapBackendTooltipAndLabel(BackendHelper.BackendNames.jEcdar);
+                    updateTitlePaneVisibility((TitledPane) lookup("#inputOutputPane"), controller.getQuery().getQuery());
+                    swapBackendButton.setRipplerDisabled(true);
+                } else {
+                    swapBackendButton.setRipplerDisabled(false);
+                }
+            });
         });
     }
 

@@ -370,10 +370,13 @@ public class Edge implements Serializable, Nearable {
         if (isLockedJson != null) setIsLocked(isLockedJson.getAsBoolean());
         else setIsLocked(getSync().equals("*"));
 
-        json.getAsJsonArray(NAILS).forEach(jsonElement -> {
-            final Nail newNail = new Nail((JsonObject) jsonElement);
-            nails.add(newNail);
-        });
+        if(json.has(NAILS)){
+            json.getAsJsonArray(NAILS).forEach(jsonElement -> {
+                final Nail newNail = new Nail((JsonObject) jsonElement);
+                nails.add(newNail);
+            });
+        }
+
     }
 
     @Override
