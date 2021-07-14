@@ -203,7 +203,7 @@ public class ComponentController extends ModelController implements Initializabl
             if (!getComponent().getAllButInitialLocations().contains(location))
                 return true; // Do now show messages for locations not in the set of locations
 
-            for (final Edge edge : getComponent().getSubEdges()) {
+            for (final Edge edge : getComponent().getEdges()) {
                 final Location targetLocation = edge.getTargetLocation();
                 if (targetLocation != null && targetLocation.equals(location)) return true;
             }
@@ -252,7 +252,7 @@ public class ComponentController extends ModelController implements Initializabl
         checkLocations.accept(component);
 
         // Check location whenever we get new edges
-        component.getEdges().addListener(new ListChangeListener<DisplayableEdge>() {
+        component.getDisplayableEdges().addListener(new ListChangeListener<DisplayableEdge>() {
             @Override
             public void onChanged(final Change<? extends DisplayableEdge> c) {
                 while (c.next()) {
@@ -746,7 +746,7 @@ public class ComponentController extends ModelController implements Initializabl
         };
 
         // React on addition of edges to the component
-        newComponent.getEdges().addListener(new ListChangeListener<DisplayableEdge>() {
+        newComponent.getDisplayableEdges().addListener(new ListChangeListener<DisplayableEdge>() {
             @Override
             public void onChanged(final Change<? extends DisplayableEdge> c) {
                 if (c.next()) {
@@ -762,7 +762,7 @@ public class ComponentController extends ModelController implements Initializabl
                 }
             }
         });
-        newComponent.getEdges().forEach(handleAddedEdge);
+        newComponent.getDisplayableEdges().forEach(handleAddedEdge);
     }
 
     private void initializeDeclarations() {

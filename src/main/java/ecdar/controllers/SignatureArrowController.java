@@ -3,19 +3,14 @@ package ecdar.controllers;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
 import ecdar.abstractions.EdgeStatus;
-import ecdar.utility.colors.Color;
 import ecdar.utility.helpers.SelectHelper;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.collections.ListChangeListener;
-import javafx.scene.Group;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.LineTo;
-import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 
 import java.net.URL;
@@ -63,7 +58,7 @@ public class SignatureArrowController {
     private List<Edge> findEdgesForSync() {
         List<Edge> matchingEdges = new ArrayList<>();
 
-        component.get().getSubEdges().forEach((edge) -> {
+        component.get().getEdges().forEach((edge) -> {
             final String edgeSync = edge.getSync();
             final EdgeStatus edgeStatus = edge.ioStatus.get();
 

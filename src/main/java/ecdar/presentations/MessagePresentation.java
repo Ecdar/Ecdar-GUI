@@ -6,7 +6,6 @@ import ecdar.abstractions.Edge;
 import ecdar.abstractions.Location;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.code_analysis.Nearable;
-import ecdar.controllers.CanvasController;
 import ecdar.controllers.EcdarController;
 import ecdar.utility.helpers.SelectHelper;
 import javafx.beans.InvalidationListener;
@@ -75,7 +74,7 @@ public class MessagePresentation extends HBox {
                                 });
                             } else if (nearable instanceof Edge) { // We are pressing an edge, find the edge and open the corresponding component
                                 Ecdar.getProject().getComponents().forEach(component -> {
-                                    if (component.getEdges().contains(nearable)) {
+                                    if (component.getDisplayableEdges().contains(nearable)) {
                                         openComponent[0] = component;
                                     }
                                 });

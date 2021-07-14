@@ -29,8 +29,8 @@ public class ChangeTargetOperator extends MutationOperator {
         final List<MutationTestCase> cases = new ArrayList<>();
 
         // For all edges in the original component
-        for (int edgeIndex = 0; edgeIndex < original.getSubEdges().size(); edgeIndex++) {
-            final Edge originalEdge = original.getSubEdges().get(edgeIndex);
+        for (int edgeIndex = 0; edgeIndex < original.getEdges().size(); edgeIndex++) {
+            final Edge originalEdge = original.getEdges().get(edgeIndex);
 
             // Ignore if locked (e.g. if edge on the Inconsistent or Universal locations)
             if (originalEdge.getIsLocked().get()) continue;
@@ -42,7 +42,7 @@ public class ChangeTargetOperator extends MutationOperator {
                 final Component mutant = original.cloneForVerification();
 
                 // Mutate
-                final Edge mutantEdge = mutant.getSubEdges().get(edgeIndex);
+                final Edge mutantEdge = mutant.getEdges().get(edgeIndex);
                 final String newLocId = originalLocation.getId();
                 mutantEdge.setTargetLocation(mutant.findLocation(newLocId));
 
@@ -65,7 +65,7 @@ public class ChangeTargetOperator extends MutationOperator {
 
     @Override
     public int getUpperLimit(final Component original) {
-        return (original.getLocations().size() - 1) * original.getEdges().size();
+        return (original.getLocations().size() - 1) * original.getDisplayableEdges().size();
     }
 
     @Override

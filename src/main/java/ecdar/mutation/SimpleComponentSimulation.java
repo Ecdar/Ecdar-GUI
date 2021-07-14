@@ -145,7 +145,7 @@ public class SimpleComponentSimulation implements ComponentSimulation {
      * @return the stream
      */
     private Stream<Edge> getAvailableEdgeStream(final String sync, final EdgeStatus status) {
-        return component.getSubEdges().stream().filter(e -> e.getSourceLocation().equals(currentLocation))
+        return component.getEdges().stream().filter(e -> e.getSourceLocation().equals(currentLocation))
                 .filter(e -> e.getStatus() == status)
                 .filter(e -> e.getSync().equals(sync))
                 .filter(e -> e.getGuard().trim().isEmpty() ||

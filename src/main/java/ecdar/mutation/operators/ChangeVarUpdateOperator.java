@@ -32,8 +32,8 @@ public class ChangeVarUpdateOperator extends MutationOperator {
         final List<MutationTestCase> cases = new ArrayList<>();
 
         // For all edges in the original component
-        for (int edgeIndex = 0; edgeIndex < original.getSubEdges().size(); edgeIndex++) {
-            final Edge originalEdge = original.getSubEdges().get(edgeIndex);
+        for (int edgeIndex = 0; edgeIndex < original.getEdges().size(); edgeIndex++) {
+            final Edge originalEdge = original.getEdges().get(edgeIndex);
 
             // Ignore if locked (e.g. if edge on the Inconsistent or Universal locations)
             if (originalEdge.getIsLocked().get()) continue;
@@ -49,7 +49,7 @@ public class ChangeVarUpdateOperator extends MutationOperator {
                     // For each possible assignment of that variable
                     for (int value = local.getMiddle(); value <= local.getRight(); value++) {
                         final Component mutant = original.cloneForVerification();
-                        final Edge mutantEdge = mutant.getSubEdges().get(finalEdgeIndex);
+                        final Edge mutantEdge = mutant.getEdges().get(finalEdgeIndex);
 
                         final List<String> newSimpleUpdates = new ArrayList<>();
 
@@ -74,7 +74,7 @@ public class ChangeVarUpdateOperator extends MutationOperator {
                         if (sides.get(local.getLeft()).equals(String.valueOf(value))) continue;
 
                         final Component mutant = original.cloneForVerification();
-                        final Edge mutantEdge = mutant.getSubEdges().get(finalEdgeIndex);
+                        final Edge mutantEdge = mutant.getEdges().get(finalEdgeIndex);
 
                         final List<String> newSimpleUpdates = new ArrayList<>();
 
@@ -116,7 +116,7 @@ public class ChangeVarUpdateOperator extends MutationOperator {
         // Get the sum of valuations of each variable
         final int varValueCount = original.getLocalVariablesWithBounds().stream().mapToInt(local -> local.getRight() - local.getMiddle() + 1).sum();
 
-        return original.getEdges().size() * varValueCount;
+        return original.getDisplayableEdges().size() * varValueCount;
 
     }
 

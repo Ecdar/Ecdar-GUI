@@ -106,7 +106,7 @@ public class EcdarDocument {
             }
         }
 
-        for (final Edge ecdarEdge : component.getSubEdges()) {
+        for (final Edge ecdarEdge : component.getEdges()) {
             // Draw edges that are purely location to location edges
             if (ecdarEdge.getSourceLocation() != null && ecdarEdge.getSourceLocation().getType() != Location.Type.UNIVERSAL
                 && ecdarEdge.getTargetLocation() != null) {
