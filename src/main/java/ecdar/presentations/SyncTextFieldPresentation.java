@@ -26,6 +26,9 @@ public class SyncTextFieldPresentation extends StackPane {
                 }
             });
 
+            // Set text when using redo stack to re-add sync
+            controller.textField.setText(edgeSyncTextProperty.get());
+
             controller.textField.setPromptText(this.placeholder);
 
             controller.label.textProperty()

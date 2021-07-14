@@ -24,6 +24,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.MouseEvent;
@@ -183,9 +184,8 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                 // There were added some nails
                 change.getAddedSubList().forEach(newNail -> {
                     // Create a new nail presentation based on the abstraction added to the list
-                    final NailPresentation newNailPresentation = new NailPresentation(newNail, newEdge, newComponent, this);
+                    NailPresentation newNailPresentation = new NailPresentation(newNail, newEdge, newComponent, this);
                     nailNailPresentationMap.put(newNail, newNailPresentation);
-
                     edgeRoot.getChildren().addAll(newNailPresentation);
 
                     if (newEdge.getTargetCircular() != null) {
@@ -498,10 +498,9 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
 
         return new MenuElement(text, mouseEvent -> {
             DisplayableEdge tempEdge = getEdge();
-            // ToDo NIELS: Handle changing back
-
             Nail syncNail = getEdge().getNails().stream().filter((nail) -> nail.getPropertyType() == DisplayableEdge.PropertyType.SYNCHRONIZATION).findFirst().get();
-            TagPresentation tempTagPresentation = nailNailPresentationMap.get(syncNail).getController().propertyTag;
+
+            TagPresentation previousTagPresentation = nailNailPresentationMap.get(syncNail).getController().propertyTag;
 
             UndoRedoStack.pushAndPerform(
                     () -> {
@@ -509,6 +508,8 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                             component.get().removeEdge(tempEdge);
                             setEdge(new GroupedEdge((Edge) tempEdge));
                             component.get().addEdge(getEdge());
+                            nailNailPresentationMap.get(syncNail).getController().propertyTag = new MultiSyncTagPresentation((GroupedEdge) getEdge(),
+                                    () -> updateSyncLabelOnNail(nailNailPresentationMap.get(syncNail), previousTagPresentation));
                         }
                     },
                     () -> {
@@ -516,12 +517,32 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                         component.get().removeEdge(edge);
                         setEdge(((GroupedEdge) edge).getEdges().get(0));
                         component.get().addEdge(tempEdge);
+                        nailNailPresentationMap.get(syncNail).getController().propertyTag = previousTagPresentation;
                     },
                     "Switch single-/multi-sync status of edge",
                     "switch"
             );
             dropDownMenu.hide();
         }).setDisableable(getEdge().getIsLocked());
+    }
+
+    /**
+     * Updates the synchronization label and tag.
+     * The update depends on the edge I/O status.
+     * @param nailPresentation NailPresentation to update label of
+     * @param propertyTag Property tag to update
+     */
+    private void updateSyncLabelOnNail(final NailPresentation nailPresentation, final TagPresentation propertyTag) {
+        final Label propertyLabel = nailPresentation.getController().propertyLabel;
+
+        // show ? or ! dependent on edge I/O status
+        if (getEdge().ioStatus.get().equals(EdgeStatus.INPUT)) {
+            propertyLabel.setText("?");
+            propertyTag.setPlaceholder("Input");
+        } else {
+            propertyLabel.setText("!");
+            propertyTag.setPlaceholder("Output");
+        }
     }
 
     private void switchEdgeStatus() {

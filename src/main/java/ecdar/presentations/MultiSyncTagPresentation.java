@@ -56,6 +56,8 @@ public class MultiSyncTagPresentation extends TagPresentation {
             });
         });
 
+        addSyncTextField(edge.getEdges().get(0).syncProperty(), false);
+
         edge.getEdges().addListener((ListChangeListener<Edge>) change -> {
             while (change.next()) {
                 if (change.wasRemoved()) {
@@ -64,7 +66,7 @@ public class MultiSyncTagPresentation extends TagPresentation {
 
                 if (change.wasAdded()) {
                     change.getAddedSubList().forEach(addedEdge -> {
-                        addSyncTextField(addedEdge.syncProperty());
+                        addSyncTextField(addedEdge.syncProperty(), true);
                     });
                 }
             }
@@ -82,8 +84,6 @@ public class MultiSyncTagPresentation extends TagPresentation {
                 setMaxHeight(newHeight);
             }
         });
-
-        addSyncTextField(edge.getEdges().get(0).syncProperty());
     }
 
     @Override
@@ -131,16 +131,6 @@ public class MultiSyncTagPresentation extends TagPresentation {
 
     public MultiSyncTagController getController() {
         return controller;
-    }
-
-    public void addEdge(DisplayableEdge newEdge) {
-        if (newEdge instanceof Edge) {
-            this.edge.getEdges().add((Edge) newEdge);
-        } else if (newEdge instanceof GroupedEdge) {
-            ((GroupedEdge) newEdge).getEdges().forEach((subEdgeOfNewEdge) -> {
-                this.edge.getEdges().add(subEdgeOfNewEdge);
-            });
-        }
     }
 
     private void updateTopBorder() {
@@ -221,48 +211,49 @@ public class MultiSyncTagPresentation extends TagPresentation {
     }
 
     private void removeSyncTextField(Edge removedEdge) {
-        SyncTextFieldPresentation syncTextFieldToDelete = null;
-
         for(int i = 0; i < controller.syncList.getChildren().size(); i++) {
             if(((SyncTextFieldPresentation) controller.syncList.getChildren().get(i)).getController().textField.getText().equals(removedEdge.getSync())) {
-                syncTextFieldToDelete = ((SyncTextFieldPresentation) controller.syncList.getChildren().get(i));
+                controller.syncList.getChildren().remove((controller.syncList.getChildren().get(i)));
                 break;
             }
         }
-
-        controller.syncList.getChildren().remove(syncTextFieldToDelete);
     }
 
-    private void addSyncTextField(StringProperty edgeSyncTextProperty) {
+    private void addSyncTextField(StringProperty edgeSyncTextProperty, boolean shouldPushToRedoStack) {
         final SyncTextFieldPresentation syncTextFieldPresentation = new SyncTextFieldPresentation(placeholder, edgeSyncTextProperty);
 
         controller.syncList.getChildren().add(syncTextFieldPresentation);
 
         Platform.runLater(() -> {
-            initializeTextFieldForSync(syncTextFieldPresentation);
+            initializeTextFieldForSync(syncTextFieldPresentation, shouldPushToRedoStack);
             initializeLabelForSync(syncTextFieldPresentation);
 
             ensureTagIsWithinComponent();
         });
     }
 
-    private void initializeTextFieldForSync(SyncTextFieldPresentation syncTextField) {
+    private void initializeTextFieldForSync(SyncTextFieldPresentation syncTextField, boolean shouldPushToRedoStack) {
         // Add/remove empty sync as needed
         syncTextField.getController().textField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue.isEmpty()) {
                 this.removeEmptySync(syncTextField.getController().textField);
             } else if (oldValue.isEmpty()) {
                 Edge newEdge = edge.getBaseSubEdge();
-                UndoRedoStack.pushAndPerform(
-                        () -> {
-                            this.edge.addEdgeToGroup(newEdge);
-                        },
-                        () -> {
-                            this.edge.getEdges().remove(newEdge);
-                        },
-                        "New sync added to multi-sync edge",
-                        "list_alt"
-                );
+
+                if (shouldPushToRedoStack) {
+                    UndoRedoStack.pushAndPerform(
+                            () -> {
+                                this.edge.addEdgeToGroup(newEdge);
+                            },
+                            () -> {
+                                this.edge.removeEdgeAddedBeforeEmptySync();
+                            },
+                            "New sync added to multi-sync edge",
+                            "list_alt"
+                    );
+                } else {
+                    this.edge.addEdgeToGroup(newEdge);
+                }
             }
         });
     }
