@@ -497,7 +497,6 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
         }
 
         return new MenuElement(text, mouseEvent -> {
-            DisplayableEdge tempEdge = getEdge();
             Nail syncNail = getEdge().getNails().stream().filter((nail) -> nail.getPropertyType() == DisplayableEdge.PropertyType.SYNCHRONIZATION).findFirst().get();
 
             TagPresentation previousTagPresentation = nailNailPresentationMap.get(syncNail).getController().propertyTag;
@@ -505,8 +504,8 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
             UndoRedoStack.pushAndPerform(
                     () -> {
                         if (getEdge() instanceof Edge) {
-                            component.get().removeEdge(tempEdge);
-                            setEdge(new GroupedEdge((Edge) tempEdge));
+                            component.get().removeEdge(getEdge());
+                            setEdge(new GroupedEdge((Edge) getEdge()));
                             component.get().addEdge(getEdge());
                             nailNailPresentationMap.get(syncNail).getController().propertyTag = new MultiSyncTagPresentation((GroupedEdge) getEdge(),
                                     () -> updateSyncLabelOnNail(nailNailPresentationMap.get(syncNail), previousTagPresentation));
@@ -515,8 +514,9 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                     () -> {
                         DisplayableEdge edge = getEdge();
                         component.get().removeEdge(edge);
-                        setEdge(((GroupedEdge) edge).getEdges().get(0));
-                        component.get().addEdge(tempEdge);
+                        Edge singleEdge = ((GroupedEdge) edge).getEdges().get(0);
+                        setEdge(singleEdge);
+                        component.get().addEdge(singleEdge);
                         nailNailPresentationMap.get(syncNail).getController().propertyTag = previousTagPresentation;
                     },
                     "Switch single-/multi-sync status of edge",
