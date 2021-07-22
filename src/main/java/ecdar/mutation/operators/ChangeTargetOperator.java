@@ -65,7 +65,7 @@ public class ChangeTargetOperator extends MutationOperator {
 
     @Override
     public int getUpperLimit(final Component original) {
-        return (original.getLocations().size() - 1) * original.getEdges().size();
+        return (original.getLocations().size() - 1) * original.getDisplayableEdges().size();
     }
 
     @Override

@@ -116,7 +116,7 @@ public class ChangeVarUpdateOperator extends MutationOperator {
         // Get the sum of valuations of each variable
         final int varValueCount = original.getLocalVariablesWithBounds().stream().mapToInt(local -> local.getRight() - local.getMiddle() + 1).sum();
 
-        return original.getEdges().size() * varValueCount;
+        return original.getDisplayableEdges().size() * varValueCount;
 
     }
 

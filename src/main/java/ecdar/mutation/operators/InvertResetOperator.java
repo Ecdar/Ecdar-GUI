@@ -87,7 +87,7 @@ public class InvertResetOperator extends MutationOperator {
 
     @Override
     public int getUpperLimit(final Component original) {
-        return original.getEdges().size() * original.getClocks().size();
+        return original.getDisplayableEdges().size() * original.getClocks().size();
 
     }
 

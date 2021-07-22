@@ -14,6 +14,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import javafx.beans.property.*;
 
+import java.util.Arrays;
+import java.util.Collections;
+
 public class Location implements Circular, Serializable, Nearable, DropDownMenu.HasColor {
     private static final String NICKNAME = "nickname";
     private static final String ID = "id";
@@ -327,7 +330,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     public Edge addLeftEdge(final String syncString, final EdgeStatus status) {
         final Edge edge = new Edge(this, status);
         edge.setTargetLocation(this);
-        edge.setProperty(Edge.PropertyType.SYNCHRONIZATION, syncString);
+        edge.setProperty(Edge.PropertyType.SYNCHRONIZATION, Collections.singletonList(syncString));
         final Nail inputNail1;
         final Nail inputNailSync;
         final Nail inputNail2;
@@ -350,7 +353,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     public Edge addRightEdge(final String syncString, final EdgeStatus status){
         final Edge edge = new Edge(this, status);
         edge.setTargetLocation(this);
-        edge.setProperty(Edge.PropertyType.SYNCHRONIZATION, syncString);
+        edge.setProperty(Edge.PropertyType.SYNCHRONIZATION, Collections.singletonList(syncString));
         final Nail inputNail1;
         final Nail inputNailSync;
         final Nail inputNail2;

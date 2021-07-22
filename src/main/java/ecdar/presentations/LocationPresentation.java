@@ -2,14 +2,11 @@ package ecdar.presentations;
 
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Location;
-import ecdar.controllers.CanvasController;
 import ecdar.controllers.EcdarController;
 import ecdar.controllers.LocationController;
 import ecdar.utility.colors.Color;
 import ecdar.utility.helpers.BindingHelper;
-import ecdar.utility.helpers.MouseTrackable;
 import ecdar.utility.helpers.SelectHelper;
-import ecdar.utility.mouse.MouseTracker;
 import javafx.animation.*;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.*;

@@ -5,7 +5,6 @@ import ecdar.abstractions.Edge;
 import ecdar.abstractions.EdgeStatus;
 import ecdar.abstractions.Location;
 import ecdar.mutation.MutationTestingException;
-import ecdar.mutation.operators.InvertResetOperator;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -39,9 +38,9 @@ public class InvertResetOperatorTest {
         // 2 clocks, 3 edges, we except 2 * 3 = 6 mutants
         Assert.assertEquals(6, mutants.size());
 
-        Assert.assertEquals(1, mutants.stream().filter(m -> m.getEdges().get(1).getUpdate().isEmpty()).count());
-        Assert.assertEquals(1, mutants.stream().filter(m -> m.getEdges().get(1).getUpdate().equals("x = 0, y = 0")).count());
+        Assert.assertEquals(1, mutants.stream().filter(m -> m.getDisplayableEdges().get(1).getUpdate().isEmpty()).count());
+        Assert.assertEquals(1, mutants.stream().filter(m -> m.getDisplayableEdges().get(1).getUpdate().equals("x = 0, y = 0")).count());
 
-        Assert.assertEquals(0, mutants.stream().filter(m -> m.getEdges().get(2).getUpdate().isEmpty()).count());
+        Assert.assertEquals(0, mutants.stream().filter(m -> m.getDisplayableEdges().get(2).getUpdate().isEmpty()).count());
     }
 }

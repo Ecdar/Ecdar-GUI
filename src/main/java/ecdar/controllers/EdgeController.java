@@ -24,6 +24,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.MouseEvent;
@@ -40,7 +41,7 @@ import static ecdar.presentations.Grid.GRID_SIZE;
 
 public class EdgeController implements Initializable, SelectHelper.ItemSelectable, Highlightable {
     private final ObservableList<Link> links = FXCollections.observableArrayList();
-    private final ObjectProperty<Edge> edge = new SimpleObjectProperty<>();
+    private final ObjectProperty<DisplayableEdge> edge = new SimpleObjectProperty<>();
     private final ObjectProperty<Component> component = new SimpleObjectProperty<>();
     private final SimpleArrowHead simpleArrowHead = new SimpleArrowHead();
     private final SimpleBooleanProperty isHoveringEdge = new SimpleBooleanProperty(false);
@@ -84,7 +85,6 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                 }
             });
         });
-
 
         initializeLinksListener();
 
@@ -130,7 +130,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
         });
     }
 
-    private ChangeListener<Component> getComponentChangeListener(final Edge newEdge) {
+    private ChangeListener<Component> getComponentChangeListener(final DisplayableEdge newEdge) {
         return (obsComponent, oldComponent, newComponent) -> {
             // Draw new edge from a location
             if (newEdge.getNails().isEmpty() && newEdge.getTargetCircular() == null) {
@@ -178,15 +178,14 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
         };
     }
 
-    private ListChangeListener<Nail> getNailsChangeListener(final Edge newEdge, final Component newComponent) {
+    private ListChangeListener<Nail> getNailsChangeListener(final DisplayableEdge newEdge, final Component newComponent) {
         return change -> {
             while (change.next()) {
                 // There were added some nails
                 change.getAddedSubList().forEach(newNail -> {
                     // Create a new nail presentation based on the abstraction added to the list
-                    final NailPresentation newNailPresentation = new NailPresentation(newNail, newEdge, newComponent, this);
+                    NailPresentation newNailPresentation = new NailPresentation(newNail, newEdge, newComponent, this);
                     nailNailPresentationMap.put(newNail, newNailPresentation);
-
                     edgeRoot.getChildren().addAll(newNailPresentation);
 
                     if (newEdge.getTargetCircular() != null) {
@@ -274,7 +273,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
         };
     }
 
-    private ChangeListener<Circular> getNewSourceCircularListener(final Edge newEdge) {
+    private ChangeListener<Circular> getNewSourceCircularListener(final DisplayableEdge newEdge) {
         // When the source location is set, finish drawing the edge
         return (obsSourceLocation, oldSourceCircular, newSourceCircular) -> {
             // If the nails list is empty, directly connect the source and target locations
@@ -307,7 +306,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
         };
     }
 
-    private ChangeListener<Circular> getNewTargetCircularListener(final Edge newEdge) {
+    private ChangeListener<Circular> getNewTargetCircularListener(final DisplayableEdge newEdge) {
         // When the target location is set, finish drawing the edge
         return (obsTargetLocation, oldTargetCircular, newTargetCircular) -> {
             // If the nails list is empty, directly connect the source and target locations
@@ -488,6 +487,91 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
         }).setDisableable(getEdge().getIsLocked());
     }
 
+    public MenuElement getMakeGroupedEdgeMenuElement(DropDownMenu dropDownMenu) {
+        // Switch between input and output edge
+        final String text;
+        if (getEdge() instanceof Edge) {
+            text = "Make multi-sync edge";
+
+            return new MenuElement(text, mouseEvent -> {
+                Nail syncNail = getEdge().getNails().stream().filter((nail) -> nail.getPropertyType() == DisplayableEdge.PropertyType.SYNCHRONIZATION).findFirst().get();
+                TagPresentation previousTagPresentation = nailNailPresentationMap.get(syncNail).getController().propertyTag;
+
+                final Edge singleEdge = (Edge) getEdge();
+                final GroupedEdge multiEdge = new GroupedEdge((Edge) getEdge());
+
+                UndoRedoStack.pushAndPerform(
+                        () -> {
+                            component.get().removeEdge(singleEdge);
+                            setEdge(multiEdge);
+                            component.get().addEdge(getEdge());
+                            nailNailPresentationMap.get(syncNail).getController().propertyTag = new MultiSyncTagPresentation(multiEdge,
+                                    () -> updateSyncLabelOnNail(nailNailPresentationMap.get(syncNail), previousTagPresentation));
+                        },
+                        () -> {
+                            component.get().removeEdge(multiEdge);
+                            setEdge(singleEdge);
+                            component.get().addEdge(singleEdge);
+                            nailNailPresentationMap.get(syncNail).getController().propertyTag = previousTagPresentation;
+                        },
+                        "Switch single-/multi-sync status of edge",
+                        "switch"
+                );
+                dropDownMenu.hide();
+            }).setDisableable(getEdge().getIsLocked());
+        } else {
+            text = "Split into single-sync edges";
+
+            return new MenuElement(text, mouseEvent -> {
+                Nail syncNail = getEdge().getNails().stream().filter((nail) -> nail.getPropertyType() == DisplayableEdge.PropertyType.SYNCHRONIZATION).findFirst().get();
+                TagPresentation previousTagPresentation = nailNailPresentationMap.get(syncNail).getController().propertyTag;
+
+                final Edge singleEdge = ((GroupedEdge) getEdge()).getEdges().get(0);
+                final GroupedEdge multiEdge = (GroupedEdge) getEdge();
+
+                UndoRedoStack.pushAndPerform(
+                        () -> {
+                            component.get().removeEdge(multiEdge);
+                            setEdge(singleEdge);
+                            component.get().addEdge(getEdge());
+                            for (int i = 1; i < multiEdge.getEdges().size() - 1; i++) {
+                                component.get().addEdge(multiEdge.getEdges().get(i));
+                            }
+                            nailNailPresentationMap.get(syncNail).getController().propertyTag = new TagPresentation();
+                        },
+                        () -> {
+                            component.get().removeEdge(singleEdge);
+                            setEdge(multiEdge);
+                            component.get().addEdge(multiEdge);
+                            nailNailPresentationMap.get(syncNail).getController().propertyTag = previousTagPresentation;
+                        },
+                        "Switch single-/multi-sync status of edge",
+                        "switch"
+                );
+                dropDownMenu.hide();
+            }).setDisableable(getEdge().getIsLocked());
+        }
+    }
+
+    /**
+     * Updates the synchronization label and tag.
+     * The update depends on the edge I/O status.
+     * @param nailPresentation NailPresentation to update label of
+     * @param propertyTag Property tag to update
+     */
+    private void updateSyncLabelOnNail(final NailPresentation nailPresentation, final TagPresentation propertyTag) {
+        final Label propertyLabel = nailPresentation.getController().propertyLabel;
+
+        // show ? or ! dependent on edge I/O status
+        if (getEdge().ioStatus.get().equals(EdgeStatus.INPUT)) {
+            propertyLabel.setText("?");
+            propertyTag.setPlaceholder("Input");
+        } else {
+            propertyLabel.setText("!");
+            propertyTag.setPlaceholder("Output");
+        }
+    }
+
     private void switchEdgeStatus() {
         getEdge().switchStatus();
 
@@ -554,15 +638,15 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
         });
     }
 
-    public Edge getEdge() {
+    public DisplayableEdge getEdge() {
         return edge.get();
     }
 
-    public void setEdge(final Edge edge) {
+    public void setEdge(final DisplayableEdge edge) {
         this.edge.set(edge);
     }
 
-    public ObjectProperty<Edge> edgeProperty() {
+    public ObjectProperty<DisplayableEdge> edgeProperty() {
         return edge;
     }
 
@@ -607,9 +691,9 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
     }
 
     public void edgeDragged(final MouseEvent event){
-        //Check if the edge is selected to ensure that the drag is not targeting a select, guard, update, or sync node
+        // Check if the edge is selected to ensure that the drag is not targeting a select, guard, update, or sync node
         if(SelectHelper.getSelectedElements().get(0) == this){
-            Edge oldEdge = edge.get();
+            DisplayableEdge oldEdge = edge.get();
             Location source, target;
 
             //Get the coordinates of the source of the original edge
@@ -686,7 +770,13 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                 newEdge.selectProperty().set(edge.get().getSelect());
                 newEdge.guardProperty().set(edge.get().getGuard());
                 newEdge.updateProperty().set(edge.get().getUpdate());
-                newEdge.syncProperty().set(edge.get().getSync());
+
+                if(edge.getValue() instanceof Edge) {
+                    newEdge.syncProperty().set(((Edge) edge.get()).getSync());
+                } else {
+                    //ToDo NIELS: Handle setting synchronization on GroupedEdge
+                }
+
                 for (Nail n : edge.get().getNails()) {
                     newEdge.addNail(n);
                 }
@@ -729,7 +819,13 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                 newEdge.selectProperty().set(edge.get().getSelect());
                 newEdge.guardProperty().set(edge.get().getGuard());
                 newEdge.updateProperty().set(edge.get().getUpdate());
-                newEdge.syncProperty().set(edge.get().getSync());
+
+                if(edge.getValue() instanceof Edge) {
+                    newEdge.syncProperty().set(((Edge) edge.get()).getSync());
+                } else {
+                    //ToDo NIELS: Handle setting synchronization on GroupedEdge
+                }
+
                 for (Nail n : edge.get().getNails()) {
                     newEdge.addNail(n);
                 }
@@ -739,7 +835,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
 
     @Override
     public void color(final Color color, final Color.Intensity intensity) {
-        final Edge edge = getEdge();
+        final DisplayableEdge edge = getEdge();
 
         // Set the color of the edge
         edge.setColorIntensity(intensity);

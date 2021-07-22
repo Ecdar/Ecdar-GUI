@@ -7,7 +7,6 @@ import ecdar.backend.BackendDriverManager;
 import ecdar.backend.BackendHelper;
 import ecdar.backend.IBackendDriver;
 import ecdar.backend.ReveaalDriver;
-import ecdar.controllers.CanvasController;
 import ecdar.controllers.QueryController;
 import ecdar.controllers.EcdarController;
 import ecdar.utility.colors.Color;

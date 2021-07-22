@@ -82,7 +82,7 @@ public class SinkLocationOperator extends MutationOperator {
 
     @Override
     public int getUpperLimit(final Component original) {
-        return original.getEdges().size();
+        return original.getDisplayableEdges().size();
 
     }
 
