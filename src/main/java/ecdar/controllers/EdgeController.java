@@ -531,10 +531,13 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
 
                 UndoRedoStack.pushAndPerform(
                         () -> {
-                                component.get().removeEdge(multiEdge);
-                                setEdge(singleEdge);
-                                component.get().addEdge(getEdge());
-                                nailNailPresentationMap.get(syncNail).getController().propertyTag = new TagPresentation();
+                            component.get().removeEdge(multiEdge);
+                            setEdge(singleEdge);
+                            component.get().addEdge(getEdge());
+                            for (int i = 1; i < multiEdge.getEdges().size() - 1; i++) {
+                                component.get().addEdge(multiEdge.getEdges().get(i));
+                            }
+                            nailNailPresentationMap.get(syncNail).getController().propertyTag = new TagPresentation();
                         },
                         () -> {
                             component.get().removeEdge(singleEdge);
