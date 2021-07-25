@@ -503,14 +503,12 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                 UndoRedoStack.pushAndPerform(
                         () -> {
                             component.get().removeEdge(singleEdge);
-                            setEdge(multiEdge);
-                            component.get().addEdge(getEdge());
+                            component.get().addEdge(multiEdge);
                             nailNailPresentationMap.get(syncNail).getController().propertyTag = new MultiSyncTagPresentation(multiEdge,
                                     () -> updateSyncLabelOnNail(nailNailPresentationMap.get(syncNail), previousTagPresentation));
                         },
                         () -> {
                             component.get().removeEdge(multiEdge);
-                            setEdge(singleEdge);
                             component.get().addEdge(singleEdge);
                             nailNailPresentationMap.get(syncNail).getController().propertyTag = previousTagPresentation;
                         },
@@ -529,30 +527,25 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                 final Edge singleEdge = ((GroupedEdge) getEdge()).getEdges().get(0);
                 final GroupedEdge multiEdge = (GroupedEdge) getEdge();
 
-                final int indexOfLastSubEdge = multiEdge.getEdges().size() - 1;
-
                 UndoRedoStack.pushAndPerform(
                         () -> {
                             component.get().removeEdge(multiEdge);
-                            setEdge(singleEdge);
-                            component.get().addEdge(getEdge());
-                            for (int i = 1; i < indexOfLastSubEdge; i++) {
-                                component.get().addEdge(multiEdge.getEdges().get(i));
+                            for (Edge edge : multiEdge.getEdges()) {
+                                component.get().addEdge(edge);
                             }
                             nailNailPresentationMap.get(syncNail).getController().propertyTag = new TagPresentation();
                         },
                         () -> {
-                            for (int i = indexOfLastSubEdge; i > 0; i--) {
-                                component.get().removeEdge(multiEdge.getEdges().get(i));
+                            for (Edge edge : multiEdge.getEdges()) {
+                                component.get().removeEdge(edge);
                             }
-                            component.get().removeEdge(singleEdge);
-                            setEdge(multiEdge);
                             component.get().addEdge(multiEdge);
                             nailNailPresentationMap.get(syncNail).getController().propertyTag = previousTagPresentation;
                         },
                         "Split multi-sync edge into individual edges",
                         "switch"
                 );
+
                 dropDownMenu.hide();
             }).setDisableable(getEdge().getIsLocked());
         }

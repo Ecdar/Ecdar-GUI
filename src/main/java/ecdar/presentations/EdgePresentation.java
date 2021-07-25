@@ -2,7 +2,6 @@ package ecdar.presentations;
 
 import ecdar.abstractions.Component;
 import ecdar.abstractions.DisplayableEdge;
-import ecdar.abstractions.Edge;
 import ecdar.controllers.EdgeController;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;

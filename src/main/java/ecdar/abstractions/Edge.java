@@ -242,7 +242,7 @@ public class Edge extends DisplayableEdge implements Serializable {
 
     /**
      * Adds a guard nail at (0, 0).
-     * Adds a specified guard property the this edge.
+     * Adds a specified guard property to this edge.
      * @param guard the specified guard property
      */
     public void addGuardNail(final String guard) {
@@ -254,7 +254,7 @@ public class Edge extends DisplayableEdge implements Serializable {
 
     /**
      * Adds an update nail at (0, 0).
-     * Adds a specified update property the this edge.
+     * Adds a specified update property to this edge.
      * @param update the specified update property
      */
     public void addUpdateNail(final String update) {
