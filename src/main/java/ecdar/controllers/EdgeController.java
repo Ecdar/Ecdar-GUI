@@ -487,11 +487,11 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
         }).setDisableable(getEdge().getIsLocked());
     }
 
-    public MenuElement getMakeGroupedEdgeMenuElement(DropDownMenu dropDownMenu) {
+    public MenuElement getMultiSyncEdgeMenuElement(DropDownMenu dropDownMenu) {
         // Switch between input and output edge
         final String text;
         if (getEdge() instanceof Edge) {
-            text = "Make multi-sync edge";
+            text = "Make edge multi-sync";
 
             return new MenuElement(text, mouseEvent -> {
                 Nail syncNail = getEdge().getNails().stream().filter((nail) -> nail.getPropertyType() == DisplayableEdge.PropertyType.SYNCHRONIZATION).findFirst().get();
@@ -514,7 +514,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                             component.get().addEdge(singleEdge);
                             nailNailPresentationMap.get(syncNail).getController().propertyTag = previousTagPresentation;
                         },
-                        "Switch single-/multi-sync status of edge",
+                        "Turned edge into multi-sync edge",
                         "switch"
                 );
                 dropDownMenu.hide();
@@ -529,23 +529,28 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                 final Edge singleEdge = ((GroupedEdge) getEdge()).getEdges().get(0);
                 final GroupedEdge multiEdge = (GroupedEdge) getEdge();
 
+                final int indexOfLastSubEdge = multiEdge.getEdges().size() - 1;
+
                 UndoRedoStack.pushAndPerform(
                         () -> {
                             component.get().removeEdge(multiEdge);
                             setEdge(singleEdge);
                             component.get().addEdge(getEdge());
-                            for (int i = 1; i < multiEdge.getEdges().size() - 1; i++) {
+                            for (int i = 1; i < indexOfLastSubEdge; i++) {
                                 component.get().addEdge(multiEdge.getEdges().get(i));
                             }
                             nailNailPresentationMap.get(syncNail).getController().propertyTag = new TagPresentation();
                         },
                         () -> {
+                            for (int i = indexOfLastSubEdge; i > 0; i--) {
+                                component.get().removeEdge(multiEdge.getEdges().get(i));
+                            }
                             component.get().removeEdge(singleEdge);
                             setEdge(multiEdge);
                             component.get().addEdge(multiEdge);
                             nailNailPresentationMap.get(syncNail).getController().propertyTag = previousTagPresentation;
                         },
-                        "Switch single-/multi-sync status of edge",
+                        "Split multi-sync edge into individual edges",
                         "switch"
                 );
                 dropDownMenu.hide();
@@ -696,14 +701,12 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
             DisplayableEdge oldEdge = edge.get();
             Location source, target;
 
-            //Get the coordinates of the source of the original edge
             if(oldEdge.getSourceLocation() != null) {
                 source = oldEdge.getSourceLocation();
             } else {
                 return;
             }
 
-            //Get the coordinates of the target of the original edge
             if(oldEdge.getTargetLocation() != null) {
                 target = oldEdge.getTargetLocation();
             } else {
@@ -711,125 +714,86 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
             }
 
             //Decide whether the source or the target of the edge should be updated
-            boolean closestToTarget = (Math.abs(event.getX() - target.getX()) < Math.abs(event.getX() - source.getX())) &&
-                    (Math.abs(event.getY() - target.getY()) < Math.abs(event.getY() - source.getY()));
+            boolean closestToTarget = getDistance(event.getX(), event.getY(), target.getX(), target.getY()) < getDistance(event.getX(), event.getY(), source.getX(), source.getY());
 
-            //Handle drag close to nails
+            //Handle drag closer to nails than locations
             if(edge.get().getNails().size() > 0){
+                boolean dragIsCloserToNail;
+
                 if(!closestToTarget){
                     //Check if the drag is closer to the first nail than to source
                     Nail firstNail = edge.get().getNails().get(0);
-                    boolean closestToFirstNail = getDistance(event.getX(), event.getY(), firstNail.getX(), firstNail.getY()) < getDistance(event.getX(), event.getY(), source.getX(), source.getY());
-
-                    //If the drag is closest to the first node, no drag should be initiated
-                    if(closestToFirstNail){
-                        return;
-                    }
+                    dragIsCloserToNail = getDistance(event.getX(), event.getY(), firstNail.getX(), firstNail.getY()) < getDistance(event.getX(), event.getY(), source.getX(), source.getY());
                 } else {
                     //Check if the drag is closer to the last nail than to target
                     Nail lastNail = edge.get().getNails().get(edge.get().getNails().size() - 1);
-                    boolean closestToLastNail = getDistance(event.getX(), event.getY(), lastNail.getX(), lastNail.getY()) < getDistance(event.getX(), event.getY(), target.getX(), target.getY());
+                    dragIsCloserToNail = getDistance(event.getX(), event.getY(), lastNail.getX(), lastNail.getY()) < getDistance(event.getX(), event.getY(), target.getX(), target.getY());
+                }
 
-                    //If the drag is closest to the last node, no drag should be initiated
-                    if(closestToLastNail){
-                        return;
-                    }
+                //If the drag is closer to a nail than the locations, no drag should be initiated
+                if(dragIsCloserToNail){
+                    return;
                 }
             }
 
-            if(closestToTarget){
-                //The drag event occurred closest to the target, create a new edge
-                final Edge newEdge;
+            final DisplayableEdge newEdge = getNewDisplayableEdgeBasedOnOld(oldEdge);
 
-                //Create the new edge with the same source as the old edge
-                newEdge = new Edge(source, oldEdge.getStatus());
-
-                //Add the new edge and remove the old (needed on top of thee push to the undo an redo stack)
-                getComponent().addEdge(newEdge);
-                getComponent().removeEdge(oldEdge);
-
-                KeyboardTracker.registerKeybind(KeyboardTracker.ABANDON_EDGE, new Keybind(new KeyCodeCombination(KeyCode.ESCAPE), () -> {
-                    getComponent().removeEdge(newEdge);
-                    UndoRedoStack.forgetLast();
-                }));
-
-                UndoRedoStack.push(() -> { // Perform
-                    //Add the new edge and remove the old
-                    getComponent().addEdge(newEdge);
-                    getComponent().removeEdge(oldEdge);
-
-                }, () -> { // Undo
-                    //Add the old edge back and remove the new
-                    getComponent().addEdge(oldEdge);
-                    getComponent().removeEdge(newEdge);
-                }, "Updated edge", "add-circle");
-
-                //Make the state of the new edge correspond with the state of the old
-                newEdge.setColor(getColor());
-                newEdge.setColorIntensity(getColorIntensity());
-                newEdge.selectProperty().set(edge.get().getSelect());
-                newEdge.guardProperty().set(edge.get().getGuard());
-                newEdge.updateProperty().set(edge.get().getUpdate());
-
-                if(edge.getValue() instanceof Edge) {
-                    newEdge.syncProperty().set(((Edge) edge.get()).getSync());
-                } else {
-                    //ToDo NIELS: Handle setting synchronization on GroupedEdge
-                }
-
-                for (Nail n : edge.get().getNails()) {
-                    newEdge.addNail(n);
-                }
-            } else {
-                //The drag event occurred closest to the source
-                final Edge newEdge;
-
-                //Create the new edge with the same source as the old edge (is changed later)
-                newEdge = new Edge(source, oldEdge.getStatus());
-
+            if (!closestToTarget) {
                 //Set the source to a new MouseCircular, which will follow the mouse and handle setting the new source
                 newEdge.sourceCircularProperty().set(new MouseCircular(newEdge, getComponent()));
-
-                //Set the target to the same as the old edge
                 newEdge.setTargetLocation(target);
-
-                //Add the new edge and remove the old (needed on top of thee push to the undo an redo stack)
-                getComponent().addEdge(newEdge);
-                getComponent().removeEdge(oldEdge);
-
-                KeyboardTracker.registerKeybind(KeyboardTracker.ABANDON_EDGE, new Keybind(new KeyCodeCombination(KeyCode.ESCAPE), () -> {
-                    getComponent().removeEdge(newEdge);
-                    UndoRedoStack.forgetLast();
-                }));
-
-                UndoRedoStack.push(() -> { // Perform
-                    //Add the new edge and remove the old
-                    getComponent().addEdge(newEdge);
-                    getComponent().removeEdge(oldEdge);
-
-                }, () -> { // Undo
-                    //Add the old edge back and remove the new
-                    getComponent().addEdge(oldEdge);
-                    getComponent().removeEdge(newEdge);
-                }, "Updated edge", "add-circle");
-
-                //Make the state of the new edge correspond with the state of the old
-                newEdge.setColor(getColor());
-                newEdge.setColorIntensity(getColorIntensity());
-                newEdge.selectProperty().set(edge.get().getSelect());
-                newEdge.guardProperty().set(edge.get().getGuard());
-                newEdge.updateProperty().set(edge.get().getUpdate());
-
-                if(edge.getValue() instanceof Edge) {
-                    newEdge.syncProperty().set(((Edge) edge.get()).getSync());
-                } else {
-                    //ToDo NIELS: Handle setting synchronization on GroupedEdge
-                }
-
-                for (Nail n : edge.get().getNails()) {
-                    newEdge.addNail(n);
-                }
             }
+
+            addNewEdgeAndRemoveOld(oldEdge, newEdge);
+            setStateOfNewEdgeToTheStateOfTheOld(oldEdge, newEdge);
+        }
+    }
+
+    private DisplayableEdge getNewDisplayableEdgeBasedOnOld(DisplayableEdge oldEdge) {
+        final DisplayableEdge newEdge;
+
+        if (oldEdge instanceof Edge) {
+            newEdge = new Edge(oldEdge.getSourceLocation(), oldEdge.getStatus());
+        } else {
+            if (((GroupedEdge) oldEdge).getEdges().size() > 0) {
+                newEdge = new GroupedEdge(((GroupedEdge) oldEdge).getEdges());
+            } else {
+                newEdge = new GroupedEdge(new Edge(oldEdge.getSourceLocation(), oldEdge.getStatus()));
+            }
+        }
+
+        return newEdge;
+    }
+
+    private void addNewEdgeAndRemoveOld(DisplayableEdge oldEdge, DisplayableEdge newEdge) {
+        KeyboardTracker.registerKeybind(KeyboardTracker.ABANDON_EDGE, new Keybind(new KeyCodeCombination(KeyCode.ESCAPE), () -> {
+            getComponent().removeEdge(newEdge);
+            UndoRedoStack.forgetLast();
+        }));
+
+        UndoRedoStack.pushAndPerform(() -> { // Perform
+            getComponent().removeEdge(oldEdge);
+            getComponent().addEdge(newEdge);
+
+        }, () -> { // Undo
+            getComponent().removeEdge(newEdge);
+            getComponent().addEdge(oldEdge);
+        }, "Updated edge", "update");
+    }
+
+    private void setStateOfNewEdgeToTheStateOfTheOld(DisplayableEdge oldEdge, DisplayableEdge newEdge) {
+        newEdge.setColor(getColor());
+        newEdge.setColorIntensity(getColorIntensity());
+        newEdge.selectProperty().set(oldEdge.getSelect());
+        newEdge.guardProperty().set(oldEdge.getGuard());
+        newEdge.updateProperty().set(oldEdge.getUpdate());
+
+        if(oldEdge instanceof Edge && newEdge instanceof Edge) {
+            ((Edge) newEdge).syncProperty().set(((Edge) oldEdge).getSync());
+        }
+
+        for (Nail n : oldEdge.getNails()) {
+            newEdge.addNail(n);
         }
     }
 

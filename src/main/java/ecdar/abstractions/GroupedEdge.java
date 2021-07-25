@@ -1,16 +1,13 @@
 package ecdar.abstractions;
 
 import ecdar.Ecdar;
-import ecdar.utility.UndoRedoStack;
+import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Stack;
-import java.util.function.BiConsumer;
 
 public class GroupedEdge extends DisplayableEdge {
     private static final String ID = "id";
@@ -19,26 +16,39 @@ public class GroupedEdge extends DisplayableEdge {
     private final ObservableList<Edge> edges = FXCollections.observableList(new ArrayList<>());
     private final StringProperty id = new SimpleStringProperty("");
 
-    public GroupedEdge(Edge edge) {
-        edges.add(edge);
+    public GroupedEdge(Edge initialEdge) {
+        if (!initialEdge.getSync().equals("")) {
+            edges.add(initialEdge);
+        }
+
+        ioStatus = new SimpleObjectProperty<>(initialEdge.ioStatus.get());
+        initializeFromEdge(initialEdge);
+        setTargetLocation(initialEdge.getTargetLocation());
+
+        initialEdge.getNails().forEach(this::addNail);
+    }
+
+    public GroupedEdge(ObservableList<Edge> initialEdges) {
+        Edge edge = initialEdges.get(0);
+
+        if (!edge.getSync().equals("")) {
+            this.edges.add(edge);
+        }
+
         ioStatus = new SimpleObjectProperty<>(edge.ioStatus.get());
         initializeFromEdge(edge);
 
-        edge.getNails().forEach(this::addNail);
-
-
-        // ToDo NIELS: REMOVE!!!
-        UndoRedoStack.setDebugRunnable(new BiConsumer<Stack<UndoRedoStack.Command>, Stack<UndoRedoStack.Command>>() {
-            @Override
-            public void accept(Stack<UndoRedoStack.Command> commands, Stack<UndoRedoStack.Command> commands2) {
-
+        edge.getNails().forEach(nail -> {
+            // For some reason the synchronization nails are added when dragging, so this prevents that
+            if(!nail.getPropertyType().equals(PropertyType.SYNCHRONIZATION)) {
+                this.addNail(nail);
             }
         });
+        initialEdges.stream().skip(1).forEach(this::addEdgeToGroup);
     }
 
     private void initializeFromEdge(Edge edge) {
         setSourceLocation(edge.getSourceLocation());
-        setTargetLocation(edge.getTargetLocation());
         setSelect(edge.getSelect());
         setGuard(edge.getGuard());
         setUpdate(edge.getUpdate());
@@ -50,14 +60,11 @@ public class GroupedEdge extends DisplayableEdge {
     }
 
     public boolean addEdgeToGroup(Edge newEdge) {
-        return edges.add(newEdge);
-    }
+        if (!newEdge.getGuard().equals(this.getGuard()) || !newEdge.getUpdate().equals(this.getUpdate())) {
+            return false;
+        }
 
-    /**
-     * Remove the latest non-empty edge from the edge list. This is necessary, as the latest edge will always have an empty sync.
-     */
-    public void removeEdgeAddedBeforeEmptySync() {
-        edges.remove(edges.size() - 2);
+        return edges.add(newEdge);
     }
 
     public ObservableList<Edge> getEdges() {
@@ -106,16 +113,18 @@ public class GroupedEdge extends DisplayableEdge {
         Edge edge = new Edge(getSourceLocation(), getStatus());
 
         // Initialize edge with new sync
-        edge.setTargetLocation(this.getTargetLocation());
-        edge.setSelect(this.getSelect());
-        edge.setGuard(this.getGuard());
-        edge.setUpdate(this.getGuard());
-        edge.setColor(this.getColor());
-        edge.setColorIntensity(this.getColorIntensity());
+        edge.sourceLocation.set(this.getSourceLocation());
+        edge.targetLocation.set(this.getTargetLocation());
+        edge.ioStatus.bind(this.ioStatus);
+        edge.selectProperty().bind(this.selectProperty());
+        edge.guardProperty().bind(this.guardProperty());
+        edge.updateProperty().bind(this.updateProperty());
+        edge.colorProperty().bind(this.colorProperty());
+        edge.colorIntensityProperty().bind(this.colorIntensityProperty());
         edge.setIsHighlighted(this.getIsHighlighted());
-        edge.setIsLocked(this.getIsLocked().getValue());
+        edge.getIsLocked().bind(this.getIsLocked());
         edge.setGroup(this.getId());
-        edge.addSyncNail("");
+        edge.makeSyncNailBetweenLocations();
 
         return edge;
     }
@@ -146,8 +155,6 @@ public class GroupedEdge extends DisplayableEdge {
         } else if (propertyType.equals(PropertyType.GUARD)) {
             guardProperty().unbind();
             setGuard(newProperty.get(0));
-        } else if (propertyType.equals(PropertyType.SYNCHRONIZATION)) {
-            // ToDo NIELS: Handle synchronization property
         } else if (propertyType.equals(PropertyType.UPDATE)) {
             updateProperty().unbind();
             setUpdate(newProperty.get(0));
@@ -162,5 +169,25 @@ public class GroupedEdge extends DisplayableEdge {
         }
 
         return syncProperties;
+    }
+
+    @Override
+    public void setTargetLocation(final Location targetLocation) {
+        this.targetLocation.set(targetLocation);
+        updateTargetCircular();
+
+        this.edges.forEach(e -> {
+            e.setTargetLocation(targetLocation);
+        });
+    }
+
+    @Override
+    public void setSourceLocation(final Location sourceLocation) {
+        this.sourceLocation.set(sourceLocation);
+        updateSourceCircular();
+
+        this.edges.forEach(e -> {
+            e.setSourceLocation(sourceLocation);
+        });
     }
 }

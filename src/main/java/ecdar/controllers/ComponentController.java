@@ -380,7 +380,7 @@ public class ComponentController extends ModelController implements Initializabl
         initializeDropDownMenu.accept(getComponent());
     }
 
-    private void initializeFinishEdgeContextMenu(final Edge unfinishedEdge) {
+    private void initializeFinishEdgeContextMenu(final DisplayableEdge unfinishedEdge) {
 
         final Consumer<Component> initializeDropDownMenu = (component) -> {
             if (component == null) {
@@ -826,7 +826,7 @@ public class ComponentController extends ModelController implements Initializabl
         event.consume();
         EcdarController.getActiveCanvasPresentation().getController().leaveTextAreas();
 
-        final Edge unfinishedEdge = getComponent().getUnfinishedEdge();
+        final DisplayableEdge unfinishedEdge = getComponent().getUnfinishedEdge();
 
         if ((event.isShiftDown() && event.isPrimaryButtonDown()) || event.isMiddleButtonDown()) {
             final Location location = new Location();

@@ -584,8 +584,8 @@ public class Component extends HighLevelModelObject implements Boxed {
         initialLocation.setType(Location.Type.INITIAL);
     }
 
-    public Edge getUnfinishedEdge() {
-        for (final Edge edge : getListOfEdgesFromDisplayableEdges(edges)) {
+    public DisplayableEdge getUnfinishedEdge() {
+        for (final DisplayableEdge edge : edges) {
             if (edge.getTargetLocation() == null)
                 return edge;
         }
@@ -675,11 +675,13 @@ public class Component extends HighLevelModelObject implements Boxed {
                     edges.add(newGroupedEdge);
                 } else {
                     boolean hasSameGuardAndUpdate = groupedEdge.addEdgeToGroup(newEdge);
+
                     if (!hasSameGuardAndUpdate) {
-                        // ToDo NIELS: Somehow an edge with different guard and/or update was given the same group id
+                        // The edge has the same group id as another edge, but has different guard and/or update
+                        newEdge.setGroup("");
+                        edges.add(newEdge);
                     }
                 }
-
             } else {
                 edges.add(newEdge);
             }

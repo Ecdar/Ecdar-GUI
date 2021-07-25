@@ -346,7 +346,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
             if (root.isPlaced()) {
 
-                final Edge unfinishedEdge = component.getUnfinishedEdge();
+                final DisplayableEdge unfinishedEdge = component.getUnfinishedEdge();
 
                 if (unfinishedEdge == null && event.getButton().equals(MouseButton.SECONDARY)) {
                     initializeDropDownMenu();

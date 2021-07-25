@@ -88,7 +88,7 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
 
         if (getNail().getPropertyType().equals(Edge.PropertyType.SYNCHRONIZATION)) {
             contextMenu.addMenuElement(edgeController.getChangeStatusMenuElement(contextMenu));
-            contextMenu.addMenuElement(edgeController.getMakeGroupedEdgeMenuElement(contextMenu));
+            contextMenu.addMenuElement(edgeController.getMultiSyncEdgeMenuElement(contextMenu));
         } else {
             // Only delete option if not sync nail
             contextMenu.addClickableAndDisableableListElement("Delete", getEdge().getIsLocked(), (mouseEvent -> {

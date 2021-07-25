@@ -17,8 +17,8 @@ public abstract class DisplayableEdge implements Nearable {
     public ObjectProperty<EdgeStatus> ioStatus;
 
     // Verification properties
-    private final ObjectProperty<Location> sourceLocation = new SimpleObjectProperty<>();
-    private final ObjectProperty<Location> targetLocation = new SimpleObjectProperty<>();
+    protected final ObjectProperty<Location> sourceLocation = new SimpleObjectProperty<>();
+    protected final ObjectProperty<Location> targetLocation = new SimpleObjectProperty<>();
 
     private final StringProperty select = new SimpleStringProperty("");
     private final StringProperty guard = new SimpleStringProperty("");
@@ -192,13 +192,13 @@ public abstract class DisplayableEdge implements Nearable {
         return null;
     }
 
-    private void updateSourceCircular() {
+    protected void updateSourceCircular() {
         if(getSourceLocation() != null) {
             sourceCircular.set(getSourceLocation());
         }
     }
 
-    private void updateTargetCircular() {
+    protected void updateTargetCircular() {
         if(getTargetLocation() != null) {
             targetCircular.set(getTargetLocation());
         }
