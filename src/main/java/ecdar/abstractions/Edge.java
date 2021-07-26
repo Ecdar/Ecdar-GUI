@@ -34,7 +34,10 @@ public class Edge extends DisplayableEdge implements Serializable {
         setSourceLocation(sourceLocation);
         ioStatus = new SimpleObjectProperty<>(status);
 
-        setId();
+        // Check needed for tests to pass in src/test/java/ecdar/mutation/operators/SinkLocationOperatorTest.java
+        if (Ecdar.getProject() != null) {
+            setId();
+        }
 
         bindReachabilityAnalysis();
     }
@@ -42,14 +45,6 @@ public class Edge extends DisplayableEdge implements Serializable {
     public Edge(final JsonObject jsonObject, final Component component) {
         deserialize(jsonObject, component);
         bindReachabilityAnalysis();
-    }
-
-    /**
-     * Generates an id for this, and binds reachability analysis.
-     */
-    public void initialize() {
-        setId();
-        System.out.println(getId());
     }
 
     public String getSync() {
