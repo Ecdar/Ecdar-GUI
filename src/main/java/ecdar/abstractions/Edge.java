@@ -34,6 +34,8 @@ public class Edge extends DisplayableEdge implements Serializable {
         setSourceLocation(sourceLocation);
         ioStatus = new SimpleObjectProperty<>(status);
 
+        setId();
+
         bindReachabilityAnalysis();
     }
 
@@ -200,9 +202,11 @@ public class Edge extends DisplayableEdge implements Serializable {
         else setId();
 
         final JsonPrimitive groupJson = json.getAsJsonPrimitive(GROUP);
+
         if (groupJson != null) {
             setGroup(groupJson.getAsString());
         }
+
         else setGroup("");
 
         setSelect(json.getAsJsonPrimitive(SELECT).getAsString());

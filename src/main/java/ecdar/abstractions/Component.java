@@ -657,9 +657,12 @@ public class Component extends HighLevelModelObject implements Boxed {
             JsonObject edgeObject = (JsonObject) jsonElement;
             final Edge newEdge = new Edge((JsonObject) jsonElement, this);
 
+            String edgeGroup = "";
             if (edgeObject.has("group")) {
-                String edgeGroup = edgeObject.getAsJsonPrimitive("group").getAsString();
+                edgeGroup = edgeObject.getAsJsonPrimitive("group").getAsString();
+            }
 
+            if (!edgeGroup.isEmpty()) {
                 GroupedEdge groupedEdge = null;
                 for (DisplayableEdge edge : edges) {
                     if (edge instanceof GroupedEdge && edge.getId().equals(edgeGroup)) {
@@ -821,6 +824,18 @@ public class Component extends HighLevelModelObject implements Boxed {
             if(location.getType() != Location.Type.UNIVERSAL || location.getType() != Location.Type.INCONSISTENT){
                 ids.add(location.getId().substring(Location.ID_LETTER_LENGTH));
             }
+        }
+        return ids;
+    }
+
+    /**
+     * Gets the id of all edges in this component
+     * @return ids of all edges in this component
+     */
+    HashSet<String> getEdgeIds() {
+        final HashSet<String> ids = new HashSet<>();
+        for (final Edge edge : getEdges()){
+            ids.add(edge.getId().substring(Edge.ID_LETTER_LENGTH));
         }
         return ids;
     }

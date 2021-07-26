@@ -1,9 +1,9 @@
 package ecdar.abstractions;
 
 import ecdar.Ecdar;
-import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 
 import java.util.ArrayList;
@@ -26,6 +26,8 @@ public class GroupedEdge extends DisplayableEdge {
         setTargetLocation(initialEdge.getTargetLocation());
 
         initialEdge.getNails().forEach(this::addNail);
+
+        setId();
     }
 
     public GroupedEdge(ObservableList<Edge> initialEdges) {
@@ -45,6 +47,8 @@ public class GroupedEdge extends DisplayableEdge {
             }
         });
         initialEdges.stream().skip(1).forEach(this::addEdgeToGroup);
+
+        setId();
     }
 
     private void initializeFromEdge(Edge edge) {
@@ -90,7 +94,7 @@ public class GroupedEdge extends DisplayableEdge {
      */
     protected void setId() {
         for(int counter = 0; ; counter++) {
-            if(!Ecdar.getProject().getLocationIds().contains(String.valueOf(counter))){
+            if(!Ecdar.getProject().getEdgeIds().contains(String.valueOf(counter))){
                 id.set(EDGE_GROUP + counter);
                 return;
             }
@@ -125,6 +129,12 @@ public class GroupedEdge extends DisplayableEdge {
         edge.getIsLocked().bind(this.getIsLocked());
         edge.setGroup(this.getId());
         edge.makeSyncNailBetweenLocations();
+
+        edge.getNails().addAll(getNails());
+        getNails().addListener((ListChangeListener<Nail>) c -> {
+            edge.getNails().clear();
+            edge.getNails().addAll(getNails());
+        });
 
         return edge;
     }
