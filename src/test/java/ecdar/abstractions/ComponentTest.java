@@ -52,15 +52,15 @@ public class ComponentTest {
         // The two ids should be different
         Assert.assertNotEquals(id1, id2);
 
-        Assert.assertEquals(id1, original.getDisplayableEdges().get(0).getTargetLocation().getId());
-        Assert.assertEquals(id1, clone.getDisplayableEdges().get(0).getTargetLocation().getId());
+        Assert.assertEquals(id1, original.getEdges().get(0).getTargetLocation().getId());
+        Assert.assertEquals(id1, clone.getEdges().get(0).getTargetLocation().getId());
 
         // Make original change target loc
         edge1.setTargetLocation(loc2);
 
         // Only original should change
-        Assert.assertEquals(id2, original.getDisplayableEdges().get(0).getTargetLocation().getId());
-        Assert.assertEquals(id1, clone.getDisplayableEdges().get(0).getTargetLocation().getId());
+        Assert.assertEquals(id2, original.getEdges().get(0).getTargetLocation().getId());
+        Assert.assertEquals(id1, clone.getEdges().get(0).getTargetLocation().getId());
     }
 
     @Test
@@ -87,15 +87,15 @@ public class ComponentTest {
         // The two ids should be different
         Assert.assertNotEquals(id1, id2);
 
-        Assert.assertEquals(id1, original.getDisplayableEdges().get(0).getTargetLocation().getId());
-        Assert.assertEquals(id1, clone.getDisplayableEdges().get(0).getTargetLocation().getId());
+        Assert.assertEquals(id1, original.getEdges().get(0).getTargetLocation().getId());
+        Assert.assertEquals(id1, clone.getEdges().get(0).getTargetLocation().getId());
 
         // Make clone change target loc
-        clone.getDisplayableEdges().get(0).setTargetLocation(loc2);
+        clone.getEdges().get(0).setTargetLocation(loc2);
 
         // Only original should change
-        Assert.assertEquals(id1, original.getDisplayableEdges().get(0).getTargetLocation().getId());
-        Assert.assertEquals(id2, clone.getDisplayableEdges().get(0).getTargetLocation().getId());
+        Assert.assertEquals(id1, original.getEdges().get(0).getTargetLocation().getId());
+        Assert.assertEquals(id2, clone.getEdges().get(0).getTargetLocation().getId());
     }
 
     @Test
@@ -139,23 +139,23 @@ public class ComponentTest {
         c.updateIOList();
 
         Assert.assertEquals(3, c.getLocations().size());
-        Assert.assertEquals(3, c.getDisplayableEdges().size());
+        Assert.assertEquals(3, c.getEdges().size());
 
         c.applyAngelicCompletion();
 
         Assert.assertEquals(3, c.getLocations().size());
 
-        Assert.assertEquals(8, c.getDisplayableEdges().size());
+        Assert.assertEquals(8, c.getEdges().size());
 
         // l1 should have two new input edges without guards
-        Edge edge = c.getDisplayableEdges().get(3);
+        Edge edge = c.getEdges().get(3);
         Assert.assertEquals(EdgeStatus.INPUT, edge.getStatus());
         Assert.assertEquals("a", edge.getSync());
         Assert.assertEquals("", edge.getGuard());
         Assert.assertEquals(l1, edge.getSourceLocation());
         Assert.assertEquals(l1, edge.getTargetLocation());
 
-        edge = c.getDisplayableEdges().get(4);
+        edge = c.getEdges().get(4);
         Assert.assertEquals(EdgeStatus.INPUT, edge.getStatus());
         Assert.assertEquals("b", edge.getSync());
         Assert.assertEquals("", edge.getGuard());
@@ -163,7 +163,7 @@ public class ComponentTest {
         Assert.assertEquals(l1, edge.getTargetLocation());
 
         // l2 should have one new input edge without guard
-        edge = c.getDisplayableEdges().get(5);
+        edge = c.getEdges().get(5);
         Assert.assertEquals(EdgeStatus.INPUT, edge.getStatus());
         Assert.assertEquals("b", edge.getSync());
         Assert.assertEquals("", edge.getGuard());
@@ -172,7 +172,7 @@ public class ComponentTest {
 
         // l3 should have two new input edges
         // one without guard
-        edge = c.getDisplayableEdges().get(6);
+        edge = c.getEdges().get(6);
         Assert.assertEquals(EdgeStatus.INPUT, edge.getStatus());
         Assert.assertEquals("a", edge.getSync());
         Assert.assertEquals("", edge.getGuard());
@@ -180,7 +180,7 @@ public class ComponentTest {
         Assert.assertEquals(l3, edge.getTargetLocation());
 
         // and one with negated guard
-        edge = c.getDisplayableEdges().get(7);
+        edge = c.getEdges().get(7);
         Assert.assertEquals(EdgeStatus.INPUT, edge.getStatus());
         Assert.assertEquals("b", edge.getSync());
         Assert.assertEquals("x > 3", edge.getGuard());
@@ -205,21 +205,21 @@ public class ComponentTest {
         c.updateIOList();
 
         Assert.assertEquals(1, c.getLocations().size());
-        Assert.assertEquals(1, c.getDisplayableEdges().size());
+        Assert.assertEquals(1, c.getEdges().size());
 
         c.applyAngelicCompletion();
 
         Assert.assertEquals(1, c.getLocations().size());
-        Assert.assertEquals(3, c.getDisplayableEdges().size());
+        Assert.assertEquals(3, c.getEdges().size());
 
-        Edge edge = c.getDisplayableEdges().get(1);
+        Edge edge = c.getEdges().get(1);
         Assert.assertEquals(EdgeStatus.INPUT, edge.getStatus());
         Assert.assertEquals("a", edge.getSync());
         Assert.assertEquals("x <= 1", edge.getGuard());
         Assert.assertEquals(l1, edge.getSourceLocation());
         Assert.assertEquals(l1, edge.getTargetLocation());
 
-        edge = c.getDisplayableEdges().get(2);
+        edge = c.getEdges().get(2);
         Assert.assertEquals(EdgeStatus.INPUT, edge.getStatus());
         Assert.assertEquals("a", edge.getSync());
         Assert.assertEquals("x > 3", edge.getGuard());
@@ -250,14 +250,14 @@ public class ComponentTest {
         c.updateIOList();
 
         Assert.assertEquals(1, c.getLocations().size());
-        Assert.assertEquals(2, c.getDisplayableEdges().size());
+        Assert.assertEquals(2, c.getEdges().size());
 
         c.applyAngelicCompletion();
 
         Assert.assertEquals(1, c.getLocations().size());
-        Assert.assertEquals(3, c.getDisplayableEdges().size());
+        Assert.assertEquals(3, c.getEdges().size());
 
-        final Edge edge = c.getDisplayableEdges().get(2);
+        final Edge edge = c.getEdges().get(2);
         Assert.assertEquals(EdgeStatus.INPUT, edge.getStatus());
         Assert.assertEquals("a", edge.getSync());
         Assert.assertEquals("x <= 3&&x > 1", edge.getGuard());
@@ -282,14 +282,14 @@ public class ComponentTest {
         c.updateIOList();
 
         Assert.assertEquals(1, c.getLocations().size());
-        Assert.assertEquals(1, c.getDisplayableEdges().size());
+        Assert.assertEquals(1, c.getEdges().size());
 
         c.applyAngelicCompletion();
 
         Assert.assertEquals(1, c.getLocations().size());
-        Assert.assertEquals(2, c.getDisplayableEdges().size());
+        Assert.assertEquals(2, c.getEdges().size());
 
-        final Edge edge = c.getDisplayableEdges().get(1);
+        final Edge edge = c.getEdges().get(1);
         Assert.assertEquals(EdgeStatus.INPUT, edge.getStatus());
         Assert.assertEquals("a", edge.getSync());
         Assert.assertEquals("x - y <= 3 + n % 5", edge.getGuard());
