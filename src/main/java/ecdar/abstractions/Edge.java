@@ -25,6 +25,7 @@ public class Edge extends DisplayableEdge implements Serializable {
     private static final String STATUS = "status";
     private static final String IS_LOCKED = "isLocked";
     public static final String EDGE = "E";
+    public static final String EDGE_GROUP = "EG";
     static final int ID_LETTER_LENGTH = 1;
 
     private final StringProperty sync = new SimpleStringProperty("");

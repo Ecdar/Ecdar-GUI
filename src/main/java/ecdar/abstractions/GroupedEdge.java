@@ -10,9 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GroupedEdge extends DisplayableEdge {
-    private static final String ID = "id";
-    private static final String EDGE_GROUP = "edge_group";
-
     private final ObservableList<Edge> edges = FXCollections.observableList(new ArrayList<>());
     private final StringProperty id = new SimpleStringProperty("");
 
@@ -95,7 +92,7 @@ public class GroupedEdge extends DisplayableEdge {
     protected void setId() {
         for(int counter = 0; ; counter++) {
             if(!Ecdar.getProject().getEdgeIds().contains(String.valueOf(counter))){
-                id.set(EDGE_GROUP + counter);
+                id.set(Edge.EDGE_GROUP + counter);
                 return;
             }
         }
