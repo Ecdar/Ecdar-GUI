@@ -488,67 +488,30 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
     }
 
     public MenuElement getMultiSyncEdgeMenuElement(DropDownMenu dropDownMenu) {
-        // Switch between input and output edge
-        final String text;
-        if (getEdge() instanceof Edge) {
-            text = "Make edge multi-sync";
+        return new MenuElement("Make edge multi-sync", mouseEvent -> {
+            Nail syncNail = getEdge().getNails().stream().filter((nail) -> nail.getPropertyType() == DisplayableEdge.PropertyType.SYNCHRONIZATION).findFirst().get();
+            TagPresentation previousTagPresentation = nailNailPresentationMap.get(syncNail).getController().propertyTag;
 
-            return new MenuElement(text, mouseEvent -> {
-                Nail syncNail = getEdge().getNails().stream().filter((nail) -> nail.getPropertyType() == DisplayableEdge.PropertyType.SYNCHRONIZATION).findFirst().get();
-                TagPresentation previousTagPresentation = nailNailPresentationMap.get(syncNail).getController().propertyTag;
+            final Edge singleEdge = (Edge) getEdge();
+            final GroupedEdge multiEdge = new GroupedEdge((Edge) getEdge());
 
-                final Edge singleEdge = (Edge) getEdge();
-                final GroupedEdge multiEdge = new GroupedEdge((Edge) getEdge());
-
-                UndoRedoStack.pushAndPerform(
-                        () -> {
-                            component.get().removeEdge(singleEdge);
-                            component.get().addEdge(multiEdge);
-                            nailNailPresentationMap.get(syncNail).getController().propertyTag = new MultiSyncTagPresentation(multiEdge,
-                                    () -> updateSyncLabelOnNail(nailNailPresentationMap.get(syncNail), previousTagPresentation));
-                        },
-                        () -> {
-                            component.get().removeEdge(multiEdge);
-                            component.get().addEdge(singleEdge);
-                            nailNailPresentationMap.get(syncNail).getController().propertyTag = previousTagPresentation;
-                        },
-                        "Turned edge into multi-sync edge",
-                        "switch"
-                );
-                dropDownMenu.hide();
-            }).setDisableable(getEdge().getIsLocked());
-        } else {
-            text = "Split into single-sync edges";
-
-            return new MenuElement(text, mouseEvent -> {
-                Nail syncNail = getEdge().getNails().stream().filter((nail) -> nail.getPropertyType() == DisplayableEdge.PropertyType.SYNCHRONIZATION).findFirst().get();
-                TagPresentation previousTagPresentation = nailNailPresentationMap.get(syncNail).getController().propertyTag;
-
-                final Edge singleEdge = ((GroupedEdge) getEdge()).getEdges().get(0);
-                final GroupedEdge multiEdge = (GroupedEdge) getEdge();
-
-                UndoRedoStack.pushAndPerform(
-                        () -> {
-                            component.get().removeEdge(multiEdge);
-                            for (Edge edge : multiEdge.getEdges()) {
-                                component.get().addEdge(edge);
-                            }
-                            nailNailPresentationMap.get(syncNail).getController().propertyTag = new TagPresentation();
-                        },
-                        () -> {
-                            for (Edge edge : multiEdge.getEdges()) {
-                                component.get().removeEdge(edge);
-                            }
-                            component.get().addEdge(multiEdge);
-                            nailNailPresentationMap.get(syncNail).getController().propertyTag = previousTagPresentation;
-                        },
-                        "Split multi-sync edge into individual edges",
-                        "switch"
-                );
-
-                dropDownMenu.hide();
-            }).setDisableable(getEdge().getIsLocked());
-        }
+            UndoRedoStack.pushAndPerform(
+                    () -> {
+                        component.get().removeEdge(singleEdge);
+                        component.get().addEdge(multiEdge);
+                        nailNailPresentationMap.get(syncNail).getController().propertyTag = new MultiSyncTagPresentation(multiEdge,
+                                () -> updateSyncLabelOnNail(nailNailPresentationMap.get(syncNail), previousTagPresentation));
+                    },
+                    () -> {
+                        component.get().removeEdge(multiEdge);
+                        component.get().addEdge(singleEdge);
+                        nailNailPresentationMap.get(syncNail).getController().propertyTag = previousTagPresentation;
+                    },
+                    "Turned edge into multi-sync edge",
+                    "switch"
+            );
+            dropDownMenu.hide();
+        }).setDisableable(getEdge().getIsLocked());
     }
 
     /**
