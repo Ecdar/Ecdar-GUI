@@ -170,6 +170,8 @@ public class MultiSyncTagPresentation extends TagPresentation {
         controller.frame.setOnMousePressed(event -> {
             previousX = getTranslateX();
             previousY = getTranslateY();
+
+            controller.frame.setCursor(Cursor.CLOSED_HAND);
         });
 
         controller.frame.setOnMouseDragged(event -> {
@@ -209,6 +211,8 @@ public class MultiSyncTagPresentation extends TagPresentation {
                 // Reset the was dragged boolean
                 wasDragged = false;
             }
+
+            controller.frame.setCursor(Cursor.OPEN_HAND);
 
             Platform.runLater(this::ensureTagIsWithinComponent);
         });

@@ -268,7 +268,7 @@ public abstract class DisplayableEdge implements Nearable {
         return (getSourceLocation() != null && getSourceLocation().equals(getTargetLocation()));
     }
 
-    public BooleanProperty getIsLocked(){return isLocked; }
+    public BooleanProperty getIsLockedProperty(){return isLocked; }
 
     public void setIsLocked(boolean bool){isLocked.setValue(bool); }
 

@@ -16,7 +16,7 @@ public class SyncTextFieldPresentation extends StackPane {
         this.placeholder = placeholder;
 
         Platform.runLater(() -> {
-            // Visualize active text field by offsetting the text field
+            // Visualize active text field with horizontal offset
             controller.textField.focusedProperty().addListener((observable, oldFocused, newFocused) -> {
                 if (newFocused) {
                     controller.textField.setTranslateY(2);

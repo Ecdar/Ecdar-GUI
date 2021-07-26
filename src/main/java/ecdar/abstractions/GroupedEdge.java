@@ -56,7 +56,7 @@ public class GroupedEdge extends DisplayableEdge {
         setColor(edge.getColor());
         setColorIntensity(edge.getColorIntensity());
         setIsHighlighted(edge.getIsHighlighted());
-        setIsLocked(edge.getIsLocked().getValue());
+        setIsLocked(edge.getIsLockedProperty().getValue());
         setStatus(edge.getStatus());
     }
 
@@ -123,7 +123,7 @@ public class GroupedEdge extends DisplayableEdge {
         edge.colorProperty().bind(this.colorProperty());
         edge.colorIntensityProperty().bind(this.colorIntensityProperty());
         edge.setIsHighlighted(this.getIsHighlighted());
-        edge.getIsLocked().bind(this.getIsLocked());
+        edge.getIsLockedProperty().bind(this.getIsLockedProperty());
         edge.setGroup(this.getId());
         edge.makeSyncNailBetweenLocations();
 

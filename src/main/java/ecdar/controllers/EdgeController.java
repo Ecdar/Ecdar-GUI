@@ -421,7 +421,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
 
                         dropDownMenu.addSpacerElement();
 
-                        dropDownMenu.addClickableAndDisableableListElement("Add Nail", getEdge().getIsLocked(), mouseEvent -> {
+                        dropDownMenu.addClickableAndDisableableListElement("Add Nail", getEdge().getIsLockedProperty(), mouseEvent -> {
                             final double nailX = Math.round((DropDownMenu.x - getComponent().getBox().getX()) / GRID_SIZE) * GRID_SIZE;
                             final double nailY = Math.round((DropDownMenu.y - getComponent().getBox().getY()) / GRID_SIZE) * GRID_SIZE;
                             final Nail newNail = new Nail(nailX, nailY);
@@ -436,7 +436,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                         });
                         dropDownMenu.addSpacerElement();
 
-                        dropDownMenu.addClickableAndDisableableListElement("Delete",getEdge().getIsLocked(), mouseEvent -> {
+                        dropDownMenu.addClickableAndDisableableListElement("Delete",getEdge().getIsLockedProperty(), mouseEvent -> {
                             UndoRedoStack.pushAndPerform(() -> { // Perform
                                 getComponent().removeEdge(getEdge());
                             }, () -> { // Undo
@@ -484,7 +484,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                     "switch"
             );
             dropDownMenu.hide();
-        }).setDisableable(getEdge().getIsLocked());
+        }).setDisableable(getEdge().getIsLockedProperty());
     }
 
     public MenuElement getMultiSyncEdgeMenuElement(DropDownMenu dropDownMenu) {
@@ -511,7 +511,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                     "switch"
             );
             dropDownMenu.hide();
-        }).setDisableable(getEdge().getIsLocked());
+        }).setDisableable(getEdge().getIsLockedProperty());
     }
 
     /**
@@ -523,7 +523,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
     private void updateSyncLabelOnNail(final NailPresentation nailPresentation, final TagPresentation propertyTag) {
         final Label propertyLabel = nailPresentation.getController().propertyLabel;
 
-        // show ? or ! dependent on edge I/O status
+        // Show ? or ! dependent on edge I/O status
         if (getEdge().ioStatus.get().equals(EdgeStatus.INPUT)) {
             propertyLabel.setText("?");
             propertyTag.setPlaceholder("Input");
@@ -556,7 +556,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
             if (nail.getPropertyType().equals(Edge.PropertyType.SYNCHRONIZATION)) data[Edge.PropertyType.SYNCHRONIZATION.getI()] = i;
             if (nail.getPropertyType().equals(Edge.PropertyType.UPDATE)) data[Edge.PropertyType.UPDATE.getI()] = i;
 
-            if ((getEdge().getIsLocked().getValue()) || nail.getPropertyType().equals(type)) {
+            if ((getEdge().getIsLockedProperty().getValue()) || nail.getPropertyType().equals(type)) {
                 isDisabled.set(true);
             }
 
@@ -669,24 +669,24 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                 return;
             }
 
-            //Decide whether the source or the target of the edge should be updated
+            // Decide whether the source or the target of the edge should be updated
             boolean closestToTarget = getDistance(event.getX(), event.getY(), target.getX(), target.getY()) < getDistance(event.getX(), event.getY(), source.getX(), source.getY());
 
-            //Handle drag closer to nails than locations
+            // Handle drag closer to nails than locations
             if(edge.get().getNails().size() > 0){
                 boolean dragIsCloserToNail;
 
                 if(!closestToTarget){
-                    //Check if the drag is closer to the first nail than to source
+                    // Check if the drag is closer to the first nail than to source
                     Nail firstNail = edge.get().getNails().get(0);
                     dragIsCloserToNail = getDistance(event.getX(), event.getY(), firstNail.getX(), firstNail.getY()) < getDistance(event.getX(), event.getY(), source.getX(), source.getY());
                 } else {
-                    //Check if the drag is closer to the last nail than to target
+                    // Check if the drag is closer to the last nail than to target
                     Nail lastNail = edge.get().getNails().get(edge.get().getNails().size() - 1);
                     dragIsCloserToNail = getDistance(event.getX(), event.getY(), lastNail.getX(), lastNail.getY()) < getDistance(event.getX(), event.getY(), target.getX(), target.getY());
                 }
 
-                //If the drag is closer to a nail than the locations, no drag should be initiated
+                // If the drag is closer to a nail than the locations, no drag should be initiated
                 if(dragIsCloserToNail){
                     return;
                 }
@@ -695,7 +695,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
             final DisplayableEdge newEdge = getNewDisplayableEdgeBasedOnOld(oldEdge);
 
             if (!closestToTarget) {
-                //Set the source to a new MouseCircular, which will follow the mouse and handle setting the new source
+                // Set the source to a new MouseCircular, which will follow the mouse and handle setting the new source
                 newEdge.sourceCircularProperty().set(new MouseCircular(newEdge, getComponent()));
                 newEdge.setTargetLocation(target);
             }

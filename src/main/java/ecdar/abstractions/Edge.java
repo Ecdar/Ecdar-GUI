@@ -109,7 +109,7 @@ public class Edge extends DisplayableEdge implements Serializable {
         });
 
         // Clone if edge is locked (e.g. the Inconsistent and Universal locations have locked edges)
-        clone.setIsLocked(getIsLocked().get());
+        clone.setIsLocked(getIsLockedProperty().get());
 
         return clone;
     }
@@ -165,7 +165,7 @@ public class Edge extends DisplayableEdge implements Serializable {
         result.addProperty(UPDATE, getUpdate());
         result.addProperty(SYNC, getSync());
 
-        result.addProperty(IS_LOCKED, getIsLocked().get());
+        result.addProperty(IS_LOCKED, getIsLockedProperty().get());
 
         final JsonArray nails = new JsonArray();
         getNails().forEach(nail -> nails.add(nail.serialize()));

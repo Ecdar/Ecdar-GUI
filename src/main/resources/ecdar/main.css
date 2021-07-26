@@ -232,13 +232,6 @@
 	-fx-background-insets: 0 0 0 0;
 }
 
-#addSyncBtn {
-	-fx-font-size: 11px;
-	-fx-border-style: HIDDEN SOLID SOLID SOLID;
-	-fx-border-color: -divider-color;
-	-fx-background-color: -grey-100;
-}
-
 <!-- Scroll pane related styling -->
 .scroll-bar:horizontal .track,
 .scroll-bar:vertical .track{

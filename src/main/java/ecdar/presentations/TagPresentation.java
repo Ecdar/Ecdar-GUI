@@ -99,6 +99,7 @@ public class TagPresentation extends StackPane {
         shape.setOnMousePressed(event -> {
             previousX = getTranslateX();
             previousY = getTranslateY();
+            shape.setCursor(Cursor.CLOSED_HAND);
         });
 
         this.setOnMouseDragged(event -> {
@@ -156,6 +157,8 @@ public class TagPresentation extends StackPane {
             } else if (getTranslateY() + locationAware.getValue().getY() < getComponent().getBox().getY() + GRID_SIZE * 2) {
                 setTranslateY(getComponent().getBox().getY() - locationAware.getValue().getY() + GRID_SIZE * 2);
             }
+
+            shape.setCursor(Cursor.OPEN_HAND);
         });
 
         textField.focusedProperty().addListener((observable, oldValue, newValue) -> {

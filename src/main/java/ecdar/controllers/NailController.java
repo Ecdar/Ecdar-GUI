@@ -79,10 +79,6 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
         this.edgeController = controller;
     }
 
-    public EdgeController getEdgeController() {
-        return this.edgeController;
-    }
-
     private void showContextMenu() {
         final DropDownMenu contextMenu = new DropDownMenu(root);
 
@@ -93,7 +89,7 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
             }
         } else {
             // Only delete option if not sync nail
-            contextMenu.addClickableAndDisableableListElement("Delete", getEdge().getIsLocked(), (mouseEvent -> {
+            contextMenu.addClickableAndDisableableListElement("Delete", getEdge().getIsLockedProperty(), (mouseEvent -> {
                 final Nail nail = getNail();
                 final DisplayableEdge edge = getEdge();
                 final Component component = getComponent();
@@ -142,7 +138,7 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
         final DisplayableEdge edge = getEdge();
 
         // Do not delete nail if its edge is locked or nail is sync nail
-        if (edge.getIsLocked().getValue()) {
+        if (edge.getIsLockedProperty().getValue()) {
             root.shake();
             Ecdar.showToast("This nail is locked. You cannot delete it.");
             return;

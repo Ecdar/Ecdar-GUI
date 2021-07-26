@@ -1291,7 +1291,7 @@ public class EcdarController implements Initializable {
                 final DisplayableEdge edge = ((EdgeController) selectable).getEdge();
 
                 // Dont delete edge if it is locked
-                if(edge.getIsLocked().getValue()){return;}
+                if(edge.getIsLockedProperty().getValue()){return;}
 
                 UndoRedoStack.pushAndPerform(() -> { // Perform
                     // Remove the edge
