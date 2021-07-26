@@ -34,7 +34,7 @@ public class InvertResetOperator extends MutationOperator {
             final Edge originalEdge = original.getEdges().get(edgeIndex);
 
             // Ignore if locked (e.g. if edge on the Inconsistent or Universal locations)
-            if (originalEdge.getIsLocked().get()) continue;
+            if (originalEdge.getIsLockedProperty().get()) continue;
 
             // For each clock
             final int finalEdgeIndex = edgeIndex;
@@ -87,7 +87,7 @@ public class InvertResetOperator extends MutationOperator {
 
     @Override
     public int getUpperLimit(final Component original) {
-        return original.getEdges().size() * original.getClocks().size();
+        return original.getDisplayableEdges().size() * original.getClocks().size();
 
     }
 

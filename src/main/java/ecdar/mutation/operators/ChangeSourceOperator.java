@@ -33,7 +33,7 @@ class ChangeSourceOperator extends MutationOperator {
             final Edge originalEdge = original.getEdges().get(edgeIndex);
 
             // Ignore if locked (e.g. if edge on the Inconsistent or Universal locations)
-            if (originalEdge.getIsLocked().get()) continue;
+            if (originalEdge.getIsLockedProperty().get()) continue;
 
             // Change the source of that edge to (almost) each of the locations
             for (final Location originalLocation : original.getLocations()) {
@@ -72,7 +72,7 @@ class ChangeSourceOperator extends MutationOperator {
 
     @Override
     public int getUpperLimit(final Component original) {
-        return (original.getLocations().size() - 1) * original.getEdges().size();
+        return (original.getLocations().size() - 1) * original.getDisplayableEdges().size();
     }
 
     @Override

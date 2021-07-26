@@ -1,10 +1,9 @@
 package ecdar.utility.helpers;
 
 import ecdar.abstractions.Component;
-import ecdar.abstractions.Edge;
+import ecdar.abstractions.DisplayableEdge;
 import ecdar.abstractions.Location;
 import ecdar.controllers.EcdarController;
-import ecdar.presentations.CanvasPresentation;
 import ecdar.utility.mouse.MouseTracker;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -20,7 +19,7 @@ public class MouseCircular implements Circular {
     private final SimpleDoubleProperty scale = new SimpleDoubleProperty(1d);
     private final MouseTracker mouseTracker = EcdarController.getActiveCanvasPresentation().mouseTracker;
 
-    public MouseCircular(Edge edge, Component component){
+    public MouseCircular(DisplayableEdge edge, Component component){
         //Set the initial x and y coordinates of the circular
         x.set(mouseTracker.getGridX());
         y.set(mouseTracker.getGridY());
@@ -39,16 +38,20 @@ public class MouseCircular implements Circular {
 
         //Set the new source to the clicked circular
         EventHandler<MouseEvent> eventHandler = event -> {
-            //Go through all locations and set the source of the edge to the first location within the radius of the mouse
-            List<Location> locations = component.getLocations();
-            Location closestLoc = locations.get(0);
-            for (Location loc : locations) {
-                if(Math.abs(loc.getY() - getY()) < radius.get() * 2 && Math.abs(loc.getX() - getX()) < radius.get() * 2 && Math.abs(loc.getY() - getY()) + Math.abs(loc.getX() - getX()) < Math.abs(closestLoc.getY() - getY()) + Math.abs(closestLoc.getX() - getX())){
-                    closestLoc = loc;
+            if (event.isPrimaryButtonDown()) {
+                //Go through all locations and set the source of the edge to the first location within the radius of the mouse
+                List<Location> locations = component.getLocations();
+                Location closestLoc = locations.get(0);
+                for (Location loc : locations) {
+                    if(isWithinRadiusOfMouse(loc) &&
+                            Math.abs(loc.getY() - getY()) + Math.abs(loc.getX() - getX()) <
+                            Math.abs(closestLoc.getY() - getY()) + Math.abs(closestLoc.getX() - getX())){
+                        closestLoc = loc;
+                    }
                 }
-            }
 
-            edge.setSourceLocation(closestLoc);
+                edge.setSourceLocation(closestLoc);
+            }
         };
 
         //Set register the eventHandler
@@ -62,6 +65,10 @@ public class MouseCircular implements Circular {
                 mouseTracker.registerOnMousePressedEventHandler(eventHandler);
             }
         });
+    }
+
+    private boolean isWithinRadiusOfMouse(Location loc) {
+        return Math.abs(loc.getY() - getY()) < radius.get() * 2 && Math.abs(loc.getX() - getX()) < radius.get() * 2;
     }
 
     @Override

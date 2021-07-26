@@ -214,7 +214,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
             final Component component = getComponent();
             final Location location = getLocation();
 
-            final List<Edge> relatedEdges = component.getRelatedEdges(location);
+            final List<DisplayableEdge> relatedEdges = component.getRelatedEdges(location);
 
             UndoRedoStack.pushAndPerform(() -> { // Perform
                 // Remove the location
@@ -346,7 +346,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
             if (root.isPlaced()) {
 
-                final Edge unfinishedEdge = component.getUnfinishedEdge();
+                final DisplayableEdge unfinishedEdge = component.getUnfinishedEdge();
 
                 if (unfinishedEdge == null && event.getButton().equals(MouseButton.SECONDARY)) {
                     initializeDropDownMenu();

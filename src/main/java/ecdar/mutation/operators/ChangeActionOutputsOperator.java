@@ -32,7 +32,7 @@ public class ChangeActionOutputsOperator extends ChangeActionOperator {
             final Edge originalEdge = original.getEdges().get(edgeIndex);
 
             // Ignore if locked (e.g. if edge on the Inconsistent or Universal locations)
-            if (originalEdge.getIsLocked().get()) continue;
+            if (originalEdge.getIsLockedProperty().get()) continue;
 
             // Change the action of that edge to another action
             final int finalEdgeIndex = edgeIndex;

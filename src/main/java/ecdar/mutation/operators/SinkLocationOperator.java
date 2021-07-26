@@ -34,7 +34,7 @@ public class SinkLocationOperator extends MutationOperator {
             final Edge originalEdge = original.getEdges().get(edgeIndex);
 
             // Ignore if locked (e.g. if edge on the Inconsistent or Universal locations)
-            if (originalEdge.getIsLocked().get()) continue;
+            if (originalEdge.getIsLockedProperty().get()) continue;
 
             final Component mutant = original.cloneForVerification();
 
@@ -82,7 +82,7 @@ public class SinkLocationOperator extends MutationOperator {
 
     @Override
     public int getUpperLimit(final Component original) {
-        return original.getEdges().size();
+        return original.getDisplayableEdges().size();
 
     }
 

@@ -55,7 +55,7 @@ public class ChangeGuardOpLocalsOperator extends ChangeGuardOpOperator {
             final Edge originalEdge = original.getEdges().get(edgeIndex);
 
             // Ignore if locked (e.g. if edge on the Inconsistent or Universal locations)
-            if (originalEdge.getIsLocked().get()) continue;
+            if (originalEdge.getIsLockedProperty().get()) continue;
 
             // Ignore if guard is empty
             if (originalEdge.getGuard().isEmpty()) continue;
