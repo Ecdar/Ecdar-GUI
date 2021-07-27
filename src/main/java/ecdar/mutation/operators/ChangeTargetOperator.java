@@ -33,7 +33,7 @@ public class ChangeTargetOperator extends MutationOperator {
             final Edge originalEdge = original.getEdges().get(edgeIndex);
 
             // Ignore if locked (e.g. if edge on the Inconsistent or Universal locations)
-            if (originalEdge.getIsLocked().get()) continue;
+            if (originalEdge.getIsLockedProperty().get()) continue;
 
             for (final Location originalLocation : original.getLocations()) {
                 // Ignore if location is target in original edge
@@ -65,7 +65,7 @@ public class ChangeTargetOperator extends MutationOperator {
 
     @Override
     public int getUpperLimit(final Component original) {
-        return (original.getLocations().size() - 1) * original.getEdges().size();
+        return (original.getLocations().size() - 1) * original.getDisplayableEdges().size();
     }
 
     @Override

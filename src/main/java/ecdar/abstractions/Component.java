@@ -37,7 +37,7 @@ public class Component extends HighLevelModelObject implements Boxed {
 
     // Verification properties
     private final ObservableList<Location> locations = FXCollections.observableArrayList();
-    private final ObservableList<Edge> edges = FXCollections.observableArrayList();
+    private final ObservableList<DisplayableEdge> edges = FXCollections.observableArrayList();
     private final ObservableList<String> inputStrings = FXCollections.observableArrayList();
     private final ObservableList<String> outputStrings = FXCollections.observableArrayList();
     private final StringProperty description = new SimpleStringProperty("");
@@ -129,9 +129,7 @@ public class Component extends HighLevelModelObject implements Boxed {
             addLocation(originalLoc.cloneForVerification());
         }
 
-        for (final Edge originalEdge : original.getEdges()) {
-            addEdge(originalEdge.cloneForVerification(this));
-        }
+        getListOfEdgesFromDisplayableEdges(original.getDisplayableEdges()).forEach(edge -> addEdge((edge).cloneForVerification(this)));
 
         setDeclarationsText(original.getDeclarationsText());
     }
@@ -145,10 +143,11 @@ public class Component extends HighLevelModelObject implements Boxed {
 
         getLocations().forEach(location -> inputStrings.forEach(input -> {
             // Get outgoing input edges that has the chosen input
-            final List<Edge> matchingEdges = getOutgoingEdges(location).stream().filter(
+            final List<Edge> matchingEdges = getListOfEdgesFromDisplayableEdges(getOutgoingEdges(location)).stream().filter(
                     edge -> edge.getStatus().equals(EdgeStatus.INPUT) &&
                             edge.getSync().equals(input)).collect(Collectors.toList()
             );
+
 
             // If no such edges, add a self loop without a guard
             if (matchingEdges.isEmpty()) {
@@ -270,7 +269,7 @@ public class Component extends HighLevelModelObject implements Boxed {
 
         getLocations().forEach(location -> inputStrings.forEach(input -> {
             // Get outgoing input edges that has the chosen input
-            final List<Edge> matchingEdges = getOutgoingEdges(location).stream().filter(
+            final List<Edge> matchingEdges = getListOfEdgesFromDisplayableEdges(getOutgoingEdges(location)).stream().filter(
                     edge -> edge.getStatus().equals(EdgeStatus.INPUT) &&
                             edge.getSync().equals(input)).collect(Collectors.toList()
             );
@@ -346,24 +345,46 @@ public class Component extends HighLevelModelObject implements Boxed {
     private void initializeIOListeners() {
         final ChangeListener<Object> listener = (observable, oldValue, newValue) -> updateIOList();
 
-        edges.addListener((ListChangeListener<Edge>) c -> {
+        edges.addListener((ListChangeListener<DisplayableEdge>) c -> {
             // Update the list so empty I/O status is also added to I/OLists
             updateIOList();
 
             while(c.next()) {
-                for (final Edge e : c.getAddedSubList()) {
-                    addSyncListener(listener, e);
+                for (final DisplayableEdge e : c.getAddedSubList()) {
+                    if (e instanceof Edge) {
+                        getEdgeOrSubEdges(e).forEach(edge -> addSyncListener(listener, edge));
+                    } else if (e instanceof GroupedEdge) {
+                        ((GroupedEdge) e).getEdges().addListener((ListChangeListener<DisplayableEdge>) change -> {
+                            while(change.next()) {
+                                updateIOList();
+                                // Add listeners to edges added to group edge
+                                for (final DisplayableEdge addedEdge : change.getAddedSubList()) {
+                                    getEdgeOrSubEdges(addedEdge).forEach(edge -> addSyncListener(listener, edge));
+                                }
+
+                                // Remove listeners from edges removed from group edge
+                                for (final DisplayableEdge addedEdge : change.getRemoved()) {
+                                    getEdgeOrSubEdges(addedEdge).forEach(edge -> {
+                                        edge.syncProperty().removeListener(listener);
+                                        edge.ioStatus.removeListener(listener);
+                                    });
+                                }
+                            }
+                        });
+                    }
                 }
 
-                for (final Edge e : c.getRemoved()) {
-                    e.syncProperty().removeListener(listener);
-                    e.ioStatus.removeListener(listener);
+                for (final DisplayableEdge e : c.getRemoved()) {
+                    getEdgeOrSubEdges(e).forEach(edge -> {
+                        edge.syncProperty().removeListener(listener);
+                        edge.ioStatus.removeListener(listener);
+                    });
                 }
             }
         });
 
         // Add listener to edges initially
-        edges.forEach(edge -> addSyncListener(listener, edge));
+        edges.forEach(edge -> getEdgeOrSubEdges(edge).forEach(subEdge -> addSyncListener(listener, subEdge)));
     }
 
     /**
@@ -384,7 +405,9 @@ public class Component extends HighLevelModelObject implements Boxed {
         final List<String> localInputStrings = new ArrayList<>();
         final List<String> localOutputStrings = new ArrayList<>();
 
-        for (final Edge edge : edges) {
+        List<Edge> edgeList = getListOfEdgesFromDisplayableEdges(edges);
+
+        for (final Edge edge : edgeList) {
             // Extract channel id based on UPPAAL id definition
             final String channel = edge.getSync().replaceAll("^([a-zA-Z_][a-zA-Z0-9_]*).*$", "$1");
 
@@ -405,6 +428,27 @@ public class Component extends HighLevelModelObject implements Boxed {
 
         inputStrings.setAll(localInputStrings);
         outputStrings.setAll(localOutputStrings);
+    }
+
+    private List<Edge> getListOfEdgesFromDisplayableEdges(List<DisplayableEdge> displayableEdges) {
+        List<Edge> result = new ArrayList<>();
+        for (final DisplayableEdge originalEdge : displayableEdges) {
+            result.addAll(getEdgeOrSubEdges(originalEdge));
+        }
+
+        return result;
+    }
+
+    private List<Edge> getEdgeOrSubEdges(DisplayableEdge edge) {
+        List<Edge> result = new ArrayList<>();
+
+        if(edge instanceof Edge) {
+            result.add((Edge) edge);
+        } else {
+            result.addAll(((GroupedEdge) edge).getEdges());
+        }
+
+        return result;
     }
 
     /**
@@ -449,23 +493,40 @@ public class Component extends HighLevelModelObject implements Boxed {
         return locations.remove(location);
     }
 
-    public ObservableList<Edge> getEdges() {
+    /**
+     * Returns all DisplayableEdges of the component (returning a list potentially containing GroupEdges and Edges)
+     * @return All visual edges of the component
+     */
+    public ObservableList<DisplayableEdge> getDisplayableEdges() {
         return edges;
     }
 
-    public boolean addEdge(final Edge edge) {
+    /**
+     * Returns all edges of the component (returning the sub-edges of GroupEdges as individual edges)
+     * @return All functional edges of the component
+     */
+    public List<Edge> getEdges() {
+        return getListOfEdgesFromDisplayableEdges(edges);
+    }
+
+    public boolean addEdge(final DisplayableEdge edge) {
         return edges.add(edge);
     }
 
-    public boolean removeEdge(final Edge edge) {
+    public boolean removeEdge(final DisplayableEdge edge) {
         return edges.remove(edge);
     }
 
-    public List<Edge> getRelatedEdges(final Location location) {
-        final ArrayList<Edge> relatedEdges = new ArrayList<>();
+    /**
+     * Returns all edges either starting from or ending in the given location (returning a list potentially containing GroupEdges and Edges)
+     * @param location to get related edges of
+     * @return List of DisplayableEdges starting from or ending in the location
+     */
+    public List<DisplayableEdge> getRelatedEdges(final Location location) {
+        final ArrayList<DisplayableEdge> relatedEdges = new ArrayList<>();
 
         edges.forEach(edge -> {
-            if(location.equals(edge.getSourceLocation()) ||location.equals(edge.getTargetLocation())) {
+            if(location.equals(edge.getSourceLocation()) || location.equals(edge.getTargetLocation())) {
                 relatedEdges.add(edge);
             }
         });
@@ -479,8 +540,8 @@ public class Component extends HighLevelModelObject implements Boxed {
      * @param location the specified location
      * @return the filtered edges
      */
-    public synchronized List<Edge> getOutgoingEdges(final Location location) {
-        return getEdges().filtered(edge -> location == edge.getSourceLocation());
+    public synchronized List<DisplayableEdge> getOutgoingEdges(final Location location) {
+        return getDisplayableEdges().filtered(edge -> location == edge.getSourceLocation());
     }
 
     public boolean isDeclarationOpen() {
@@ -523,8 +584,8 @@ public class Component extends HighLevelModelObject implements Boxed {
         initialLocation.setType(Location.Type.INITIAL);
     }
 
-    public Edge getUnfinishedEdge() {
-        for (final Edge edge : edges) {
+    public DisplayableEdge getUnfinishedEdge() {
+        for (final DisplayableEdge edge : edges) {
             if (edge.getTargetLocation() == null)
                 return edge;
         }
@@ -566,7 +627,8 @@ public class Component extends HighLevelModelObject implements Boxed {
         result.add(LOCATIONS, locations);
 
         final JsonArray edges = new JsonArray();
-        getEdges().forEach(edge -> edges.add(edge.serialize()));
+        getListOfEdgesFromDisplayableEdges(this.edges).forEach(edge -> edges.add(edge.serialize()));
+
         result.add(EDGES, edges);
 
         result.addProperty(DESCRIPTION, getDescription());
@@ -592,8 +654,41 @@ public class Component extends HighLevelModelObject implements Boxed {
         });
 
         json.getAsJsonArray(EDGES).forEach(jsonElement -> {
+            JsonObject edgeObject = (JsonObject) jsonElement;
             final Edge newEdge = new Edge((JsonObject) jsonElement, this);
-            edges.add(newEdge);
+
+            String edgeGroup = "";
+            if (edgeObject.has("group")) {
+                edgeGroup = edgeObject.getAsJsonPrimitive("group").getAsString();
+            }
+
+            if (!edgeGroup.isEmpty()) {
+                GroupedEdge groupedEdge = null;
+                for (DisplayableEdge edge : edges) {
+                    if (edge instanceof GroupedEdge && edge.getId().equals(edgeGroup)) {
+                        groupedEdge = ((GroupedEdge) edge);
+                        break;
+                    }
+                }
+
+                if (groupedEdge == null) {
+                    GroupedEdge newGroupedEdge = new GroupedEdge(newEdge);
+                    newGroupedEdge.setId(edgeGroup);
+
+                    edges.add(newGroupedEdge);
+                } else {
+                    boolean hasSameGuardAndUpdate = groupedEdge.addEdgeToGroup(newEdge);
+
+                    if (!hasSameGuardAndUpdate) {
+                        // The edge has the same group id as another edge, but has different guard and/or update
+                        newEdge.setGroup("");
+                        edges.add(newEdge);
+                    }
+                }
+            } else {
+                edges.add(newEdge);
+            }
+
         });
 
         setDescription(json.getAsJsonPrimitive(DESCRIPTION).getAsString());
@@ -650,7 +745,7 @@ public class Component extends HighLevelModelObject implements Boxed {
 
     private void bindReachabilityAnalysis() {
         locations.addListener((ListChangeListener<? super Location>) c -> EcdarController.runReachabilityAnalysis());
-        edges.addListener((ListChangeListener<? super Edge>) c -> EcdarController.runReachabilityAnalysis());
+        edges.addListener((ListChangeListener<? super DisplayableEdge>) c -> EcdarController.runReachabilityAnalysis());
         declarationsTextProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
         includeInPeriodicCheckProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
     }
@@ -729,6 +824,18 @@ public class Component extends HighLevelModelObject implements Boxed {
             if(location.getType() != Location.Type.UNIVERSAL || location.getType() != Location.Type.INCONSISTENT){
                 ids.add(location.getId().substring(Location.ID_LETTER_LENGTH));
             }
+        }
+        return ids;
+    }
+
+    /**
+     * Gets the id of all edges in this component
+     * @return ids of all edges in this component
+     */
+    HashSet<String> getEdgeIds() {
+        final HashSet<String> ids = new HashSet<>();
+        for (final Edge edge : getEdges()){
+            ids.add(edge.getId().substring(Edge.ID_LETTER_LENGTH));
         }
         return ids;
     }
@@ -823,7 +930,7 @@ public class Component extends HighLevelModelObject implements Boxed {
      */
     public void moveAllNodesLeft() {
         getLocations().forEach(loc -> loc.setX(loc.getX() - Grid.GRID_SIZE));
-        getEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setX(nail.getX() - Grid.GRID_SIZE)));
+        getDisplayableEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setX(nail.getX() - Grid.GRID_SIZE)));
     }
 
     /**
@@ -831,7 +938,7 @@ public class Component extends HighLevelModelObject implements Boxed {
      */
     public void moveAllNodesRight() {
         getLocations().forEach(loc -> loc.setX(loc.getX() + Grid.GRID_SIZE));
-        getEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setX(nail.getX() + Grid.GRID_SIZE)));
+        getDisplayableEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setX(nail.getX() + Grid.GRID_SIZE)));
     }
 
     /**
@@ -839,7 +946,7 @@ public class Component extends HighLevelModelObject implements Boxed {
      */
     public void moveAllNodesDown() {
         getLocations().forEach(loc -> loc.setY(loc.getY() + Grid.GRID_SIZE));
-        getEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setY(nail.getY() + Grid.GRID_SIZE)));
+        getDisplayableEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setY(nail.getY() + Grid.GRID_SIZE)));
     }
 
     /**
@@ -847,14 +954,14 @@ public class Component extends HighLevelModelObject implements Boxed {
      */
     public void moveAllNodesUp() {
         getLocations().forEach(loc -> loc.setY(loc.getY() - Grid.GRID_SIZE));
-        getEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setY(nail.getY() - Grid.GRID_SIZE)));
+        getDisplayableEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setY(nail.getY() - Grid.GRID_SIZE)));
     }
 
-    public List<Edge> getInputEdges() {
-        return getEdges().filtered(edge -> edge.getStatus().equals(EdgeStatus.INPUT));
+    public List<DisplayableEdge> getInputEdges() {
+        return getDisplayableEdges().filtered(edge -> edge.getStatus().equals(EdgeStatus.INPUT));
     }
 
-    public List<Edge> getOutputEdges() {
-        return getEdges().filtered(edge -> edge.getStatus().equals(EdgeStatus.OUTPUT));
+    public List<DisplayableEdge> getOutputEdges() {
+        return getDisplayableEdges().filtered(edge -> edge.getStatus().equals(EdgeStatus.OUTPUT));
     }
 }

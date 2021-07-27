@@ -388,6 +388,20 @@ public class Project {
     }
 
     /**
+     * gets the id of all edges in the project and inserts it into a set
+     * @return the set of all edge ids
+     */
+    Set<String> getEdgeIds(){
+        final Set<String> ids = new HashSet<>();
+
+        for (final Component component : getComponents()) {
+            ids.addAll(component.getEdgeIds());
+        }
+
+        return ids;
+    }
+
+    /**
      * gets the id of all systems in the project and inserts it into a set
      * @return the set of all system names
      */
