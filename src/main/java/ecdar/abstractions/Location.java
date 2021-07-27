@@ -441,7 +441,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     }
 
     public enum Urgency {
-        NORMAL, URGENT, COMMITTED
+        NORMAL, URGENT, COMMITTED, PROHIBITED
     }
 
     public enum Reachability {
