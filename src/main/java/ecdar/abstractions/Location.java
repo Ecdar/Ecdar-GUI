@@ -14,7 +14,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import javafx.beans.property.*;
 
-import java.util.Arrays;
 import java.util.Collections;
 
 public class Location implements Circular, Serializable, Nearable, DropDownMenu.HasColor {
