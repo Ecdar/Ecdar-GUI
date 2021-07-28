@@ -15,6 +15,12 @@ public class jEcdarThread extends BackendThread {
     }
 
     public void run() {
+        // If the project isn't saved, the project directory is null
+        if (Ecdar.projectDirectory.get() == null) {
+            failure.accept(new BackendException.MissingFileQueryException("Project is not saved"));
+            return;
+        }
+
         ProcessBuilder pb = new ProcessBuilder("java", "-jar", "src/libs/j-Ecdar.jar");
         pb.redirectErrorStream(true);
         try {

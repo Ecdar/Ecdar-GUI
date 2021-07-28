@@ -151,6 +151,10 @@ public class Query implements Serializable {
                             setQueryState(QueryState.UNKNOWN);
                         } else {
                             setQueryState(QueryState.SYNTAX_ERROR);
+                            if (e instanceof BackendException.MissingFileQueryException) {
+                                Ecdar.showToast("Please save the project before trying to run queries");
+                            }
+
                             this.addError(e.getMessage());
                             final Throwable cause = e.getCause();
                             if (cause != null) {

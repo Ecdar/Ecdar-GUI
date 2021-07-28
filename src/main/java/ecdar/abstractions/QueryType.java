@@ -1,6 +1,7 @@
 package ecdar.abstractions;
 
 public enum QueryType {
+    REACHABILITY("reachability", "E<>"),
     REFINEMENT("refinement", "<="),
     QUOTIENT("quotient", "\\"),
     SPECIFICATION("specification", "Spec"),
@@ -28,6 +29,8 @@ public enum QueryType {
 
     public static QueryType fromString(String s) {
         switch (s.toLowerCase()) {
+            case "E<>":
+                return REACHABILITY;
             case "refinement":
                 return REFINEMENT;
             case "quotient":
