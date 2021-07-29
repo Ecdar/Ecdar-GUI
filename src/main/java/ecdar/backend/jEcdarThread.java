@@ -33,7 +33,7 @@ public class jEcdarThread extends BackendThread {
                     var jEcdarWriter = new BufferedWriter(new OutputStreamWriter(jEcdarEngineInstance.getOutputStream()));
             ) {
                 //Run the query with the j-Ecdar process
-                jEcdarWriter.write("-rq -json " + Ecdar.projectDirectory.get() + " " + query.replaceAll("\\s", "") + "\n"); // Newline added to signal EOI
+                jEcdarWriter.write("-rq -json \"" + Ecdar.projectDirectory.get() + "\" " + query.replaceAll("\\s", "") + "\n"); // Newline added to signal EOI
                 jEcdarWriter.flush();
 
                 //Read the result of the query from the j-Ecdar process

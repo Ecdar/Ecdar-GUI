@@ -28,29 +28,12 @@ public enum QueryType {
     }
 
     public static QueryType fromString(String s) {
-        switch (s.toLowerCase()) {
-            case "E<>":
-                return REACHABILITY;
-            case "refinement":
-                return REFINEMENT;
-            case "quotient":
-                return QUOTIENT;
-            case "specification":
-                return SPECIFICATION;
-            case "implementation":
-                return IMPLEMENTATION;
-            case "consistency":
-            case "local-consistency":
-                return LOCAL_CONSISTENCY;
-            case "global-consistency":
-                return GLOBAL_CONSISTENCY;
-            case "bisim":
-                return BISIM_MIN;
-            case "get":
-            case "get-new-component":
-                return GET_NEW_COMPONENT;
-            default:
-                return null;
+        for (QueryType type : QueryType.values()) {
+            if (type.queryName.equals(s.toLowerCase()) || type.symbol.equals(s.toLowerCase())) {
+                return type;
+            }
         }
+
+        return null;
     }
 }
