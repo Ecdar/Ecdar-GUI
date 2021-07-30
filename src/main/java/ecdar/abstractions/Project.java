@@ -21,8 +21,6 @@ import java.util.*;
  * A project of models.
  */
 public class Project {
-    private final static String GLOBAL_DCL_FILENAME = "GlobalDeclarations";
-    private final static String SYSTEM_DCL_FILENAME = "SystemDeclarations";
     private final static String QUERIES_FILENAME = "Queries";
     private final static String JSON_FILENAME_EXTENSION = ".json";
     private static final String FOLDER_NAME_COMPONENTS = "Components";
@@ -33,16 +31,12 @@ public class Project {
     private final ObservableList<Component> components;
     private final ObservableList<EcdarSystem> systems;
     private final ObservableList<MutationTestPlan> testPlans;
-    private final ObjectProperty<Declarations> globalDeclarations;
-    private final ObjectProperty<Declarations> systemDeclarations;
 
     public Project() {
         queries = FXCollections.observableArrayList();
         components = FXCollections.observableArrayList();
         systems = FXCollections.observableArrayList();
         testPlans = FXCollections.observableArrayList();
-        globalDeclarations = new SimpleObjectProperty<>(new Declarations("Global Declarations"));
-        systemDeclarations = new SimpleObjectProperty<>(new Declarations("System Declarations"));
     }
 
     public ObservableList<Query> getQueries() {
@@ -61,22 +55,6 @@ public class Project {
         return testPlans;
     }
 
-    public Declarations getGlobalDeclarations() {
-        return globalDeclarations.get();
-    }
-
-    public void setGlobalDeclarations(final Declarations declarations) {
-        globalDeclarations.set(declarations);
-    }
-
-    public Declarations getSystemDeclarations() {
-        return systemDeclarations.get();
-    }
-
-    public void setSystemDeclarations(final Declarations declarations) {
-        systemDeclarations.set(declarations);
-    }
-
     /**
      * Serializes and stores this as JSON files at a given directory.
      * @param directory object containing path to the desired directory to store at
@@ -89,20 +67,6 @@ public class Project {
         FileUtils.forceMkdir(new File(Ecdar.projectDirectory.getValue() + File.separator + FOLDER_NAME_COMPONENTS));
         FileUtils.forceMkdir(new File(Ecdar.projectDirectory.getValue() + File.separator + FOLDER_NAME_SYSTEMS));
         FileUtils.forceMkdir(new File(Ecdar.projectDirectory.getValue() + File.separator + FOLDER_NAME_TESTS));
-
-        {
-            // Save global declarations
-            final Writer globalWriter = getSaveFileWriter(GLOBAL_DCL_FILENAME);
-            getNewGson().toJson(getGlobalDeclarations().serialize(), globalWriter);
-            globalWriter.close();
-        }
-
-        {
-            // Save system declarations
-            final Writer systemDclWriter = getSaveFileWriter(SYSTEM_DCL_FILENAME);
-            getNewGson().toJson(getSystemDeclarations().serialize(), systemDclWriter);
-            systemDclWriter.close();
-        }
 
         // Save components
         for (final Component component : getComponents()) {
@@ -206,21 +170,11 @@ public class Project {
     private void deserializeFileHelper(final File file) throws IOException {
         final String fileContent = Files.toString(file, Charset.defaultCharset());
 
-        switch (file.getName()) {
-            case GLOBAL_DCL_FILENAME + JSON_FILENAME_EXTENSION:
-                final JsonObject globalJsonObj = new JsonParser().parse(fileContent).getAsJsonObject();
-                setGlobalDeclarations(new Declarations(globalJsonObj));
-                break;
-            case SYSTEM_DCL_FILENAME + JSON_FILENAME_EXTENSION:
-                final JsonObject sysJsonObj = new JsonParser().parse(fileContent).getAsJsonObject();
-                setSystemDeclarations(new Declarations(sysJsonObj));
-                break;
-            case QUERIES_FILENAME + JSON_FILENAME_EXTENSION:
-                new JsonParser().parse(fileContent).getAsJsonArray().forEach(jsonElement -> {
-                    final Query newQuery = new Query((JsonObject) jsonElement);
-                    getQueries().add(newQuery);
-                });
-                break;
+        if ((QUERIES_FILENAME + JSON_FILENAME_EXTENSION).equals(file.getName())) {
+            new JsonParser().parse(fileContent).getAsJsonArray().forEach(jsonElement -> {
+                final Query newQuery = new Query((JsonObject) jsonElement);
+                getQueries().add(newQuery);
+            });
         }
     }
 
@@ -361,9 +315,6 @@ public class Project {
      * Be sure to disable code analysis before call and enable after call.
      */
     public void clean() {
-        getGlobalDeclarations().clearDeclarationsText();
-        getSystemDeclarations().clearDeclarationsText();
-
         queries.clear();
 
         components.clear();

@@ -149,9 +149,7 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
         final Project project = new Project();
         mutant.setName(MutationTestPlanController.MUTANT_NAME);
         project.getComponents().addAll(testModel, mutant);
-        project.setGlobalDeclarations(Ecdar.getProject().getGlobalDeclarations());
         mutant.updateIOList(); // Update io in order to get the right system declarations for the mutant
-        project.setSystemDeclarations(new SimpleComponentsSystemDeclarations(testModel, mutant));
 
         new Thread(() -> {
             try {

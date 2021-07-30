@@ -139,9 +139,7 @@ class ExportHandler {
         // make a project with the mutant
         final Project project = new Project();
         project.getComponents().add(mutant);
-        project.setGlobalDeclarations(Ecdar.getProject().getGlobalDeclarations());
         mutant.updateIOList(); // Update io in order to get the right system declarations for the mutant
-        project.setSystemDeclarations(new SimpleComponentsSystemDeclarations(mutant));
 
         BackendHelper.storeBackendModel(project, "mutants" + File.separator + "xml", testCase.getId());
     }
