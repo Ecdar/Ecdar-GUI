@@ -38,7 +38,7 @@ public class ReveaalDriver implements IBackendDriver {
      * @return A reachability query string.
      */
     public String getLocationReachableQuery(final Location location, final Component component) {
-        return "E<> " + component.getName() + "." + location.getId();
+        return "E<> " + component.getName() + "." + location.getId() + " (" + component.getName() + ")";
     }
 
     /**
