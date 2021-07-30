@@ -157,6 +157,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                     dropDownMenu.hide();
                 }
         );
+
         dropDownMenu.addSpacerElement();
         final BooleanProperty isUrgent = new SimpleBooleanProperty(false);
         isUrgent.bind(getLocation().urgencyProperty().isEqualTo(Location.Urgency.URGENT));
@@ -166,6 +167,19 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
             } else {
                 getLocation().setUrgency(Location.Urgency.URGENT);
             }
+
+            dropDownMenu.hide();
+        });
+
+        final BooleanProperty isProhibited = new SimpleBooleanProperty(false);
+        isProhibited.bind(getLocation().urgencyProperty().isEqualTo(Location.Urgency.PROHIBITED));
+        dropDownMenu.addToggleableAndDisableableListElement("Prohibited", isProhibited, getLocation().getIsLocked(), event -> {
+            if (isProhibited.get()) {
+                getLocation().setUrgency(Location.Urgency.NORMAL);
+            } else {
+                getLocation().setUrgency(Location.Urgency.PROHIBITED);
+            }
+
             dropDownMenu.hide();
         });
 

@@ -372,7 +372,7 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
 
             boolean normalOrProhibited = newUrgency.equals(Location.Urgency.NORMAL) || newUrgency.equals(Location.Urgency.PROHIBITED);
 
-            if(oldUrgency.equals(Location.Urgency.NORMAL) && !(normalOrProhibited)) {
+            if(!oldUrgency.equals(Location.Urgency.URGENT) && !(normalOrProhibited)) {
                 toUrgent.play();
             } else if(normalOrProhibited) {
                 toNormal.play();
