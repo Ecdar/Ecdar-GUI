@@ -1,7 +1,8 @@
 package ecdar.utility.helpers;
 
 import ecdar.controllers.EcdarController;
-import ecdar.presentations.CanvasPresentation;
+import ecdar.presentations.ComponentInstancePresentation;
+import ecdar.presentations.ComponentOperatorPresentation;
 import ecdar.presentations.ComponentPresentation;
 import ecdar.utility.UndoRedoStack;
 import javafx.beans.property.BooleanProperty;
@@ -11,7 +12,9 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ObservableDoubleValue;
 import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
+import javafx.util.Pair;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -96,6 +99,8 @@ public class ItemDragHelper {
         final DoubleProperty previousY = new SimpleDoubleProperty();
         final BooleanProperty wasDragged = new SimpleBooleanProperty();
 
+        final ArrayList<Pair<Double, Double>> previousLocations = new ArrayList<>();
+
         final DoubleProperty xDiff = new SimpleDoubleProperty();
         final DoubleProperty yDiff = new SimpleDoubleProperty();
 
@@ -106,6 +111,10 @@ public class ItemDragHelper {
             previousY.set(mouseSubject.getLayoutY());
             xDiff.set(event.getX());
             yDiff.set(event.getY());
+
+            for (SelectHelper.ItemSelectable item : SelectHelper.getSelectedElements()) {
+                previousLocations.add(new Pair<>(item.getX(), item.getY()));
+            }
         });
 
         mouseSubject.addEventHandler(MouseEvent.MOUSE_DRAGGED, event -> {
@@ -120,12 +129,37 @@ public class ItemDragHelper {
             final double unRoundedY = dragBounds.trimY(newY - yDiff.get());
             double finalNewX = unRoundedX - unRoundedX % GRID_SIZE;
             double finalNewY = unRoundedY - unRoundedY % GRID_SIZE;
+
             if (mouseSubject instanceof ComponentPresentation) {
                 finalNewX -= 0.5 * GRID_SIZE;
                 finalNewY -= 0.5 * GRID_SIZE;
             }
+
             mouseSubject.setLayoutX(finalNewX);
             mouseSubject.setLayoutY(finalNewY);
+
+            for (int i = 0; i < SelectHelper.getSelectedElements().size(); i++) {
+                SelectHelper.ItemSelectable item = SelectHelper.getSelectedElements().get(i);
+
+                // ToDo NIELS: Handle ComponentInstancePresentation and ComponentOperatorPresentation
+                if (!item.equals(mouseSubject) && !(item instanceof ComponentInstancePresentation) && !(item instanceof ComponentOperatorPresentation)) {
+                    final double itemNewX = previousLocations.get(i).getKey() + finalNewX - previousX.doubleValue();
+                    final double itemNewY = previousLocations.get(i).getValue() + finalNewY - previousY.doubleValue();
+
+                    final double itemUnRoundedX = dragBounds.trimX(itemNewX);
+                    final double itemUnRoundedY = dragBounds.trimY(itemNewY);
+                    double itemFinalNewX = itemUnRoundedX - itemUnRoundedX % GRID_SIZE;
+                    double itemFinalNewY = itemUnRoundedY - itemUnRoundedY % GRID_SIZE;
+
+                    if (item instanceof ComponentPresentation) {
+                        itemFinalNewX -= 0.5 * GRID_SIZE;
+                        itemFinalNewY -= 0.5 * GRID_SIZE;
+                    }
+
+                    item.xProperty().set(itemFinalNewX);
+                    item.yProperty().set(itemFinalNewY);
+                }
+            }
 
             wasDragged.set(true);
         });
@@ -143,10 +177,30 @@ public class ItemDragHelper {
                         () -> {
                             mouseSubject.setLayoutX(currentX);
                             mouseSubject.setLayoutY(currentY);
+
+                            for (int i = 0; i < SelectHelper.getSelectedElements().size(); i++) {
+                                SelectHelper.ItemSelectable item = SelectHelper.getSelectedElements().get(i);
+
+                                // ToDo NIELS: Handle ComponentInstancePresentation and ComponentOperatorPresentation
+                                if (!item.equals(mouseSubject) && !(item instanceof ComponentInstancePresentation) && !(item instanceof ComponentOperatorPresentation)) {
+                                    item.xProperty().set(item.getX());
+                                    item.yProperty().set(item.getY());
+                                }
+                            }
                         },
                         () -> {
                             mouseSubject.setLayoutX(storePreviousX);
                             mouseSubject.setLayoutY(storePreviousY);
+
+                            for (int i = 0; i < SelectHelper.getSelectedElements().size(); i++) {
+                                SelectHelper.ItemSelectable item = SelectHelper.getSelectedElements().get(i);
+
+                                // ToDo NIELS: Handle ComponentInstancePresentation and ComponentOperatorPresentation
+                                if (!item.equals(mouseSubject) && !(item instanceof ComponentInstancePresentation) && !(item instanceof ComponentOperatorPresentation)) {
+                                    item.xProperty().set(previousLocations.get(i).getKey());
+                                    item.yProperty().set(previousLocations.get(i).getValue());
+                                }
+                            }
                         },
                         String.format("Moved " + mouseSubject.getClass() + " from (%f,%f) to (%f,%f)", currentX, currentY, storePreviousX, storePreviousY),
                         "pin-drop"

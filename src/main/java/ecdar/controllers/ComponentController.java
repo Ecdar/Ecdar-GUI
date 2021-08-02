@@ -6,6 +6,7 @@ import ecdar.backend.BackendDriverManager;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.presentations.*;
 import ecdar.utility.UndoRedoStack;
+import ecdar.utility.colors.Color;
 import ecdar.utility.helpers.*;
 import ecdar.utility.mouse.MouseTracker;
 import com.jfoenix.controls.JFXPopup;
@@ -25,6 +26,7 @@ import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.StyleClassedTextArea;
@@ -50,6 +52,7 @@ public class ComponentController extends ModelController implements Initializabl
     public JFXRippler toggleDeclarationButton;
     public Label x;
     public Label y;
+    public Pane modelContainerSubComponent;
     public Pane modelContainerLocation;
     public Pane modelContainerEdge;
 
@@ -825,6 +828,7 @@ public class ComponentController extends ModelController implements Initializabl
     private void modelContainerPressed(final MouseEvent event) {
         event.consume();
         EcdarController.getActiveCanvasPresentation().getController().leaveTextAreas();
+        SelectHelper.clearSelectedElements();
 
         final DisplayableEdge unfinishedEdge = getComponent().getUnfinishedEdge();
 
@@ -885,9 +889,64 @@ public class ComponentController extends ModelController implements Initializabl
 
                 unfinishedEdge.addNail(newNail);
             } else {
-                SelectHelper.clearSelectedElements();
+                startDragBox(event);
             }
         }
+    }
+
+    private void startDragBox(MouseEvent event) {
+        Rectangle selectionRectangle = new Rectangle();
+        selectionRectangle.setStroke(SelectHelper.SELECT_COLOR.getColor(SelectHelper.SELECT_COLOR_INTENSITY_BORDER));
+
+        javafx.scene.paint.Color fillColor = SelectHelper.SELECT_COLOR.getColor(Color.Intensity.I100);
+        fillColor = fillColor.deriveColor(fillColor.getHue(), fillColor.getSaturation(), fillColor.getBrightness(), 0.5);
+        selectionRectangle.setFill(fillColor);
+
+        selectionRectangle.getStrokeDashArray().addAll(5.0, 5.0);
+
+        double mouseDownX = event.getX();
+        double mouseDownY = event.getY();
+        selectionRectangle.setX(mouseDownX);
+        selectionRectangle.setY(mouseDownY);
+        selectionRectangle.setWidth(0);
+        selectionRectangle.setHeight(0);
+
+        modelContainerSubComponent.setOnMouseDragged(e -> {
+            selectionRectangle.setX(Math.min(e.getX(), mouseDownX));
+            selectionRectangle.setWidth(Math.abs(e.getX() - mouseDownX));
+            selectionRectangle.setY(Math.min(e.getY(), mouseDownY));
+            selectionRectangle.setHeight(Math.abs(e.getY() - mouseDownY));
+
+            SelectHelper.clearSelectedElements();
+
+            for (Location loc : component.get().getLocations()) {
+                if (selectionRectangle.getX() <= loc.getX() &&
+                        loc.getX() <= selectionRectangle.getX() + selectionRectangle.getWidth() &&
+                        selectionRectangle.getY() <= loc.getY() &&
+                        loc.getY() <= selectionRectangle.getY() + selectionRectangle.getHeight()) {
+
+                    SelectHelper.addToSelection(locationPresentationMap.get(loc).getController());
+                }
+            }
+
+            for (DisplayableEdge edge : component.get().getDisplayableEdges()) {
+                for (Nail nail : edge.getNails()) {
+                    if (selectionRectangle.getX() <= nail.getX() &&
+                            nail.getX() <= selectionRectangle.getX() + selectionRectangle.getWidth() &&
+                            selectionRectangle.getY() <= nail.getY() &&
+                            nail.getY() <= selectionRectangle.getY() + selectionRectangle.getHeight()) {
+
+                        SelectHelper.addToSelection((edgePresentationMap.get(edge)).getController().getNailNailPresentationMap().get(nail).getController());
+                    }
+                }
+            }
+        });
+
+        modelContainerSubComponent.setOnMouseReleased(e -> {
+            modelContainerSubComponent.getChildren().remove(selectionRectangle);
+        });
+
+        modelContainerSubComponent.getChildren().add(selectionRectangle);
     }
 
     public MouseTracker getMouseTracker() {

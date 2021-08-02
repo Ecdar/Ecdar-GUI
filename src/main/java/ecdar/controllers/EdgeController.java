@@ -46,6 +46,11 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
     private final SimpleArrowHead simpleArrowHead = new SimpleArrowHead();
     private final SimpleBooleanProperty isHoveringEdge = new SimpleBooleanProperty(false);
     private final SimpleIntegerProperty timeHoveringEdge = new SimpleIntegerProperty(0);
+
+    public Map<Nail, NailPresentation> getNailNailPresentationMap() {
+        return nailNailPresentationMap;
+    }
+
     private final Map<Nail, NailPresentation> nailNailPresentationMap = new HashMap<>();
     public Group edgeRoot;
     private Runnable collapseNail;

@@ -46,11 +46,6 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
 
         controller.zoomHelper.setGrid(this.grid);
         controller.zoomHelper.setCanvas(this);
-
-        mouseTracker.registerOnMousePressedEventHandler(event -> {
-            // Deselect all elements
-            SelectHelper.clearSelectedElements();
-        });
     }
 
     private void initializeGrid() {
