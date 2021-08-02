@@ -10,6 +10,7 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ObservableDoubleValue;
+import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Pair;
@@ -112,6 +113,8 @@ public class ItemDragHelper {
             xDiff.set(event.getX());
             yDiff.set(event.getY());
 
+            previousLocations.clear();
+
             for (SelectHelper.ItemSelectable item : SelectHelper.getSelectedElements()) {
                 previousLocations.add(new Pair<>(item.getX(), item.getY()));
             }
@@ -165,12 +168,19 @@ public class ItemDragHelper {
         });
 
         mouseSubject.addEventHandler(MouseEvent.MOUSE_RELEASED, event -> {
-            if(!event.isPrimaryButtonDown()) return;
-
             final double currentX = mouseSubject.getLayoutX();
             final double currentY = mouseSubject.getLayoutY();
             final double storePreviousX = previousX.get();
             final double storePreviousY = previousY.get();
+
+            final ArrayList<SelectHelper.ItemSelectable> selectedItems = new ArrayList<>(SelectHelper.getSelectedElements());
+            final ArrayList<Pair<Double, Double>> currentLocations = new ArrayList<>();
+
+            for (SelectHelper.ItemSelectable item : selectedItems) {
+                currentLocations.add(new Pair<>(item.getX(), item.getY()));
+            }
+
+            final ArrayList<Pair<Double, Double>> savedLocations = new ArrayList<>(previousLocations);
 
             if(currentX != storePreviousX || currentY != storePreviousY) {
                 UndoRedoStack.pushAndPerform(
@@ -178,13 +188,13 @@ public class ItemDragHelper {
                             mouseSubject.setLayoutX(currentX);
                             mouseSubject.setLayoutY(currentY);
 
-                            for (int i = 0; i < SelectHelper.getSelectedElements().size(); i++) {
-                                SelectHelper.ItemSelectable item = SelectHelper.getSelectedElements().get(i);
+                            for (int i = 0; i < selectedItems.size(); i++) {
+                                SelectHelper.ItemSelectable item = selectedItems.get(i);
 
                                 // ToDo NIELS: Handle ComponentInstancePresentation and ComponentOperatorPresentation
                                 if (!item.equals(mouseSubject) && !(item instanceof ComponentInstancePresentation) && !(item instanceof ComponentOperatorPresentation)) {
-                                    item.xProperty().set(item.getX());
-                                    item.yProperty().set(item.getY());
+                                    item.xProperty().set(currentLocations.get(i).getKey());
+                                    item.yProperty().set(currentLocations.get(i).getValue());
                                 }
                             }
                         },
@@ -192,13 +202,13 @@ public class ItemDragHelper {
                             mouseSubject.setLayoutX(storePreviousX);
                             mouseSubject.setLayoutY(storePreviousY);
 
-                            for (int i = 0; i < SelectHelper.getSelectedElements().size(); i++) {
-                                SelectHelper.ItemSelectable item = SelectHelper.getSelectedElements().get(i);
+                            for (int i = 0; i < selectedItems.size(); i++) {
+                                SelectHelper.ItemSelectable item = selectedItems.get(i);
 
                                 // ToDo NIELS: Handle ComponentInstancePresentation and ComponentOperatorPresentation
                                 if (!item.equals(mouseSubject) && !(item instanceof ComponentInstancePresentation) && !(item instanceof ComponentOperatorPresentation)) {
-                                    item.xProperty().set(previousLocations.get(i).getKey());
-                                    item.yProperty().set(previousLocations.get(i).getValue());
+                                    item.xProperty().set(savedLocations.get(i).getKey());
+                                    item.yProperty().set(savedLocations.get(i).getValue());
                                 }
                             }
                         },
