@@ -105,7 +105,6 @@ public class ItemDragHelper {
 
         mouseSubject.addEventHandler(MouseEvent.MOUSE_PRESSED, event -> {
             if(!event.isPrimaryButtonDown()) return;
-
             event.consume();
             
             previousXOfMouseSubject.set(mouseSubject.getLayoutX());
@@ -122,7 +121,6 @@ public class ItemDragHelper {
 
         mouseSubject.addEventHandler(MouseEvent.MOUSE_DRAGGED, event -> {
             if(!event.isPrimaryButtonDown()) return;
-
             event.consume();
 
             final DragBounds dragBounds = getDragBounds.get();

@@ -2,7 +2,6 @@ package ecdar.presentations;
 
 import ecdar.abstractions.Box;
 import ecdar.abstractions.HighLevelModelObject;
-import ecdar.controllers.CanvasController;
 import ecdar.controllers.EcdarController;
 import ecdar.controllers.ModelController;
 import ecdar.utility.UndoRedoStack;
