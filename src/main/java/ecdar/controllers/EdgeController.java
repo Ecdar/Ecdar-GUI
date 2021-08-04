@@ -660,7 +660,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
     }
 
     public void edgeDragged(final MouseEvent event){
-        // Check if the edge is selected to ensure that the drag is not targeting a select, guard, update, or sync node
+        // Check if the edge is selected to ensure that the drag is not targeting a nail
         if(SelectHelper.getSelectedElements().size() == 0 || SelectHelper.getSelectedElements().get(0) == this){
             DisplayableEdge oldEdge = edge.get();
             Location source, target;

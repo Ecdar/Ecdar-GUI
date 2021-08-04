@@ -94,7 +94,7 @@ public class CanvasShellController implements Initializable {
     }
 
     private void updateSelection(Parent currentNode, Rectangle selectionRectangle) {
-        // None of these nodes contain ItemSelectable nodes, so avoiding traversing sub-trees improves performance
+        // None of these nodes contain ItemSelectable nodes, so avoiding traversing these sub-trees improves performance
         if (currentNode instanceof VBox || currentNode instanceof ValidationPane || currentNode instanceof JFXRippler || currentNode instanceof BorderPane) {
             return;
         }
