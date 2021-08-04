@@ -1,7 +1,6 @@
 package ecdar.presentations;
 
 import ecdar.abstractions.*;
-import ecdar.controllers.CanvasController;
 import ecdar.controllers.ComponentInstanceController;
 import ecdar.controllers.EcdarController;
 import ecdar.utility.colors.Color;

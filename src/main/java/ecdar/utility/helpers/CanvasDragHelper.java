@@ -210,6 +210,8 @@ public class CanvasDragHelper {
         final BooleanProperty isBeingDragged = new SimpleBooleanProperty(false);
 
         mouseTracker.registerOnMousePressedEventHandler(event -> {
+            event.consume();
+
             presWasAllowed.set(conditional.apply(event));
             if (!presWasAllowed.get()) return;
             isBeingDragged.set(true);
@@ -221,12 +223,11 @@ public class CanvasDragHelper {
             previousYTranslation[0] = subject.getTranslateY();
 
             subject.setCursor(Cursor.MOVE);
-
-            event.consume();
         });
 
         mouseTracker.registerOnMouseDraggedEventHandler(event -> {
             if (!presWasAllowed.get() || !isBeingDragged.get()) return;
+            event.consume();
 
             final double gridSize = Grid.GRID_SIZE * subject.getScaleX();
 
@@ -246,8 +247,6 @@ public class CanvasDragHelper {
             }
 
             subject.setCursor(Cursor.MOVE);
-
-            event.consume();
         });
 
         mouseTracker.registerOnMouseReleasedEventHandler(event -> {

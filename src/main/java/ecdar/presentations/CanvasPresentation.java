@@ -2,24 +2,15 @@ package ecdar.presentations;
 
 import ecdar.controllers.CanvasController;
 import ecdar.controllers.EcdarController;
-import ecdar.utility.UndoRedoStack;
 import ecdar.utility.helpers.CanvasDragHelper;
 import ecdar.utility.helpers.MouseTrackable;
-import ecdar.utility.helpers.SelectHelper;
-import ecdar.utility.keyboard.Keybind;
-import ecdar.utility.keyboard.KeyboardTracker;
 import ecdar.utility.mouse.MouseTracker;
-import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.*;
-import javafx.scene.shape.Rectangle;
 
 public class CanvasPresentation extends Pane implements MouseTrackable {
     public MouseTracker mouseTracker;
