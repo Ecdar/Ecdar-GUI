@@ -131,6 +131,8 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
         final DoubleProperty prevWidth = new SimpleDoubleProperty();
 
         rightAnchor.setOnMousePressed(event -> {
+            event.consume();
+
             prevX.set(event.getScreenX());
             prevWidth.set(box.getWidth());
         });
@@ -185,6 +187,8 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
         final DoubleProperty prevHeight = new SimpleDoubleProperty();
 
         bottomAnchor.setOnMousePressed(event -> {
+            event.consume();
+            
             prevY.set(event.getScreenY());
             prevHeight.set(box.getHeight());
         });
