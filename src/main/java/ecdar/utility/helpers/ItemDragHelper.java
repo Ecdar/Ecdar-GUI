@@ -94,8 +94,8 @@ public class ItemDragHelper {
 
     public static void makeDraggable(final Node mouseSubject,
                                      final Supplier<DragBounds> getDragBounds) {
-        final DoubleProperty previousX = new SimpleDoubleProperty();
-        final DoubleProperty previousY = new SimpleDoubleProperty();
+        final DoubleProperty previousXOfMouseSubject = new SimpleDoubleProperty();
+        final DoubleProperty previousYOfMouseSubject = new SimpleDoubleProperty();
         final BooleanProperty wasDragged = new SimpleBooleanProperty();
 
         final ArrayList<Pair<Double, Double>> previousLocations = new ArrayList<>();
@@ -108,8 +108,8 @@ public class ItemDragHelper {
 
             event.consume();
             
-            previousX.set(mouseSubject.getLayoutX());
-            previousY.set(mouseSubject.getLayoutY());
+            previousXOfMouseSubject.set(mouseSubject.getLayoutX());
+            previousYOfMouseSubject.set(mouseSubject.getLayoutY());
             xDiff.set(event.getX());
             yDiff.set(event.getY());
 
@@ -127,21 +127,21 @@ public class ItemDragHelper {
 
             final DragBounds dragBounds = getDragBounds.get();
 
-            final double newX = EcdarController.getActiveCanvasPresentation().mouseTracker.getGridX() - ((Boxed) EcdarController.getActiveCanvasPresentation().getController().getActiveModel()).getBox().getX();
-            final double newY = EcdarController.getActiveCanvasPresentation().mouseTracker.getGridY() - ((Boxed) EcdarController.getActiveCanvasPresentation().getController().getActiveModel()).getBox().getY();
+            final double mouseSubjectNewX = EcdarController.getActiveCanvasPresentation().mouseTracker.getGridX() - ((Boxed) EcdarController.getActiveCanvasPresentation().getController().getActiveModel()).getBox().getX();
+            final double mouseSubjectNewY = EcdarController.getActiveCanvasPresentation().mouseTracker.getGridY() - ((Boxed) EcdarController.getActiveCanvasPresentation().getController().getActiveModel()).getBox().getY();
 
-            final double unRoundedX = dragBounds.trimX(newX - xDiff.get());
-            final double unRoundedY = dragBounds.trimY(newY - yDiff.get());
-            double finalNewX = unRoundedX - unRoundedX % GRID_SIZE;
-            double finalNewY = unRoundedY - unRoundedY % GRID_SIZE;
+            final double unRoundedX = dragBounds.trimX(mouseSubjectNewX - xDiff.get());
+            final double unRoundedY = dragBounds.trimY(mouseSubjectNewY - yDiff.get());
+            double mouseSubjectFinalNewX = unRoundedX - unRoundedX % GRID_SIZE;
+            double mouseSubjectFinalNewY = unRoundedY - unRoundedY % GRID_SIZE;
 
             if (mouseSubject instanceof ComponentPresentation) {
-                finalNewX -= 0.5 * GRID_SIZE;
-                finalNewY -= 0.5 * GRID_SIZE;
+                mouseSubjectFinalNewX -= 0.5 * GRID_SIZE;
+                mouseSubjectFinalNewY -= 0.5 * GRID_SIZE;
             }
 
-            mouseSubject.setLayoutX(finalNewX);
-            mouseSubject.setLayoutY(finalNewY);
+            mouseSubject.setLayoutX(mouseSubjectFinalNewX);
+            mouseSubject.setLayoutY(mouseSubjectFinalNewY);
 
             int numberOfSelectedItems = SelectHelper.getSelectedElements().size();
 
@@ -149,8 +149,8 @@ public class ItemDragHelper {
                 SelectHelper.ItemSelectable item = SelectHelper.getSelectedElements().get(i);
 
                 if (!item.equals(mouseSubject)) {
-                    final double itemNewX = previousLocations.get(i).getKey() + finalNewX - previousX.doubleValue();
-                    final double itemNewY = previousLocations.get(i).getValue() + finalNewY - previousY.doubleValue();
+                    final double itemNewX = previousLocations.get(i).getKey() + mouseSubjectFinalNewX - previousXOfMouseSubject.doubleValue();
+                    final double itemNewY = previousLocations.get(i).getValue() + mouseSubjectFinalNewY - previousYOfMouseSubject.doubleValue();
 
                     final double itemUnRoundedX = dragBounds.trimX(itemNewX);
                     final double itemUnRoundedY = dragBounds.trimY(itemNewY);
@@ -177,10 +177,10 @@ public class ItemDragHelper {
         });
 
         mouseSubject.addEventHandler(MouseEvent.MOUSE_RELEASED, event -> {
-            final double currentX = mouseSubject.getLayoutX();
-            final double currentY = mouseSubject.getLayoutY();
-            final double storePreviousX = previousX.get();
-            final double storePreviousY = previousY.get();
+            final double mouseSubjectCurrentX = mouseSubject.getLayoutX();
+            final double mouseSubjectCurrentY = mouseSubject.getLayoutY();
+            final double mouseSubjectPreviousX = previousXOfMouseSubject.get();
+            final double mouseSubjectPreviousY = previousYOfMouseSubject.get();
 
             // Copying the coordinates and selected items is necessary for the undo/redo stack to function properly
             final ArrayList<SelectHelper.ItemSelectable> selectedItems = new ArrayList<>(SelectHelper.getSelectedElements());
@@ -190,15 +190,15 @@ public class ItemDragHelper {
             }
             final ArrayList<Pair<Double, Double>> savedLocations = new ArrayList<>(previousLocations);
 
-            if(currentX != storePreviousX || currentY != storePreviousY) {
+            if(mouseSubjectCurrentX != mouseSubjectPreviousX || mouseSubjectCurrentY != mouseSubjectPreviousY) {
                 UndoRedoStack.pushAndPerform(
                         () -> {
-                            placeSelectedItems(mouseSubject, currentX, currentY, currentLocations, selectedItems);
+                            placeSelectedItems(mouseSubject, mouseSubjectCurrentX, mouseSubjectCurrentY, currentLocations, selectedItems);
                         },
                         () -> {
-                            placeSelectedItems(mouseSubject, storePreviousX, storePreviousY, savedLocations, selectedItems);
+                            placeSelectedItems(mouseSubject, mouseSubjectPreviousX, mouseSubjectPreviousY, savedLocations, selectedItems);
                         },
-                        String.format("Moved " + mouseSubject.getClass() + " from (%f,%f) to (%f,%f)", currentX, currentY, storePreviousX, storePreviousY),
+                        String.format("Moved " + mouseSubject.getClass() + " from (%f,%f) to (%f,%f)", mouseSubjectCurrentX, mouseSubjectCurrentY, mouseSubjectPreviousX, mouseSubjectPreviousY),
                         "pin-drop"
                 );
             }
