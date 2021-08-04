@@ -206,12 +206,9 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
 
         if (selectionCoordinates == null || itemCoordinates == null) return false;
 
-        return selectionCoordinates.getMinX() <
-                itemCoordinates.getMinX() &&
-                itemCoordinates.getMinX() + 10 <
-                        selectionRectangle.getWidth() +
-                                selectionCoordinates.getMinX() &&
+        return selectionCoordinates.getMinX() < itemCoordinates.getMinX() &&
+                itemCoordinates.getMinX() < selectionCoordinates.getMaxX() &&
                 selectionCoordinates.getMinY() < itemCoordinates.getMinY() &&
-                itemCoordinates.getMinY() + 10 < selectionRectangle.getHeight() + selectionCoordinates.getMinY();
+                itemCoordinates.getMinY() < selectionCoordinates.getMaxY();
     }
 }

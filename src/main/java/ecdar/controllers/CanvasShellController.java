@@ -1,19 +1,11 @@
 package ecdar.controllers;
 
 import com.jfoenix.controls.JFXRippler;
-import com.jfoenix.skins.ValidationPane;
 import ecdar.abstractions.*;
 import ecdar.presentations.*;
-import ecdar.utility.colors.Color;
-import ecdar.utility.helpers.SelectHelper;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.Bounds;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
-import javafx.scene.shape.Rectangle;
 
 import java.net.URL;
 import java.util.ResourceBundle;
