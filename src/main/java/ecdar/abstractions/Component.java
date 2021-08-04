@@ -19,6 +19,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.util.Pair;
+import jdk.swing.interop.SwingInterOpUtils;
 import org.apache.commons.lang3.tuple.Triple;
 
 import java.util.*;
@@ -895,7 +896,13 @@ public class Component extends HighLevelModelObject implements Boxed {
      * @return Triples containing (left) name of the variable, (middle) lower bound, (right) upper bound
      */
     public List<Triple<String, Integer, Integer>> getLocalVariablesWithBounds() {
-        final List<Triple<String, Integer, Integer>> typedefs = Ecdar.getProject().getGlobalDeclarations().getTypedefs();
+        final List<Triple<String, Integer, Integer>> types = new ArrayList<>();
+
+        final Matcher typeDefMatcher = Pattern.compile(".*typedef\\s+int\\s*\\[(\\d+)\\s*,\\s*(\\d+)]\\s*(\\w*)\\s*;.*").matcher(getTypeDefsFromAllComponents());
+
+        while (typeDefMatcher.find()) {
+            types.add(Triple.of(typeDefMatcher.group(3), Integer.parseInt(typeDefMatcher.group(1)), Integer.parseInt(typeDefMatcher.group(2))));
+        }
 
         final List<Triple<String, Integer, Integer>> locals = new ArrayList<>();
 
@@ -903,7 +910,7 @@ public class Component extends HighLevelModelObject implements Boxed {
             final Matcher matcher = Pattern.compile("^\\s*(\\w+)\\s+(\\w+)(\\W|$)").matcher(statement);
             if (!matcher.find()) return;
 
-            final Optional<Triple<String, Integer, Integer>> typedef = typedefs.stream()
+            final Optional<Triple<String, Integer, Integer>> typedef = types.stream()
                     .filter(def -> def.getLeft().equals(matcher.group(1))).findAny();
             if (!typedef.isPresent()) return;
 
@@ -911,6 +918,35 @@ public class Component extends HighLevelModelObject implements Boxed {
         });
 
         return locals;
+    }
+
+    private String getTypeDefsFromAllComponents() {
+        final StringBuilder typeDefs = new StringBuilder("broadcast chan ");
+        final ArrayList<String> channels = new ArrayList<>();
+
+        Ecdar.getProject().getComponents().forEach(c -> {
+            c.outputStrings.forEach(output -> {
+                if (!channels.contains(output)) {
+                    channels.add(output);
+                }
+            });
+
+            c.inputStrings.forEach(input -> {
+                if (!channels.contains(input)) {
+                    channels.add(input);
+                }
+            });
+        });
+
+        for (String chan : channels) {
+            typeDefs.append(chan).append(", ");
+        }
+
+        if (typeDefs.toString().endsWith("chan ")) return "";
+
+        typeDefs.delete(typeDefs.length() - 2, typeDefs.length()).append(";");
+
+        return typeDefs.toString();
     }
 
     /**

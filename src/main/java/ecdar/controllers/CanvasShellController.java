@@ -1,6 +1,7 @@
 package ecdar.controllers;
 
 import com.jfoenix.controls.JFXRippler;
+import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.presentations.CanvasPresentation;
 import ecdar.utility.helpers.ZoomHelper;
