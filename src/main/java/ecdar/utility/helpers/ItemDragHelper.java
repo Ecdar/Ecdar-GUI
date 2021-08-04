@@ -107,6 +107,8 @@ public class ItemDragHelper {
 
         mouseSubject.addEventHandler(MouseEvent.MOUSE_PRESSED, event -> {
             if(!event.isPrimaryButtonDown()) return;
+
+            event.consume();
             
             previousX.set(mouseSubject.getLayoutX());
             previousY.set(mouseSubject.getLayoutY());
@@ -122,6 +124,8 @@ public class ItemDragHelper {
 
         mouseSubject.addEventHandler(MouseEvent.MOUSE_DRAGGED, event -> {
             if(!event.isPrimaryButtonDown()) return;
+
+            event.consume();
 
             final DragBounds dragBounds = getDragBounds.get();
 
@@ -141,11 +145,13 @@ public class ItemDragHelper {
             mouseSubject.setLayoutX(finalNewX);
             mouseSubject.setLayoutY(finalNewY);
 
-            for (int i = 0; i < SelectHelper.getSelectedElements().size(); i++) {
+            int numberOfSelectedItems = SelectHelper.getSelectedElements().size();
+
+            for (int i = 0; i < numberOfSelectedItems; i++) {
                 SelectHelper.ItemSelectable item = SelectHelper.getSelectedElements().get(i);
 
-                // ToDo NIELS: Handle ComponentInstancePresentation and ComponentOperatorPresentation
-                if (!item.equals(mouseSubject) && !(item instanceof ComponentInstancePresentation) && !(item instanceof ComponentOperatorPresentation)) {
+                // ToDo NIELS: Handle ComponentOperatorPresentation
+                if (!item.equals(mouseSubject) && !item.xProperty().isBound()) {
                     final double itemNewX = previousLocations.get(i).getKey() + finalNewX - previousX.doubleValue();
                     final double itemNewY = previousLocations.get(i).getValue() + finalNewY - previousY.doubleValue();
 
@@ -191,8 +197,8 @@ public class ItemDragHelper {
                             for (int i = 0; i < selectedItems.size(); i++) {
                                 SelectHelper.ItemSelectable item = selectedItems.get(i);
 
-                                // ToDo NIELS: Handle ComponentInstancePresentation and ComponentOperatorPresentation
-                                if (!item.equals(mouseSubject) && !(item instanceof ComponentInstancePresentation) && !(item instanceof ComponentOperatorPresentation)) {
+                                // ToDo NIELS: Handle ComponentOperatorPresentation
+                                if (!item.equals(mouseSubject) && !item.xProperty().isBound()) {
                                     item.xProperty().set(currentLocations.get(i).getKey());
                                     item.yProperty().set(currentLocations.get(i).getValue());
                                 }
@@ -202,11 +208,13 @@ public class ItemDragHelper {
                             mouseSubject.setLayoutX(storePreviousX);
                             mouseSubject.setLayoutY(storePreviousY);
 
-                            for (int i = 0; i < selectedItems.size(); i++) {
+                            int numberOfSelectedItems = selectedItems.size();
+
+                            for (int i = 0; i < numberOfSelectedItems; i++) {
                                 SelectHelper.ItemSelectable item = selectedItems.get(i);
 
-                                // ToDo NIELS: Handle ComponentInstancePresentation and ComponentOperatorPresentation
-                                if (!item.equals(mouseSubject) && !(item instanceof ComponentInstancePresentation) && !(item instanceof ComponentOperatorPresentation)) {
+                                // ToDo NIELS: HandleComponentOperatorPresentation
+                                if (!item.equals(mouseSubject) && !item.xProperty().isBound()) {
                                     item.xProperty().set(savedLocations.get(i).getKey());
                                     item.yProperty().set(savedLocations.get(i).getValue());
                                 }

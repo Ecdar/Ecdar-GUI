@@ -10,7 +10,7 @@
       type="StackPane"
       fx:id="root"
       fx:controller="ecdar.controllers.CanvasShellController">
-    <CanvasPresentation fx:id="canvasPresentation"/>
+    <CanvasPresentation fx:id="canvasPresentation" onMousePressed="#startDragBox"/>
     <StackPane fx:id="toolbar"
                StackPane.alignment="TOP_LEFT"
                minHeight="56" maxHeight="56" maxWidth="224">

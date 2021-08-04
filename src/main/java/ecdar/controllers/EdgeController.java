@@ -46,11 +46,6 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
     private final SimpleArrowHead simpleArrowHead = new SimpleArrowHead();
     private final SimpleBooleanProperty isHoveringEdge = new SimpleBooleanProperty(false);
     private final SimpleIntegerProperty timeHoveringEdge = new SimpleIntegerProperty(0);
-
-    public Map<Nail, NailPresentation> getNailNailPresentationMap() {
-        return nailNailPresentationMap;
-    }
-
     private final Map<Nail, NailPresentation> nailNailPresentationMap = new HashMap<>();
     public Group edgeRoot;
     private Runnable collapseNail;
@@ -624,6 +619,10 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
         this.component.set(component);
     }
 
+    public Map<Nail, NailPresentation> getNailNailPresentationMap() {
+        return nailNailPresentationMap;
+    }
+
     public ObjectProperty<Component> componentProperty() {
         return component;
     }
@@ -649,7 +648,11 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
             event.consume();
 
             if (event.isShortcutDown()) {
-                SelectHelper.addToSelection(this);
+                if (SelectHelper.getSelectedElements().contains(this)) {
+                    SelectHelper.deselect(this);
+                } else {
+                    SelectHelper.addToSelection(this);
+                }
             } else {
                 SelectHelper.select(this);
             }
@@ -658,7 +661,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
 
     public void edgeDragged(final MouseEvent event){
         // Check if the edge is selected to ensure that the drag is not targeting a select, guard, update, or sync node
-        if(SelectHelper.getSelectedElements().get(0) == this){
+        if(SelectHelper.getSelectedElements().size() == 0 || SelectHelper.getSelectedElements().get(0) == this){
             DisplayableEdge oldEdge = edge.get();
             Location source, target;
 
@@ -701,7 +704,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
 
             if (!closestToTarget) {
                 // Set the source to a new MouseCircular, which will follow the mouse and handle setting the new source
-                newEdge.sourceCircularProperty().set(new MouseCircular(newEdge, getComponent()));
+                newEdge.sourceCircularProperty().set(new MouseCircular());
                 newEdge.setTargetLocation(target);
             }
 

@@ -285,7 +285,11 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
             event.consume();
 
             if (event.isShortcutDown()) {
-                SelectHelper.addToSelection(this);
+                if (SelectHelper.getSelectedElements().contains(this)) {
+                    SelectHelper.deselect(this);
+                } else {
+                    SelectHelper.addToSelection(this);
+                }
             } else {
                 SelectHelper.select(this);
             }

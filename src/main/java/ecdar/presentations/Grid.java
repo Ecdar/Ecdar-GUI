@@ -1,12 +1,8 @@
 package ecdar.presentations;
 
-import ecdar.controllers.CanvasController;
-import ecdar.controllers.EcdarController;
 import javafx.application.Platform;
 import javafx.scene.Parent;
 import javafx.scene.shape.Line;
-import javafx.scene.shape.Rectangle;
-import javafx.stage.Screen;
 
 import java.util.ArrayList;
 
