@@ -187,7 +187,6 @@ public class ComponentController extends ModelController implements Initializabl
      * Finds the max height of the input/output signature container and the component
      * @return a double of the largest height
      */
-
     private double findMaxHeight() {
         double inputHeight = inputSignatureContainer.getHeight();
         double outputHeight = outputSignatureContainer.getHeight();
@@ -379,6 +378,7 @@ public class ComponentController extends ModelController implements Initializabl
                 initializeDropDownMenu.accept(getComponent());
             }
         });
+
         initializeDropDownMenu.accept(getComponent());
     }
 
@@ -899,8 +899,15 @@ public class ComponentController extends ModelController implements Initializabl
                 }
 
                 unfinishedEdge.addNail(newNail);
+            } else {
+                contextMenu.hide();
             }
         }
+    }
+
+    @FXML
+    private void modelContainerDragged() {
+        contextMenu.hide();
     }
 
     public MouseTracker getMouseTracker() {
