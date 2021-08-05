@@ -556,4 +556,13 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
         return yProperty().get();
     }
 
+    @Override
+    public double getSelectableWidth() {
+        return getLocation().getRadius() * 2;
+    }
+
+    @Override
+    public double getSelectableHeight() {
+        return getLocation().getRadius() * 2;
+    }
 }

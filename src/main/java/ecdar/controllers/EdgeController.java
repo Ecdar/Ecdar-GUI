@@ -849,6 +849,16 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
         return yProperty().get();
     }
 
+    @Override
+    public double getSelectableWidth() {
+        return 0;
+    }
+
+    @Override
+    public double getSelectableHeight() {
+        return 0;
+    }
+
     private double getDistance(double x1, double y1, double x2, double y2){
         return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
     }

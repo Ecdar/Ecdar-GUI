@@ -173,17 +173,17 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
         }
 
         if (currentNode instanceof LocationPresentation) {
-            if (selectIfWithinSelectionBox(currentNode, selectionRectangle)) {
+            if (selectIfWithinSelectionBox(((LocationPresentation) currentNode).getController().circle, ((LocationPresentation) currentNode).getController(), selectionRectangle)) {
                 SelectHelper.addToSelection(((LocationPresentation) currentNode).getController());
             }
         } else if (currentNode instanceof EdgePresentation) {
             ((EdgePresentation) currentNode).getController().getNailNailPresentationMap().values().forEach((nailPresentation -> {
-                if (selectIfWithinSelectionBox(nailPresentation, selectionRectangle)) {
+                if (selectIfWithinSelectionBox(nailPresentation.getController().nailCircle, nailPresentation.getController(), selectionRectangle)) {
                     SelectHelper.addToSelection(nailPresentation.getController());
                 }
             }));
         } else if (currentNode instanceof ComponentOperatorPresentation || currentNode instanceof ComponentInstancePresentation) {
-            if (selectIfWithinSelectionBox(currentNode, selectionRectangle)) {
+            if (selectIfWithinSelectionBox(currentNode, (SelectHelper.ItemSelectable) currentNode, selectionRectangle)) {
                 SelectHelper.addToSelection((SelectHelper.ItemSelectable) currentNode);
             }
         }
@@ -196,19 +196,19 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
     }
 
     /**
-     * Returns whether the item is within the selection.
+     * Returns whether the item is within the selection box.
      * @param item the node to check.
      * @param selectionRectangle the selection box.
      */
-    private boolean selectIfWithinSelectionBox(Node item, Rectangle selectionRectangle) {
+    private boolean selectIfWithinSelectionBox(Node item, SelectHelper.ItemSelectable itemSelectable, Rectangle selectionRectangle) {
         Bounds itemCoordinates = item.localToScreen(item.getLayoutBounds());
-        Bounds selectionCoordinates = selectionRectangle.localToScreen(selectionRectangle.getLayoutBounds());
+        Bounds selectionBoxCoordinates = selectionRectangle.localToScreen(selectionRectangle.getLayoutBounds());
 
-        if (selectionCoordinates == null || itemCoordinates == null) return false;
+        if (selectionBoxCoordinates == null || itemCoordinates == null) return false;
 
-        return selectionCoordinates.getMinX() < itemCoordinates.getCenterX() - itemCoordinates.getWidth() / 4 &&
-                itemCoordinates.getCenterX() - itemCoordinates.getWidth() / 2 < selectionCoordinates.getMinX() + selectionRectangle.getWidth() &&
-                selectionCoordinates.getMinY() < itemCoordinates.getCenterY() &&
-                itemCoordinates.getCenterY() < selectionCoordinates.getMinY() + selectionRectangle.getHeight();
+        return selectionBoxCoordinates.getMinX() < itemCoordinates.getMinX() + itemSelectable.getSelectableWidth() / 2 &&
+                itemCoordinates.getMinX() + itemSelectable.getSelectableWidth() / 2 < selectionBoxCoordinates.getMinX() + selectionRectangle.getWidth() &&
+                selectionBoxCoordinates.getMinY() < itemCoordinates.getMinY() + itemSelectable.getSelectableHeight() / 2 &&
+                itemCoordinates.getMinY() + itemSelectable.getSelectableHeight() / 2 < selectionBoxCoordinates.getMinY() + selectionRectangle.getHeight();
     }
 }

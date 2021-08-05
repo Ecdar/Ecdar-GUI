@@ -177,6 +177,16 @@ public class ComponentOperatorPresentation extends StackPane implements SelectHe
         return controller.getOperator().getBox().getY();
     }
 
+    @Override
+    public double getSelectableWidth() {
+        return getMinWidth();
+    }
+
+    @Override
+    public double getSelectableHeight() {
+        return getMinWidth();
+    }
+
     /**
      * Dyes the delegates with the select color.
      */

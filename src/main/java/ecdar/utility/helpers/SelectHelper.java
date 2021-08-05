@@ -87,6 +87,10 @@ public class SelectHelper {
         Color.Intensity getColorIntensity();
 
         ItemDragHelper.DragBounds getDragBounds();
+
+        double getSelectableWidth();
+
+        double getSelectableHeight();
     }
 
 }

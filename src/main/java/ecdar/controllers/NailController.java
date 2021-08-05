@@ -300,6 +300,16 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
     }
 
     @Override
+    public double getSelectableWidth() {
+        return nailCircle.getRadius() * 2;
+    }
+
+    @Override
+    public double getSelectableHeight() {
+        return nailCircle.getRadius() * 2;
+    }
+
+    @Override
     public boolean nudge(final NudgeDirection direction) {
         final double oldX = root.getLayoutX();
         final double newX = getDragBounds().trimX(root.getLayoutX() + direction.getXOffset());

@@ -382,4 +382,14 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
     public double getY() {
         return yProperty().get();
     }
+
+    @Override
+    public double getSelectableWidth() {
+        return ComponentInstance.WIDTH;
+    }
+
+    @Override
+    public double getSelectableHeight() {
+        return ComponentInstance.HEIGHT;
+    }
 }
