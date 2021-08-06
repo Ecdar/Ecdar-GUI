@@ -1,11 +1,13 @@
 package ecdar.controllers;
 
 import com.jfoenix.controls.JFXRippler;
-import ecdar.abstractions.*;
-import ecdar.presentations.*;
+
+import ecdar.abstractions.Component;
+import ecdar.presentations.CanvasPresentation;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.layout.*;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 
 import java.net.URL;
 import java.util.ResourceBundle;

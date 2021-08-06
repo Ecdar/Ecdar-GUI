@@ -43,7 +43,7 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
         initializeGrid();
 
         CanvasDragHelper.makeDraggable(this, mouseEvent -> mouseEvent.getButton().equals(MouseButton.SECONDARY));
-        mouseTracker.registerOnMousePressedEventHandler(this::startDragBox);
+        mouseTracker.registerOnMousePressedEventHandler(this::startDragSelect);
 
         controller.zoomHelper.setGrid(this.grid);
         controller.zoomHelper.setCanvas(this);
@@ -131,23 +131,14 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
         return controller;
     }
 
-    private void startDragBox(final MouseEvent event) {
+    private void startDragSelect(final MouseEvent event) {
         if(event.isPrimaryButtonDown()) {
             SelectHelper.clearSelectedElements();
 
-            Rectangle selectionRectangle = new Rectangle();
-            selectionRectangle.setStroke(SelectHelper.SELECT_COLOR.getColor(SelectHelper.SELECT_COLOR_INTENSITY_BORDER));
-            javafx.scene.paint.Color fillColor = SelectHelper.SELECT_COLOR.getColor(Color.Intensity.I100);
-            fillColor = fillColor.deriveColor(fillColor.getHue(), fillColor.getSaturation(), fillColor.getBrightness(), 0.5);
-            selectionRectangle.setFill(fillColor);
-            selectionRectangle.getStrokeDashArray().addAll(5.0, 5.0);
-
             double mouseDownX = event.getX();
             double mouseDownY = event.getY();
-            selectionRectangle.setX(mouseDownX);
-            selectionRectangle.setY(mouseDownY);
-            selectionRectangle.setWidth(0);
-            selectionRectangle.setHeight(0);
+
+            Rectangle selectionRectangle = initializeRectangleForSelectionBox(mouseDownX, mouseDownY);
 
             mouseTracker.registerOnMouseDraggedEventHandler(e -> {
                 selectionRectangle.setX(Math.min(e.getX(), mouseDownX));
@@ -164,6 +155,22 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
             mouseTracker.registerOnMouseReleasedEventHandler(e -> this.getChildren().remove(selectionRectangle));
             this.getChildren().add(selectionRectangle);
         }
+    }
+
+    private Rectangle initializeRectangleForSelectionBox(double mouseDownX, double mouseDownY) {
+        Rectangle selectionRectangle = new Rectangle();
+        selectionRectangle.setStroke(SelectHelper.SELECT_COLOR.getColor(SelectHelper.SELECT_COLOR_INTENSITY_BORDER));
+        javafx.scene.paint.Color fillColor = SelectHelper.SELECT_COLOR.getColor(Color.Intensity.I100);
+        fillColor = fillColor.deriveColor(fillColor.getHue(), fillColor.getSaturation(), fillColor.getBrightness(), 0.5);
+        selectionRectangle.setFill(fillColor);
+        selectionRectangle.getStrokeDashArray().addAll(5.0, 5.0);
+
+        selectionRectangle.setX(mouseDownX);
+        selectionRectangle.setY(mouseDownY);
+        selectionRectangle.setWidth(0);
+        selectionRectangle.setHeight(0);
+
+        return selectionRectangle;
     }
 
     private void updateSelection(Parent currentNode, Rectangle selectionRectangle) {
@@ -197,8 +204,10 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
 
     /**
      * Returns whether the item is within the selection box.
-     * @param item the node to check.
+     * @param item the node to potentially be selected.
+     * @param itemSelectable the ItemSelectable object related to the item (in order to get width and height for the checks).
      * @param selectionRectangle the selection box.
+     * @return whether the item is within the bounds of the selectionRectangle
      */
     private boolean selectIfWithinSelectionBox(Node item, SelectHelper.ItemSelectable itemSelectable, Rectangle selectionRectangle) {
         Bounds itemCoordinates = item.localToScreen(item.getLayoutBounds());

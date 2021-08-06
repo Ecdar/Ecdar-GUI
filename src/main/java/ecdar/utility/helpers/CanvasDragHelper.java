@@ -47,11 +47,11 @@ public class CanvasDragHelper {
         final boolean[] hasDragged = {false};
 
         final EventHandler<MouseEvent> onMouseDragged = event -> {
-            // Stop propagation of this event
-            event.consume();
-
             // Check if we are allowed to drag in the first place
             if (!conditional.apply(event)) return;
+
+            // Stop propagation of this event
+            event.consume();
 
             // Get the bounds (must be inside the lambda, because bounds might have changed from since we last moved the subject)
             final Bounds[] bounds = {null};
@@ -134,11 +134,11 @@ public class CanvasDragHelper {
 
         // Un-register the onMouseDragged event listener when we stop dragging
         mouseTracker.registerOnMouseReleasedEventHandler(event -> {
-            // Stop propagation of this event
-            event.consume();
-
             // Check if we are allowed to drag in the first place
             if (!conditional.apply(event) || !hasDragged[0]) return;
+
+            // Stop propagation of this event
+            event.consume();
 
             hasDragged[0] = false;
 
@@ -210,11 +210,11 @@ public class CanvasDragHelper {
         final BooleanProperty isBeingDragged = new SimpleBooleanProperty(false);
 
         mouseTracker.registerOnMousePressedEventHandler(event -> {
-            event.consume();
-
             presWasAllowed.set(conditional.apply(event));
             if (!presWasAllowed.get()) return;
             isBeingDragged.set(true);
+
+            event.consume();
 
             dragXOffset[0] = subject.xProperty().get() - event.getScreenX();
             dragYOffset[0] = subject.yProperty().get() - event.getScreenY();
