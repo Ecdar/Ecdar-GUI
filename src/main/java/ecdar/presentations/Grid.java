@@ -46,7 +46,7 @@ public class Grid extends Parent {
      */
     public void handleTranslateX(double oldValue, double newValue, double scale) {
         //Move the grid in the opposite direction of the canvas drag, to keep its location on screen
-        this.setTranslateX(Grid.snap(this.getTranslateX() - (newValue - oldValue) / scale) + GRID_SIZE * 0.5);
+        this.setTranslateX(this.getTranslateX() - (newValue - oldValue) / scale);
     }
 
     /**
@@ -57,7 +57,7 @@ public class Grid extends Parent {
      */
     public void handleTranslateY(double oldValue, double newValue, double scale) {
         //Move the grid in the opposite direction of the canvas drag, to keep its location on screen
-        this.setTranslateY(Grid.snap(this.getTranslateY() - (newValue - oldValue) / scale) + GRID_SIZE * 0.5);
+        this.setTranslateY(this.getTranslateY() - (newValue - oldValue) / scale);
     }
 
     /**
@@ -68,6 +68,14 @@ public class Grid extends Parent {
         // The given size of the canvas divided by the given scale
         double screenWidth = (int) Grid.snap(((CanvasShellPresentation) getParent().getParent()).getWidth() / scale * 4);
         double screenHeight = (int) Grid.snap(((CanvasShellPresentation) getParent().getParent()).getHeight() / scale * 4);
+
+        if (this.getTranslateX() != Grid.snap(this.getTranslateX())) {
+            this.setTranslateX(Grid.snap(this.getTranslateX()) + GRID_SIZE * 0.5);
+        }
+
+        if (this.getTranslateY() != Grid.snap(this.getTranslateY())) {
+            this.setTranslateY(Grid.snap(this.getTranslateY()) + GRID_SIZE * 0.5);
+        }
 
         Platform.runLater(() -> {
             // Remove old vertical lines

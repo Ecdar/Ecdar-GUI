@@ -3,6 +3,9 @@ package ecdar.utility.helpers;
 import ecdar.controllers.EcdarController;
 import ecdar.presentations.CanvasPresentation;
 import ecdar.presentations.Grid;
+import ecdar.presentations.ModelPresentation;
+import ecdar.presentations.SystemPresentation;
+import javafx.scene.Node;
 
 public class ZoomHelper {
     private CanvasPresentation canvasPresentation;
@@ -127,16 +130,36 @@ public class ZoomHelper {
     private void centerComponentAndUpdateGrid(double newScale){
         // Check added to avoid NullPointerException
         if(EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation != null){
-            // Calculate the new x and y offsets needed to center the component
-            double xOffset = newScale * canvasPresentation.getWidth() * 1.0f / 2 - newScale * EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation.getWidth() * 1.0f / 2;
-            double yOffset = newScale * canvasPresentation.getHeight() * 1.0f / 3 - newScale * EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation.getHeight() * 1.0f / 3 + newScale * Grid.TOOL_BAR_HEIGHT * 1.0f / 3;
+            updateGrid(newScale, EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation);
+        } else if (EcdarController.getActiveCanvasPresentation().getController().getActiveModel() != null) {
+            // The canvas is currently showing an EcdarSystem object
+            SystemPresentation systemPresentation = null;
 
-            // Center the component based on the offsets
-            canvasPresentation.setTranslateX(Grid.snap(xOffset));
-            canvasPresentation.setTranslateY(Grid.snap(yOffset));
+            for (Node node : EcdarController.getActiveCanvasPresentation().getController().root.getChildren()) {
+                if (node instanceof SystemPresentation) {
+                    systemPresentation = (SystemPresentation) node;
+                    break;
+                }
+            }
 
-            // Redraw the grid based on the new scale and canvas size
-            grid.updateGrid(newScale);
+            if (systemPresentation == null) {
+                return;
+            }
+
+            updateGrid(newScale, systemPresentation);
         }
+    }
+
+    private void updateGrid(double newScale, ModelPresentation modelPresentation) {
+        // Calculate the new x and y offsets needed to center the component
+        double xOffset = newScale * canvasPresentation.getWidth() * 1.0f / 2 - newScale * modelPresentation.getWidth() * 1.0f / 2;
+        double yOffset = newScale * canvasPresentation.getHeight() * 1.0f / 3 - newScale * modelPresentation.getHeight() * 1.0f / 3 + newScale * Grid.TOOL_BAR_HEIGHT * 1.0f / 3;
+
+        // Center the component based on the offsets
+        canvasPresentation.setTranslateX(Grid.snap(xOffset));
+        canvasPresentation.setTranslateY(Grid.snap(yOffset));
+
+        // Redraw the grid based on the new scale and canvas size
+        grid.updateGrid(newScale);
     }
 }
