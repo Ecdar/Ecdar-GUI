@@ -168,8 +168,7 @@ public class ComponentController extends ModelController implements Initializabl
             outputSignatureContainer.getChildren().add(newArrow);
         }
     }
-
-
+    
     /***
      * Updates the component's height to match the input/output signature containers
      * if the component is smaller than either of them

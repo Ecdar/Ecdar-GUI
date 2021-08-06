@@ -22,8 +22,8 @@ public class Grid extends Parent {
             if(newValue != null) {
                 updateGrid(1);
                 Platform.runLater(() -> {
-                    newValue.widthProperty().addListener((observable1 -> this.updateGrid(getParent().getScaleX())));
-                    newValue.heightProperty().addListener((observable1 -> this.updateGrid(getParent().getScaleY())));
+                    newValue.widthProperty().addListener((observable1 -> this.updateGrid(getScaleX())));
+                    newValue.heightProperty().addListener((observable1 -> this.updateGrid(getScaleY())));
                 });
             }
         });
@@ -46,7 +46,7 @@ public class Grid extends Parent {
      */
     public void handleTranslateX(double oldValue, double newValue, double scale) {
         //Move the grid in the opposite direction of the canvas drag, to keep its location on screen
-        this.setTranslateX(this.getTranslateX() - (newValue - oldValue) / scale);
+        this.setTranslateX(Grid.snap(this.getTranslateX() - (newValue - oldValue) / scale) + GRID_SIZE * 0.5);
     }
 
     /**
@@ -57,7 +57,7 @@ public class Grid extends Parent {
      */
     public void handleTranslateY(double oldValue, double newValue, double scale) {
         //Move the grid in the opposite direction of the canvas drag, to keep its location on screen
-        this.setTranslateY(this.getTranslateY() - (newValue - oldValue) / scale);
+        this.setTranslateY(Grid.snap(this.getTranslateY() - (newValue - oldValue) / scale) + GRID_SIZE * 0.5);
     }
 
     /**
