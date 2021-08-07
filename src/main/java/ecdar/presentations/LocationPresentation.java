@@ -370,11 +370,11 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
                 }
             };
 
-            boolean normalOrProhibited = newUrgency.equals(Location.Urgency.NORMAL) || newUrgency.equals(Location.Urgency.PROHIBITED);
+            boolean isNormalOrProhibited = newUrgency.equals(Location.Urgency.NORMAL) || newUrgency.equals(Location.Urgency.PROHIBITED);
 
-            if(!oldUrgency.equals(Location.Urgency.URGENT) && !(normalOrProhibited)) {
+            if(!oldUrgency.equals(Location.Urgency.URGENT) && !isNormalOrProhibited) {
                 toUrgent.play();
-            } else if(normalOrProhibited) {
+            } else if(isNormalOrProhibited && oldUrgency.equals(Location.Urgency.URGENT)) {
                 toNormal.play();
             }
 
