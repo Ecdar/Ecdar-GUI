@@ -63,7 +63,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
     public Label idLabel;
     public Line nameTagLine;
     public Line invariantTagLine;
-    public Line crossOut;
+    public Line prohibitedLocStrikeThrough;
 
     private DropDownMenu dropDownMenu;
     private boolean dropDownMenuInitialized = false;

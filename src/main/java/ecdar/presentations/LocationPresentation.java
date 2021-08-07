@@ -389,11 +389,11 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
             if(newUrgency.equals(Location.Urgency.PROHIBITED)) {
                 notCommittedShape.setStrokeWidth(4);
                 notCommittedShape.setStroke(Color.RED.getColor(Color.Intensity.A700));
-                controller.crossOut.setVisible(true);
+                controller.prohibitedLocStrikeThrough.setVisible(true);
             } else {
                 notCommittedShape.setStrokeWidth(1);
                 notCommittedShape.setStroke(location.getColor().getColor(location.getColorIntensity().next(2)));
-                controller.crossOut.setVisible(false);
+                controller.prohibitedLocStrikeThrough.setVisible(false);
             }
         };
 
