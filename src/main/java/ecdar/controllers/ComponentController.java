@@ -848,7 +848,7 @@ public class ComponentController extends ModelController implements Initializabl
 
             getComponent().addLocation(location);
 
-            // Run later to ensure that the listener on added location runs first
+            // Run later to ensure that the location is added to the locationPresentationMap first
             Platform.runLater(() -> {
                 LocationPresentation locPres = locationPresentationMap.get(location);
 

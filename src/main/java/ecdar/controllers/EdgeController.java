@@ -174,7 +174,6 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
 
             // Changes are made to the nails list
             newEdge.getNails().addListener(getNailsChangeListener(newEdge, newComponent));
-
         };
     }
 

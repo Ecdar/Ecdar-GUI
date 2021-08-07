@@ -132,7 +132,7 @@ public class ZoomHelper {
         if(EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation != null){
             updateGrid(newScale, EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation);
         } else if (EcdarController.getActiveCanvasPresentation().getController().getActiveModel() != null) {
-            // The canvas is currently showing an EcdarSystem object
+            // The canvas is currently showing an EcdarSystem object, so wee need to find the SystemPresentation in order to center it on screen
             SystemPresentation systemPresentation = null;
 
             for (Node node : EcdarController.getActiveCanvasPresentation().getController().root.getChildren()) {
