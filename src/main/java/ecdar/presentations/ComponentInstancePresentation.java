@@ -1,7 +1,6 @@
 package ecdar.presentations;
 
 import ecdar.abstractions.*;
-import ecdar.controllers.CanvasController;
 import ecdar.controllers.ComponentInstanceController;
 import ecdar.controllers.EcdarController;
 import ecdar.utility.colors.Color;
@@ -285,7 +284,11 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
             event.consume();
 
             if (event.isShortcutDown()) {
-                SelectHelper.addToSelection(this);
+                if (SelectHelper.getSelectedElements().contains(this)) {
+                    SelectHelper.deselect(this);
+                } else {
+                    SelectHelper.addToSelection(this);
+                }
             } else {
                 SelectHelper.select(this);
             }
@@ -378,5 +381,15 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
     @Override
     public double getY() {
         return yProperty().get();
+    }
+
+    @Override
+    public double getSelectableWidth() {
+        return ComponentInstance.WIDTH;
+    }
+
+    @Override
+    public double getSelectableHeight() {
+        return ComponentInstance.HEIGHT;
     }
 }

@@ -1,9 +1,10 @@
 package ecdar.controllers;
 
 import com.jfoenix.controls.JFXRippler;
+
 import ecdar.abstractions.Component;
+import ecdar.abstractions.EcdarSystem;
 import ecdar.presentations.CanvasPresentation;
-import ecdar.utility.helpers.ZoomHelper;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.layout.Pane;
@@ -26,8 +27,9 @@ public class CanvasShellController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         canvasPresentation.getController().activeComponentProperty().addListener(((observable, oldValue, newValue) -> {
-            toolbar.setVisible(newValue instanceof Component);
-            canvasPresentation.getController().zoomHelper.setActive(newValue instanceof Component);
+            boolean shouldZoomBeActive = newValue instanceof Component || newValue instanceof EcdarSystem;
+            toolbar.setVisible(shouldZoomBeActive);
+            canvasPresentation.getController().zoomHelper.setActive(shouldZoomBeActive);
         }));
     }
     @FXML

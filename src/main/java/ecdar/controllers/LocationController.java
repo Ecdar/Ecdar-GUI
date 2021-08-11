@@ -9,6 +9,7 @@ import ecdar.presentations.*;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
 import ecdar.utility.helpers.ItemDragHelper;
+import ecdar.utility.helpers.MouseCircular;
 import ecdar.utility.helpers.SelectHelper;
 import ecdar.utility.keyboard.Keybind;
 import ecdar.utility.keyboard.KeyboardTracker;
@@ -344,8 +345,9 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
             final Component component = getComponent();
 
-            if (root.isPlaced()) {
+            if (isAnyEdgeWithoutSource()) return;
 
+            if (root.isPlaced()) {
                 final DisplayableEdge unfinishedEdge = component.getUnfinishedEdge();
 
                 if (unfinishedEdge == null && event.getButton().equals(MouseButton.SECONDARY)) {
@@ -366,6 +368,9 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                         } else {
                             unfinishedEdge.makeSyncNailBetweenLocations();
                         }
+                    } else if (getLocation().equals(unfinishedEdge.getSourceLocation()) && unfinishedEdge.getNails().size() == 1) {
+                        final Nail nail = new Nail(unfinishedEdge.getNails().get(0).getX(), unfinishedEdge.getNails().get(0).getY() + 2 *GRID_SIZE);
+                        unfinishedEdge.addNail(nail);
                     }
 
                     UndoRedoStack.push(() -> { // Perform
@@ -388,7 +393,11 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                     else {
                         if(root.isInteractable()) {
                             if (event.isShortcutDown()) {
-                                SelectHelper.addToSelection(this);
+                                if (SelectHelper.getSelectedElements().contains(this)) {
+                                    SelectHelper.deselect(this);
+                                } else {
+                                    SelectHelper.addToSelection(this);
+                                }
                             } else {
                                 SelectHelper.select(this);
                             }
@@ -433,6 +442,35 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
         });
 
 
+    }
+
+    /**
+     * Checks if there is currently an edge without a source location.
+     * If there is, set the source location to this location and return true, else return false.
+     */
+    public boolean isAnyEdgeWithoutSource() {
+        DisplayableEdge edgeWithoutSource = null;
+
+        for (DisplayableEdge edge : getComponent().getDisplayableEdges()) {
+            if (edge.sourceCircularProperty().get() instanceof MouseCircular) {
+                edgeWithoutSource = edge;
+                break;
+            }
+        }
+
+        if (edgeWithoutSource != null) {
+            edgeWithoutSource.setSourceLocation(getLocation());
+
+            // Make self-loop pretty if needed
+            if (edgeWithoutSource.getTargetLocation().equals(getLocation()) && edgeWithoutSource.getNails().size() == 1) {
+                final Nail nail = new Nail(edgeWithoutSource.getNails().get(0).getX(), edgeWithoutSource.getNails().get(0).getY() + 2 *GRID_SIZE);
+                edgeWithoutSource.addNail(nail);
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     @Override
@@ -518,4 +556,13 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
         return yProperty().get();
     }
 
+    @Override
+    public double getSelectableWidth() {
+        return getLocation().getRadius() * 2;
+    }
+
+    @Override
+    public double getSelectableHeight() {
+        return getLocation().getRadius() * 2;
+    }
 }
