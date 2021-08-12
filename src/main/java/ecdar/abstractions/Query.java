@@ -9,9 +9,12 @@ import com.uppaal.engine.Engine;
 import javafx.application.Platform;
 import javafx.beans.property.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Query implements Serializable {
     private static final String QUERY = "query";
@@ -71,6 +74,39 @@ public class Query implements Serializable {
 
     public StringProperty queryProperty() {
         return query;
+    }
+
+    public String getCleanQueryOrEmptyString() {
+        String cleanQuery = getQuery().replaceAll("\\s", "");
+
+        ArrayList<String> whiteList = new ArrayList<>();
+        Ecdar.getProject().getComponents().forEach((c) -> {
+            whiteList.add(c.getName());
+            c.getLocations().forEach((l) -> {
+                whiteList.add(l.getId());
+            });
+        });
+
+        for (QueryType value : QueryType.values()) {
+            whiteList.add(value.getSymbol());
+        }
+        whiteList.add(".");
+        whiteList.add("(");
+        whiteList.add(")");
+
+        StringBuilder patternString = new StringBuilder(whiteList.get(0));
+        whiteList.stream().skip(1).forEach((s -> patternString.append("|").append(s)));
+        patternString.append("*");
+        Pattern p = Pattern.compile(patternString.toString());
+        Matcher m = p.matcher(cleanQuery);
+
+        System.out.println(m.matches());
+
+        if (m.matches()) {
+            return cleanQuery;
+        } else {
+            return "";
+        }
     }
 
     public String getComment() {
@@ -138,7 +174,13 @@ public class Query implements Serializable {
 
             errors.set("");
 
-            backendThread = BackendDriverManager.getInstance(this.currentBackend).getBackendThreadForQuery(getType().getQueryName() + ": " + getQuery().replaceAll("\\s", "") + " " + getIgnoredInputOutputsOnQuery(),
+            String queryString = getCleanQueryOrEmptyString();
+            if (queryString.isEmpty()) {
+                // ToDo NIELS: Handle the query not being runnable (probably due to not being whitelisted)
+                return;
+            }
+
+            backendThread = BackendDriverManager.getInstance(this.currentBackend).getBackendThreadForQuery(getType().getQueryName() + ": " + queryString + " " + getIgnoredInputOutputsOnQuery(),
                     aBoolean -> {
                         if (aBoolean) {
                             setQueryState(QueryState.SUCCESSFUL);
