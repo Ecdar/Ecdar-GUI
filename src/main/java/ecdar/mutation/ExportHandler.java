@@ -136,9 +136,10 @@ class ExportHandler {
     private static void storeMutantXml(final MutationTestCase testCase) throws BackendException, IOException, URISyntaxException {
         final Component mutant = testCase.getMutant();
 
-        // make a project with the mutant
+        // Make a project with the mutant
         final Project project = new Project();
         project.getComponents().add(mutant);
+        project.setGlobalDeclarations(Ecdar.getProject().getGlobalDeclarations());
         mutant.updateIOList(); // Update io in order to get the right system declarations for the mutant
 
         BackendHelper.storeBackendModel(project, "mutants" + File.separator + "xml", testCase.getId());

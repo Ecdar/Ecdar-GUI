@@ -47,6 +47,14 @@ public class ProjectPaneController implements Initializable {
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
+        // Bind global declarations and add mouse event
+        final FilePresentation globalDclPresentation = new FilePresentation(Ecdar.getProject().getGlobalDeclarations());
+        globalDclPresentation.setOnMousePressed(event -> {
+            event.consume();
+            EcdarController.getActiveCanvasPresentation().getController().setActiveModel(Ecdar.getProject().getGlobalDeclarations());
+        });
+        filesList.getChildren().add(globalDclPresentation);
+
         Ecdar.getProject().getComponents().addListener(new ListChangeListener<Component>() {
             @Override
             public void onChanged(final Change<? extends Component> c) {

@@ -66,6 +66,9 @@ public class EcdarDocument {
         for (final Component component : project.getComponents()) {
             generateAndAddTemplate(component);
         }
+
+        // Set global declarations
+        xmlDocument.setProperty(DECLARATION_PROPERTY_TAG, project.getGlobalDeclarations().getDeclarationsText());
     }
 
     /**

@@ -1,10 +1,8 @@
 package ecdar.controllers;
 
 import com.jfoenix.controls.JFXRippler;
-import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.presentations.CanvasPresentation;
-import ecdar.utility.helpers.ZoomHelper;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.layout.Pane;
