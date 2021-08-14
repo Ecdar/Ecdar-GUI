@@ -190,7 +190,11 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
         root.addEventHandler(MouseEvent.MOUSE_PRESSED, event -> {
             event.consume();
             if (event.isShortcutDown()) {
-                SelectHelper.addToSelection(this);
+                if (SelectHelper.getSelectedElements().contains(this)) {
+                    SelectHelper.deselect(this);
+                } else {
+                    SelectHelper.addToSelection(this);
+                }
             } else if(event.isSecondaryButtonDown()) {
                 showContextMenu();
             } else {
@@ -293,6 +297,16 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
     @Override
     public double getY() {
         return yProperty().get();
+    }
+
+    @Override
+    public double getSelectableWidth() {
+        return nailCircle.getRadius() * 2;
+    }
+
+    @Override
+    public double getSelectableHeight() {
+        return nailCircle.getRadius() * 2;
     }
 
     @Override

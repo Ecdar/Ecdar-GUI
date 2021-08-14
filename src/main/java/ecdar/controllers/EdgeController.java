@@ -174,7 +174,6 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
 
             // Changes are made to the nails list
             newEdge.getNails().addListener(getNailsChangeListener(newEdge, newComponent));
-
         };
     }
 
@@ -619,6 +618,10 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
         this.component.set(component);
     }
 
+    public Map<Nail, NailPresentation> getNailNailPresentationMap() {
+        return nailNailPresentationMap;
+    }
+
     public ObjectProperty<Component> componentProperty() {
         return component;
     }
@@ -644,7 +647,11 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
             event.consume();
 
             if (event.isShortcutDown()) {
-                SelectHelper.addToSelection(this);
+                if (SelectHelper.getSelectedElements().contains(this)) {
+                    SelectHelper.deselect(this);
+                } else {
+                    SelectHelper.addToSelection(this);
+                }
             } else {
                 SelectHelper.select(this);
             }
@@ -652,8 +659,8 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
     }
 
     public void edgeDragged(final MouseEvent event){
-        // Check if the edge is selected to ensure that the drag is not targeting a select, guard, update, or sync node
-        if(SelectHelper.getSelectedElements().get(0) == this){
+        // Check if the edge is selected to ensure that the drag is not targeting a nail
+        if(SelectHelper.getSelectedElements().size() == 0 || SelectHelper.getSelectedElements().get(0) == this){
             DisplayableEdge oldEdge = edge.get();
             Location source, target;
 
@@ -696,7 +703,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
 
             if (!closestToTarget) {
                 // Set the source to a new MouseCircular, which will follow the mouse and handle setting the new source
-                newEdge.sourceCircularProperty().set(new MouseCircular(newEdge, getComponent()));
+                newEdge.sourceCircularProperty().set(new MouseCircular());
                 newEdge.setTargetLocation(target);
             }
 
@@ -839,6 +846,16 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
     @Override
     public double getY() {
         return yProperty().get();
+    }
+
+    @Override
+    public double getSelectableWidth() {
+        return 0;
+    }
+
+    @Override
+    public double getSelectableHeight() {
+        return 0;
     }
 
     private double getDistance(double x1, double y1, double x2, double y2){
