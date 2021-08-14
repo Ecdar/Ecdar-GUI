@@ -19,7 +19,7 @@
             <Rectangle fx:id="background" StackPane.alignment="TOP_LEFT"/>
 
             <StackPane>
-                <Pane fx:id="modelContainerSubComponent" onMousePressed="#modelContainerPressed"/>
+                <Pane fx:id="modelContainerSubComponent" onMousePressed="#modelContainerPressed" onMouseDragged="#modelContainerDragged"/>
                 <Pane fx:id="modelContainerLocation" pickOnBounds="false"/>
                 <Pane fx:id="modelContainerEdge" pickOnBounds="false"/>
             </StackPane>

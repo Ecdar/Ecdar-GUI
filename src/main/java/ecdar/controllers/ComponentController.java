@@ -12,6 +12,7 @@ import com.jfoenix.controls.JFXPopup;
 import com.jfoenix.controls.JFXRippler;
 import javafx.animation.Interpolator;
 import javafx.animation.Transition;
+import javafx.application.Platform;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -50,6 +51,7 @@ public class ComponentController extends ModelController implements Initializabl
     public JFXRippler toggleDeclarationButton;
     public Label x;
     public Label y;
+    public Pane modelContainerSubComponent;
     public Pane modelContainerLocation;
     public Pane modelContainerEdge;
 
@@ -166,8 +168,7 @@ public class ComponentController extends ModelController implements Initializabl
             outputSignatureContainer.getChildren().add(newArrow);
         }
     }
-
-
+    
     /***
      * Updates the component's height to match the input/output signature containers
      * if the component is smaller than either of them
@@ -185,7 +186,6 @@ public class ComponentController extends ModelController implements Initializabl
      * Finds the max height of the input/output signature container and the component
      * @return a double of the largest height
      */
-
     private double findMaxHeight() {
         double inputHeight = inputSignatureContainer.getHeight();
         double outputHeight = outputSignatureContainer.getHeight();
@@ -214,7 +214,7 @@ public class ComponentController extends ModelController implements Initializabl
         final Consumer<Component> checkLocations = (component) -> {
             final List<Location> ignored = new ArrayList<>();
 
-            // Run through all of the locations we are currently displaying a warning for, checking if we should remove them
+            // Run through all the locations we are currently displaying a warning for, checking if we should remove them
             final Set<Location> removeMessages = new HashSet<>();
             messages.keySet().forEach(location -> {
                 // Check if the location has some incoming edges
@@ -301,7 +301,7 @@ public class ComponentController extends ModelController implements Initializabl
                     component.addLocation(newLocation);
                 }, () -> { // Undo
                     component.removeLocation(newLocation);
-                }, "Added location '" + newLocation.toString() + "' to component '" + component.getName() + "'", "add-circle");
+                }, "Added location '" + newLocation + "' to component '" + component.getName() + "'", "add-circle");
             });
 
             // Adds the add universal location element to the drop down menu, this element adds an universal location and its required edges
@@ -327,7 +327,7 @@ public class ComponentController extends ModelController implements Initializabl
                     component.removeLocation(newLocation);
                     component.removeEdge(inputEdge);
                     component.removeEdge(outputEdge);
-                }, "Added universal location '" + newLocation.toString() + "' to component '" + component.getName() + "'", "add-circle");
+                }, "Added universal location '" + newLocation + "' to component '" + component.getName() + "'", "add-circle");
             });
 
             // Adds the add inconsistent location element to the drop down menu, this element adds an inconsistent location
@@ -343,7 +343,7 @@ public class ComponentController extends ModelController implements Initializabl
                     component.addLocation(newLocation);
                 }, () -> { // Undo
                     component.removeLocation(newLocation);
-                }, "Added inconsistent location '" + newLocation.toString() + "' to component '" + component.getName() + "'", "add-circle");
+                }, "Added inconsistent location '" + newLocation + "' to component '" + component.getName() + "'", "add-circle");
             });
 
             contextMenu.addSpacerElement();
@@ -377,6 +377,7 @@ public class ComponentController extends ModelController implements Initializabl
                 initializeDropDownMenu.accept(getComponent());
             }
         });
+
         initializeDropDownMenu.accept(getComponent());
     }
 
@@ -503,6 +504,11 @@ public class ComponentController extends ModelController implements Initializabl
 
     private void initializeLocationHandling(final Component newComponent) {
         final Consumer<Location> handleAddedLocation = (loc) -> {
+            // Check related to undo/redo stack
+            if (locationPresentationMap.containsKey(loc)) {
+                return;
+            }
+
             // Create a new presentation, and register it on the map
             final LocationPresentation newLocationPresentation = new LocationPresentation(loc, newComponent);
 
@@ -734,11 +740,7 @@ public class ComponentController extends ModelController implements Initializabl
             modelContainerEdge.getChildren().add(edgePresentation);
 
             final Consumer<Circular> updateMouseTransparency = (newCircular) -> {
-                if (newCircular == null) {
-                    edgePresentation.setMouseTransparent(true);
-                } else {
-                    edgePresentation.setMouseTransparent(false);
-                }
+                edgePresentation.setMouseTransparent(newCircular == null);
             };
 
             edge.targetCircularProperty().addListener((obs1, oldTarget, newTarget) -> updateMouseTransparency.accept(newTarget));
@@ -823,7 +825,6 @@ public class ComponentController extends ModelController implements Initializabl
 
     @FXML
     private void modelContainerPressed(final MouseEvent event) {
-        event.consume();
         EcdarController.getActiveCanvasPresentation().getController().leaveTextAreas();
 
         final DisplayableEdge unfinishedEdge = getComponent().getUnfinishedEdge();
@@ -847,18 +848,31 @@ public class ComponentController extends ModelController implements Initializabl
 
             getComponent().addLocation(location);
 
-            // Add the new location
-            UndoRedoStack.push(() -> { // Perform
-                getComponent().addLocation(location);
-                if (unfinishedEdge != null) {
-                    getComponent().addEdge(unfinishedEdge);
-                }
-            }, () -> { // Undo
-                getComponent().removeLocation(location);
-                if (unfinishedEdge != null) {
-                    getComponent().removeEdge(unfinishedEdge);
-                }
-            }, "Finished edge '" + unfinishedEdge + "' by adding '" + location + "' to component '" + component.getName() + "'", "add-circle");
+            // Run later to ensure that the location is added to the locationPresentationMap first
+            Platform.runLater(() -> {
+                LocationPresentation locPres = locationPresentationMap.get(location);
+
+                // Add the new location
+                UndoRedoStack.push(() -> { // Perform
+                    // Adding the LocationPresentation this way is necessary for further changes to the location to be handled correctly in the stack
+                    locationPresentationMap.put(location, locPres);
+                    modelContainerLocation.getChildren().add(locPres);
+
+                    getComponent().addLocation(location);
+                    if (unfinishedEdge != null) {
+                        getComponent().addEdge(unfinishedEdge);
+                    }
+                }, () -> { // Undo
+                    getComponent().removeLocation(location);
+                    if (unfinishedEdge != null) {
+                        getComponent().removeEdge(unfinishedEdge);
+                    }
+                }, "Finished edge '" + unfinishedEdge + "' by adding '" + location + "' to component '" + component.getName() + "'", "add-circle");
+
+                // If we have an edge without a source location set the new location as its source
+                locationPresentationMap.get(location).getController().isAnyEdgeWithoutSource();
+            });
+
 
 
         } else if (event.isSecondaryButtonDown()) {
@@ -885,9 +899,14 @@ public class ComponentController extends ModelController implements Initializabl
 
                 unfinishedEdge.addNail(newNail);
             } else {
-                SelectHelper.clearSelectedElements();
+                contextMenu.hide();
             }
         }
+    }
+
+    @FXML
+    private void modelContainerDragged() {
+        contextMenu.hide();
     }
 
     public MouseTracker getMouseTracker() {

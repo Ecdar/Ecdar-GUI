@@ -22,4 +22,8 @@ public class EdgePresentation extends Group {
         controller.setComponent(component);
         this.component.bind(controller.componentProperty());
     }
+
+    public EdgeController getController() {
+        return controller;
+    }
 }

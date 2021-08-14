@@ -109,7 +109,11 @@ public class SystemEdgeController implements Initializable {
         // If primary clicked, select
         if (event.getButton().equals(MouseButton.PRIMARY)) {
             if (event.isShortcutDown()) {
-                SelectHelper.addToSelection(selectable);
+                if (SelectHelper.getSelectedElements().contains(selectable)) {
+                    SelectHelper.deselect(selectable);
+                } else {
+                    SelectHelper.addToSelection(selectable);
+                }
             } else {
                 SelectHelper.select(selectable);
             }
