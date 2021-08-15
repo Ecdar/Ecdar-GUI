@@ -3,6 +3,8 @@ package ecdar.backend;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Location;
+import ecdar.abstractions.Query;
+import ecdar.abstractions.QueryType;
 import javafx.util.Pair;
 
 import java.io.BufferedReader;
@@ -59,29 +61,34 @@ public class ReveaalDriver implements IBackendDriver {
         return "E<> (" + String.join(" || ", locationNames) + ") && deadlock";
     }
 
-    public Pair<ArrayList<String>, ArrayList<String>> getInputOutputs(String query) {
-        if(!query.startsWith("refinement")) {
+    public Pair<ArrayList<String>, ArrayList<String>> getInputOutputs(Query query) {
+        if(!query.getType().equals(QueryType.REFINEMENT)) {
+            return null;
+        }
+
+        String queryString = query.getCleanQueryOrEmptyString();
+        if (queryString.isEmpty()) {
             return null;
         }
 
         // Pair is used as a tuple, not a key-value pair
         Pair<ArrayList<String>, ArrayList<String>> inputOutputs = new Pair<>(new ArrayList<>(), new ArrayList<>());
 
-        ProcessBuilder pb = new ProcessBuilder("src/Reveaal", "-c", Ecdar.projectDirectory.get(), query.replaceAll("\\s", ""));
+        ProcessBuilder pb = new ProcessBuilder("src/Reveaal", "-c", Ecdar.projectDirectory.get(), QueryType.REFINEMENT.getQueryName() + ":" + queryString);
         pb.redirectErrorStream(true);
         try {
-            //Start the j-Ecdar process
+            //Start the Reveaal process
             Process ReveaalEngineInstance = pb.start();
 
-            //Communicate with the j-Ecdar process
+            //Communicate with the Reveaal process
             try (
                     var ReveaalReader = new BufferedReader(new InputStreamReader(ReveaalEngineInstance.getInputStream()));
             ) {
-                //Read the result of the query from the j-Ecdar process
+                //Read the result of the query from the Reveaal process
                 String line;
                 while ((line = ReveaalReader.readLine()) != null) {
                     // Process the query result
-                    if (line.endsWith("extra inputs")){
+                    if (line.startsWith("extra inputs")){
                         Matcher m = Pattern.compile("[\"]([^\"]+)[\"]").matcher(line);
                         while(m.find()){
                             inputOutputs.getKey().add(m.group(1));

@@ -242,10 +242,8 @@ public class QueryPresentation extends AnchorPane {
             final TitledPane inputOutputPane = (TitledPane) lookup("#inputOutputPane");
             inputOutputPane.setAnimated(true);
 
-            final Consumer<String> changeTitledPaneVisibility = (queryString) -> updateTitlePaneVisibility(inputOutputPane, queryString);
-
             // Run the consumer to ensure that the input/output pane is displayed for existing refinement queries
-            changeTitledPaneVisibility.accept(controller.getQuery().getQuery());
+            updateTitlePaneVisibility(inputOutputPane);
 
             // Bind the expand icon to the expand property of the pane
             inputOutputPane.expandedProperty().addListener((observable, oldValue, newValue) -> {
@@ -261,12 +259,12 @@ public class QueryPresentation extends AnchorPane {
             final JFXTextField queryTextField = (JFXTextField) lookup("#query");
             queryTextField.focusedProperty().addListener((observable, oldValue, newValue) -> {
                 if (!newValue) {
-                    changeTitledPaneVisibility.accept(controller.getQuery().getQuery());
+                    updateTitlePaneVisibility(inputOutputPane);
                 }
             });
 
             // Change visibility of input/output Pane when backend is changed for the query
-            lookup("#swapBackendButton").setOnMousePressed(event -> changeTitledPaneVisibility.accept(controller.getQuery().getQuery()));
+            lookup("#swapBackendButton").setOnMousePressed(event -> updateTitlePaneVisibility(inputOutputPane));
 
             Platform.runLater(() -> addIgnoredInputOutputsFromQuery(inputOutputPane));
         });
@@ -342,7 +340,7 @@ public class QueryPresentation extends AnchorPane {
 
                 this.controller.getQuery().setCurrentBackend(newBackend);
                 setSwapBackendTooltipAndLabel(newBackend);
-                updateTitlePaneVisibility(inputOutputPane, controller.getQuery().getQuery());
+                updateTitlePaneVisibility(inputOutputPane);
             });
 
             swapBackendButtonTooltip = new Tooltip();
@@ -351,17 +349,14 @@ public class QueryPresentation extends AnchorPane {
         });
     }
 
-    private void updateTitlePaneVisibility(TitledPane inputOutputPane, String queryString) {
+    private void updateTitlePaneVisibility(TitledPane inputOutputPane) {
         final IBackendDriver backendDriver;
 
-        // Check if the query is a refinement and that the engine is set to Reveaal
-        if (queryString.startsWith("refinement") && (backendDriver = BackendDriverManager.getInstance(this.controller.getQuery().getCurrentBackend())) instanceof ReveaalDriver) {
+        // Check if the query is a refinement and that the engine is set to Reveaal to decide input/output visibility
+        if (this.controller.getQuery().getType() != null && this.controller.getQuery().getType().equals(QueryType.REFINEMENT) && (backendDriver = BackendDriverManager.getInstance(this.controller.getQuery().getCurrentBackend())) instanceof ReveaalDriver) {
             initiateResetInputOutputButton(inputOutputPane, (ReveaalDriver) backendDriver);
-
-            // Make the input/output pane visible
             inputOutputPaneVisibility(true);
         } else {
-            // Hide the input/output pane
             inputOutputPaneVisibility(false);
         }
     }
@@ -371,11 +366,14 @@ public class QueryPresentation extends AnchorPane {
         final VBox outputBox = (VBox) inputOutputPane.lookup("#outputBox");
 
         // Get inputs and outputs
-        Pair<ArrayList<String>, ArrayList<String>> inputOutputs = backendDriver.getInputOutputs(controller.getQuery().getQuery());
+        Pair<ArrayList<String>, ArrayList<String>> inputOutputs = backendDriver.getInputOutputs(controller.getQuery());
 
-        if (shouldResetSelections) {
+        if (shouldResetSelections || inputOutputs == null) {
             // Reset selections for ignored inputs and outputs
             clearIgnoredInputsAndOutputs(inputBox, outputBox);
+            if (inputOutputs == null) {
+                return;
+            }
         }
 
         addNewElementsToMap(inputOutputs.getKey(), controller.getQuery().ignoredInputs, inputBox);
