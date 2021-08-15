@@ -90,21 +90,21 @@ public class Query implements Serializable {
         for (QueryType value : QueryType.values()) {
             whiteList.add(value.getSymbol());
         }
-        whiteList.add(".");
-        whiteList.add("(");
-        whiteList.add(")");
+
+        whiteList.add("\\|\\|");
+        whiteList.add("\\.");
+        whiteList.add("\\(");
+        whiteList.add("\\)");
 
         StringBuilder patternString = new StringBuilder(whiteList.get(0));
         whiteList.stream().skip(1).forEach((s -> patternString.append("|").append(s)));
-        patternString.append("*");
-        Pattern p = Pattern.compile(patternString.toString());
+        Pattern p = Pattern.compile("^(" + patternString + ")+$");
         Matcher m = p.matcher(cleanQuery);
-
-        System.out.println(m.matches());
 
         if (m.matches()) {
             return cleanQuery;
         } else {
+            Ecdar.showToast("The query is not accepted. Make sure to use accepted and present components and operators only");
             return "";
         }
     }
@@ -167,6 +167,7 @@ public class Query implements Serializable {
                     BackendHelper.buildEcdarDocument();
                 } catch (final BackendException e) {
                     Ecdar.showToast("Could not build XML document. I got the error: " + e.getMessage());
+                    setQueryState(QueryState.SYNTAX_ERROR);
                     e.printStackTrace();
                     return;
                 }
@@ -176,7 +177,7 @@ public class Query implements Serializable {
 
             String queryString = getCleanQueryOrEmptyString();
             if (queryString.isEmpty()) {
-                // ToDo NIELS: Handle the query not being runnable (probably due to not being whitelisted)
+                setQueryState(QueryState.SYNTAX_ERROR);
                 return;
             }
 

@@ -26,7 +26,6 @@ public class ReveaalThread extends BackendThread {
                 String line;
                 QueryState result = QueryState.RUNNING;
                 while ((line = ReveaalReader.readLine()) != null) {
-                    System.out.println(line);
                     if (hasBeenCanceled.get()) {
                         cancel(ReveaalEngineInstance);
                         return;

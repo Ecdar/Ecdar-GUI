@@ -68,13 +68,13 @@ public class ReveaalDriver implements IBackendDriver {
 
         String queryString = query.getCleanQueryOrEmptyString();
         if (queryString.isEmpty()) {
-            // ToDo NIELS: Handle the query not being runnable (probably due to not being whitelisted)
+            return null;
         }
 
         // Pair is used as a tuple, not a key-value pair
         Pair<ArrayList<String>, ArrayList<String>> inputOutputs = new Pair<>(new ArrayList<>(), new ArrayList<>());
 
-        ProcessBuilder pb = new ProcessBuilder("src/Reveaal", "-c", Ecdar.projectDirectory.get(), QueryType.REFINEMENT.getQueryName() + queryString);
+        ProcessBuilder pb = new ProcessBuilder("src/Reveaal", "-c", Ecdar.projectDirectory.get(), QueryType.REFINEMENT.getQueryName() + ":" + queryString);
         pb.redirectErrorStream(true);
         try {
             //Start the Reveaal process
@@ -88,7 +88,7 @@ public class ReveaalDriver implements IBackendDriver {
                 String line;
                 while ((line = ReveaalReader.readLine()) != null) {
                     // Process the query result
-                    if (line.endsWith("extra inputs")){
+                    if (line.startsWith("extra inputs")){
                         Matcher m = Pattern.compile("[\"]([^\"]+)[\"]").matcher(line);
                         while(m.find()){
                             inputOutputs.getKey().add(m.group(1));
