@@ -46,6 +46,8 @@
             <Label fx:id="idLabel" styleClass="sub-caption" mouseTransparent="true"/>
         </Group>
 
+        <Line fx:id="prohibitedLocStrikeThrough" strokeWidth="3" startX="-9" startY="-9" endX="9" endY="9" style="-fx-stroke: -red-A700"/>
+
     </Group>
 
 </fx:root>

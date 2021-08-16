@@ -346,7 +346,6 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
 
         final Location location = controller.getLocation();
 
-
         BiConsumer<Location.Urgency, Location.Urgency> updateUrgencies = (oldUrgency, newUrgency) -> {
             final Transition toUrgent = new Transition() {
                 {
@@ -370,10 +369,11 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
                 }
             };
 
-            if(oldUrgency.equals(Location.Urgency.NORMAL) && !newUrgency.equals(Location.Urgency.NORMAL)) {
-                toUrgent.play();
+            boolean isNormalOrProhibited = newUrgency.equals(Location.Urgency.NORMAL) || newUrgency.equals(Location.Urgency.PROHIBITED);
 
-            } else if(newUrgency.equals(Location.Urgency.NORMAL)) {
+            if(!oldUrgency.equals(Location.Urgency.URGENT) && !isNormalOrProhibited) {
+                toUrgent.play();
+            } else if(isNormalOrProhibited && oldUrgency.equals(Location.Urgency.URGENT)) {
                 toNormal.play();
             }
 
@@ -383,6 +383,16 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
             } else {
                 committedShape.setVisible(false);
                 notCommittedShape.setVisible(true);
+            }
+
+            if(newUrgency.equals(Location.Urgency.PROHIBITED)) {
+                notCommittedShape.setStrokeWidth(4);
+                notCommittedShape.setStroke(Color.RED.getColor(Color.Intensity.A700));
+                controller.prohibitedLocStrikeThrough.setVisible(true);
+            } else {
+                notCommittedShape.setStrokeWidth(1);
+                notCommittedShape.setStroke(location.getColor().getColor(location.getColorIntensity().next(2)));
+                controller.prohibitedLocStrikeThrough.setVisible(false);
             }
         };
 
@@ -399,7 +409,10 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
         // Delegate to style the label based on the color of the location
         final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
             notCommittedShape.setFill(newColor.getColor(newIntensity));
-            notCommittedShape.setStroke(newColor.getColor(newIntensity.next(2)));
+
+            if (!location.getUrgency().equals(Location.Urgency.PROHIBITED)) {
+                notCommittedShape.setStroke(newColor.getColor(newIntensity.next(2)));
+            }
 
             committedShape.setFill(newColor.getColor(newIntensity));
             committedShape.setStroke(newColor.getColor(newIntensity.next(2)));
