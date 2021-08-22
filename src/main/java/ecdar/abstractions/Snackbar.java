@@ -16,8 +16,9 @@ public class Snackbar extends JFXSnackbar {
 
     @Override
     public void enqueue(SnackbarEvent event) {
-        if (getCurrentEvent() == null || !getCurrentEvent().equals(event) && !awaitingEvents.contains(event)) {
+        if (getCurrentEvent() == null || !getCurrentEvent().equals(event)) {
 
+            // This is necessary, as calling contains() on the awaitingEvents list compares the events insufficiently
             JFXSnackbarLayout content = (JFXSnackbarLayout) event.getContent();
             for (SnackbarEvent e : awaitingEvents) {
                 if (content.getToast().equals(((JFXSnackbarLayout) e.getContent()).getToast())) {
