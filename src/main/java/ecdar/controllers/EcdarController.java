@@ -153,7 +153,7 @@ public class EcdarController implements Initializable {
     public MenuItem menuBarHelpAbout;
     public MenuItem menuBarHelpTest;
 
-    public JFXSnackbar snackbar;
+    public Snackbar snackbar;
     public HBox statusBar;
     public Label statusLabel;
     public Label queryLabel;
