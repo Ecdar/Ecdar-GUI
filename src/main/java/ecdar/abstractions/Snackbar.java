@@ -4,11 +4,11 @@ import com.jfoenix.controls.JFXSnackbar;
 import com.jfoenix.controls.JFXSnackbarLayout;
 import javafx.scene.layout.Pane;
 
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.ArrayList;
 
 public class Snackbar extends JFXSnackbar {
-    private final Queue<SnackbarEvent> eventConcurrentLinkedQueue = new ConcurrentLinkedQueue<>();
+    private final ArrayList<SnackbarEvent> awaitingEvents = new ArrayList<>();
+    private long millisecondsOfEventsInQueue = 0;
 
     public Snackbar(Pane snackbarContainer) {
         super(snackbarContainer);
@@ -16,25 +16,29 @@ public class Snackbar extends JFXSnackbar {
 
     @Override
     public void enqueue(SnackbarEvent event) {
-        if (getCurrentEvent() == null || !getCurrentEvent().equals(event) && !eventConcurrentLinkedQueue.contains(event)) {
+        if (getCurrentEvent() == null || !getCurrentEvent().equals(event) && !awaitingEvents.contains(event)) {
 
             JFXSnackbarLayout content = (JFXSnackbarLayout) event.getContent();
-            for (SnackbarEvent e : eventConcurrentLinkedQueue) {
+            for (SnackbarEvent e : awaitingEvents) {
                 if (content.getToast().equals(((JFXSnackbarLayout) e.getContent()).getToast())) {
                     return;
                 }
             }
-            
+
+            millisecondsOfEventsInQueue += event.getTimeout().toMillis();
+
             new java.util.Timer().schedule(
                     new java.util.TimerTask() {
                         @Override
                         public void run() {
-                            eventConcurrentLinkedQueue.remove(event);
+                            awaitingEvents.remove(event);
+                            millisecondsOfEventsInQueue -= event.getTimeout().toMillis();
                         }
                     },
-                    (long) event.getTimeout().toMillis()
+                    millisecondsOfEventsInQueue
             );
 
+            awaitingEvents.add(event);
             super.enqueue(event);
         }
     }

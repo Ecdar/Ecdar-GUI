@@ -2,6 +2,7 @@ package ecdar.presentations;
 
 import com.jfoenix.controls.JFXRippler;
 import com.jfoenix.skins.ValidationPane;
+import ecdar.Ecdar;
 import ecdar.controllers.CanvasController;
 import ecdar.controllers.EcdarController;
 import ecdar.utility.colors.Color;
@@ -134,6 +135,7 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
 
     private void startDragSelect(final MouseEvent event) {
         if(event.isPrimaryButtonDown()) {
+            Ecdar.showToast("Prim");
             SelectHelper.clearSelectedElements();
 
             double mouseDownX = event.getX();
@@ -155,7 +157,11 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
 
             mouseTracker.registerOnMouseReleasedEventHandler(e -> Platform.runLater(() -> this.getChildren().remove(selectionRectangle)));
             this.getChildren().add(selectionRectangle);
+        } else {
+            Ecdar.showToast("Sec");
         }
+
+        Ecdar.showToast("Any");
     }
 
     private Rectangle initializeRectangleForSelectionBox(double mouseDownX, double mouseDownY) {
