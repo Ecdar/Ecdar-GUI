@@ -90,6 +90,11 @@ public class QueryPresentation extends AnchorPane {
 
             final DropDownMenu dropDownMenu = new DropDownMenu(detailsButton);
 
+            dropDownMenu.addClickableListElement("Run and Show in Simulator", event -> {
+                controller.getQuery().runInSimulator(true);
+                dropDownMenu.hide();
+            });
+
             dropDownMenu.addToggleableListElement("Run Periodically", controller.getQuery().isPeriodicProperty(), event -> {
                 // Toggle the property
                 controller.getQuery().setIsPeriodic(!controller.getQuery().isPeriodic());

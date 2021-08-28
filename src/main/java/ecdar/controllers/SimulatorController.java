@@ -5,8 +5,8 @@ import com.uppaal.model.system.concrete.ConcreteTransition;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
 import ecdar.backend.BackendException;
+import ecdar.backend.BackendHelper;
 import ecdar.backend.SimulationHandler;
-import ecdar.backend.UPPAALDriver;
 import ecdar.presentations.LeftSimPanePresentation;
 import ecdar.presentations.RightSimPanePresentation;
 import ecdar.presentations.SimulatorOverviewPresentation;
@@ -34,7 +34,6 @@ public class SimulatorController implements Initializable, Presentable {
     public Rectangle bottomFillerElement;
     public RightSimPanePresentation rightSimPane;
     public LeftSimPanePresentation leftSimPane;
-    private Declarations systemDeclarations;
     private boolean firstTimeInSimulator;
 
     private final static DoubleProperty width = new SimpleDoubleProperty(),
@@ -54,7 +53,6 @@ public class SimulatorController implements Initializable, Presentable {
      * It also prepares the processes to be shown in the {@link SimulatorOverviewPresentation} by: <br />
      *  - Building the system if it has been updated or never have been created.<br />
      *  - Adding the components which are going to be used in the simulation to
-     *    {@link SimulatorOverviewController#componentArrayList}
      */
     @Override
     public void willShow() {
@@ -69,10 +67,6 @@ public class SimulatorController implements Initializable, Presentable {
         if(!firstTimeInSimulator && !overviewPresentation.getController().getComponentObservableList()
                 .containsAll(findComponentsInCurrentSimulation())) {
             shouldSimulationBeReset = true;
-        }
-
-        if(systemDeclarations == null || shouldSimulationBeReset) {
-            systemDeclarations = Ecdar.getProject().getSystemDeclarations();
         }
 
         if (shouldSimulationBeReset || firstTimeInSimulator) {
@@ -97,7 +91,7 @@ public class SimulatorController implements Initializable, Presentable {
     private void resetSimulation() throws BackendException.SystemNotFoundException {
         final SimulationHandler sm = Ecdar.getSimulationHandler();
         try {
-            UPPAALDriver.buildEcdarDocument();
+            BackendHelper.buildEcdarDocument();
             sm.initializeDefaultSystem();
         } catch (final BackendException.SystemNotFoundException ex){
             Ecdar.showToast("A system is not declared, or contains syntax errors");
@@ -156,8 +150,8 @@ public class SimulatorController implements Initializable, Presentable {
     public void willHide() {
         overviewPresentation.getController().removeProcessesFromGroup();
         overviewPresentation.getController().getComponentObservableList().forEach(component -> {
-            component.getBox().setX(Box.INITIAL_X);
-            component.getBox().setY(Box.INITIAL_Y);
+            component.getBox().setX(5.00);
+            component.getBox().setY(5.00);
         });
         overviewPresentation.getController().unhighlightProcesses();
     }

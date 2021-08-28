@@ -55,7 +55,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
-public class EcdarController implements Initializable {
+public class EcdarController implements Initializable, Presentable {
 
     // Reachability analysis
     public static boolean reachabilityServiceEnabled = false;
@@ -66,6 +66,7 @@ public class EcdarController implements Initializable {
 
     // View stuff
     public StackPane root;
+    public SimulatorPresentation simulatorPresentation = new SimulatorPresentation();
     public QueryPanePresentation queryPane;
     public ProjectPanePresentation filePane;
     public StackPane toolbar;
@@ -134,6 +135,7 @@ public class EcdarController implements Initializable {
     public Tab backendErrorsTab;
     public ScrollPane backendErrorsScrollPane;
     public VBox backendErrorsList;
+    public HBox centerContainer;
 
     // The program top menu
     public MenuBar menuBar;
@@ -141,6 +143,10 @@ public class EcdarController implements Initializable {
     public MenuItem menuBarViewQueryPanel;
     public MenuItem menuBarViewGrid;
     public MenuItem menuBarViewCanvasSplit;
+    public MenuItem menuBarViewSimLeftPanel;
+    public MenuItem menuBarViewSimRightPanel;
+    public MenuItem menuBarViewHome;
+    public MenuItem menuBarViewSim;
     public MenuItem menuBarFileCreateNewProject;
     public MenuItem menuBarFileOpenProject;
     public MenuItem menuBarFileSave;
@@ -148,6 +154,9 @@ public class EcdarController implements Initializable {
     public MenuItem menuBarFileNewMutationTestObject;
     public MenuItem menuBarFileExportAsPng;
     public MenuItem menuBarFileExportAsPngNoBorder;
+    public MenuItem menuBarZoomInSimulator;
+    public MenuItem menuBarZoomOutSimulator;
+    public MenuItem menuBarZoomResetSimulator;
     public MenuItem menuBarOptionsCache;
     public MenuItem menuBarHelpHelp;
     public MenuItem menuBarHelpAbout;
@@ -167,11 +176,14 @@ public class EcdarController implements Initializable {
     private static JFXDialog _queryDialog;
     private static Text _queryTextResult;
     private static Text _queryTextQuery;
+    public JFXDialog reloadSimulatorDialog;
+    private static JFXDialog _reloadSimulatorDialog;
 
     private double tabPanePreviousY = 0;
     public boolean shouldISkipOpeningTheMessagesContainer = true;
 
     private static final ObjectProperty<CanvasPresentation> activeCanvasPresentation = new SimpleObjectProperty<>(new CanvasPresentation());
+    private static final ObjectProperty<EcdarController.Mode> currentMode = new SimpleObjectProperty<>(EcdarController.Mode.Editor);
 
     public static void runReachabilityAnalysis() {
         if (!reachabilityServiceEnabled) return;
@@ -207,12 +219,31 @@ public class EcdarController implements Initializable {
 
         initializeEdgeStatusHandling();
 
+        this.initializeMode();
         initializeKeybindings();
         initializeTabPane();
         initializeStatusBar();
         initializeMessages();
         initializeMenuBar();
         initializeReachabilityAnalysisThread();
+        this.simulatorPresentation.getController().root.prefWidthProperty().bind(this.centerContainer.widthProperty());
+
+    }
+
+    private void initializeMode() {
+        currentMode.addListener((obs, oldMode, newMode) -> {
+            if (newMode == EcdarController.Mode.Editor && oldMode != newMode) {
+                this.enterEditorMode();
+            } else if (newMode == EcdarController.Mode.Simulator && oldMode != newMode) {
+                this.enterSimulatorMode();
+            }
+
+        });
+        if (currentMode.get() == EcdarController.Mode.Editor) {
+            this.enterEditorMode();
+        } else if (currentMode.get() == EcdarController.Mode.Simulator) {
+            this.enterSimulatorMode();
+        }
 
     }
 
@@ -1227,6 +1258,77 @@ public class EcdarController implements Initializable {
         }
     }
 
+    private void enterEditorMode() {
+        if (!this.centerContainer.getChildren().contains(Ecdar.getPresentation())) {
+            Ecdar.getPresentation().getController().willShow();
+            this.simulatorPresentation.getController().willHide();
+            this.centerContainer.getChildren().remove(this.simulatorPresentation);
+            this.centerContainer.getChildren().add(Ecdar.getPresentation());
+            this.updateMenuItems();
+        }
+    }
+
+    private void enterSimulatorMode() {
+        if (!this.centerContainer.getChildren().contains(this.simulatorPresentation)) {
+            currentMode.setValue(EcdarController.Mode.Simulator);
+            Ecdar.getPresentation().getController().willHide();
+            this.simulatorPresentation.getController().willShow();
+            this.centerContainer.getChildren().remove(Ecdar.getPresentation());
+            this.centerContainer.getChildren().add(this.simulatorPresentation);
+            this.updateMenuItems();
+        }
+    }
+
+    private void updateMenuItems() {
+        switch(currentMode.get()) {
+            case Editor:
+                this.menuBarViewGrid.setDisable(false);
+                this.menuBarViewFilePanel.setDisable(false);
+                this.menuBarViewQueryPanel.setDisable(false);
+                this.menuBarViewSimLeftPanel.setDisable(true);
+                this.menuBarViewSimRightPanel.setDisable(true);
+                this.menuBarFileExportAsPngNoBorder.setDisable(false);
+                this.menuBarFileExportAsPng.setDisable(false);
+                this.menuBarZoomInSimulator.setDisable(true);
+                this.menuBarZoomOutSimulator.setDisable(true);
+                this.menuBarZoomResetSimulator.setDisable(true);
+                KeyboardTracker.unregisterKeybind("ZOOM_IN");
+                KeyboardTracker.unregisterKeybind("ZOOM_OUT");
+                KeyboardTracker.unregisterKeybind("ZOOM_RESET");
+                break;
+            case Simulator:
+                this.menuBarViewGrid.setDisable(true);
+                this.menuBarViewFilePanel.setDisable(true);
+                this.menuBarViewSimLeftPanel.setDisable(false);
+                this.menuBarViewSimRightPanel.setDisable(false);
+                this.menuBarFileExportAsPngNoBorder.setDisable(true);
+                this.menuBarFileExportAsPng.setDisable(true);
+                this.menuBarViewQueryPanel.setDisable(true);
+                this.menuBarZoomInSimulator.setDisable(false);
+                this.menuBarZoomOutSimulator.setDisable(false);
+                this.menuBarZoomResetSimulator.setDisable(false);
+                this.setExtraZoomKeybindings();
+        }
+    }
+
+    private void setExtraZoomKeybindings() {
+        KeyCodeCombination zoomInCombination2 = new KeyCodeCombination(KeyCode.ADD, KeyCombination.SHORTCUT_DOWN);
+        KeyboardTracker.registerKeybind("ZOOM_IN", new Keybind(zoomInCombination2, (keyEvent) -> {
+            keyEvent.consume();
+            this.simulatorPresentation.getController().overviewPresentation.getController().zoomIn();
+        }));
+        KeyCodeCombination zoomOutCombination2 = new KeyCodeCombination(KeyCode.SUBTRACT, KeyCombination.SHORTCUT_DOWN);
+        KeyboardTracker.registerKeybind("ZOOM_OUT", new Keybind(zoomOutCombination2, (keyEvent) -> {
+            keyEvent.consume();
+            this.simulatorPresentation.getController().overviewPresentation.getController().zoomOut();
+        }));
+        KeyCodeCombination zoomResetCombination = new KeyCodeCombination(KeyCode.NUMPAD0, KeyCombination.SHORTCUT_DOWN);
+        KeyboardTracker.registerKeybind("ZOOM_RESET", new Keybind(zoomResetCombination, (keyEvent) -> {
+            keyEvent.consume();
+            this.simulatorPresentation.getController().overviewPresentation.getController().resetZoom();
+        }));
+    }
+
     /**
      * This method is used as a central place to decide whether the tabPane is opened or closed
      * @param height the value used to set the height of the tabPane
@@ -1368,5 +1470,67 @@ public class EcdarController implements Initializable {
             _queryTextQuery.setText(query.getQuery());
         }
         _queryDialog.show();
+    }
+
+    /**
+     * Used by the cancel button in the reload dialog.
+     * Closes the dialog when called.
+     */
+    @FXML
+    private void cancelReloadSimulatorDialog() {
+        reloadSimulatorDialog.close();
+    }
+
+    /**
+     * Used by the OK button in the reload dialog.
+     * Reloads the system of the simulator.
+     */
+    @FXML
+    private void okReloadSimulatorDialog() {
+        simulatorPresentation.getController().resetCurrentSimulation();
+        reloadSimulatorDialog.close();
+    }
+
+    public static void openReloadSimulationDialog() {
+        _reloadSimulatorDialog.show();
+    }
+
+    /**
+     * Changes the mode to simulator, causing the view to change to simulator mode
+     */
+    public static void showSimulator() {
+        currentMode.setValue(Mode.Simulator);
+    }
+
+    public void willShow() {
+        initializeKeybindings();
+        getActiveCanvasPresentation().getController().resetCurrentActiveModelPlacement();
+    }
+
+    public void willHide() {
+        this.unregisterKeybindings();
+    }
+
+    private void unregisterKeybindings() {
+        KeyboardTracker.unregisterKeybind("CREATE_COMPONENT");
+        KeyboardTracker.unregisterKeybind("NUDGE_UP");
+        KeyboardTracker.unregisterKeybind("NUDGE_DOWN");
+        KeyboardTracker.unregisterKeybind("NUDGE_LEFT");
+        KeyboardTracker.unregisterKeybind("NUDGE_RIGHT");
+        KeyboardTracker.unregisterKeybind("DESELECT");
+        KeyboardTracker.unregisterKeybind("NUDGE_W");
+        KeyboardTracker.unregisterKeybind("NUDGE_A");
+        KeyboardTracker.unregisterKeybind("NUDGE_S");
+        KeyboardTracker.unregisterKeybind("NUDGE_D");
+        KeyboardTracker.unregisterKeybind("DELETE_SELECTED");
+        KeyboardTracker.unregisterKeybind("COLOR_SELECTED");
+    }
+
+    private static enum Mode {
+        Editor,
+        Simulator;
+
+        private Mode() {
+        }
     }
 }

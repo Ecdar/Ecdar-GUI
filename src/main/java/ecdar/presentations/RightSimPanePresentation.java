@@ -34,7 +34,7 @@ public class RightSimPanePresentation extends StackPane {
      * Initializes the thin border on the left side of the querypane toolbar
      */
     private void initializeLeftBorder() {
-        controller.queryPaneElement.getController().toolbar.setBorder(new Border(new BorderStroke(
+        controller.queryPane.getController().toolbar.setBorder(new Border(new BorderStroke(
                 Color.GREY_BLUE.getColor(Color.Intensity.I900),
                 BorderStrokeStyle.SOLID,
                 CornerRadii.EMPTY,

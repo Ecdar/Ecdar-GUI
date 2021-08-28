@@ -199,17 +199,52 @@
                             <FontIcon iconLiteral="gmi-check" iconSize="24" fill="black"/>
                         </graphic>
                     </MenuItem>
+                    <MenuItem fx:id="menuBarViewHome" text="Home">
+                        <graphic>
+                            <FontIcon iconLiteral="gmi-home" iconSize="24" fill="black"/>
+                        </graphic>
+                    </MenuItem>
+                    <MenuItem fx:id="menuBarViewSim" text="Simulator">
+                        <graphic>
+                            <FontIcon iconLiteral="gmi-play-circle-outline" iconSize="24" fill="black"/>
+                        </graphic>
+                    </MenuItem>
+                    <MenuItem fx:id="menuBarViewSimLeftPanel" text="Simulator Left Panel">
+                        <graphic>
+                            <FontIcon iconLiteral="gmi-check" iconSize="24" fill="black"/>
+                        </graphic>
+                    </MenuItem>
+                    <MenuItem fx:id="menuBarViewSimRightPanel" text="Simulator Right Panel">
+                        <graphic>
+                            <FontIcon iconLiteral="gmi-check" iconSize="24" fill="black"/>
+                        </graphic>
+                    </MenuItem>
                     <MenuItem fx:id="menuBarViewGrid" text="Grid">
                         <graphic>
                             <FontIcon iconLiteral="gmi-check" iconSize="24" fill="black"/>
                         </graphic>
                     </MenuItem>
-
-                    <SeparatorMenuItem/>
-
                     <MenuItem fx:id="menuBarViewCanvasSplit" text="Split canvas">
                         <graphic>
                             <FontIcon iconLiteral="gmi-border-all" iconSize="24" fill="black"/>
+                        </graphic>
+                    </MenuItem>
+
+                    <SeparatorMenuItem/>
+
+                    <MenuItem fx:id="menuBarZoomInSimulator" text="Zoom in">
+                        <graphic>
+                            <FontIcon iconLiteral="gmi-zoom-in" iconSize="24" fill="black"/>
+                        </graphic>
+                    </MenuItem>
+                    <MenuItem fx:id="menuBarZoomOutSimulator" text="Zoom out">
+                        <graphic>
+                            <FontIcon iconLiteral="gmi-zoom-out" iconSize="24" fill="black"/>
+                        </graphic>
+                    </MenuItem>
+                    <MenuItem fx:id="menuBarZoomResetSimulator" text="Reset zoom">
+                        <graphic>
+                            <FontIcon iconLiteral="gmi-youtube-searched-for" iconSize="24" fill="black"/>
                         </graphic>
                     </MenuItem>
                 </Menu>

@@ -6,6 +6,7 @@ import ecdar.model_canvas.arrow_heads.ChannelReceiverArrowHead;
 import ecdar.model_canvas.arrow_heads.ChannelSenderArrowHead;
 import ecdar.presentations.CanvasPresentation;
 import ecdar.presentations.Link;
+import ecdar.presentations.SimTagPresentation;
 import ecdar.presentations.TagPresentation;
 import ecdar.utility.mouse.MouseTracker;
 import javafx.beans.binding.DoubleBinding;
@@ -174,6 +175,15 @@ public class BindingHelper {
             subject.endXProperty().bind(lineBinding.startX);
             subject.endYProperty().bind(lineBinding.startY);
         }
+    }
+
+    public static void bind(final Line subject, final SimTagPresentation target) {
+        subject.startXProperty().set(0);
+        subject.startYProperty().set(0);
+        subject.endXProperty().bind(target.translateXProperty().add(target.minWidthProperty().divide(2)));
+        subject.endYProperty().bind(target.translateYProperty().add(target.heightProperty().divide(2)));
+        subject.opacityProperty().bind(target.opacityProperty());
+        subject.visibleProperty().bind(target.visibleProperty());
     }
 
     private static class LineBinding {

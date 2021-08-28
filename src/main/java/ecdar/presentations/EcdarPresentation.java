@@ -94,6 +94,14 @@ public class EcdarPresentation extends StackPane {
         KeyboardTracker.registerKeybind(KeyboardTracker.REDO, new Keybind(new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN), UndoRedoStack::redo));
     }
 
+    public BooleanProperty toggleLeftSimPane() {
+        return this.controller.simulatorPresentation.toggleLeftPane();
+    }
+
+    public BooleanProperty toggleRightSimPane() {
+        return this.controller.simulatorPresentation.toggleRightPane();
+    }
+
     private void initializeSnackbar() {
         controller.snackbar = new JFXSnackbar(controller.root);
         controller.snackbar.setPrefWidth(568);

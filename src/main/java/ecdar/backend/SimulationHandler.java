@@ -77,52 +77,13 @@ public class SimulationHandler {
      * Initializes the default system (non-query system)
      */
     public void initializeDefaultSystem() throws BackendException.SystemNotFoundException {
-        final Document doc = UPPAALDriver.generateSystemDocument();
-        initializeUsingDocument(doc);
         currentSimulation = "";
-    }
-
-    /**
-     * Helper method to initialize a simulation. Used for constructors that have documents but no engine
-     * @param document the system document to base the simulation on
-     * @throws BackendException.SystemNotFoundException if a system was not linked to the backend
-     */
-    private void initializeUsingDocument(final Document document) throws BackendException.SystemNotFoundException {
-        final Engine engine = UPPAALDriver.getEngine();
-        try {
-            engine.getSystem(document, new Vector<>());
-        } catch (EngineException | IOException e) {
-            e.printStackTrace();
-        }
-        if (engine.getSystem() == null)
-            throw new BackendException.SystemNotFoundException("Could not find a system linked to the given engine " + engine);
-        this.engine = engine;
-        initializeSimulation();
-    }
-
-    /**
-     * Changes the engine of the current {@link SimulationHandler}.
-     * Releases the previous engine and performs an initial step
-     * @param engine the new engine to use
-     * @param query  the query that has been run on the new engine.
-     *               If no query has been run then just pass the empty string or null.
-     */
-    public void changeEngine(Engine engine, String query) {
-        if (this.engine != null) {
-            UPPAALDriver.releaseEngine(this.engine);
-        }
-        this.engine = engine;
-        initialStep();
-        // If the query is empty the engine has just been changed and no query has been run
-        if (query == null || query.equals("")) return;
-        currentSimulation = QUERY_PREFIX + query;
     }
 
     /**
      * Initializes the values and properties in the {@link SimulationHandler}.
      * Can also be used as a reset of the simulation.
      * THIS METHOD DOES NOT RESET THE ENGINE,
-     * use {@link SimulationHandler#changeEngine(Engine, String)} to change engine or create a new {@link SimulationHandler}.
      */
     private void initializeSimulation() {
         // Initialization

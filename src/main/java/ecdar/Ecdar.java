@@ -3,6 +3,7 @@ package ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Project;
 import ecdar.backend.BackendHelper;
+import ecdar.backend.SimulationHandler;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.controllers.EcdarController;
 import ecdar.presentations.BackgroundThreadPresentation;
@@ -40,6 +41,7 @@ public class Ecdar extends Application {
     public static final String VERSION = "2.1";
     public static boolean serializationDone = false;
     private static Project project;
+    private static SimulationHandler simulationHandler;
     private static EcdarPresentation presentation;
     public static SimpleStringProperty projectDirectory = new SimpleStringProperty();
     private static BooleanProperty isUICached = new SimpleBooleanProperty();
@@ -82,6 +84,8 @@ public class Ecdar extends Application {
     public static Project getProject() {
         return project;
     }
+
+    public static SimulationHandler getSimulationHandler() { return simulationHandler; }
 
     public static EcdarPresentation getPresentation() {
         return presentation;
@@ -132,6 +136,18 @@ public class Ecdar extends Application {
 
         return isSplit;
     }
+
+    /**
+     * Opens or closes the left pane of the simulator. Calls {@see SimulatorPresentation#toggleLeftPane}
+     * @return @return A Boolean Property that is true if the pane is open and false if it is closed
+     */
+    public static BooleanProperty toggleLeftSimPane() { return presentation.toggleLeftSimPane(); }
+
+    /**
+     * Opens or closes the right pane of the simulator. Calls {@see SimulatorPresentation#toggleRightPane}
+     * @return @return A Boolean Property that is true if the pane is open and false if it is closed
+     */
+    public static BooleanProperty toggleRightSimPane() { return presentation.toggleRightSimPane(); }
 
     private void forceCreateFolder(final String directoryPath) throws IOException {
         final File directory = new File(directoryPath);

@@ -216,4 +216,15 @@ public class CanvasController implements Initializable {
     public boolean isGridAllowed() {
         return allowGrid.get();
     }
+
+    public void resetCurrentActiveModelPlacement() {
+        if (activeModel.get() instanceof Component) {
+            this.resetComponentBoxPlacement((Component)activeModel.get());
+        }
+    }
+
+    private void resetComponentBoxPlacement(Component component) {
+        component.getBox().setX(5.0D);
+        component.getBox().setY(5.0D);
+    }
 }

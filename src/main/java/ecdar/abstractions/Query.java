@@ -3,6 +3,7 @@ package ecdar.abstractions;
 import ecdar.Ecdar;
 import ecdar.backend.*;
 import ecdar.controllers.EcdarController;
+import ecdar.controllers.SimulatorController;
 import ecdar.utility.serialize.Serializable;
 import com.google.gson.JsonObject;
 import com.uppaal.engine.Engine;
@@ -11,7 +12,7 @@ import javafx.beans.property.*;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 public class Query implements Serializable {
     private static final String QUERY = "query";
@@ -32,7 +33,7 @@ public class Query implements Serializable {
     private final ObjectProperty<QueryType> type = new SimpleObjectProperty<>();
     private BackendHelper.BackendNames currentBackend;
     private BackendThread backendThread;
-    private Consumer<Boolean> runQuery;
+    private BiConsumer<Boolean, Boolean> runQuery;
 
     public Query(final String query, final String comment, final QueryState queryState) {
         this.query.set(query);
@@ -123,7 +124,7 @@ public class Query implements Serializable {
     private Boolean forcedCancel = false;
 
     private void initializeRunQuery() {
-        runQuery = (buildEcdarDocument) -> {
+        runQuery = (buildEcdarDocument, showSimulator) -> {
             setQueryState(QueryState.RUNNING);
 
             if (buildEcdarDocument) {
@@ -142,6 +143,13 @@ public class Query implements Serializable {
                     aBoolean -> {
                         if (aBoolean) {
                             setQueryState(QueryState.SUCCESSFUL);
+
+                            if(showSimulator) {
+                                Platform.runLater(() -> {
+                                    SimulatorController.setSelectedTransition(null);
+                                    EcdarController.showSimulator();
+                                });
+                            }
                         } else {
                             setQueryState(QueryState.ERROR);
                         }
@@ -236,7 +244,11 @@ public class Query implements Serializable {
     }
 
     public void run(final boolean buildEcdarDocument) {
-        runQuery.accept(buildEcdarDocument);
+        runQuery.accept(buildEcdarDocument, false);
+    }
+
+    public void runInSimulator(final boolean buildEcdarDocument) {
+        runQuery.accept(buildEcdarDocument, true);
     }
 
     public void cancel() {

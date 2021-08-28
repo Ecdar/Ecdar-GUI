@@ -137,7 +137,7 @@ public class SimNailPresentation extends Group implements Highlightable {
                 }
 
                 //Disable the ability to edit the tag if the nails edge is locked
-                if(controller.getEdge().getIsLocked().getValue()){
+                if(controller.getEdge().getIsLockedProperty().getValue()){
                     propertyTag.setDisabledText(true);
                 }
             }
