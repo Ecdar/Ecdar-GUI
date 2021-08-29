@@ -2,6 +2,7 @@ package ecdar.presentations;
 
 import ecdar.abstractions.Edge;
 import ecdar.controllers.EcdarController;
+import ecdar.controllers.MainController;
 import ecdar.controllers.SyncTextFieldController;
 import javafx.application.Platform;
 import javafx.beans.binding.When;
@@ -22,7 +23,7 @@ public class SyncTextFieldPresentation extends StackPane {
                     controller.textField.setTranslateY(2);
                 } else {
                     controller.textField.setTranslateY(0);
-                    EcdarController.getActiveCanvasPresentation().getController().leaveTextAreas();
+                    MainController.getActiveCanvasPresentation().getController().leaveTextAreas();
                 }
             });
 

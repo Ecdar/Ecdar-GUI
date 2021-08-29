@@ -64,7 +64,7 @@ public class CanvasController implements Initializable {
      */
     public void setActiveModel(final HighLevelModelObject model) {
         activeModel.set(model);
-        Platform.runLater(EcdarController.getActiveCanvasPresentation().getController()::leaveTextAreas);
+        Platform.runLater(MainController.getActiveCanvasPresentation().getController()::leaveTextAreas);
     }
 
     public ObjectProperty<HighLevelModelObject> activeComponentProperty() {

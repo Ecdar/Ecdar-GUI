@@ -4,6 +4,7 @@ import ecdar.abstractions.Component;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.controllers.CanvasController;
 import ecdar.controllers.EcdarController;
+import ecdar.controllers.MainController;
 import ecdar.utility.colors.Color;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -102,7 +103,7 @@ public class MessageCollectionPresentation extends VBox {
         };
 
         final EventHandler<MouseEvent> onMousePressed = event -> {
-            EcdarController.getActiveCanvasPresentation().getController().setActiveModel(component);
+            MainController.getActiveCanvasPresentation().getController().setActiveModel(component);
         };
 
         headline.setOnMouseEntered(onMouseEntered);

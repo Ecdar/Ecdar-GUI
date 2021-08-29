@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import ecdar.presentations.SimulatorOverviewPresentation?>
+
+<?import javafx.scene.shape.Rectangle?>
+<?import ecdar.presentations.RightSimPanePresentation?>
+<?import ecdar.presentations.LeftSimPanePresentation?>
+<?import javafx.scene.control.Label?>
+<fx:root xmlns="http://javafx.com/javafx"
+         xmlns:fx="http://javafx.com/fxml"
+         fx:id="root"
+         fx:controller="ecdar.controllers.SimulatorController"
+         type="StackPane">
+    <BorderPane>
+        <center>
+            <StackPane>
+                <SimulatorOverviewPresentation fx:id="overviewPresentation"/>
+                <StackPane fx:id="toolbar"
+                           StackPane.alignment="TOP_CENTER"
+                           minHeight="56" maxHeight="56" >
+                    <HBox style="-fx-padding: 0 16 0 16;">
+                        <!-- Content of the toolbar -->
+                        <Region HBox.hgrow="ALWAYS" />
+                    </HBox>
+                </StackPane>
+                <RightSimPanePresentation
+                        fx:id="rightSimPane"
+                        StackPane.alignment="TOP_RIGHT"
+                        maxWidth="400"/>
+
+                <LeftSimPanePresentation
+                        fx:id="leftSimPane"
+                        StackPane.alignment="TOP_LEFT"
+                        maxWidth="300" />
+            </StackPane>
+        </center>
+
+        <right>
+            <Label fx:id="rightPaneFillerElement"/>
+        </right>
+
+        <left>
+            <Label fx:id="leftPaneFillerElement"/>
+        </left>
+
+        <bottom>
+            <!--The bottomFillerElement is a view that pushes up other content as the user resizes the tabPaneContainer
+            The value 55 is the height of the statusbar plus the tabPaneContainer-->
+            <VBox minHeight="55">
+                <Rectangle fx:id="bottomFillerElement"/>
+            </VBox>
+        </bottom>
+    </BorderPane>
+</fx:root>

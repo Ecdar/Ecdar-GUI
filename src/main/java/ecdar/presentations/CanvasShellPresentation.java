@@ -3,6 +3,7 @@ package ecdar.presentations;
 import com.jfoenix.controls.JFXRippler;
 import ecdar.controllers.CanvasShellController;
 import ecdar.controllers.EcdarController;
+import ecdar.controllers.MainController;
 import ecdar.utility.colors.Color;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -17,9 +18,9 @@ public class CanvasShellPresentation extends StackPane {
         controller = new EcdarFXMLLoader().loadAndGetController("CanvasShellPresentation.fxml", this);
 
         getController().root.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
-            EcdarController.getActiveCanvasPresentation().getParent().setOpacity(0.75);
+            MainController.getActiveCanvasPresentation().getParent().setOpacity(0.75);
             this.setOpacity(1);
-            EcdarController.setActiveCanvasPresentation(getController().canvasPresentation);
+            MainController.setActiveCanvasPresentation(getController().canvasPresentation);
         });
 
         initializeToolbar();

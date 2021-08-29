@@ -3,6 +3,7 @@ package ecdar.presentations;
 import ecdar.abstractions.EcdarSystemEdge;
 import ecdar.abstractions.EcdarSystem;
 import ecdar.controllers.EcdarController;
+import ecdar.controllers.MainController;
 import ecdar.controllers.SystemEdgeController;
 import ecdar.utility.colors.Color;
 import ecdar.utility.helpers.ItemDragHelper;
@@ -49,8 +50,8 @@ public class SystemEdgePresentation extends Group implements SelectHelper.ItemSe
             link.startYProperty().bind(edge.getTempNode().getEdgeY());
 
             // Bind to mouse position (snapped to the grid)
-            link.endXProperty().bind(EcdarController.getActiveCanvasPresentation().mouseTracker.gridXProperty().subtract(Grid.GRID_SIZE / 2));
-            link.endYProperty().bind(EcdarController.getActiveCanvasPresentation().mouseTracker.gridYProperty().subtract(Grid.GRID_SIZE / 2));
+            link.endXProperty().bind(MainController.getActiveCanvasPresentation().mouseTracker.gridXProperty().subtract(Grid.GRID_SIZE / 2));
+            link.endYProperty().bind(MainController.getActiveCanvasPresentation().mouseTracker.gridYProperty().subtract(Grid.GRID_SIZE / 2));
         }
 
         // If edge source and target changes, bind

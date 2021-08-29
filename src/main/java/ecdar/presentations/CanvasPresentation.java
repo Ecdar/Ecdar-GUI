@@ -4,6 +4,7 @@ import com.jfoenix.controls.JFXRippler;
 import com.jfoenix.skins.ValidationPane;
 import ecdar.controllers.CanvasController;
 import ecdar.controllers.EcdarController;
+import ecdar.controllers.MainController;
 import ecdar.utility.colors.Color;
 import ecdar.utility.helpers.CanvasDragHelper;
 import ecdar.utility.helpers.MouseTrackable;
@@ -100,7 +101,7 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
      * @param shouldShow true iff views should show an inset
      */
     public static void showBottomInset(final Boolean shouldShow) {
-        EcdarController.getActiveCanvasPresentation().getController().updateOffset(shouldShow);
+        MainController.getActiveCanvasPresentation().getController().updateOffset(shouldShow);
     }
 
     @Override

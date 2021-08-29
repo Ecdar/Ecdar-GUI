@@ -285,11 +285,11 @@ public class ComponentController extends ModelController implements Initializabl
                 final Location newLocation = new Location();
                 newLocation.initialize();
 
-                double x = DropDownMenu.x / EcdarController.getActiveCanvasPresentation().getScaleX() - LocationPresentation.RADIUS / 2;
+                double x = DropDownMenu.x / MainController.getActiveCanvasPresentation().getScaleX() - LocationPresentation.RADIUS / 2;
                 x = Grid.snap(x);
                 newLocation.setX(x);
 
-                double y = DropDownMenu.y / EcdarController.getActiveCanvasPresentation().getScaleY() - LocationPresentation.RADIUS / 2;
+                double y = DropDownMenu.y / MainController.getActiveCanvasPresentation().getScaleY() - LocationPresentation.RADIUS / 2;
                 y = Grid.snap(y);
                 newLocation.setY(y);
 
@@ -825,7 +825,7 @@ public class ComponentController extends ModelController implements Initializabl
 
     @FXML
     private void modelContainerPressed(final MouseEvent event) {
-        EcdarController.getActiveCanvasPresentation().getController().leaveTextAreas();
+        MainController.getActiveCanvasPresentation().getController().leaveTextAreas();
 
         final DisplayableEdge unfinishedEdge = getComponent().getUnfinishedEdge();
 
@@ -877,17 +877,17 @@ public class ComponentController extends ModelController implements Initializabl
 
         } else if (event.isSecondaryButtonDown()) {
             if (unfinishedEdge == null) {
-                contextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX() * EcdarController.getActiveCanvasPresentation().getScaleX(), event.getY() * EcdarController.getActiveCanvasPresentation().getScaleY());
+                contextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX() * MainController.getActiveCanvasPresentation().getScaleX(), event.getY() * MainController.getActiveCanvasPresentation().getScaleY());
             } else {
                 initializeFinishEdgeContextMenu(unfinishedEdge);
-                finishEdgeContextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX() * EcdarController.getActiveCanvasPresentation().getScaleX(), event.getY() * EcdarController.getActiveCanvasPresentation().getScaleY());
+                finishEdgeContextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX() * MainController.getActiveCanvasPresentation().getScaleX(), event.getY() * MainController.getActiveCanvasPresentation().getScaleY());
             }
         } else if (event.isPrimaryButtonDown()) {
             // We are drawing an edge
             if (unfinishedEdge != null) {
                 // Calculate the position for the new nail (based on the component position and the canvas mouse tracker)
-                final DoubleBinding x = EcdarController.getActiveCanvasPresentation().mouseTracker.gridXProperty().subtract(getComponent().getBox().getXProperty());
-                final DoubleBinding y = EcdarController.getActiveCanvasPresentation().mouseTracker.gridYProperty().subtract(getComponent().getBox().getYProperty());
+                final DoubleBinding x = MainController.getActiveCanvasPresentation().mouseTracker.gridXProperty().subtract(getComponent().getBox().getXProperty());
+                final DoubleBinding y = MainController.getActiveCanvasPresentation().mouseTracker.gridYProperty().subtract(getComponent().getBox().getYProperty());
 
                 // Create the abstraction for the new nail and add it to the unfinished edge
                 final Nail newNail = new Nail(x, y);

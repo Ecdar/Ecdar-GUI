@@ -1,6 +1,7 @@
 package ecdar.utility.helpers;
 
 import ecdar.controllers.EcdarController;
+import ecdar.controllers.MainController;
 import ecdar.utility.mouse.MouseTracker;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -10,7 +11,7 @@ public class MouseCircular implements Circular {
     private final DoubleProperty y = new SimpleDoubleProperty(0d);
     private final DoubleProperty radius = new SimpleDoubleProperty(10);
     private final SimpleDoubleProperty scale = new SimpleDoubleProperty(1d);
-    private final MouseTracker mouseTracker = EcdarController.getActiveCanvasPresentation().mouseTracker;
+    private final MouseTracker mouseTracker = MainController.getActiveCanvasPresentation().mouseTracker;
 
     public MouseCircular(){
         //Set the initial x and y coordinates of the circular

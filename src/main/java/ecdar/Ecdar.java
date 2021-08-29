@@ -6,8 +6,10 @@ import ecdar.backend.BackendHelper;
 import ecdar.backend.SimulationHandler;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.controllers.EcdarController;
+import ecdar.controllers.MainController;
 import ecdar.presentations.BackgroundThreadPresentation;
 import ecdar.presentations.EcdarPresentation;
+import ecdar.presentations.MainPresentation;
 import ecdar.presentations.UndoRedoHistoryPresentation;
 import ecdar.utility.keyboard.Keybind;
 import ecdar.utility.keyboard.KeyboardTracker;
@@ -42,7 +44,7 @@ public class Ecdar extends Application {
     public static boolean serializationDone = false;
     private static Project project;
     private static SimulationHandler simulationHandler;
-    private static EcdarPresentation presentation;
+    private static MainPresentation presentation;
     public static SimpleStringProperty projectDirectory = new SimpleStringProperty();
     private static BooleanProperty isUICached = new SimpleBooleanProperty();
     private static final BooleanProperty isSplit = new SimpleBooleanProperty(true); //Set to true to ensure correct behaviour at first toggle.
@@ -87,7 +89,7 @@ public class Ecdar extends Application {
 
     public static SimulationHandler getSimulationHandler() { return simulationHandler; }
 
-    public static EcdarPresentation getPresentation() {
+    public static MainPresentation getPresentation() {
         return presentation;
     }
 
@@ -158,6 +160,7 @@ public class Ecdar extends Application {
     public void start(final Stage stage) {
         // Load or create new project
         project = new Project();
+        simulationHandler = new SimulationHandler();
 
         // Set the title for the application
         stage.setTitle("Ecdar " + VERSION);
@@ -171,7 +174,7 @@ public class Ecdar extends Application {
         //stage.initStyle(StageStyle.UNIFIED);
 
         // Make the view used for the application
-        presentation = new EcdarPresentation();
+        presentation = new MainPresentation();
 
         // Bind presentation to cached property
         isUICached.addListener(((observable, oldValue, newValue) -> presentation.setCache(newValue)));
@@ -209,7 +212,7 @@ public class Ecdar extends Application {
         stage.show();
 
         project.reset();
-        EcdarController.getActiveCanvasPresentation().getController().setActiveModel(Ecdar.getProject().getComponents().get(0));
+        MainController.getActiveCanvasPresentation().getController().setActiveModel(Ecdar.getProject().getComponents().get(0));
 
         EcdarController.reachabilityServiceEnabled = true;
 
@@ -299,12 +302,12 @@ public class Ecdar extends Application {
             if (initialShownComponent == null) {
                 initialShownComponent = component;
             }
-            EcdarController.getActiveCanvasPresentation().getController().setActiveModel(component);
+            MainController.getActiveCanvasPresentation().getController().setActiveModel(component);
         }
 
         // If we found a component set that as active
         if (initialShownComponent != null) {
-            EcdarController.getActiveCanvasPresentation().getController().setActiveModel(initialShownComponent);
+            MainController.getActiveCanvasPresentation().getController().setActiveModel(initialShownComponent);
         }
         serializationDone = true;
     }

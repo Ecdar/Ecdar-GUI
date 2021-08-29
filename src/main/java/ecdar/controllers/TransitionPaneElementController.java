@@ -204,7 +204,7 @@ public class TransitionPaneElementController implements Initializable {
     @FXML
     private void refreshTransitions() {
         SimulatorController.setSelectedTransition(null);
-        EcdarController.openReloadSimulationDialog();
+        MainController.openReloadSimulationDialog();
     }
 
     /**

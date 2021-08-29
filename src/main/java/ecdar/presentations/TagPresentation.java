@@ -2,6 +2,7 @@ package ecdar.presentations;
 
 import ecdar.abstractions.Component;
 import ecdar.controllers.EcdarController;
+import ecdar.controllers.MainController;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
 import ecdar.utility.helpers.LocationAware;
@@ -56,7 +57,7 @@ public class TagPresentation extends StackPane {
             textFieldFocusProperty().addListener((observable, oldValue, newValue) -> {
                 if(!hadInitialFocus && newValue) {
                     hadInitialFocus = true;
-                    EcdarController.getActiveCanvasPresentation().getController().leaveTextAreas();
+                    MainController.getActiveCanvasPresentation().getController().leaveTextAreas();
                 }
             });
         });
@@ -105,10 +106,10 @@ public class TagPresentation extends StackPane {
         this.setOnMouseDragged(event -> {
             event.consume();
 
-            final double newX = EcdarController.getActiveCanvasPresentation().mouseTracker.gridXProperty().subtract(getComponent().getBox().getXProperty()).subtract(getLocationAware().xProperty()).doubleValue() - getMinWidth() / 2;
+            final double newX = MainController.getActiveCanvasPresentation().mouseTracker.gridXProperty().subtract(getComponent().getBox().getXProperty()).subtract(getLocationAware().xProperty()).doubleValue() - getMinWidth() / 2;
             setTranslateX(newX);
 
-            final double newY = EcdarController.getActiveCanvasPresentation().mouseTracker.gridYProperty().subtract(getComponent().getBox().getYProperty()).subtract(getLocationAware().yProperty()).doubleValue() - getHeight() / 2;
+            final double newY = MainController.getActiveCanvasPresentation().mouseTracker.gridYProperty().subtract(getComponent().getBox().getYProperty()).subtract(getLocationAware().yProperty()).doubleValue() - getHeight() / 2;
             setTranslateY(newY - 2);
 
             // Tell the mouse release action that we can store an update
@@ -171,7 +172,7 @@ public class TagPresentation extends StackPane {
         });
 
         // When enter or escape is pressed release focus
-        textField.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
+        textField.setOnKeyPressed(MainController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
     }
 
     void initializeLabel() {

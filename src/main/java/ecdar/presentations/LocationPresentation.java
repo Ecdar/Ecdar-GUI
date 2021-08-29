@@ -4,6 +4,7 @@ import ecdar.abstractions.Component;
 import ecdar.abstractions.Location;
 import ecdar.controllers.EcdarController;
 import ecdar.controllers.LocationController;
+import ecdar.controllers.MainController;
 import ecdar.utility.colors.Color;
 import ecdar.utility.helpers.BindingHelper;
 import ecdar.utility.helpers.SelectHelper;
@@ -258,8 +259,8 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
             BindingHelper.bind(controller.invariantTagLine, controller.invariantTag);
         };
 
-        controller.nicknameTag.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
-        controller.invariantTag.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
+        controller.nicknameTag.setOnKeyPressed(MainController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
+        controller.invariantTag.setOnKeyPressed(MainController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
 
         // Update the tags when the loc updates
         controller.locationProperty().addListener(observable -> updateTags.accept(loc));

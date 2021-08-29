@@ -3,6 +3,7 @@ package ecdar.abstractions;
 import ecdar.Ecdar;
 import ecdar.backend.*;
 import ecdar.controllers.EcdarController;
+import ecdar.controllers.MainController;
 import ecdar.controllers.SimulatorController;
 import ecdar.utility.serialize.Serializable;
 import com.google.gson.JsonObject;
@@ -147,7 +148,7 @@ public class Query implements Serializable {
                             if(showSimulator) {
                                 Platform.runLater(() -> {
                                     SimulatorController.setSelectedTransition(null);
-                                    EcdarController.showSimulator();
+                                    MainController.showSimulator();
                                 });
                             }
                         } else {
@@ -166,7 +167,7 @@ public class Query implements Serializable {
                                 if (cause instanceof NullPointerException) {
                                     setQueryState(QueryState.UNKNOWN);
                                 } else {
-                                    Platform.runLater(() -> EcdarController.openQueryDialog(this, cause.toString()));
+                                    Platform.runLater(() -> MainController.openQueryDialog(this, cause.toString()));
                                 }
                             }
                         }

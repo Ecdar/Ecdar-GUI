@@ -1,8 +1,10 @@
 package ecdar.backend;
 
+import com.company.Main;
 import ecdar.abstractions.Query;
 import ecdar.abstractions.QueryState;
 import ecdar.controllers.EcdarController;
+import ecdar.controllers.MainController;
 import javafx.application.Platform;
 
 public class QueryListener {
@@ -34,7 +36,7 @@ public class QueryListener {
     public void setFeedback(final String s) {
         if (s.contains("inf") || s.contains("sup")) {
             Platform.runLater(() -> {
-                EcdarController.openQueryDialog(query, s.split("\n")[1]);
+                MainController.openQueryDialog(query, s.split("\n")[1]);
             });
         }
     }
