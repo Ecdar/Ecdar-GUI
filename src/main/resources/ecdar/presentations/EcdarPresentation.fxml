@@ -15,91 +15,98 @@
          type="StackPane"
          fx:id="root"
          fx:controller="ecdar.controllers.EcdarController">
-            <StackPane>
-                <StackPane fx:id="canvasPane">
-                        <!-- Canvases go here -->
-                </StackPane>
+    <BorderPane>
+        <center>
+            <StackPane fx:id="canvasPane">
+                <!-- Canvases go here -->
+            </StackPane>
 
-                <StackPane fx:id="toolbar"
-                           StackPane.alignment="TOP_CENTER"
-                           minHeight="56" maxHeight="56">
+            <StackPane fx:id="toolbar"
+                       StackPane.alignment="TOP_CENTER"
+                       minHeight="56" maxHeight="56">
 
-                    <HBox style="-fx-padding: 0 16 0 16;">
+                <HBox style="-fx-padding: 0 16 0 16;">
 
-                        <!-- UNDO -->
-                        <JFXRippler fx:id="undo">
-                            <StackPane minWidth="40" minHeight="40" onMouseClicked="#undoClicked">
-                                <FontIcon iconLiteral="gmi-undo" iconSize="24" fill="white"/>
-                            </StackPane>
-                        </JFXRippler>
+                    <!-- UNDO -->
+                    <JFXRippler fx:id="undo">
+                        <StackPane minWidth="40" minHeight="40" onMouseClicked="#undoClicked">
+                            <FontIcon iconLiteral="gmi-undo" iconSize="24" fill="white"/>
+                        </StackPane>
+                    </JFXRippler>
 
-                        <Region minWidth="8"/>
+                    <Region minWidth="8"/>
 
-                        <!-- REDO -->
-                        <JFXRippler fx:id="redo">
-                            <StackPane minWidth="40" minHeight="40" onMouseClicked="#redoClicked">
-                                <FontIcon iconLiteral="gmi-redo" iconSize="24" fill="white"/>
-                            </StackPane>
-                        </JFXRippler>
+                    <!-- REDO -->
+                    <JFXRippler fx:id="redo">
+                        <StackPane minWidth="40" minHeight="40" onMouseClicked="#redoClicked">
+                            <FontIcon iconLiteral="gmi-redo" iconSize="24" fill="white"/>
+                        </StackPane>
+                    </JFXRippler>
 
-                        <Region minWidth="16"/>
+                    <Region minWidth="16"/>
 
-                        <!-- Switch between input and output edges -->
-                        <HBox alignment="CENTER" spacing="-5">
-                            <JFXButton fx:id="switchToInputButton" text="Input" textFill="white"
-                                       onMouseClicked="#switchToInputClicked"
-                                       styleClass="button" style="-fx-padding: 2 4 2 4"/>
-                            <JFXToggleButton fx:id="switchEdgeStatusButton"
-                                             onMouseClicked="#switchEdgeStatusClicked"
-                                             style="-jfx-toggle-color:#dddddd;-jfx-untoggle-color:#dddddd;
-                                             -jfx-toggle-line-color:#7C8B92;-jfx-untoggle-line-color:#7C8B92;
-                                             -fx-padding: 0 0 0 0"/>
-                            <JFXButton fx:id="switchToOutputButton" text="Output" textFill="grey"
-                                       onMouseClicked="#switchToOutputClicked"
-                                       styleClass="button" style="-fx-padding: 2 4 2 4"/>
-                        </HBox>
-
-                        <Region HBox.hgrow="ALWAYS" />
-
-                        <!-- DELETE SELECTED -->
-                        <JFXRippler fx:id="deleteSelected">
-                            <StackPane minWidth="40" minHeight="40" onMouseClicked="#deleteSelectedClicked">
-                                <FontIcon iconLiteral="gmi-delete" iconSize="24" fill="white"/>
-                            </StackPane>
-                        </JFXRippler>
-
-                        <Region minWidth="8"/>
-
-                        <!-- COLOR SELECTED -->
-                        <JFXRippler fx:id="colorSelected">
-                            <StackPane minWidth="40" minHeight="40">
-                                <FontIcon iconLiteral="gmi-color-lens" iconSize="24" fill="white"/>
-                            </StackPane>
-                        </JFXRippler>
+                    <!-- Switch between input and output edges -->
+                    <HBox alignment="CENTER" spacing="-5">
+                        <JFXButton fx:id="switchToInputButton" text="Input" textFill="white"
+                                   onMouseClicked="#switchToInputClicked"
+                                   styleClass="button" style="-fx-padding: 2 4 2 4"/>
+                        <JFXToggleButton fx:id="switchEdgeStatusButton"
+                                         onMouseClicked="#switchEdgeStatusClicked"
+                                         style="-jfx-toggle-color:#dddddd;-jfx-untoggle-color:#dddddd;
+                                     -jfx-toggle-line-color:#7C8B92;-jfx-untoggle-line-color:#7C8B92;
+                                     -fx-padding: 0 0 0 0"/>
+                        <JFXButton fx:id="switchToOutputButton" text="Output" textFill="grey"
+                                   onMouseClicked="#switchToOutputClicked"
+                                   styleClass="button" style="-fx-padding: 2 4 2 4"/>
                     </HBox>
 
-                </StackPane>
+                    <Region HBox.hgrow="ALWAYS" />
 
-                <QueryPanePresentation
-                        fx:id="queryPane"
-                        StackPane.alignment="TOP_RIGHT"
-                        maxWidth="400"/>
+                    <!-- DELETE SELECTED -->
+                    <JFXRippler fx:id="deleteSelected">
+                        <StackPane minWidth="40" minHeight="40" onMouseClicked="#deleteSelectedClicked">
+                            <FontIcon iconLiteral="gmi-delete" iconSize="24" fill="white"/>
+                        </StackPane>
+                    </JFXRippler>
 
-                <ProjectPanePresentation
-                        fx:id="filePane"
-                        StackPane.alignment="TOP_LEFT"
-                        maxWidth="300"/>
+                    <Region minWidth="8"/>
 
-                <!-- Query pane -->
-                <Label fx:id="queryPaneFillerElement"/>
-
-                <!-- File pane -->
-                <Label fx:id="filePaneFillerElement"/>
-
-                <!--The bottomFillerElement is a view that pushes up other content as the user resizes the tabPaneContainer
-                The value 55 is the height of the statusbar plus the tabPaneContainer-->
-                <VBox minHeight="55">
-                    <Rectangle fx:id="bottomFillerElement"/>
-                </VBox>
+                    <!-- COLOR SELECTED -->
+                    <JFXRippler fx:id="colorSelected">
+                        <StackPane minWidth="40" minHeight="40">
+                            <FontIcon iconLiteral="gmi-color-lens" iconSize="24" fill="white"/>
+                        </StackPane>
+                    </JFXRippler>
+                </HBox>
             </StackPane>
+
+            <RightSimPanePresentation
+                    fx:id="queryPane"
+                    StackPane.alignment="TOP_RIGHT"
+                    maxWidth="400"/>
+
+            <ProjectPanePresentation
+                    fx:id="filePane"
+                    StackPane.alignment="TOP_LEFT"
+                    maxWidth="300"/>
+        </center>
+
+        <!-- Query pane -->
+        <right>
+            <Label fx:id="queryPaneFillerElement"/>
+        </right>
+
+        <!-- File pane -->
+        <left>
+            <Label fx:id="filePaneFillerElement"/>
+        </left>
+
+        <bottom>
+            <!--The bottomFillerElement is a view that pushes up other content as the user resizes the tabPaneContainer
+            The value 55 is the height of the statusbar plus the tabPaneContainer-->
+            <VBox minHeight="55">
+                <Rectangle fx:id="bottomFillerElement"/>
+            </VBox>
+        </bottom>
+    </BorderPane>
 </fx:root>

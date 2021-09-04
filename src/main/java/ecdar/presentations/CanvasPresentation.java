@@ -3,7 +3,6 @@ package ecdar.presentations;
 import com.jfoenix.controls.JFXRippler;
 import com.jfoenix.skins.ValidationPane;
 import ecdar.controllers.CanvasController;
-import ecdar.controllers.EcdarController;
 import ecdar.controllers.MainController;
 import ecdar.utility.colors.Color;
 import ecdar.utility.helpers.CanvasDragHelper;

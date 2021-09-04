@@ -31,12 +31,10 @@ public class MainPresentation extends StackPane {
         controller = new EcdarFXMLLoader().loadAndGetController("MainPresentation.fxml", this);
 
         initializeTopBar();
-
-        initializeTopBar();
         initializeMessageContainer();
+        initializeHelpImages();
         initializeSnackbar();
         initializeQueryDetailsDialog();
-        initializeHelpImages();
     }
 
     private void initializeTopBar() {
@@ -74,34 +72,6 @@ public class MainPresentation extends StackPane {
 
         controller.helpOutputImage.setImage(new Image(Ecdar.class.getResource("ic_help_output.png").toExternalForm()));
         fitSizeWhenAvailable(controller.helpOutputImage, controller.helpOutputPane);
-    }
-
-    public static void fitSizeWhenAvailable(final ImageView imageView, final StackPane pane) {
-        pane.widthProperty().addListener((observable, oldValue, newValue) ->
-                imageView.setFitWidth(pane.getWidth()));
-        pane.heightProperty().addListener((observable, oldValue, newValue) ->
-                imageView.setFitHeight(pane.getHeight()));
-    }
-
-    public BooleanProperty toggleFilePane() {
-        return controller.ecdarPresentation.toggleFilePane();
-    }
-
-    public BooleanProperty toggleQueryPane() {
-        return controller.ecdarPresentation.toggleQueryPane();
-    }
-
-    public BooleanProperty toggleGrid() {
-        return controller.ecdarPresentation.toggleGrid();
-    }
-
-    public BooleanProperty toggleLeftSimPane() { return controller.simulatorPresentation.toggleLeftPane(); }
-
-    public BooleanProperty toggleRightSimPane() { return controller.simulatorPresentation.toggleRightPane(); }
-
-    public void showHelp() {
-        controller.dialogContainer.setVisible(true);
-        controller.dialog.show(controller.dialogContainer);
     }
 
     private void initializeSnackbar() {
@@ -225,11 +195,39 @@ public class MainPresentation extends StackPane {
         )));
     }
 
-    public void showSnackbarMessage(final String message) {
-        controller.snackbar.enqueue(new JFXSnackbar.SnackbarEvent(new Text(message)));
-    }
-
     public MainController getController() {
         return controller;
+    }
+
+    public static void fitSizeWhenAvailable(final ImageView imageView, final StackPane pane) {
+        pane.widthProperty().addListener((observable, oldValue, newValue) ->
+                imageView.setFitWidth(pane.getWidth()));
+        pane.heightProperty().addListener((observable, oldValue, newValue) ->
+                imageView.setFitHeight(pane.getHeight()));
+    }
+
+    public BooleanProperty toggleFilePane() {
+        return controller.ecdarPresentation.toggleFilePane();
+    }
+
+    public BooleanProperty toggleQueryPane() {
+        return controller.ecdarPresentation.toggleQueryPane();
+    }
+
+    public BooleanProperty toggleGrid() {
+        return controller.ecdarPresentation.toggleGrid();
+    }
+
+    public BooleanProperty toggleLeftSimPane() { return controller.simulatorPresentation.toggleLeftPane(); }
+
+    public BooleanProperty toggleRightSimPane() { return controller.simulatorPresentation.toggleRightPane(); }
+
+    public void showHelp() {
+        controller.dialogContainer.setVisible(true);
+        controller.dialog.show(controller.dialogContainer);
+    }
+
+    public void showSnackbarMessage(final String message) {
+        controller.snackbar.enqueue(new JFXSnackbar.SnackbarEvent(new Text(message)));
     }
 }

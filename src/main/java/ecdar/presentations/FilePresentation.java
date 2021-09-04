@@ -124,6 +124,26 @@ public class FilePresentation extends AnchorPane {
         setBackground.accept(color, colorIntensity);
     }
 
+    /**
+     * Initialises the icons for the three different file types in Ecdar: Component, System and Declarations
+     */
+    private void initializeFileIcons() {
+        if(model.get() instanceof Component){
+            controller.fileImage.setImage(new Image(Ecdar.class.getResource("component_frame.png").toExternalForm()));
+        } else if(model.get() instanceof EcdarSystem){
+            controller.fileImage.setImage(new Image(Ecdar.class.getResource("system_frame.png").toExternalForm()));
+        } else if(model.get() instanceof MutationTestPlan){
+            controller.fileImage.setImage(new Image(Ecdar.class.getResource("test_frame.png").toExternalForm()));
+        } else {
+            controller.fileImage.setImage(new Image(Ecdar.class.getResource("description_frame.png").toExternalForm()));
+        }
+        MainPresentation.fitSizeWhenAvailable(controller.fileImage, controller.filePane);
+    }
+
+    public HighLevelModelObject getModel() {
+        return model.get();
+    }
+
     private ArrayList<HighLevelModelObject> getActiveComponents() {
         ArrayList<HighLevelModelObject> activeComponents = new ArrayList<>();
 
@@ -139,24 +159,8 @@ public class FilePresentation extends AnchorPane {
         return activeComponents;
     }
 
-    /**
-     * Initialises the icons for the three different file types in Ecdar: Component, System and Declarations
-     */
-    private void initializeFileIcons() {
-        if(model.get() instanceof Component){
-            controller.fileImage.setImage(new Image(Ecdar.class.getResource("component_frame.png").toExternalForm()));
-        } else if(model.get() instanceof EcdarSystem){
-            controller.fileImage.setImage(new Image(Ecdar.class.getResource("system_frame.png").toExternalForm()));
-        } else if(model.get() instanceof MutationTestPlan){
-            controller.fileImage.setImage(new Image(Ecdar.class.getResource("test_frame.png").toExternalForm()));
-        } else {
-            controller.fileImage.setImage(new Image(Ecdar.class.getResource("description_frame.png").toExternalForm()));
-        }
-        EcdarPresentation.fitSizeWhenAvailable(controller.fileImage, controller.filePane);
-    }
-
-    public HighLevelModelObject getModel() {
-        return model.get();
+    public void setActive(boolean active) {
+        isActive = active;
     }
 
     /**
@@ -193,9 +197,5 @@ public class FilePresentation extends AnchorPane {
         } else {
             setBackground.accept(color, colorIntensity);
         }
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
     }
 }

@@ -74,12 +74,13 @@ public class EcdarPresentation extends StackPane {
             ranInitialToggle.set(true);
         });
 
-        KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_IN, new Keybind(new KeyCodeCombination(KeyCode.PLUS, KeyCombination.SHORTCUT_DOWN), () -> MainController.getActiveCanvasPresentation().getController().zoomHelper.zoomIn()));
-        KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_OUT, new Keybind(new KeyCodeCombination(KeyCode.MINUS, KeyCombination.SHORTCUT_DOWN), () -> MainController.getActiveCanvasPresentation().getController().zoomHelper.zoomOut()));
-        KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_TO_FIT, new Keybind(new KeyCodeCombination(KeyCode.EQUALS, KeyCombination.SHORTCUT_DOWN), () -> MainController.getActiveCanvasPresentation().getController().zoomHelper.zoomToFit()));
-        KeyboardTracker.registerKeybind(KeyboardTracker.RESET_ZOOM, new Keybind(new KeyCodeCombination(KeyCode.DIGIT0, KeyCombination.SHORTCUT_DOWN), () -> MainController.getActiveCanvasPresentation().getController().zoomHelper.resetZoom()));
-        KeyboardTracker.registerKeybind(KeyboardTracker.UNDO, new Keybind(new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN), UndoRedoStack::undo));
-        KeyboardTracker.registerKeybind(KeyboardTracker.REDO, new Keybind(new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN), UndoRedoStack::redo));
+        // ToDo NIELS: Check if the keybindings in MainController and CanvasPresentation can replace these
+//        KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_IN, new Keybind(new KeyCodeCombination(KeyCode.PLUS, KeyCombination.SHORTCUT_DOWN), () -> MainController.getActiveCanvasPresentation().getController().zoomHelper.zoomIn()));
+//        KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_OUT, new Keybind(new KeyCodeCombination(KeyCode.MINUS, KeyCombination.SHORTCUT_DOWN), () -> MainController.getActiveCanvasPresentation().getController().zoomHelper.zoomOut()));
+//        KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_TO_FIT, new Keybind(new KeyCodeCombination(KeyCode.EQUALS, KeyCombination.SHORTCUT_DOWN), () -> MainController.getActiveCanvasPresentation().getController().zoomHelper.zoomToFit()));
+//        KeyboardTracker.registerKeybind(KeyboardTracker.RESET_ZOOM, new Keybind(new KeyCodeCombination(KeyCode.DIGIT0, KeyCombination.SHORTCUT_DOWN), () -> MainController.getActiveCanvasPresentation().getController().zoomHelper.resetZoom()));
+//        KeyboardTracker.registerKeybind(KeyboardTracker.UNDO, new Keybind(new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN), UndoRedoStack::undo));
+//        KeyboardTracker.registerKeybind(KeyboardTracker.REDO, new Keybind(new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN), UndoRedoStack::redo));
     }
 
     private void initializeUndoRedoButtons() {
@@ -225,6 +226,9 @@ public class EcdarPresentation extends StackPane {
     }
 
     private void initializeToggleQueryPaneFunctionality() {
+        initializeOpenQueryPaneAnimation();
+        initializeCloseQueryPaneAnimation();
+
         // Set the translation of the query pane to be equal to its width
         // Will hide the element, and force it in then the right side of the border pane is enlarged
         controller.queryPane.translateXProperty().bind(controller.queryPane.widthProperty());
@@ -349,11 +353,8 @@ public class EcdarPresentation extends StackPane {
                 ));
     }
 
-    public static void fitSizeWhenAvailable(final ImageView imageView, final StackPane pane) {
-        pane.widthProperty().addListener((observable, oldValue, newValue) ->
-                imageView.setFitWidth(pane.getWidth()));
-        pane.heightProperty().addListener((observable, oldValue, newValue) ->
-                imageView.setFitHeight(pane.getHeight()));
+    public EcdarController getController() {
+        return controller;
     }
 
     public BooleanProperty toggleQueryPane() {
@@ -388,9 +389,5 @@ public class EcdarPresentation extends StackPane {
      */
     public BooleanProperty toggleGrid(){
         return MainController.getActiveCanvasPresentation().toggleGridUi();
-    }
-
-    public EcdarController getController() {
-        return controller;
     }
 }

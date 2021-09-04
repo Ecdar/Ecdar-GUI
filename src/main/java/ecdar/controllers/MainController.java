@@ -189,6 +189,16 @@ public class MainController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        initializeMode();
+        initializeMenuBar();
+        initializeTabPane();
+        initializeMessages();
+        initializeStatusBar();
+        initializeQueryDialog();
+        initializeReloadDialog();
+
+        simulatorPresentation.getController().root.prefWidthProperty().bind(centerContainer.widthProperty());
+
         dialog.setDialogContainer(dialogContainer);
         dialogContainer.opacityProperty().bind(dialog.getChildren().get(0).scaleXProperty());
         dialog.setOnDialogClosed(event -> dialogContainer.setVisible(false));
@@ -198,25 +208,16 @@ public class MainController implements Initializable {
         _queryTextQuery = queryTextQuery;
         queryDialog.setDialogContainer(queryDialogContainer);
         queryDialogContainer.opacityProperty().bind(queryDialog.getChildren().get(0).scaleXProperty());
+
         queryDialog.setOnDialogClosed(event -> {
             queryDialogContainer.setVisible(false);
             queryDialogContainer.setMouseTransparent(true);
         });
+
         queryDialog.setOnDialogOpened(event -> {
             queryDialogContainer.setVisible(true);
             queryDialogContainer.setMouseTransparent(false);
         });
-
-        initializeMode();
-
-        initializeMenuBar();
-        initializeTabPane();
-        initializeMessages();
-        initializeStatusBar();
-        initializeQueryDialog();
-        initializeReloadDialog();
-
-        simulatorPresentation.getController().root.prefWidthProperty().bind(centerContainer.widthProperty());
     }
 
     /**
@@ -262,6 +263,17 @@ public class MainController implements Initializable {
         initializeUICacheMenuElement();
 
         initializeHelpMenu();
+
+        //TODO change to match on macOS
+        menuBarZoomInSimulator.setAccelerator(new KeyCodeCombination(KeyCode.PLUS, KeyCombination.SHORTCUT_DOWN));
+        menuBarZoomInSimulator.setOnAction(event -> simulatorPresentation.getController().overviewPresentation.getController().zoomIn());
+
+        //TODO change to match on macOS
+        menuBarZoomOutSimulator.setAccelerator(new KeyCodeCombination(KeyCode.MINUS, KeyCombination.SHORTCUT_DOWN));
+        menuBarZoomOutSimulator.setOnAction(event -> simulatorPresentation.getController().overviewPresentation.getController().zoomOut());
+
+        menuBarZoomResetSimulator.setAccelerator(new KeyCodeCombination(KeyCode.DIGIT0, KeyCombination.SHORTCUT_DOWN));
+        menuBarZoomResetSimulator.setOnAction(event -> simulatorPresentation.getController().overviewPresentation.getController().resetZoom());
     }
 
     private void initializeHelpMenu() {
@@ -352,6 +364,26 @@ public class MainController implements Initializable {
             menuBarViewGrid.getGraphic().opacityProperty().bind(new When(isOn).then(1).otherwise(0));
         });
 
+        menuBarViewHome.setAccelerator(new KeyCodeCombination(KeyCode.DIGIT1, KeyCombination.SHORTCUT_DOWN));
+        menuBarViewHome.setOnAction(event -> editorRipplerClicked());
+
+        menuBarViewSim.setAccelerator(new KeyCodeCombination(KeyCode.DIGIT2, KeyCombination.SHORTCUT_DOWN));
+        menuBarViewSim.setOnAction(event -> simulatorRipplerClicked());
+
+        menuBarViewSimLeftPanel.getGraphic().setOpacity(1);
+        menuBarViewSimLeftPanel.setAccelerator(new KeyCodeCombination(KeyCode.L, KeyCodeCombination.SHORTCUT_DOWN));
+        menuBarViewSimLeftPanel.setOnAction(event -> {
+            final BooleanProperty isOpen = Ecdar.toggleLeftSimPane();
+            menuBarViewSimLeftPanel.getGraphic().opacityProperty().bind(new When(isOpen).then(1).otherwise(0));
+        });
+
+        menuBarViewSimRightPanel.getGraphic().setOpacity(1);
+        menuBarViewSimRightPanel.setAccelerator(new KeyCodeCombination(KeyCode.R, KeyCodeCombination.SHORTCUT_DOWN));
+        menuBarViewSimRightPanel.setOnAction(event -> {
+            final BooleanProperty isOpen = Ecdar.toggleRightSimPane();
+            menuBarViewSimRightPanel.getGraphic().opacityProperty().bind(new When(isOpen).then(1).otherwise(0));
+        });
+
         menuBarViewCanvasSplit.getGraphic().setOpacity(1);
         menuBarViewCanvasSplit.setOnAction(event -> {
             final BooleanProperty isSplit = Ecdar.toggleCanvasSplit();
@@ -396,7 +428,7 @@ public class MainController implements Initializable {
             }
         });
     }
-    
+
     /**
      * Initializes the query dialog that pops up to show the result of executing a query
      */
@@ -458,6 +490,19 @@ public class MainController implements Initializable {
     }
 
     /**
+     * Save project at a given directory.
+     * @param directory directory to save at
+     */
+    private static void save(final File directory) {
+        try {
+            Ecdar.getProject().serialize(directory);
+        } catch (final IOException e) {
+            Ecdar.showToast("Could not save project: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * Save project as.
      */
     private void saveAs() {
@@ -472,19 +517,6 @@ public class MainController implements Initializable {
             save(file);
         } else {
             Ecdar.showToast("The project was not saved.");
-        }
-    }
-
-    /**
-     * Save project at a given directory.
-     * @param directory directory to save at
-     */
-    private static void save(final File directory) {
-        try {
-            Ecdar.getProject().serialize(directory);
-        } catch (final IOException e) {
-            Ecdar.showToast("Could not save project: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 
@@ -861,8 +893,6 @@ public class MainController implements Initializable {
     }
 
     private void initializeTabPane() {
-        ecdarPresentation.getController().bottomFillerElement.heightProperty().bind(tabPaneContainer.maxHeightProperty());
-
         tabPane.getSelectionModel().selectedIndexProperty().addListener((obs, oldSelected, newSelected) -> {
             if (newSelected.intValue() < 0 || tabPaneContainer.getMaxHeight() > 35) return;
 
@@ -878,6 +908,15 @@ public class MainController implements Initializable {
 
         tabPane.setTabMinHeight(35);
         tabPane.setTabMaxHeight(35);
+
+        EcdarController ecdarController = ecdarPresentation.getController();
+        if(ecdarController != null) {
+            ecdarController.bottomFillerElement.heightProperty().bind(tabPaneContainer.maxHeightProperty());
+        }
+        SimulatorController simController = simulatorPresentation.getController();
+        if(simController != null) {
+            simController.bottomFillerElement.heightProperty().bind(tabPaneContainer.maxHeightProperty());
+        }
     }
 
     @FXML

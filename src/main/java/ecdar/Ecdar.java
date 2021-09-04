@@ -88,7 +88,7 @@ public class Ecdar extends Application {
     }
 
     public static SimulationHandler getSimulationHandler() { return simulationHandler; }
-
+    // NOT PRESENT!!!
     public static MainPresentation getPresentation() {
         return presentation;
     }
@@ -174,6 +174,7 @@ public class Ecdar extends Application {
         //stage.initStyle(StageStyle.UNIFIED);
 
         // Make the view used for the application
+        project.reset();
         presentation = new MainPresentation();
 
         // Bind presentation to cached property
@@ -211,7 +212,6 @@ public class Ecdar extends Application {
         // We're now ready! Let the curtains fall!
         stage.show();
 
-        project.reset();
         MainController.getActiveCanvasPresentation().getController().setActiveModel(Ecdar.getProject().getComponents().get(0));
 
         EcdarController.reachabilityServiceEnabled = true;

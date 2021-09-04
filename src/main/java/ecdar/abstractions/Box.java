@@ -14,6 +14,8 @@ public class Box {
     private static final String Y = "y";
     private static final String WIDTH = "width";
     private static final String HEIGHT = "height";
+    public static final double INITIAL_X = 5d;
+    public static final double INITIAL_Y = 5d;
 
     private final DoubleProperty x = new SimpleDoubleProperty(0d);
     private final DoubleProperty y = new SimpleDoubleProperty(0d);

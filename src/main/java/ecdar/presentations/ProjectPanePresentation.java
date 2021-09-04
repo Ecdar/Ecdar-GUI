@@ -77,9 +77,9 @@ public class ProjectPanePresentation extends StackPane {
      */
     private void initializeAddModelIcons() {
         controller.createComponentImage.setImage(new Image(Ecdar.class.getResource("add_component_frame.png").toExternalForm()));
-        EcdarPresentation.fitSizeWhenAvailable(controller.createComponentImage, controller.createComponentPane);
+        MainPresentation.fitSizeWhenAvailable(controller.createComponentImage, controller.createComponentPane);
         controller.createSystemImage.setImage(new Image(Ecdar.class.getResource("add_system_frame.png").toExternalForm()));
-        EcdarPresentation.fitSizeWhenAvailable(controller.createSystemImage, controller.createSystemPane);
+        MainPresentation.fitSizeWhenAvailable(controller.createSystemImage, controller.createSystemPane);
     }
 
     /**

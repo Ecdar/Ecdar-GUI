@@ -66,7 +66,7 @@ public class EcdarController implements Initializable, Presentable {
 
     // View stuff
     public StackPane root;
-    public QueryPanePresentation queryPane;
+    public RightSimPanePresentation queryPane;
     public ProjectPanePresentation filePane;
     public StackPane toolbar;
     public Label queryPaneFillerElement;
@@ -79,15 +79,6 @@ public class EcdarController implements Initializable, Presentable {
     public JFXRippler redo;
     public StackPane tabPaneContainer;
 
-    public ImageView helpInitialImage;
-    public StackPane helpInitialPane;
-    public ImageView helpUrgentImage;
-    public StackPane helpUrgentPane;
-    public ImageView helpInputImage;
-    public StackPane helpInputPane;
-    public ImageView helpOutputImage;
-    public StackPane helpOutputPane;
-
     public JFXButton switchToInputButton;
     public JFXButton switchToOutputButton;
     public JFXToggleButton switchEdgeStatusButton;
@@ -96,17 +87,17 @@ public class EcdarController implements Initializable, Presentable {
 
     private double expandHeight = 300;
 
-    public final Transition expandMessagesContainer = new Transition() {
-        {
-            setInterpolator(Interpolator.SPLINE(0.645, 0.045, 0.355, 1));
-            setCycleDuration(Duration.millis(200));
-        }
-
-        @Override
-        protected void interpolate(final double frac) {
-            setMaxHeight(35 + frac * (expandHeight - 35));
-        }
-    };
+//    public final Transition expandMessagesContainer = new Transition() {
+//        {
+//            setInterpolator(Interpolator.SPLINE(0.645, 0.045, 0.355, 1));
+//            setCycleDuration(Duration.millis(200));
+//        }
+//
+//        @Override
+//        protected void interpolate(final double frac) {
+//            setMaxHeight(35 + frac * (expandHeight - 35));
+//        }
+//    };
 
     public static void runReachabilityAnalysis() {
         if (!reachabilityServiceEnabled) return;
@@ -123,6 +114,23 @@ public class EcdarController implements Initializable, Presentable {
         initializeEdgeStatusHandling();
         initializeKeybindings();
         initializeReachabilityAnalysisThread();
+
+        canvasPane.getChildren().clear();
+
+        CanvasShellPresentation canvasShellPresentation = new CanvasShellPresentation();
+        HighLevelModelObject model = MainController.getActiveCanvasPresentation().getController().getActiveModel();
+        if(model != null) {
+            canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(MainController.getActiveCanvasPresentation().getController().getActiveModel());
+        } else {
+            canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(Ecdar.getProject().getComponents().get(0));
+        }
+
+        canvasShellPresentation.getController().toolbar.setTranslateY(48);
+        canvasPane.getChildren().add(canvasShellPresentation);
+
+        MainController.setActiveCanvasPresentation(canvasShellPresentation.getController().canvasPresentation);
+
+//        filePane.getController().updateColorsOnFilePresentations();
     }
 
     /**
@@ -139,11 +147,13 @@ public class EcdarController implements Initializable, Presentable {
         Keybind binding = new Keybind(combination, (event) -> {
             final Component newComponent = new Component(true);
             UndoRedoStack.pushAndPerform(() -> { // Perform
+
                 Ecdar.getProject().getComponents().add(newComponent);
             }, () -> { // Undo
                 Ecdar.getProject().getComponents().remove(newComponent);
             }, "Created new component: " + newComponent.getName(), "add-circle");
 
+            // NULL POINTER vvvvv
             MainController.getActiveCanvasPresentation().getController().setActiveModel(newComponent);
         });
         KeyboardTracker.registerKeybind(KeyboardTracker.CREATE_COMPONENT, binding);
@@ -323,75 +333,75 @@ public class EcdarController implements Initializable, Presentable {
         }).start();
     }
 
-    public void expandMessagesIfNotExpanded() {
-        if (tabPaneContainer.getMaxHeight() <= 35) {
-            expandMessagesContainer.play();
-        }
-    }
+//    public void expandMessagesIfNotExpanded() {
+//        if (tabPaneContainer.getMaxHeight() <= 35) {
+//            expandMessagesContainer.play();
+//        }
+//    }
 
-    public void collapseMessagesIfNotCollapsed() {
-        final Transition collapse = new Transition() {
-            double height = tabPaneContainer.getMaxHeight();
+//    public void collapseMessagesIfNotCollapsed() {
+//        final Transition collapse = new Transition() {
+//            double height = tabPaneContainer.getMaxHeight();
+//
+//            {
+//                setInterpolator(Interpolator.SPLINE(0.645, 0.045, 0.355, 1));
+//                setCycleDuration(Duration.millis(200));
+//            }
+//
+//            @Override
+//            protected void interpolate(final double frac) {
+//                setMaxHeight(((height - 35) * (1 - frac)) + 35);
+//            }
+//        };
+//
+//        if (tabPaneContainer.getMaxHeight() > 35) {
+//            expandHeight = tabPaneContainer.getHeight();
+//            collapse.play();
+//        }
+//    }
 
-            {
-                setInterpolator(Interpolator.SPLINE(0.645, 0.045, 0.355, 1));
-                setCycleDuration(Duration.millis(200));
-            }
+//    @FXML
+//    public void collapseMessagesClicked() {
+//        final Transition collapse = new Transition() {
+//            double height = tabPaneContainer.getMaxHeight();
+//
+//            {
+//                setInterpolator(Interpolator.SPLINE(0.645, 0.045, 0.355, 1));
+//                setCycleDuration(Duration.millis(200));
+//            }
+//
+//            @Override
+//            protected void interpolate(final double frac) {
+//                setMaxHeight(((height - 35) * (1 - frac)) + 35);
+//            }
+//        };
+//
+//        if (tabPaneContainer.getMaxHeight() > 35) {
+//            expandHeight = tabPaneContainer.getHeight();
+//            collapse.play();
+//        } else {
+//            expandMessagesContainer.play();
+//        }
+//    }
 
-            @Override
-            protected void interpolate(final double frac) {
-                setMaxHeight(((height - 35) * (1 - frac)) + 35);
-            }
-        };
-
-        if (tabPaneContainer.getMaxHeight() > 35) {
-            expandHeight = tabPaneContainer.getHeight();
-            collapse.play();
-        }
-    }
-
-    @FXML
-    public void collapseMessagesClicked() {
-        final Transition collapse = new Transition() {
-            double height = tabPaneContainer.getMaxHeight();
-
-            {
-                setInterpolator(Interpolator.SPLINE(0.645, 0.045, 0.355, 1));
-                setCycleDuration(Duration.millis(200));
-            }
-
-            @Override
-            protected void interpolate(final double frac) {
-                setMaxHeight(((height - 35) * (1 - frac)) + 35);
-            }
-        };
-
-        if (tabPaneContainer.getMaxHeight() > 35) {
-            expandHeight = tabPaneContainer.getHeight();
-            collapse.play();
-        } else {
-            expandMessagesContainer.play();
-        }
-    }
-
-    /**
-     * This method is used as a central place to decide whether the tabPane is opened or closed
-     * @param height the value used to set the height of the tabPane
-     */
-    public void setMaxHeight(double height) {
-        tabPaneContainer.setMaxHeight(height);
-        if(height > 35) { //The tabpane is opened
-            filePane.showBottomInset(false);
-            queryPane.showBottomInset(false);
-            CanvasPresentation.showBottomInset(false);
-        } else {
-            // When closed we push up the scrollviews in the filePane and queryPane as the tabPane
-            // would otherwise cover some items in these views
-            filePane.showBottomInset(true);
-            queryPane.showBottomInset(true);
-            CanvasPresentation.showBottomInset(true);
-        }
-    }
+//    /**
+//     * This method is used as a central place to decide whether the tabPane is opened or closed
+//     * @param height the value used to set the height of the tabPane
+//     */
+//    public void setMaxHeight(double height) {
+//        tabPaneContainer.setMaxHeight(height);
+//        if(height > 35) { //The tabpane is opened
+//            filePane.showBottomInset(false);
+//            queryPane.showBottomInset(false);
+//            CanvasPresentation.showBottomInset(false);
+//        } else {
+//            // When closed we push up the scrollviews in the filePane and queryPane as the tabPane
+//            // would otherwise cover some items in these views
+//            filePane.showBottomInset(true);
+//            queryPane.showBottomInset(true);
+//            CanvasPresentation.showBottomInset(true);
+//        }
+//    }
 
     private void nudgeSelected(final NudgeDirection direction) {
         final List<SelectHelper.ItemSelectable> selectedElements = SelectHelper.getSelectedElements();
@@ -501,15 +511,30 @@ public class EcdarController implements Initializable, Presentable {
         globalEdgeStatus.set(status);
     }
 
+    /**
+     * Called when the view is about to be shown.
+     * Initializes the keybindings for the view and resets the placement of the current active model
+     * as it could have been changed doing the simulation
+     *
+     * @see #initializeKeybindings()
+     * @see CanvasController#resetCurrentActiveModelPlacement()
+     */
     public void willShow() {
         initializeKeybindings();
         MainController.getActiveCanvasPresentation().getController().resetCurrentActiveModelPlacement();
     }
 
+    /**
+     * Called when the view is about to be hidden.
+     * Disables the keybindings for the view
+     */
     public void willHide() {
         this.unregisterKeybindings();
     }
 
+    /**
+     * Unregisters all keybindings for the view
+     */
     private void unregisterKeybindings() {
         KeyboardTracker.unregisterKeybind("CREATE_COMPONENT");
         KeyboardTracker.unregisterKeybind("NUDGE_UP");
@@ -531,10 +556,6 @@ public class EcdarController implements Initializable, Presentable {
         } else {
             setCanvasModeToSingular();
         }
-    }
-
-    private void initializeCanvasPane() {
-        Platform.runLater(this::setCanvasModeToSingular);
     }
 
     /**
