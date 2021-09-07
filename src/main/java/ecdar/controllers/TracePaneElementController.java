@@ -4,7 +4,7 @@ import com.jfoenix.controls.JFXRippler;
 import com.uppaal.model.system.SystemLocation;
 import com.uppaal.model.system.concrete.ConcreteState;
 import ecdar.Ecdar;
-import ecdar.backend.SimulationHandler;
+import ecdar.simulation.SimulationHandler;
 import ecdar.presentations.TransitionPresentation;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;

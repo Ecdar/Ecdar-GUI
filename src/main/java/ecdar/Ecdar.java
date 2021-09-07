@@ -3,7 +3,7 @@ package ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Project;
 import ecdar.backend.BackendHelper;
-import ecdar.backend.SimulationHandler;
+import ecdar.simulation.SimulationHandler;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.controllers.EcdarController;
 import ecdar.controllers.MainController;
@@ -88,7 +88,7 @@ public class Ecdar extends Application {
     }
 
     public static SimulationHandler getSimulationHandler() { return simulationHandler; }
-    // NOT PRESENT!!!
+
     public static MainPresentation getPresentation() {
         return presentation;
     }

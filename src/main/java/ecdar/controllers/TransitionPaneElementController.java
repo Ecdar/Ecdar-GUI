@@ -5,7 +5,7 @@ import com.jfoenix.controls.JFXTextField;
 import com.uppaal.model.system.SystemEdge;
 import com.uppaal.model.system.concrete.ConcreteTransition;
 import ecdar.Ecdar;
-import ecdar.backend.SimulationHandler;
+import ecdar.simulation.SimulationHandler;
 import ecdar.presentations.TransitionPresentation;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;

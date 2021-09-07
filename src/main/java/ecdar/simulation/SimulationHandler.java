@@ -1,4 +1,4 @@
-package ecdar.backend;
+package ecdar.simulation;
 
 import com.uppaal.engine.Engine;
 import com.uppaal.engine.EngineException;
@@ -9,6 +9,8 @@ import com.uppaal.model.system.concrete.ConcreteState;
 import com.uppaal.model.system.concrete.ConcreteSuccessor;
 import com.uppaal.model.system.concrete.ConcreteTransition;
 import ecdar.Ecdar;
+import ecdar.backend.BackendException;
+import ecdar.backend.BackendHelper;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -76,8 +78,28 @@ public class SimulationHandler {
     /**
      * Initializes the default system (non-query system)
      */
-    public void initializeDefaultSystem() throws BackendException.SystemNotFoundException {
+    public void initializeDefaultSystem() throws BackendException {
+        final Document doc = BackendHelper.getEcdarDocument();
+        initializeUsingDocument(doc);
         currentSimulation = "";
+    }
+
+    /**
+     * Helper method to initialize a simulation. Used for constructors that have documents but no engine
+     * @param document the system document to base the simulation on
+     * @throws BackendException.SystemNotFoundException if a system was not linked to the backend
+     */
+    private void initializeUsingDocument(final Document document) throws BackendException.SystemNotFoundException {
+        final Engine engine = BackendHelper.getEngine();
+        try {
+            engine.getSystem(document, new Vector<>());
+        } catch (EngineException | IOException e) {
+            e.printStackTrace();
+        }
+        if (engine.getSystem() == null)
+            throw new BackendException.SystemNotFoundException("Could not find a system linked to the given engine " + engine);
+        this.engine = engine;
+        initializeSimulation();
     }
 
     /**
@@ -395,7 +417,7 @@ public class SimulationHandler {
     }
 
     /**
-     * Prints all available transitions to {@link System#out}.
+     * Prints all available transitions to {@link java.lang.System#out}.
      * This is very useful for debugging.
      * If a string representation is needed please use {@link SimulationHandler#getAvailableTransitionsAsStrings()}
      * instead.
@@ -404,7 +426,7 @@ public class SimulationHandler {
         System.out.println("---------------------------------");
 
         System.out.println(numberOfSteps + " Successor state " + currentConcreteState.toString() + " Entry time " + currentTime);
-        System.out.print("Available transitions: ");
+        java.lang.System.out.print("Available transitions: ");
         availableTransitions.forEach(
                 concreteTransition -> System.out.println(concreteTransition.getLabel() + " "));
 

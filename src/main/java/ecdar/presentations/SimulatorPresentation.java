@@ -44,6 +44,8 @@ public class SimulatorPresentation extends StackPane {
             toggleLeftPane();
             toggleRightPane();
         });
+
+        setBackground(new Background(new BackgroundFill(new javafx.scene.paint.Color(0, 0, 1, 1), CornerRadii.EMPTY, Insets.EMPTY)));
     }
 
     public BooleanProperty toggleLeftPane() {

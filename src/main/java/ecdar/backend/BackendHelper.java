@@ -1,5 +1,6 @@
 package ecdar.backend;
 
+import com.uppaal.engine.Engine;
 import com.uppaal.model.core2.Document;
 import ecdar.Ecdar;
 import ecdar.abstractions.Project;
@@ -12,9 +13,14 @@ import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collections;
 
 public final class BackendHelper {
+    // ToDO NIELS: To be removed due to being UPPAAL dependent {
+    public static final int MAX_ENGINES = 10;
+    public static final Object engineLock = false; // Used to lock concurrent engine reference access
+    // ToDO NIELS: To be removed due to being UPPAAL dependent }
     final static String TEMP_DIRECTORY = "temporary";
     private static EcdarDocument ecdarDocument;
     public static String storeBackendModel(Project project, String fileName) throws BackendException, IOException, URISyntaxException {
@@ -88,11 +94,86 @@ public final class BackendHelper {
         ecdarDocument = new EcdarDocument();
     }
 
+    // ToDO NIELS: To be removed due to being UPPAAL dependent
+    private static final ArrayList<Engine> createdEngines = new ArrayList<>();
+    private static final ArrayList<Engine> availableEngines = new ArrayList<>();
+
+    // ToDO NIELS: To be removed due to being UPPAAL dependent
+    public static Document getEcdarDocument() throws BackendException {
+        if (ecdarDocument == null) {
+            buildEcdarDocument();
+        }
+
+        return ecdarDocument.toXmlDocument();
+    }
+
     /**
      * Stop all running queries.
      */
     public static void stopQueries() {
         Ecdar.getProject().getQueries().forEach(Query::cancel);
+    }
+
+    // ToDO NIELS: To be removed due to being UPPAAL dependent
+    public static Engine getEngine() {
+        synchronized (createdEngines) {
+            if (!(createdEngines.size() >= MAX_ENGINES && availableEngines.size() == 0)) {
+                final Engine engine = getAvailableEngineOrCreateNew();
+                if (engine != null) {
+                    return engine;
+                }
+            }
+        }
+
+        // No engines are available currently, check back again later
+        return null;
+    }
+
+    // ToDO NIELS: To be removed due to being UPPAAL dependent
+    private static Engine getAvailableEngineOrCreateNew() {
+        if (availableEngines.size() == 0) {
+            final File serverFile = findServerFile();
+
+            // Allows us to use the server file
+            if(!serverFile.setExecutable(true)){
+                //The user does not have permission to do so
+                System.out.println("Insufficient permission when trying to set the server as executable");
+                Ecdar.showToast("Insufficient permission when trying to set the server as executable");
+            }
+
+            // Check if the user copied the file correctly
+            if (!serverFile.exists()) {
+                System.out.println("Could not find backend-file: "
+                        + serverFile.getAbsolutePath()
+                        + ". Please make sure to copy UPPAAL binaries to this location.");
+            }
+
+            // Create a new engine, set the server path, and return it
+            final Engine engine = new Engine();
+            engine.setServerPath(serverFile.getPath());
+            createdEngines.add(engine);
+            return engine;
+        } else {
+            final Engine engine = availableEngines.get(0);
+            availableEngines.remove(0);
+            return engine;
+        }
+    }
+
+    // ToDO NIELS: To be removed due to being UPPAAL dependent
+    private static File findServerFile() {
+        final String os = System.getProperty("os.name");
+        final File file;
+
+        if (os.contains("Mac")) {
+            file = new File(Ecdar.getServerPath() + File.separator + "bin-MacOS" + File.separator + "server");
+        } else if (os.contains("Linux")) {
+            file = new File(Ecdar.getServerPath() + File.separator + "bin-Linux" + File.separator + "server");
+        } else {
+            file = new File(Ecdar.getServerPath() + File.separator + "bin-Win32" + File.separator + "server" + ".exe");
+        }
+
+        return file;
     }
 
     /**

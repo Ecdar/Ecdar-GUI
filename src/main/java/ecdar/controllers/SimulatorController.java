@@ -6,7 +6,7 @@ import ecdar.Ecdar;
 import ecdar.abstractions.*;
 import ecdar.backend.BackendException;
 import ecdar.backend.BackendHelper;
-import ecdar.backend.SimulationHandler;
+import ecdar.simulation.SimulationHandler;
 import ecdar.presentations.LeftSimPanePresentation;
 import ecdar.presentations.RightSimPanePresentation;
 import ecdar.presentations.SimulatorOverviewPresentation;
