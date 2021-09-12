@@ -66,15 +66,14 @@ public class ReveaalDriver implements IBackendDriver {
             return null;
         }
 
-        String queryString = query.getCleanQueryOrEmptyString();
-        if (queryString.isEmpty()) {
+        if (query.getQuery().isEmpty()) {
             return null;
         }
 
         // Pair is used as a tuple, not a key-value pair
         Pair<ArrayList<String>, ArrayList<String>> inputOutputs = new Pair<>(new ArrayList<>(), new ArrayList<>());
 
-        ProcessBuilder pb = new ProcessBuilder("src/Reveaal", "-c", Ecdar.projectDirectory.get(), QueryType.REFINEMENT.getQueryName() + ":" + queryString);
+        ProcessBuilder pb = new ProcessBuilder("src/Reveaal", "-c", Ecdar.projectDirectory.get(), QueryType.REFINEMENT.getQueryName() + ":" + query.getQuery());
         pb.redirectErrorStream(true);
         try {
             //Start the Reveaal process

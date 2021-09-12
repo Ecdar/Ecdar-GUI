@@ -76,39 +76,6 @@ public class Query implements Serializable {
         return query;
     }
 
-    public String getCleanQueryOrEmptyString() {
-        String cleanQuery = getQuery().replaceAll("\\s", "");
-
-        ArrayList<String> whiteList = new ArrayList<>();
-        Ecdar.getProject().getComponents().forEach((c) -> {
-            whiteList.add(c.getName());
-            c.getLocations().forEach((l) -> {
-                whiteList.add(l.getId());
-            });
-        });
-
-        for (QueryType value : QueryType.values()) {
-            whiteList.add(value.getSymbol());
-        }
-
-        whiteList.add("\\|\\|");
-        whiteList.add("\\.");
-        whiteList.add("\\(");
-        whiteList.add("\\)");
-
-        StringBuilder patternString = new StringBuilder(whiteList.get(0));
-        whiteList.stream().skip(1).forEach((s -> patternString.append("|").append(s)));
-        Pattern p = Pattern.compile("^(" + patternString + ")+$");
-        Matcher m = p.matcher(cleanQuery);
-
-        if (m.matches()) {
-            return cleanQuery;
-        } else {
-            Ecdar.showToast("The query is not accepted. Make sure to use accepted and present components and operators only");
-            return "";
-        }
-    }
-
     public String getComment() {
         return comment.get();
     }
@@ -175,13 +142,12 @@ public class Query implements Serializable {
 
             errors.set("");
 
-            String queryString = getCleanQueryOrEmptyString();
-            if (queryString.isEmpty()) {
+            if (getQuery().isEmpty()) {
                 setQueryState(QueryState.SYNTAX_ERROR);
                 return;
             }
 
-            backendThread = BackendDriverManager.getInstance(this.currentBackend).getBackendThreadForQuery(getType().getQueryName() + ": " + queryString + " " + getIgnoredInputOutputsOnQuery(),
+            backendThread = BackendDriverManager.getInstance(this.currentBackend).getBackendThreadForQuery(getType().getQueryName() + ": " + getQuery() + " " + getIgnoredInputOutputsOnQuery(),
                     aBoolean -> {
                         if (aBoolean) {
                             setQueryState(QueryState.SUCCESSFUL);
