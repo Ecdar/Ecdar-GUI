@@ -1,6 +1,6 @@
 package ecdar.presentations;
 
-import ecdar.controllers.SimulatorController;
+import ecdar.simulation.EcdarSimulationController;
 import ecdar.utility.colors.Color;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
@@ -17,7 +17,7 @@ import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 
 public class SimulatorPresentation extends StackPane {
-    private final SimulatorController controller;
+    private final EcdarSimulationController controller;
     private final BooleanProperty leftPaneOpen = new SimpleBooleanProperty(false);
     private final SimpleDoubleProperty leftPaneAnimationProperty = new SimpleDoubleProperty(0);
     private final BooleanProperty rightPaneOpen = new SimpleBooleanProperty(false);
@@ -75,7 +75,7 @@ public class SimulatorPresentation extends StackPane {
     }
 
     /**
-     * Initializes the {@link SimulatorController#toolbar} with the right background color
+     * Initializes the {@link EcdarSimulationController#toolbar} with the right background color
      */
     private void initializeToolbar() {
         final Color color = Color.GREY_BLUE;
@@ -186,7 +186,7 @@ public class SimulatorPresentation extends StackPane {
      * The way to get the associated/linked controller of this presenter
      * @return the controller linked to this presenter
      */
-    public SimulatorController getController() {
+    public EcdarSimulationController getController() {
         return controller;
     }
 }

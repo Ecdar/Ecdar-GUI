@@ -4,8 +4,9 @@ import com.jfoenix.controls.JFXRippler;
 import com.uppaal.model.system.SystemLocation;
 import com.uppaal.model.system.concrete.ConcreteState;
 import ecdar.Ecdar;
-import ecdar.simulation.SimulationHandler;
 import ecdar.presentations.TransitionPresentation;
+import ecdar.simulation.EcdarSimulationController;
+import ecdar.simulation.EcdarSimulationHandler;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.ListChangeListener;
@@ -42,20 +43,20 @@ public class TracePaneElementController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        Ecdar.getSimulationHandler().getTraceLog().addListener((ListChangeListener<ConcreteState>) c -> {
-            while (c.next()) {
-                for(final ConcreteState state: c.getAddedSubList()) {
-                    insertTraceState(state, true);
-                }
-
-                for(final ConcreteState state: c.getRemoved()) {
-                    traceList.getChildren().remove(transitionPresentationMap.get(state));
-                    transitionPresentationMap.remove(state);
-                }
-            }
-
-            numberOfSteps.set(transitionPresentationMap.size());
-        });
+//        Ecdar.getSimulationHandler().getTraceLog().addListener((ListChangeListener<ConcreteState>) c -> {
+//            while (c.next()) {
+//                for(final ConcreteState state: c.getAddedSubList()) {
+//                    insertTraceState(state, true);
+//                }
+//
+//                for(final ConcreteState state: c.getRemoved()) {
+//                    traceList.getChildren().remove(transitionPresentationMap.get(state));
+//                    transitionPresentationMap.remove(state);
+//                }
+//            }
+//
+//            numberOfSteps.set(transitionPresentationMap.size());
+//        });
 
         initializeTraceExpand();
     }
@@ -112,20 +113,20 @@ public class TracePaneElementController implements Initializable {
 
         transitionPresentation.setOnMouseReleased(event -> {
             event.consume();
-            final SimulationHandler simHandler = Ecdar.getSimulationHandler();
+            final EcdarSimulationHandler simHandler = Ecdar.getSimulationHandler();
             if (simHandler == null) return;
-            Ecdar.getSimulationHandler().selectTransitionFromLog(state);
+            //Ecdar.getSimulationHandler().selectTransitionFromLog(state);
         });
 
         EventHandler mouseEntered = transitionPresentation.getOnMouseEntered();
         transitionPresentation.setOnMouseEntered(event -> {
-            SimulatorController.setSelectedState(state);
+            EcdarSimulationController.setSelectedState(state);
             mouseEntered.handle(event);
         });
 
         EventHandler mouseExited = transitionPresentation.getOnMouseExited();
         transitionPresentation.setOnMouseExited(event -> {
-            SimulatorController.setSelectedState(null);
+            EcdarSimulationController.setSelectedState(null);
             mouseExited.handle(event);
         });
 

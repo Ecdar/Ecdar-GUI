@@ -2,7 +2,7 @@ package ecdar.presentations;
 
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Location;
-import ecdar.controllers.SimLocationController;
+import ecdar.simulation.SimLocationController;
 import ecdar.utility.Highlightable;
 import ecdar.utility.colors.Color;
 import ecdar.utility.helpers.BindingHelper;

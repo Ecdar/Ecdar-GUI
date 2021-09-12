@@ -1,20 +1,15 @@
-package ecdar.controllers;
+package ecdar.simulation;
 
 import ecdar.Debug;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
 import ecdar.abstractions.Nail;
-import ecdar.presentations.Grid;
 import ecdar.presentations.SimNailPresentation;
 import ecdar.presentations.SimTagPresentation;
 import ecdar.utility.colors.Color;
-import ecdar.utility.helpers.ItemDragHelper;
-import ecdar.utility.helpers.SelectHelper;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableDoubleValue;
 import javafx.fxml.Initializable;
 import javafx.scene.Group;
 import javafx.scene.control.Label;

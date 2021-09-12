@@ -6,6 +6,7 @@ import com.uppaal.model.system.SystemLocation;
 import ecdar.abstractions.*;
 import ecdar.presentations.SimEdgePresentation;
 import ecdar.presentations.SimLocationPresentation;
+import ecdar.simulation.EcdarSimulatorOverviewController;
 import javafx.animation.Interpolator;
 import javafx.animation.Transition;
 import javafx.beans.property.ObjectProperty;
@@ -25,7 +26,7 @@ import java.net.URL;
 import java.util.*;
 
 /**
- * The controller for the process shown in the {@link SimulatorOverviewController}
+ * The controller for the process shown in the {@link EcdarSimulatorOverviewController}
  */
 public class ProcessController extends ModelController implements Initializable {
     public StackPane componentPane;

@@ -1,4 +1,4 @@
-package ecdar.controllers;
+package ecdar.simulation;
 
 import com.uppaal.model.system.Process;
 import com.uppaal.model.system.SystemEdge;
@@ -8,6 +8,7 @@ import com.uppaal.model.system.concrete.ConcreteTransition;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.presentations.ProcessPresentation;
+import ecdar.simulation.EcdarSimulationController;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -19,7 +20,6 @@ import javafx.scene.Group;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.*;
 
-import java.math.BigDecimal;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,7 +30,7 @@ import java.util.ResourceBundle;
  * The controller of the middle part of the simulator.
  * It is here where processes of a simulation will be shown.
  */
-public class SimulatorOverviewController implements Initializable {
+public class EcdarSimulatorOverviewController implements Initializable {
     public AnchorPane root;
     public ScrollPane scrollPane;
     public FlowPane processContainer;
@@ -108,7 +108,8 @@ public class SimulatorOverviewController implements Initializable {
                 }
             }
             // Highlight the current state when the processes change
-            highlightProcessState(Ecdar.getSimulationHandler().getCurrentConcreteState());
+            // ToDo NIELS: Do highlighting better
+            //  highlightProcessState(Ecdar.getSimulationHandler().getCurrentConcreteState());
             processContainer.getChildren().addAll(processes.values());
             processPresentations.putAll(processes);
          });
@@ -124,31 +125,32 @@ public class SimulatorOverviewController implements Initializable {
 
     /**
      * Setup listeners for displaying clock and variable values on the {@link ProcessPresentation}
+     * ToDo NIELS: Fix below
      */
     private void initializeSimulationVariables() {
-        Ecdar.getSimulationHandler().getSimulationVariables().addListener((InvalidationListener) obs -> {
-            Ecdar.getSimulationHandler().getSimulationVariables().forEach((s, bigDecimal) -> {
-                if (!s.equals("t(0)")) {// As t(0) does not belong to any process
-                    final String[] spittedString = s.split("\\.");
-                    // If the process containing the var is not there we just skip it
-                    if (spittedString.length > 0 && processPresentations.size() > 0) {
-                        processPresentations.get(spittedString[0]).getController().getVariables().put(spittedString[1], bigDecimal);
-                    }
-                }
-            });
-        });
-        Ecdar.getSimulationHandler().getSimulationClocks().addListener((InvalidationListener) obs -> {
-            if(processPresentations.size() == 0) return;
-            Ecdar.getSimulationHandler().getSimulationClocks().forEach((s, bigDecimal) -> {
-                if (!s.equals("t(0)")) {// As t(0) does not belong to any process
-                    final String[] spittedString = s.split("\\.");
-                    // If the process containing the clock is not there we just skip it
-                    if (spittedString.length > 0 && processPresentations.size() > 0) {
-                        processPresentations.get(spittedString[0]).getController().getClocks().put(spittedString[1], bigDecimal);
-                    }
-                }
-            });
-        });
+//        Ecdar.getSimulationHandler().getSimulationVariables().addListener((InvalidationListener) obs -> {
+//            Ecdar.getSimulationHandler().getSimulationVariables().forEach((s, bigDecimal) -> {
+//                if (!s.equals("t(0)")) {// As t(0) does not belong to any process
+//                    final String[] spittedString = s.split("\\.");
+//                    // If the process containing the var is not there we just skip it
+//                    if (spittedString.length > 0 && processPresentations.size() > 0) {
+//                        processPresentations.get(spittedString[0]).getController().getVariables().put(spittedString[1], bigDecimal);
+//                    }
+//                }
+//            });
+//        });
+//        Ecdar.getSimulationHandler().getSimulationClocks().addListener((InvalidationListener) obs -> {
+//            if(processPresentations.size() == 0) return;
+//            Ecdar.getSimulationHandler().getSimulationClocks().forEach((s, bigDecimal) -> {
+//                if (!s.equals("t(0)")) {// As t(0) does not belong to any process
+//                    final String[] spittedString = s.split("\\.");
+//                    // If the process containing the clock is not there we just skip it
+//                    if (spittedString.length > 0 && processPresentations.size() > 0) {
+//                        processPresentations.get(spittedString[0]).getController().getClocks().put(spittedString[1], bigDecimal);
+//                    }
+//                }
+//            });
+//        });
     }
 
     /**
@@ -232,7 +234,7 @@ public class SimulatorOverviewController implements Initializable {
      * @see FlowPane#scaleXProperty()
      * @see FlowPane#scaleYProperty()
      */
-    void zoomIn() {
+    public void zoomIn() {
         if (isMaxZoomInReached) return;
         isMaxZoomOutReached = false;
         processContainer.setScaleX(processContainer.getScaleX() * SCALE_DELTA);
@@ -246,7 +248,7 @@ public class SimulatorOverviewController implements Initializable {
      * @see FlowPane#scaleXProperty()
      * @see FlowPane#scaleYProperty()
      */
-    void zoomOut() {
+    public void zoomOut() {
         if(isMaxZoomOutReached) return;
         isMaxZoomInReached = false;
         processContainer.setScaleX(processContainer.getScaleX() * (1 / SCALE_DELTA));
@@ -258,7 +260,7 @@ public class SimulatorOverviewController implements Initializable {
      * @see FlowPane#scaleXProperty()
      * @see FlowPane#scaleYProperty()
      */
-    void resetZoom() {
+    public void resetZoom() {
         if(processContainer.getScaleX() == 1) return;
         resetZoom = true;
         isMaxZoomInReached = false;
@@ -290,9 +292,10 @@ public class SimulatorOverviewController implements Initializable {
 
     /**
      * Initializer method to setup listeners that handle highlighting when selected/current state/transition changes
+     * ToDo NILES: Fix below
      */
     private void initializeHighlighting() {
-        SimulatorController.getSelectedTransitionProperty().addListener((observable, oldTransition, newTransition) -> {
+        EcdarSimulationController.getSelectedTransitionProperty().addListener((observable, oldTransition, newTransition) -> {
             unhighlightProcesses();
 
             // If the new transition is not null, we want to highlight the locations and edges in the new value
@@ -300,11 +303,11 @@ public class SimulatorOverviewController implements Initializable {
             if(newTransition != null) {
                 highlightProcessTransition(newTransition);
             } else {
-                highlightProcessState(Ecdar.getSimulationHandler().getCurrentConcreteState());
+               // highlightProcessState(Ecdar.getSimulationHandler().getCurrentConcreteState());
             }
         });
 
-        SimulatorController.getSelectedStateProperty().addListener((observable, oldState, newState) -> {
+        EcdarSimulationController.getSelectedStateProperty().addListener((observable, oldState, newState) -> {
             unhighlightProcesses();
 
             // If the new state is not null, we want to highlight the locations in the new value
@@ -312,7 +315,7 @@ public class SimulatorOverviewController implements Initializable {
             if(newState != null) {
                 highlightProcessState(newState);
             } else {
-                highlightProcessState(Ecdar.getSimulationHandler().getCurrentConcreteState());
+                //highlightProcessState(Ecdar.getSimulationHandler().getCurrentConcreteState());
             }
         });
     }

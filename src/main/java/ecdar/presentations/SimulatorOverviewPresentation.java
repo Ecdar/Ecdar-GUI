@@ -1,6 +1,6 @@
 package ecdar.presentations;
 
-import ecdar.controllers.SimulatorOverviewController;
+import ecdar.simulation.EcdarSimulatorOverviewController;
 import javafx.scene.layout.AnchorPane;
 
 /**
@@ -8,13 +8,13 @@ import javafx.scene.layout.AnchorPane;
  * It is here where processes of a simulation will be shown.
  */
 public class SimulatorOverviewPresentation extends AnchorPane {
-    private final SimulatorOverviewController controller;
+    private final EcdarSimulatorOverviewController controller;
 
     public SimulatorOverviewPresentation() {
         controller = new EcdarFXMLLoader().loadAndGetController("SimulatorOverviewPresentation.fxml", this);
     }
 
-    public SimulatorOverviewController getController() {
+    public EcdarSimulatorOverviewController getController() {
         return controller;
     }
 }

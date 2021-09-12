@@ -2,9 +2,8 @@ package ecdar.abstractions;
 
 import ecdar.Ecdar;
 import ecdar.backend.*;
-import ecdar.controllers.EcdarController;
 import ecdar.controllers.MainController;
-import ecdar.controllers.SimulatorController;
+import ecdar.simulation.EcdarSimulationController;
 import ecdar.utility.serialize.Serializable;
 import com.google.gson.JsonObject;
 import com.uppaal.engine.Engine;
@@ -147,7 +146,7 @@ public class Query implements Serializable {
 
                             if(showSimulator) {
                                 Platform.runLater(() -> {
-                                    SimulatorController.setSelectedTransition(null);
+                                    EcdarSimulationController.setSelectedTransition(null);
                                     MainController.showSimulator();
                                 });
                             }

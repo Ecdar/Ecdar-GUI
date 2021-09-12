@@ -1,4 +1,4 @@
-package ecdar.controllers;
+package ecdar.simulation;
 
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;

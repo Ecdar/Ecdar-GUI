@@ -2,7 +2,7 @@ package ecdar.presentations;
 
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
-import ecdar.controllers.SimEdgeController;
+import ecdar.simulation.SimEdgeController;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Group;

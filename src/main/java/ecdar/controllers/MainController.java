@@ -10,6 +10,8 @@ import ecdar.abstractions.Query;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.presentations.*;
+import ecdar.simulation.EcdarSimulationController;
+import ecdar.simulation.EcdarSimulatorOverviewController;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
 import ecdar.utility.keyboard.Keybind;
@@ -913,7 +915,7 @@ public class MainController implements Initializable {
         if(ecdarController != null) {
             ecdarController.bottomFillerElement.heightProperty().bind(tabPaneContainer.maxHeightProperty());
         }
-        SimulatorController simController = simulatorPresentation.getController();
+        EcdarSimulationController simController = simulatorPresentation.getController();
         if(simController != null) {
             simController.bottomFillerElement.heightProperty().bind(tabPaneContainer.maxHeightProperty());
         }
@@ -1029,7 +1031,7 @@ public class MainController implements Initializable {
     }
 
     /**
-     * Sets keybindings for zooming in the {@link SimulatorOverviewController} using the numpad
+     * Sets keybindings for zooming in the {@link EcdarSimulatorOverviewController} using the numpad
      */
     private void setExtraZoomKeybindings() {
         // Numpad plus +

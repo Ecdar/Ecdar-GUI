@@ -1,4 +1,4 @@
-package ecdar.controllers;
+package ecdar.simulation;
 
 import com.uppaal.model.system.concrete.ConcreteState;
 import com.uppaal.model.system.concrete.ConcreteTransition;
@@ -6,7 +6,6 @@ import ecdar.Ecdar;
 import ecdar.abstractions.*;
 import ecdar.backend.BackendException;
 import ecdar.backend.BackendHelper;
-import ecdar.simulation.SimulationHandler;
 import ecdar.presentations.LeftSimPanePresentation;
 import ecdar.presentations.RightSimPanePresentation;
 import ecdar.presentations.SimulatorOverviewPresentation;
@@ -24,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class SimulatorController implements Initializable, Presentable {
+public class EcdarSimulationController implements Initializable, Presentable {
 
     public StackPane root;
     public SimulatorOverviewPresentation overviewPresentation;
@@ -56,11 +55,12 @@ public class SimulatorController implements Initializable, Presentable {
      */
     @Override
     public void willShow() {
-        final SimulationHandler sm = Ecdar.getSimulationHandler();
+        final EcdarSimulationHandler sm = Ecdar.getSimulationHandler();
         boolean shouldSimulationBeReset = true;
 
-        //Have the user left a trace or is he simulating a query
-        if (sm.traceLog.size() >= 2 || sm.getCurrentSimulation().contains(SimulationHandler.QUERY_PREFIX)) {
+        // ToDo NIELS: Handle the below check to check if the user has actually left
+        // Have the user left a trace or is he simulating a query
+        if (false) {
             shouldSimulationBeReset = false;
         }
 
@@ -72,27 +72,26 @@ public class SimulatorController implements Initializable, Presentable {
         if (shouldSimulationBeReset || firstTimeInSimulator) {
             try {
                 resetSimulation();
-                sm.resetToInitialLocation();
             } catch (final BackendException.SystemNotFoundException ex) {
                 overviewPresentation.getController().addProcessesToGroup();
                 return;
             }
         }
         overviewPresentation.getController().addProcessesToGroup();
-        overviewPresentation.getController().highlightProcessState(sm.getCurrentConcreteState());
+        //overviewPresentation.getController().highlightProcessState(sm.getCurrentConcreteState());
     }
 
     /**
      * Resets the current simulation, and prepares for a new simulation by clearing the
-     * {@link SimulatorOverviewController#processContainer} and adding the processes of the new simulation.
+     * {@link EcdarSimulatorOverviewController#processContainer} and adding the processes of the new simulation.
      *
      * @throws BackendException.SystemNotFoundException if the system is not declared or contains syntax errors.
      */
     private void resetSimulation() throws BackendException.SystemNotFoundException {
-        final SimulationHandler sm = Ecdar.getSimulationHandler();
+        final EcdarSimulationHandler sm = Ecdar.getSimulationHandler();
         try {
             BackendHelper.buildEcdarDocument();
-            sm.initializeDefaultSystem();
+          //  sm.initializeDefaultSystem();
         } catch (final BackendException.SystemNotFoundException ex){
             Ecdar.showToast("A system is not declared, or contains syntax errors");
             throw ex;
@@ -109,7 +108,6 @@ public class SimulatorController implements Initializable, Presentable {
 
     /**
      * Finds the components that are used in the current simulation by looking at the component found in
-     * {@link Project#getComponents()} and compare them to the processes declared in the {@link SimulationHandler#getSystem()}
      *
      * TODO This does currently not work if the same component is used multiple times.
      *
@@ -117,15 +115,15 @@ public class SimulatorController implements Initializable, Presentable {
      */
     private List<Component> findComponentsInCurrentSimulation() {
         //Show components from the system
-        final SimulationHandler sm = Ecdar.getSimulationHandler();
+        final EcdarSimulationHandler sm = Ecdar.getSimulationHandler();
         List<Component> components = new ArrayList<>();
-        for (int i = 0; i < sm.getSystem().getNoOfProcesses(); i++) {
-            final int finalI = i; // when using a var in lambda it has to be final
-            final List<Component> filteredList = Ecdar.getProject().getComponents().filtered(component -> {
-                return component.getName().contentEquals(sm.getSystem().getProcess(finalI).getName());
-            });
-            components.addAll(filteredList);
-        }
+//        for (int i = 0; i < sm.getSystem().getNoOfProcesses(); i++) {
+//            final int finalI = i; // when using a var in lambda it has to be final
+//            final List<Component> filteredList = Ecdar.getProject().getComponents().filtered(component -> {
+//                return component.getName().contentEquals(sm.getSystem().getProcess(finalI).getName());
+//            });
+//            components.addAll(filteredList);
+//        }
         return components;
     }
 
@@ -142,7 +140,6 @@ public class SimulatorController implements Initializable, Presentable {
             overviewPresentation.getController().addProcessesToGroup();
             return;
         }
-        Ecdar.getSimulationHandler().resetToInitialLocation();
         overviewPresentation.getController().addProcessesToGroup();
     }
 
@@ -169,7 +166,7 @@ public class SimulatorController implements Initializable, Presentable {
     }
 
     public static void setSelectedTransition(ConcreteTransition selectedTransition) {
-        SimulatorController.selectedTransition.set(selectedTransition);
+        EcdarSimulationController.selectedTransition.set(selectedTransition);
     }
 
     public static ObjectProperty<ConcreteState> getSelectedStateProperty() {
@@ -177,6 +174,6 @@ public class SimulatorController implements Initializable, Presentable {
     }
 
     public static void setSelectedState(ConcreteState selectedState) {
-        SimulatorController.selectedState.set(selectedState);
+        EcdarSimulationController.selectedState.set(selectedState);
     }
 }

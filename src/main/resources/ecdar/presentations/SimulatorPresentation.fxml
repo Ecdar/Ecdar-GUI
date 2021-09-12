@@ -10,7 +10,7 @@
 <fx:root xmlns="http://javafx.com/javafx"
          xmlns:fx="http://javafx.com/fxml"
          fx:id="root"
-         fx:controller="ecdar.controllers.SimulatorController"
+         fx:controller="ecdar.simulation.EcdarSimulationController"
          type="StackPane">
     <BorderPane>
         <center>

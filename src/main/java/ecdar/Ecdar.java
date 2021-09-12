@@ -3,7 +3,6 @@ package ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Project;
 import ecdar.backend.BackendHelper;
-import ecdar.simulation.SimulationHandler;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.controllers.EcdarController;
 import ecdar.controllers.MainController;
@@ -11,6 +10,7 @@ import ecdar.presentations.BackgroundThreadPresentation;
 import ecdar.presentations.EcdarPresentation;
 import ecdar.presentations.MainPresentation;
 import ecdar.presentations.UndoRedoHistoryPresentation;
+import ecdar.simulation.EcdarSimulationHandler;
 import ecdar.utility.keyboard.Keybind;
 import ecdar.utility.keyboard.KeyboardTracker;
 import javafx.application.Application;
@@ -43,7 +43,7 @@ public class Ecdar extends Application {
     public static final String VERSION = "2.1";
     public static boolean serializationDone = false;
     private static Project project;
-    private static SimulationHandler simulationHandler;
+    private static EcdarSimulationHandler simulationHandler;
     private static MainPresentation presentation;
     public static SimpleStringProperty projectDirectory = new SimpleStringProperty();
     private static BooleanProperty isUICached = new SimpleBooleanProperty();
@@ -87,7 +87,7 @@ public class Ecdar extends Application {
         return project;
     }
 
-    public static SimulationHandler getSimulationHandler() { return simulationHandler; }
+    public static EcdarSimulationHandler getSimulationHandler() { return simulationHandler; }
 
     public static MainPresentation getPresentation() {
         return presentation;
@@ -160,7 +160,7 @@ public class Ecdar extends Application {
     public void start(final Stage stage) {
         // Load or create new project
         project = new Project();
-        simulationHandler = new SimulationHandler();
+        simulationHandler = new EcdarSimulationHandler();
 
         // Set the title for the application
         stage.setTitle("Ecdar " + VERSION);
