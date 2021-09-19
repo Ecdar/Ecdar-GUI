@@ -12,6 +12,8 @@ public class ReveaalThread extends BackendThread {
     }
 
     public void run() {
+//            ProtoBufConverter.getQueryProtoBuf(query).writeTo(outStream);
+
         ProcessBuilder pb = new ProcessBuilder("src/Reveaal", Ecdar.projectDirectory.get(), query);
         pb.redirectErrorStream(true);
         try {
