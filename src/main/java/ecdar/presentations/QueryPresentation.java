@@ -3,10 +3,7 @@ package ecdar.presentations;
 import com.jfoenix.controls.*;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
-import ecdar.backend.BackendDriverManager;
-import ecdar.backend.BackendHelper;
-import ecdar.backend.IBackendDriver;
-import ecdar.backend.ReveaalDriver;
+import ecdar.backend.*;
 import ecdar.controllers.QueryController;
 import ecdar.controllers.EcdarController;
 import ecdar.utility.colors.Color;
@@ -272,16 +269,16 @@ public class QueryPresentation extends AnchorPane {
         });
     }
 
-    private void initiateResetInputOutputButton(TitledPane inputOutputPane, ReveaalDriver backendDriver) {
+    private void initiateResetInputOutputButton(TitledPane inputOutputPane) {
         Platform.runLater(() -> {
             final JFXRippler resetInputOutputPaneButton = (JFXRippler) inputOutputPane.lookup("#inputOutputPaneUpdateButton");
 
-            initializeResetInputOutputPaneButton(inputOutputPane, backendDriver, resetInputOutputPaneButton);
+            initializeResetInputOutputPaneButton(inputOutputPane, resetInputOutputPaneButton);
 
             // Get the inputs and outputs automatically, when executing a refinement query
             controller.actionButton.setOnMousePressed(event -> {
                 // Update the ignored inputs and outputs without clearing the lists
-                updateInputOutputs(inputOutputPane, backendDriver, false);
+                updateInputOutputs(inputOutputPane, false);
             });
 
             // Install tooltip on the reset button
@@ -292,7 +289,6 @@ public class QueryPresentation extends AnchorPane {
     }
 
     private void initializeResetInputOutputPaneButton(TitledPane inputOutputPane,
-                                                      ReveaalDriver backendDriver,
                                                       JFXRippler resetInputOutputPaneButton) {
         Platform.runLater(() -> {
             final FontIcon resetInputOutputPaneButtonIcon = (FontIcon) lookup("#inputOutputPaneUpdateButtonIcon");
@@ -312,7 +308,7 @@ public class QueryPresentation extends AnchorPane {
                 resetInputOutputPaneButton.setDisable(true);
                 resetInputOutputPaneButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I700));
 
-                updateInputOutputs(inputOutputPane, backendDriver, true);
+                updateInputOutputs(inputOutputPane, true);
 
                 // Enable the button after inputs and outputs have been updated
                 progressIndicator.setVisible(false);
@@ -333,30 +329,25 @@ public class QueryPresentation extends AnchorPane {
             swapBackendButton.setMaskType(JFXRippler.RipplerMask.CIRCLE);
             swapBackendButton.setOnMousePressed(event -> {
                 // Set the backend to the one not currently used and update GUI
-                final BackendHelper.BackendNames newBackend;
-                if (this.controller.getQuery().getCurrentBackend().equals(BackendHelper.BackendNames.jEcdar)) {
-                    newBackend = BackendHelper.BackendNames.Reveaal;
-                } else {
-                    newBackend = BackendHelper.BackendNames.jEcdar;
-                }
+                final BackendHelper.BackendNames newBackend = (this.controller.getQuery().getBackend().equals(BackendHelper.BackendNames.jEcdar)
+                        ? BackendHelper.BackendNames.Reveaal
+                        : BackendHelper.BackendNames.jEcdar);
 
-                this.controller.getQuery().setCurrentBackend(newBackend);
+                this.controller.getQuery().setBackend(newBackend);
                 setSwapBackendTooltipAndLabel(newBackend);
                 updateTitlePaneVisibility(inputOutputPane, controller.getQuery().getQuery());
             });
 
             swapBackendButtonTooltip = new Tooltip();
-            setSwapBackendTooltipAndLabel(this.controller.getQuery().getCurrentBackend());
+            setSwapBackendTooltipAndLabel(this.controller.getQuery().getBackend());
             JFXTooltip.install(swapBackendButton, swapBackendButtonTooltip);
         });
     }
 
     private void updateTitlePaneVisibility(TitledPane inputOutputPane, String queryString) {
-        final IBackendDriver backendDriver;
-
         // Check if the query is a refinement and that the engine is set to Reveaal
-        if (queryString.startsWith("refinement") && (backendDriver = BackendDriverManager.getInstance(this.controller.getQuery().getCurrentBackend())) instanceof ReveaalDriver) {
-            initiateResetInputOutputButton(inputOutputPane, (ReveaalDriver) backendDriver);
+        if (queryString.startsWith("refinement") && BackendHelper.backendSupportsInputOutputs(controller.getQuery().getBackend())) {
+            initiateResetInputOutputButton(inputOutputPane);
 
             // Make the input/output pane visible
             inputOutputPaneVisibility(true);
@@ -366,12 +357,14 @@ public class QueryPresentation extends AnchorPane {
         }
     }
 
-    private void updateInputOutputs(TitledPane inputOutputPane, ReveaalDriver backendDriver, Boolean shouldResetSelections) {
+    private void updateInputOutputs(TitledPane inputOutputPane, Boolean shouldResetSelections) {
         final VBox inputBox = (VBox) inputOutputPane.lookup("#inputBox");
         final VBox outputBox = (VBox) inputOutputPane.lookup("#outputBox");
 
         // Get inputs and outputs
-        Pair<ArrayList<String>, ArrayList<String>> inputOutputs = backendDriver.getInputOutputs(controller.getQuery().getQuery());
+        Pair<ArrayList<String>, ArrayList<String>> inputOutputs = Ecdar.getBackendDriver().getInputOutputs(controller.getQuery().getQuery());
+
+        if (inputOutputs == null) return;
 
         if (shouldResetSelections) {
             // Reset selections for ignored inputs and outputs

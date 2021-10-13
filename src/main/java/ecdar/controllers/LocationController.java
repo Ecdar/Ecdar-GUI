@@ -2,7 +2,7 @@ package ecdar.controllers;
 
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
-import ecdar.backend.BackendDriverManager;
+import ecdar.backend.BackendHelper;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.code_analysis.Nearable;
 import ecdar.presentations.*;
@@ -189,7 +189,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
         dropDownMenu.addClickableListElement("Is " + getLocation().getId() + " reachable?", event -> {
             dropDownMenu.hide();
             // Generate the query from the backend
-            final String reachabilityQuery = BackendDriverManager.getInstance().getLocationReachableQuery(getLocation(), getComponent());
+            final String reachabilityQuery = BackendHelper.getLocationReachableQuery(getLocation(), getComponent());
 
             // Add proper comment
             final String reachabilityComment = "Is " + getLocation().getMostDescriptiveIdentifier() + " reachable?";

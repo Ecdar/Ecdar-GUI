@@ -220,6 +220,12 @@
                             <FontIcon iconLiteral="gmi-check" iconSize="24" fill="black"/>
                         </graphic>
                     </MenuItem>
+
+                    <MenuItem fx:id="menuBarOptionsDefaultBackend" text="Backend">
+                        <graphic>
+                            <FontIcon iconLiteral="gmi-autorenew" iconSize="24" fill="black"/>
+                        </graphic>
+                    </MenuItem>
                 </Menu>
 
                 <Menu text="Help">

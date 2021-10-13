@@ -3,7 +3,6 @@ package ecdar.controllers;
 import ecdar.Debug;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
-import ecdar.backend.BackendDriverManager;
 import ecdar.backend.BackendException;
 import ecdar.backend.BackendHelper;
 import ecdar.code_analysis.CodeAnalysis;
@@ -149,6 +148,7 @@ public class EcdarController implements Initializable {
     public MenuItem menuBarFileExportAsPng;
     public MenuItem menuBarFileExportAsPngNoBorder;
     public MenuItem menuBarOptionsCache;
+    public MenuItem menuBarOptionsDefaultBackend;
     public MenuItem menuBarHelpHelp;
     public MenuItem menuBarHelpAbout;
     public MenuItem menuBarHelpTest;
@@ -382,29 +382,30 @@ public class EcdarController implements Initializable {
                         component.getLocations().forEach(location -> location.setReachability(Location.Reachability.EXCLUDED));
                     } else {
                         component.getLocations().forEach(location -> {
-                            final String locationReachableQuery = BackendDriverManager.getInstance().getLocationReachableQuery(location, component);
-                            final Thread verifyThread = BackendDriverManager.getInstance().getBackendThreadForQuery(
-                                    locationReachableQuery,
-                                    (result -> {
-                                        if (result) {
-                                            location.setReachability(Location.Reachability.REACHABLE);
-                                        } else {
-                                            location.setReachability(Location.Reachability.UNREACHABLE);
-                                        }
-                                        Debug.removeThread(Thread.currentThread());
-                                    }),
-                                    (e) -> {
-                                        location.setReachability(Location.Reachability.UNKNOWN);
-                                        Debug.removeThread(Thread.currentThread());
-                                    },
-                                    2000
-                            );
-
-                            if(verifyThread != null){
-                                verifyThread.setName(locationReachableQuery + " (" + verifyThread.getName() + ")");
-                                Debug.addThread(verifyThread);
-                                threads.add(verifyThread);
-                            }
+                            final String locationReachableQuery = BackendHelper.getLocationReachableQuery(location, component);
+                            // ToDo NIELS: Needs new implementation after thread pool implementation
+//                            final Thread verifyThread = BackendDriverManager.getInstance().getBackendThreadForQuery(
+//                                    locationReachableQuery,
+//                                    (result -> {
+//                                        if (result) {
+//                                            location.setReachability(Location.Reachability.REACHABLE);
+//                                        } else {
+//                                            location.setReachability(Location.Reachability.UNREACHABLE);
+//                                        }
+//                                        Debug.removeThread(Thread.currentThread());
+//                                    }),
+//                                    (e) -> {
+//                                        location.setReachability(Location.Reachability.UNKNOWN);
+//                                        Debug.removeThread(Thread.currentThread());
+//                                    },
+//                                    2000
+//                            );
+//
+//                            if(verifyThread != null){
+//                                verifyThread.setName(locationReachableQuery + " (" + verifyThread.getName() + ")");
+//                                Debug.addThread(verifyThread);
+//                                threads.add(verifyThread);
+//                            }
                         });
                     }
                 });
@@ -465,7 +466,7 @@ public class EcdarController implements Initializable {
 
         initializeViewMenu();
 
-        initializeUICacheMenuElement();
+        initializeOptionsMenu();
 
         initializeHelpMenu();
     }
@@ -500,11 +501,23 @@ public class EcdarController implements Initializable {
     /**
      * Initializes the UI Cache menu element.
      */
-    private void initializeUICacheMenuElement() {
+    private void initializeOptionsMenu() {
         menuBarOptionsCache.setOnAction(event -> {
             final BooleanProperty isCached = Ecdar.toggleUICache();
             menuBarOptionsCache.getGraphic().opacityProperty().bind(new When(isCached).then(1).otherwise(0));
         });
+
+        menuBarOptionsDefaultBackend.setOnAction(event -> {
+            BackendHelper.defaultBackend = (BackendHelper.defaultBackend.equals(BackendHelper.BackendNames.jEcdar)
+                    ? BackendHelper.BackendNames.Reveaal
+                    : BackendHelper.BackendNames.jEcdar);
+
+            menuBarOptionsDefaultBackend.setText("Default backend: " + BackendHelper.defaultBackend.name());
+
+            Ecdar.preferences.put("default_backend", Integer.toString(BackendHelper.defaultBackend.ordinal()));
+        });
+
+        menuBarOptionsDefaultBackend.setText("Default backend: " + BackendHelper.defaultBackend.name());
     }
 
     private void initializeEditMenu() {

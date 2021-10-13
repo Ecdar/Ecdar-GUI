@@ -2,6 +2,7 @@ package ecdar;
 
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Project;
+import ecdar.backend.BackendDriver;
 import ecdar.backend.BackendHelper;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.controllers.EcdarController;
@@ -28,10 +29,11 @@ import javafx.stage.Stage;
 import jiconfont.icons.GoogleMaterialDesignIcons;
 import jiconfont.javafx.IconFontFX;
 import org.apache.commons.io.FileUtils;
+
+import java.io.*;
+import java.net.Socket;
 import java.util.prefs.Preferences;
 
-import java.io.File;
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.CodeSource;
 
@@ -44,6 +46,7 @@ public class Ecdar extends Application {
     public static SimpleStringProperty projectDirectory = new SimpleStringProperty();
     private static BooleanProperty isUICached = new SimpleBooleanProperty();
     private static final BooleanProperty isSplit = new SimpleBooleanProperty(true); //Set to true to ensure correct behaviour at first toggle.
+    private static final BackendDriver backendDriver = new BackendDriver();
     private Stage debugStage;
 
     /**
@@ -133,6 +136,14 @@ public class Ecdar extends Application {
         return isSplit;
     }
 
+    /**
+     * Returns the backend driver used to execute queries and handle simulation
+     * @return BackendDriver
+     */
+    public static BackendDriver getBackendDriver() {
+        return backendDriver;
+    }
+
     private void forceCreateFolder(final String directoryPath) throws IOException {
         final File directory = new File(directoryPath);
         FileUtils.forceMkdir(directory);
@@ -149,6 +160,7 @@ public class Ecdar extends Application {
         // Load the fonts required for the project
         IconFontFX.register(GoogleMaterialDesignIcons.getIconFont());
         loadFonts();
+        loadPreferences();
 
         // Remove the classic decoration
         // kyrke - 2020-04-17: Disabled due to bug https://bugs.openjdk.java.net/browse/JDK-8154847
@@ -239,6 +251,32 @@ public class Ecdar extends Application {
             Platform.exit();
             System.exit(0);
         });
+
+//        try {
+//            System.out.println("---------------------Connecting...---------------------");
+//            System.out.println();
+//            Socket socket = new Socket("127.0.0.1", 5141);
+//
+//            var reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+//            var writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+//
+//            writer.write("Hello from the client side");
+//
+//            int inte;
+//            while ((inte = reader.read()) != -1) {
+//                System.out.println(inte);
+//            }
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+    }
+
+    private void loadPreferences() {
+        BackendHelper.defaultBackend = preferences.getInt("default_backend", BackendHelper.BackendNames.jEcdar.ordinal())
+                == BackendHelper.BackendNames.jEcdar.ordinal()
+                ? BackendHelper.BackendNames.jEcdar
+                : BackendHelper.BackendNames.Reveaal;
     }
 
     /**
