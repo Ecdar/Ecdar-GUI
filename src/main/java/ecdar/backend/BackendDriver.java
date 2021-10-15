@@ -25,35 +25,38 @@ public class BackendDriver {
 
     private final Queue<ExecutableQuery> waitingQueries = new LinkedList<>();
 
-    private Integer portNum = 5425;
+    private Integer portNum = 5162;
+
+    private final ArrayList<Process> backendProcesses = new ArrayList<>();
 
     public BackendDriver() {
         new Thread(() -> {
             while(true) {
+                // Try to read from all Reveaal instances that are executing a query and have outputted something
                 for (QuerySocket socket : reveaalSockets) {
                     try {
-                        readFromSocket(socket);
-                        System.out.println("Data read");
+                        if (socket.isRunningQuery() && socket.getReader().ready()) readFromSocket(socket);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
 
+                // Try to read from all jEcdar instances that are executing a query and have outputted something
                 for (QuerySocket socket : jEcdarSockets) {
                     try {
-                        readFromSocket(socket);
-                        System.out.println("Data read");
+                        if (socket.isRunningQuery() && socket.getReader().ready()) readFromSocket(socket);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
 
+                // Execute the next waiting query
                 ExecutableQuery query = waitingQueries.poll();
                 if (query != null) query.execute();
-                else System.out.println("Query was null");
 
+                // Currently necessary in order not to crash the program
                 try {
-                    Thread.sleep(2000);
+                    Thread.sleep(1);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                     return;
@@ -67,16 +70,12 @@ public class BackendDriver {
     }
 
     private void readFromSocket(QuerySocket socket) throws IOException {
-        if (!socket.isRunningQuery()) {
-            return;
-        }
-
-        String line;
-        while ((line = socket.getReader().readLine()) != null) {
+        int line;
+        System.out.println("Starting read");
+        while (socket.getReader().ready() && (line = socket.getReader().read()) != 0) {
             System.out.println(line);
-
             // Skip the returned query and possible notes, as these should not be shown in the GUI
-            if (line.startsWith("note:")) {
+            /*if (line.startsWith("note:")) {
                 continue;
             }
 
@@ -90,48 +89,41 @@ public class BackendDriver {
             } else {
                 socket.getExecutableQuery().queryListener.getQuery().setQueryState(QueryState.SYNTAX_ERROR);
                 socket.getExecutableQuery().failure.accept(new BackendException.QueryErrorException(line));
-            }
+            }*/
 
-            socket.executableQuery = null;
             // ToDo NIELS: Maybe just trigger poll() on query queue here instead of while loop (would require some initial poll technique)
         }
+
+        socket.getExecutableQuery().success.accept(true);
+        socket.executableQuery = null;
     }
 
-    private void executeQuery(String query, BackendHelper.BackendNames backend, Consumer<Boolean> success, Consumer<BackendException> failure, QueryListener queryListener) {
-        if(queryListener.getQuery().getQueryState() == QueryState.UNKNOWN) return;
+    private void executeQuery(ExecutableQuery executableQuery) {
+        if(executableQuery.queryListener.getQuery().getQueryState() == QueryState.UNKNOWN) return;
 
         // Get available socket or start new
         Optional<QuerySocket> socket;
-        if (backend.equals(BackendHelper.BackendNames.jEcdar)) {
+        if (executableQuery.backend.equals(BackendHelper.BackendNames.jEcdar)) {
             socket = jEcdarSockets.stream().filter((element) -> !element.isRunningQuery()).findFirst();
         } else {
             socket = reveaalSockets.stream().filter((element) -> !element.isRunningQuery()).findFirst();
         }
 
-        QuerySocket querySocket = socket.orElseGet(() -> getNewSocket(backend));
+        QuerySocket querySocket = socket.orElseGet(() -> getNewSocket(executableQuery.backend));
+
+        System.out.println(querySocket);
 
         // If the query socket is null, there are no available sockets
         // and the maximum number of sockets has already been reached
         if (querySocket == null) {
             System.out.println("Query re-queued");
-            waitingQueries.add(new ExecutableQuery(query, backend, success, failure, queryListener));
+            waitingQueries.add(executableQuery);
             return;
         }
 
-        try {
-            System.out.println("Trying to execute query...");
-            querySocket.getWriter().write(ProtoBufConverter.getQueryProtoBuf(query).getQueryBytes().toStringUtf8().toCharArray());
-
-            int inte;
-            while ((inte = querySocket.getReader().read()) != -1) {
-                System.out.println(inte);
-
-                querySocket.executableQuery.success.accept(true);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            failure.accept(new BackendException.BadBackendQueryException(e.getMessage()));
-        }
+            System.out.println("Execute query...");
+            querySocket.executeQuery(executableQuery);
+            System.out.println("Query executed");
     }
 
     private QuerySocket getNewSocket(BackendHelper.BackendNames backend) {
@@ -145,30 +137,23 @@ public class BackendDriver {
     private QuerySocket startNewQuerySocket(BackendHelper.BackendNames backend, Pair<AtomicInteger, AtomicInteger> numberOfSockets, ArrayList<QuerySocket> querySockets) {
         if (numberOfSockets.getKey().get() < numberOfSockets.getValue().get()) {
             try {
-                portNum += 1;
+                while (true) {
+                    portNum += 1;
 
-                ProcessBuilder pb;
-                if (backend.equals(BackendHelper.BackendNames.jEcdar)) {
-                    pb = new ProcessBuilder("java", "-jar", "src/libs/j-Ecdar.jar");
-                } else {
-                    pb = new ProcessBuilder("src/Reveaal", "-p 127.0.0.1:" + portNum);
-                    System.out.println("Reveaal started on port: " + portNum);
+                    ProcessBuilder pb;
+                    if (backend.equals(BackendHelper.BackendNames.jEcdar)) {
+                        pb = new ProcessBuilder("java", "-jar", "src/libs/j-Ecdar.jar");
+                    } else {
+                        pb = new ProcessBuilder("src/Reveaal", "-p", "127.0.0.1:" + portNum).inheritIO();
+                    }
+
+                    Process p = pb.start();
+                    if (p.isAlive()) {
+                        // If the process is not alive, the process failed while starting up, try again
+                        backendProcesses.add(p);
+                        break;
+                    }
                 }
-                pb.redirectErrorStream(true);
-                Process process = pb.start();
-
-                var reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                var writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
-
-                Thread.sleep(200);
-
-                System.out.println(process.isAlive());
-
-//                    System.out.println(line);
-//
-//                    String[] socketInfo = line.trim().split(" ");
-//
-//                    if (socketInfo.length != 2) continue;
 
                 QuerySocket newSocket = new QuerySocket(new Socket((String) null, portNum, null, 0));
 
@@ -177,7 +162,7 @@ public class BackendDriver {
 
                 return newSocket;
 
-            } catch (IOException | InterruptedException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         } else {
@@ -229,6 +214,25 @@ public class BackendDriver {
         return inputOutputs;
     }
 
+    public void closeAllSockets() throws IOException {
+        // ToDo java.util.ConcurrentModificationException thrown
+        for (QuerySocket s : reveaalSockets) {
+            s.close();
+        }
+
+        for (QuerySocket s : jEcdarSockets) {
+            System.out.println(s.isRunningQuery());
+            s.close();
+        }
+
+        for (Process p : backendProcesses) {
+            System.out.println(p.info());
+            if (p.isAlive()) {
+                p.destroyForcibly();
+            }
+        }
+    }
+
     private class ExecutableQuery {
         private final String query;
         private final BackendHelper.BackendNames backend;
@@ -245,7 +249,7 @@ public class BackendDriver {
         }
 
         public void execute() {
-            executeQuery(this.query, this.backend, this.success, this.failure, this.queryListener);
+            executeQuery(this);
         }
 
     }
@@ -274,17 +278,21 @@ public class BackendDriver {
             return executableQuery;
         }
 
-        public void setExecutableQuery(ExecutableQuery executableQuery) {
+        public void executeQuery(ExecutableQuery executableQuery) {
             this.executableQuery = executableQuery;
+            try {
+                getWriter().write(ProtoBufConverter.getQueryProtoBuf(executableQuery.query).getQueryBytes().toStringUtf8().toCharArray());
+            } catch (IOException e) {
+                e.printStackTrace();
+                executableQuery.failure.accept(new BackendException.BadBackendQueryException(e.getMessage()));
+            }
         }
 
         public boolean isRunningQuery() {
-            return executableQuery == null;
+            return executableQuery != null;
         }
 
         public void close() throws IOException {
-            reader.close();
-            writer.close();
             socket.close();
 
             // Remove the socket from the socket list

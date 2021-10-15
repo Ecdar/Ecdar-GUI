@@ -248,6 +248,12 @@ public class Ecdar extends Application {
         stage.setOnCloseRequest(event -> {
             BackendHelper.stopQueries();
 
+            try {
+                backendDriver.closeAllSockets();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             Platform.exit();
             System.exit(0);
         });
