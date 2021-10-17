@@ -7,10 +7,8 @@ import javafx.util.Pair;
 
 import java.io.*;
 import java.net.*;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Optional;
-import java.util.Queue;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
@@ -18,10 +16,10 @@ import java.util.regex.Pattern;
 
 public class BackendDriver {
     private final Pair<AtomicInteger, AtomicInteger> numberOfReveaalSockets = new Pair<>(new AtomicInteger(0), new AtomicInteger(5));
-    private final ArrayList<QuerySocket> reveaalSockets = new ArrayList<>();
+    private final List<QuerySocket> reveaalSockets = new CopyOnWriteArrayList<>();
 
     private final Pair<AtomicInteger, AtomicInteger> numberOfJEcdarSockets = new Pair<>(new AtomicInteger(0), new AtomicInteger(5));
-    private final ArrayList<QuerySocket> jEcdarSockets = new ArrayList<>();
+    private final List<QuerySocket> jEcdarSockets = new CopyOnWriteArrayList<>();
 
     private final Queue<ExecutableQuery> waitingQueries = new LinkedList<>();
 
@@ -134,7 +132,7 @@ public class BackendDriver {
         } // ToDO NIELS: Refactor
     }
 
-    private QuerySocket startNewQuerySocket(BackendHelper.BackendNames backend, Pair<AtomicInteger, AtomicInteger> numberOfSockets, ArrayList<QuerySocket> querySockets) {
+    private QuerySocket startNewQuerySocket(BackendHelper.BackendNames backend, Pair<AtomicInteger, AtomicInteger> numberOfSockets, List<QuerySocket> querySockets) {
         if (numberOfSockets.getKey().get() < numberOfSockets.getValue().get()) {
             try {
                 while (true) {
@@ -215,22 +213,9 @@ public class BackendDriver {
     }
 
     public void closeAllSockets() throws IOException {
-        // ToDo java.util.ConcurrentModificationException thrown
-        for (QuerySocket s : reveaalSockets) {
-            s.close();
-        }
-
-        for (QuerySocket s : jEcdarSockets) {
-            System.out.println(s.isRunningQuery());
-            s.close();
-        }
-
-        for (Process p : backendProcesses) {
-            System.out.println(p.info());
-            if (p.isAlive()) {
-                p.destroyForcibly();
-            }
-        }
+        for (QuerySocket s : reveaalSockets) s.close();
+        for (QuerySocket s : jEcdarSockets) s.close();
+        for (Process p : backendProcesses) p.destroy(); // ToDo: Should be forcibly maybe?
     }
 
     private class ExecutableQuery {
