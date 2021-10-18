@@ -109,6 +109,7 @@ public class EcdarController implements Initializable {
     public JFXDialog aboutDialog;
     public JFXButton aboutAcceptButton;
     public StackPane canvasPane;
+    public JFXSlider menuBarOptionsNumberOfSocketsSlider;
 
     private double expandHeight = 300;
 
@@ -518,6 +519,16 @@ public class EcdarController implements Initializable {
         });
 
         menuBarOptionsDefaultBackend.setText("Default backend: " + BackendHelper.defaultBackend.name());
+
+        menuBarOptionsNumberOfSocketsSlider.valueChangingProperty().addListener((observable, oldValue, newValue) -> {
+            if (oldValue && !newValue) {
+                int newIntValue = (int) Math.round(menuBarOptionsNumberOfSocketsSlider.getValue());
+                Ecdar.getBackendDriver().setMaxNumberOfSockets(newIntValue);
+                Ecdar.preferences.put("number_of_backend_sockets", Integer.toString(newIntValue));
+            }
+        });
+
+        menuBarOptionsNumberOfSocketsSlider.setValue(Ecdar.getBackendDriver().getMaxNumberOfSockets());
     }
 
     private void initializeEditMenu() {

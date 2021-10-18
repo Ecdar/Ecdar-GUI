@@ -221,11 +221,22 @@
                         </graphic>
                     </MenuItem>
 
+                    <SeparatorMenuItem/>
+
                     <MenuItem fx:id="menuBarOptionsDefaultBackend" text="Backend">
                         <graphic>
                             <FontIcon iconLiteral="gmi-autorenew" iconSize="24" fill="black"/>
                         </graphic>
                     </MenuItem>
+
+                    <Menu text="Backend Sockets">
+                        <MenuItem>
+                            <graphic>
+                                <JFXSlider styleClass="jfx-slider" min="1" max="20"
+                                           fx:id="menuBarOptionsNumberOfSocketsSlider"/>
+                            </graphic>
+                        </MenuItem>
+                    </Menu>
                 </Menu>
 
                 <Menu text="Help">

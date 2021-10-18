@@ -31,7 +31,6 @@ import jiconfont.javafx.IconFontFX;
 import org.apache.commons.io.FileUtils;
 
 import java.io.*;
-import java.net.Socket;
 import java.util.prefs.Preferences;
 
 import java.net.URISyntaxException;
@@ -283,6 +282,8 @@ public class Ecdar extends Application {
                 == BackendHelper.BackendNames.jEcdar.ordinal()
                 ? BackendHelper.BackendNames.jEcdar
                 : BackendHelper.BackendNames.Reveaal;
+
+        getBackendDriver().setMaxNumberOfSockets(preferences.getInt("number_of_backend_sockets", 5));
     }
 
     /**

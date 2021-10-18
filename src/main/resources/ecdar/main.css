@@ -290,3 +290,26 @@
 .scroll-bar:vertical:focused {
 	-fx-background-color: transparent;
 }
+
+.jfx-slider {
+	-fx-pref-width: 80;
+	-fx-snap-to-ticks: true;
+}
+
+.jfx-slider > .track {
+	-fx-background-color: -divider-color;
+}
+
+.jfx-slider > .thumb, .jfx-slider > .animated-thumb, .jfx-slider > .colored-track{
+	-fx-background-color: -primary-color;
+}
+
+.jfx-slider > .thumb {
+	-fx-pref-width: 10;
+	-fx-background-radius: 3;
+}
+
+.jfx-slider > .slider-value {
+	-fx-fill: -primary-color-darker;
+	-fx-stroke: -primary-color-darker;
+}
