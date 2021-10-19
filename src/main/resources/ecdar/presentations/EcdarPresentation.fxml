@@ -10,6 +10,7 @@
 <?import ecdar.presentations.*?>
 <?import ecdar.Ecdar?>
 <?import javafx.scene.text.TextFlow?>
+<?import javafx.geometry.Insets?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="StackPane"
@@ -229,14 +230,19 @@
                         </graphic>
                     </MenuItem>
 
-                    <Menu text="Backend Sockets">
-                        <MenuItem>
-                            <graphic>
+                    <CustomMenuItem disable="true">
+                        <content>
+                            <HBox alignment="CENTER" spacing="8">
+                                <padding>
+                                    <Insets left="2" right="10"/>
+                                </padding>
+                                <FontIcon iconLiteral="gmi-settings-input-component" iconSize="20" fill="black"/>
+                                <Text>Backend Sockets: </Text>
                                 <JFXSlider styleClass="jfx-slider" min="1" max="20"
                                            fx:id="menuBarOptionsNumberOfSocketsSlider"/>
-                            </graphic>
-                        </MenuItem>
-                    </Menu>
+                            </HBox>
+                        </content>
+                    </CustomMenuItem>
                 </Menu>
 
                 <Menu text="Help">

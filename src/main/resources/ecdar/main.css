@@ -292,7 +292,7 @@
 }
 
 .jfx-slider {
-	-fx-pref-width: 80;
+	-fx-pref-width: 60;
 	-fx-snap-to-ticks: true;
 }
 
