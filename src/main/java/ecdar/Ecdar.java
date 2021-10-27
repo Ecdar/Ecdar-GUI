@@ -45,7 +45,7 @@ public class Ecdar extends Application {
     public static SimpleStringProperty projectDirectory = new SimpleStringProperty();
     private static BooleanProperty isUICached = new SimpleBooleanProperty();
     private static final BooleanProperty isSplit = new SimpleBooleanProperty(true); //Set to true to ensure correct behaviour at first toggle.
-    private static final BackendDriver backendDriver = new BackendDriver();
+    private static BackendDriver backendDriver;
     private Stage debugStage;
 
     /**
@@ -283,6 +283,7 @@ public class Ecdar extends Application {
                 ? BackendHelper.BackendNames.jEcdar
                 : BackendHelper.BackendNames.Reveaal;
 
+        backendDriver = new BackendDriver(preferences.get("backend_host_address", "127.0.0.1"));
         getBackendDriver().setMaxNumberOfSockets(preferences.getInt("number_of_backend_sockets", 5));
     }
 

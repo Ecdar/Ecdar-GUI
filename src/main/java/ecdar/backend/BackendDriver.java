@@ -3,56 +3,40 @@ package ecdar.backend;
 import EcdarProtoBuf.ComponentProtos;
 import EcdarProtoBuf.EcdarBackendGrpc;
 import EcdarProtoBuf.QueryProtos;
+import com.google.protobuf.Empty;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.QueryState;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.stub.StreamObserver;
 import javafx.util.Pair;
+import org.springframework.util.SocketUtils;
 
 import java.io.*;
-import java.net.*;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class BackendDriver {
-    private final Pair<AtomicInteger, AtomicInteger> numberOfReveaalSockets = new Pair<>(new AtomicInteger(0), new AtomicInteger(5));
-    private final List<QuerySocket> reveaalSockets = new CopyOnWriteArrayList<>();
+    private final Pair<AtomicInteger, AtomicInteger> numberOfReveaalConnections = new Pair<>(new AtomicInteger(0), new AtomicInteger(5));
+    private final List<BackendConnection> reveaalConnections = new CopyOnWriteArrayList<>();
 
-    private final Pair<AtomicInteger, AtomicInteger> numberOfJEcdarSockets = new Pair<>(new AtomicInteger(0), new AtomicInteger(5));
-    private final List<QuerySocket> jEcdarSockets = new CopyOnWriteArrayList<>();
+    private final Pair<AtomicInteger, AtomicInteger> numberOfJEcdarConnections = new Pair<>(new AtomicInteger(0), new AtomicInteger(5));
+    private final List<BackendConnection> jEcdarConnections = new CopyOnWriteArrayList<>();
 
     private final Queue<ExecutableQuery> waitingQueries = new LinkedList<>();
 
-    private Integer globalPortNumber = 5162;
-
     private final ArrayList<Process> backendProcesses = new ArrayList<>();
 
-    public BackendDriver() {
+    private final String hostAddress;
+
+    public BackendDriver(String hostAddress) {
+        this.hostAddress = hostAddress;
+
         new Thread(() -> {
             while(true) {
-                // Try to read from all Reveaal instances that are executing a query and have outputted something
-//                for (QuerySocket socket : reveaalSockets) {
-//                    try {
-//                        if (socket.isRunningQuery() && socket.getReader().ready()) readFromSocket(socket);
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//
-//                // Try to read from all jEcdar instances that are executing a query and have outputted something
-//                for (QuerySocket socket : jEcdarSockets) {
-//                    try {
-//                        if (socket.isRunningQuery() && socket.getReader().ready()) readFromSocket(socket);
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-
                 // Execute the next waiting query
                 ExecutableQuery query = waitingQueries.poll();
                 if (query != null) query.execute();
@@ -73,10 +57,12 @@ public class BackendDriver {
     }
 
     public Pair<ArrayList<String>, ArrayList<String>> getInputOutputs(String query) {
-//        if (!query.startsWith("refinement")) {
-//            return null;
-//        }
-//
+        if (!query.startsWith("refinement")) {
+            return null;
+        }
+
+        // ToDo NIELS: Reimplement with backend connection
+
 //        // Pair is used as a tuple, not a key-value pair
 //        Pair<ArrayList<String>, ArrayList<String>> inputOutputs = new Pair<>(new ArrayList<>(), new ArrayList<>());
 //
@@ -87,9 +73,7 @@ public class BackendDriver {
 //            Process ReveaalEngineInstance = pb.start();
 //
 //            //Communicate with the j-Ecdar process
-//            try (
-//                    var ReveaalReader = new BufferedReader(new InputStreamReader(ReveaalEngineInstance.getInputStream()));
-//            ) {
+//            try (var ReveaalReader = new BufferedReader(new InputStreamReader(ReveaalEngineInstance.getInputStream()))) {
 //                //Read the result of the query from the j-Ecdar process
 //                String line;
 //                while ((line = ReveaalReader.readLine()) != null) {
@@ -111,113 +95,143 @@ public class BackendDriver {
 //            e.printStackTrace();
 //        }
 //
-        return null;//inputOutputs;
+        return null; //inputOutputs;
     }
 
     public void closeAllSockets() throws IOException {
-        for (QuerySocket s : reveaalSockets) s.close();
-        for (QuerySocket s : jEcdarSockets) s.close();
-        for (Process p : backendProcesses) p.destroy(); // ToDo NIELS: Should be forcibly maybe?
+        for (BackendConnection s : reveaalConnections) s.close();
+        for (BackendConnection s : jEcdarConnections) s.close();
+        for (Process p : backendProcesses) p.destroy();
     }
 
     public void setMaxNumberOfSockets(int i) {
-        numberOfReveaalSockets.getValue().set(i);
-        numberOfJEcdarSockets.getValue().set(i);
+        numberOfReveaalConnections.getValue().set(i);
+        numberOfJEcdarConnections.getValue().set(i);
 
-        // ToDo NIELS: Potentially stop sockets until within new range [0, i]
+        // ToDo NIELS: Potentially close connections until within new range [0, i]
     }
 
     public int getMaxNumberOfSockets() {
-        return numberOfReveaalSockets.getValue().get();
-    }
-
-    private void readFromSocket(QuerySocket socket) throws IOException {
-        String line;
-        System.out.println("Starting read");
-        while (socket.getReader().ready() && !(line = socket.getReader().readLine()).isEmpty()) {
-            System.out.println(line);
-            // Skip the returned query and possible notes, as these should not be shown in the GUI
-            if (line.startsWith("note:")) {
-                continue;
-            }
-
-            // Process the query result
-            if ((line.endsWith("true") || line.startsWith("Query: Query")) && (socket.getExecutableQuery().queryListener.getQuery().getQueryState().getStatusCode() <= QueryState.SUCCESSFUL.getStatusCode())) {
-                socket.getExecutableQuery().queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
-                socket.getExecutableQuery().success.accept(true);
-            } else if (line.endsWith("result: false")) {
-                socket.getExecutableQuery().queryListener.getQuery().setQueryState(QueryState.ERROR);
-                socket.getExecutableQuery().success.accept(false);
-            } else {
-                socket.getExecutableQuery().queryListener.getQuery().setQueryState(QueryState.SYNTAX_ERROR);
-                socket.getExecutableQuery().failure.accept(new BackendException.QueryErrorException(line));
-            }
-
-            // ToDo NIELS: Maybe just trigger poll() on query queue here instead of while loop (would require some initial poll technique)
-        }
-
-        socket.getExecutableQuery().success.accept(true);
-        socket.executableQuery = null;
+        return numberOfReveaalConnections.getValue().get();
     }
 
     private void executeQuery(ExecutableQuery executableQuery) {
         if(executableQuery.queryListener.getQuery().getQueryState() == QueryState.UNKNOWN) return;
 
         // Get available socket or start new
-        Optional<QuerySocket> socket;
+        final Optional<BackendConnection> socket;
         if (executableQuery.backend.equals(BackendHelper.BackendNames.jEcdar)) {
-            socket = jEcdarSockets.stream().filter((element) -> !element.isRunningQuery()).findFirst();
+            socket = jEcdarConnections.stream().filter((element) -> !element.isRunningQuery()).findFirst();
         } else {
-            socket = reveaalSockets.stream().filter((element) -> !element.isRunningQuery()).findFirst();
+            socket = reveaalConnections.stream().filter((element) -> !element.isRunningQuery()).findFirst();
         }
 
-        QuerySocket querySocket = socket.orElseGet(() -> (executableQuery.backend == BackendHelper.BackendNames.Reveaal
-                ? startNewQuerySocket(BackendHelper.BackendNames.Reveaal, numberOfReveaalSockets, reveaalSockets)
-                : startNewQuerySocket(BackendHelper.BackendNames.jEcdar, numberOfJEcdarSockets, jEcdarSockets)));
+        BackendConnection backendConnection = socket.orElseGet(() -> (executableQuery.backend == BackendHelper.BackendNames.Reveaal
+                ? startNewBackendConnection(BackendHelper.BackendNames.Reveaal, numberOfReveaalConnections, reveaalConnections)
+                : startNewBackendConnection(BackendHelper.BackendNames.jEcdar, numberOfJEcdarConnections, jEcdarConnections)));
 
         // If the query socket is null, there are no available sockets
         // and the maximum number of sockets has already been reached
-        if (querySocket == null) {
+        if (backendConnection == null) {
             waitingQueries.add(executableQuery);
             return;
         }
 
-        querySocket.executeQuery(executableQuery);
+        backendConnection.setExecutableQuery(executableQuery);
+
+        var componentsBuilder = QueryProtos.ComponentsUpdateRequest.newBuilder();
+        for (Component c : Ecdar.getProject().getComponents()) {
+            componentsBuilder.addComponents(ComponentProtos.Component.newBuilder().setJson(c.serialize().toString()).build());
+        }
+
+        StreamObserver<Empty> observer = new StreamObserver<>() {
+            boolean error = false;
+
+            @Override
+            public void onNext(Empty value) {}
+
+            @Override
+            public void onError(Throwable t) {
+                backendConnection.getExecutableQuery().queryListener.getQuery().setQueryState(QueryState.ERROR);
+                backendConnection.getExecutableQuery().failure.accept(new BackendException.QueryErrorException(t.getMessage()));
+                waitingQueries.add(backendConnection.getExecutableQuery());
+                backendConnection.setExecutableQuery(null);
+                error = true;
+            }
+
+            @Override
+            public void onCompleted() {
+                if (!error) {
+                    StreamObserver<EcdarProtoBuf.QueryProtos.QueryResponse> responseObserver = new StreamObserver<>() {
+                        @Override
+                        public void onNext(QueryProtos.QueryResponse value) {
+                            if (value.getRefinement().getSuccess()) {
+                                backendConnection.getExecutableQuery().queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
+                                backendConnection.getExecutableQuery().success.accept(true);
+                            } else {
+                                backendConnection.getExecutableQuery().queryListener.getQuery().setQueryState(QueryState.ERROR);
+                                backendConnection.getExecutableQuery().success.accept(false);
+                            }
+                        }
+
+                        @Override
+                        public void onError(Throwable t) {
+                            backendConnection.getExecutableQuery().queryListener.getQuery().setQueryState(QueryState.SYNTAX_ERROR);
+                            backendConnection.getExecutableQuery().failure.accept(new BackendException.QueryErrorException(t.getMessage()));
+                            waitingQueries.add(backendConnection.getExecutableQuery());
+                            backendConnection.setExecutableQuery(null);
+                        }
+
+                        @Override
+                        public void onCompleted() {
+                            backendConnection.setExecutableQuery(null);
+                            System.out.println("We are done testing!!!");
+                        }
+                    };
+
+                    backendConnection.getStub().sendQuery(QueryProtos.Query.newBuilder().setId(0).setQuery(backendConnection.getExecutableQuery().query).build(), responseObserver);
+                }
+            }
+        };
+
+        backendConnection.getStub().updateComponents(componentsBuilder.build(), observer);
     }
 
-    private QuerySocket startNewQuerySocket(BackendHelper.BackendNames backend, Pair<AtomicInteger, AtomicInteger> numberOfSockets, List<QuerySocket> querySockets) {
+    private BackendConnection startNewBackendConnection(BackendHelper.BackendNames backend, Pair<AtomicInteger, AtomicInteger> numberOfSockets, List<BackendConnection> backendConnections) {
         if (numberOfSockets.getKey().get() < numberOfSockets.getValue().get()) {
             try {
+                int portNumber = SocketUtils.findAvailableTcpPort();
                 while (true) {
-                    globalPortNumber += 1;
-
                     ProcessBuilder pb;
                     if (backend.equals(BackendHelper.BackendNames.jEcdar)) {
                         pb = new ProcessBuilder("java", "-jar", "src/libs/j-Ecdar.jar");
                     } else {
-                        pb = new ProcessBuilder("src/Reveaal", "-p", "127.0.0.1:" + globalPortNumber).inheritIO();
+                        pb = new ProcessBuilder("src/Reveaal", "-p", this.hostAddress + ":" + portNumber).inheritIO();
                     }
 
                     Process p = pb.start();
                     if (p.isAlive()) {
-                        // If the process is not alive, the process failed while starting up, try again ToDo NIELS: This is caused by Socket or ConnectionRefused exceptions, so a better way of handling this is needed
+                        // If the process is not alive, it failed while starting up, try again
                         backendProcesses.add(p);
                         break;
                     }
                 }
 
-                QuerySocket newSocket = new QuerySocket(new Socket((String) null, globalPortNumber, null, 0));
+                ManagedChannel channel = ManagedChannelBuilder.forTarget(this.hostAddress + ":" + portNumber).usePlaintext().build();
+                EcdarBackendGrpc.EcdarBackendStub stub = EcdarBackendGrpc.newStub(channel);
 
-                querySockets.add(newSocket);
+                BackendConnection newConnection = new BackendConnection(stub);
+
+                backendConnections.add(newConnection);
                 numberOfSockets.getKey().getAndIncrement();
 
-                return newSocket;
+                return newConnection;
 
             } catch (IOException e) {
                 e.printStackTrace();
             }
         } else {
-            System.out.println("Max number of sockets already reached");
+//            System.out.println("Max number of sockets already reached");
         }
 
         return null;
@@ -243,52 +257,24 @@ public class BackendDriver {
         }
     }
 
-    private class QuerySocket {
-        private final BufferedReader reader;
-        private final BufferedWriter writer;
-        private final Socket socket;
+    private class BackendConnection {
+        private final EcdarBackendGrpc.EcdarBackendStub stub;
         private ExecutableQuery executableQuery = null;
 
-        QuerySocket(Socket socket) throws IOException {
-            this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            this.writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-            this.socket = socket;
-
-            socket.close();
+        BackendConnection(EcdarBackendGrpc.EcdarBackendStub stub) throws IOException {
+            this.stub = stub;
         }
 
-        public BufferedReader getReader() {
-            return reader;
-        }
-
-        public BufferedWriter getWriter() {
-            return writer;
+        public EcdarBackendGrpc.EcdarBackendStub getStub() {
+            return stub;
         }
 
         public ExecutableQuery getExecutableQuery() {
             return executableQuery;
         }
 
-        public void executeQuery(ExecutableQuery executableQuery) {
+        public void setExecutableQuery(ExecutableQuery executableQuery) {
             this.executableQuery = executableQuery;
-
-            ManagedChannel channel = ManagedChannelBuilder.forTarget(socket.getInetAddress().toString() + ":" + socket.getPort()).usePlaintext().build();
-
-            System.out.println("Channel: " + channel);
-
-            EcdarBackendGrpc.EcdarBackendBlockingStub stub = EcdarBackendGrpc.newBlockingStub(channel);
-
-            var componentsBuilder = QueryProtos.ComponentsUpdateRequest.newBuilder();
-
-            for (Component c : Ecdar.getProject().getComponents()) {
-                componentsBuilder.addComponents(ComponentProtos.Component.newBuilder().setJson(c.serialize().toString()).build());
-            }
-
-            System.out.println(stub.updateComponents(componentsBuilder.build()));
-
-            QueryProtos.QueryResponse result = stub.sendQuery(QueryProtos.Query.newBuilder().setId(0).setQuery(executableQuery.query).build());
-
-            System.out.println(result.getResultCase().getNumber());
         }
 
         public boolean isRunningQuery() {
@@ -296,13 +282,11 @@ public class BackendDriver {
         }
 
         public void close() throws IOException {
-            socket.close();
-
             // Remove the socket from the socket list
-            if (jEcdarSockets.remove(this)) {
-                numberOfJEcdarSockets.getKey().getAndDecrement();
-            } else if(reveaalSockets.remove(this)) {
-                numberOfReveaalSockets.getKey().getAndDecrement();
+            if (jEcdarConnections.remove(this)) {
+                numberOfJEcdarConnections.getKey().getAndDecrement();
+            } else if(reveaalConnections.remove(this)) {
+                numberOfReveaalConnections.getKey().getAndDecrement();
             } else {
                 // ToDo NIELS: Somehow the socket was not present in either list
                 System.out.println("The socket was not found in the socket lists");
@@ -313,7 +297,6 @@ public class BackendDriver {
 
     enum TraceType {
         NONE, SOME, SHORTEST, FASTEST;
-
 
         @Override
         public String toString() {
