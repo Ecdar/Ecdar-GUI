@@ -17,16 +17,19 @@ version '2.1'
 mainClassName = 'ECDAR'
 
 sourceCompatibility = JavaVersion.VERSION_11
+configurations.implementation.setCanBeResolved(true)
 
 //create a single Jar with all dependencies
 task fatJar(type: Jar) {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
     manifest {
         attributes 'Implementation-Title': 'Gradle Jar File Example',
                 'Implementation-Version': version,
                 'Main-Class': 'ecdar.Ecdar'
     }
     baseName = project.name
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    from { configurations.implementation.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
 }
 
