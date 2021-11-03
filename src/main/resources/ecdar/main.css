@@ -293,7 +293,6 @@
 
 .jfx-slider {
 	-fx-pref-width: 60;
-	-fx-snap-to-ticks: true;
 }
 
 .jfx-slider > .track {
@@ -312,4 +311,16 @@
 .jfx-slider > .slider-value {
 	-fx-fill: -primary-color-darker;
 	-fx-stroke: -primary-color-darker;
+}
+
+.menu-item-embedded-control {
+
+}
+
+.menu-item-embedded-control:hover {
+	-fx-background-color: none;
+}
+
+.menu-item-embedded-control:selected {
+	-fx-background-color: none;
 }

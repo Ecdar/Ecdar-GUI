@@ -6,6 +6,8 @@ option java_multiple_files = false;
 option java_package = "EcdarProtoBuf";
 option java_outer_classname = "ServiceProtos";
 
+import "component.proto";
+import "objects.proto";
 import "query.proto";
 
 import "google/protobuf/empty.proto";

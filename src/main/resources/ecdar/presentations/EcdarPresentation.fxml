@@ -230,7 +230,7 @@
                         </graphic>
                     </MenuItem>
 
-                    <CustomMenuItem disable="true">
+                    <CustomMenuItem hideOnClick="false" styleClass="menu-item-embedded-control">
                         <content>
                             <HBox alignment="CENTER" spacing="8">
                                 <padding>
