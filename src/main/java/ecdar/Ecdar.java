@@ -181,6 +181,8 @@ public class Ecdar extends Application {
         scene.getStylesheets().add("ecdar/main.css");
         scene.getStylesheets().add("ecdar/colors.css");
         scene.getStylesheets().add("ecdar/model_canvas.css");
+        scene.getStylesheets().add("ecdar/query_pane.css");
+        scene.getStylesheets().add("ecdar/scroll_pane.css");
 
         // Handle a mouse click as a deselection of all elements
         scene.setOnMousePressed(event -> {

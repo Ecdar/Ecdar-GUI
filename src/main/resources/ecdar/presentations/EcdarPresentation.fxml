@@ -11,6 +11,7 @@
 <?import ecdar.Ecdar?>
 <?import javafx.scene.text.TextFlow?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.cell.TextFieldTableCell?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="StackPane"
@@ -224,25 +225,13 @@
 
                     <SeparatorMenuItem/>
 
-                    <MenuItem fx:id="menuBarOptionsDefaultBackend" text="Backend">
+                    <MenuItem fx:id="menuBarOptionsBackendOptions" text="Backend options">
                         <graphic>
-                            <FontIcon iconLiteral="gmi-autorenew" iconSize="24" fill="black"/>
+                            <FontIcon iconLiteral="gmi-settings-input-component" iconSize="24" fill="black"/>
                         </graphic>
                     </MenuItem>
-
-                    <CustomMenuItem hideOnClick="false" styleClass="menu-item-embedded-control">
-                        <content>
-                            <HBox alignment="CENTER" spacing="8">
-                                <padding>
-                                    <Insets left="2" right="10"/>
-                                </padding>
-                                <FontIcon iconLiteral="gmi-settings-input-component" iconSize="20" fill="black"/>
-                                <Text>Backend Sockets: </Text>
-                                <JFXSlider styleClass="jfx-slider" min="1" max="20"
-                                           fx:id="menuBarOptionsNumberOfSocketsSlider"/>
-                            </HBox>
-                        </content>
-                    </CustomMenuItem>
+                                <!--<JFXSlider styleClass="jfx-slider" min="1" max="20"
+                                           fx:id="menuBarOptionsNumberOfSocketsSlider"/>-->
                 </Menu>
 
                 <Menu text="Help">
@@ -375,7 +364,7 @@
 
                     <HBox style="-fx-padding: 8px;">
                         <Region HBox.hgrow="ALWAYS"/>
-                        <JFXButton text="CLOSE" onMouseClicked="#closeDialog"/>
+                        <JFXButton text="CLOSE" onMouseClicked="#closeQueryDialog"/>
                     </HBox>
 
                 </VBox>
@@ -478,7 +467,7 @@
 
                     <HBox style="-fx-padding: 8px;">
                         <Region HBox.hgrow="ALWAYS"/>
-                        <JFXButton text="CLOSE" onMouseClicked="#closeDialog"/>
+                        <JFXButton text="CLOSE" onMouseClicked="#closeQueryDialog"/>
                     </HBox>
 
                 </VBox>
@@ -563,6 +552,32 @@
                     <JFXButton fx:id="aboutAcceptButton" styleClass="dialog-accept">CLOSE</JFXButton>
                 </actions>
             </JFXDialogLayout>
+        </JFXDialog>
+    </StackPane>
+
+    <!-- Backends Dialog -->
+    <StackPane fx:id="backendOptionsDialogContainer" style="-fx-background-color: #0000007F;" mouseTransparent="true">
+        <JFXDialog fx:id="backendOptionsDialog">
+            <VBox>
+                <!-- Will scale the dialog -->
+                <Region minWidth="400"/>
+                <!-- Content -->
+                <VBox style="-fx-padding: 20px">
+                    <Text styleClass="headline">Backends</Text>
+                    <Region prefHeight="10"/>
+                    <VBox styleClass="backendInstancesVBox">
+                        <VBox fx:id="backendInstanceList"/>
+                        <HBox fx:id="addBackendSection">
+                            <JFXButton styleClass="button" fx:id="addBackendButton">+</JFXButton>
+                        </HBox>
+                    </VBox>
+                    <HBox style="-fx-padding: 8px;">
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <JFXButton text="Cancel" onMouseClicked="#closeBackendDialog"/>
+                        <JFXButton text="Save" onMouseClicked="#saveChangesToBackendOptions"/>
+                    </HBox>
+                </VBox>
+            </VBox>
         </JFXDialog>
     </StackPane>
 </fx:root>

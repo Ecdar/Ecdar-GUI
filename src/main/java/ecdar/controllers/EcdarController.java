@@ -109,7 +109,8 @@ public class EcdarController implements Initializable {
     public JFXDialog aboutDialog;
     public JFXButton aboutAcceptButton;
     public StackPane canvasPane;
-    public JFXSlider menuBarOptionsNumberOfSocketsSlider;
+    public JFXButton addBackendButton;
+    public HBox addBackendSection;
 
     private double expandHeight = 300;
 
@@ -149,7 +150,7 @@ public class EcdarController implements Initializable {
     public MenuItem menuBarFileExportAsPng;
     public MenuItem menuBarFileExportAsPngNoBorder;
     public MenuItem menuBarOptionsCache;
-    public MenuItem menuBarOptionsDefaultBackend;
+    public MenuItem menuBarOptionsBackendOptions;
     public MenuItem menuBarHelpHelp;
     public MenuItem menuBarHelpAbout;
     public MenuItem menuBarHelpTest;
@@ -164,6 +165,10 @@ public class EcdarController implements Initializable {
     public JFXDialog queryDialog;
     public Text queryTextResult;
     public Text queryTextQuery;
+
+    public StackPane backendOptionsDialogContainer;
+    public JFXDialog backendOptionsDialog;
+    public VBox backendInstanceList;
 
     private static JFXDialog _queryDialog;
     private static Text _queryTextResult;
@@ -186,28 +191,9 @@ public class EcdarController implements Initializable {
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
-        dialog.setDialogContainer(dialogContainer);
-        dialogContainer.opacityProperty().bind(dialog.getChildren().get(0).scaleXProperty());
-        dialog.setOnDialogClosed(event -> dialogContainer.setVisible(false));
-
-        _queryDialog = queryDialog;
-        _queryTextResult = queryTextResult;
-        _queryTextQuery = queryTextQuery;
-        queryDialog.setDialogContainer(queryDialogContainer);
-        queryDialogContainer.opacityProperty().bind(queryDialog.getChildren().get(0).scaleXProperty());
-        queryDialog.setOnDialogClosed(event -> {
-            queryDialogContainer.setVisible(false);
-            queryDialogContainer.setMouseTransparent(true);
-        });
-        queryDialog.setOnDialogOpened(event -> {
-            queryDialogContainer.setVisible(true);
-            queryDialogContainer.setMouseTransparent(false);
-        });
-
+        initilizeDialogs();
         initializeCanvasPane();
-
         initializeEdgeStatusHandling();
-
         initializeKeybindings();
         initializeTabPane();
         initializeStatusBar();
@@ -215,6 +201,42 @@ public class EcdarController implements Initializable {
         initializeMenuBar();
         initializeReachabilityAnalysisThread();
 
+    }
+
+    private void initilizeDialogs() {
+        dialog.setDialogContainer(dialogContainer);
+        dialogContainer.opacityProperty().bind(dialog.getChildren().get(0).scaleXProperty());
+        dialog.setOnDialogClosed(event -> dialogContainer.setVisible(false));
+
+        _queryDialog = queryDialog;
+        _queryTextResult = queryTextResult;
+        _queryTextQuery = queryTextQuery;
+
+        initializeDialog(queryDialog, queryDialogContainer);
+        initializeBackendInstanceList();
+    }
+
+    private void initializeBackendInstanceList() {
+        initializeDialog(backendOptionsDialog, backendOptionsDialogContainer);
+
+        HBox.setHgrow(addBackendButton, Priority.ALWAYS);
+        addBackendButton.setMaxWidth(Double.MAX_VALUE);
+
+        backendInstanceList.getChildren().add(new BackendInstancePresentation());
+    }
+
+    private void initializeDialog(JFXDialog dialog, StackPane dialogContainer) {
+        dialog.setDialogContainer(dialogContainer);
+        dialogContainer.opacityProperty().bind(dialog.getChildren().get(0).scaleXProperty());
+        dialogContainer.opacityProperty().bind(dialog.getChildren().get(0).scaleXProperty());
+        dialog.setOnDialogClosed(event -> {
+            dialogContainer.setVisible(false);
+            dialogContainer.setMouseTransparent(true);
+        });
+        dialog.setOnDialogOpened(event -> {
+            dialogContainer.setVisible(true);
+            dialogContainer.setMouseTransparent(false);
+        });
     }
 
     /**
@@ -508,27 +530,10 @@ public class EcdarController implements Initializable {
             menuBarOptionsCache.getGraphic().opacityProperty().bind(new When(isCached).then(1).otherwise(0));
         });
 
-        menuBarOptionsDefaultBackend.setOnAction(event -> {
-            BackendHelper.defaultBackend = (BackendHelper.defaultBackend.equals(BackendHelper.BackendNames.jEcdar)
-                    ? BackendHelper.BackendNames.Reveaal
-                    : BackendHelper.BackendNames.jEcdar);
-
-            menuBarOptionsDefaultBackend.setText("Default backend: " + BackendHelper.defaultBackend.name());
-
-            Ecdar.preferences.put("default_backend", Integer.toString(BackendHelper.defaultBackend.ordinal()));
+        menuBarOptionsBackendOptions.setOnAction(event -> {
+                backendOptionsDialogContainer.setVisible(true);
+                backendOptionsDialog.show(backendOptionsDialogContainer);
         });
-
-        menuBarOptionsDefaultBackend.setText("Default backend: " + BackendHelper.defaultBackend.name());
-
-        menuBarOptionsNumberOfSocketsSlider.valueChangingProperty().addListener((observable, oldValue, newValue) -> {
-            if (oldValue && !newValue) {
-                int newIntValue = (int) Math.round(menuBarOptionsNumberOfSocketsSlider.getValue());
-                Ecdar.getBackendDriver().setMaxNumberOfSockets(newIntValue);
-                Ecdar.preferences.put("number_of_backend_sockets", Integer.toString(newIntValue));
-            }
-        });
-
-        menuBarOptionsNumberOfSocketsSlider.setValue(Ecdar.getBackendDriver().getMaxNumberOfSockets());
     }
 
     private void initializeEditMenu() {
@@ -616,7 +621,7 @@ public class EcdarController implements Initializable {
             // The initial location for the file choosing dialog
             final File jarDir = new File(System.getProperty("java.class.path")).getAbsoluteFile().getParentFile();
 
-            // If the file does not exist, we must be running it from a development environment, use an default location
+            // If the file does not exist, we must be running it from a development environment, use default location
             if(jarDir.exists()) {
                 projectPicker.setInitialDirectory(jarDir);
             }
@@ -1379,9 +1384,33 @@ public class EcdarController implements Initializable {
     }
 
     @FXML
-    private void closeDialog() {
+    private void closeQueryDialog() {
         dialog.close();
         queryDialog.close();
+    }
+
+    @FXML
+    private void closeBackendDialog() {
+        dialog.close();
+        backendOptionsDialog.close();
+    }
+
+    @FXML
+    private void saveChangesToBackendOptions() {
+        /*portRangeStart.focusedProperty().addListener((observable, oldValue, newValue) -> {
+            if (oldValue && !newValue) {
+                int newIntValue = (int) Math.round(menuBarOptionsNumberOfSocketsSlider.getValue());
+                Ecdar.getBackendDriver().setMaxNumberOfSockets(newIntValue);
+                Ecdar.preferences.put("number_of_backend_sockets", Integer.toString(newIntValue));
+            }
+        });
+
+        BackendHelper.defaultBackend = (BackendHelper.defaultBackend.equals(BackendHelper.BackendNames.jEcdar)
+                ? BackendHelper.BackendNames.Reveaal
+                : BackendHelper.BackendNames.jEcdar);
+        Ecdar.preferences.put("default_backend", Integer.toString(BackendHelper.defaultBackend.ordinal()));
+*/
+        this.closeBackendDialog();
     }
 
     public static void openQueryDialog(final Query query, final String text) {

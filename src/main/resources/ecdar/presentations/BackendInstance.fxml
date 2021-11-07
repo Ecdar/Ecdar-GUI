@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+
+<?import javafx.scene.text.Text?>
+<?import com.jfoenix.controls.JFXCheckBox?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import com.jfoenix.controls.JFXRadioButton?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import com.jfoenix.controls.JFXRippler?>
+<fx:root xmlns:fx="http://javafx.com/fxml/1"
+         xmlns="http://javafx.com/javafx/8.0.76-ea"
+         type="StackPane" fx:controller="ecdar.controllers.BackendInstanceController"
+         styleClass="backendInstanceStackPane">
+    <HBox>
+        <StackPane minWidth="40" minHeight="40"
+                   fx:id="moveBackendInstance"
+                   StackPane.alignment="CENTER_LEFT">
+            <FontIcon iconLiteral="gmi-reorder" iconSize="20" fill="black"/>
+        </StackPane>
+        <Region prefWidth="20"/>
+        <VBox spacing="10" prefWidth="300">
+            <HBox>
+                <JFXTextField styleClass="title" promptText="Backend name">New backend</JFXTextField>
+                <JFXRippler fx:id="removeBackend">
+                    <StackPane minWidth="40" minHeight="40"
+                               onMouseClicked="#removeBackendClicked"
+                               StackPane.alignment="TOP_RIGHT">
+                        <FontIcon iconLiteral="gmi-delete" iconSize="20" fill="black"/>
+                    </StackPane>
+                </JFXRippler>
+            </HBox>
+            <Region prefHeight="20"/>
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Text styleClass="subhead">Address: </Text>
+                <JFXTextField fx:id="address" promptText="xxx.xxx.xxx.xxx" prefWidth="110"/>
+                <JFXCheckBox fx:id="localAddress" onMouseClicked="#addressLocalClicked">Local</JFXCheckBox>
+            </HBox>
+            <HBox spacing="10" alignment="CENTER_LEFT" fx:id="portSection">
+                <Text styleClass="subhead">Port range: </Text>
+                <JFXTextField fx:id="portRangeStart" promptText="0" prefWidth="80"/>
+                <Text>-</Text>
+                <JFXTextField fx:id="portRangeEnd" promptText="65535" prefWidth="80"/>
+            </HBox>
+            <HBox fx:id="pathToBackendSection" spacing="10" alignment="CENTER_LEFT">
+                <Text styleClass="subhead">Path to backend: </Text>
+                <JFXTextField fx:id="pathToBackend" promptText="Absolute path"/>
+                <JFXRippler fx:id="pickPathToBackend">
+                    <StackPane minWidth="40" minHeight="40"
+                               onMouseClicked="#openPathToBackendDialog"
+                               StackPane.alignment="TOP_RIGHT">
+                        <FontIcon iconLiteral="gmi-open-in-new" iconSize="20" fill="black"/>
+                    </StackPane>
+                </JFXRippler>
+            </HBox>
+            <JFXRadioButton fx:id="defaultBackend" styleClass="subhead">Default</JFXRadioButton>
+        </VBox>
+    </HBox>
+</fx:root>
