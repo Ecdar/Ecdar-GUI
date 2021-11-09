@@ -109,8 +109,6 @@ public class EcdarController implements Initializable {
     public JFXDialog aboutDialog;
     public JFXButton aboutAcceptButton;
     public StackPane canvasPane;
-    public JFXButton addBackendButton;
-    public HBox addBackendSection;
 
     private double expandHeight = 300;
 
@@ -169,6 +167,7 @@ public class EcdarController implements Initializable {
     public StackPane backendOptionsDialogContainer;
     public JFXDialog backendOptionsDialog;
     public VBox backendInstanceList;
+    public JFXButton addBackendButton;
 
     private static JFXDialog _queryDialog;
     private static Text _queryTextResult;
@@ -221,8 +220,24 @@ public class EcdarController implements Initializable {
 
         HBox.setHgrow(addBackendButton, Priority.ALWAYS);
         addBackendButton.setMaxWidth(Double.MAX_VALUE);
+        addBackendButton.setOnMouseClicked((event) -> {
+            BackendInstancePresentation newBackendInstance = new BackendInstancePresentation();
 
-        backendInstanceList.getChildren().add(new BackendInstancePresentation());
+            backendInstanceList.getChildren().add(newBackendInstance);
+            newBackendInstance.getController().moveBackendInstanceUp.setOnMouseClicked((mouseEvent) -> moveBackendInstance(newBackendInstance, -1));
+            newBackendInstance.getController().moveBackendInstanceDown.setOnMouseClicked((mouseEvent) -> moveBackendInstance(newBackendInstance, +1));
+            newBackendInstance.getController().removeBackend.setOnMouseClicked((mouseEvent) -> backendInstanceList.getChildren().remove(newBackendInstance));
+        });
+    }
+
+    private void moveBackendInstance(BackendInstancePresentation newBackendInstance, int i) {
+        int currentIndex = backendInstanceList.getChildren().indexOf(newBackendInstance);
+        // Math.max added to avoid index -1
+        int newIndex = Math.max(0, (currentIndex + i) % backendInstanceList.getChildren().size());
+        // ToDo NIELS: Prevent loop around for overflow or add for underflow
+
+        backendInstanceList.getChildren().remove(newBackendInstance);
+        backendInstanceList.getChildren().add(newIndex, newBackendInstance);
     }
 
     private void initializeDialog(JFXDialog dialog, StackPane dialogContainer) {

@@ -16,4 +16,8 @@ public class BackendInstancePresentation extends StackPane {
         controller.pickPathToBackend.setRipplerFill(Color.GREY.getColor(Color.Intensity.I500));
         controller.pickPathToBackend.setMaskType(JFXRippler.RipplerMask.CIRCLE);
     }
+
+    public BackendInstanceController getController() {
+        return controller;
+    }
 }

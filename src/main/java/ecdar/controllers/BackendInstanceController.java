@@ -4,8 +4,10 @@ import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXRippler;
 import com.jfoenix.controls.JFXTextField;
 import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
+import javafx.scene.Node;
 import javafx.scene.control.RadioButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -24,12 +26,15 @@ public class BackendInstanceController {
     public HBox pathToBackendSection;
     public HBox portSection;
     public JFXRippler removeBackend;
-    public StackPane moveBackendInstance;
+    public StackPane moveBackendInstanceUp;
+    public StackPane moveBackendInstanceDown;
+    private ObservableList<Node> instanceList;
 
     public BackendInstanceController() {
         Platform.runLater(() -> {
             this.handleLocalPropertyChanged();
-            moveBackendInstance.setCursor(Cursor.OPEN_HAND);
+            moveBackendInstanceUp.setCursor(Cursor.HAND);
+            moveBackendInstanceDown.setCursor(Cursor.HAND);
         });
     }
 
@@ -75,12 +80,5 @@ public class BackendInstanceController {
         if(file != null) {
             pathToBackend.setText(file.getAbsolutePath());
         }
-    }
-
-    @FXML
-    private void removeBackendClicked() {
-        System.out.println("Backend removed");
-        // ToDo NIELS: Handle queries using the given backend
-        // ToDo NIELS: Handle prompt user to confirm deletion
     }
 }

@@ -565,9 +565,9 @@
                 <VBox style="-fx-padding: 20px">
                     <Text styleClass="headline">Backends</Text>
                     <Region prefHeight="10"/>
-                    <VBox styleClass="backendInstancesVBox">
-                        <VBox fx:id="backendInstanceList"/>
-                        <HBox fx:id="addBackendSection">
+                    <VBox styleClass="backend-instances-list">
+                        <VBox fx:id="backendInstanceList" prefWidth="400"/>
+                        <HBox>
                             <JFXButton styleClass="button" fx:id="addBackendButton">+</JFXButton>
                         </HBox>
                     </VBox>

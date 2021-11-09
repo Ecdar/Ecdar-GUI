@@ -254,7 +254,7 @@
 	-fx-stroke: -primary-color-darker;
 }*/
 
-.backendInstancesVBox {
+.backend-instances-list {
 	-fx-padding: 5;
 	-fx-border-style: SOLID SOLID SOLID SOLID;
 	-fx-border-color: -divider-color;
@@ -262,7 +262,6 @@
 }
 
 .backendInstanceStackPane {
-	-fx-background-color: -blue-grey-50;
 	-fx-padding: 20 0 20 0;
 	-fx-border-style: SOLID SOLID SOLID SOLID;
 	-fx-border-color: -divider-color;
