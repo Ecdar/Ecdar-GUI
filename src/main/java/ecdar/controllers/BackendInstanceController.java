@@ -12,6 +12,7 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.stage.DirectoryChooser;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.File;
 
@@ -28,7 +29,8 @@ public class BackendInstanceController {
     public JFXRippler removeBackend;
     public StackPane moveBackendInstanceUp;
     public StackPane moveBackendInstanceDown;
-    private ObservableList<Node> instanceList;
+    public StackPane content;
+    public FontIcon expansionIcon;
 
     public BackendInstanceController() {
         Platform.runLater(() -> {
@@ -59,6 +61,19 @@ public class BackendInstanceController {
     @FXML
     private void addressLocalClicked(){
         handleLocalPropertyChanged();
+    }
+
+    @FXML
+    private void expansionClicked() {
+        if (expansionIcon.getIconLiteral().equals("gmi-expand-less")) {
+            expansionIcon.setIconLiteral("gmi-expand-more");
+            content.setVisible(false);
+            content.setManaged(false);
+        } else {
+            expansionIcon.setIconLiteral("gmi-expand-less");
+            content.setVisible(true);
+            content.setManaged(true);
+        }
     }
 
     @FXML

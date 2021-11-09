@@ -167,7 +167,7 @@ public class EcdarController implements Initializable {
     public StackPane backendOptionsDialogContainer;
     public JFXDialog backendOptionsDialog;
     public VBox backendInstanceList;
-    public JFXButton addBackendButton;
+    public JFXRippler addBackendButton;
 
     private static JFXDialog _queryDialog;
     private static Text _queryTextResult;

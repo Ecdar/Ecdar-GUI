@@ -256,14 +256,13 @@
 
 .backend-instances-list {
 	-fx-padding: 5;
-	-fx-border-style: SOLID SOLID SOLID SOLID;
+	-fx-border-style: SOLID HIDDEN SOLID HIDDEN;
 	-fx-border-color: -divider-color;
 	-fx-border-width: 2px;
 }
 
-.backendInstanceStackPane {
-	-fx-padding: 20 0 20 0;
-	-fx-border-style: SOLID SOLID SOLID SOLID;
+.backend-instance {
+	-fx-border-style: DASHED DASHED DASHED DASHED;
 	-fx-border-color: -divider-color;
-	-fx-border-width: 2px;
+	-fx-border-width: 1px;
 }

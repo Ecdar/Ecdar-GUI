@@ -565,12 +565,15 @@
                 <VBox style="-fx-padding: 20px">
                     <Text styleClass="headline">Backends</Text>
                     <Region prefHeight="10"/>
-                    <VBox styleClass="backend-instances-list">
-                        <VBox fx:id="backendInstanceList" prefWidth="400"/>
-                        <HBox>
-                            <JFXButton styleClass="button" fx:id="addBackendButton">+</JFXButton>
-                        </HBox>
-                    </VBox>
+                    <ScrollPane styleClass="backend-instances-list" style="-fx-font-size:13px;-fx-background-color:transparent;" hbarPolicy="NEVER" fitToWidth="true" fitToHeight="true" maxHeight="600">
+                        <VBox fx:id="backendInstanceList" prefWidth="400" spacing="5"/>
+                    </ScrollPane>
+                    <JFXRippler fx:id="addBackendButton" alignment="CENTER_RIGHT">
+                        <StackPane minWidth="300" minHeight="40"
+                                   StackPane.alignment="CENTER">
+                            <FontIcon iconLiteral="gmi-add" iconSize="20" fill="black"/>
+                        </StackPane>
+                    </JFXRippler>
                     <HBox style="-fx-padding: 8px;">
                         <Region HBox.hgrow="ALWAYS"/>
                         <JFXButton text="Cancel" onMouseClicked="#closeBackendDialog"/>

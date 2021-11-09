@@ -8,29 +8,40 @@
 <?import com.jfoenix.controls.JFXRadioButton?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 <?import com.jfoenix.controls.JFXRippler?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.geometry.Insets?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="StackPane" fx:controller="ecdar.controllers.BackendInstanceController"
-         styleClass="backendInstanceStackPane">
-    <HBox>
-        <VBox alignment="CENTER">
+         styleClass="backend-instance">
+    <HBox spacing="10">
+        <VBox alignment="CENTER" prefWidth="50" style="-fx-background-color: -primary-color-darker">
             <JFXRippler fx:id="moveBackendInstanceUp" alignment="CENTER_RIGHT">
                 <StackPane minWidth="40" minHeight="40"
                            StackPane.alignment="CENTER_LEFT">
-                    <FontIcon iconLiteral="gmi-expand-less" iconSize="20" fill="black"/>
+                    <FontIcon iconLiteral="gmi-expand-less" iconSize="20" fill="white"/>
                 </StackPane>
             </JFXRippler>
             <JFXRippler fx:id="moveBackendInstanceDown" alignment="CENTER_RIGHT">
                 <StackPane minWidth="40" minHeight="40"
                            StackPane.alignment="CENTER_LEFT">
-                    <FontIcon iconLiteral="gmi-expand-more" iconSize="20" fill="black"/>
+                    <FontIcon iconLiteral="gmi-expand-more" iconSize="20" fill="white"/>
                 </StackPane>
             </JFXRippler>
         </VBox>
-        <Region prefWidth="20"/>
-        <VBox spacing="10" prefWidth="300">
-            <HBox prefWidth="300">
+        <VBox spacing="10" prefWidth="350">
+            <padding>
+                <Insets top="10" bottom="10"/>
+            </padding>
+            <HBox alignment="CENTER_LEFT">
                 <JFXTextField styleClass="subhead" promptText="Backend name" prefWidth="240">New backend</JFXTextField>
+                <JFXRippler alignment="CENTER_RIGHT">
+                    <StackPane minWidth="40" minHeight="40"
+                               onMouseClicked="#expansionClicked"
+                               StackPane.alignment="CENTER">
+                        <FontIcon fx:id="expansionIcon" iconLiteral="gmi-expand-less" iconSize="20" fill="black"/>
+                    </StackPane>
+                </JFXRippler>
                 <JFXRippler fx:id="removeBackend" alignment="CENTER_RIGHT">
                     <StackPane minWidth="40" minHeight="40"
                                StackPane.alignment="TOP_RIGHT">
@@ -39,28 +50,33 @@
                 </JFXRippler>
             </HBox>
             <Region prefHeight="5"/>
-            <HBox spacing="10" alignment="CENTER_LEFT">
-                <Text styleClass="subhead">Address: </Text>
-                <JFXTextField fx:id="address" promptText="xxx.xxx.xxx.xxx" prefWidth="110"/>
-                <JFXCheckBox fx:id="localAddress" onMouseClicked="#addressLocalClicked">Local</JFXCheckBox>
-            </HBox>
-            <HBox spacing="10" alignment="CENTER_LEFT" fx:id="portSection">
-                <Text styleClass="subhead">Port range: </Text>
-                <JFXTextField fx:id="portRangeStart" promptText="0" prefWidth="80"/>
-                <Text>-</Text>
-                <JFXTextField fx:id="portRangeEnd" promptText="65535" prefWidth="80"/>
-            </HBox>
-            <HBox fx:id="pathToBackendSection" spacing="10" alignment="CENTER_LEFT">
-                <Text styleClass="subhead">Path to backend: </Text>
-                <JFXTextField fx:id="pathToBackend" promptText="Absolute path"/>
-                <JFXRippler fx:id="pickPathToBackend">
-                    <StackPane minWidth="40" minHeight="40"
-                               onMouseClicked="#openPathToBackendDialog"
-                               StackPane.alignment="TOP_RIGHT">
-                        <FontIcon iconLiteral="gmi-open-in-new" iconSize="20" fill="black"/>
-                    </StackPane>
-                </JFXRippler>
-            </HBox>
+            <StackPane fx:id="content">
+                <VBox spacing="20">
+                    <HBox spacing="15" alignment="CENTER_LEFT">
+                        <Text styleClass="subhead">Address: </Text>
+                        <JFXTextField fx:id="address" promptText="xxx.xxx.xxx.xxx" prefWidth="110" alignment="CENTER"/>
+                        <Region prefWidth="15"/>
+                        <JFXCheckBox fx:id="localAddress" onMouseClicked="#addressLocalClicked">Local</JFXCheckBox>
+                    </HBox>
+                    <HBox fx:id="portSection" spacing="15" alignment="CENTER_LEFT">
+                        <Text styleClass="subhead">Port range: </Text>
+                        <JFXTextField fx:id="portRangeStart" promptText="0" prefWidth="60" alignment="CENTER"/>
+                        <Text>-</Text>
+                        <JFXTextField fx:id="portRangeEnd" promptText="65535" prefWidth="60" alignment="CENTER"/>
+                    </HBox>
+                    <HBox fx:id="pathToBackendSection" spacing="15" alignment="CENTER_LEFT">
+                        <Text styleClass="subhead">Path to backend: </Text>
+                        <JFXTextField fx:id="pathToBackend" promptText="Absolute path"/>
+                        <JFXRippler fx:id="pickPathToBackend">
+                            <StackPane minWidth="20" minHeight="20"
+                                       onMouseClicked="#openPathToBackendDialog"
+                                       StackPane.alignment="TOP_RIGHT">
+                                <FontIcon iconLiteral="gmi-open-in-new" iconSize="20" fill="black"/>
+                            </StackPane>
+                        </JFXRippler>
+                    </HBox>
+                </VBox>
+            </StackPane>
             <JFXRadioButton fx:id="defaultBackend" styleClass="subhead">Default</JFXRadioButton>
         </VBox>
     </HBox>
