@@ -23,8 +23,8 @@ public class BackendDriver {
     private final Pair<AtomicInteger, AtomicInteger> numberOfReveaalConnections = new Pair<>(new AtomicInteger(0), new AtomicInteger(5));
     private final List<BackendConnection> reveaalConnections = new CopyOnWriteArrayList<>();
 
-    private final Pair<AtomicInteger, AtomicInteger> numberOfJEcdarConnections = new Pair<>(new AtomicInteger(0), new AtomicInteger(5));
-    private final List<BackendConnection> jEcdarConnections = new CopyOnWriteArrayList<>();
+//    private final Pair<AtomicInteger, AtomicInteger> numberOfJEcdarConnections = new Pair<>(new AtomicInteger(0), new AtomicInteger(5));
+//    private final List<BackendConnection> jEcdarConnections = new CopyOnWriteArrayList<>();
 
     private final String hostAddress;
 
@@ -88,12 +88,12 @@ public class BackendDriver {
 
     public void closeAllSockets() throws IOException {
         for (BackendConnection s : reveaalConnections) s.close();
-        for (BackendConnection s : jEcdarConnections) s.close();
+        // for (BackendConnection s : jEcdarConnections) s.close();
     }
 
     public void setMaxNumberOfSockets(int i) {
         numberOfReveaalConnections.getValue().set(i);
-        numberOfJEcdarConnections.getValue().set(i);
+        // numberOfJEcdarConnections.getValue().set(i);
 
         // ToDo NIELS: Potentially close connections until within new range [0, i]
     }
@@ -105,17 +105,24 @@ public class BackendDriver {
     private void executeQuery(ExecutableQuery executableQuery) {
         if(executableQuery.queryListener.getQuery().getQueryState() == QueryState.UNKNOWN) return;
 
-        // Get available connection or start new
-        final Optional<BackendConnection> connection;
         if (executableQuery.backend.equals(BackendHelper.BackendNames.jEcdar)) {
-            connection = jEcdarConnections.stream().filter((element) -> !element.isRunningQuery()).findFirst();
-        } else {
-            connection = reveaalConnections.stream().filter((element) -> !element.isRunningQuery()).findFirst();
+            jEcdarThread jECDARBackendThread = new jEcdarThread(executableQuery.query, executableQuery.success, executableQuery.failure, executableQuery.queryListener);
+            jECDARBackendThread.start();
+            return;
         }
 
-        final BackendConnection backendConnection = connection.orElseGet(() -> (executableQuery.backend == BackendHelper.BackendNames.Reveaal
-                ? startNewBackendConnection(BackendHelper.BackendNames.Reveaal, numberOfReveaalConnections, reveaalConnections)
-                : startNewBackendConnection(BackendHelper.BackendNames.jEcdar, numberOfJEcdarConnections, jEcdarConnections)));
+        // Get available connection or start new
+        final Optional<BackendConnection> connection;
+//        if (executableQuery.backend.equals(BackendHelper.BackendNames.jEcdar)) {
+//            connection = jEcdarConnections.stream().filter((element) -> !element.isRunningQuery()).findFirst();
+//        } else {
+        connection = reveaalConnections.stream().filter((element) -> !element.isRunningQuery()).findFirst();
+        //}
+
+        final BackendConnection backendConnection = connection.orElseGet(() ->
+                (startNewBackendConnection(BackendHelper.BackendNames.Reveaal, numberOfReveaalConnections, reveaalConnections)));
+
+        // : startNewBackendConnection(BackendHelper.BackendNames.jEcdar, numberOfJEcdarConnections, jEcdarConnections)
 
         // If the query connection is null, there are no available sockets
         // and the maximum number of sockets has already been reached
@@ -336,9 +343,10 @@ public class BackendDriver {
 
         public void close() throws IOException {
             // Remove the socket from the socket list
-            if (jEcdarConnections.remove(this)) {
-                numberOfJEcdarConnections.getKey().getAndDecrement();
-            } else if(reveaalConnections.remove(this)) {
+//            if (jEcdarConnections.remove(this)) {
+//                numberOfJEcdarConnections.getKey().getAndDecrement();
+            /*} else */
+            if(reveaalConnections.remove(this)) {
                 numberOfReveaalConnections.getKey().getAndDecrement();
             }
 
