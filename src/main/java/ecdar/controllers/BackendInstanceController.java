@@ -4,10 +4,8 @@ import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXRippler;
 import com.jfoenix.controls.JFXTextField;
 import javafx.application.Platform;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
-import javafx.scene.Node;
 import javafx.scene.control.RadioButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -18,25 +16,25 @@ import java.io.File;
 
 public class BackendInstanceController {
     public JFXTextField address;
-    public RadioButton defaultBackend;
+    public RadioButton defaultBackendRadioButton;
     public JFXTextField portRangeStart;
     public JFXTextField portRangeEnd;
     public JFXCheckBox localAddress;
     public JFXTextField pathToBackend;
+    public HBox addressSection;
     public JFXRippler pickPathToBackend;
     public HBox pathToBackendSection;
-    public HBox portSection;
-    public JFXRippler removeBackend;
-    public StackPane moveBackendInstanceUp;
-    public StackPane moveBackendInstanceDown;
+    public JFXRippler removeBackendRippler;
+    public StackPane moveBackendInstanceUpRippler;
+    public StackPane moveBackendInstanceDownRippler;
     public StackPane content;
     public FontIcon expansionIcon;
 
     public BackendInstanceController() {
         Platform.runLater(() -> {
             this.handleLocalPropertyChanged();
-            moveBackendInstanceUp.setCursor(Cursor.HAND);
-            moveBackendInstanceDown.setCursor(Cursor.HAND);
+            moveBackendInstanceUpRippler.setCursor(Cursor.HAND);
+            moveBackendInstanceDownRippler.setCursor(Cursor.HAND);
         });
     }
 
@@ -44,15 +42,15 @@ public class BackendInstanceController {
         if (localAddress.isSelected()) {
             address.setDisable(true);
             address.setText("127.0.0.1");
-            portSection.setVisible(false);
-            portSection.setManaged(false);
+            addressSection.setVisible(false);
+            addressSection.setManaged(false);
             pathToBackendSection.setVisible(true);
             pathToBackendSection.setManaged(true);
         } else {
             address.setDisable(false);
             address.setText("");
-            portSection.setVisible(true);
-            portSection.setManaged(true);
+            addressSection.setVisible(true);
+            addressSection.setManaged(true);
             pathToBackendSection.setVisible(false);
             pathToBackendSection.setManaged(false);
         }

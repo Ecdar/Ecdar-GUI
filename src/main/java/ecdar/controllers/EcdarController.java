@@ -168,6 +168,7 @@ public class EcdarController implements Initializable {
     public JFXDialog backendOptionsDialog;
     public VBox backendInstanceList;
     public JFXRippler addBackendButton;
+    public ToggleGroup defaultBackendToggleGroup = new ToggleGroup();
 
     private static JFXDialog _queryDialog;
     private static Text _queryTextResult;
@@ -224,9 +225,10 @@ public class EcdarController implements Initializable {
             BackendInstancePresentation newBackendInstance = new BackendInstancePresentation();
 
             backendInstanceList.getChildren().add(newBackendInstance);
-            newBackendInstance.getController().moveBackendInstanceUp.setOnMouseClicked((mouseEvent) -> moveBackendInstance(newBackendInstance, -1));
-            newBackendInstance.getController().moveBackendInstanceDown.setOnMouseClicked((mouseEvent) -> moveBackendInstance(newBackendInstance, +1));
-            newBackendInstance.getController().removeBackend.setOnMouseClicked((mouseEvent) -> backendInstanceList.getChildren().remove(newBackendInstance));
+            newBackendInstance.getController().moveBackendInstanceUpRippler.setOnMouseClicked((mouseEvent) -> moveBackendInstance(newBackendInstance, -1));
+            newBackendInstance.getController().moveBackendInstanceDownRippler.setOnMouseClicked((mouseEvent) -> moveBackendInstance(newBackendInstance, +1));
+            newBackendInstance.getController().removeBackendRippler.setOnMouseClicked((mouseEvent) -> backendInstanceList.getChildren().remove(newBackendInstance));
+            newBackendInstance.getController().defaultBackendRadioButton.setToggleGroup(defaultBackendToggleGroup);
         });
     }
 
