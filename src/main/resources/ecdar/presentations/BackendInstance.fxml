@@ -26,9 +26,9 @@
                 </StackPane>
             </JFXRippler>
         </VBox>
-        <VBox spacing="10" prefWidth="350">
+        <VBox>
             <padding>
-                <Insets top="10" bottom="10"/>
+                <Insets top="5" bottom="5"/>
             </padding>
             <HBox alignment="CENTER_LEFT">
                 <JFXTextField styleClass="subhead" promptText="Backend name" prefWidth="240">New backend</JFXTextField>
@@ -50,10 +50,11 @@
             <StackPane fx:id="content">
                 <VBox spacing="20">
                     <HBox spacing="15" alignment="CENTER_LEFT">
-                        <HBox fx:id="addressSection" spacing="10">
+                        <HBox fx:id="addressSection" spacing="10" alignment="CENTER_LEFT">
                             <Text styleClass="subhead">Address: </Text>
                             <JFXTextField fx:id="address" promptText="xxx.xxx.xxx.xxx" prefWidth="110" alignment="CENTER"/>
                         </HBox>
+                        <Region prefHeight="5"/>
                         <HBox fx:id="pathToBackendSection" spacing="10" alignment="CENTER_LEFT">
                             <Text styleClass="subhead">Path: </Text>
                             <JFXTextField fx:id="pathToBackend" promptText="Absolute path"/>
@@ -74,6 +75,7 @@
                         <Text>-</Text>
                         <JFXTextField fx:id="portRangeEnd" promptText="65535" prefWidth="60" alignment="CENTER"/>
                     </HBox>
+                    <Region prefHeight="5"/>
                 </VBox>
             </StackPane>
             <JFXRadioButton fx:id="defaultBackendRadioButton" styleClass="subhead">Default</JFXRadioButton>
