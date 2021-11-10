@@ -262,7 +262,7 @@
 }
 
 .backend-instance {
-	-fx-border-style: DASHED DASHED DASHED DASHED;
+	-fx-border-style: SOLID SOLID SOLID SOLID;
 	-fx-border-color: -divider-color;
 	-fx-border-width: 1px;
 }
