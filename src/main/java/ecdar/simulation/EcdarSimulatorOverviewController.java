@@ -7,6 +7,7 @@ import com.uppaal.model.system.concrete.ConcreteState;
 import com.uppaal.model.system.concrete.ConcreteTransition;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
+import ecdar.abstractions.Location;
 import ecdar.presentations.ProcessPresentation;
 import ecdar.simulation.EcdarSimulationController;
 import javafx.collections.FXCollections;
@@ -359,14 +360,14 @@ public class EcdarSimulatorOverviewController implements Initializable {
      * Finds the processes for the input locations in the input {@link ConcreteState} and highlights the locations.
      * @param state The state with the locations to highlight
      */
-    public void highlightProcessState(final ConcreteState state) {
-        for (int i = 0; i < state.getLocations().length; i++) {
-            final SystemLocation loc = state.getLocations()[i];
+    public void highlightProcessState(final EcdarSystemState state) {
+        for (int i = 0; i < state.getLocations().size(); i++) {
+            final Location loc = state.getLocations().get(i);
 
             for(final ProcessPresentation presentation: processPresentations.values()) {
                 final String processName = presentation.getController().getComponent().getName();
 
-                if(processName.equals(loc.getProcess().getName())) {
+                if(presentation.getController().getComponent().getLocations().contains(loc)) {
                     presentation.getController().highlightLocation(loc);
                 }
             }

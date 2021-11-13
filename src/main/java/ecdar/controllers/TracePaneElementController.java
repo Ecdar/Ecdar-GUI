@@ -4,9 +4,11 @@ import com.jfoenix.controls.JFXRippler;
 import com.uppaal.model.system.SystemLocation;
 import com.uppaal.model.system.concrete.ConcreteState;
 import ecdar.Ecdar;
+import ecdar.abstractions.Location;
 import ecdar.presentations.TransitionPresentation;
 import ecdar.simulation.EcdarSimulationController;
 import ecdar.simulation.EcdarSimulationHandler;
+import ecdar.simulation.EcdarSystemState;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.ListChangeListener;
@@ -38,25 +40,25 @@ public class TracePaneElementController implements Initializable {
     public Label summarySubtitleLabel;
 
     private SimpleBooleanProperty isTraceExpanded = new SimpleBooleanProperty(false);
-    private Map<ConcreteState, TransitionPresentation> transitionPresentationMap = new LinkedHashMap<>();
+    private Map<EcdarSystemState, TransitionPresentation> transitionPresentationMap = new LinkedHashMap<>();
     private SimpleIntegerProperty numberOfSteps = new SimpleIntegerProperty(0);
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-//        Ecdar.getSimulationHandler().getTraceLog().addListener((ListChangeListener<ConcreteState>) c -> {
-//            while (c.next()) {
-//                for(final ConcreteState state: c.getAddedSubList()) {
-//                    insertTraceState(state, true);
-//                }
-//
-//                for(final ConcreteState state: c.getRemoved()) {
-//                    traceList.getChildren().remove(transitionPresentationMap.get(state));
-//                    transitionPresentationMap.remove(state);
-//                }
-//            }
-//
-//            numberOfSteps.set(transitionPresentationMap.size());
-//        });
+        Ecdar.getSimulationHandler().traceLog.addListener((ListChangeListener<EcdarSystemState>) c -> {
+            while (c.next()) {
+                for(final EcdarSystemState state: c.getAddedSubList()) {
+                    insertTraceState(state, true);
+                }
+
+                for(final EcdarSystemState state: c.getRemoved()) {
+                    traceList.getChildren().remove(transitionPresentationMap.get(state));
+                    transitionPresentationMap.remove(state);
+                }
+            }
+
+            numberOfSteps.set(transitionPresentationMap.size());
+        });
 
         initializeTraceExpand();
     }
@@ -107,7 +109,7 @@ public class TracePaneElementController implements Initializable {
      * @param state The state the should be inserted into the trace log
      * @param shouldAnimate A boolean that indicates whether the trace should fade in when added to the view
      */
-    private void insertTraceState(final ConcreteState state, final boolean shouldAnimate) {
+    private void insertTraceState(final EcdarSystemState state, final boolean shouldAnimate) {
         final TransitionPresentation transitionPresentation = new TransitionPresentation();
         transitionPresentationMap.put(state, transitionPresentation);
 
@@ -148,12 +150,12 @@ public class TracePaneElementController implements Initializable {
      * @param state The ConcreteState to represent
      * @return A string representing the state
      */
-    private String traceString(ConcreteState state) {
+    private String traceString(EcdarSystemState state) {
         String title = "(";
-        int length = state.getLocations().length;
+        int length = state.getLocations().size();
         for (int i = 0; i < length ; i++) {
-            SystemLocation sysLocation = state.getLocations()[i];
-            String locationName = sysLocation.getName();
+            Location sysLocation = state.getLocations().get(i);
+            String locationName = sysLocation.getNickname();
             if (i == length-1) {
                 title += locationName;
             } else {

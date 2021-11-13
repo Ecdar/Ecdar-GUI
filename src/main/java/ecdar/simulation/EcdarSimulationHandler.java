@@ -37,15 +37,16 @@ public class EcdarSimulationHandler {
      * and kept empty when doing system simulations
      */
     private String currentSimulation = "";
-
     private final ObservableMap<String, BigDecimal> simulationVariables = FXCollections.observableHashMap();
     private final ObservableMap<String, BigDecimal> simulationClocks = FXCollections.observableHashMap();
+    private EcdarSystemState currentState;
+
     /**
      * For some reason the successor.getTransitions() only sometimes returns some of the transitions
      * that are available, when running the initial step.
      * That is why we need to keep track of the initial transitions.
      */
-    public ObservableList<ConcreteState> traceLog = FXCollections.observableArrayList();
+    public ObservableList<EcdarSystemState> traceLog = FXCollections.observableArrayList();
 
     /**
      * The constructor of the {@link EcdarSimulationHandler}.
@@ -54,6 +55,7 @@ public class EcdarSimulationHandler {
      */
     public EcdarSimulationHandler() {
         initializeSimulation();
+        currentState = getInitialStep().getKey();
     }
 
     /**
@@ -75,6 +77,14 @@ public class EcdarSimulationHandler {
      * Take a step in the simulation.
      */
     public Pair<EcdarSystemState, Vector<Edge>> getSuccessor(EcdarSystemState state, Edge transition) {
+        // ToDo NIELS: Get successor state and save it to the currentState before returning
         return null;
+    }
+
+    /**
+     * Returns the current state, which is the last state returned by getSuccessor
+     */
+    public EcdarSystemState getCurrentState() {
+        return currentState;
     }
 }

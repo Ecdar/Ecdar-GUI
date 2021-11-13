@@ -31,7 +31,7 @@ import static ecdar.presentations.Grid.GRID_SIZE;
  * This class have some of the same functionality as {@link ComponentPresentation} and could be refactored
  * into a base class.
  */
-public class ProcessPresentation extends ModelPresentation {
+public class  ProcessPresentation extends ModelPresentation {
     private final ProcessController controller;
 
     /**

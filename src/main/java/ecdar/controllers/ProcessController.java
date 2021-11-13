@@ -193,11 +193,11 @@ public class ProcessController extends ModelController implements Initializable 
      * Method that highlights all locations with the same name as the input {@link SystemLocation}
      * @param location The locations to highlight
      */
-    public void highlightLocation(final SystemLocation location) {
+    public void highlightLocation(final Location location) {
         for (Map.Entry<Location, SimLocationPresentation> locEntry: locationPresentationMap.entrySet()) {
             final String locName = locEntry.getKey().getId();
 
-            if(locName.equals(location.getName())) {
+            if(locName.equals(location.getNickname())) {
                 locEntry.getValue().highlight();
             }
         }

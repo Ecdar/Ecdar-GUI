@@ -38,7 +38,7 @@ public class EcdarSimulationController implements Initializable, Presentable {
     private final static DoubleProperty width = new SimpleDoubleProperty(),
             height = new SimpleDoubleProperty();
     private static ObjectProperty<ConcreteTransition> selectedTransition = new SimpleObjectProperty<>();
-    private static ObjectProperty<ConcreteState> selectedState = new SimpleObjectProperty<>();
+    private static ObjectProperty<EcdarSystemState> selectedState = new SimpleObjectProperty<>();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -78,7 +78,7 @@ public class EcdarSimulationController implements Initializable, Presentable {
             }
         }
         overviewPresentation.getController().addProcessesToGroup();
-        //overviewPresentation.getController().highlightProcessState(sm.getCurrentConcreteState());
+        overviewPresentation.getController().highlightProcessState(sm.getCurrentState());
     }
 
     /**
@@ -169,11 +169,11 @@ public class EcdarSimulationController implements Initializable, Presentable {
         EcdarSimulationController.selectedTransition.set(selectedTransition);
     }
 
-    public static ObjectProperty<ConcreteState> getSelectedStateProperty() {
+    public static ObjectProperty<EcdarSystemState> getSelectedStateProperty() {
         return selectedState;
     }
 
-    public static void setSelectedState(ConcreteState selectedState) {
+    public static void setSelectedState(EcdarSystemState selectedState) {
         EcdarSimulationController.selectedState.set(selectedState);
     }
 }
