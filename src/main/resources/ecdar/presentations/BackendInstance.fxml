@@ -12,7 +12,7 @@
          type="StackPane" fx:controller="ecdar.controllers.BackendInstanceController"
          styleClass="backend-instance">
     <HBox spacing="10">
-        <VBox alignment="CENTER" prefWidth="50" style="-fx-background-color: -primary-color-darker">
+        <VBox alignment="CENTER" minWidth="50" maxWidth="50" style="-fx-background-color: -primary-color-darker">
             <JFXRippler fx:id="moveBackendInstanceUpRippler" alignment="CENTER_RIGHT">
                 <StackPane minWidth="40" minHeight="40"
                            StackPane.alignment="CENTER_LEFT">
@@ -28,10 +28,10 @@
         </VBox>
         <VBox>
             <padding>
-                <Insets top="5" bottom="5"/>
+                <Insets top="5" bottom="10" left="5" right="5"/>
             </padding>
             <HBox alignment="CENTER_LEFT">
-                <JFXTextField styleClass="subhead" promptText="Backend name" prefWidth="240">New backend</JFXTextField>
+                <JFXTextField fx:id="backendName" styleClass="subhead" promptText="Backend name">New backend</JFXTextField>
                 <JFXRippler alignment="CENTER_RIGHT">
                     <StackPane minWidth="40" minHeight="40"
                                onMouseClicked="#expansionClicked"
@@ -48,16 +48,19 @@
             </HBox>
             <Region prefHeight="5"/>
             <StackPane fx:id="content">
+                <padding>
+                    <Insets right="15"/>
+                </padding>
                 <VBox spacing="20">
+                    <Region/>
                     <HBox spacing="15" alignment="CENTER_LEFT">
                         <HBox fx:id="addressSection" spacing="10" alignment="CENTER_LEFT">
                             <Text styleClass="subhead">Address: </Text>
-                            <JFXTextField fx:id="address" promptText="xxx.xxx.xxx.xxx" prefWidth="110" alignment="CENTER"/>
+                            <JFXTextField fx:id="address" promptText="xxx.xxx.xxx.xxx" alignment="CENTER"/>
                         </HBox>
-                        <Region prefHeight="5"/>
                         <HBox fx:id="pathToBackendSection" spacing="10" alignment="CENTER_LEFT">
                             <Text styleClass="subhead">Path: </Text>
-                            <JFXTextField fx:id="pathToBackend" promptText="Absolute path"/>
+                            <JFXTextField fx:id="pathToBackend" promptText="Absolute path" alignment="CENTER"/>
                             <JFXRippler fx:id="pickPathToBackend">
                                 <StackPane minWidth="20" minHeight="20"
                                            onMouseClicked="#openPathToBackendDialog"
@@ -66,14 +69,13 @@
                                 </StackPane>
                             </JFXRippler>
                         </HBox>
-                        <Region prefWidth="5"/>
                         <JFXCheckBox fx:id="localAddress" onMouseClicked="#addressLocalClicked">Local</JFXCheckBox>
                     </HBox>
                     <HBox spacing="15" alignment="CENTER_LEFT">
                         <Text styleClass="subhead">Port range: </Text>
-                        <JFXTextField fx:id="portRangeStart" promptText="0" prefWidth="60" alignment="CENTER"/>
+                        <JFXTextField fx:id="portRangeStart" promptText="0" alignment="CENTER"/>
                         <Text>-</Text>
-                        <JFXTextField fx:id="portRangeEnd" promptText="65535" prefWidth="60" alignment="CENTER"/>
+                        <JFXTextField fx:id="portRangeEnd" promptText="65535" alignment="CENTER"/>
                     </HBox>
                     <Region prefHeight="5"/>
                 </VBox>

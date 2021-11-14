@@ -8,6 +8,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Cursor;
 import javafx.scene.control.RadioButton;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.stage.DirectoryChooser;
 import org.kordamp.ikonli.javafx.FontIcon;
@@ -29,13 +30,27 @@ public class BackendInstanceController {
     public StackPane moveBackendInstanceDownRippler;
     public StackPane content;
     public FontIcon expansionIcon;
+    public JFXTextField backendName;
 
     public BackendInstanceController() {
         Platform.runLater(() -> {
             this.handleLocalPropertyChanged();
             moveBackendInstanceUpRippler.setCursor(Cursor.HAND);
             moveBackendInstanceDownRippler.setCursor(Cursor.HAND);
+            setHGrow();
         });
+    }
+
+    private void setHGrow() {
+        HBox.setHgrow(backendName.getParent().getParent(), Priority.ALWAYS);
+        HBox.setHgrow(backendName, Priority.ALWAYS);
+        HBox.setHgrow(content, Priority.ALWAYS);
+        HBox.setHgrow(addressSection, Priority.ALWAYS);
+        HBox.setHgrow(address, Priority.ALWAYS);
+        HBox.setHgrow(pathToBackendSection, Priority.ALWAYS);
+        HBox.setHgrow(pathToBackend, Priority.ALWAYS);
+        HBox.setHgrow(portRangeStart, Priority.ALWAYS);
+        HBox.setHgrow(portRangeEnd, Priority.ALWAYS);
     }
 
     private void handleLocalPropertyChanged() {
