@@ -65,9 +65,12 @@ public class QueryPresentation extends AnchorPane {
 
 
             queryTextField.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler(keyEvent -> {
-                if (keyEvent.getCode().equals(KeyCode.ENTER)) {
-                    runQuery();
-                }
+                Platform.runLater(() -> {
+
+                    if (keyEvent.getCode().equals(KeyCode.ENTER)) {
+                        runQuery();
+                    }
+                });
             }));
 
             commentTextField.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
@@ -125,12 +128,14 @@ public class QueryPresentation extends AnchorPane {
 
             // Delegate that based on the query state updated the action icon
             final Consumer<QueryState> updateIcon = (queryState) -> {
-                if (queryState.equals(QueryState.RUNNING)) {
-                    actionButtonIcon.setIconLiteral("gmi-stop");
-                } else {
-                    actionButtonIcon.setIconLiteral("gmi-play-arrow");
-                }
-                actionButtonIcon.setIconSize(24);
+                Platform.runLater(() -> {
+                    if (queryState.equals(QueryState.RUNNING)) {
+                        actionButtonIcon.setIconLiteral("gmi-stop");
+                    } else {
+                        actionButtonIcon.setIconLiteral("gmi-play-arrow");
+                    }
+                    actionButtonIcon.setIconSize(24);
+                });
             };
 
             // Update the icon initially
@@ -142,11 +147,13 @@ public class QueryPresentation extends AnchorPane {
             controller.actionButton.setMaskType(JFXRippler.RipplerMask.CIRCLE);
 
             controller.actionButton.getChildren().get(0).setOnMousePressed(event -> {
-                if (controller.getQuery().getQueryState().equals(QueryState.RUNNING)) {
-                    controller.getQuery().cancel();
-                } else {
-                    runQuery();
-                }
+                Platform.runLater(() -> {
+                    if (controller.getQuery().getQueryState().equals(QueryState.RUNNING)) {
+                        controller.getQuery().cancel();
+                    } else {
+                        runQuery();
+                    }
+                });
             });
         });
     }
@@ -170,42 +177,46 @@ public class QueryPresentation extends AnchorPane {
 
             // Delegate that based on a query state updates tooltip of the query
             final Consumer<QueryState> updateToolTip = (queryState) -> {
-                if (queryState.getStatusCode() == 1) {
-                    this.tooltip.setText("This query was a success!");
-                } else if (queryState.getStatusCode() == 3) {
-                    this.tooltip.setText("The query has not been executed yet");
-                } else {
-                    this.tooltip.setText(controller.getQuery().getCurrentErrors());
-                }
+                Platform.runLater(() -> {
+                    if (queryState.getStatusCode() == 1) {
+                        this.tooltip.setText("This query was successful!");
+                    } else if (queryState.getStatusCode() == 3) {
+                        this.tooltip.setText("The query has not been executed yet");
+                    } else {
+                        this.tooltip.setText(controller.getQuery().getCurrentErrors());
+                    }
+                });
             };
 
             // Delegate that based on a query state updates the color of the state indicator
             final Consumer<QueryState> updateStateIndicator = (queryState) -> {
-                this.tooltip.setText("");
+                Platform.runLater(() -> {
+                    this.tooltip.setText("");
 
-                final Color color = queryState.getColor();
-                final Color.Intensity colorIntensity = queryState.getColorIntensity();
+                    final Color color = queryState.getColor();
+                    final Color.Intensity colorIntensity = queryState.getColorIntensity();
 
-                if (queryState.equals(QueryState.UNKNOWN) || queryState.equals(QueryState.RUNNING)) {
-                    stateIndicator.setBackground(new Background(new BackgroundFill(TRANSPARENT,
-                            CornerRadii.EMPTY,
-                            Insets.EMPTY)
-                    ));
-                } else {
-                    stateIndicator.setBackground(new Background(new BackgroundFill(color.getColor(colorIntensity),
-                            CornerRadii.EMPTY,
-                            Insets.EMPTY)
-                    ));
-                }
+                    if (queryState.equals(QueryState.UNKNOWN) || queryState.equals(QueryState.RUNNING)) {
+                        stateIndicator.setBackground(new Background(new BackgroundFill(TRANSPARENT,
+                                CornerRadii.EMPTY,
+                                Insets.EMPTY)
+                        ));
+                    } else {
+                        stateIndicator.setBackground(new Background(new BackgroundFill(color.getColor(colorIntensity),
+                                CornerRadii.EMPTY,
+                                Insets.EMPTY)
+                        ));
+                    }
 
-                setStatusIndicatorContentColor(new javafx.scene.paint.Color(1, 1, 1, 1), statusIcon, queryTypeExpandIcon, queryState);
+                    setStatusIndicatorContentColor(new javafx.scene.paint.Color(1, 1, 1, 1), statusIcon, queryTypeExpandIcon, queryState);
 
-                if (queryState.equals(QueryState.RUNNING) || queryState.equals(QueryState.UNKNOWN)) {
-                    setStatusIndicatorContentColor(Color.GREY.getColor(Color.Intensity.I700), statusIcon, queryTypeExpandIcon, null);
-                }
+                    if (queryState.equals(QueryState.RUNNING) || queryState.equals(QueryState.UNKNOWN)) {
+                        setStatusIndicatorContentColor(Color.GREY.getColor(Color.Intensity.I700), statusIcon, queryTypeExpandIcon, null);
+                    }
 
-                // The tooltip is updated here to handle all cases that are not syntax error
-                updateToolTip.accept(queryState);
+                    // The tooltip is updated here to handle all cases that are not syntax error
+                    updateToolTip.accept(queryState);
+                });
             };
 
             // Update the initial color

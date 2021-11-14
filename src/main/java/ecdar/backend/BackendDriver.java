@@ -198,11 +198,11 @@ public class BackendDriver {
 
         switch (errorType) {
             case "CANCELLED":
-                backendConnection.getExecutableQuery().queryListener.getQuery().setQueryState(QueryState.SYNTAX_ERROR);
+                backendConnection.getExecutableQuery().queryListener.getQuery().setQueryState(QueryState.ERROR);
                 backendConnection.getExecutableQuery().failure.accept(new BackendException.QueryErrorException("The query was cancelled by the backend."));
                 break;
             case "DEADLINE_EXCEEDED":
-                backendConnection.getExecutableQuery().queryListener.getQuery().setQueryState(QueryState.SYNTAX_ERROR);
+                backendConnection.getExecutableQuery().queryListener.getQuery().setQueryState(QueryState.ERROR);
                 backendConnection.getExecutableQuery().failure.accept(new BackendException.QueryErrorException("The backend did not answer the request in time."));
 
                 new Timer().schedule(new TimerTask() {
@@ -213,13 +213,25 @@ public class BackendDriver {
                 }, rerunQueryDelay);
 
                 break;
-            case "UNIMPLEMENTED":
+            case "INTERNAL":
                 backendConnection.getExecutableQuery().queryListener.getQuery().setQueryState(QueryState.ERROR);
+                backendConnection.getExecutableQuery().failure.accept(new BackendException.QueryErrorException("Teh backend encountered an internal error."));
+
+                new Timer().schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        query.execute();
+                    }
+                }, rerunQueryDelay);
+
+                break;
+            case "UNIMPLEMENTED":
+                backendConnection.getExecutableQuery().queryListener.getQuery().setQueryState(QueryState.SYNTAX_ERROR);
                 backendConnection.getExecutableQuery().failure.accept(new BackendException.QueryErrorException("The given query type is not supported by the backend."));
                 break;
             default:
                 backendConnection.getExecutableQuery().queryListener.getQuery().setQueryState(QueryState.ERROR);
-                backendConnection.getExecutableQuery().failure.accept(new BackendException.QueryErrorException("The query failed due to error type: " + errorType));
+                backendConnection.getExecutableQuery().failure.accept(new BackendException.QueryErrorException("The query failed and gave the following error: " + errorType));
 
                 new Timer().schedule(new TimerTask() {
                     @Override
@@ -271,7 +283,7 @@ public class BackendDriver {
 
                 ManagedChannel channel = ManagedChannelBuilder.forTarget(this.hostAddress + ":" + portNumber)
                         .usePlaintext()
-                        .keepAliveWithoutCalls(true)
+                        .idleTimeout(2000, TimeUnit.MILLISECONDS)
                         .keepAliveTime(1000, TimeUnit.MILLISECONDS)
                         .keepAliveTimeout(2000, TimeUnit.MILLISECONDS)
                         .build();
