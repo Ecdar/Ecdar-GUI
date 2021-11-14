@@ -3,8 +3,10 @@ package ecdar.controllers;
 import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXRippler;
 import com.jfoenix.controls.JFXTextField;
+import ecdar.abstractions.BackendInstance;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.Cursor;
 import javafx.scene.control.RadioButton;
 import javafx.scene.layout.HBox;
@@ -14,31 +16,40 @@ import javafx.stage.DirectoryChooser;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.File;
+import java.net.URL;
+import java.util.ResourceBundle;
 
-public class BackendInstanceController {
+public class BackendInstanceController implements Initializable {
+    private BackendInstance backendInstance = null;
+
+    public JFXTextField backendName;
+    public FontIcon expansionIcon;
+    public JFXRippler removeBackendRippler;
+    public StackPane content;
+    public HBox addressSection;
     public JFXTextField address;
-    public RadioButton defaultBackendRadioButton;
+    public JFXCheckBox isLocal;
+    public HBox pathToBackendSection;
+    public JFXRippler pickPathToBackend;
+    public JFXTextField pathToBackend;
     public JFXTextField portRangeStart;
     public JFXTextField portRangeEnd;
-    public JFXCheckBox localAddress;
-    public JFXTextField pathToBackend;
-    public HBox addressSection;
-    public JFXRippler pickPathToBackend;
-    public HBox pathToBackendSection;
-    public JFXRippler removeBackendRippler;
     public StackPane moveBackendInstanceUpRippler;
     public StackPane moveBackendInstanceDownRippler;
-    public StackPane content;
-    public FontIcon expansionIcon;
-    public JFXTextField backendName;
+    public RadioButton defaultBackendRadioButton;
 
-    public BackendInstanceController() {
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
         Platform.runLater(() -> {
             this.handleLocalPropertyChanged();
             moveBackendInstanceUpRippler.setCursor(Cursor.HAND);
             moveBackendInstanceDownRippler.setCursor(Cursor.HAND);
             setHGrow();
         });
+    }
+
+    public void setBackendInstance(BackendInstance instance) {
+        this.backendInstance = instance;
     }
 
     private void setHGrow() {
@@ -54,7 +65,7 @@ public class BackendInstanceController {
     }
 
     private void handleLocalPropertyChanged() {
-        if (localAddress.isSelected()) {
+        if (isLocal.isSelected()) {
             address.setDisable(true);
             address.setText("127.0.0.1");
             addressSection.setVisible(false);

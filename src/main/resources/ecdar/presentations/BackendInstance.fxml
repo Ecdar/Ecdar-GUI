@@ -69,7 +69,7 @@
                                 </StackPane>
                             </JFXRippler>
                         </HBox>
-                        <JFXCheckBox fx:id="localAddress" onMouseClicked="#addressLocalClicked">Local</JFXCheckBox>
+                        <JFXCheckBox fx:id="isLocal" onMouseClicked="#addressLocalClicked">Local</JFXCheckBox>
                     </HBox>
                     <HBox spacing="15" alignment="CENTER_LEFT">
                         <Text styleClass="subhead">Port range: </Text>
