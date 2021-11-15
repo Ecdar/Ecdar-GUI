@@ -1,5 +1,8 @@
 package ecdar.controllers;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import ecdar.Debug;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
@@ -219,17 +222,30 @@ public class EcdarController implements Initializable {
     private void initializeBackendInstanceList() {
         initializeDialog(backendOptionsDialog, backendOptionsDialogContainer);
 
+        String defaultBackendInstanceList = "{'backends': [{'name': 'Reveaal', 'isLocal': 'true', 'isDefault': 'true', 'location': '/', 'portRangeStart': '5032', 'portRangeEnd': '5040'},{'name': 'jECDAR', 'isLocal': 'True', 'isDefault': 'False', 'location': '/', 'portRangeStart': '5042', 'portRangeEnd': '5050'}]}";
+        final JsonObject jsonObject = JsonParser.parseString(Ecdar.preferences.get("backends", defaultBackendInstanceList)).getAsJsonObject();
+        final JsonArray backends = jsonObject.getAsJsonArray("backends");
+
+        backends.forEach((backend) -> {
+            BackendInstance newBackendInstance = new BackendInstance(backend.getAsJsonObject());
+            BackendInstancePresentation newBackendInstancePresentation = new BackendInstancePresentation(newBackendInstance);
+            addBackendInstancePresentationToList(newBackendInstancePresentation);
+        });
+
         HBox.setHgrow(addBackendButton, Priority.ALWAYS);
         addBackendButton.setMaxWidth(Double.MAX_VALUE);
         addBackendButton.setOnMouseClicked((event) -> {
-            BackendInstancePresentation newBackendInstance = new BackendInstancePresentation();
-
-            backendInstanceList.getChildren().add(newBackendInstance);
-            newBackendInstance.getController().moveBackendInstanceUpRippler.setOnMouseClicked((mouseEvent) -> moveBackendInstance(newBackendInstance, -1));
-            newBackendInstance.getController().moveBackendInstanceDownRippler.setOnMouseClicked((mouseEvent) -> moveBackendInstance(newBackendInstance, +1));
-            newBackendInstance.getController().removeBackendRippler.setOnMouseClicked((mouseEvent) -> backendInstanceList.getChildren().remove(newBackendInstance));
-            newBackendInstance.getController().defaultBackendRadioButton.setToggleGroup(defaultBackendToggleGroup);
+            BackendInstancePresentation newBackendInstancePresentation = new BackendInstancePresentation();
+            addBackendInstancePresentationToList(newBackendInstancePresentation);
         });
+    }
+
+    private void addBackendInstancePresentationToList(BackendInstancePresentation newBackendInstancePresentation) {
+        backendInstanceList.getChildren().add(newBackendInstancePresentation);
+        newBackendInstancePresentation.getController().moveBackendInstanceUpRippler.setOnMouseClicked((mouseEvent) -> moveBackendInstance(newBackendInstancePresentation, -1));
+        newBackendInstancePresentation.getController().moveBackendInstanceDownRippler.setOnMouseClicked((mouseEvent) -> moveBackendInstance(newBackendInstancePresentation, +1));
+        newBackendInstancePresentation.getController().removeBackendRippler.setOnMouseClicked((mouseEvent) -> backendInstanceList.getChildren().remove(newBackendInstancePresentation));
+        newBackendInstancePresentation.getController().defaultBackendRadioButton.setToggleGroup(defaultBackendToggleGroup);
     }
 
     private void moveBackendInstance(BackendInstancePresentation newBackendInstance, int i) {

@@ -20,7 +20,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class BackendInstanceController implements Initializable {
-    private BackendInstance backendInstance = null;
+    private BackendInstance backendInstance = new BackendInstance();
 
     public JFXTextField backendName;
     public FontIcon expansionIcon;
@@ -50,6 +50,17 @@ public class BackendInstanceController implements Initializable {
 
     public void setBackendInstance(BackendInstance instance) {
         this.backendInstance = instance;
+    }
+
+    public BackendInstance updateBackendInstance() {
+        backendInstance.setName(backendName.getText());
+        backendInstance.setLocal(isLocal.isSelected());
+        backendInstance.setDefault(defaultBackendRadioButton.isSelected());
+        backendInstance.setBackendLocation(isLocal.isSelected() ? pathToBackend.getText() : address.getText());
+        backendInstance.setPortStart(Integer.parseInt(portRangeStart.getText()));
+        backendInstance.setPortEnd(Integer.parseInt(portRangeEnd.getText()));
+
+        return backendInstance;
     }
 
     private void setHGrow() {

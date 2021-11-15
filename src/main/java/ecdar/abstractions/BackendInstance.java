@@ -18,6 +18,12 @@ public class BackendInstance implements Serializable {
     private int portStart;
     private int portEnd;
 
+    public BackendInstance() {};
+
+    public BackendInstance(final JsonObject jsonObject) {
+        deserialize(jsonObject);
+    };
+
     public String getName() {
         return name;
     }
@@ -64,6 +70,10 @@ public class BackendInstance implements Serializable {
 
     public void setPortEnd(int portEnd) {
         this.portEnd = portEnd;
+    }
+
+    public int getNumberOfInstances() {
+        return this.portEnd - this.portStart;
     }
 
     @Override

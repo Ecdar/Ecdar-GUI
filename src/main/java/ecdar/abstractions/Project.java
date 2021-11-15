@@ -221,7 +221,7 @@ public class Project {
                 final String fileContent = Files.toString(file, Charset.defaultCharset());
 
                 // Parse the file to an json object
-                final JsonObject jsonObject = new JsonParser().parse(fileContent).getAsJsonObject();
+                final JsonObject jsonObject = JsonParser.parseString(fileContent).getAsJsonObject();
 
                 // Fetch the name of the component
                 final String componentName = jsonObject.get("name").getAsString();
@@ -261,7 +261,7 @@ public class Project {
             // If JSON file
             if (file.getName().endsWith(JSON_FILENAME_EXTENSION)) {
                 final String fileContent = Files.toString(file, Charset.defaultCharset());
-                final JsonObject json = new JsonParser().parse(fileContent).getAsJsonObject();
+                final JsonObject json = JsonParser.parseString(fileContent).getAsJsonObject();
                 final String name = json.get("name").getAsString();
                 nameJsonMap.put(name, json);
             }
