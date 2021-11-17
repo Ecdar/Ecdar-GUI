@@ -78,12 +78,12 @@
                 </JFXRippler>
             </HBox>
             <StackPane AnchorPane.leftAnchor="144" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0">
-                <JFXRippler id="swapBackendButton">
+                <!--<JFXRippler id="swapBackendButton">
                     <VBox alignment="CENTER" minWidth="40" minHeight="40">
                         <FontIcon iconLiteral="gmi-swap-horiz" iconSize="18"/>
                         <Label id="currentBackendLabel"/>
                     </VBox>
-                </JFXRippler>
+                </JFXRippler>-->
             </StackPane>
         </VBox>
     </StackPane>

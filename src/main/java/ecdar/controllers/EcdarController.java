@@ -222,7 +222,7 @@ public class EcdarController implements Initializable {
     private void initializeBackendInstanceList() {
         initializeDialog(backendOptionsDialog, backendOptionsDialogContainer);
 
-        String defaultBackendInstanceList = "{'backends': [{'name': 'Reveaal', 'isLocal': 'true', 'isDefault': 'true', 'location': '/', 'portRangeStart': '5032', 'portRangeEnd': '5040'},{'name': 'jECDAR', 'isLocal': 'True', 'isDefault': 'False', 'location': '/', 'portRangeStart': '5042', 'portRangeEnd': '5050'}]}";
+        String defaultBackendInstanceList = "{'backends': [{'name': 'Reveaal', 'isLocal': 'true', 'isDefault': 'true', 'location': 'src/Reveaal', 'portRangeStart': '5032', 'portRangeEnd': '5040'},{'name': 'jECDAR', 'isLocal': 'True', 'isDefault': 'False', 'location': 'src/libs/j-Ecdar.jar', 'portRangeStart': '5042', 'portRangeEnd': '5050'}]}";
         final JsonObject jsonObject = JsonParser.parseString(Ecdar.preferences.get("backends", defaultBackendInstanceList)).getAsJsonObject();
         final JsonArray backends = jsonObject.getAsJsonArray("backends");
 
@@ -1430,19 +1430,7 @@ public class EcdarController implements Initializable {
 
     @FXML
     private void saveChangesToBackendOptions() {
-        /*portRangeStart.focusedProperty().addListener((observable, oldValue, newValue) -> {
-            if (oldValue && !newValue) {
-                int newIntValue = (int) Math.round(menuBarOptionsNumberOfSocketsSlider.getValue());
-                Ecdar.getBackendDriver().setMaxNumberOfSockets(newIntValue);
-                Ecdar.preferences.put("number_of_backend_sockets", Integer.toString(newIntValue));
-            }
-        });
-
-        BackendHelper.defaultBackend = (BackendHelper.defaultBackend.equals(BackendHelper.BackendNames.jEcdar)
-                ? BackendHelper.BackendNames.Reveaal
-                : BackendHelper.BackendNames.jEcdar);
-        Ecdar.preferences.put("default_backend", Integer.toString(BackendHelper.defaultBackend.ordinal()));
-*/
+        Ecdar.preferences.put("default_backend", BackendHelper.getDefaultBackend().getName());
         this.closeBackendDialog();
     }
 

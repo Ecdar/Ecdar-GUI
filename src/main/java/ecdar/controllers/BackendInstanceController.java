@@ -13,6 +13,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.File;
@@ -48,8 +49,26 @@ public class BackendInstanceController implements Initializable {
         });
     }
 
+    /***
+     * Sets the BackendInstance object and overrides the current settings shown in the GUI
+     * @param instance the new BackendInstance
+     */
     public void setBackendInstance(BackendInstance instance) {
         this.backendInstance = instance;
+
+        this.backendName.setText(instance.getName());
+        this.isLocal.setSelected(instance.isLocal());
+        this.defaultBackendRadioButton.setSelected(instance.isDefault());
+
+        // Check if the path or the address should be used
+        if (isLocal.isSelected()) {
+            this.pathToBackend.setText(instance.getBackendLocation());
+        } else {
+            this.address.setText(instance.getBackendLocation());
+        }
+
+        this.portRangeStart.setText(String.valueOf(instance.getPortStart()));
+        this.portRangeEnd.setText(String.valueOf(instance.getPortEnd()));
     }
 
     public BackendInstance updateBackendInstance() {
@@ -114,19 +133,19 @@ public class BackendInstanceController implements Initializable {
     @FXML
     private void openPathToBackendDialog() {
         // Dialog title
-        final DirectoryChooser backendPicker = new DirectoryChooser();
+        final FileChooser backendPicker = new FileChooser();
         backendPicker.setTitle("Choose backend");
 
         // The initial location for the file choosing dialog
         final File jarDir = new File(pathToBackend.getText()).getAbsoluteFile().getParentFile();
 
-        // If the file does not exist, we must be running it from a development environment, use an default location
+        // If the file does not exist, we must be running it from a development environment, use a default location
         if(jarDir.exists()) {
             backendPicker.setInitialDirectory(jarDir);
         }
 
         // Prompt the user to find a file (will halt the UI thread)
-        final File file = backendPicker.showDialog(null);
+        final File file = backendPicker.showOpenDialog(null);
         if(file != null) {
             pathToBackend.setText(file.getAbsolutePath());
         }

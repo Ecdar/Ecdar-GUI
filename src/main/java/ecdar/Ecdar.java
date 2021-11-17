@@ -45,7 +45,7 @@ public class Ecdar extends Application {
     public static SimpleStringProperty projectDirectory = new SimpleStringProperty();
     private static BooleanProperty isUICached = new SimpleBooleanProperty();
     private static final BooleanProperty isSplit = new SimpleBooleanProperty(true); //Set to true to ensure correct behaviour at first toggle.
-    private static BackendDriver backendDriver;
+    private static final BackendDriver backendDriver = new BackendDriver();
     private Stage debugStage;
 
     /**
@@ -159,7 +159,7 @@ public class Ecdar extends Application {
         // Load the fonts required for the project
         IconFontFX.register(GoogleMaterialDesignIcons.getIconFont());
         loadFonts();
-        loadPreferences();
+        loadBackends();
 
         // Remove the classic decoration
         // kyrke - 2020-04-17: Disabled due to bug https://bugs.openjdk.java.net/browse/JDK-8154847
@@ -250,7 +250,7 @@ public class Ecdar extends Application {
             BackendHelper.stopQueries();
 
             try {
-                backendDriver.closeAllSockets();
+                backendDriver.closeAllBackendConnection();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -279,14 +279,8 @@ public class Ecdar extends Application {
 //        }
     }
 
-    private void loadPreferences() {
-        BackendHelper.defaultBackend = preferences.getInt("default_backend", BackendHelper.BackendNames.jEcdar.ordinal())
-                == BackendHelper.BackendNames.jEcdar.ordinal()
-                ? BackendHelper.BackendNames.jEcdar
-                : BackendHelper.BackendNames.Reveaal;
-
-        backendDriver = new BackendDriver(preferences.get("backend_host_address", "127.0.0.1"));
-        getBackendDriver().setMaxNumberOfSockets(preferences.getInt("number_of_backend_sockets", 5));
+    private void loadBackends() {
+        // ToDo NIELS: Load backends
     }
 
     /**

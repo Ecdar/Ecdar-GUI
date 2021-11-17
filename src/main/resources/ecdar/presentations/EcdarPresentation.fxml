@@ -566,7 +566,7 @@
                     <Text styleClass="headline">Backends</Text>
                     <Region prefHeight="10"/>
                     <ScrollPane styleClass="backend-instances-list" style="-fx-font-size:13px;-fx-background-color:transparent;" hbarPolicy="NEVER" fitToWidth="true" fitToHeight="true" maxHeight="600">
-                        <VBox fx:id="backendInstanceList" prefWidth="400" spacing="5"/>
+                        <VBox fx:id="backendInstanceList" prefWidth="600" spacing="5"/>
                     </ScrollPane>
                     <JFXRippler fx:id="addBackendButton" alignment="CENTER_RIGHT">
                         <StackPane minWidth="300" minHeight="40"

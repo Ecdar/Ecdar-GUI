@@ -2,10 +2,7 @@ package ecdar.backend;
 
 import com.uppaal.model.core2.Document;
 import ecdar.Ecdar;
-import ecdar.abstractions.Component;
-import ecdar.abstractions.Location;
-import ecdar.abstractions.Project;
-import ecdar.abstractions.Query;
+import ecdar.abstractions.*;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -17,11 +14,13 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public final class BackendHelper {
     final static String TEMP_DIRECTORY = "temporary";
     private static EcdarDocument ecdarDocument;
-    public static BackendHelper.BackendNames defaultBackend = BackendHelper.BackendNames.jEcdar;
+    public static BackendInstance defaultBackend = null;
+    private static List<BackendInstance> backendInstances = new ArrayList<>();
 
     public static String storeBackendModel(Project project, String fileName) throws BackendException, IOException, URISyntaxException {
         return storeBackendModel(project, TEMP_DIRECTORY, fileName);
@@ -81,8 +80,8 @@ public final class BackendHelper {
      * @param backend the name of the backend to check
      * @return true if the backend supports ignored inputs and outputs, else false
      */
-    public static Boolean backendSupportsInputOutputs(BackendHelper.BackendNames backend) {
-        return backend == BackendHelper.BackendNames.Reveaal;
+    public static Boolean backendSupportsInputOutputs(BackendInstance backend) {
+        return true;
     }
 
     /**
@@ -140,15 +139,24 @@ public final class BackendHelper {
         return "E<> (" + String.join(" || ", locationNames) + ") && deadlock";
     }
 
-    /**
-     * Enum for the available backends. Used for saving and loading the queries.
-     */
-    public enum BackendNames {
-        jEcdar, Reveaal;
+    public static BackendInstance getBackendInstanceByName(String backendInstanceName) {
+        Optional<BackendInstance> backendInstance = backendInstances.stream().filter(bi -> bi.getName().equals(backendInstanceName)).findFirst();
+        return backendInstance.orElse(null);
+    }
 
-        @Override
-        public String toString() {
-            return this.ordinal() == 0 ? "jEcdar" : "Reveaal";
-        }
+    public static BackendInstance getDefaultBackend() {
+        return defaultBackend;
+    }
+
+    public static void setBackendInstances(List<BackendInstance> backendInstances) {
+        BackendHelper.backendInstances = backendInstances;
+    }
+
+    public static List<BackendInstance> getBackendInstances() {
+        return backendInstances;
+    }
+
+    public static void setDefaultBackendInstance(BackendInstance newDefaultBackend) {
+        defaultBackend = newDefaultBackend;
     }
 }

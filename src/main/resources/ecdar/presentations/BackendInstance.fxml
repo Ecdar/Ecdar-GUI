@@ -56,11 +56,11 @@
                     <HBox spacing="15" alignment="CENTER_LEFT">
                         <HBox fx:id="addressSection" spacing="10" alignment="CENTER_LEFT">
                             <Text styleClass="subhead">Address: </Text>
-                            <JFXTextField fx:id="address" promptText="xxx.xxx.xxx.xxx" alignment="CENTER"/>
+                            <JFXTextField fx:id="address" promptText="xxx.xxx.xxx.xxx"/>
                         </HBox>
                         <HBox fx:id="pathToBackendSection" spacing="10" alignment="CENTER_LEFT">
                             <Text styleClass="subhead">Path: </Text>
-                            <JFXTextField fx:id="pathToBackend" promptText="Absolute path" alignment="CENTER"/>
+                            <JFXTextField fx:id="pathToBackend" promptText="Absolute path"/>
                             <JFXRippler fx:id="pickPathToBackend">
                                 <StackPane minWidth="20" minHeight="20"
                                            onMouseClicked="#openPathToBackendDialog"
