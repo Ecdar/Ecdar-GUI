@@ -129,29 +129,29 @@ public class EcdarSimulatorOverviewController implements Initializable {
      * ToDo NIELS: Fix below
      */
     private void initializeSimulationVariables() {
-//        Ecdar.getSimulationHandler().getSimulationVariables().addListener((InvalidationListener) obs -> {
-//            Ecdar.getSimulationHandler().getSimulationVariables().forEach((s, bigDecimal) -> {
-//                if (!s.equals("t(0)")) {// As t(0) does not belong to any process
-//                    final String[] spittedString = s.split("\\.");
-//                    // If the process containing the var is not there we just skip it
-//                    if (spittedString.length > 0 && processPresentations.size() > 0) {
-//                        processPresentations.get(spittedString[0]).getController().getVariables().put(spittedString[1], bigDecimal);
-//                    }
-//                }
-//            });
-//        });
-//        Ecdar.getSimulationHandler().getSimulationClocks().addListener((InvalidationListener) obs -> {
-//            if(processPresentations.size() == 0) return;
-//            Ecdar.getSimulationHandler().getSimulationClocks().forEach((s, bigDecimal) -> {
-//                if (!s.equals("t(0)")) {// As t(0) does not belong to any process
-//                    final String[] spittedString = s.split("\\.");
-//                    // If the process containing the clock is not there we just skip it
-//                    if (spittedString.length > 0 && processPresentations.size() > 0) {
-//                        processPresentations.get(spittedString[0]).getController().getClocks().put(spittedString[1], bigDecimal);
-//                    }
-//                }
-//            });
-//        });
+        Ecdar.getSimulationHandler().getSimulationVariables().addListener((InvalidationListener) obs -> {
+            Ecdar.getSimulationHandler().getSimulationVariables().forEach((s, bigDecimal) -> {
+                if (!s.equals("t(0)")) {// As t(0) does not belong to any process
+                    final String[] spittedString = s.split("\\.");
+                    // If the process containing the var is not there we just skip it
+                    if (spittedString.length > 0 && processPresentations.size() > 0) {
+                        processPresentations.get(spittedString[0]).getController().getVariables().put(spittedString[1], bigDecimal);
+                    }
+                }
+            });
+        });
+        Ecdar.getSimulationHandler().getSimulationClocks().addListener((InvalidationListener) obs -> {
+            if(processPresentations.size() == 0) return;
+            Ecdar.getSimulationHandler().getSimulationClocks().forEach((s, bigDecimal) -> {
+                if (!s.equals("t(0)")) {// As t(0) does not belong to any process
+                    final String[] spittedString = s.split("\\.");
+                    // If the process containing the clock is not there we just skip it
+                    if (spittedString.length > 0 && processPresentations.size() > 0) {
+                        processPresentations.get(spittedString[0]).getController().getClocks().put(spittedString[1], bigDecimal);
+                    }
+                }
+            });
+        });
     }
 
     /**

@@ -12,6 +12,7 @@ import ecdar.Ecdar;
 import ecdar.abstractions.Edge;
 import ecdar.backend.BackendException;
 import ecdar.backend.BackendHelper;
+import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -86,5 +87,13 @@ public class EcdarSimulationHandler {
      */
     public EcdarSystemState getCurrentState() {
         return currentState;
+    }
+
+    public ObservableMap<String, BigDecimal> getSimulationVariables() {
+        return simulationVariables;
+    }
+
+    public ObservableMap<String, BigDecimal> getSimulationClocks() {
+        return simulationClocks;
     }
 }
