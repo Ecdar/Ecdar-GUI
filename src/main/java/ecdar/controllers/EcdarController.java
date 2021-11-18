@@ -862,6 +862,7 @@ public class EcdarController implements Initializable {
 
         // Update the startIndex for the next canvasShellPresentation
         for (int i = 0; i < numComponents; i++) {
+
             if (canvasShellPresentation.getController().canvasPresentation.getController().getActiveModel() != null && canvasShellPresentation.getController().canvasPresentation.getController().getActiveModel().equals(components.get(i))) {
                 currentCompNum = i + 1;
             }

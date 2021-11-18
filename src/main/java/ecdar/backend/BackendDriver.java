@@ -103,7 +103,7 @@ public class BackendDriver {
     }
 
     private void executeQuery(ExecutableQuery executableQuery) {
-        if(executableQuery.queryListener.getQuery().getQueryState() == QueryState.UNKNOWN) return;
+        if (executableQuery.queryListener.getQuery().getQueryState() == QueryState.UNKNOWN) return;
 
         if (executableQuery.backend.equals(BackendHelper.BackendNames.jEcdar)) {
             jEcdarThread jECDARBackendThread = new jEcdarThread(executableQuery.query, executableQuery.success, executableQuery.failure, executableQuery.queryListener);
@@ -148,13 +148,13 @@ public class BackendDriver {
 
             @Override
             public void onNext(Empty value) {
-                System.out.println("Response to Connection!");
             }
 
             @Override
             public void onError(Throwable t) {
-                if(executableQuery.queryListener.getQuery().getQueryState() == QueryState.UNKNOWN) backendConnection.setExecutableQuery(null);
-                else {
+                if (executableQuery.queryListener.getQuery().getQueryState() == QueryState.UNKNOWN) {
+                    backendConnection.setExecutableQuery(null);
+                } else {
                     handleBackendError(t, backendConnection);
                     error = true;
                 }
@@ -166,7 +166,7 @@ public class BackendDriver {
                     StreamObserver<EcdarProtoBuf.QueryProtos.QueryResponse> responseObserver = new StreamObserver<>() {
                         @Override
                         public void onNext(QueryProtos.QueryResponse value) {
-                            if(executableQuery.queryListener.getQuery().getQueryState() == QueryState.UNKNOWN) {
+                            if (executableQuery.queryListener.getQuery().getQueryState() == QueryState.UNKNOWN) {
                                 backendConnection.setExecutableQuery(null);
                                 return;
                             }
@@ -257,7 +257,20 @@ public class BackendDriver {
     }
 
     private void handleResponse(ExecutableQuery executableQuery, QueryProtos.QueryResponse value) {
+        System.out.println("Handle response");
         if (value.hasRefinement() && value.getRefinement().getSuccess()) {
+            executableQuery.queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
+            executableQuery.success.accept(true);
+        } else if (value.hasConsistency() && value.getConsistency().getSuccess()) {
+            System.out.println("Consistency");
+            executableQuery.queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
+            executableQuery.success.accept(true);
+        } else if (value.hasDeterminism() && value.getDeterminism().getSuccess()) {
+            System.out.println("Determinism");
+            executableQuery.queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
+            executableQuery.success.accept(true);
+        } else if (value.hasComponent()) {
+            System.out.println("Component");
             executableQuery.queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
             executableQuery.success.accept(true);
         } else {
@@ -280,7 +293,7 @@ public class BackendDriver {
                     } else {
                         pb = new ProcessBuilder("src/Reveaal", "-p", this.hostAddress + ":" + portNumber).redirectErrorStream(true);
                     }
-                    
+
                     p = pb.start();
                     // If the process is not alive, it failed while starting up, try again
                 } while (!p.isAlive());
@@ -293,19 +306,16 @@ public class BackendDriver {
                         .build();
 
                 EcdarBackendGrpc.EcdarBackendStub stub = EcdarBackendGrpc.newStub(channel);
-
                 BackendConnection newConnection = new BackendConnection(p, stub);
                 backendConnections.add(newConnection);
                 numberOfSockets.getKey().getAndIncrement();
 
                 return newConnection;
-
             } catch (IOException e) {
                 e.printStackTrace();
             }
         } else {
             System.out.println("Max number of sockets already reached");
-
         }
 
         return null;
@@ -362,7 +372,7 @@ public class BackendDriver {
 //            if (jEcdarConnections.remove(this)) {
 //                numberOfJEcdarConnections.getKey().getAndDecrement();
             /*} else */
-            if(reveaalConnections.remove(this)) {
+            if (reveaalConnections.remove(this)) {
                 numberOfReveaalConnections.getKey().getAndDecrement();
             }
 
