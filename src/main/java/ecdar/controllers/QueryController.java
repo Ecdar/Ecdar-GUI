@@ -1,5 +1,6 @@
 package ecdar.controllers;
 
+import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXRippler;
 import ecdar.abstractions.Query;
 import ecdar.abstractions.QueryType;
@@ -20,9 +21,10 @@ public class QueryController implements Initializable {
     public JFXRippler actionButton;
     public JFXRippler queryTypeExpand;
     public Text queryTypeSymbol;
+    public JFXComboBox<String> backendsDropdown;
     private Query query;
     private final Map<QueryType, SimpleBooleanProperty> queryTypeListElementsSelectedState = new HashMap<>();
-    private final Tooltip noQueryTypeSatTooltip = new Tooltip("Please select a query type beneath the status icon");
+    private final Tooltip noQueryTypeSetTooltip = new Tooltip("Please select a query type beneath the status icon");
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -36,13 +38,13 @@ public class QueryController implements Initializable {
                 actionButton.setDisable(false);
                 ((FontIcon) actionButton.lookup("#actionButtonIcon")).setIconColor(Color.GREY.getColor(Color.Intensity.I900));
                 Platform.runLater(() -> {
-                    Tooltip.uninstall(actionButton.getParent(), noQueryTypeSatTooltip);
+                    Tooltip.uninstall(actionButton.getParent(), noQueryTypeSetTooltip);
                 });
             } else {
                 actionButton.setDisable(true);
                 ((FontIcon) actionButton.lookup("#actionButtonIcon")).setIconColor(Color.GREY.getColor(Color.Intensity.I500));
                 Platform.runLater(() -> {
-                    Tooltip.install(actionButton.getParent(), noQueryTypeSatTooltip);
+                    Tooltip.install(actionButton.getParent(), noQueryTypeSetTooltip);
                 });
             }
         }));
@@ -57,7 +59,7 @@ public class QueryController implements Initializable {
             if (query.getType() == null) {
                 actionButton.setDisable(true);
                 ((FontIcon) actionButton.lookup("#actionButtonIcon")).setIconColor(Color.GREY.getColor(Color.Intensity.I500));
-                Tooltip.install(actionButton.getParent(), noQueryTypeSatTooltip);
+                Tooltip.install(actionButton.getParent(), noQueryTypeSetTooltip);
             }
         });
     }

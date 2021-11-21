@@ -5,6 +5,7 @@ import com.jfoenix.controls.JFXRippler;
 import com.jfoenix.controls.JFXTextField;
 import ecdar.abstractions.BackendInstance;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Cursor;
@@ -13,6 +14,7 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import org.kordamp.ikonli.javafx.FontIcon;
@@ -28,6 +30,7 @@ public class BackendInstanceController implements Initializable {
     public Label backendNameIssue;
     public FontIcon expansionIcon;
     public JFXRippler removeBackendRippler;
+    public FontIcon removeBackendIcon;
     public StackPane content;
     public HBox addressSection;
     public JFXTextField address;
@@ -50,11 +53,13 @@ public class BackendInstanceController implements Initializable {
             setHGrow();
 
             // Prevent deletion of default backend instance
-            removeBackendRippler.setDisable(defaultBackendRadioButton.isSelected());
             defaultBackendRadioButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
-                removeBackendRippler.setDisable(newValue);
+                if (newValue) {
+                    removeBackendIcon.setFill(Color.GREY);
+                } else {
+                    removeBackendIcon.setFill(Color.BLACK);
+                }
             });
-            // ToDo NIELS: Visualize remove rippler disabled
         });
     }
 
@@ -81,6 +86,7 @@ public class BackendInstanceController implements Initializable {
     }
 
     public BackendInstance updateBackendInstance() {
+        System.out.println("Saving " + backendName.getText() + "...");
         backendInstance.setName(backendName.getText());
         backendInstance.setLocal(isLocal.isSelected());
         backendInstance.setDefault(defaultBackendRadioButton.isSelected());

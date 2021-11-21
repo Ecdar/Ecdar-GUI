@@ -10,6 +10,7 @@ import ecdar.utility.colors.Color;
 import javafx.application.Platform;
 import javafx.beans.binding.When;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleListProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
@@ -22,11 +23,9 @@ import javafx.scene.text.TextAlignment;
 import javafx.util.Pair;
 import org.kordamp.ikonli.javafx.FontIcon;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static javafx.scene.paint.Color.*;
 
@@ -48,8 +47,14 @@ public class QueryPresentation extends AnchorPane {
         initializeDetailsButton();
         initializeTextFields();
         initializeInputOutputPaneAndAddIgnoredInputOutputs();
-        // initializeSwapBackendButton();
+        initializeBackendsDropdown();
         initializeMoreInformationButtonAndQueryTypeSymbol();
+    }
+
+    private void initializeBackendsDropdown() {
+        SimpleListProperty<String> backendNames = new SimpleListProperty<>();
+        backendNames.addAll(BackendHelper.getBackendInstances().stream().map(BackendInstance::getName).collect(Collectors.toList()));
+        controller.backendsDropdown.setItems(backendNames);
     }
 
     private void initializeTextFields() {
@@ -317,32 +322,15 @@ public class QueryPresentation extends AnchorPane {
             });
         });
     }
-//
-//    private void initializeSwapBackendButton() {
-//        Platform.runLater(() -> {
-//            final JFXRippler swapBackendButton = (JFXRippler) lookup("#swapBackendButton");
-//            final TitledPane inputOutputPane = (TitledPane) lookup("#inputOutputPane");
-//            this.currentBackendLabel = (Label) lookup("#currentBackendLabel");
-//
-//            swapBackendButton.setCursor(Cursor.HAND);
-//            swapBackendButton.setRipplerFill(Color.GREY.getColor(Color.Intensity.I500));
-//            swapBackendButton.setMaskType(JFXRippler.RipplerMask.CIRCLE);
-//            swapBackendButton.setOnMousePressed(event -> {
-//                // Set the backend to the one not currently used and update GUI
-//                final BackendHelper.BackendNames newBackend = (this.controller.getQuery().getBackend().equals(BackendHelper.BackendNames.jEcdar)
-//                        ? BackendHelper.BackendNames.Reveaal
-//                        : BackendHelper.BackendNames.jEcdar);
-//
-//                this.controller.getQuery().setBackend(newBackend);
-//                setSwapBackendTooltipAndLabel(newBackend);
-//                updateTitlePaneVisibility(inputOutputPane, controller.getQuery().getQuery());
-//            });
-//
-//            swapBackendButtonTooltip = new Tooltip();
-//            setSwapBackendTooltipAndLabel(this.controller.getQuery().getBackend());
-//            JFXTooltip.install(swapBackendButton, swapBackendButtonTooltip);
-//        });
-//    }
+
+    private void initializeBackendDropdown() {
+        Platform.runLater(() -> {
+            this.currentBackendLabel = (Label) lookup("#currentBackendLabel");
+            swapBackendButtonTooltip = new Tooltip();
+            swapBackendButtonTooltip.setText("Current backend used for the query");
+            JFXTooltip.install(controller.backendsDropdown, swapBackendButtonTooltip);
+        });
+    }
 
     private void updateTitlePaneVisibility(TitledPane inputOutputPane, String queryString) {
         // Check if the query is a refinement and that the engine is set to Reveaal

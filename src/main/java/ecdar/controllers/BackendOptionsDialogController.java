@@ -4,20 +4,16 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.jfoenix.controls.JFXButton;
-import com.jfoenix.controls.JFXDialog;
 import com.jfoenix.controls.JFXRippler;
 import ecdar.Ecdar;
 import ecdar.abstractions.BackendInstance;
 import ecdar.backend.BackendHelper;
 import ecdar.presentations.BackendInstancePresentation;
-import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.ToggleGroup;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import org.apache.commons.lang3.Range;
 
@@ -28,6 +24,7 @@ import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 public class BackendOptionsDialogController implements Initializable {
@@ -48,14 +45,19 @@ public class BackendOptionsDialogController implements Initializable {
 
     private void initializeBackendInstanceList() {
         String defaultBackendInstanceList = "{'backends': [{'name': 'Reveaal', 'isLocal': 'true', 'isDefault': 'true', 'location': 'src/Reveaal', 'portRangeStart': '5032', 'portRangeEnd': '5040'},{'name': 'jECDAR', 'isLocal': 'True', 'isDefault': 'False', 'location': 'src/libs/j-Ecdar.jar', 'portRangeStart': '5042', 'portRangeEnd': '5050'}]}";
-        final JsonObject jsonObject = JsonParser.parseString(Ecdar.preferences.get("backends", defaultBackendInstanceList)).getAsJsonObject();
-        final JsonArray backends = jsonObject.getAsJsonArray("backends");
+        final JsonObject jsonObject = JsonParser.parseString(Ecdar.preferences.get("backend_instances", defaultBackendInstanceList)).getAsJsonObject();
+        final JsonArray backends = jsonObject.getAsJsonArray();
+
+        ArrayList<BackendInstance> backendInstances = new ArrayList<>();
 
         backends.forEach((backend) -> {
             BackendInstance newBackendInstance = new BackendInstance(backend.getAsJsonObject());
             BackendInstancePresentation newBackendInstancePresentation = new BackendInstancePresentation(newBackendInstance);
             addBackendInstancePresentationToList(newBackendInstancePresentation);
+            backendInstances.add(newBackendInstance);
         });
+
+        BackendHelper.setBackendInstances(backendInstances);
 
         HBox.setHgrow(addBackendButton, Priority.ALWAYS);
         addBackendButton.setMaxWidth(Double.MAX_VALUE);
@@ -69,7 +71,11 @@ public class BackendOptionsDialogController implements Initializable {
         backendInstanceList.getChildren().add(newBackendInstancePresentation);
         newBackendInstancePresentation.getController().moveBackendInstanceUpRippler.setOnMouseClicked((mouseEvent) -> moveBackendInstance(newBackendInstancePresentation, -1));
         newBackendInstancePresentation.getController().moveBackendInstanceDownRippler.setOnMouseClicked((mouseEvent) -> moveBackendInstance(newBackendInstancePresentation, +1));
-        newBackendInstancePresentation.getController().removeBackendRippler.setOnMouseClicked((mouseEvent) -> backendInstanceList.getChildren().remove(newBackendInstancePresentation));
+        newBackendInstancePresentation.getController().removeBackendRippler.setOnMouseClicked((mouseEvent) -> {
+            if (!newBackendInstancePresentation.getController().defaultBackendRadioButton.isSelected()) {
+                backendInstanceList.getChildren().remove(newBackendInstancePresentation);
+            }
+        });
         newBackendInstancePresentation.getController().defaultBackendRadioButton.setToggleGroup(defaultBackendToggleGroup);
     }
 
@@ -171,7 +177,26 @@ public class BackendOptionsDialogController implements Initializable {
      */
     public boolean saveChangesToBackendOptions() {
         if (this.backendInstaceListIsErrorFree()) {
-            Ecdar.preferences.put("default_backend", BackendHelper.getDefaultBackend().getName());
+            ArrayList<BackendInstance> backendInstances = new ArrayList<>();
+            for (Node backendInstance : backendInstanceList.getChildren()) {
+                if (backendInstance instanceof BackendInstancePresentation) {
+                    backendInstances.add(((BackendInstancePresentation) backendInstance).getController().updateBackendInstance());
+                }
+            }
+
+            BackendHelper.setBackendInstances(backendInstances);
+
+            JsonArray jsonArray = new JsonArray();
+            for (BackendInstance bi : backendInstances) {
+                jsonArray.add(bi.serialize());
+            }
+
+            Ecdar.preferences.put("backend_instances", jsonArray.getAsString());
+
+            // The is always a default backend set, so isPresent check is unnecessary
+            String defaultBackendName = (backendInstances.stream().filter(BackendInstance::isDefault).findFirst().get().getName());
+            Ecdar.preferences.put("default_backend", defaultBackendName);
+
             return true;
         } else {
             return false;

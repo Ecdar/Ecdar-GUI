@@ -37,7 +37,7 @@ public class Query implements Serializable {
         this.query.set(query);
         this.comment.set(comment);
         this.queryState.set(queryState);
-        setBackend(BackendHelper.defaultBackend);
+        setBackend(BackendHelper.getDefaultBackendInstance());
 
         initializeRunQuery();
     }
@@ -221,7 +221,7 @@ public class Query implements Serializable {
         if(json.has(BACKEND)) {
             setBackend(BackendHelper.getBackendInstanceByName(json.getAsJsonPrimitive(BACKEND).getAsString()));
         } else {
-            setBackend(BackendHelper.defaultBackend);
+            setBackend(BackendHelper.getDefaultBackendInstance());
         }
     }
 

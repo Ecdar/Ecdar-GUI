@@ -44,7 +44,7 @@
                 <JFXRippler fx:id="removeBackendRippler" alignment="CENTER_RIGHT">
                     <StackPane minWidth="40" minHeight="40"
                                StackPane.alignment="TOP_RIGHT">
-                        <FontIcon iconLiteral="gmi-delete" iconSize="20" fill="black"/>
+                        <FontIcon fx:id="removeBackendIcon" iconLiteral="gmi-delete" iconSize="20" fill="black"/>
                     </StackPane>
                 </JFXRippler>
             </HBox>

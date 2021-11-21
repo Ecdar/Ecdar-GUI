@@ -3,6 +3,8 @@ package ecdar.backend;
 import com.uppaal.model.core2.Document;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
+import javafx.beans.property.SimpleListProperty;
+import javafx.collections.ObservableList;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -19,8 +21,8 @@ import java.util.Optional;
 public final class BackendHelper {
     final static String TEMP_DIRECTORY = "temporary";
     private static EcdarDocument ecdarDocument;
-    public static BackendInstance defaultBackend = null;
-    private static List<BackendInstance> backendInstances = new ArrayList<>();
+    private static BackendInstance defaultBackend = null;
+    private static ObservableList<BackendInstance> backendInstances = new SimpleListProperty<>();
 
     public static String storeBackendModel(Project project, String fileName) throws BackendException, IOException, URISyntaxException {
         return storeBackendModel(project, TEMP_DIRECTORY, fileName);
@@ -144,15 +146,16 @@ public final class BackendHelper {
         return backendInstance.orElse(null);
     }
 
-    public static BackendInstance getDefaultBackend() {
+    public static BackendInstance getDefaultBackendInstance() {
         return defaultBackend;
     }
 
     public static void setBackendInstances(List<BackendInstance> backendInstances) {
-        BackendHelper.backendInstances = backendInstances;
+        BackendHelper.backendInstances = new SimpleListProperty<>();
+        BackendHelper.backendInstances.addAll(backendInstances);
     }
 
-    public static List<BackendInstance> getBackendInstances() {
+    public static ObservableList<BackendInstance> getBackendInstances() {
         return backendInstances;
     }
 
