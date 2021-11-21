@@ -8,6 +8,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Cursor;
+import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -24,6 +25,7 @@ public class BackendInstanceController implements Initializable {
     private BackendInstance backendInstance = new BackendInstance();
 
     public JFXTextField backendName;
+    public Label backendNameIssue;
     public FontIcon expansionIcon;
     public JFXRippler removeBackendRippler;
     public StackPane content;
@@ -46,6 +48,13 @@ public class BackendInstanceController implements Initializable {
             moveBackendInstanceUpRippler.setCursor(Cursor.HAND);
             moveBackendInstanceDownRippler.setCursor(Cursor.HAND);
             setHGrow();
+
+            // Prevent deletion of default backend instance
+            removeBackendRippler.setDisable(defaultBackendRadioButton.isSelected());
+            defaultBackendRadioButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
+                removeBackendRippler.setDisable(newValue);
+            });
+            // ToDo NIELS: Visualize remove rippler disabled
         });
     }
 

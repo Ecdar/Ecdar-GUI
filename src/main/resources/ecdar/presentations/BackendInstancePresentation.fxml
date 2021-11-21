@@ -7,6 +7,7 @@
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 <?import com.jfoenix.controls.JFXRippler?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="StackPane" fx:controller="ecdar.controllers.BackendInstanceController"
@@ -32,6 +33,7 @@
             </padding>
             <HBox alignment="CENTER_LEFT">
                 <JFXTextField fx:id="backendName" styleClass="subhead" promptText="Backend name">New backend</JFXTextField>
+                <Label fx:id="backendNameIssue" styleClass="input-violation, sub-caption" visible="false"/>
                 <JFXRippler alignment="CENTER_RIGHT">
                     <StackPane minWidth="40" minHeight="40"
                                onMouseClicked="#expansionClicked"

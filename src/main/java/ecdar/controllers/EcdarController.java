@@ -1,8 +1,5 @@
 package ecdar.controllers;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import ecdar.Debug;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
@@ -168,10 +165,7 @@ public class EcdarController implements Initializable {
     public Text queryTextQuery;
 
     public StackPane backendOptionsDialogContainer;
-    public JFXDialog backendOptionsDialog;
-    public VBox backendInstanceList;
-    public JFXRippler addBackendButton;
-    public ToggleGroup defaultBackendToggleGroup = new ToggleGroup();
+    public BackendOptionsDialogPresentation backendOptionsDialog;
 
     private static JFXDialog _queryDialog;
     private static Text _queryTextResult;
@@ -203,7 +197,6 @@ public class EcdarController implements Initializable {
         initializeMessages();
         initializeMenuBar();
         initializeReachabilityAnalysisThread();
-
     }
 
     private void initilizeDialogs() {
@@ -216,46 +209,20 @@ public class EcdarController implements Initializable {
         _queryTextQuery = queryTextQuery;
 
         initializeDialog(queryDialog, queryDialogContainer);
-        initializeBackendInstanceList();
-    }
-
-    private void initializeBackendInstanceList() {
         initializeDialog(backendOptionsDialog, backendOptionsDialogContainer);
 
-        String defaultBackendInstanceList = "{'backends': [{'name': 'Reveaal', 'isLocal': 'true', 'isDefault': 'true', 'location': 'src/Reveaal', 'portRangeStart': '5032', 'portRangeEnd': '5040'},{'name': 'jECDAR', 'isLocal': 'True', 'isDefault': 'False', 'location': 'src/libs/j-Ecdar.jar', 'portRangeStart': '5042', 'portRangeEnd': '5050'}]}";
-        final JsonObject jsonObject = JsonParser.parseString(Ecdar.preferences.get("backends", defaultBackendInstanceList)).getAsJsonObject();
-        final JsonArray backends = jsonObject.getAsJsonArray("backends");
-
-        backends.forEach((backend) -> {
-            BackendInstance newBackendInstance = new BackendInstance(backend.getAsJsonObject());
-            BackendInstancePresentation newBackendInstancePresentation = new BackendInstancePresentation(newBackendInstance);
-            addBackendInstancePresentationToList(newBackendInstancePresentation);
+        backendOptionsDialog.getController().closeButton.setOnMouseClicked(event -> {
+            backendOptionsDialog.getController().resetBackendOptions();
+            dialog.close();
+            backendOptionsDialog.close();
         });
 
-        HBox.setHgrow(addBackendButton, Priority.ALWAYS);
-        addBackendButton.setMaxWidth(Double.MAX_VALUE);
-        addBackendButton.setOnMouseClicked((event) -> {
-            BackendInstancePresentation newBackendInstancePresentation = new BackendInstancePresentation();
-            addBackendInstancePresentationToList(newBackendInstancePresentation);
+        backendOptionsDialog.getController().saveButton.setOnMouseClicked(event -> {
+            if (backendOptionsDialog.getController().saveChangesToBackendOptions()) {
+                dialog.close();
+                backendOptionsDialog.close();
+            }
         });
-    }
-
-    private void addBackendInstancePresentationToList(BackendInstancePresentation newBackendInstancePresentation) {
-        backendInstanceList.getChildren().add(newBackendInstancePresentation);
-        newBackendInstancePresentation.getController().moveBackendInstanceUpRippler.setOnMouseClicked((mouseEvent) -> moveBackendInstance(newBackendInstancePresentation, -1));
-        newBackendInstancePresentation.getController().moveBackendInstanceDownRippler.setOnMouseClicked((mouseEvent) -> moveBackendInstance(newBackendInstancePresentation, +1));
-        newBackendInstancePresentation.getController().removeBackendRippler.setOnMouseClicked((mouseEvent) -> backendInstanceList.getChildren().remove(newBackendInstancePresentation));
-        newBackendInstancePresentation.getController().defaultBackendRadioButton.setToggleGroup(defaultBackendToggleGroup);
-    }
-
-    private void moveBackendInstance(BackendInstancePresentation newBackendInstance, int i) {
-        int currentIndex = backendInstanceList.getChildren().indexOf(newBackendInstance);
-        // Math.max added to avoid index -1
-        int newIndex = Math.max(0, (currentIndex + i) % backendInstanceList.getChildren().size());
-        // ToDo NIELS: Prevent loop around for overflow or add for underflow
-
-        backendInstanceList.getChildren().remove(newBackendInstance);
-        backendInstanceList.getChildren().add(newIndex, newBackendInstance);
     }
 
     private void initializeDialog(JFXDialog dialog, StackPane dialogContainer) {
@@ -274,11 +241,11 @@ public class EcdarController implements Initializable {
 
     /**
      * Initializes the keybinding for:
-     *  - New component
-     *  - Nudging with arrow keys
-     *  - Nudging with WASD
-     *  - Deletion
-     *  - Colors
+     * - New component
+     * - Nudging with arrow keys
+     * - Nudging with WASD
+     * - Deletion
+     * - Colors
      */
     private void initializeKeybindings() {
         //Press ctrl+N or cmd+N to create a new component. The canvas changes to this new component
@@ -345,12 +312,12 @@ public class EcdarController implements Initializable {
 
     /**
      * Handles the change of color on selected objects
-     * @param enabledColor The new color for the selected objects
+     *
+     * @param enabledColor  The new color for the selected objects
      * @param previousColor The color old color of the selected objects
      */
     public void changeColorOnSelectedElements(final EnabledColor enabledColor,
-                                              final List<Pair<SelectHelper.ItemSelectable, EnabledColor>> previousColor)
-    {
+                                              final List<Pair<SelectHelper.ItemSelectable, EnabledColor>> previousColor) {
         UndoRedoStack.pushAndPerform(() -> { // Perform
             SelectHelper.getSelectedElements()
                     .forEach(selectable -> selectable.color(enabledColor.color, enabledColor.intensity));
@@ -490,7 +457,7 @@ public class EcdarController implements Initializable {
             public void onChanged(final Change<? extends Thread> c) {
                 while (c.next()) {
                     Platform.runLater(() -> {
-                        if(Debug.backgroundThreads.size() == 0) {
+                        if (Debug.backgroundThreads.size() == 0) {
                             queryStatusContainer.setOpacity(0);
                         } else {
                             queryStatusContainer.setOpacity(1);
@@ -564,8 +531,9 @@ public class EcdarController implements Initializable {
         });
 
         menuBarOptionsBackendOptions.setOnAction(event -> {
-                backendOptionsDialogContainer.setVisible(true);
-                backendOptionsDialog.show(backendOptionsDialogContainer);
+            backendOptionsDialogContainer.setVisible(true);
+            backendOptionsDialog.show(backendOptionsDialogContainer);
+            backendOptionsDialog.setMouseTransparent(false);
         });
     }
 
@@ -631,7 +599,7 @@ public class EcdarController implements Initializable {
         menuBarViewCanvasSplit.getGraphic().setOpacity(1);
         menuBarViewCanvasSplit.setOnAction(event -> {
             final BooleanProperty isSplit = Ecdar.toggleCanvasSplit();
-            if(isSplit.get()) {
+            if (isSplit.get()) {
                 setCanvasModeToSingular();
                 menuBarViewCanvasSplit.setText("Split canvas");
             } else {
@@ -655,13 +623,13 @@ public class EcdarController implements Initializable {
             final File jarDir = new File(System.getProperty("java.class.path")).getAbsoluteFile().getParentFile();
 
             // If the file does not exist, we must be running it from a development environment, use default location
-            if(jarDir.exists()) {
+            if (jarDir.exists()) {
                 projectPicker.setInitialDirectory(jarDir);
             }
 
             // Prompt the user to find a file (will halt the UI thread)
             final File file = projectPicker.showDialog(root.getScene().getWindow());
-            if(file != null) {
+            if (file != null) {
                 try {
                     Ecdar.projectDirectory.set(file.getAbsolutePath());
                     Ecdar.initializeProjectFolder();
@@ -706,6 +674,7 @@ public class EcdarController implements Initializable {
 
     /**
      * Save project at a given directory.
+     *
      * @param directory directory to save at
      */
     private static void save(final File directory) {
@@ -818,7 +787,7 @@ public class EcdarController implements Initializable {
             final ComponentPresentation presentation = canvas.getController().getActiveComponentPresentation();
 
             //If there is no active component
-            if (presentation == null){
+            if (presentation == null) {
                 Ecdar.showToast("No component to export.");
                 return;
             }
@@ -843,7 +812,7 @@ public class EcdarController implements Initializable {
 
         CanvasShellPresentation canvasShellPresentation = new CanvasShellPresentation();
         HighLevelModelObject model = activeCanvasPresentation.get().getController().getActiveModel();
-        if(model != null) {
+        if (model != null) {
             canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(activeCanvasPresentation.get().getController().getActiveModel());
         } else {
             canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(Ecdar.getProject().getComponents().get(0));
@@ -928,6 +897,7 @@ public class EcdarController implements Initializable {
 
     /**
      * Initialize a new CanvasShellPresentation and set its active component to the next component encountered from the startIndex and return it
+     *
      * @param components the list of components for assigning active component of the CanvasPresentation
      * @param startIndex the index to start at when trying to find the component to set as active
      * @return new CanvasShellPresentation
@@ -937,8 +907,8 @@ public class EcdarController implements Initializable {
 
         int numComponents = components.size();
         canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(null);
-        for(int currentCompNum = startIndex; currentCompNum < numComponents; currentCompNum++){
-            if(getActiveCanvasPresentation().getController().getActiveModel() != components.get(currentCompNum)) {
+        for (int currentCompNum = startIndex; currentCompNum < numComponents; currentCompNum++) {
+            if (getActiveCanvasPresentation().getController().getActiveModel() != components.get(currentCompNum)) {
                 canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(components.get(currentCompNum));
                 break;
             }
@@ -949,6 +919,7 @@ public class EcdarController implements Initializable {
 
     /**
      * Initialize a new CanvasShellPresentation and return it
+     *
      * @return new CanvasShellPresentation
      */
     private CanvasShellPresentation initializeNewCanvasShellPresentation() {
@@ -960,6 +931,7 @@ public class EcdarController implements Initializable {
     /**
      * Take a snapshot with the grid hidden.
      * The grid is put into its original state afterwards.
+     *
      * @return the snapshot
      */
     private WritableImage takeSnapshot(CanvasPresentation canvas) {
@@ -975,6 +947,7 @@ public class EcdarController implements Initializable {
     /**
      * Zooms in times 4 to get a higher resolution.
      * Then take snapshot and zoom to times 1 again.
+     *
      * @return the snapshot
      */
     private WritableImage scaleAndTakeSnapshot(CanvasPresentation canvas) {
@@ -990,6 +963,7 @@ public class EcdarController implements Initializable {
 
     /**
      * Crops and exports an image.
+     *
      * @param image the image
      */
     private void CropAndExportImage(final WritableImage image) {
@@ -1015,12 +989,12 @@ public class EcdarController implements Initializable {
         }
 
         final File file = filePicker.showSaveDialog(root.getScene().getWindow());
-        if (file != null){
+        if (file != null) {
             try {
                 ImageIO.write(finalImage, "png", file);
                 Ecdar.showToast("Export succeeded.");
             } catch (final IOException e) {
-                Ecdar.showToast("Export failed. "+ e.getMessage());
+                Ecdar.showToast("Export failed. " + e.getMessage());
             }
         } else {
             Ecdar.showToast("Export was cancelled.");
@@ -1029,6 +1003,7 @@ public class EcdarController implements Initializable {
 
     /**
      * Crops an image so that the all-white borders are removed.
+     *
      * @param image the original image
      * @return the cropped image
      */
@@ -1044,6 +1019,7 @@ public class EcdarController implements Initializable {
 
     /**
      * Gets the top y coordinate of an auto cropped image.
+     *
      * @param image the original image
      * @return the y coordinate
      */
@@ -1061,6 +1037,7 @@ public class EcdarController implements Initializable {
 
     /**
      * Gets the left x coordinate of an auto cropped image.
+     *
      * @param image the original image
      * @return the x coordinate
      */
@@ -1078,6 +1055,7 @@ public class EcdarController implements Initializable {
 
     /**
      * Gets the bottom y coordinate of an auto cropped image.
+     *
      * @param image the original image
      * @return the y coordinate
      */
@@ -1095,6 +1073,7 @@ public class EcdarController implements Initializable {
 
     /**
      * Gets the right x coordinate of an auto cropped image.
+     *
      * @param image the original image
      * @return the x coordinate
      */
@@ -1291,11 +1270,12 @@ public class EcdarController implements Initializable {
 
     /**
      * This method is used as a central place to decide whether the tabPane is opened or closed
+     *
      * @param height the value used to set the height of the tabPane
      */
     public void setMaxHeight(double height) {
         tabPaneContainer.setMaxHeight(height);
-        if(height > 35) { //The tabpane is opened
+        if (height > 35) { //The tabpane is opened
             filePane.showBottomInset(false);
             queryPane.showBottomInset(false);
             CanvasPresentation.showBottomInset(false);
@@ -1328,7 +1308,7 @@ public class EcdarController implements Initializable {
                     });
 
                     // If some one was not able to nudge disallow the current nudge and remove from the undo stack
-                    if(foundUnNudgableElement[0]){
+                    if (foundUnNudgableElement[0]) {
                         nudgedElements.forEach(nudgedElement -> nudgedElement.nudge(direction.reverse()));
                         UndoRedoStack.forgetLast();
                     }
@@ -1353,7 +1333,9 @@ public class EcdarController implements Initializable {
                 final DisplayableEdge edge = ((EdgeController) selectable).getEdge();
 
                 // Dont delete edge if it is locked
-                if(edge.getIsLockedProperty().getValue()){return;}
+                if (edge.getIsLockedProperty().getValue()) {
+                    return;
+                }
 
                 UndoRedoStack.pushAndPerform(() -> { // Perform
                     // Remove the edge
@@ -1410,6 +1392,7 @@ public class EcdarController implements Initializable {
 
     /**
      * Sets the global edge status.
+     *
      * @param status the status
      */
     private void setGlobalEdgeStatus(EdgeStatus status) {
@@ -1420,18 +1403,6 @@ public class EcdarController implements Initializable {
     private void closeQueryDialog() {
         dialog.close();
         queryDialog.close();
-    }
-
-    @FXML
-    private void closeBackendDialog() {
-        dialog.close();
-        backendOptionsDialog.close();
-    }
-
-    @FXML
-    private void saveChangesToBackendOptions() {
-        Ecdar.preferences.put("default_backend", BackendHelper.getDefaultBackend().getName());
-        this.closeBackendDialog();
     }
 
     public static void openQueryDialog(final Query query, final String text) {

@@ -16,7 +16,7 @@ public class BackendInstancePresentation extends StackPane {
     }
 
     public BackendInstancePresentation() {
-        controller = new EcdarFXMLLoader().loadAndGetController("BackendInstance.fxml", this);
+        controller = new EcdarFXMLLoader().loadAndGetController("BackendInstancePresentation.fxml", this);
 
         controller.pickPathToBackend.setCursor(Cursor.HAND);
         controller.pickPathToBackend.setRipplerFill(Color.GREY.getColor(Color.Intensity.I500));

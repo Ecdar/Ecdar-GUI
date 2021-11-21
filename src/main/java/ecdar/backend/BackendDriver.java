@@ -8,6 +8,7 @@ import ecdar.Ecdar;
 import ecdar.abstractions.BackendInstance;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.QueryState;
+import ecdar.controllers.EcdarController;
 import io.grpc.*;
 import io.grpc.stub.StreamObserver;
 import javafx.util.Pair;
@@ -97,8 +98,8 @@ public class BackendDriver {
                 .findFirst()
                 .orElseGet(() -> startNewBackendConnection(executableQuery.backend));
 
-        // If the connection is null, there are no available sockets
-        // and the specified port range is occupied. Schedule a rerun of the query
+        // If the connection is null, there are no available connections,
+        // and it was not possible to start a new one
         if (backendConnection == null) {
             new Timer().schedule(new TimerTask() {
                 @Override
@@ -226,47 +227,48 @@ public class BackendDriver {
     }
 
     private BackendConnection startNewBackendConnection(BackendInstance backend) {
-        try {
-            Process p;
-            BackendConnection newConnection = null;
-            String hostAddress = (backend.isLocal() ? "127.0.0.1" : backend.getBackendLocation());
+        Process p;
+        String hostAddress = (backend.isLocal() ? "127.0.0.1" : backend.getBackendLocation());
 
-            try {
-                int portNumber = SocketUtils.findAvailableTcpPort(backend.getPortStart(), backend.getPortEnd());
 
-                do {
-                    ProcessBuilder pb;
-                    if (backend.getBackendLocation().endsWith(".jar")) {
-                        pb = new ProcessBuilder("java", "-jar", backend.getBackendLocation());
-                    } else {
-                        pb = new ProcessBuilder(backend.getBackendLocation(), "-p", hostAddress + ":" + portNumber).redirectErrorStream(true);
-                    }
+        int portNumber = SocketUtils.findAvailableTcpPort(backend.getPortStart(), backend.getPortEnd());
 
-                    p = pb.start();
-                    // If the process is not alive, it failed while starting up, try again
-                } while (!p.isAlive());
-
-                ManagedChannel channel = ManagedChannelBuilder.forTarget(hostAddress + ":" + portNumber)
-                        .usePlaintext()
-                        .keepAliveWithoutCalls(true)
-                        .keepAliveTime(1000, TimeUnit.MILLISECONDS)
-                        .keepAliveTimeout(2000, TimeUnit.MILLISECONDS)
-                        .build();
-
-                EcdarBackendGrpc.EcdarBackendStub stub = EcdarBackendGrpc.newStub(channel);
-
-                newConnection = new BackendConnection(p, stub);
-                this.openBackendConnections.add(newConnection);
-            } catch (IllegalStateException e) {
-                Ecdar.showToast("Unable to find a free port in port range: " + backend.getPortStart() + " - " + backend.getPortEnd() + " for " + backend.getName() + " sockets");
+        do {
+            ProcessBuilder pb;
+            if (backend.getBackendLocation().endsWith(".jar")) {
+                pb = new ProcessBuilder("java", "-jar", backend.getBackendLocation());
+            } else {
+                pb = new ProcessBuilder(backend.getBackendLocation(), "-p", hostAddress + ":" + portNumber).redirectErrorStream(true);
             }
 
-            return newConnection;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            try {
+                p = pb.start();
+            } catch (IOException ioException) {
+                Ecdar.showToast("Unable to start backend instance. Check the error tab for more details.");
+                // ToDo NIELS: Add error to errors tab with text:
+                //  "The backend instance could not be started. Make sure that the following is correct:
+                //  - Path/address
+                //  - At least one port in the port range is free for the given address (localhost if backend is set to local)
+                //  - The backend is an executable or a .jar file
+                //  - The backend supports the '-p {host}:{port}' flag on startup
+                ioException.printStackTrace();
+                return null;
+            }
+            // If the process is not alive, it failed while starting up, try again
+        } while (!p.isAlive());
 
-        return null;
+        ManagedChannel channel = ManagedChannelBuilder.forTarget(hostAddress + ":" + portNumber)
+                .usePlaintext()
+                .keepAliveWithoutCalls(true)
+                .keepAliveTime(1000, TimeUnit.MILLISECONDS)
+                .keepAliveTimeout(2000, TimeUnit.MILLISECONDS)
+                .build();
+
+        EcdarBackendGrpc.EcdarBackendStub stub = EcdarBackendGrpc.newStub(channel);
+
+        BackendConnection newConnection = new BackendConnection(p, stub);
+        this.openBackendConnections.add(newConnection);
+        return newConnection;
     }
 
     private class ExecutableQuery {
@@ -294,7 +296,7 @@ public class BackendDriver {
         private final EcdarBackendGrpc.EcdarBackendStub stub;
         private ExecutableQuery executableQuery = null;
 
-        BackendConnection(Process process, EcdarBackendGrpc.EcdarBackendStub stub) throws IOException {
+        BackendConnection(Process process, EcdarBackendGrpc.EcdarBackendStub stub) {
             this.process = process;
             this.stub = stub;
         }

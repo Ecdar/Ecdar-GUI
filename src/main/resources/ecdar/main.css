@@ -266,3 +266,7 @@
 	-fx-border-color: -divider-color;
 	-fx-border-width: 1px;
 }
+
+.input-violation {
+	-fx-text-fill: red;
+}
