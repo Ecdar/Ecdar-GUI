@@ -257,7 +257,7 @@ public class BackendDriver {
     }
 
     private void handleResponse(ExecutableQuery executableQuery, QueryProtos.QueryResponse value) {
-        System.out.println("Handle response");
+        // ToDo NIELS: Handle error response by Reveaal
         if (value.hasRefinement() && value.getRefinement().getSuccess()) {
             executableQuery.queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
             executableQuery.success.accept(true);
@@ -291,7 +291,7 @@ public class BackendDriver {
                     if (backend.equals(BackendHelper.BackendNames.jEcdar)) {
                         pb = new ProcessBuilder("java", "-jar", "src/libs/j-Ecdar.jar");
                     } else {
-                        pb = new ProcessBuilder("src/Reveaal", "-p", this.hostAddress + ":" + portNumber).redirectErrorStream(true);
+                        pb = new ProcessBuilder("src/Reveaal", "-p", this.hostAddress + ":" + portNumber).redirectErrorStream(true).inheritIO();
                     }
 
                     p = pb.start();
