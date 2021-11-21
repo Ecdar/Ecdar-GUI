@@ -9,9 +9,11 @@ import com.uppaal.model.system.concrete.ConcreteState;
 import com.uppaal.model.system.concrete.ConcreteSuccessor;
 import com.uppaal.model.system.concrete.ConcreteTransition;
 import ecdar.Ecdar;
+import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
 import ecdar.backend.BackendException;
 import ecdar.backend.BackendHelper;
+import ecdar.controllers.EcdarController;
 import javafx.beans.Observable;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -41,6 +43,7 @@ public class EcdarSimulationHandler {
     private final ObservableMap<String, BigDecimal> simulationVariables = FXCollections.observableHashMap();
     private final ObservableMap<String, BigDecimal> simulationClocks = FXCollections.observableHashMap();
     private EcdarSystemState currentState;
+    private ArrayList<Component> components = new ArrayList<>();
 
     /**
      * For some reason the successor.getTransitions() only sometimes returns some of the transitions
@@ -56,21 +59,29 @@ public class EcdarSimulationHandler {
      */
     public EcdarSimulationHandler() {
         initializeSimulation();
-        currentState = getInitialStep().getKey();
+        // currentState = getInitialStep().getKey();
     }
 
     /**
      * Initializes the values and properties in the {@link EcdarSimulationHandler}.
      * Can also be used as a reset of the simulation.
      * THIS METHOD DOES NOT RESET THE ENGINE,
+     * ToDo NIELS: Probably delete
      */
     private void initializeSimulation() {
+    }
+
+    public void initializeNewSimulation(ArrayList<Component> components) {
+        this.components = components;
+
+        // ToDo NIELS: Call backend with components to initialize new simulation
     }
 
     /**
      * Reloads the whole simulation sets the initial transitions, states, etc
      */
     public Pair<EcdarSystemState, Vector<Edge>> getInitialStep() {
+        // ToDo NIELS: Execute backend query to fetch initial step
         return null;
     }
 

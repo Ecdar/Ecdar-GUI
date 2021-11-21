@@ -1,6 +1,5 @@
 package ecdar.simulation;
 
-import com.uppaal.model.system.concrete.ConcreteState;
 import com.uppaal.model.system.concrete.ConcreteTransition;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
@@ -77,6 +76,7 @@ public class EcdarSimulationController implements Initializable, Presentable {
                 return;
             }
         }
+
         overviewPresentation.getController().addProcessesToGroup();
         overviewPresentation.getController().highlightProcessState(sm.getCurrentState());
     }
@@ -91,7 +91,7 @@ public class EcdarSimulationController implements Initializable, Presentable {
         final EcdarSimulationHandler sm = Ecdar.getSimulationHandler();
         try {
             BackendHelper.buildEcdarDocument();
-          //  sm.initializeDefaultSystem();
+            sm.initializeNewSimulation(new ArrayList<>(overviewPresentation.getController().getComponentObservableList()));
         } catch (final BackendException.SystemNotFoundException ex){
             Ecdar.showToast("A system is not declared, or contains syntax errors");
             throw ex;
@@ -100,6 +100,7 @@ public class EcdarSimulationController implements Initializable, Presentable {
             System.out.println(ex);
             return;
         }
+
         overviewPresentation.getController().clearOverview();
         overviewPresentation.getController().getComponentObservableList().clear();
         overviewPresentation.getController().getComponentObservableList().addAll(findComponentsInCurrentSimulation());
@@ -137,10 +138,9 @@ public class EcdarSimulationController implements Initializable, Presentable {
         }
         catch (final BackendException.SystemNotFoundException ex){
             //system is not declared or contains syntax errors
+        } finally {
             overviewPresentation.getController().addProcessesToGroup();
-            return;
         }
-        overviewPresentation.getController().addProcessesToGroup();
     }
 
     @Override
