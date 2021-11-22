@@ -4,6 +4,7 @@ import com.uppaal.model.core2.Document;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
 import javafx.beans.property.SimpleListProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.apache.commons.io.FileUtils;
 
@@ -151,8 +152,7 @@ public final class BackendHelper {
     }
 
     public static void setBackendInstances(List<BackendInstance> backendInstances) {
-        BackendHelper.backendInstances = new SimpleListProperty<>();
-        BackendHelper.backendInstances.addAll(backendInstances);
+        BackendHelper.backendInstances = FXCollections.observableList(backendInstances);
     }
 
     public static ObservableList<BackendInstance> getBackendInstances() {

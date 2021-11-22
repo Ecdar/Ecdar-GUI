@@ -11,6 +11,8 @@ import javafx.application.Platform;
 import javafx.beans.binding.When;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
@@ -52,8 +54,7 @@ public class QueryPresentation extends AnchorPane {
     }
 
     private void initializeBackendsDropdown() {
-        SimpleListProperty<String> backendNames = new SimpleListProperty<>();
-        backendNames.addAll(BackendHelper.getBackendInstances().stream().map(BackendInstance::getName).collect(Collectors.toList()));
+        ObservableList<String> backendNames = FXCollections.observableList(BackendHelper.getBackendInstances().stream().map(BackendInstance::getName).collect(Collectors.toList()));
         controller.backendsDropdown.setItems(backendNames);
     }
 

@@ -32,8 +32,10 @@
                 <Insets top="5" bottom="10" left="5" right="5"/>
             </padding>
             <HBox alignment="CENTER_LEFT">
-                <JFXTextField fx:id="backendName" styleClass="subhead" promptText="Backend name">New backend</JFXTextField>
-                <Label fx:id="backendNameIssue" styleClass="input-violation, sub-caption" visible="false"/>
+                <VBox spacing="10">
+                    <JFXTextField fx:id="backendName" styleClass="subhead" promptText="Backend name">New backend</JFXTextField>
+                    <Label fx:id="backendNameIssue" styleClass="input-violation, sub-caption" visible="false">This is not working... And it is you</Label>
+                </VBox>
                 <JFXRippler alignment="CENTER_RIGHT">
                     <StackPane minWidth="40" minHeight="40"
                                onMouseClicked="#expansionClicked"

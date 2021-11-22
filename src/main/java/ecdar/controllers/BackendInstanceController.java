@@ -60,6 +60,8 @@ public class BackendInstanceController implements Initializable {
                     removeBackendIcon.setFill(Color.BLACK);
                 }
             });
+
+            if (defaultBackendRadioButton.isSelected()) removeBackendIcon.setFill(Color.GREY);
         });
     }
 
@@ -98,7 +100,8 @@ public class BackendInstanceController implements Initializable {
     }
 
     private void setHGrow() {
-        HBox.setHgrow(backendName.getParent().getParent(), Priority.ALWAYS);
+        HBox.setHgrow(backendName.getParent().getParent().getParent(), Priority.ALWAYS);
+        HBox.setHgrow(backendName.getParent(), Priority.ALWAYS);
         HBox.setHgrow(backendName, Priority.ALWAYS);
         HBox.setHgrow(content, Priority.ALWAYS);
         HBox.setHgrow(addressSection, Priority.ALWAYS);

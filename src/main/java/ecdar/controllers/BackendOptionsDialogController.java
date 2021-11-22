@@ -44,9 +44,8 @@ public class BackendOptionsDialogController implements Initializable {
     }
 
     private void initializeBackendInstanceList() {
-        String defaultBackendInstanceList = "{'backends': [{'name': 'Reveaal', 'isLocal': 'true', 'isDefault': 'true', 'location': 'src/Reveaal', 'portRangeStart': '5032', 'portRangeEnd': '5040'},{'name': 'jECDAR', 'isLocal': 'True', 'isDefault': 'False', 'location': 'src/libs/j-Ecdar.jar', 'portRangeStart': '5042', 'portRangeEnd': '5050'}]}";
-        final JsonObject jsonObject = JsonParser.parseString(Ecdar.preferences.get("backend_instances", defaultBackendInstanceList)).getAsJsonObject();
-        final JsonArray backends = jsonObject.getAsJsonArray();
+        String defaultBackendInstanceList = "[{'name': 'Reveaal', 'isLocal': 'true', 'isDefault': 'true', 'location': 'src/Reveaal', 'portRangeStart': '5032', 'portRangeEnd': '5040'},{'name': 'jECDAR', 'isLocal': 'True', 'isDefault': 'False', 'location': 'src/libs/j-Ecdar.jar', 'portRangeStart': '5042', 'portRangeEnd': '5050'}]";
+        final JsonArray backends = JsonParser.parseString(Ecdar.preferences.get("backend_instances", defaultBackendInstanceList)).getAsJsonArray();
 
         ArrayList<BackendInstance> backendInstances = new ArrayList<>();
 
@@ -191,7 +190,7 @@ public class BackendOptionsDialogController implements Initializable {
                 jsonArray.add(bi.serialize());
             }
 
-            Ecdar.preferences.put("backend_instances", jsonArray.getAsString());
+            Ecdar.preferences.put("backend_instances", jsonArray.toString());
 
             // The is always a default backend set, so isPresent check is unnecessary
             String defaultBackendName = (backendInstances.stream().filter(BackendInstance::isDefault).findFirst().get().getName());
