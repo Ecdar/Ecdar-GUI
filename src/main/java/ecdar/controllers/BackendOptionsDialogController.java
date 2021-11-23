@@ -17,6 +17,8 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import org.apache.commons.lang3.Range;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URL;
@@ -26,6 +28,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
+import java.util.Scanner;
 
 public class BackendOptionsDialogController implements Initializable {
     public VBox backendInstanceList;
@@ -40,23 +43,39 @@ public class BackendOptionsDialogController implements Initializable {
     }
 
     public void resetBackendOptions() {
-        // ToDo NIELS: Read saved options and override current
+        BackendHelper.setBackendInstances(new ArrayList<>());
+        backendInstanceList.getChildren().clear();
+        initializeBackendInstanceList();
     }
 
     private void initializeBackendInstanceList() {
-        String defaultBackendInstanceList = "[{'name': 'Reveaal', 'isLocal': 'true', 'isDefault': 'true', 'location': 'src/Reveaal', 'portRangeStart': '5032', 'portRangeEnd': '5040'},{'name': 'jECDAR', 'isLocal': 'True', 'isDefault': 'False', 'location': 'src/libs/j-Ecdar.jar', 'portRangeStart': '5042', 'portRangeEnd': '5050'}]";
-        final JsonArray backends = JsonParser.parseString(Ecdar.preferences.get("backend_instances", defaultBackendInstanceList)).getAsJsonArray();
+        try {
+            // ToDo NIELS: Maybe use load JSON from file function instead of reading from file like this
+            File myObj = new File("src/main/resources/ecdar/default_backends.json");
+            Scanner myReader = new Scanner(myObj);
 
-        ArrayList<BackendInstance> backendInstances = new ArrayList<>();
+            StringBuilder defaultBackendInstanceList = new StringBuilder();
+            while (myReader.hasNextLine()) {
+                defaultBackendInstanceList.append(myReader.nextLine());
+            }
+            myReader.close();
 
-        backends.forEach((backend) -> {
-            BackendInstance newBackendInstance = new BackendInstance(backend.getAsJsonObject());
-            BackendInstancePresentation newBackendInstancePresentation = new BackendInstancePresentation(newBackendInstance);
-            addBackendInstancePresentationToList(newBackendInstancePresentation);
-            backendInstances.add(newBackendInstance);
-        });
+            final JsonArray backends = JsonParser.parseString(Ecdar.preferences.get("backend_instances", defaultBackendInstanceList.toString())).getAsJsonArray();
 
-        BackendHelper.setBackendInstances(backendInstances);
+            ArrayList<BackendInstance> backendInstances = new ArrayList<>();
+
+            backends.forEach((backend) -> {
+                BackendInstance newBackendInstance = new BackendInstance(backend.getAsJsonObject());
+                BackendInstancePresentation newBackendInstancePresentation = new BackendInstancePresentation(newBackendInstance);
+                addBackendInstancePresentationToList(newBackendInstancePresentation);
+                backendInstances.add(newBackendInstance);
+            });
+
+            BackendHelper.setBackendInstances(backendInstances);
+        } catch (FileNotFoundException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
 
         HBox.setHgrow(addBackendButton, Priority.ALWAYS);
         addBackendButton.setMaxWidth(Double.MAX_VALUE);

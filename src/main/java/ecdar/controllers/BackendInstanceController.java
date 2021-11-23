@@ -92,7 +92,6 @@ public class BackendInstanceController implements Initializable {
     }
 
     public BackendInstance updateBackendInstance() {
-        System.out.println("Saving " + backendName.getText() + "...");
         backendInstance.setName(backendName.getText());
         backendInstance.setLocal(isLocal.isSelected());
         backendInstance.setDefault(defaultBackendRadioButton.isSelected());
