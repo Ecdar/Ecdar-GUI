@@ -32,7 +32,7 @@
                 <Insets top="5" bottom="10" left="5" right="5"/>
             </padding>
             <HBox alignment="CENTER_LEFT">
-                <VBox spacing="10">
+                <VBox>
                     <JFXTextField fx:id="backendName" styleClass="subhead" promptText="Backend name"/>
                     <Label fx:id="backendNameIssue" styleClass="input-violation, sub-caption" visible="false"/>
                 </VBox>
@@ -55,9 +55,9 @@
                 <padding>
                     <Insets right="15"/>
                 </padding>
-                <VBox spacing="20">
+                <VBox>
                     <Region/>
-                    <VBox spacing="10">
+                    <VBox>
                         <HBox spacing="15" alignment="CENTER_LEFT">
                             <HBox fx:id="addressSection" spacing="10" alignment="CENTER_LEFT">
                                 <Text styleClass="subhead">Address: </Text>
@@ -80,12 +80,12 @@
                     </VBox>
                     <HBox spacing="15" alignment="CENTER_LEFT">
                         <Text styleClass="subhead">Port range: </Text>
-                        <VBox spacing="10">
+                        <VBox>
                             <JFXTextField fx:id="portRangeStart" promptText="0" alignment="CENTER"/>
                             <Label fx:id="portRangeStartIssue" styleClass="input-violation, sub-caption" visible="false"/>
                         </VBox>
                         <Text>-</Text>
-                        <VBox spacing="10">
+                        <VBox>
                             <JFXTextField fx:id="portRangeEnd" promptText="65535" alignment="CENTER"/>
                             <Label fx:id="portRangeEndIssue" styleClass="input-violation, sub-caption" visible="false"/>
                         </VBox>

@@ -100,8 +100,9 @@ public class BackendOptionsDialogController implements Initializable {
             if (child instanceof BackendInstancePresentation) {
                 BackendInstanceController backendInstanceController = ((BackendInstancePresentation) child).getController();
 
-                error = backendNameIsErrorFree(backendInstanceController);
+                error = backendNameIsErrorFree(backendInstanceController) && error;
                 error = portRangeIsErrorFree(backendInstanceController) && error;
+                error = backendInstanceLocationIsErrorFree(backendInstanceController) && error;
             }
         }
 
@@ -148,22 +149,22 @@ public class BackendOptionsDialogController implements Initializable {
 
         if (!portRange.contains(portRangeStart)) {
             if (backendInstanceController.portRangeStartIssue.getText().isBlank()) {
-                backendInstanceController.portRangeStartIssue.setText("Port must be within range 0 - 65535");
+                backendInstanceController.portRangeStartIssue.setText("Value must be within range 0 - 65535");
             } else {
                 backendInstanceController.portRangeStartIssue.setText(" and within range 0 - 65535");
             }
             errorFree = false;
         }
-        if (!portRange.contains(portRangeEnd)){
+        if (!portRange.contains(portRangeEnd)) {
             if (backendInstanceController.portRangeEndIssue.getText().isBlank()) {
-                backendInstanceController.portRangeEndIssue.setText("Port must be within range 0 - 65535");
+                backendInstanceController.portRangeEndIssue.setText("Value must be within range 0 - 65535");
             } else {
                 backendInstanceController.portRangeEndIssue.setText(" and within range 0 - 65535");
             }
             errorFree = false;
         }
 
-        if(portRangeEnd - portRangeStart < 0) {
+        if (portRangeEnd - portRangeStart < 0) {
             backendInstanceController.portRangeIssue.setText("Start of port range must be greater than end");
             errorFree = false;
         }
@@ -176,37 +177,53 @@ public class BackendOptionsDialogController implements Initializable {
     }
 
     private boolean backendInstanceLocationIsErrorFree(BackendInstanceController backendInstanceController) {
+        boolean errorFree = true;
+
         if (backendInstanceController.isLocal.isSelected()) {
-            Path localBackendPath = Paths.get(backendInstanceController.pathToBackend.getText());
-            if (!Files.isExecutable(localBackendPath)) {
-                // ToDo NIELS: The path either does not exist or it is read/execute protected
-                return false;
-            }
+            if (backendInstanceController.pathToBackend.getText().isBlank()) {
+                backendInstanceController.locationIssue.setText("Please specify an address for this backend");
+                errorFree = false;
+            } else {
+                Path localBackendPath = Paths.get(backendInstanceController.pathToBackend.getText());
 
-            if (!localBackendPath.endsWith(".jar") && !localBackendPath.endsWith(".exe") && !localBackendPath.getFileName().toString().contains(".")) {
-                // ToDo NIELS: The path is not an accepted file type
-                return false;
-            }
-        } else {
-            try {
-                InetAddress address = InetAddress.getByName(backendInstanceController.address.getText());
-                boolean reachable = address.isReachable(200);
-
-                if (!reachable) {
-                    // ToDo NIELS: Address is unreachable
-                    return false;
+                if (!Files.isExecutable(localBackendPath)) {
+                    backendInstanceController.locationIssue.setText("The above file does not exists or ECDAR does not have the privileges to execute it");
+                    errorFree = false;
                 }
 
-            } catch (UnknownHostException unknownHostException) {
-                // ToDo NIELS: The address is not an acceptable hostname
-                return false;
-            } catch (IOException ioException) {
-                // ToDo NIELS: IOException while trying to reach host
-                return false;
+                if (!localBackendPath.toString().endsWith(".jar") && !localBackendPath.toString().endsWith(".exe") && localBackendPath.toString().contains(".")) {
+                    backendInstanceController.locationIssue.setText("The file type is not accepted. It must be either a jar or an executable file");
+                    errorFree = false;
+                }
+            }
+        } else {
+            if (backendInstanceController.address.getText().isBlank()) {
+                backendInstanceController.locationIssue.setText("Please specify an address for the external host");
+                errorFree = false;
+            } else {
+                try {
+                    InetAddress address = InetAddress.getByName(backendInstanceController.address.getText());
+                    boolean reachable = address.isReachable(200);
+
+                    if (!reachable) {
+                        backendInstanceController.locationIssue.setText("The above address is not reachable. Make sure that the host is correct");
+                        errorFree = false;
+                    }
+
+                } catch (UnknownHostException unknownHostException) {
+                    backendInstanceController.locationIssue.setText("The above address is not an acceptable host name");
+                    errorFree = false;
+                } catch (IOException ioException) {
+                    backendInstanceController.locationIssue.setText("An I/O exception was encountered while trying to reach host");
+                    // ToDo NIELS: Log the following: ioException.getMessage();
+                    errorFree = false;
+                }
             }
         }
 
-        return true;
+        backendInstanceController.locationIssue.setVisible(!errorFree);
+
+        return errorFree;
     }
 
     /**
