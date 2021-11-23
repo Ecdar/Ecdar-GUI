@@ -33,8 +33,8 @@
             </padding>
             <HBox alignment="CENTER_LEFT">
                 <VBox spacing="10">
-                    <JFXTextField fx:id="backendName" styleClass="subhead" promptText="Backend name">New backend</JFXTextField>
-                    <Label fx:id="backendNameIssue" styleClass="input-violation, sub-caption" visible="false">This is not working... And it is you</Label>
+                    <JFXTextField fx:id="backendName" styleClass="subhead" promptText="Backend name"/>
+                    <Label fx:id="backendNameIssue" styleClass="input-violation, sub-caption" visible="false"/>
                 </VBox>
                 <JFXRippler alignment="CENTER_RIGHT">
                     <StackPane minWidth="40" minHeight="40"
@@ -57,30 +57,40 @@
                 </padding>
                 <VBox spacing="20">
                     <Region/>
-                    <HBox spacing="15" alignment="CENTER_LEFT">
-                        <HBox fx:id="addressSection" spacing="10" alignment="CENTER_LEFT">
-                            <Text styleClass="subhead">Address: </Text>
-                            <JFXTextField fx:id="address" promptText="xxx.xxx.xxx.xxx"/>
+                    <VBox spacing="10">
+                        <HBox spacing="15" alignment="CENTER_LEFT">
+                            <HBox fx:id="addressSection" spacing="10" alignment="CENTER_LEFT">
+                                <Text styleClass="subhead">Address: </Text>
+                                <JFXTextField fx:id="address" promptText="xxx.xxx.xxx.xxx"/>
+                            </HBox>
+                            <HBox fx:id="pathToBackendSection" spacing="10" alignment="CENTER_LEFT">
+                                <Text styleClass="subhead">Path: </Text>
+                                <JFXTextField fx:id="pathToBackend" promptText="Absolute path"/>
+                                <JFXRippler fx:id="pickPathToBackend">
+                                    <StackPane minWidth="20" minHeight="20"
+                                               onMouseClicked="#openPathToBackendDialog"
+                                               StackPane.alignment="TOP_RIGHT">
+                                        <FontIcon iconLiteral="gmi-open-in-new" iconSize="20" fill="black"/>
+                                    </StackPane>
+                                </JFXRippler>
+                            </HBox>
+                            <JFXCheckBox fx:id="isLocal" onMouseClicked="#addressLocalClicked">Local</JFXCheckBox>
                         </HBox>
-                        <HBox fx:id="pathToBackendSection" spacing="10" alignment="CENTER_LEFT">
-                            <Text styleClass="subhead">Path: </Text>
-                            <JFXTextField fx:id="pathToBackend" promptText="Absolute path"/>
-                            <JFXRippler fx:id="pickPathToBackend">
-                                <StackPane minWidth="20" minHeight="20"
-                                           onMouseClicked="#openPathToBackendDialog"
-                                           StackPane.alignment="TOP_RIGHT">
-                                    <FontIcon iconLiteral="gmi-open-in-new" iconSize="20" fill="black"/>
-                                </StackPane>
-                            </JFXRippler>
-                        </HBox>
-                        <JFXCheckBox fx:id="isLocal" onMouseClicked="#addressLocalClicked">Local</JFXCheckBox>
-                    </HBox>
+                        <Label fx:id="locationIssue" styleClass="input-violation, sub-caption" visible="false"/>
+                    </VBox>
                     <HBox spacing="15" alignment="CENTER_LEFT">
                         <Text styleClass="subhead">Port range: </Text>
-                        <JFXTextField fx:id="portRangeStart" promptText="0" alignment="CENTER"/>
+                        <VBox spacing="10">
+                            <JFXTextField fx:id="portRangeStart" promptText="0" alignment="CENTER"/>
+                            <Label fx:id="portRangeStartIssue" styleClass="input-violation, sub-caption" visible="false"/>
+                        </VBox>
                         <Text>-</Text>
-                        <JFXTextField fx:id="portRangeEnd" promptText="65535" alignment="CENTER"/>
+                        <VBox spacing="10">
+                            <JFXTextField fx:id="portRangeEnd" promptText="65535" alignment="CENTER"/>
+                            <Label fx:id="portRangeEndIssue" styleClass="input-violation, sub-caption" visible="false"/>
+                        </VBox>
                     </HBox>
+                    <Label fx:id="portRangeIssue" styleClass="input-violation, sub-caption" visible="false"/>
                     <Region prefHeight="5"/>
                 </VBox>
             </StackPane>

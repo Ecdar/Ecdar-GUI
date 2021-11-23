@@ -94,45 +94,85 @@ public class BackendOptionsDialogController implements Initializable {
      * @return whether any errors were found
      */
     private boolean backendInstaceListIsErrorFree() {
+        boolean error = true;
+
         for (Node child : backendInstanceList.getChildren()) {
             if (child instanceof BackendInstancePresentation) {
                 BackendInstanceController backendInstanceController = ((BackendInstancePresentation) child).getController();
 
-                return portRangeIsErrorFree(backendInstanceController);
+                error = backendNameIsErrorFree(backendInstanceController);
+                error = portRangeIsErrorFree(backendInstanceController) && error;
             }
         }
 
+        return error;
+    }
+
+    private boolean backendNameIsErrorFree(BackendInstanceController backendInstanceController) {
+        String backendName = backendInstanceController.backendName.getText();
+
+        if (backendName.isBlank()) {
+            backendInstanceController.backendNameIssue.setText("The backend name cannot be empty");
+            backendInstanceController.backendNameIssue.setVisible(true);
+            return false;
+        }
+
+        backendInstanceController.backendNameIssue.setVisible(false);
         return true;
     }
 
     private boolean portRangeIsErrorFree(BackendInstanceController backendInstanceController) {
-        int portRangeStart;
-        int portRangeEnd;
+        boolean errorFree = true;
+        int portRangeStart = 0, portRangeEnd = 0;
+        backendInstanceController.portRangeStartIssue.setText("");
+        backendInstanceController.portRangeStartIssue.setVisible(false);
+        backendInstanceController.portRangeEndIssue.setText("");
+        backendInstanceController.portRangeEndIssue.setVisible(false);
+        backendInstanceController.portRangeIssue.setVisible(false);
 
         try {
             portRangeStart = Integer.parseInt(backendInstanceController.portRangeStart.getText());
         } catch (NumberFormatException numberFormatException) {
-            // ToDO NIELS: The value is not an integer
-            return false;
+            backendInstanceController.portRangeStartIssue.setText("Value must be integer");
+            errorFree = false;
         }
 
         try {
             portRangeEnd = Integer.parseInt(backendInstanceController.portRangeEnd.getText());
         } catch (NumberFormatException numberFormatException) {
-            // ToDO NIELS: The value is not an integer
-            return false;
+            backendInstanceController.portRangeEndIssue.setText("Value must be integer");
+            errorFree = false;
         }
 
         Range<Integer> portRange = Range.between(0, 65535);
 
-        if (!portRange.contains(portRangeStart)
-                || !portRange.contains(portRangeEnd)
-                || portRangeEnd - portRangeStart < 0) {
-            // ToDo NIELS: The port range is not acceptable
-            return false;
+        if (!portRange.contains(portRangeStart)) {
+            if (backendInstanceController.portRangeStartIssue.getText().isBlank()) {
+                backendInstanceController.portRangeStartIssue.setText("Port must be within range 0 - 65535");
+            } else {
+                backendInstanceController.portRangeStartIssue.setText(" and within range 0 - 65535");
+            }
+            errorFree = false;
+        }
+        if (!portRange.contains(portRangeEnd)){
+            if (backendInstanceController.portRangeEndIssue.getText().isBlank()) {
+                backendInstanceController.portRangeEndIssue.setText("Port must be within range 0 - 65535");
+            } else {
+                backendInstanceController.portRangeEndIssue.setText(" and within range 0 - 65535");
+            }
+            errorFree = false;
         }
 
-        return true;
+        if(portRangeEnd - portRangeStart < 0) {
+            backendInstanceController.portRangeIssue.setText("Start of port range must be greater than end");
+            errorFree = false;
+        }
+
+        backendInstanceController.portRangeStartIssue.setVisible(!errorFree);
+        backendInstanceController.portRangeEndIssue.setVisible(!errorFree);
+        backendInstanceController.portRangeIssue.setVisible(!errorFree);
+
+        return errorFree;
     }
 
     private boolean backendInstanceLocationIsErrorFree(BackendInstanceController backendInstanceController) {
