@@ -98,4 +98,9 @@ public class BackendInstance implements Serializable {
         setPortStart(json.getAsJsonPrimitive(PORT_RANGE_START).getAsInt());
         setPortEnd(json.getAsJsonPrimitive(PORT_RANGE_END).getAsInt());
     }
+
+    @Override
+    public String toString() {
+        return name; // ToDo NIELS: Ask if port range should be included
+    }
 }

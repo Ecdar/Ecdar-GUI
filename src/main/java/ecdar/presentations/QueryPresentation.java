@@ -12,6 +12,7 @@ import javafx.beans.binding.When;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -34,9 +35,7 @@ import static javafx.scene.paint.Color.*;
 public class QueryPresentation extends AnchorPane {
 
     private final Tooltip tooltip = new Tooltip();
-    private Tooltip swapBackendButtonTooltip;
-    private Label currentBackendLabel;
-
+    private Tooltip backendDropdownTooltip;
     private final QueryController controller;
 
     public QueryPresentation(final Query query) {
@@ -54,8 +53,14 @@ public class QueryPresentation extends AnchorPane {
     }
 
     private void initializeBackendsDropdown() {
-        ObservableList<String> backendNames = FXCollections.observableList(BackendHelper.getBackendInstances().stream().map(BackendInstance::getName).collect(Collectors.toList()));
-        controller.backendsDropdown.setItems(backendNames);
+        controller.backendsDropdown.setItems(BackendHelper.getBackendInstances());
+        BackendHelper.addBackendInstanceListener(() -> controller.backendsDropdown.setItems(BackendHelper.getBackendInstances()));
+
+        backendDropdownTooltip = new Tooltip();
+        backendDropdownTooltip.setText("Current backend used for the query");
+        JFXTooltip.install(controller.backendsDropdown, backendDropdownTooltip);
+
+        controller.backendsDropdown.setValue(BackendHelper.getDefaultBackendInstance());
     }
 
     private void initializeTextFields() {
@@ -268,8 +273,8 @@ public class QueryPresentation extends AnchorPane {
                 }
             });
 
-            // Change visibility of input/output Pane when backend is changed for the query
-            lookup("#swapBackendButton").setOnMousePressed(event -> changeTitledPaneVisibility.accept(controller.getQuery().getQuery()));
+            // Change visibility of input/output Pane when backend is changed for the query ToDo NIELS
+            // lookup("#swapBackendButton").setOnMousePressed(event -> changeTitledPaneVisibility.accept(controller.getQuery().getQuery()));
 
             Platform.runLater(() -> addIgnoredInputOutputsFromQuery(inputOutputPane));
         });
@@ -321,15 +326,6 @@ public class QueryPresentation extends AnchorPane {
                 resetInputOutputPaneButton.setDisable(false);
                 resetInputOutputPaneButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I900));
             });
-        });
-    }
-
-    private void initializeBackendDropdown() {
-        Platform.runLater(() -> {
-            this.currentBackendLabel = (Label) lookup("#currentBackendLabel");
-            swapBackendButtonTooltip = new Tooltip();
-            swapBackendButtonTooltip.setText("Current backend used for the query");
-            JFXTooltip.install(controller.backendsDropdown, swapBackendButtonTooltip);
         });
     }
 

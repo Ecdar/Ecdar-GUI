@@ -1,7 +1,6 @@
 package ecdar.controllers;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXRippler;
@@ -43,7 +42,6 @@ public class BackendOptionsDialogController implements Initializable {
     }
 
     public void resetBackendOptions() {
-        BackendHelper.setBackendInstances(new ArrayList<>());
         backendInstanceList.getChildren().clear();
         initializeBackendInstanceList();
     }
@@ -71,7 +69,7 @@ public class BackendOptionsDialogController implements Initializable {
                 backendInstances.add(newBackendInstance);
             });
 
-            BackendHelper.setBackendInstances(backendInstances);
+            BackendHelper.updateBackendInstances(backendInstances);
         } catch (FileNotFoundException e) {
             System.out.println("An error occurred.");
             e.printStackTrace();
@@ -99,6 +97,7 @@ public class BackendOptionsDialogController implements Initializable {
 
     private void moveBackendInstance(BackendInstancePresentation newBackendInstance, int i) {
         int currentIndex = backendInstanceList.getChildren().indexOf(newBackendInstance);
+
         // Math.max added to avoid index -1
         int newIndex = Math.max(0, (currentIndex + i) % backendInstanceList.getChildren().size());
         // ToDo NIELS: Prevent loop around for overflow or add for underflow
@@ -132,7 +131,7 @@ public class BackendOptionsDialogController implements Initializable {
         String backendName = backendInstanceController.backendName.getText();
 
         if (backendName.isBlank()) {
-            backendInstanceController.backendNameIssue.setText("The backend name cannot be empty");
+            backendInstanceController.backendNameIssue.setText(ValidationErrorMessages.BACKEND_NAME_EMPTY.toString());
             backendInstanceController.backendNameIssue.setVisible(true);
             return false;
         }
@@ -153,14 +152,14 @@ public class BackendOptionsDialogController implements Initializable {
         try {
             portRangeStart = Integer.parseInt(backendInstanceController.portRangeStart.getText());
         } catch (NumberFormatException numberFormatException) {
-            backendInstanceController.portRangeStartIssue.setText("Value must be integer");
+            backendInstanceController.portRangeStartIssue.setText(ValidationErrorMessages.VALUE_NOT_INTEGER.toString());
             errorFree = false;
         }
 
         try {
             portRangeEnd = Integer.parseInt(backendInstanceController.portRangeEnd.getText());
         } catch (NumberFormatException numberFormatException) {
-            backendInstanceController.portRangeEndIssue.setText("Value must be integer");
+            backendInstanceController.portRangeEndIssue.setText(ValidationErrorMessages.VALUE_NOT_INTEGER.toString());
             errorFree = false;
         }
 
@@ -168,23 +167,23 @@ public class BackendOptionsDialogController implements Initializable {
 
         if (!portRange.contains(portRangeStart)) {
             if (backendInstanceController.portRangeStartIssue.getText().isBlank()) {
-                backendInstanceController.portRangeStartIssue.setText("Value must be within range 0 - 65535");
+                backendInstanceController.portRangeStartIssue.setText(ValidationErrorMessages.PORT_VALUE_NOT_WITHIN_ACCEPTABLE_RANGE.toString());
             } else {
-                backendInstanceController.portRangeStartIssue.setText(" and within range 0 - 65535");
+                backendInstanceController.portRangeStartIssue.setText(ValidationErrorMessages.PORT_VALUE_NOT_WITHIN_ACCEPTABLE_RANGE_CONCATINATION.toString());
             }
             errorFree = false;
         }
         if (!portRange.contains(portRangeEnd)) {
             if (backendInstanceController.portRangeEndIssue.getText().isBlank()) {
-                backendInstanceController.portRangeEndIssue.setText("Value must be within range 0 - 65535");
+                backendInstanceController.portRangeEndIssue.setText(ValidationErrorMessages.PORT_VALUE_NOT_WITHIN_ACCEPTABLE_RANGE.toString());
             } else {
-                backendInstanceController.portRangeEndIssue.setText(" and within range 0 - 65535");
+                backendInstanceController.portRangeEndIssue.setText(ValidationErrorMessages.PORT_VALUE_NOT_WITHIN_ACCEPTABLE_RANGE_CONCATINATION.toString());
             }
             errorFree = false;
         }
 
         if (portRangeEnd - portRangeStart < 0) {
-            backendInstanceController.portRangeIssue.setText("Start of port range must be greater than end");
+            backendInstanceController.portRangeIssue.setText(ValidationErrorMessages.PORT_RANGE_MUST_BE_INCREMENTAL.toString());
             errorFree = false;
         }
 
@@ -200,24 +199,19 @@ public class BackendOptionsDialogController implements Initializable {
 
         if (backendInstanceController.isLocal.isSelected()) {
             if (backendInstanceController.pathToBackend.getText().isBlank()) {
-                backendInstanceController.locationIssue.setText("Please specify an address for this backend");
+                backendInstanceController.locationIssue.setText(ValidationErrorMessages.FILE_LOCATION_IS_BLANK.toString());
                 errorFree = false;
             } else {
                 Path localBackendPath = Paths.get(backendInstanceController.pathToBackend.getText());
 
                 if (!Files.isExecutable(localBackendPath)) {
-                    backendInstanceController.locationIssue.setText("The above file does not exists or ECDAR does not have the privileges to execute it");
-                    errorFree = false;
-                }
-
-                if (!localBackendPath.toString().endsWith(".jar") && !localBackendPath.toString().endsWith(".exe") && localBackendPath.toString().contains(".")) {
-                    backendInstanceController.locationIssue.setText("The file type is not accepted. It must be either a jar or an executable file");
+                    backendInstanceController.locationIssue.setText(ValidationErrorMessages.FILE_DOES_NOT_EXIST_OR_NOT_EXECUTABLE.toString());
                     errorFree = false;
                 }
             }
         } else {
             if (backendInstanceController.address.getText().isBlank()) {
-                backendInstanceController.locationIssue.setText("Please specify an address for the external host");
+                backendInstanceController.locationIssue.setText(ValidationErrorMessages.HOST_ADDRESS_IS_BLANK.toString());
                 errorFree = false;
             } else {
                 try {
@@ -225,15 +219,15 @@ public class BackendOptionsDialogController implements Initializable {
                     boolean reachable = address.isReachable(200);
 
                     if (!reachable) {
-                        backendInstanceController.locationIssue.setText("The above address is not reachable. Make sure that the host is correct");
+                        backendInstanceController.locationIssue.setText(ValidationErrorMessages.HOST_NOT_REACHABLE.toString());
                         errorFree = false;
                     }
 
                 } catch (UnknownHostException unknownHostException) {
-                    backendInstanceController.locationIssue.setText("The above address is not an acceptable host name");
+                    backendInstanceController.locationIssue.setText(ValidationErrorMessages.UNACCEPTABLE_HOST_NAME.toString());
                     errorFree = false;
                 } catch (IOException ioException) {
-                    backendInstanceController.locationIssue.setText("An I/O exception was encountered while trying to reach host");
+                    backendInstanceController.locationIssue.setText(ValidationErrorMessages.IO_EXCEPTION_WITH_HOST.toString());
                     // ToDo NIELS: Log the following: ioException.getMessage();
                     errorFree = false;
                 }
@@ -259,7 +253,7 @@ public class BackendOptionsDialogController implements Initializable {
                 }
             }
 
-            BackendHelper.setBackendInstances(backendInstances);
+            BackendHelper.updateBackendInstances(backendInstances);
 
             JsonArray jsonArray = new JsonArray();
             for (BackendInstance bi : backendInstances) {
@@ -269,12 +263,84 @@ public class BackendOptionsDialogController implements Initializable {
             Ecdar.preferences.put("backend_instances", jsonArray.toString());
 
             // The is always a default backend set, so isPresent check is unnecessary
-            String defaultBackendName = (backendInstances.stream().filter(BackendInstance::isDefault).findFirst().get().getName());
+            BackendInstance defaultBackend = backendInstances.stream().filter(BackendInstance::isDefault).findFirst().get();
+            BackendHelper.setDefaultBackendInstance(defaultBackend);
+
+            String defaultBackendName = (defaultBackend.getName());
             Ecdar.preferences.put("default_backend", defaultBackendName);
 
             return true;
         } else {
             return false;
+        }
+    }
+
+    private enum ValidationErrorMessages {
+        BACKEND_NAME_EMPTY {
+            @Override
+            public String toString() {
+                return "The backend name cannot be empty";
+            }
+        },
+        VALUE_NOT_INTEGER {
+            @Override
+            public String toString() {
+                return "Value must be integer";
+            }
+        },
+        PORT_RANGE_MUST_BE_INCREMENTAL {
+            @Override
+            public String toString() {
+                return "Start of port range must be greater than end";
+            }
+        },
+        PORT_VALUE_NOT_WITHIN_ACCEPTABLE_RANGE {
+            @Override
+            public String toString() {
+                return "Value must be within range 0 - 65535";
+            }
+        },
+        PORT_VALUE_NOT_WITHIN_ACCEPTABLE_RANGE_CONCATINATION {
+            @Override
+            public String toString() {
+                return " and within range 0 - 65535";
+            }
+        },
+        FILE_LOCATION_IS_BLANK {
+            @Override
+            public String toString() {
+                return "Please specify a file for this backend";
+            }
+        },
+        FILE_DOES_NOT_EXIST_OR_NOT_EXECUTABLE {
+            @Override
+            public String toString() {
+                return "The above file does not exists or ECDAR does not have the privileges to execute it";
+            }
+        },
+        HOST_ADDRESS_IS_BLANK {
+            @Override
+            public String toString() {
+                return "Please specify an address for the external host";
+            }
+        },
+        HOST_NOT_REACHABLE {
+            @Override
+            public String toString() {
+                return "The above address is not reachable. Make sure that the host is correct";
+            }
+        },
+        UNACCEPTABLE_HOST_NAME {
+            @Override
+            public String toString() {
+                return "The above address is not an acceptable host name";
+            }
+        },
+        IO_EXCEPTION_WITH_HOST {
+            @Override
+            public String toString() {
+                return "An I/O exception was encountered while trying to reach the host";
+            }
         }
     }
 }

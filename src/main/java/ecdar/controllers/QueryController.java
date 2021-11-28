@@ -2,6 +2,7 @@ package ecdar.controllers;
 
 import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXRippler;
+import ecdar.abstractions.BackendInstance;
 import ecdar.abstractions.Query;
 import ecdar.abstractions.QueryType;
 import ecdar.utility.colors.Color;
@@ -21,7 +22,7 @@ public class QueryController implements Initializable {
     public JFXRippler actionButton;
     public JFXRippler queryTypeExpand;
     public Text queryTypeSymbol;
-    public JFXComboBox<String> backendsDropdown;
+    public JFXComboBox<BackendInstance> backendsDropdown;
     private Query query;
     private final Map<QueryType, SimpleBooleanProperty> queryTypeListElementsSelectedState = new HashMap<>();
     private final Tooltip noQueryTypeSetTooltip = new Tooltip("Please select a query type beneath the status icon");

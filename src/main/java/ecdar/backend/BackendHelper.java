@@ -24,6 +24,7 @@ public final class BackendHelper {
     private static EcdarDocument ecdarDocument;
     private static BackendInstance defaultBackend = null;
     private static ObservableList<BackendInstance> backendInstances = new SimpleListProperty<>();
+    private static List<Runnable> backendInstancesUpdatedListeners = new ArrayList<>();
 
     public static String storeBackendModel(Project project, String fileName) throws BackendException, IOException, URISyntaxException {
         return storeBackendModel(project, TEMP_DIRECTORY, fileName);
@@ -46,7 +47,7 @@ public final class BackendHelper {
         FileUtils.forceMkdir(new File(directoryPath));
 
         final String path = directoryPath + File.separator + fileName + ".xml";
-        storeEcdarFile(new EcdarDocument(project).toXmlDocument(),  path);
+        storeEcdarFile(new EcdarDocument(project).toXmlDocument(), path);
 
         return path;
     }
@@ -103,7 +104,7 @@ public final class BackendHelper {
      * @throws BackendException if the document could not be built
      */
     public static void buildEcdarDocument() throws BackendException {
-        ecdarDocument = new EcdarDocument();
+        BackendHelper.ecdarDocument = new EcdarDocument();
     }
 
     /**
@@ -142,24 +143,57 @@ public final class BackendHelper {
         return "E<> (" + String.join(" || ", locationNames) + ") && deadlock";
     }
 
+    /**
+     * Returns the BackendInstance with the specified name, or null, if no such BackendInstance exists
+     *
+     * @param backendInstanceName Name of the BackendInstance to return
+     * @return The BackendInstance with matching name or null if such a BackendInstance does not exist
+     */
     public static BackendInstance getBackendInstanceByName(String backendInstanceName) {
-        Optional<BackendInstance> backendInstance = backendInstances.stream().filter(bi -> bi.getName().equals(backendInstanceName)).findFirst();
+        Optional<BackendInstance> backendInstance = BackendHelper.backendInstances.stream().filter(bi -> bi.getName().equals(backendInstanceName)).findFirst();
         return backendInstance.orElse(null);
     }
 
+    /**
+     * Returns the default BackendInstance
+     *
+     * @return The default BackendInstance
+     */
     public static BackendInstance getDefaultBackendInstance() {
         return defaultBackend;
     }
 
-    public static void setBackendInstances(List<BackendInstance> backendInstances) {
-        BackendHelper.backendInstances = FXCollections.observableList(backendInstances);
+    /**
+     * Sets the list of BackendInstances to match the provided list
+     *
+     * @param updatedBackendInstances The list of BackendInstances that should be stored
+     */
+    public static void updateBackendInstances(ArrayList<BackendInstance> updatedBackendInstances) {
+        BackendHelper.backendInstances = FXCollections.observableList(updatedBackendInstances);
+        for (Runnable runnable : BackendHelper.backendInstancesUpdatedListeners) {
+            runnable.run();
+        }
     }
 
+    /**
+     * Returns the ObservableList of BackendInstances
+     *
+     * @return The ObservableList of BackendInstances
+     */
     public static ObservableList<BackendInstance> getBackendInstances() {
-        return backendInstances;
+        return BackendHelper.backendInstances;
     }
 
+    /**
+     * Sets the default BackendInstance to the provided object
+     *
+     * @param newDefaultBackend The new defaultBackend
+     */
     public static void setDefaultBackendInstance(BackendInstance newDefaultBackend) {
-        defaultBackend = newDefaultBackend;
+        BackendHelper.defaultBackend = newDefaultBackend;
+    }
+
+    public static void addBackendInstanceListener(Runnable runnable) {
+        BackendHelper.backendInstancesUpdatedListeners.add(runnable);
     }
 }
