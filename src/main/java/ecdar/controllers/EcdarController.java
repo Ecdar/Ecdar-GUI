@@ -109,7 +109,6 @@ public class EcdarController implements Initializable {
     public JFXDialog aboutDialog;
     public JFXButton aboutAcceptButton;
     public StackPane canvasPane;
-    public JFXSlider menuBarOptionsNumberOfSocketsSlider;
 
     private double expandHeight = 300;
 
@@ -150,6 +149,9 @@ public class EcdarController implements Initializable {
     public MenuItem menuBarFileExportAsPngNoBorder;
     public MenuItem menuBarOptionsCache;
     public MenuItem menuBarOptionsDefaultBackend;
+    public HBox menuBarOptionsDefaultBackendContent;
+    public Tooltip menuBarOptionsDefaultBackendTooltip;
+    public JFXSlider menuBarOptionsNumberOfSocketsSlider;
     public MenuItem menuBarHelpHelp;
     public MenuItem menuBarHelpAbout;
     public MenuItem menuBarHelpTest;
@@ -214,7 +216,6 @@ public class EcdarController implements Initializable {
         initializeMessages();
         initializeMenuBar();
         initializeReachabilityAnalysisThread();
-
     }
 
     /**
@@ -508,17 +509,27 @@ public class EcdarController implements Initializable {
             menuBarOptionsCache.getGraphic().opacityProperty().bind(new When(isCached).then(1).otherwise(0));
         });
 
+        menuBarOptionsDefaultBackendTooltip = new Tooltip("Change default backend to " +
+                (BackendHelper.defaultBackend.equals(BackendHelper.BackendNames.jEcdar)
+                ? BackendHelper.BackendNames.Reveaal.name()
+                : BackendHelper.BackendNames.jEcdar.name()));
+
+        Tooltip.install(menuBarOptionsDefaultBackendContent, menuBarOptionsDefaultBackendTooltip);
+
         menuBarOptionsDefaultBackend.setOnAction(event -> {
+            menuBarOptionsDefaultBackendTooltip.setText("Change default backend to " + BackendHelper.defaultBackend.name());
             BackendHelper.defaultBackend = (BackendHelper.defaultBackend.equals(BackendHelper.BackendNames.jEcdar)
                     ? BackendHelper.BackendNames.Reveaal
                     : BackendHelper.BackendNames.jEcdar);
 
-            menuBarOptionsDefaultBackend.setText("Default backend: " + BackendHelper.defaultBackend.name());
+            Ecdar.showToast("The default backend was changed to " + BackendHelper.defaultBackend.name());
+            ((Text) menuBarOptionsDefaultBackendContent.getChildrenUnmodifiable().get(1)).setText("Default backend: " + BackendHelper.defaultBackend.name());
 
             Ecdar.preferences.put("default_backend", Integer.toString(BackendHelper.defaultBackend.ordinal()));
+
         });
 
-        menuBarOptionsDefaultBackend.setText("Default backend: " + BackendHelper.defaultBackend.name());
+        ((Text) menuBarOptionsDefaultBackendContent.getChildrenUnmodifiable().get(1)).setText("Default backend: " + BackendHelper.defaultBackend.name());
 
         menuBarOptionsNumberOfSocketsSlider.valueChangingProperty().addListener((observable, oldValue, newValue) -> {
             if (oldValue && !newValue) {

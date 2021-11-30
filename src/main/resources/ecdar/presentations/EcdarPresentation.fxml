@@ -224,11 +224,14 @@
 
                     <SeparatorMenuItem/>
 
-                    <MenuItem fx:id="menuBarOptionsDefaultBackend" text="Backend">
-                        <graphic>
-                            <FontIcon iconLiteral="gmi-autorenew" iconSize="24" fill="black"/>
-                        </graphic>
-                    </MenuItem>
+                    <CustomMenuItem hideOnClick="false" fx:id="menuBarOptionsDefaultBackend">
+                        <content>
+                            <HBox fx:id="menuBarOptionsDefaultBackendContent" spacing="5" alignment="CENTER">
+                                <FontIcon iconLiteral="gmi-autorenew" iconSize="24" fill="black"/>
+                                <Text>Backend</Text>
+                            </HBox>
+                        </content>
+                    </CustomMenuItem>
 
                     <CustomMenuItem hideOnClick="false" styleClass="menu-item-embedded-control">
                         <content>
