@@ -18,6 +18,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class BackendDriver {
     private final Pair<AtomicInteger, AtomicInteger> numberOfReveaalConnections = new Pair<>(new AtomicInteger(0), new AtomicInteger(5));
@@ -45,45 +47,34 @@ public class BackendDriver {
     }
 
     public Pair<ArrayList<String>, ArrayList<String>> getInputOutputs(String query) {
-        if (!query.startsWith("refinement")) {
-            return null;
+        // Pair is used as a tuple, not a key-value pair
+        Pair<ArrayList<String>, ArrayList<String>> inputOutputs = new Pair<>(new ArrayList<>(), new ArrayList<>());
+        ProcessBuilder pb = new ProcessBuilder("src/Reveaal", "-p", this.hostAddress + ":" + SocketUtils.findAvailableTcpPort());
+        try {
+            Process reveaalEngineInstance = pb.start();
+
+//                                @Override
+//                                public void onNext(QueryProtos.QueryResponse value) {
+//                                    if (value.getError().endsWith("extra inputs")){
+//                                        Matcher m = Pattern.compile("[\"]([^\"]+)[\"]").matcher(value.getError());
+//                                        while (m.find()) {
+//                                            inputOutputs.getKey().add(m.group(1));
+//                                        }
+//                                    } else if (value.getError().startsWith("extra outputs")) {
+//                                        Matcher m = Pattern.compile("[\"]([^\"]+)[\"]").matcher(value.getError());
+//                                        while (m.find()) {
+//                                            inputOutputs.getValue().add(m.group(1));
+//                                        }
+//                                    }
+//                                }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
-        // ToDo NIELS: Reimplement with backend connection
+        inputOutputs.getKey().add("input");
+        inputOutputs.getValue().add("output");
 
-//        // Pair is used as a tuple, not a key-value pair
-//        Pair<ArrayList<String>, ArrayList<String>> inputOutputs = new Pair<>(new ArrayList<>(), new ArrayList<>());
-//
-//        ProcessBuilder pb = new ProcessBuilder("src/Reveaal", "-c", Ecdar.projectDirectory.get(), query.replaceAll("\\s", ""));
-//        pb.redirectErrorStream(true);
-//        try {
-//            //Start the j-Ecdar process
-//            Process ReveaalEngineInstance = pb.start();
-//
-//            //Communicate with the j-Ecdar process
-//            try (var ReveaalReader = new BufferedReader(new InputStreamReader(ReveaalEngineInstance.getInputStream()))) {
-//                //Read the result of the query from the j-Ecdar process
-//                String line;
-//                while ((line = ReveaalReader.readLine()) != null) {
-//                    // Process the query result
-//                    if (line.endsWith("extra inputs")){
-//                        Matcher m = Pattern.compile("[\"]([^\"]+)[\"]").matcher(line);
-//                        while(m.find()){
-//                            inputOutputs.getKey().add(m.group(1));
-//                        }
-//                    } else if (line.startsWith("extra outputs")) {
-//                        Matcher m = Pattern.compile("[\"]([^\"]+)[\"]").matcher(line);
-//                        while(m.find()){
-//                            inputOutputs.getValue().add(m.group(1));
-//                        }
-//                    }
-//                }
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//
-        return null; //inputOutputs;
+        return inputOutputs;
     }
 
     public void closeAllSockets() throws IOException {
@@ -219,14 +210,14 @@ public class BackendDriver {
                 break;
             case "INTERNAL":
                 backendConnection.getExecutableQuery().queryListener.getQuery().setQueryState(QueryState.ERROR);
-                backendConnection.getExecutableQuery().failure.accept(new BackendException.QueryErrorException("The backend encountered an internal error"));
+                backendConnection.getExecutableQuery().failure.accept(new BackendException.QueryErrorException("Reveaal was unable to execute this query:\n" + t.getMessage().split(": ", 2)[1]));
 
-                new Timer().schedule(new TimerTask() {
+                /*new Timer().schedule(new TimerTask() {
                     @Override
                     public void run() {
                         query.execute();
                     }
-                }, rerunQueryDelay);
+                }, rerunQueryDelay);*/
 
                 break;
             case "UNKNOWN":
@@ -257,7 +248,6 @@ public class BackendDriver {
     }
 
     private void handleResponse(ExecutableQuery executableQuery, QueryProtos.QueryResponse value) {
-        // ToDo NIELS: Handle error response by Reveaal
         if (value.hasRefinement() && value.getRefinement().getSuccess()) {
             executableQuery.queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
             executableQuery.success.accept(true);
@@ -291,7 +281,7 @@ public class BackendDriver {
                     if (backend.equals(BackendHelper.BackendNames.jEcdar)) {
                         pb = new ProcessBuilder("java", "-jar", "src/libs/j-Ecdar.jar");
                     } else {
-                        pb = new ProcessBuilder("src/Reveaal", "-p", this.hostAddress + ":" + portNumber).redirectErrorStream(true).inheritIO();
+                        pb = new ProcessBuilder("src/Reveaal", "-p", this.hostAddress + ":" + portNumber);
                     }
 
                     p = pb.start();
