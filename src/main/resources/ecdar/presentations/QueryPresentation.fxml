@@ -78,7 +78,7 @@
                 </JFXRippler>
             </HBox>
             <StackPane AnchorPane.leftAnchor="144" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0">
-                <JFXComboBox fx:id="backendsDropdown"/>
+                <JFXComboBox fx:id="backendsDropdown" maxWidth="100"/>
             </StackPane>
         </VBox>
     </StackPane>
