@@ -374,18 +374,14 @@ public class QueryPresentation extends AnchorPane {
         final VBox inputBox = (VBox) inputOutputPane.lookup("#inputBox");
         final VBox outputBox = (VBox) inputOutputPane.lookup("#outputBox");
 
-        // Get inputs and outputs
-        Pair<ArrayList<String>, ArrayList<String>> inputOutputs = Ecdar.getBackendDriver().getInputOutputs(controller.getQuery().getQuery());
-
-        if (inputOutputs == null) return;
+        IgnoredInputOutputQuery query = new IgnoredInputOutputQuery(this.controller.getQuery(), this, controller.getQuery().ignoredInputs, inputBox, controller.getQuery().ignoredOutputs, outputBox);
 
         if (shouldResetSelections) {
             // Reset selections for ignored inputs and outputs
             clearIgnoredInputsAndOutputs(inputBox, outputBox);
         }
 
-        addNewElementsToMap(inputOutputs.getKey(), controller.getQuery().ignoredInputs, inputBox);
-        addNewElementsToMap(inputOutputs.getValue(), controller.getQuery().ignoredOutputs, outputBox);
+        Ecdar.getBackendDriver().getInputOutputs(query);
     }
 
     private void clearIgnoredInputsAndOutputs(VBox inputBox, VBox outputBox) {
@@ -398,17 +394,7 @@ public class QueryPresentation extends AnchorPane {
         });
     }
 
-    private void addNewElementsToMap(ArrayList<String> keys, HashMap<String, Boolean> associatedMap, VBox associatedVBox) {
-        // Add inputs to list and as checkboxes in UI
-        for (String key : keys) {
-            if (!associatedMap.containsKey(key)) {
-                addInputOrOutput(key, false, associatedMap, associatedVBox);
-                associatedMap.put(key, false);
-            }
-        }
-    }
-
-    private void addInputOrOutput(String name, Boolean state, Map<String, Boolean> associatedMap, VBox associatedBox) {
+    public void addInputOrOutput(String name, Boolean state, Map<String, Boolean> associatedMap, VBox associatedBox) {
         HBox sliderBox = new HBox();
         sliderBox.setAlignment(Pos.CENTER_LEFT);
 

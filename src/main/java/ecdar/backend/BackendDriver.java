@@ -6,6 +6,7 @@ import EcdarProtoBuf.QueryProtos;
 import com.google.protobuf.Empty;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
+import ecdar.abstractions.Query;
 import ecdar.abstractions.QueryState;
 import io.grpc.*;
 import io.grpc.stub.StreamObserver;
@@ -35,6 +36,15 @@ public class BackendDriver {
 
     public BackendDriver(String hostAddress) {
         this.hostAddress = hostAddress;
+        Timer t = new Timer();
+        TimerTask tt = new TimerTask() {
+            @Override
+            public void run() {
+                System.out.println(numberOfReveaalConnections.getKey());
+            }
+        };
+
+        t.schedule(tt, 2000);
     }
 
     public void addQueryToExecutionQueue(String query, BackendHelper.BackendNames backend, Consumer<Boolean> success, Consumer<BackendException> failure, QueryListener queryListener) {
@@ -46,35 +56,75 @@ public class BackendDriver {
         }, rerunQueryDelay);
     }
 
-    public Pair<ArrayList<String>, ArrayList<String>> getInputOutputs(String query) {
-        // Pair is used as a tuple, not a key-value pair
-        Pair<ArrayList<String>, ArrayList<String>> inputOutputs = new Pair<>(new ArrayList<>(), new ArrayList<>());
-        ProcessBuilder pb = new ProcessBuilder("src/Reveaal", "-p", this.hostAddress + ":" + SocketUtils.findAvailableTcpPort());
-        try {
-            Process reveaalEngineInstance = pb.start();
+    /**
+     * Asynchronous method for fetching inputs and outputs for the given refinement query and adding these to the
+     * ignored inputs and outputs pane for the given query
+     *
+     * @param query the ignored input output query containing the query and related GUI elements
+     */
+    public void getInputOutputs(IgnoredInputOutputQuery query) {
+        ExecutableQuery executableQuery = new ExecutableQuery(query.getQuery().getQuery(), BackendHelper.BackendNames.Reveaal, a -> {}, e -> {}, new QueryListener(query.getQuery()));
 
-//                                @Override
-//                                public void onNext(QueryProtos.QueryResponse value) {
-//                                    if (value.getError().endsWith("extra inputs")){
-//                                        Matcher m = Pattern.compile("[\"]([^\"]+)[\"]").matcher(value.getError());
-//                                        while (m.find()) {
-//                                            inputOutputs.getKey().add(m.group(1));
-//                                        }
-//                                    } else if (value.getError().startsWith("extra outputs")) {
-//                                        Matcher m = Pattern.compile("[\"]([^\"]+)[\"]").matcher(value.getError());
-//                                        while (m.find()) {
-//                                            inputOutputs.getValue().add(m.group(1));
-//                                        }
-//                                    }
-//                                }
-        } catch (IOException e) {
-            e.printStackTrace();
+        // Get available connection or start new
+        final Optional<BackendConnection> connection;
+        connection = reveaalConnections.stream().filter((element) -> !element.isRunningQuery()).findFirst();
+
+        final BackendConnection backendConnection = connection.orElseGet(() ->
+                (startNewBackendConnection(BackendHelper.BackendNames.Reveaal, numberOfReveaalConnections, reveaalConnections)));
+        // If the query connection is null, there are no available sockets
+        // and the maximum number of sockets has already been reached
+        if (backendConnection == null) {
+            new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    getInputOutputs(query);
+                }
+            }, rerunQueryDelay);
+            return;
         }
 
-        inputOutputs.getKey().add("input");
-        inputOutputs.getValue().add("output");
+        backendConnection.setExecutableQuery(executableQuery);
 
-        return inputOutputs;
+        QueryProtos.ComponentsUpdateRequest.Builder componentsBuilder = QueryProtos.ComponentsUpdateRequest.newBuilder();
+        for (Component c : Ecdar.getProject().getComponents()) {
+            componentsBuilder.addComponents(ComponentProtos.Component.newBuilder().setJson(c.serialize().toString()).build());
+        }
+
+        StreamObserver<Empty> observer = new StreamObserver<>() {
+            private boolean error = false;
+
+            @Override
+            public void onNext(Empty value) {
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                error = true;
+            }
+
+            @Override
+            public void onCompleted() {
+                if (!error) {
+                    StreamObserver<EcdarProtoBuf.QueryProtos.QueryResponse> responseObserver = new StreamObserver<>() {
+                        @Override
+                        public void onNext(QueryProtos.QueryResponse value) {
+
+                        }
+
+                        @Override
+                        public void onError(Throwable t) {}
+
+                        @Override
+                        public void onCompleted() {
+                            backendConnection.setExecutableQuery(null);
+                        }
+                    };
+                    backendConnection.getStub().withDeadlineAfter(deadlineForResponses, TimeUnit.MILLISECONDS).sendQuery(QueryProtos.Query.newBuilder().setId(0).setQuery(query.getQuery().getQuery()).build(), responseObserver);
+                }
+            }
+        };
+
+        backendConnection.getStub().withDeadlineAfter(deadlineForResponses, TimeUnit.MILLISECONDS).updateComponents(componentsBuilder.build(), observer);
     }
 
     public void closeAllSockets() throws IOException {
@@ -86,7 +136,18 @@ public class BackendDriver {
         numberOfReveaalConnections.getValue().set(i);
         // numberOfJEcdarConnections.getValue().set(i);
 
-        // ToDo NIELS: Potentially close connections until within new range [0, i]
+        while(numberOfReveaalConnections.getKey().get() > numberOfReveaalConnections.getKey().get()) {
+            BackendConnection unoccupiedConnection = reveaalConnections.stream().filter(backendConnection -> backendConnection.executableQuery == null).findFirst().orElse(null);
+            if (unoccupiedConnection != null) {
+                try {
+                    unoccupiedConnection.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    numberOfReveaalConnections.getKey().decrementAndGet();
+                }
+            }
+        }
     }
 
     public int getMaxNumberOfSockets() {
@@ -326,6 +387,9 @@ public class BackendDriver {
             this.queryListener = queryListener;
         }
 
+        /**
+         * Execute the query using the backend driver
+         */
         public void execute() {
             executeQuery(this);
         }
@@ -341,22 +405,47 @@ public class BackendDriver {
             this.stub = stub;
         }
 
+        /**
+         * Get the gRPC stub of the connection to use for query execution
+         *
+         * @return the gRPC stub of this connection
+         */
         public EcdarBackendGrpc.EcdarBackendStub getStub() {
             return stub;
         }
 
+        /**
+         * Get the executable query currently being executed or waiting for execution with this connection
+         *
+         * @return the query
+         */
         public ExecutableQuery getExecutableQuery() {
             return executableQuery;
         }
 
+        /**
+         * Set the executable query to execute with the connection
+         *
+         * @param executableQuery query to execute
+         */
         public void setExecutableQuery(ExecutableQuery executableQuery) {
             this.executableQuery = executableQuery;
         }
 
+        /**
+         * Get whether this backend connection is currently occupied with execution of a query
+         *
+         * @return true if the connection is in use
+         */
         public boolean isRunningQuery() {
             return executableQuery != null;
         }
 
+        /**
+         * Close the gRPC connection and end the process
+         *
+         * @throws IOException originally thrown by the destroy method on java.lang.Process
+         */
         public void close() throws IOException {
             // Remove the socket from the socket list
 //            if (jEcdarConnections.remove(this)) {
