@@ -6,7 +6,6 @@ import EcdarProtoBuf.QueryProtos;
 import com.google.protobuf.Empty;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
-import ecdar.abstractions.Query;
 import ecdar.abstractions.QueryState;
 import io.grpc.*;
 import io.grpc.stub.StreamObserver;
@@ -19,15 +18,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class BackendDriver {
     private final Pair<AtomicInteger, AtomicInteger> numberOfReveaalConnections = new Pair<>(new AtomicInteger(0), new AtomicInteger(5));
     private final List<BackendConnection> reveaalConnections = new CopyOnWriteArrayList<>();
 
-//    private final Pair<AtomicInteger, AtomicInteger> numberOfJEcdarConnections = new Pair<>(new AtomicInteger(0), new AtomicInteger(5));
-//    private final List<BackendConnection> jEcdarConnections = new CopyOnWriteArrayList<>();
+    private final Pair<AtomicInteger, AtomicInteger> numberOfJEcdarConnections = new Pair<>(new AtomicInteger(0), new AtomicInteger(5));
+    private final List<BackendConnection> jEcdarConnections = new CopyOnWriteArrayList<>();
 
     private final String hostAddress;
 
@@ -47,6 +44,15 @@ public class BackendDriver {
         t.schedule(tt, 2000);
     }
 
+    /**
+     * Add the query to execution queue with consumers for success and failure, executed when response received from backends
+     *
+     * @param query         the query to be executed
+     * @param backend       the backend to execute the query on
+     * @param success       consumer for a successful response
+     * @param failure       consumer for a failure response
+     * @param queryListener query listener for referencing the query for GUI purposes
+     */
     public void addQueryToExecutionQueue(String query, BackendHelper.BackendNames backend, Consumer<Boolean> success, Consumer<BackendException> failure, QueryListener queryListener) {
         new Timer().schedule(new TimerTask() {
             @Override
@@ -63,7 +69,14 @@ public class BackendDriver {
      * @param query the ignored input output query containing the query and related GUI elements
      */
     public void getInputOutputs(IgnoredInputOutputQuery query) {
-        ExecutableQuery executableQuery = new ExecutableQuery(query.getQuery().getQuery(), BackendHelper.BackendNames.Reveaal, a -> {}, e -> {}, new QueryListener(query.getQuery()));
+        ExecutableQuery executableQuery = new ExecutableQuery(query.getQuery().getQuery(), BackendHelper.BackendNames.Reveaal,
+                a -> {
+                    
+                },
+                e -> {
+
+                },
+                new QueryListener(query.getQuery()));
 
         // Get available connection or start new
         final Optional<BackendConnection> connection;
@@ -108,18 +121,23 @@ public class BackendDriver {
                     StreamObserver<EcdarProtoBuf.QueryProtos.QueryResponse> responseObserver = new StreamObserver<>() {
                         @Override
                         public void onNext(QueryProtos.QueryResponse value) {
-
+                            if (value.hasQuery() && value.getQuery().hasIgnoredInputOutputs()) {
+                                System.out.println(value.getQuery().getIgnoredInputOutputs());
+                            } else {
+                                System.out.println("Not the desired output: " + value);
+                            }
                         }
 
                         @Override
-                        public void onError(Throwable t) {}
+                        public void onError(Throwable t) {
+                        }
 
                         @Override
                         public void onCompleted() {
                             backendConnection.setExecutableQuery(null);
                         }
                     };
-                    backendConnection.getStub().withDeadlineAfter(deadlineForResponses, TimeUnit.MILLISECONDS).sendQuery(QueryProtos.Query.newBuilder().setId(0).setQuery(query.getQuery().getQuery()).build(), responseObserver);
+                    backendConnection.getStub().withDeadlineAfter(deadlineForResponses, TimeUnit.MILLISECONDS).sendQuery(QueryProtos.Query.newBuilder().setId(0).setQuery(query.getQuery().getQuery()).setIgnoredInputOutputs(QueryProtos.IgnoredInputOutputs.newBuilder().getDefaultInstanceForType()).build(), responseObserver);
                 }
             }
         };
@@ -129,14 +147,14 @@ public class BackendDriver {
 
     public void closeAllSockets() throws IOException {
         for (BackendConnection s : reveaalConnections) s.close();
-        // for (BackendConnection s : jEcdarConnections) s.close();
+        for (BackendConnection s : jEcdarConnections) s.close();
     }
 
     public void setMaxNumberOfSockets(int i) {
         numberOfReveaalConnections.getValue().set(i);
-        // numberOfJEcdarConnections.getValue().set(i);
+        numberOfJEcdarConnections.getValue().set(i);
 
-        while(numberOfReveaalConnections.getKey().get() > numberOfReveaalConnections.getKey().get()) {
+        while (numberOfReveaalConnections.getKey().get() > numberOfReveaalConnections.getKey().get()) {
             BackendConnection unoccupiedConnection = reveaalConnections.stream().filter(backendConnection -> backendConnection.executableQuery == null).findFirst().orElse(null);
             if (unoccupiedConnection != null) {
                 try {
@@ -157,24 +175,16 @@ public class BackendDriver {
     private void executeQuery(ExecutableQuery executableQuery) {
         if (executableQuery.queryListener.getQuery().getQueryState() == QueryState.UNKNOWN) return;
 
-        if (executableQuery.backend.equals(BackendHelper.BackendNames.jEcdar)) {
-            jEcdarThread jECDARBackendThread = new jEcdarThread(executableQuery.query, executableQuery.success, executableQuery.failure, executableQuery.queryListener);
-            jECDARBackendThread.start();
-            return;
-        }
-
         // Get available connection or start new
         final Optional<BackendConnection> connection;
-//        if (executableQuery.backend.equals(BackendHelper.BackendNames.jEcdar)) {
-//            connection = jEcdarConnections.stream().filter((element) -> !element.isRunningQuery()).findFirst();
-//        } else {
-        connection = reveaalConnections.stream().filter((element) -> !element.isRunningQuery()).findFirst();
-        //}
+        if (executableQuery.backend.equals(BackendHelper.BackendNames.jEcdar)) {
+            connection = jEcdarConnections.stream().filter((element) -> !element.isRunningQuery()).findFirst();
+        } else {
+            connection = reveaalConnections.stream().filter((element) -> !element.isRunningQuery()).findFirst();
+        }
 
-        final BackendConnection backendConnection = connection.orElseGet(() ->
-                (startNewBackendConnection(BackendHelper.BackendNames.Reveaal, numberOfReveaalConnections, reveaalConnections)));
-
-        // : startNewBackendConnection(BackendHelper.BackendNames.jEcdar, numberOfJEcdarConnections, jEcdarConnections)
+        final BackendConnection backendConnection = connection.orElseGet(() -> executableQuery.backend.equals(BackendHelper.BackendNames.jEcdar) ?
+                (startNewBackendConnection(BackendHelper.BackendNames.Reveaal, numberOfReveaalConnections, reveaalConnections)) : startNewBackendConnection(BackendHelper.BackendNames.jEcdar, numberOfJEcdarConnections, jEcdarConnections));
 
         // If the query connection is null, there are no available sockets
         // and the maximum number of sockets has already been reached
@@ -272,14 +282,6 @@ public class BackendDriver {
             case "INTERNAL":
                 backendConnection.getExecutableQuery().queryListener.getQuery().setQueryState(QueryState.ERROR);
                 backendConnection.getExecutableQuery().failure.accept(new BackendException.QueryErrorException("Reveaal was unable to execute this query:\n" + t.getMessage().split(": ", 2)[1]));
-
-                /*new Timer().schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        query.execute();
-                    }
-                }, rerunQueryDelay);*/
-
                 break;
             case "UNKNOWN":
                 backendConnection.getExecutableQuery().queryListener.getQuery().setQueryState(QueryState.ERROR);
@@ -288,13 +290,6 @@ public class BackendDriver {
             default:
                 backendConnection.getExecutableQuery().queryListener.getQuery().setQueryState(QueryState.ERROR);
                 backendConnection.getExecutableQuery().failure.accept(new BackendException.QueryErrorException("The query failed and gave the following error: " + errorType));
-
-                new Timer().schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        query.execute();
-                    }
-                }, rerunQueryDelay);
 
                 try {
                     backendConnection.close();
@@ -366,7 +361,7 @@ public class BackendDriver {
                 e.printStackTrace();
             }
         } else {
-            System.out.println("Max number of sockets already reached");
+//            System.out.println("Max number of sockets already reached");
         }
 
         return null;
@@ -448,10 +443,9 @@ public class BackendDriver {
          */
         public void close() throws IOException {
             // Remove the socket from the socket list
-//            if (jEcdarConnections.remove(this)) {
-//                numberOfJEcdarConnections.getKey().getAndDecrement();
-            /*} else */
-            if (reveaalConnections.remove(this)) {
+            if (jEcdarConnections.remove(this)) {
+                numberOfJEcdarConnections.getKey().getAndDecrement();
+            } else if (reveaalConnections.remove(this)) {
                 numberOfReveaalConnections.getKey().getAndDecrement();
             }
 
