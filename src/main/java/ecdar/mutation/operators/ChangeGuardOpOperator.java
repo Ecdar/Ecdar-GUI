@@ -38,7 +38,7 @@ public abstract class ChangeGuardOpOperator extends MutationOperator {
             final Edge originalEdge = original.getEdges().get(edgeIndex);
 
             // Ignore if locked (e.g. if edge on the Inconsistent or Universal locations)
-            if (originalEdge.getIsLocked().get()) continue;
+            if (originalEdge.getIsLockedProperty().get()) continue;
 
             // Ignore if guard is empty
             if (originalEdge.getGuard().isEmpty()) continue;
@@ -75,7 +75,7 @@ public abstract class ChangeGuardOpOperator extends MutationOperator {
                             new TextFlowBuilder().text("Changed ").boldText("guard").text(" of ")
                                     .edgeLinks(originalEdge, original.getName()).text(" from ")
                                     .boldText(originalEdge.getGuard()).text(" to ")
-                                    .boldText(mutant.getEdges().get(edgeIndex).getGuard()).build()
+                                    .boldText(mutant.getDisplayableEdges().get(edgeIndex).getGuard()).build()
                     ));
                 }
             }
@@ -113,7 +113,7 @@ public abstract class ChangeGuardOpOperator extends MutationOperator {
         final String[] newSimpleGuards = originalSimpleGuards.clone();
         newSimpleGuards[simpleGuardIndex] = newSimpleGuard;
 
-        mutant.getEdges().get(edgeIndex).setGuard(String.join("&&", newSimpleGuards));
+        mutant.getDisplayableEdges().get(edgeIndex).setGuard(String.join("&&", newSimpleGuards));
 
         return mutant;
     }

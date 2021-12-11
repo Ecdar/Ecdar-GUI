@@ -4,8 +4,6 @@ import com.google.gson.GsonBuilder;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Project;
-import ecdar.abstractions.SimpleComponentsSystemDeclarations;
-import ecdar.backend.BackendDriverManager;
 import ecdar.backend.BackendException;
 import ecdar.backend.BackendHelper;
 import ecdar.mutation.models.MutationTestCase;
@@ -136,12 +134,11 @@ class ExportHandler {
     private static void storeMutantXml(final MutationTestCase testCase) throws BackendException, IOException, URISyntaxException {
         final Component mutant = testCase.getMutant();
 
-        // make a project with the mutant
+        // Make a project with the mutant
         final Project project = new Project();
         project.getComponents().add(mutant);
         project.setGlobalDeclarations(Ecdar.getProject().getGlobalDeclarations());
         mutant.updateIOList(); // Update io in order to get the right system declarations for the mutant
-        project.setSystemDeclarations(new SimpleComponentsSystemDeclarations(mutant));
 
         BackendHelper.storeBackendModel(project, "mutants" + File.separator + "xml", testCase.getId());
     }

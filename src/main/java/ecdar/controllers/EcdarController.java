@@ -3,7 +3,6 @@ package ecdar.controllers;
 import ecdar.Debug;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
-import ecdar.backend.BackendDriverManager;
 import ecdar.backend.BackendException;
 import ecdar.backend.BackendHelper;
 import ecdar.code_analysis.CodeAnalysis;
@@ -149,6 +148,10 @@ public class EcdarController implements Initializable {
     public MenuItem menuBarFileExportAsPng;
     public MenuItem menuBarFileExportAsPngNoBorder;
     public MenuItem menuBarOptionsCache;
+    public MenuItem menuBarOptionsDefaultBackend;
+    public HBox menuBarOptionsDefaultBackendContent;
+    public Tooltip menuBarOptionsDefaultBackendTooltip;
+    public JFXSlider menuBarOptionsNumberOfSocketsSlider;
     public MenuItem menuBarHelpHelp;
     public MenuItem menuBarHelpAbout;
     public MenuItem menuBarHelpTest;
@@ -219,7 +222,6 @@ public class EcdarController implements Initializable {
         initializeMessages();
         initializeMenuBar();
         initializeReachabilityAnalysisThread();
-
     }
 
     /**
@@ -400,29 +402,30 @@ public class EcdarController implements Initializable {
                         component.getLocations().forEach(location -> location.setReachability(Location.Reachability.EXCLUDED));
                     } else {
                         component.getLocations().forEach(location -> {
-                            final String locationReachableQuery = BackendDriverManager.getInstance().getLocationReachableQuery(location, component);
-                            final Thread verifyThread = BackendDriverManager.getInstance().getBackendThreadForQuery(
-                                    locationReachableQuery,
-                                    (result -> {
-                                        if (result) {
-                                            location.setReachability(Location.Reachability.REACHABLE);
-                                        } else {
-                                            location.setReachability(Location.Reachability.UNREACHABLE);
-                                        }
-                                        Debug.removeThread(Thread.currentThread());
-                                    }),
-                                    (e) -> {
-                                        location.setReachability(Location.Reachability.UNKNOWN);
-                                        Debug.removeThread(Thread.currentThread());
-                                    },
-                                    2000
-                            );
-
-                            if(verifyThread != null){
-                                verifyThread.setName(locationReachableQuery + " (" + verifyThread.getName() + ")");
-                                Debug.addThread(verifyThread);
-                                threads.add(verifyThread);
-                            }
+                            final String locationReachableQuery = BackendHelper.getLocationReachableQuery(location, component);
+                            // ToDo NIELS: Needs new implementation after thread pool implementation
+//                            final Thread verifyThread = BackendDriverManager.getInstance().getBackendThreadForQuery(
+//                                    locationReachableQuery,
+//                                    (result -> {
+//                                        if (result) {
+//                                            location.setReachability(Location.Reachability.REACHABLE);
+//                                        } else {
+//                                            location.setReachability(Location.Reachability.UNREACHABLE);
+//                                        }
+//                                        Debug.removeThread(Thread.currentThread());
+//                                    }),
+//                                    (e) -> {
+//                                        location.setReachability(Location.Reachability.UNKNOWN);
+//                                        Debug.removeThread(Thread.currentThread());
+//                                    },
+//                                    2000
+//                            );
+//
+//                            if(verifyThread != null){
+//                                verifyThread.setName(locationReachableQuery + " (" + verifyThread.getName() + ")");
+//                                Debug.addThread(verifyThread);
+//                                threads.add(verifyThread);
+//                            }
                         });
                     }
                 });
@@ -483,7 +486,7 @@ public class EcdarController implements Initializable {
 
         initializeViewMenu();
 
-        initializeUICacheMenuElement();
+        initializeOptionsMenu();
 
         initializeHelpMenu();
     }
@@ -518,11 +521,43 @@ public class EcdarController implements Initializable {
     /**
      * Initializes the UI Cache menu element.
      */
-    private void initializeUICacheMenuElement() {
+    private void initializeOptionsMenu() {
         menuBarOptionsCache.setOnAction(event -> {
             final BooleanProperty isCached = Ecdar.toggleUICache();
             menuBarOptionsCache.getGraphic().opacityProperty().bind(new When(isCached).then(1).otherwise(0));
         });
+
+        menuBarOptionsDefaultBackendTooltip = new Tooltip("Change default backend to " +
+                (BackendHelper.defaultBackend.equals(BackendHelper.BackendNames.jEcdar)
+                ? BackendHelper.BackendNames.Reveaal.name()
+                : BackendHelper.BackendNames.jEcdar.name()));
+
+        Tooltip.install(menuBarOptionsDefaultBackendContent, menuBarOptionsDefaultBackendTooltip);
+
+        menuBarOptionsDefaultBackend.setOnAction(event -> {
+            menuBarOptionsDefaultBackendTooltip.setText("Change default backend to " + BackendHelper.defaultBackend.name());
+            BackendHelper.defaultBackend = (BackendHelper.defaultBackend.equals(BackendHelper.BackendNames.jEcdar)
+                    ? BackendHelper.BackendNames.Reveaal
+                    : BackendHelper.BackendNames.jEcdar);
+
+            Ecdar.showToast("The default backend was changed to " + BackendHelper.defaultBackend.name());
+            ((Text) menuBarOptionsDefaultBackendContent.getChildrenUnmodifiable().get(1)).setText("Default backend: " + BackendHelper.defaultBackend.name());
+
+            Ecdar.preferences.put("default_backend", Integer.toString(BackendHelper.defaultBackend.ordinal()));
+
+        });
+
+        ((Text) menuBarOptionsDefaultBackendContent.getChildrenUnmodifiable().get(1)).setText("Default backend: " + BackendHelper.defaultBackend.name());
+
+        menuBarOptionsNumberOfSocketsSlider.valueChangingProperty().addListener((observable, oldValue, newValue) -> {
+            if (oldValue && !newValue) {
+                int newIntValue = (int) Math.round(menuBarOptionsNumberOfSocketsSlider.getValue());
+                Ecdar.getBackendDriver().setMaxNumberOfConnections(newIntValue);
+                Ecdar.preferences.put("number_of_backend_sockets", Integer.toString(newIntValue));
+            }
+        });
+
+        menuBarOptionsNumberOfSocketsSlider.setValue(Ecdar.getBackendDriver().getMaxNumberOfSockets());
     }
 
     private void initializeEditMenu() {
@@ -856,6 +891,7 @@ public class EcdarController implements Initializable {
 
         // Update the startIndex for the next canvasShellPresentation
         for (int i = 0; i < numComponents; i++) {
+
             if (canvasShellPresentation.getController().canvasPresentation.getController().getActiveModel() != null && canvasShellPresentation.getController().canvasPresentation.getController().getActiveModel().equals(components.get(i))) {
                 currentCompNum = i + 1;
             }
@@ -1306,10 +1342,10 @@ public class EcdarController implements Initializable {
                 ((LocationController) selectable).tryDelete();
             } else if (selectable instanceof EdgeController) {
                 final Component component = ((EdgeController) selectable).getComponent();
-                final Edge edge = ((EdgeController) selectable).getEdge();
+                final DisplayableEdge edge = ((EdgeController) selectable).getEdge();
 
                 // Dont delete edge if it is locked
-                if(edge.getIsLocked().getValue()){return;}
+                if(edge.getIsLockedProperty().getValue()){return;}
 
                 UndoRedoStack.pushAndPerform(() -> { // Perform
                     // Remove the edge

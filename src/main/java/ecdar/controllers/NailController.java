@@ -2,9 +2,7 @@ package ecdar.controllers;
 
 import ecdar.Debug;
 import ecdar.Ecdar;
-import ecdar.abstractions.Component;
-import ecdar.abstractions.Edge;
-import ecdar.abstractions.Nail;
+import ecdar.abstractions.*;
 import ecdar.presentations.*;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
@@ -26,6 +24,8 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class NailController implements Initializable, SelectHelper.ItemSelectable, Nudgeable {
@@ -33,7 +33,7 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
     public static boolean nailBeingDragged = false;
 
     private final ObjectProperty<Component> component = new SimpleObjectProperty<>();
-    private final ObjectProperty<Edge> edge = new SimpleObjectProperty<>();
+    private final ObjectProperty<DisplayableEdge> edge = new SimpleObjectProperty<>();
     private final ObjectProperty<Nail> nail = new SimpleObjectProperty<>();
 
     private EdgeController edgeController;
@@ -84,15 +84,18 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
 
         if (getNail().getPropertyType().equals(Edge.PropertyType.SYNCHRONIZATION)) {
             contextMenu.addMenuElement(edgeController.getChangeStatusMenuElement(contextMenu));
+            if (getEdge() instanceof Edge) {
+                contextMenu.addMenuElement(edgeController.getMultiSyncEdgeMenuElement(contextMenu));
+            }
         } else {
             // Only delete option if not sync nail
-            contextMenu.addClickableAndDisableableListElement("Delete", getEdge().getIsLocked(), (mouseEvent -> {
+            contextMenu.addClickableAndDisableableListElement("Delete", getEdge().getIsLockedProperty(), (mouseEvent -> {
                 final Nail nail = getNail();
-                final Edge edge = getEdge();
+                final DisplayableEdge edge = getEdge();
                 final Component component = getComponent();
                 final int index = edge.getNails().indexOf(nail);
 
-                final String restoreProperty = edge.getProperty(nail.getPropertyType());
+                final List<String> restoreProperty = edge.getProperty(nail.getPropertyType());
 
                 // If the last nail on a self loop for a location, delete the edge too
                 final boolean shouldDeleteEdgeAlso = edge.isSelfLoop() && edge.getNails().size() == 1;
@@ -106,7 +109,10 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
                 UndoRedoStack.pushAndPerform(
                         () -> {
                             edge.removeNail(nail);
-                            edge.setProperty(nail.getPropertyType(), "");
+
+                            List<String> nailProperty = new ArrayList<>();
+                            nailProperty.add("");
+                            edge.setProperty(nail.getPropertyType(), nailProperty);
                             if(shouldDeleteEdgeAlso) {
                                 component.removeEdge(edge);
                             }
@@ -129,10 +135,10 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
     }
 
     public void tryDelete() {
-        final Edge edge = getEdge();
+        final DisplayableEdge edge = getEdge();
 
         // Do not delete nail if its edge is locked or nail is sync nail
-        if (edge.getIsLocked().getValue()) {
+        if (edge.getIsLockedProperty().getValue()) {
             root.shake();
             Ecdar.showToast("This nail is locked. You cannot delete it.");
             return;
@@ -146,7 +152,7 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
         final Nail nail = getNail();
         final int index = edge.getNails().indexOf(nail);
 
-        final String restoreProperty = edge.getProperty(nail.getPropertyType());
+        final List<String> restoreProperty = edge.getProperty(nail.getPropertyType());
 
         // If the last nail on a self loop for a location delete the edge too
         final boolean shouldDeleteEdgeAlso = edge.isSelfLoop() && edge.getNails().size() == 1;
@@ -160,7 +166,10 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
         UndoRedoStack.pushAndPerform(
                 () -> {
                     edge.removeNail(nail);
-                    edge.setProperty(nail.getPropertyType(), "");
+
+                    List<String> nailProperty = new ArrayList<>();
+                    nailProperty.add("");
+                    edge.setProperty(nail.getPropertyType(), nailProperty);
                     if(shouldDeleteEdgeAlso) {
                         component.removeEdge(edge);
                     }
@@ -178,11 +187,14 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
     }
 
     private void initializeMouseControls() {
-
         root.addEventHandler(MouseEvent.MOUSE_PRESSED, event -> {
             event.consume();
             if (event.isShortcutDown()) {
-                SelectHelper.addToSelection(this);
+                if (SelectHelper.getSelectedElements().contains(this)) {
+                    SelectHelper.deselect(this);
+                } else {
+                    SelectHelper.addToSelection(this);
+                }
             } else if(event.isSecondaryButtonDown()) {
                 showContextMenu();
             } else {
@@ -220,15 +232,15 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
         return component;
     }
 
-    public Edge getEdge() {
+    public DisplayableEdge getEdge() {
         return edge.get();
     }
 
-    public void setEdge(final Edge edge) {
+    public void setEdge(final DisplayableEdge edge) {
         this.edge.set(edge);
     }
 
-    public ObjectProperty<Edge> edgeProperty() {
+    public ObjectProperty<DisplayableEdge> edgeProperty() {
         return edge;
     }
 
@@ -285,6 +297,16 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
     @Override
     public double getY() {
         return yProperty().get();
+    }
+
+    @Override
+    public double getSelectableWidth() {
+        return nailCircle.getRadius() * 2;
+    }
+
+    @Override
+    public double getSelectableHeight() {
+        return nailCircle.getRadius() * 2;
     }
 
     @Override

@@ -2,6 +2,8 @@ package ecdar.backend;
 
 import com.uppaal.model.core2.Document;
 import ecdar.Ecdar;
+import ecdar.abstractions.Component;
+import ecdar.abstractions.Location;
 import ecdar.abstractions.Project;
 import ecdar.abstractions.Query;
 import org.apache.commons.io.FileUtils;
@@ -12,11 +14,15 @@ import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 public final class BackendHelper {
     final static String TEMP_DIRECTORY = "temporary";
     private static EcdarDocument ecdarDocument;
+    public static BackendHelper.BackendNames defaultBackend = BackendHelper.BackendNames.jEcdar;
+
     public static String storeBackendModel(Project project, String fileName) throws BackendException, IOException, URISyntaxException {
         return storeBackendModel(project, TEMP_DIRECTORY, fileName);
     }
@@ -70,6 +76,16 @@ public final class BackendHelper {
     }
 
     /**
+     * Check if the given backend supports ignored inputs and outputs as parameters.
+     *
+     * @param backend the name of the backend to check
+     * @return true if the backend supports ignored inputs and outputs, else false
+     */
+    public static Boolean backendSupportsInputOutputs(BackendHelper.BackendNames backend) {
+        return backend == BackendHelper.BackendNames.Reveaal;
+    }
+
+    /**
      * Gets the directory path for storing temporary files.
      *
      * @return the path
@@ -93,6 +109,35 @@ public final class BackendHelper {
      */
     public static void stopQueries() {
         Ecdar.getProject().getQueries().forEach(Query::cancel);
+    }
+
+    /**
+     * Generates a reachability query based on the given location and component
+     *
+     * @param location  The location which should be checked for reachability
+     * @param component The component where the location belong to / are placed
+     * @return A reachability query string
+     */
+    public static String getLocationReachableQuery(final Location location, final Component component) {
+        return "E<> " + component.getName() + "." + location.getId();
+    }
+
+    /**
+     * Generates a string for a deadlock query based on the component
+     *
+     * @param component The component which should be checked for deadlocks
+     * @return A deadlock query string
+     */
+    public static String getExistDeadlockQuery(final Component component) {
+        // Get the names of the locations of this component. Used to produce the deadlock query
+        final String templateName = component.getName();
+        final List<String> locationNames = new ArrayList<>();
+
+        for (final Location location : component.getLocations()) {
+            locationNames.add(templateName + "." + location.getId());
+        }
+
+        return "E<> (" + String.join(" || ", locationNames) + ") && deadlock";
     }
 
     /**

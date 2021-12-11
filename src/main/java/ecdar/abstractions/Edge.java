@@ -1,22 +1,20 @@
 package ecdar.abstractions;
 
 import com.google.gson.JsonPrimitive;
-import ecdar.code_analysis.Nearable;
+import ecdar.Ecdar;
 import ecdar.controllers.EcdarController;
-import ecdar.presentations.Grid;
-import ecdar.utility.colors.Color;
-import ecdar.utility.helpers.Circular;
 import ecdar.utility.serialize.Serializable;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import javafx.beans.property.*;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class Edge implements Serializable, Nearable {
+public class Edge extends DisplayableEdge implements Serializable {
 
+    private static final String ID = "id";
+    private static final String GROUP = "group";
     private static final String SOURCE_LOCATION = "sourceLocation";
     private static final String TARGET_LOCATION = "targetLocation";
     private static final String SELECT = "select";
@@ -26,36 +24,21 @@ public class Edge implements Serializable, Nearable {
     private static final String NAILS = "nails";
     private static final String STATUS = "status";
     private static final String IS_LOCKED = "isLocked";
+    public static final String EDGE = "E";
+    public static final String EDGE_GROUP = "EG";
+    static final int ID_LETTER_LENGTH = 1;
 
-    // Defines if this is an input or an output edge
-    public ObjectProperty<EdgeStatus> ioStatus;
-
-    // Verification properties
-    private final ObjectProperty<Location> sourceLocation = new SimpleObjectProperty<>();
-    private final ObjectProperty<Location> targetLocation = new SimpleObjectProperty<>();
-
-    private final StringProperty select = new SimpleStringProperty("");
-    private final StringProperty guard = new SimpleStringProperty("");
-    private final StringProperty update = new SimpleStringProperty("");
     private final StringProperty sync = new SimpleStringProperty("");
-
-    // Styling properties
-    private final ObjectProperty<Color> color = new SimpleObjectProperty<>(Color.GREY_BLUE);
-    private final ObjectProperty<Color.Intensity> colorIntensity = new SimpleObjectProperty<>(Color.Intensity.I700);
-    private final ObservableList<Nail> nails = FXCollections.observableArrayList();
-
-    // Circulars
-    private final ObjectProperty<Circular> sourceCircular = new SimpleObjectProperty<>();
-    private final ObjectProperty<Circular> targetCircular = new SimpleObjectProperty<>();
-
-    // Boolean for if this edge is locked or can be edited
-    private final BooleanProperty isLocked = new SimpleBooleanProperty(false);
-
-    private final BooleanProperty isHighlighted = new SimpleBooleanProperty(false);
+    private final StringProperty group = new SimpleStringProperty("");
 
     public Edge(final Location sourceLocation, final EdgeStatus status) {
         setSourceLocation(sourceLocation);
         ioStatus = new SimpleObjectProperty<>(status);
+
+        // Check needed for tests to pass in src/test/java/ecdar/mutation/operators/SinkLocationOperatorTest.java
+        if (Ecdar.getProject() != null) {
+            setId();
+        }
 
         bindReachabilityAnalysis();
     }
@@ -63,6 +46,34 @@ public class Edge implements Serializable, Nearable {
     public Edge(final JsonObject jsonObject, final Component component) {
         deserialize(jsonObject, component);
         bindReachabilityAnalysis();
+    }
+
+    public String getSync() {
+        return sync.get();
+    }
+
+    public void setSync(final String sync) {
+        this.sync.set(sync);
+    }
+
+    public StringProperty syncProperty() {
+        return sync;
+    }
+
+    /**
+     * Gets the synchronization string concatenated with the synchronization symbol (? or !).
+     * @return the synchronization string concatenated with the synchronization symbol.
+     */
+    public String getSyncWithSymbol() {
+        return sync.get() + (ioStatus.get().equals(EdgeStatus.INPUT) ? "?" : "!");
+    }
+
+    public String getGroup(){
+        return group.get();
+    }
+
+    public void setGroup(final String string){
+        group.set(string);
     }
 
     /**
@@ -98,230 +109,52 @@ public class Edge implements Serializable, Nearable {
         });
 
         // Clone if edge is locked (e.g. the Inconsistent and Universal locations have locked edges)
-        clone.setIsLocked(getIsLocked().get());
+        clone.setIsLocked(getIsLockedProperty().get());
 
         return clone;
     }
 
-    public Location getSourceLocation() {
-        return sourceLocation.get();
-    }
-
-    public void setSourceLocation(final Location sourceLocation) {
-        this.sourceLocation.set(sourceLocation);
-        updateSourceCircular();
-    }
-
-    public ObjectProperty<Circular> sourceCircularProperty() {
-        return sourceCircular;
-    }
-
-    public ObjectProperty<Location> sourceLocationProperty() {
-        return sourceLocation;
-    }
-
-    public Location getTargetLocation() {
-        return targetLocation.get();
-    }
-
-    public void setTargetLocation(final Location targetLocation) {
-        this.targetLocation.set(targetLocation);
-        updateTargetCircular();
-    }
-
-    public ObjectProperty<Location> targetLocationProperty() {
-        return targetLocation;
-    }
-
-    public String getSelect() {
-        return select.get();
-    }
-
-    private void setSelect(final String select) {
-        this.select.set(select);
-    }
-
-    public StringProperty selectProperty() {
-        return select;
-    }
-
-    public String getGuard() {
-        return guard.get();
-    }
-
-    public void setGuard(final String guard) {
-        this.guard.set(guard);
-    }
-
-    public StringProperty guardProperty() {
-        return guard;
-    }
-
-    public String getUpdate() {
-        return update.get();
-    }
-
-    public void setUpdate(final String update) {
-        this.update.set(update);
-    }
-
-    public StringProperty updateProperty() {
-        return update;
-    }
-
-    public String getSync() {
-        return sync.get();
-    }
-
-    public void setSync(final String sync) {
-        this.sync.set(sync);
-    }
-
-    public StringProperty syncProperty() {
-        return sync;
-    }
-
-    /**
-     * Gets the synchronization string concatenated with the synchronization symbol (? or !).
-     * @return the synchronization string concatenated with the synchronization symbol.
-     */
-    public String getSyncWithSymbol() {
-        return sync.get() + (ioStatus.get().equals(EdgeStatus.INPUT) ? "?" : "!");
-    }
-
-    public Color getColor() {
-        return color.get();
-    }
-
-    public void setColor(final Color color) {
-        this.color.set(color);
-    }
-
-    public ObjectProperty<Color> colorProperty() {
-        return color;
-    }
-
-    public Color.Intensity getColorIntensity() {
-        return colorIntensity.get();
-    }
-
-    public void setColorIntensity(final Color.Intensity colorIntensity) {
-        this.colorIntensity.set(colorIntensity);
-    }
-
-    public ObjectProperty<Color.Intensity> colorIntensityProperty() {
-        return colorIntensity;
-    }
-
-    public void setIsHighlighted(final boolean highlight){ this.isHighlighted.set(highlight);}
-
-    public boolean getIsHighlighted(){ return this.isHighlighted.get(); }
-
-    public BooleanProperty isHighlightedProperty() { return this.isHighlighted; }
-
-    public ObservableList<Nail> getNails() {
-        return nails;
-    }
-
-    public boolean addNail(final Nail nail) {
-        return nails.add(nail);
-    }
-
-    public void insertNailAt(final Nail nail, final int index) {
-        nails.add(index, nail);
-    }
-
-    public boolean removeNail(final Nail nail) {
-        return nails.remove(nail);
-    }
-
-    public ObjectProperty<Circular> targetCircularProperty() {
-        return targetCircular;
-    }
-
-    /**
-     * Gets whether this has a synchronization nail.
-     * @return true iff this has a synchronization nail
-     */
-    public boolean hasSyncNail() {
-        for (final Nail nail : getNails()) {
-            if (nail.getPropertyType().equals(PropertyType.SYNCHRONIZATION)) return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Makes a synchronization nail between the source and target locations.
-     */
-    public void makeSyncNailBetweenLocations() {
-        final double x = Grid.snap((getSourceLocation().getX() + getTargetLocation().getX()) / 2.0);
-        final double y = Grid.snap((getSourceLocation().getY() + getTargetLocation().getY()) / 2.0);
-
-        final Nail nail = new Nail(x, y);
-        nail.setPropertyType(Edge.PropertyType.SYNCHRONIZATION);
-        addNail(nail);
-    }
-
-    public Circular getSourceCircular() {
-        if(sourceCircular != null) {
-            return sourceCircular.get();
-        }
-        return null;
-    }
-
-    public Circular getTargetCircular() {
-        if(targetCircular != null) {
-            return targetCircular.get();
-        }
-        return null;
-    }
-
-    private void updateSourceCircular() {
-        if(getSourceLocation() != null) {
-            sourceCircular.set(getSourceLocation());
-        }
-    }
-
-    private void updateTargetCircular() {
-        if(getTargetLocation() != null) {
-            targetCircular.set(getTargetLocation());
-        }
-    }
-
-    public String getProperty(final PropertyType propertyType) {
+    public List<String> getProperty(final PropertyType propertyType) {
+        List<String> result = new ArrayList<>();
         if (propertyType.equals(PropertyType.SELECTION)) {
-            return getSelect();
+            result.add(getSelect());
+            return result;
         } else if (propertyType.equals(PropertyType.GUARD)) {
-            return getGuard();
+            result.add(getGuard());
+            return result;
         } else if (propertyType.equals(PropertyType.SYNCHRONIZATION)) {
-            return getSync();
+            result.add(getSync());
+            return result;
         } else if (propertyType.equals(PropertyType.UPDATE)) {
-            return getUpdate();
+            result.add(getUpdate());
+            return result;
         } else {
-            return "";
+            return result;
         }
     }
 
-    public void setProperty(final PropertyType propertyType, final String newProperty) {
+    public void setProperty(final PropertyType propertyType, final List<String> newProperty) {
         if (propertyType.equals(PropertyType.SELECTION)) {
             selectProperty().unbind();
-            setSelect(newProperty);
+            setSelect(newProperty.get(0));
         } else if (propertyType.equals(PropertyType.GUARD)) {
             guardProperty().unbind();
-            setGuard(newProperty);
+            setGuard(newProperty.get(0));
         } else if (propertyType.equals(PropertyType.SYNCHRONIZATION)) {
             syncProperty().unbind();
-            setSync(newProperty);
+            setSync(newProperty.get(0));
         } else if (propertyType.equals(PropertyType.UPDATE)) {
             updateProperty().unbind();
-            setUpdate(newProperty);
+            setUpdate(newProperty.get(0));
         }
     }
 
     @Override
     public JsonObject serialize() {
         final JsonObject result = new JsonObject();
+
+        result.addProperty(ID, getId());
+        result.addProperty(GROUP, getGroup());
 
         result.addProperty(SOURCE_LOCATION, getSourceLocation().getId());
         result.addProperty(TARGET_LOCATION, getTargetLocation().getId());
@@ -332,7 +165,7 @@ public class Edge implements Serializable, Nearable {
         result.addProperty(UPDATE, getUpdate());
         result.addProperty(SYNC, getSync());
 
-        result.addProperty(IS_LOCKED, isLocked.get());
+        result.addProperty(IS_LOCKED, getIsLockedProperty().get());
 
         final JsonArray nails = new JsonArray();
         getNails().forEach(nail -> nails.add(nail.serialize()));
@@ -360,6 +193,18 @@ public class Edge implements Serializable, Nearable {
 
         ioStatus = new SimpleObjectProperty<>(EdgeStatus.valueOf(json.getAsJsonPrimitive(STATUS).getAsString()));
 
+        final JsonPrimitive IDJson = json.getAsJsonPrimitive(ID);
+        if (IDJson != null) setId(IDJson.getAsString());
+        else setId();
+
+        final JsonPrimitive groupJson = json.getAsJsonPrimitive(GROUP);
+
+        if (groupJson != null) {
+            setGroup(groupJson.getAsString());
+        }
+
+        else setGroup("");
+
         setSelect(json.getAsJsonPrimitive(SELECT).getAsString());
         setGuard(json.getAsJsonPrimitive(GUARD).getAsString());
         setUpdate(json.getAsJsonPrimitive(UPDATE).getAsString());
@@ -373,79 +218,10 @@ public class Edge implements Serializable, Nearable {
         if(json.has(NAILS)){
             json.getAsJsonArray(NAILS).forEach(jsonElement -> {
                 final Nail newNail = new Nail((JsonObject) jsonElement);
-                nails.add(newNail);
+                addNail(newNail);
             });
         }
-
     }
-
-    @Override
-    public String generateNearString() {
-        String result = "Edge";
-
-        if (getSourceLocation() != null) {
-            result += " from " + getSourceLocation().generateNearString();
-        } else {
-            result += " from " + getSourceCircular();
-        }
-
-        if (getTargetLocation() != null) {
-            result += " to " + getTargetLocation().generateNearString();
-        } else {
-            result += " to " + getTargetCircular();
-        }
-
-        return result;
-    }
-
-    /**
-     * Gets if this is an input or output edge.
-     * @return the status
-     */
-    public EdgeStatus getStatus() {
-        return ioStatus.get();
-    }
-
-    public void setStatus(final EdgeStatus status) {
-        ioStatus.set(status);
-    }
-
-    /**
-     * Switches if the status of this is input or output
-     */
-    public void switchStatus() {
-        if (ioStatus.get() == EdgeStatus.INPUT) {
-            ioStatus.set(EdgeStatus.OUTPUT);
-        } else {
-            ioStatus.set(EdgeStatus.INPUT);
-        }
-    }
-
-    public enum PropertyType {
-        NONE(-1),
-        SELECTION(0),
-        GUARD(1),
-        SYNCHRONIZATION(2),
-        UPDATE(3);
-
-        private final int i;
-
-        PropertyType(final int i) {
-            this.i = i;
-        }
-
-        public int getI() {
-            return i;
-        }
-    }
-
-    public boolean isSelfLoop() {
-        return (getSourceLocation() != null && getSourceLocation().equals(getTargetLocation()));
-    }
-
-    public BooleanProperty getIsLocked(){return isLocked; }
-
-    public void setIsLocked(boolean bool){isLocked.setValue(bool); }
 
     private void bindReachabilityAnalysis() {
         selectProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
@@ -468,7 +244,7 @@ public class Edge implements Serializable, Nearable {
 
     /**
      * Adds a guard nail at (0, 0).
-     * Adds a specified guard property the this edge.
+     * Adds a specified guard property to this edge.
      * @param guard the specified guard property
      */
     public void addGuardNail(final String guard) {
@@ -480,7 +256,7 @@ public class Edge implements Serializable, Nearable {
 
     /**
      * Adds an update nail at (0, 0).
-     * Adds a specified update property the this edge.
+     * Adds a specified update property to this edge.
      * @param update the specified update property
      */
     public void addUpdateNail(final String update) {

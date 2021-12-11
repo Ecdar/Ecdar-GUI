@@ -2,13 +2,14 @@ package ecdar.controllers;
 
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
-import ecdar.backend.BackendDriverManager;
+import ecdar.backend.BackendHelper;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.code_analysis.Nearable;
 import ecdar.presentations.*;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
 import ecdar.utility.helpers.ItemDragHelper;
+import ecdar.utility.helpers.MouseCircular;
 import ecdar.utility.helpers.SelectHelper;
 import ecdar.utility.keyboard.Keybind;
 import ecdar.utility.keyboard.KeyboardTracker;
@@ -63,6 +64,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
     public Label idLabel;
     public Line nameTagLine;
     public Line invariantTagLine;
+    public Line prohibitedLocStrikeThrough;
 
     private DropDownMenu dropDownMenu;
     private boolean dropDownMenuInitialized = false;
@@ -156,6 +158,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                     dropDownMenu.hide();
                 }
         );
+
         dropDownMenu.addSpacerElement();
         final BooleanProperty isUrgent = new SimpleBooleanProperty(false);
         isUrgent.bind(getLocation().urgencyProperty().isEqualTo(Location.Urgency.URGENT));
@@ -165,6 +168,19 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
             } else {
                 getLocation().setUrgency(Location.Urgency.URGENT);
             }
+
+            dropDownMenu.hide();
+        });
+
+        final BooleanProperty isProhibited = new SimpleBooleanProperty(false);
+        isProhibited.bind(getLocation().urgencyProperty().isEqualTo(Location.Urgency.PROHIBITED));
+        dropDownMenu.addToggleableAndDisableableListElement("Prohibited", isProhibited, getLocation().getIsLocked(), event -> {
+            if (isProhibited.get()) {
+                getLocation().setUrgency(Location.Urgency.NORMAL);
+            } else {
+                getLocation().setUrgency(Location.Urgency.PROHIBITED);
+            }
+
             dropDownMenu.hide();
         });
 
@@ -173,7 +189,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
         dropDownMenu.addClickableListElement("Is " + getLocation().getId() + " reachable?", event -> {
             dropDownMenu.hide();
             // Generate the query from the backend
-            final String reachabilityQuery = BackendDriverManager.getInstance().getLocationReachableQuery(getLocation(), getComponent());
+            final String reachabilityQuery = BackendHelper.getLocationReachableQuery(getLocation(), getComponent());
 
             // Add proper comment
             final String reachabilityComment = "Is " + getLocation().getMostDescriptiveIdentifier() + " reachable?";
@@ -214,7 +230,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
             final Component component = getComponent();
             final Location location = getLocation();
 
-            final List<Edge> relatedEdges = component.getRelatedEdges(location);
+            final List<DisplayableEdge> relatedEdges = component.getRelatedEdges(location);
 
             UndoRedoStack.pushAndPerform(() -> { // Perform
                 // Remove the location
@@ -344,9 +360,10 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
             final Component component = getComponent();
 
-            if (root.isPlaced()) {
+            if (isAnyEdgeWithoutSource()) return;
 
-                final Edge unfinishedEdge = component.getUnfinishedEdge();
+            if (root.isPlaced()) {
+                final DisplayableEdge unfinishedEdge = component.getUnfinishedEdge();
 
                 if (unfinishedEdge == null && event.getButton().equals(MouseButton.SECONDARY)) {
                     initializeDropDownMenu();
@@ -366,6 +383,9 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                         } else {
                             unfinishedEdge.makeSyncNailBetweenLocations();
                         }
+                    } else if (getLocation().equals(unfinishedEdge.getSourceLocation()) && unfinishedEdge.getNails().size() == 1) {
+                        final Nail nail = new Nail(unfinishedEdge.getNails().get(0).getX(), unfinishedEdge.getNails().get(0).getY() + 2 *GRID_SIZE);
+                        unfinishedEdge.addNail(nail);
                     }
 
                     UndoRedoStack.push(() -> { // Perform
@@ -388,7 +408,11 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                     else {
                         if(root.isInteractable()) {
                             if (event.isShortcutDown()) {
-                                SelectHelper.addToSelection(this);
+                                if (SelectHelper.getSelectedElements().contains(this)) {
+                                    SelectHelper.deselect(this);
+                                } else {
+                                    SelectHelper.addToSelection(this);
+                                }
                             } else {
                                 SelectHelper.select(this);
                             }
@@ -433,6 +457,35 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
         });
 
 
+    }
+
+    /**
+     * Checks if there is currently an edge without a source location.
+     * If there is, set the source location to this location and return true, else return false.
+     */
+    public boolean isAnyEdgeWithoutSource() {
+        DisplayableEdge edgeWithoutSource = null;
+
+        for (DisplayableEdge edge : getComponent().getDisplayableEdges()) {
+            if (edge.sourceCircularProperty().get() instanceof MouseCircular) {
+                edgeWithoutSource = edge;
+                break;
+            }
+        }
+
+        if (edgeWithoutSource != null) {
+            edgeWithoutSource.setSourceLocation(getLocation());
+
+            // Make self-loop pretty if needed
+            if (edgeWithoutSource.getTargetLocation().equals(getLocation()) && edgeWithoutSource.getNails().size() == 1) {
+                final Nail nail = new Nail(edgeWithoutSource.getNails().get(0).getX(), edgeWithoutSource.getNails().get(0).getY() + 2 *GRID_SIZE);
+                edgeWithoutSource.addNail(nail);
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     @Override
@@ -518,4 +571,13 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
         return yProperty().get();
     }
 
+    @Override
+    public double getSelectableWidth() {
+        return getLocation().getRadius() * 2;
+    }
+
+    @Override
+    public double getSelectableHeight() {
+        return getLocation().getRadius() * 2;
+    }
 }

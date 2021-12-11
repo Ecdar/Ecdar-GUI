@@ -69,9 +69,6 @@ public class EcdarDocument {
 
         // Set global declarations
         xmlDocument.setProperty(DECLARATION_PROPERTY_TAG, project.getGlobalDeclarations().getDeclarationsText());
-
-        // Set the system declaration
-        xmlDocument.setProperty(SYSTEM_DCL_TAG, project.getSystemDeclarations().getDeclarationsText());
     }
 
     /**

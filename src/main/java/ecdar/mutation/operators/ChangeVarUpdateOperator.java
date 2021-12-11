@@ -36,7 +36,7 @@ public class ChangeVarUpdateOperator extends MutationOperator {
             final Edge originalEdge = original.getEdges().get(edgeIndex);
 
             // Ignore if locked (e.g. if edge on the Inconsistent or Universal locations)
-            if (originalEdge.getIsLocked().get()) continue;
+            if (originalEdge.getIsLockedProperty().get()) continue;
 
             final String oldUpdate = originalEdge.getUpdate();
             final Map<String, String> sides = ExpressionHelper.getUpdateSides(oldUpdate);
@@ -116,7 +116,7 @@ public class ChangeVarUpdateOperator extends MutationOperator {
         // Get the sum of valuations of each variable
         final int varValueCount = original.getLocalVariablesWithBounds().stream().mapToInt(local -> local.getRight() - local.getMiddle() + 1).sum();
 
-        return original.getEdges().size() * varValueCount;
+        return original.getDisplayableEdges().size() * varValueCount;
 
     }
 

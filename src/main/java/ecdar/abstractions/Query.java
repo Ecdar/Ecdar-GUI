@@ -30,15 +30,14 @@ public class Query implements Serializable {
     private final SimpleBooleanProperty isPeriodic = new SimpleBooleanProperty(false);
     private final StringProperty errors = new SimpleStringProperty("");
     private final ObjectProperty<QueryType> type = new SimpleObjectProperty<>();
-    private BackendHelper.BackendNames currentBackend;
-    private BackendThread backendThread;
+    private BackendHelper.BackendNames backend;
     private Consumer<Boolean> runQuery;
 
     public Query(final String query, final String comment, final QueryState queryState) {
         this.query.set(query);
         this.comment.set(comment);
         this.queryState.set(queryState);
-        setCurrentBackend(BackendHelper.BackendNames.jEcdar);
+        setBackend(BackendHelper.defaultBackend);
 
         initializeRunQuery();
     }
@@ -99,12 +98,12 @@ public class Query implements Serializable {
         this.isPeriodic.set(isPeriodic);
     }
 
-    public BackendHelper.BackendNames getCurrentBackend() {
-        return currentBackend;
+    public BackendHelper.BackendNames getBackend() {
+        return backend;
     }
 
-    public void setCurrentBackend(BackendHelper.BackendNames currentBackend) {
-        this.currentBackend = currentBackend;
+    public void setBackend(BackendHelper.BackendNames backend) {
+        this.backend = backend;
     }
 
     public void setType(QueryType type) {
@@ -119,12 +118,12 @@ public class Query implements Serializable {
         return this.type;
     }
 
-    private Engine engine = null;
     private Boolean forcedCancel = false;
 
     private void initializeRunQuery() {
         runQuery = (buildEcdarDocument) -> {
             setQueryState(QueryState.RUNNING);
+            forcedCancel = false;
 
             if (buildEcdarDocument) {
                 try {
@@ -138,32 +137,8 @@ public class Query implements Serializable {
 
             errors.set("");
 
-            setBackendThread();
-            backendThread.start();
-        };
-    }
-
-    private void setBackendThread() {
-        Consumer<BackendException> backendExceptionConsumer = e -> {
-            if (forcedCancel) {
-                setQueryState(QueryState.UNKNOWN);
-            } else {
-                setQueryState(QueryState.SYNTAX_ERROR);
-                this.addError(e.getMessage());
-                final Throwable cause = e.getCause();
-                if (cause != null) {
-                    // We had trouble generating the model if we get a NullPointerException
-                    if (cause instanceof NullPointerException) {
-                        setQueryState(QueryState.UNKNOWN);
-                    } else {
-                        Platform.runLater(() -> EcdarController.openQueryDialog(this, cause.toString()));
-                    }
-                }
-            }
-        };
-
-        if(query.get().startsWith("quotient")) {
-            backendThread = BackendDriverManager.getInstance(this.currentBackend).getBackendThreadForQuery(getType().getQueryName() + ": " + getQuery().replaceAll("\\s", "") + " " + getIgnoredInputOutputsOnQuery(),
+            Ecdar.getBackendDriver().addQueryToExecutionQueue(getType().getQueryName() + ": " + getQuery().replaceAll("\\s", "") + " " + getIgnoredInputOutputsOnQuery(),
+                    getBackend(),
                     aBoolean -> {
                         if (aBoolean) {
                             setQueryState(QueryState.COMPONENT_GENERATED);
@@ -171,22 +146,26 @@ public class Query implements Serializable {
                             setQueryState(QueryState.ERROR);
                         }
                     },
-                    backendExceptionConsumer,
-                    new QueryListener(this)
-            );
-        } else {
-            backendThread = BackendDriverManager.getInstance(this.currentBackend).getBackendThreadForQuery(getQuery(),
-                    aBoolean -> {
-                        if (aBoolean) {
-                            setQueryState(QueryState.SUCCESSFUL);
+                    e -> {
+                        if (forcedCancel) {
+                            setQueryState(QueryState.UNKNOWN);
                         } else {
-                            setQueryState(QueryState.ERROR);
+                            setQueryState(QueryState.SYNTAX_ERROR);
+                            this.addError(e.getMessage());
+                            final Throwable cause = e.getCause();
+                            if (cause != null) {
+                                // We had trouble generating the model if we get a NullPointerException
+                                if (cause instanceof NullPointerException) {
+                                    setQueryState(QueryState.UNKNOWN);
+                                } else {
+                                    Platform.runLater(() -> EcdarController.openQueryDialog(this, cause.toString()));
+                                }
+                            }
                         }
                     },
-                    backendExceptionConsumer,
                     new QueryListener(this)
             );
-        }
+        };
     }
 
     @Override
@@ -200,7 +179,7 @@ public class Query implements Serializable {
         result.add(IGNORED_INPUTS, getHashMapAsJsonObject(ignoredInputs));
         result.add(IGNORED_OUTPUTS, getHashMapAsJsonObject(ignoredOutputs));
 
-        result.addProperty(BACKEND, currentBackend.ordinal());
+        result.addProperty(BACKEND, backend.ordinal());
 
         return result;
     }
@@ -240,9 +219,11 @@ public class Query implements Serializable {
         }
 
         if(json.has(BACKEND)) {
-            setCurrentBackend(json.getAsJsonPrimitive(BACKEND).getAsInt() == BackendHelper.BackendNames.jEcdar.ordinal() ? BackendHelper.BackendNames.jEcdar : BackendHelper.BackendNames.Reveaal);
+            setBackend(json.getAsJsonPrimitive(BACKEND).getAsInt() == BackendHelper.BackendNames.jEcdar.ordinal()
+                    ? BackendHelper.BackendNames.jEcdar
+                    : BackendHelper.BackendNames.Reveaal);
         } else {
-            setCurrentBackend(BackendHelper.BackendNames.jEcdar);
+            setBackend(BackendHelper.defaultBackend);
         }
     }
 
@@ -261,7 +242,6 @@ public class Query implements Serializable {
     public void cancel() {
         if (getQueryState().equals(QueryState.RUNNING)) {
             forcedCancel = true;
-            backendThread.hasBeenCanceled.set(true);
             setQueryState(QueryState.UNKNOWN);
         }
     }
@@ -275,7 +255,7 @@ public class Query implements Serializable {
     }
 
     private String getIgnoredInputOutputsOnQuery() {
-        if (!BackendDriverManager.backendSupportsInputOutputs(this.currentBackend) || (!ignoredInputs.containsValue(true) && !ignoredOutputs.containsValue(true))) {
+        if (!BackendHelper.backendSupportsInputOutputs(this.backend) || (!ignoredInputs.containsValue(true) && !ignoredOutputs.containsValue(true))) {
             return "";
         }
 

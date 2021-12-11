@@ -135,6 +135,10 @@ public class CanvasController implements Initializable {
             setTranslateOfBox(newObject);
             activeComponentPresentation = new ComponentPresentation((Component) newObject);
             root.getChildren().add(activeComponentPresentation);
+
+            // To avoid NullPointerException on initial model
+            if (oldObject != null) zoomHelper.resetZoom();
+            
         } else if (newObject instanceof Declarations) {
             root.setTranslateX(0);
             root.setTranslateY(DECLARATION_Y_MARGIN);

@@ -33,7 +33,7 @@ public class ChangeGuardConstantOperator extends MutationOperator {
             final Edge originalEdge = original.getEdges().get(edgeIndex);
 
             // Ignore if locked (e.g. if edge on the Inconsistent or Universal locations)
-            if (originalEdge.getIsLocked().get()) continue;
+            if (originalEdge.getIsLockedProperty().get()) continue;
 
             final String originalGuard = originalEdge.getGuard();
             final Matcher matcher = Pattern.compile("(\\d+)").matcher(originalGuard);
@@ -89,7 +89,7 @@ public class ChangeGuardConstantOperator extends MutationOperator {
             final Edge originalEdge = original.getEdges().get(edgeIndex);
 
             // Ignore if locked (e.g. if edge on the Inconsistent or Universal locations)
-            if (originalEdge.getIsLocked().get()) continue;
+            if (originalEdge.getIsLockedProperty().get()) continue;
 
             final String originalGuard = originalEdge.getGuard();
             final Matcher matcher = Pattern.compile("(\\d+)").matcher(originalGuard);

@@ -2,7 +2,6 @@ package ecdar.presentations;
 
 import ecdar.abstractions.Box;
 import ecdar.abstractions.HighLevelModelObject;
-import ecdar.controllers.CanvasController;
 import ecdar.controllers.EcdarController;
 import ecdar.controllers.ModelController;
 import ecdar.utility.UndoRedoStack;
@@ -131,6 +130,8 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
         final DoubleProperty prevWidth = new SimpleDoubleProperty();
 
         rightAnchor.setOnMousePressed(event -> {
+            event.consume();
+
             prevX.set(event.getScreenX());
             prevWidth.set(box.getWidth());
         });
@@ -185,6 +186,8 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
         final DoubleProperty prevHeight = new SimpleDoubleProperty();
 
         bottomAnchor.setOnMousePressed(event -> {
+            event.consume();
+            
             prevY.set(event.getScreenY());
             prevHeight.set(box.getHeight());
         });

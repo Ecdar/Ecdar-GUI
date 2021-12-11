@@ -3,11 +3,7 @@ package ecdar.presentations;
 import com.jfoenix.controls.*;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
-import ecdar.backend.BackendDriverManager;
-import ecdar.backend.BackendHelper;
-import ecdar.backend.IBackendDriver;
-import ecdar.backend.ReveaalDriver;
-import ecdar.controllers.CanvasController;
+import ecdar.backend.*;
 import ecdar.controllers.QueryController;
 import ecdar.controllers.EcdarController;
 import ecdar.utility.colors.Color;
@@ -71,9 +67,12 @@ public class QueryPresentation extends AnchorPane {
 
 
             queryTextField.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler(keyEvent -> {
-                if (keyEvent.getCode().equals(KeyCode.ENTER)) {
-                    runQuery();
-                }
+                Platform.runLater(() -> {
+
+                    if (keyEvent.getCode().equals(KeyCode.ENTER)) {
+                        runQuery();
+                    }
+                });
             }));
 
             commentTextField.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
@@ -131,12 +130,14 @@ public class QueryPresentation extends AnchorPane {
 
             // Delegate that based on the query state updated the action icon
             final Consumer<QueryState> updateIcon = (queryState) -> {
-                if (queryState.equals(QueryState.RUNNING)) {
-                    actionButtonIcon.setIconLiteral("gmi-stop");
-                } else {
-                    actionButtonIcon.setIconLiteral("gmi-play-arrow");
-                }
-                actionButtonIcon.setIconSize(24);
+                Platform.runLater(() -> {
+                    if (queryState.equals(QueryState.RUNNING)) {
+                        actionButtonIcon.setIconLiteral("gmi-stop");
+                    } else {
+                        actionButtonIcon.setIconLiteral("gmi-play-arrow");
+                    }
+                    actionButtonIcon.setIconSize(24);
+                });
             };
 
             // Update the icon initially
@@ -148,11 +149,13 @@ public class QueryPresentation extends AnchorPane {
             controller.actionButton.setMaskType(JFXRippler.RipplerMask.CIRCLE);
 
             controller.actionButton.getChildren().get(0).setOnMousePressed(event -> {
-                if (controller.getQuery().getQueryState().equals(QueryState.RUNNING)) {
-                    controller.getQuery().cancel();
-                } else {
-                    runQuery();
-                }
+                Platform.runLater(() -> {
+                    if (controller.getQuery().getQueryState().equals(QueryState.RUNNING)) {
+                        controller.getQuery().cancel();
+                    } else {
+                        runQuery();
+                    }
+                });
             });
         });
     }
@@ -191,31 +194,33 @@ public class QueryPresentation extends AnchorPane {
 
             // Delegate that based on a query state updates the color of the state indicator
             final Consumer<QueryState> updateStateIndicator = (queryState) -> {
-                this.tooltip.setText("");
+                Platform.runLater(() -> {
+                    this.tooltip.setText("");
 
-                final Color color = queryState.getColor();
-                final Color.Intensity colorIntensity = queryState.getColorIntensity();
+                    final Color color = queryState.getColor();
+                    final Color.Intensity colorIntensity = queryState.getColorIntensity();
 
-                if (queryState.equals(QueryState.UNKNOWN) || queryState.equals(QueryState.RUNNING)) {
-                    stateIndicator.setBackground(new Background(new BackgroundFill(TRANSPARENT,
-                            CornerRadii.EMPTY,
-                            Insets.EMPTY)
-                    ));
-                } else {
-                    stateIndicator.setBackground(new Background(new BackgroundFill(color.getColor(colorIntensity),
-                            CornerRadii.EMPTY,
-                            Insets.EMPTY)
-                    ));
-                }
+                    if (queryState.equals(QueryState.UNKNOWN) || queryState.equals(QueryState.RUNNING)) {
+                        stateIndicator.setBackground(new Background(new BackgroundFill(TRANSPARENT,
+                                CornerRadii.EMPTY,
+                                Insets.EMPTY)
+                        ));
+                    } else {
+                        stateIndicator.setBackground(new Background(new BackgroundFill(color.getColor(colorIntensity),
+                                CornerRadii.EMPTY,
+                                Insets.EMPTY)
+                        ));
+                    }
 
-                setStatusIndicatorContentColor(new javafx.scene.paint.Color(1, 1, 1, 1), statusIcon, queryTypeExpandIcon, queryState);
+                    setStatusIndicatorContentColor(new javafx.scene.paint.Color(1, 1, 1, 1), statusIcon, queryTypeExpandIcon, queryState);
 
-                if (queryState.equals(QueryState.RUNNING) || queryState.equals(QueryState.UNKNOWN)) {
-                    setStatusIndicatorContentColor(Color.GREY.getColor(Color.Intensity.I700), statusIcon, queryTypeExpandIcon, null);
-                }
+                    if (queryState.equals(QueryState.RUNNING) || queryState.equals(QueryState.UNKNOWN)) {
+                        setStatusIndicatorContentColor(Color.GREY.getColor(Color.Intensity.I700), statusIcon, queryTypeExpandIcon, null);
+                    }
 
-                // The tooltip is updated here to handle all cases that are not syntax error
-                updateToolTip.accept(queryState);
+                    // The tooltip is updated here to handle all cases that are not syntax error
+                    updateToolTip.accept(queryState);
+                });
             };
 
             // Update the initial color
@@ -226,6 +231,8 @@ public class QueryPresentation extends AnchorPane {
 
             // Ensure that the tooltip is updated when new errors are added
             controller.getQuery().errors().addListener((observable, oldValue, newValue) -> updateToolTip.accept(controller.getQuery().getQueryState()));
+            this.tooltip.setMaxWidth(300);
+            this.tooltip.setWrapText(true);
 
             // Installing the tooltip on the statusIcon itself scales the tooltip unexpectedly, hence its parent StackPane is used
             Tooltip.install(statusIcon.getParent(), this.tooltip);
@@ -249,10 +256,10 @@ public class QueryPresentation extends AnchorPane {
             final TitledPane inputOutputPane = (TitledPane) lookup("#inputOutputPane");
             inputOutputPane.setAnimated(true);
 
-            final Consumer<String> changeTitledPaneVisibility = (queryString) -> updateTitlePaneVisibility(inputOutputPane, queryString);
+            final Consumer<Query> changeTitledPaneVisibility = (query) -> updateTitlePaneVisibility(inputOutputPane, query);
 
             // Run the consumer to ensure that the input/output pane is displayed for existing refinement queries
-            changeTitledPaneVisibility.accept(controller.getQuery().getQuery());
+            changeTitledPaneVisibility.accept(controller.getQuery());
 
             // Bind the expand icon to the expand property of the pane
             inputOutputPane.expandedProperty().addListener((observable, oldValue, newValue) -> {
@@ -268,27 +275,27 @@ public class QueryPresentation extends AnchorPane {
             final JFXTextField queryTextField = (JFXTextField) lookup("#query");
             queryTextField.focusedProperty().addListener((observable, oldValue, newValue) -> {
                 if (!newValue) {
-                    changeTitledPaneVisibility.accept(controller.getQuery().getQuery());
+                    changeTitledPaneVisibility.accept(controller.getQuery());
                 }
             });
 
             // Change visibility of input/output Pane when backend is changed for the query
-            lookup("#swapBackendButton").setOnMousePressed(event -> changeTitledPaneVisibility.accept(controller.getQuery().getQuery()));
+            lookup("#swapBackendButton").setOnMousePressed(event -> changeTitledPaneVisibility.accept(controller.getQuery()));
 
             Platform.runLater(() -> addIgnoredInputOutputsFromQuery(inputOutputPane));
         });
     }
 
-    private void initiateResetInputOutputButton(TitledPane inputOutputPane, ReveaalDriver backendDriver) {
+    private void initiateResetInputOutputButton(TitledPane inputOutputPane) {
         Platform.runLater(() -> {
             final JFXRippler resetInputOutputPaneButton = (JFXRippler) inputOutputPane.lookup("#inputOutputPaneUpdateButton");
 
-            initializeResetInputOutputPaneButton(inputOutputPane, backendDriver, resetInputOutputPaneButton);
+            initializeResetInputOutputPaneButton(inputOutputPane, resetInputOutputPaneButton);
 
             // Get the inputs and outputs automatically, when executing a refinement query
             controller.actionButton.setOnMousePressed(event -> {
                 // Update the ignored inputs and outputs without clearing the lists
-                updateInputOutputs(inputOutputPane, backendDriver, false);
+                updateInputOutputs(inputOutputPane, false);
             });
 
             // Install tooltip on the reset button
@@ -299,7 +306,6 @@ public class QueryPresentation extends AnchorPane {
     }
 
     private void initializeResetInputOutputPaneButton(TitledPane inputOutputPane,
-                                                      ReveaalDriver backendDriver,
                                                       JFXRippler resetInputOutputPaneButton) {
         Platform.runLater(() -> {
             final FontIcon resetInputOutputPaneButtonIcon = (FontIcon) lookup("#inputOutputPaneUpdateButtonIcon");
@@ -319,7 +325,7 @@ public class QueryPresentation extends AnchorPane {
                 resetInputOutputPaneButton.setDisable(true);
                 resetInputOutputPaneButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I700));
 
-                updateInputOutputs(inputOutputPane, backendDriver, true);
+                updateInputOutputs(inputOutputPane, true);
 
                 // Enable the button after inputs and outputs have been updated
                 progressIndicator.setVisible(false);
@@ -344,27 +350,24 @@ public class QueryPresentation extends AnchorPane {
                 }
 
                 // Set the backend to the one not currently used and update GUI
-                final BackendHelper.BackendNames newBackend;
-                if (this.controller.getQuery().getCurrentBackend().equals(BackendHelper.BackendNames.jEcdar)) {
-                    newBackend = BackendHelper.BackendNames.Reveaal;
-                } else {
-                    newBackend = BackendHelper.BackendNames.jEcdar;
-                }
+                final BackendHelper.BackendNames newBackend = (this.controller.getQuery().getBackend().equals(BackendHelper.BackendNames.jEcdar)
+                        ? BackendHelper.BackendNames.Reveaal
+                        : BackendHelper.BackendNames.jEcdar);
 
-                this.controller.getQuery().setCurrentBackend(newBackend);
+                this.controller.getQuery().setBackend(newBackend);
                 setSwapBackendTooltipAndLabel(newBackend);
-                updateTitlePaneVisibility(inputOutputPane, controller.getQuery().getQuery());
+                updateTitlePaneVisibility(inputOutputPane, controller.getQuery());
             });
 
             swapBackendButtonTooltip = new Tooltip();
-            setSwapBackendTooltipAndLabel(this.controller.getQuery().getCurrentBackend());
+            setSwapBackendTooltipAndLabel(this.controller.getQuery().getBackend());
             JFXTooltip.install(swapBackendButton, swapBackendButtonTooltip);
 
             lookup("#query").focusedProperty().addListener((observable, oldVal, newVal) -> {
                 if(!newVal && controller.getQuery().getQuery().startsWith("quotient")) {
-                    controller.getQuery().setCurrentBackend(BackendHelper.BackendNames.jEcdar);
+                    controller.getQuery().setBackend(BackendHelper.BackendNames.jEcdar);
                     setSwapBackendTooltipAndLabel(BackendHelper.BackendNames.jEcdar);
-                    updateTitlePaneVisibility((TitledPane) lookup("#inputOutputPane"), controller.getQuery().getQuery());
+                    updateTitlePaneVisibility((TitledPane) lookup("#inputOutputPane"), controller.getQuery());
                     swapBackendButton.setRipplerDisabled(true);
                 } else {
                     swapBackendButton.setRipplerDisabled(false);
@@ -373,12 +376,10 @@ public class QueryPresentation extends AnchorPane {
         });
     }
 
-    private void updateTitlePaneVisibility(TitledPane inputOutputPane, String queryString) {
-        final IBackendDriver backendDriver;
-
+    private void updateTitlePaneVisibility(TitledPane inputOutputPane, Query query) {
         // Check if the query is a refinement and that the engine is set to Reveaal
-        if (queryString.startsWith("refinement") && (backendDriver = BackendDriverManager.getInstance(this.controller.getQuery().getCurrentBackend())) instanceof ReveaalDriver) {
-            initiateResetInputOutputButton(inputOutputPane, (ReveaalDriver) backendDriver);
+        if (query.getType().equals(QueryType.REFINEMENT) && BackendHelper.backendSupportsInputOutputs(controller.getQuery().getBackend())) {
+            initiateResetInputOutputButton(inputOutputPane);
 
             // Make the input/output pane visible
             inputOutputPaneVisibility(true);
@@ -388,20 +389,18 @@ public class QueryPresentation extends AnchorPane {
         }
     }
 
-    private void updateInputOutputs(TitledPane inputOutputPane, ReveaalDriver backendDriver, Boolean shouldResetSelections) {
+    private void updateInputOutputs(TitledPane inputOutputPane, Boolean shouldResetSelections) {
         final VBox inputBox = (VBox) inputOutputPane.lookup("#inputBox");
         final VBox outputBox = (VBox) inputOutputPane.lookup("#outputBox");
 
-        // Get inputs and outputs
-        Pair<ArrayList<String>, ArrayList<String>> inputOutputs = backendDriver.getInputOutputs(controller.getQuery().getQuery());
+        IgnoredInputOutputQuery query = new IgnoredInputOutputQuery(this.controller.getQuery(), this, controller.getQuery().ignoredInputs, inputBox, controller.getQuery().ignoredOutputs, outputBox);
 
         if (shouldResetSelections) {
             // Reset selections for ignored inputs and outputs
             clearIgnoredInputsAndOutputs(inputBox, outputBox);
         }
 
-        addNewElementsToMap(inputOutputs.getKey(), controller.getQuery().ignoredInputs, inputBox);
-        addNewElementsToMap(inputOutputs.getValue(), controller.getQuery().ignoredOutputs, outputBox);
+        Ecdar.getBackendDriver().getInputOutputs(query);
     }
 
     private void clearIgnoredInputsAndOutputs(VBox inputBox, VBox outputBox) {
@@ -414,17 +413,7 @@ public class QueryPresentation extends AnchorPane {
         });
     }
 
-    private void addNewElementsToMap(ArrayList<String> keys, HashMap<String, Boolean> associatedMap, VBox associatedVBox) {
-        // Add inputs to list and as checkboxes in UI
-        for (String key : keys) {
-            if (!associatedMap.containsKey(key)) {
-                addInputOrOutput(key, false, associatedMap, associatedVBox);
-                associatedMap.put(key, false);
-            }
-        }
-    }
-
-    private void addInputOrOutput(String name, Boolean state, Map<String, Boolean> associatedMap, VBox associatedBox) {
+    public void addInputOrOutput(String name, Boolean state, Map<String, Boolean> associatedMap, VBox associatedBox) {
         HBox sliderBox = new HBox();
         sliderBox.setAlignment(Pos.CENTER_LEFT);
 

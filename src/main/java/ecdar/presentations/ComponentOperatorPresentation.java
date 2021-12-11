@@ -110,7 +110,11 @@ public class ComponentOperatorPresentation extends StackPane implements SelectHe
             event.consume();
 
             if (event.isShortcutDown()) {
-                SelectHelper.addToSelection(this);
+                if (SelectHelper.getSelectedElements().contains(this)) {
+                    SelectHelper.deselect(this);
+                } else {
+                    SelectHelper.addToSelection(this);
+                }
             } else {
                 SelectHelper.select(this);
             }
@@ -171,6 +175,16 @@ public class ComponentOperatorPresentation extends StackPane implements SelectHe
     @Override
     public double getY() {
         return controller.getOperator().getBox().getY();
+    }
+
+    @Override
+    public double getSelectableWidth() {
+        return getMinWidth();
+    }
+
+    @Override
+    public double getSelectableHeight() {
+        return getMinWidth();
     }
 
     /**
