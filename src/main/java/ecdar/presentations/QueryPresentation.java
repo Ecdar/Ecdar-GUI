@@ -345,10 +345,6 @@ public class QueryPresentation extends AnchorPane {
             swapBackendButton.setRipplerFill(Color.GREY.getColor(Color.Intensity.I500));
             swapBackendButton.setMaskType(JFXRippler.RipplerMask.CIRCLE);
             swapBackendButton.setOnMousePressed(event -> {
-                if(!swapBackendButton.disabledProperty().get()){
-                    return;
-                }
-
                 // Set the backend to the one not currently used and update GUI
                 final BackendHelper.BackendNames newBackend = (this.controller.getQuery().getBackend().equals(BackendHelper.BackendNames.jEcdar)
                         ? BackendHelper.BackendNames.Reveaal
@@ -362,17 +358,6 @@ public class QueryPresentation extends AnchorPane {
             swapBackendButtonTooltip = new Tooltip();
             setSwapBackendTooltipAndLabel(this.controller.getQuery().getBackend());
             JFXTooltip.install(swapBackendButton, swapBackendButtonTooltip);
-
-            lookup("#query").focusedProperty().addListener((observable, oldVal, newVal) -> {
-                if(!newVal && controller.getQuery().getQuery().startsWith("quotient")) {
-                    controller.getQuery().setBackend(BackendHelper.BackendNames.jEcdar);
-                    setSwapBackendTooltipAndLabel(BackendHelper.BackendNames.jEcdar);
-                    updateTitlePaneVisibility((TitledPane) lookup("#inputOutputPane"), controller.getQuery());
-                    swapBackendButton.setRipplerDisabled(true);
-                } else {
-                    swapBackendButton.setRipplerDisabled(false);
-                }
-            });
         });
     }
 
