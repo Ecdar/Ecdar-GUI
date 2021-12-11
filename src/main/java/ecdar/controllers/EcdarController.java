@@ -534,7 +534,7 @@ public class EcdarController implements Initializable {
         menuBarOptionsNumberOfSocketsSlider.valueChangingProperty().addListener((observable, oldValue, newValue) -> {
             if (oldValue && !newValue) {
                 int newIntValue = (int) Math.round(menuBarOptionsNumberOfSocketsSlider.getValue());
-                Ecdar.getBackendDriver().setMaxNumberOfSockets(newIntValue);
+                Ecdar.getBackendDriver().setMaxNumberOfConnections(newIntValue);
                 Ecdar.preferences.put("number_of_backend_sockets", Integer.toString(newIntValue));
             }
         });

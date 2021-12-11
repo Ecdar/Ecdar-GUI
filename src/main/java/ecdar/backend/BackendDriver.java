@@ -9,21 +9,17 @@ import ecdar.abstractions.Component;
 import ecdar.abstractions.QueryState;
 import io.grpc.*;
 import io.grpc.stub.StreamObserver;
-import javafx.util.Pair;
 import org.springframework.util.SocketUtils;
 
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 public class BackendDriver {
-    private final Pair<AtomicInteger, AtomicInteger> numberOfReveaalConnections = new Pair<>(new AtomicInteger(0), new AtomicInteger(5));
+    private int maxNumberOfBackendConnections = 5;
     private final List<BackendConnection> reveaalConnections = new CopyOnWriteArrayList<>();
-
-    private final Pair<AtomicInteger, AtomicInteger> numberOfJEcdarConnections = new Pair<>(new AtomicInteger(0), new AtomicInteger(5));
     private final List<BackendConnection> jEcdarConnections = new CopyOnWriteArrayList<>();
 
     private final String hostAddress;
@@ -33,15 +29,6 @@ public class BackendDriver {
 
     public BackendDriver(String hostAddress) {
         this.hostAddress = hostAddress;
-        Timer t = new Timer();
-        TimerTask tt = new TimerTask() {
-            @Override
-            public void run() {
-                System.out.println(numberOfReveaalConnections.getKey());
-            }
-        };
-
-        t.schedule(tt, 2000);
     }
 
     /**
@@ -71,19 +58,18 @@ public class BackendDriver {
     public void getInputOutputs(IgnoredInputOutputQuery query) {
         ExecutableQuery executableQuery = new ExecutableQuery(query.getQuery().getQuery(), BackendHelper.BackendNames.Reveaal,
                 a -> {
-                    
+
                 },
                 e -> {
 
                 },
                 new QueryListener(query.getQuery()));
 
-        // Get available connection or start new
+        // Get available connection or start new (only Reveaal supports ignored inputs/outputs)
         final Optional<BackendConnection> connection;
         connection = reveaalConnections.stream().filter((element) -> !element.isRunningQuery()).findFirst();
-
         final BackendConnection backendConnection = connection.orElseGet(() ->
-                (startNewBackendConnection(BackendHelper.BackendNames.Reveaal, numberOfReveaalConnections, reveaalConnections)));
+                (startNewBackendConnection(BackendHelper.BackendNames.Reveaal)));
         // If the query connection is null, there are no available sockets
         // and the maximum number of sockets has already been reached
         if (backendConnection == null) {
@@ -145,31 +131,46 @@ public class BackendDriver {
         backendConnection.getStub().withDeadlineAfter(deadlineForResponses, TimeUnit.MILLISECONDS).updateComponents(componentsBuilder.build(), observer);
     }
 
-    public void closeAllSockets() throws IOException {
+    /**
+     * Close every open connection for all backends
+     *
+     * @throws IOException originally thrown by related process when it is destroyed
+     */
+    public void closeAllBackendConnections() throws IOException {
         for (BackendConnection s : reveaalConnections) s.close();
         for (BackendConnection s : jEcdarConnections) s.close();
     }
 
-    public void setMaxNumberOfSockets(int i) {
-        numberOfReveaalConnections.getValue().set(i);
-        numberOfJEcdarConnections.getValue().set(i);
+    public int getMaxNumberOfSockets() {
+        return maxNumberOfBackendConnections;
+    }
 
-        while (numberOfReveaalConnections.getKey().get() > numberOfReveaalConnections.getKey().get()) {
-            BackendConnection unoccupiedConnection = reveaalConnections.stream().filter(backendConnection -> backendConnection.executableQuery == null).findFirst().orElse(null);
+    /**
+     * Change  the number of backend connection currently running for each backend.
+     *
+     * This will close connections if there are currently more connection open than the desired number
+     * @param i the new maximum for open connections
+     */
+    public void setMaxNumberOfConnections(int i) {
+        maxNumberOfBackendConnections = i;
+
+        closeAdditionalConnections(reveaalConnections);
+        closeAdditionalConnections(jEcdarConnections);
+    }
+
+    private void closeAdditionalConnections(List<BackendConnection> connections) {
+        while (connections.size() > maxNumberOfBackendConnections) {
+            BackendConnection unoccupiedConnection = connections.stream().filter(backendConnection -> backendConnection.executableQuery == null).findFirst().orElse(null);
             if (unoccupiedConnection != null) {
                 try {
                     unoccupiedConnection.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
-                    numberOfReveaalConnections.getKey().decrementAndGet();
+                    connections.remove(unoccupiedConnection);
                 }
             }
         }
-    }
-
-    public int getMaxNumberOfSockets() {
-        return numberOfReveaalConnections.getValue().get();
     }
 
     private void executeQuery(ExecutableQuery executableQuery) {
@@ -183,18 +184,23 @@ public class BackendDriver {
             connection = reveaalConnections.stream().filter((element) -> !element.isRunningQuery()).findFirst();
         }
 
-        final BackendConnection backendConnection = connection.orElseGet(() -> executableQuery.backend.equals(BackendHelper.BackendNames.jEcdar) ?
-                (startNewBackendConnection(BackendHelper.BackendNames.Reveaal, numberOfReveaalConnections, reveaalConnections)) : startNewBackendConnection(BackendHelper.BackendNames.jEcdar, numberOfJEcdarConnections, jEcdarConnections));
+        final BackendConnection backendConnection = connection.orElseGet(() -> executableQuery.backend.equals(BackendHelper.BackendNames.Reveaal) ?
+                (startNewBackendConnection(BackendHelper.BackendNames.Reveaal)) : startNewBackendConnection(BackendHelper.BackendNames.jEcdar));
 
         // If the query connection is null, there are no available sockets
         // and the maximum number of sockets has already been reached
         if (backendConnection == null) {
-            new Timer().schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    executableQuery.execute();
-                }
-            }, rerunQueryDelay);
+            if (executableQuery.tries < 5) {
+                new Timer().schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        executableQuery.execute();
+                    }
+                }, rerunQueryDelay);
+            } else {
+                executableQuery.failure.accept(new BackendException("Failed to execute query after five tries"));
+                executableQuery.queryListener.getQuery().setQueryState(QueryState.ERROR);
+            }
             return;
         }
 
@@ -214,11 +220,11 @@ public class BackendDriver {
 
             @Override
             public void onError(Throwable t) {
-                if (executableQuery.queryListener.getQuery().getQueryState() == QueryState.UNKNOWN) {
-                    backendConnection.setExecutableQuery(null);
-                } else {
+                // Check if query has been canceled
+                if (executableQuery.queryListener.getQuery().getQueryState() != QueryState.UNKNOWN) {
                     handleBackendError(t, backendConnection);
                     error = true;
+                    backendConnection.setExecutableQuery(null);
                 }
             }
 
@@ -228,21 +234,22 @@ public class BackendDriver {
                     StreamObserver<EcdarProtoBuf.QueryProtos.QueryResponse> responseObserver = new StreamObserver<>() {
                         @Override
                         public void onNext(QueryProtos.QueryResponse value) {
-                            if (executableQuery.queryListener.getQuery().getQueryState() == QueryState.UNKNOWN) {
-                                backendConnection.setExecutableQuery(null);
-                                return;
+                            if (executableQuery.queryListener.getQuery().getQueryState() != QueryState.UNKNOWN) {
+                                handleResponse(backendConnection.getExecutableQuery(), value);
                             }
-                            handleResponse(backendConnection.getExecutableQuery(), value);
+                            backendConnection.setExecutableQuery(null);
                         }
 
                         @Override
                         public void onError(Throwable t) {
-                            handleBackendError(t, backendConnection);
+                            if (executableQuery.queryListener.getQuery().getQueryState() != QueryState.UNKNOWN) {
+                                handleBackendError(t, backendConnection);
+                            }
+                            backendConnection.setExecutableQuery(null);
                         }
 
                         @Override
                         public void onCompleted() {
-                            backendConnection.setExecutableQuery(null);
                         }
                     };
                     backendConnection.getStub().withDeadlineAfter(deadlineForResponses, TimeUnit.MILLISECONDS).sendQuery(QueryProtos.Query.newBuilder().setId(0).setQuery(backendConnection.getExecutableQuery().query).build(), responseObserver);
@@ -291,11 +298,11 @@ public class BackendDriver {
                 backendConnection.getExecutableQuery().queryListener.getQuery().setQueryState(QueryState.ERROR);
                 backendConnection.getExecutableQuery().failure.accept(new BackendException.QueryErrorException("The query failed and gave the following error: " + errorType));
 
-                try {
-                    backendConnection.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+//                try {
+//                    backendConnection.close();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
 
                 break;
         }
@@ -326,18 +333,21 @@ public class BackendDriver {
         }
     }
 
-    private BackendConnection startNewBackendConnection(BackendHelper.BackendNames backend, Pair<AtomicInteger, AtomicInteger> numberOfSockets, List<BackendConnection> backendConnections) {
-        if (numberOfSockets.getKey().get() < numberOfSockets.getValue().get()) {
+    private BackendConnection startNewBackendConnection(BackendHelper.BackendNames backend) {
+        boolean isReveaal = backend.equals(BackendHelper.BackendNames.Reveaal);
+
+        if ((isReveaal ? reveaalConnections.size() < maxNumberOfBackendConnections
+                : jEcdarConnections.size() < maxNumberOfBackendConnections)) {
             try {
                 Process p;
                 int portNumber = SocketUtils.findAvailableTcpPort();
 
                 do {
                     ProcessBuilder pb;
-                    if (backend.equals(BackendHelper.BackendNames.jEcdar)) {
-                        pb = new ProcessBuilder("java", "-jar", "src/libs/j-Ecdar.jar");
-                    } else {
+                    if (isReveaal) {
                         pb = new ProcessBuilder("src/Reveaal", "-p", this.hostAddress + ":" + portNumber);
+                    } else {
+                        pb = new ProcessBuilder("java", "-jar", "src/libs/j-Ecdar.jar");
                     }
 
                     p = pb.start();
@@ -346,22 +356,22 @@ public class BackendDriver {
 
                 ManagedChannel channel = ManagedChannelBuilder.forTarget(this.hostAddress + ":" + portNumber)
                         .usePlaintext()
-                        .idleTimeout(2000, TimeUnit.MILLISECONDS)
                         .keepAliveTime(1000, TimeUnit.MILLISECONDS)
-                        .keepAliveTimeout(2000, TimeUnit.MILLISECONDS)
                         .build();
 
                 EcdarBackendGrpc.EcdarBackendStub stub = EcdarBackendGrpc.newStub(channel);
                 BackendConnection newConnection = new BackendConnection(p, stub);
-                backendConnections.add(newConnection);
-                numberOfSockets.getKey().getAndIncrement();
+
+                if (isReveaal) {
+                    reveaalConnections.add(newConnection);
+                } else {
+                    jEcdarConnections.add(newConnection);
+                }
 
                 return newConnection;
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else {
-//            System.out.println("Max number of sockets already reached");
         }
 
         return null;
@@ -373,6 +383,7 @@ public class BackendDriver {
         private final Consumer<Boolean> success;
         private final Consumer<BackendException> failure;
         private final QueryListener queryListener;
+        public int tries = 0;
 
         ExecutableQuery(String query, BackendHelper.BackendNames backend, Consumer<Boolean> success, Consumer<BackendException> failure, QueryListener queryListener) {
             this.query = query;
@@ -387,6 +398,7 @@ public class BackendDriver {
          */
         public void execute() {
             executeQuery(this);
+            tries++;
         }
     }
 
@@ -442,11 +454,11 @@ public class BackendDriver {
          * @throws IOException originally thrown by the destroy method on java.lang.Process
          */
         public void close() throws IOException {
-            // Remove the socket from the socket list
-            if (jEcdarConnections.remove(this)) {
-                numberOfJEcdarConnections.getKey().getAndDecrement();
-            } else if (reveaalConnections.remove(this)) {
-                numberOfReveaalConnections.getKey().getAndDecrement();
+            // Remove the connection from the connection list
+            if (jEcdarConnections.remove(this) || reveaalConnections.remove(this)) {
+                System.out.println("Successfully closed connection to backend");
+            } else {
+                System.out.println("Tried to remove a connection not present in either connection list");
             }
 
             process.destroy();

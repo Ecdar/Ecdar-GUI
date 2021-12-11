@@ -248,7 +248,7 @@ public class Ecdar extends Application {
             BackendHelper.stopQueries();
 
             try {
-                backendDriver.closeAllSockets();
+                backendDriver.closeAllBackendConnections();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -284,7 +284,7 @@ public class Ecdar extends Application {
                 : BackendHelper.BackendNames.Reveaal;
 
         backendDriver = new BackendDriver(preferences.get("backend_host_address", "127.0.0.1"));
-        getBackendDriver().setMaxNumberOfSockets(preferences.getInt("number_of_backend_sockets", 5));
+        getBackendDriver().setMaxNumberOfConnections(preferences.getInt("number_of_backend_sockets", 5));
     }
 
     /**

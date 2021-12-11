@@ -118,12 +118,12 @@ public class Query implements Serializable {
         return this.type;
     }
 
-    private Engine engine = null;
     private Boolean forcedCancel = false;
 
     private void initializeRunQuery() {
         runQuery = (buildEcdarDocument) -> {
             setQueryState(QueryState.RUNNING);
+            forcedCancel = false;
 
             if (buildEcdarDocument) {
                 try {
