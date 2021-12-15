@@ -321,11 +321,9 @@ public class BackendDriver {
             executableQuery.queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
             executableQuery.success.accept(true);
         } else if (value.hasConsistency() && value.getConsistency().getSuccess()) {
-            System.out.println("Consistency");
             executableQuery.queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
             executableQuery.success.accept(true);
         } else if (value.hasDeterminism() && value.getDeterminism().getSuccess()) {
-            System.out.println("Determinism");
             executableQuery.queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
             executableQuery.success.accept(true);
         } else if (value.hasComponent()) {

@@ -141,7 +141,7 @@ public class Query implements Serializable {
                     getBackend(),
                     aBoolean -> {
                         if (aBoolean) {
-                            setQueryState(QueryState.COMPONENT_GENERATED);
+                            setQueryState(QueryState.SUCCESSFUL);
                         } else {
                             setQueryState(QueryState.ERROR);
                         }
