@@ -252,10 +252,10 @@ public class QueryPresentation extends AnchorPane {
             final TitledPane inputOutputPane = (TitledPane) lookup("#inputOutputPane");
             inputOutputPane.setAnimated(true);
 
-            final Consumer<Query> changeTitledPaneVisibility = (query) -> updateTitlePaneVisibility(inputOutputPane, query);
+            final Runnable changeTitledPaneVisibility = () -> updateTitlePaneVisibility(inputOutputPane);
 
             // Run the consumer to ensure that the input/output pane is displayed for existing refinement queries
-            changeTitledPaneVisibility.accept(controller.getQuery());
+            changeTitledPaneVisibility.run();
 
             // Bind the expand icon to the expand property of the pane
             inputOutputPane.expandedProperty().addListener((observable, oldValue, newValue) -> {
@@ -271,12 +271,12 @@ public class QueryPresentation extends AnchorPane {
             final JFXTextField queryTextField = (JFXTextField) lookup("#query");
             queryTextField.focusedProperty().addListener((observable, oldValue, newValue) -> {
                 if (!newValue) {
-                    changeTitledPaneVisibility.accept(controller.getQuery());
+                    changeTitledPaneVisibility.run();
                 }
             });
 
             // Change visibility of input/output Pane when backend is changed for the query
-            lookup("#swapBackendButton").setOnMousePressed(event -> changeTitledPaneVisibility.accept(controller.getQuery()));
+            lookup("#swapBackendButton").setOnMousePressed(event -> changeTitledPaneVisibility.run());
 
             Platform.runLater(() -> addIgnoredInputOutputsFromQuery(inputOutputPane));
         });
@@ -348,7 +348,7 @@ public class QueryPresentation extends AnchorPane {
 
                 this.controller.getQuery().setBackend(newBackend);
                 setSwapBackendTooltipAndLabel(newBackend);
-                updateTitlePaneVisibility(inputOutputPane, controller.getQuery());
+                updateTitlePaneVisibility(inputOutputPane);
             });
 
             swapBackendButtonTooltip = new Tooltip();
@@ -357,9 +357,9 @@ public class QueryPresentation extends AnchorPane {
         });
     }
 
-    private void updateTitlePaneVisibility(TitledPane inputOutputPane, Query query) {
-        // Check if the query is a refinement and that the engine is set to Reveaal
-        if (query.getType().equals(QueryType.REFINEMENT) && BackendHelper.backendSupportsInputOutputs(controller.getQuery().getBackend())) {
+    private void updateTitlePaneVisibility(TitledPane inputOutputPane) {
+        // Check if the query is a refinement and that the backend supports ignored inputs and outputs
+        if (BackendHelper.backendSupportsInputOutputs(controller.getQuery().getBackend()) && controller.getQuery().getType().equals(QueryType.REFINEMENT)) {
             initiateResetInputOutputButton(inputOutputPane);
 
             // Make the input/output pane visible

@@ -8,7 +8,8 @@ public enum QueryType {
     LOCAL_CONSISTENCY("local-consistency", "lCon"),
     GLOBAL_CONSISTENCY("global-consistency", "gCon"),
     BISIM_MIN("bisim", "bsim"),
-    GET_NEW_COMPONENT("get-new-component", "get");
+    GET_NEW_COMPONENT("get-new-component", "get"),
+    REACHABILITY("reachability", "E<>");
 
     private final String queryName;
     private final String symbol;
@@ -46,6 +47,8 @@ public enum QueryType {
             case "get":
             case "get-new-component":
                 return GET_NEW_COMPONENT;
+            case "reachability":
+                return REACHABILITY;
             default:
                 return null;
         }
