@@ -93,8 +93,7 @@ public class BackendDriver {
             private boolean error = false;
 
             @Override
-            public void onNext(Empty value) {
-            }
+            public void onNext(Empty value) {}
 
             @Override
             public void onError(Throwable t) {
