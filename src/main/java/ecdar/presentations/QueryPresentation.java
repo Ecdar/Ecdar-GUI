@@ -20,6 +20,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.scene.text.TextAlignment;
 import org.kordamp.ikonli.javafx.FontIcon;
+
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -62,7 +63,6 @@ public class QueryPresentation extends AnchorPane {
 
             queryTextField.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler(keyEvent -> {
                 Platform.runLater(() -> {
-
                     if (keyEvent.getCode().equals(KeyCode.ENTER)) {
                         runQuery();
                     }
@@ -115,7 +115,7 @@ public class QueryPresentation extends AnchorPane {
             // Find the action icon
             final FontIcon actionButtonIcon = (FontIcon) lookup("#actionButtonIcon");
 
-            if(controller.getQuery() == null) {
+            if (controller.getQuery() == null) {
                 actionButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I500));
             }
 
@@ -238,7 +238,7 @@ public class QueryPresentation extends AnchorPane {
         controller.queryTypeSymbol.setFill(color);
         queryTypeExpandIcon.setIconColor(color);
 
-        if(queryState != null) {
+        if (queryState != null) {
             statusIcon.setIconLiteral("gmi-" + queryState.getIconCode().toString().toLowerCase().replace('_', '-'));
         }
     }
@@ -465,7 +465,7 @@ public class QueryPresentation extends AnchorPane {
 
     private void setSwapBackendTooltipAndLabel(BackendHelper.BackendNames backend) {
         boolean isReveaal;
-        if(backend == null){
+        if (backend == null) {
             isReveaal = false;
         } else {
             isReveaal = backend.equals(BackendHelper.BackendNames.Reveaal);
@@ -508,7 +508,7 @@ public class QueryPresentation extends AnchorPane {
             Set<Map.Entry<QueryType, SimpleBooleanProperty>> queryTypesSelected = controller.getQueryTypeListElementsSelectedState().entrySet();
 
             // Reflect the selection on the dropdown menu
-            for(Map.Entry<QueryType, SimpleBooleanProperty> pair : queryTypesSelected) {
+            for (Map.Entry<QueryType, SimpleBooleanProperty> pair : queryTypesSelected) {
                 pair.getValue().set(pair.getKey().equals(type));
             }
         });
