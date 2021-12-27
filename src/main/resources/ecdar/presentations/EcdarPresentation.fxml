@@ -230,8 +230,6 @@
                             <FontIcon iconLiteral="gmi-settings-input-component" iconSize="24" fill="black"/>
                         </graphic>
                     </MenuItem>
-                                <!--<JFXSlider styleClass="jfx-slider" min="1" max="20"
-                                           fx:id="menuBarOptionsNumberOfSocketsSlider"/>-->
                 </Menu>
 
                 <Menu text="Help">

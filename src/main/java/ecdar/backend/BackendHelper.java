@@ -122,7 +122,7 @@ public final class BackendHelper {
      * @return A reachability query string
      */
     public static String getLocationReachableQuery(final Location location, final Component component) {
-        return "E<> " + component.getName() + "." + location.getId();
+        return component.getName() + "." + location.getId();
     }
 
     /**
@@ -140,7 +140,7 @@ public final class BackendHelper {
             locationNames.add(templateName + "." + location.getId());
         }
 
-        return "E<> (" + String.join(" || ", locationNames) + ") && deadlock";
+        return "(" + String.join(" || ", locationNames) + ") && deadlock";
     }
 
     /**

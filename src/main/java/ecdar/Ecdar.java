@@ -26,7 +26,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import jiconfont.icons.GoogleMaterialDesignIcons;
+import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 import jiconfont.javafx.IconFontFX;
 import org.apache.commons.io.FileUtils;
 
@@ -250,7 +250,7 @@ public class Ecdar extends Application {
             BackendHelper.stopQueries();
 
             try {
-                backendDriver.closeAllBackendConnection();
+                backendDriver.closeAllBackendConnections();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -258,29 +258,17 @@ public class Ecdar extends Application {
             Platform.exit();
             System.exit(0);
         });
-
-//        try {
-//            System.out.println("---------------------Connecting...---------------------");
-//            System.out.println();
-//            Socket socket = new Socket("127.0.0.1", 5141);
-//
-//            var reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-//            var writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-//
-//            writer.write("Hello from the client side");
-//
-//            int inte;
-//            while ((inte = reader.read()) != -1) {
-//                System.out.println(inte);
-//            }
-//
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
     }
 
     private void loadBackends() {
         // ToDo NIELS: Load backends
+//        BackendHelper.defaultBackend = preferences.getInt("default_backend", BackendHelper.BackendNames.jEcdar.ordinal())
+//                == BackendHelper.BackendNames.jEcdar.ordinal()
+//                ? BackendHelper.BackendNames.jEcdar
+//                : BackendHelper.BackendNames.Reveaal;
+//
+//        backendDriver = new BackendDriver(preferences.get("backend_host_address", "127.0.0.1"));
+//        getBackendDriver().setMaxNumberOfConnections(preferences.getInt("number_of_backend_sockets", 5));
     }
 
     /**
@@ -365,6 +353,5 @@ public class Ecdar extends Application {
         Font.loadFont(getClass().getResourceAsStream("fonts/roboto_mono/RobotoMono-Regular.ttf"), 14);
         Font.loadFont(getClass().getResourceAsStream("fonts/roboto_mono/RobotoMono-Thin.ttf"), 14);
         Font.loadFont(getClass().getResourceAsStream("fonts/roboto_mono/RobotoMono-ThinItalic.ttf"), 14);
-
     }
 }

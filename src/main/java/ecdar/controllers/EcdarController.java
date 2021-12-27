@@ -5,6 +5,7 @@ import ecdar.Ecdar;
 import ecdar.abstractions.*;
 import ecdar.backend.BackendException;
 import ecdar.backend.BackendHelper;
+import ecdar.backend.QueryListener;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.presentations.*;
@@ -153,7 +154,7 @@ public class EcdarController implements Initializable {
     public MenuItem menuBarHelpAbout;
     public MenuItem menuBarHelpTest;
 
-    public JFXSnackbar snackbar;
+    public Snackbar snackbar;
     public HBox statusBar;
     public Label statusLabel;
     public Label queryLabel;
@@ -237,6 +238,13 @@ public class EcdarController implements Initializable {
             dialogContainer.setVisible(true);
             dialogContainer.setMouseTransparent(false);
         });
+
+        initializeKeybindings();
+        initializeTabPane();
+        initializeStatusBar();
+        initializeMessages();
+        initializeMenuBar();
+        initializeReachabilityAnalysisThread();
     }
 
     /**
@@ -353,7 +361,6 @@ public class EcdarController implements Initializable {
     private void initializeReachabilityAnalysisThread() {
         new Thread(() -> {
             while (true) {
-
                 // Wait for the reachability (the last time we changed the model) becomes smaller than the current time
                 while (reachabilityTime > System.currentTimeMillis()) {
                     try {
@@ -406,29 +413,45 @@ public class EcdarController implements Initializable {
                     } else {
                         component.getLocations().forEach(location -> {
                             final String locationReachableQuery = BackendHelper.getLocationReachableQuery(location, component);
-                            // ToDo NIELS: Needs new implementation after thread pool implementation
-//                            final Thread verifyThread = BackendDriverManager.getInstance().getBackendThreadForQuery(
-//                                    locationReachableQuery,
-//                                    (result -> {
-//                                        if (result) {
-//                                            location.setReachability(Location.Reachability.REACHABLE);
-//                                        } else {
-//                                            location.setReachability(Location.Reachability.UNREACHABLE);
-//                                        }
-//                                        Debug.removeThread(Thread.currentThread());
-//                                    }),
-//                                    (e) -> {
-//                                        location.setReachability(Location.Reachability.UNKNOWN);
-//                                        Debug.removeThread(Thread.currentThread());
-//                                    },
-//                                    2000
-//                            );
-//
-//                            if(verifyThread != null){
-//                                verifyThread.setName(locationReachableQuery + " (" + verifyThread.getName() + ")");
-//                                Debug.addThread(verifyThread);
-//                                threads.add(verifyThread);
-//                            }
+
+                            Query reachabilityQuery = new Query(locationReachableQuery, "", QueryState.UNKNOWN);
+                            reachabilityQuery.setType(QueryType.REACHABILITY);
+
+                            Ecdar.getBackendDriver().addQueryToExecutionQueue(locationReachableQuery,
+                                    BackendHelper.getDefaultBackendInstance(),
+                                    (result -> {
+                                        if (result) {
+                                            location.setReachability(Location.Reachability.REACHABLE);
+                                        } else {
+                                            location.setReachability(Location.Reachability.UNREACHABLE);
+                                        }
+                                        Debug.removeThread(Thread.currentThread());
+                                    }),
+                                    (e) -> {
+                                        location.setReachability(Location.Reachability.UNKNOWN);
+                                        Debug.removeThread(Thread.currentThread());
+                                    },
+                                    new QueryListener(reachabilityQuery));
+
+                            final Thread verifyThread = new Thread(() -> Ecdar.getBackendDriver().addQueryToExecutionQueue(locationReachableQuery,
+                                    BackendHelper.getDefaultBackendInstance(),
+                                    (result -> {
+                                        if (result) {
+                                            location.setReachability(Location.Reachability.REACHABLE);
+                                        } else {
+                                            location.setReachability(Location.Reachability.UNREACHABLE);
+                                        }
+                                        Debug.removeThread(Thread.currentThread());
+                                    }),
+                                    (e) -> {
+                                        location.setReachability(Location.Reachability.UNKNOWN);
+                                        Debug.removeThread(Thread.currentThread());
+                                    },
+                                    new QueryListener(reachabilityQuery)));
+
+                            verifyThread.setName(locationReachableQuery + " (" + verifyThread.getName() + ")");
+                            Debug.addThread(verifyThread);
+                            threads.add(verifyThread);
                         });
                     }
                 });
@@ -869,6 +892,7 @@ public class EcdarController implements Initializable {
 
         // Update the startIndex for the next canvasShellPresentation
         for (int i = 0; i < numComponents; i++) {
+
             if (canvasShellPresentation.getController().canvasPresentation.getController().getActiveModel() != null && canvasShellPresentation.getController().canvasPresentation.getController().getActiveModel().equals(components.get(i))) {
                 currentCompNum = i + 1;
             }

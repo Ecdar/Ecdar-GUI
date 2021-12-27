@@ -10,10 +10,6 @@ import ecdar.utility.colors.Color;
 import javafx.application.Platform;
 import javafx.beans.binding.When;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleListProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
@@ -23,17 +19,13 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.scene.text.TextAlignment;
-import javafx.util.Pair;
 import org.kordamp.ikonli.javafx.FontIcon;
-
-import java.util.*;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
-
 import static javafx.scene.paint.Color.*;
 
 public class QueryPresentation extends AnchorPane {
-
     private final Tooltip tooltip = new Tooltip();
     private Tooltip backendDropdownTooltip;
     private final QueryController controller;
@@ -76,9 +68,11 @@ public class QueryPresentation extends AnchorPane {
 
 
             queryTextField.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler(keyEvent -> {
-                if (keyEvent.getCode().equals(KeyCode.ENTER)) {
-                    runQuery();
-                }
+                Platform.runLater(() -> {
+                    if (keyEvent.getCode().equals(KeyCode.ENTER)) {
+                        runQuery();
+                    }
+                });
             }));
 
             commentTextField.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
@@ -127,7 +121,7 @@ public class QueryPresentation extends AnchorPane {
             // Find the action icon
             final FontIcon actionButtonIcon = (FontIcon) lookup("#actionButtonIcon");
 
-            if(controller.getQuery() == null) {
+            if (controller.getQuery() == null) {
                 actionButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I500));
             }
 
@@ -136,12 +130,14 @@ public class QueryPresentation extends AnchorPane {
 
             // Delegate that based on the query state updated the action icon
             final Consumer<QueryState> updateIcon = (queryState) -> {
-                if (queryState.equals(QueryState.RUNNING)) {
-                    actionButtonIcon.setIconLiteral("gmi-stop");
-                } else {
-                    actionButtonIcon.setIconLiteral("gmi-play-arrow");
-                }
-                actionButtonIcon.setIconSize(24);
+                Platform.runLater(() -> {
+                    if (queryState.equals(QueryState.RUNNING)) {
+                        actionButtonIcon.setIconLiteral("gmi-stop");
+                    } else {
+                        actionButtonIcon.setIconLiteral("gmi-play-arrow");
+                    }
+                    actionButtonIcon.setIconSize(24);
+                });
             };
 
             // Update the icon initially
@@ -153,11 +149,13 @@ public class QueryPresentation extends AnchorPane {
             controller.actionButton.setMaskType(JFXRippler.RipplerMask.CIRCLE);
 
             controller.actionButton.getChildren().get(0).setOnMousePressed(event -> {
-                if (controller.getQuery().getQueryState().equals(QueryState.RUNNING)) {
-                    controller.getQuery().cancel();
-                } else {
-                    runQuery();
-                }
+                Platform.runLater(() -> {
+                    if (controller.getQuery().getQueryState().equals(QueryState.RUNNING)) {
+                        controller.getQuery().cancel();
+                    } else {
+                        runQuery();
+                    }
+                });
             });
         });
     }
@@ -181,42 +179,46 @@ public class QueryPresentation extends AnchorPane {
 
             // Delegate that based on a query state updates tooltip of the query
             final Consumer<QueryState> updateToolTip = (queryState) -> {
-                if (queryState.getStatusCode() == 1) {
-                    this.tooltip.setText("This query was a success!");
-                } else if (queryState.getStatusCode() == 3) {
-                    this.tooltip.setText("The query has not been executed yet");
-                } else {
-                    this.tooltip.setText(controller.getQuery().getCurrentErrors());
-                }
+                Platform.runLater(() -> {
+                    if (queryState.getStatusCode() == 1) {
+                        this.tooltip.setText("This query was successful!");
+                    } else if (queryState.getStatusCode() == 3) {
+                        this.tooltip.setText("The query has not been executed yet");
+                    } else {
+                        this.tooltip.setText(controller.getQuery().getCurrentErrors());
+                    }
+                });
             };
 
             // Delegate that based on a query state updates the color of the state indicator
             final Consumer<QueryState> updateStateIndicator = (queryState) -> {
-                this.tooltip.setText("");
+                Platform.runLater(() -> {
+                    this.tooltip.setText("");
 
-                final Color color = queryState.getColor();
-                final Color.Intensity colorIntensity = queryState.getColorIntensity();
+                    final Color color = queryState.getColor();
+                    final Color.Intensity colorIntensity = queryState.getColorIntensity();
 
-                if (queryState.equals(QueryState.UNKNOWN) || queryState.equals(QueryState.RUNNING)) {
-                    stateIndicator.setBackground(new Background(new BackgroundFill(TRANSPARENT,
-                            CornerRadii.EMPTY,
-                            Insets.EMPTY)
-                    ));
-                } else {
-                    stateIndicator.setBackground(new Background(new BackgroundFill(color.getColor(colorIntensity),
-                            CornerRadii.EMPTY,
-                            Insets.EMPTY)
-                    ));
-                }
+                    if (queryState.equals(QueryState.UNKNOWN) || queryState.equals(QueryState.RUNNING)) {
+                        stateIndicator.setBackground(new Background(new BackgroundFill(TRANSPARENT,
+                                CornerRadii.EMPTY,
+                                Insets.EMPTY)
+                        ));
+                    } else {
+                        stateIndicator.setBackground(new Background(new BackgroundFill(color.getColor(colorIntensity),
+                                CornerRadii.EMPTY,
+                                Insets.EMPTY)
+                        ));
+                    }
 
-                setStatusIndicatorContentColor(new javafx.scene.paint.Color(1, 1, 1, 1), statusIcon, queryTypeExpandIcon, queryState);
+                    setStatusIndicatorContentColor(new javafx.scene.paint.Color(1, 1, 1, 1), statusIcon, queryTypeExpandIcon, queryState);
 
-                if (queryState.equals(QueryState.RUNNING) || queryState.equals(QueryState.UNKNOWN)) {
-                    setStatusIndicatorContentColor(Color.GREY.getColor(Color.Intensity.I700), statusIcon, queryTypeExpandIcon, null);
-                }
+                    if (queryState.equals(QueryState.RUNNING) || queryState.equals(QueryState.UNKNOWN)) {
+                        setStatusIndicatorContentColor(Color.GREY.getColor(Color.Intensity.I700), statusIcon, queryTypeExpandIcon, null);
+                    }
 
-                // The tooltip is updated here to handle all cases that are not syntax error
-                updateToolTip.accept(queryState);
+                    // The tooltip is updated here to handle all cases that are not syntax error
+                    updateToolTip.accept(queryState);
+                });
             };
 
             // Update the initial color
@@ -227,6 +229,8 @@ public class QueryPresentation extends AnchorPane {
 
             // Ensure that the tooltip is updated when new errors are added
             controller.getQuery().errors().addListener((observable, oldValue, newValue) -> updateToolTip.accept(controller.getQuery().getQueryState()));
+            this.tooltip.setMaxWidth(300);
+            this.tooltip.setWrapText(true);
 
             // Installing the tooltip on the statusIcon itself scales the tooltip unexpectedly, hence its parent StackPane is used
             Tooltip.install(statusIcon.getParent(), this.tooltip);
@@ -240,7 +244,7 @@ public class QueryPresentation extends AnchorPane {
         controller.queryTypeSymbol.setFill(color);
         queryTypeExpandIcon.setIconColor(color);
 
-        if(queryState != null) {
+        if (queryState != null) {
             statusIcon.setIconLiteral("gmi-" + queryState.getIconCode().toString().toLowerCase().replace('_', '-'));
         }
     }
@@ -250,10 +254,10 @@ public class QueryPresentation extends AnchorPane {
             final TitledPane inputOutputPane = (TitledPane) lookup("#inputOutputPane");
             inputOutputPane.setAnimated(true);
 
-            final Consumer<String> changeTitledPaneVisibility = (queryString) -> updateTitlePaneVisibility(inputOutputPane, queryString);
+            final Runnable changeTitledPaneVisibility = () -> updateTitlePaneVisibility(inputOutputPane);
 
             // Run the consumer to ensure that the input/output pane is displayed for existing refinement queries
-            changeTitledPaneVisibility.accept(controller.getQuery().getQuery());
+            changeTitledPaneVisibility.run();
 
             // Bind the expand icon to the expand property of the pane
             inputOutputPane.expandedProperty().addListener((observable, oldValue, newValue) -> {
@@ -269,13 +273,12 @@ public class QueryPresentation extends AnchorPane {
             final JFXTextField queryTextField = (JFXTextField) lookup("#query");
             queryTextField.focusedProperty().addListener((observable, oldValue, newValue) -> {
                 if (!newValue) {
-                    changeTitledPaneVisibility.accept(controller.getQuery().getQuery());
+                    changeTitledPaneVisibility.run();
                 }
             });
 
             // Change visibility of input/output Pane when backend is changed for the query ToDo NIELS
             // lookup("#swapBackendButton").setOnMousePressed(event -> changeTitledPaneVisibility.accept(controller.getQuery().getQuery()));
-
             Platform.runLater(() -> addIgnoredInputOutputsFromQuery(inputOutputPane));
         });
     }
@@ -329,9 +332,9 @@ public class QueryPresentation extends AnchorPane {
         });
     }
 
-    private void updateTitlePaneVisibility(TitledPane inputOutputPane, String queryString) {
+    private void updateTitlePaneVisibility(TitledPane inputOutputPane) {
         // Check if the query is a refinement and that the engine is set to Reveaal
-        if (queryString.startsWith("refinement") && BackendHelper.backendSupportsInputOutputs(controller.getQuery().getBackend())) {
+        if (controller.getQuery().getQuery().startsWith("refinement") && BackendHelper.backendSupportsInputOutputs(controller.getQuery().getBackend())) {
             initiateResetInputOutputButton(inputOutputPane);
 
             // Make the input/output pane visible
@@ -346,18 +349,14 @@ public class QueryPresentation extends AnchorPane {
         final VBox inputBox = (VBox) inputOutputPane.lookup("#inputBox");
         final VBox outputBox = (VBox) inputOutputPane.lookup("#outputBox");
 
-        // Get inputs and outputs
-        Pair<ArrayList<String>, ArrayList<String>> inputOutputs = Ecdar.getBackendDriver().getInputOutputs(controller.getQuery().getQuery());
-
-        if (inputOutputs == null) return;
+        IgnoredInputOutputQuery query = new IgnoredInputOutputQuery(this.controller.getQuery(), this, controller.getQuery().ignoredInputs, inputBox, controller.getQuery().ignoredOutputs, outputBox);
 
         if (shouldResetSelections) {
             // Reset selections for ignored inputs and outputs
             clearIgnoredInputsAndOutputs(inputBox, outputBox);
         }
 
-        addNewElementsToMap(inputOutputs.getKey(), controller.getQuery().ignoredInputs, inputBox);
-        addNewElementsToMap(inputOutputs.getValue(), controller.getQuery().ignoredOutputs, outputBox);
+        Ecdar.getBackendDriver().getInputOutputs(query, controller.getQuery().getBackend());
     }
 
     private void clearIgnoredInputsAndOutputs(VBox inputBox, VBox outputBox) {
@@ -370,17 +369,7 @@ public class QueryPresentation extends AnchorPane {
         });
     }
 
-    private void addNewElementsToMap(ArrayList<String> keys, HashMap<String, Boolean> associatedMap, VBox associatedVBox) {
-        // Add inputs to list and as checkboxes in UI
-        for (String key : keys) {
-            if (!associatedMap.containsKey(key)) {
-                addInputOrOutput(key, false, associatedMap, associatedVBox);
-                associatedMap.put(key, false);
-            }
-        }
-    }
-
-    private void addInputOrOutput(String name, Boolean state, Map<String, Boolean> associatedMap, VBox associatedBox) {
+    public void addInputOrOutput(String name, Boolean state, Map<String, Boolean> associatedMap, VBox associatedBox) {
         HBox sliderBox = new HBox();
         sliderBox.setAlignment(Pos.CENTER_LEFT);
 
@@ -491,7 +480,7 @@ public class QueryPresentation extends AnchorPane {
             Set<Map.Entry<QueryType, SimpleBooleanProperty>> queryTypesSelected = controller.getQueryTypeListElementsSelectedState().entrySet();
 
             // Reflect the selection on the dropdown menu
-            for(Map.Entry<QueryType, SimpleBooleanProperty> pair : queryTypesSelected) {
+            for (Map.Entry<QueryType, SimpleBooleanProperty> pair : queryTypesSelected) {
                 pair.getValue().set(pair.getKey().equals(type));
             }
         });
