@@ -224,6 +224,10 @@ public class EcdarController implements Initializable {
                 backendOptionsDialog.close();
             }
         });
+
+        // Set default backend instance
+        BackendInstance defaultBackend = BackendHelper.getBackendInstances().stream().filter(BackendInstance::isDefault).findFirst().get();
+        BackendHelper.setDefaultBackendInstance(defaultBackend);
     }
 
     private void initializeDialog(JFXDialog dialog, StackPane dialogContainer) {

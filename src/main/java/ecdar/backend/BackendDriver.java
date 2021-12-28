@@ -382,7 +382,17 @@ public class BackendDriver {
             return executableQuery;
         }
 
+        /**
+         * Get the backend instance that should be used to execute
+         * the query currently associated with this backend connection
+         *
+         * @return the instance of the associated executable query object,
+         * or null, if no executable query is currently associated
+         */
         public BackendInstance getBackendInstance() {
+            if (executableQuery == null) {
+                return null;
+            }
             return executableQuery.backend;
         }
 

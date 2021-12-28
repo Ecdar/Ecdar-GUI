@@ -40,8 +40,8 @@ public class QueryPresentation extends AnchorPane {
         initializeDetailsButton();
         initializeTextFields();
         initializeInputOutputPaneAndAddIgnoredInputOutputs();
-        initializeBackendsDropdown();
         initializeMoreInformationButtonAndQueryTypeSymbol();
+        initializeBackendsDropdown();
     }
 
     private void initializeBackendsDropdown() {

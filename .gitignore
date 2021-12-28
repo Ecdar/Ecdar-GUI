@@ -55,3 +55,6 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+# The backends
+/src/Reveaal

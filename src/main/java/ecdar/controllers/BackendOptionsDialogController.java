@@ -262,7 +262,7 @@ public class BackendOptionsDialogController implements Initializable {
 
             Ecdar.preferences.put("backend_instances", jsonArray.toString());
 
-            // The is always a default backend set, so isPresent check is unnecessary
+            // There is always a default backend set, so isPresent check is unnecessary
             BackendInstance defaultBackend = backendInstances.stream().filter(BackendInstance::isDefault).findFirst().get();
             BackendHelper.setDefaultBackendInstance(defaultBackend);
 

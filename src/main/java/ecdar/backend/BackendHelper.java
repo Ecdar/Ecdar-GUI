@@ -147,11 +147,12 @@ public final class BackendHelper {
      * Returns the BackendInstance with the specified name, or null, if no such BackendInstance exists
      *
      * @param backendInstanceName Name of the BackendInstance to return
-     * @return The BackendInstance with matching name or null if such a BackendInstance does not exist
+     * @return The BackendInstance with matching name
+     * or the default backend instance, if no matching backendInstance exists
      */
     public static BackendInstance getBackendInstanceByName(String backendInstanceName) {
         Optional<BackendInstance> backendInstance = BackendHelper.backendInstances.stream().filter(bi -> bi.getName().equals(backendInstanceName)).findFirst();
-        return backendInstance.orElse(null);
+        return backendInstance.orElse(BackendHelper.getDefaultBackendInstance());
     }
 
     /**

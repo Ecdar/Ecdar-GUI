@@ -49,6 +49,11 @@ public class QueryController implements Initializable {
                 });
             }
         }));
+
+        backendsDropdown.setValue(query.getBackend());
+        backendsDropdown.valueProperty().addListener((observable, oldValue, newValue) -> {
+            query.setBackend(newValue);
+        });
     }
 
     public Query getQuery() {
