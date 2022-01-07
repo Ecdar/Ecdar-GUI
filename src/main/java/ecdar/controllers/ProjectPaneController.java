@@ -176,7 +176,7 @@ public class ProjectPaneController implements Initializable {
         if (model instanceof Component) {
             moreInformationDropDown.addSpacerElement();
 
-            if(!filePresentation.getModel().isTemporary()) {
+            if (!filePresentation.getModel().isTemporary()) {
                 moreInformationDropDown.addClickableListElement("Delete", event -> {
                     UndoRedoStack.pushAndPerform(() -> { // Perform
                         Ecdar.getProject().getComponents().remove(model);
@@ -194,25 +194,41 @@ public class ProjectPaneController implements Initializable {
                     }, "Deleted component " + model.getName(), "delete");
                     moreInformationDropDown.hide();
                 });
-
+                
                 moreInformationDropDown.addClickableListElement("Add as component", event -> {
-                    String originalModalName = model.getName();
-                    for(int i = 2; i < 100; i++){
-                        if(Ecdar.getProject().getComponents().stream().noneMatch(component -> component.getName().equals(model.getName()))){
-                            UndoRedoStack.pushAndPerform(() -> { // Perform
-                                Ecdar.getProject().getTempComponents().remove(model);
-                                model.setTemporary(false);
-                                Ecdar.getProject().getComponents().add((Component) model);
-                                EcdarController.getActiveCanvasPresentation().getController().setActiveModel(model);
-                            }, () -> { // Undo
-                                Ecdar.getProject().getComponents().remove(model);
-                                model.setTemporary(true);
-                                Ecdar.getProject().getTempComponents().add((Component) model);
-                            }, "Add component " + model.getName(), "add");
-                            moreInformationDropDown.hide();
-                            break;
-                        } else {
-                            model.setName(originalModalName + " #" + i);
+                    if(Ecdar.getProject().getComponents().stream().noneMatch(component -> component.getName().equals(model.getName()))) {
+                        UndoRedoStack.pushAndPerform(() -> { // Perform
+                            Ecdar.getProject().getTempComponents().remove(model);
+                            model.setTemporary(false);
+                            Ecdar.getProject().getComponents().add((Component) model);
+                            EcdarController.getActiveCanvasPresentation().getController().setActiveModel(model);
+                        }, () -> { // Undo
+                            Ecdar.getProject().getComponents().remove(model);
+                            model.setTemporary(true);
+                            Ecdar.getProject().getTempComponents().add((Component) model);
+                            EcdarController.getActiveCanvasPresentation().getController().setActiveModel(model);
+                        }, "Add component " + model.getName(), "add");
+                        moreInformationDropDown.hide();
+                    } else {
+                        String originalModelName = model.getName();
+                        for (int i = 2; i < 100; i++) {
+                            final String newName = originalModelName + " #" + i;
+                            if(Ecdar.getProject().getComponents().stream().noneMatch(component -> component.getName().equals(newName))) {
+                                UndoRedoStack.pushAndPerform(() -> { // Perform
+                                    Ecdar.getProject().getTempComponents().remove(model);
+                                    model.setTemporary(false);
+                                    Ecdar.getProject().getComponents().add((Component) model);
+                                    EcdarController.getActiveCanvasPresentation().getController().setActiveModel(model);
+                                    model.setName(newName);
+                                }, () -> { // Undo
+                                    Ecdar.getProject().getComponents().remove(model);
+                                    model.setTemporary(true);
+                                    Ecdar.getProject().getTempComponents().add((Component) model);
+                                    model.setName(originalModelName);
+                                }, "Add component " + model.getName(), "add");
+                                moreInformationDropDown.hide();
+                                break;
+                            }
                         }
                     }
                 });
@@ -231,7 +247,6 @@ public class ProjectPaneController implements Initializable {
                 moreInformationDropDown.hide();
             });
         }
-
 
 
         if (model instanceof MutationTestPlan) {
@@ -276,15 +291,14 @@ public class ProjectPaneController implements Initializable {
 
     private void handleAddedModel(final HighLevelModelObject model) {
         final FilePresentation filePresentation = new FilePresentation(model);
-
         initializeMoreInformationDropDown(filePresentation);
 
-        if(model.isTemporary()) {
+        // Add the file presentation related to the model to the project pane
+        if (model.isTemporary()) {
             tempFilesList.getChildren().add(filePresentation);
         } else {
             filesList.getChildren().add(filePresentation);
         }
-
         modelPresentationMap.put(model, filePresentation);
 
         // Open the component if the presentation is pressed
@@ -293,6 +307,7 @@ public class ProjectPaneController implements Initializable {
             EcdarController.getActiveCanvasPresentation().getController().setActiveModel(model);
             updateColorsOnFilePresentations();
         });
+
         model.nameProperty().addListener(obs -> sortPresentations());
     }
 
@@ -309,6 +324,14 @@ public class ProjectPaneController implements Initializable {
                 EcdarController.getActiveCanvasPresentation().getController().setActiveModel(null);
             }
         }
+
+        // Remove the file presentation related to the model from the project pane
+        if (model.isTemporary()) {
+            tempFilesList.getChildren().remove(modelPresentationMap.get(model));
+        } else {
+            filesList.getChildren().remove(modelPresentationMap.get(model));
+        }
+        modelPresentationMap.remove(model);
     }
 
     /**
@@ -321,13 +344,11 @@ public class ProjectPaneController implements Initializable {
             }
         }
 
-        if(EcdarController.getActiveCanvasPresentation().getController().getActiveModel().isTemporary()) {
-            tempFilesList.getChildren().remove(modelPresentationMap.get(EcdarController.getActiveCanvasPresentation().getController().getActiveModel()));
-        } else {
-            filesList.getChildren().remove(modelPresentationMap.get(EcdarController.getActiveCanvasPresentation().getController().getActiveModel()));
+        for (Node child : tempFilesList.getChildren()) {
+            if (child instanceof FilePresentation) {
+                ((FilePresentation) child).updateColors();
+            }
         }
-
-        modelPresentationMap.remove(EcdarController.getActiveCanvasPresentation().getController().getActiveModel());
     }
 
     /**
@@ -368,7 +389,7 @@ public class ProjectPaneController implements Initializable {
      */
     @FXML
     private void setGeneratedComponentsVisibilityButtonClicked() {
-        if(generatedComponentsVisibilityButtonIcon.getIconCode() == Material.EXPAND_MORE) {
+        if (generatedComponentsVisibilityButtonIcon.getIconCode() == Material.EXPAND_MORE) {
             generatedComponentsVisibilityButtonIcon.setIconCode(Material.EXPAND_LESS);
             this.tempFilesList.setVisible(true);
             this.tempFilesList.setManaged(true);

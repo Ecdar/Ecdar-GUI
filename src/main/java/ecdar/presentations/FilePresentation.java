@@ -56,7 +56,6 @@ public class FilePresentation extends AnchorPane {
         final Color color = Color.GREY_BLUE;
         final Color.Intensity colorIntensity = Color.Intensity.I400;
 
-
         rippler.setMaskType(JFXRippler.RipplerMask.RECT);
         rippler.setRipplerFill(color.getColor(colorIntensity));
         rippler.setPosition(JFXRippler.RipplerPos.BACK);
