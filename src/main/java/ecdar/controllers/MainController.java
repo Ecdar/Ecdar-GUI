@@ -7,6 +7,7 @@ import ecdar.abstractions.Component;
 import ecdar.abstractions.EcdarSystem;
 import ecdar.abstractions.HighLevelModelObject;
 import ecdar.abstractions.Query;
+import ecdar.backend.BackendHelper;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.presentations.*;
@@ -106,7 +107,13 @@ public class MainController implements Initializable {
     public MenuItem menuBarZoomInSimulator;
     public MenuItem menuBarZoomOutSimulator;
     public MenuItem menuBarZoomResetSimulator;
+    // ToDo NIELS: will be deleted when custom backend get merged
     public MenuItem menuBarOptionsCache;
+    public MenuItem menuBarOptionsDefaultBackend;
+    public HBox menuBarOptionsDefaultBackendContent;
+    public Tooltip menuBarOptionsDefaultBackendTooltip;
+    public JFXSlider menuBarOptionsNumberOfSocketsSlider;
+
     public MenuItem menuBarHelpHelp;
 
     public StackPane queryDialogContainer;
@@ -255,15 +262,10 @@ public class MainController implements Initializable {
         menuBarFileSaveAs.setOnAction(event -> saveAs());
 
         initializeNewMutationTestObjectMenuItem();
-
         initializeFileExportAsPng();
-
         initializeEditMenu();
-
         initializeViewMenu();
-
-        initializeUICacheMenuElement();
-
+        initializeOptionsMenu();
         initializeHelpMenu();
 
         //TODO change to match on macOS
@@ -300,11 +302,43 @@ public class MainController implements Initializable {
     /**
      * Initializes the UI Cache menu element.
      */
-    private void initializeUICacheMenuElement() {
+    private void initializeOptionsMenu() {
         menuBarOptionsCache.setOnAction(event -> {
             final BooleanProperty isCached = Ecdar.toggleUICache();
             menuBarOptionsCache.getGraphic().opacityProperty().bind(new When(isCached).then(1).otherwise(0));
         });
+
+        menuBarOptionsDefaultBackendTooltip = new Tooltip("Change default backend to " +
+                (BackendHelper.defaultBackend.equals(BackendHelper.BackendNames.jEcdar)
+                        ? BackendHelper.BackendNames.Reveaal.name()
+                        : BackendHelper.BackendNames.jEcdar.name()));
+
+        Tooltip.install(menuBarOptionsDefaultBackendContent, menuBarOptionsDefaultBackendTooltip);
+
+        menuBarOptionsDefaultBackend.setOnAction(event -> {
+            menuBarOptionsDefaultBackendTooltip.setText("Change default backend to " + BackendHelper.defaultBackend.name());
+            BackendHelper.defaultBackend = (BackendHelper.defaultBackend.equals(BackendHelper.BackendNames.jEcdar)
+                    ? BackendHelper.BackendNames.Reveaal
+                    : BackendHelper.BackendNames.jEcdar);
+
+            Ecdar.showToast("The default backend was changed to " + BackendHelper.defaultBackend.name());
+            ((Text) menuBarOptionsDefaultBackendContent.getChildrenUnmodifiable().get(1)).setText("Default backend: " + BackendHelper.defaultBackend.name());
+
+            Ecdar.preferences.put("default_backend", Integer.toString(BackendHelper.defaultBackend.ordinal()));
+
+        });
+
+        ((Text) menuBarOptionsDefaultBackendContent.getChildrenUnmodifiable().get(1)).setText("Default backend: " + BackendHelper.defaultBackend.name());
+
+        menuBarOptionsNumberOfSocketsSlider.valueChangingProperty().addListener((observable, oldValue, newValue) -> {
+            if (oldValue && !newValue) {
+                int newIntValue = (int) Math.round(menuBarOptionsNumberOfSocketsSlider.getValue());
+                Ecdar.getBackendDriver().setMaxNumberOfConnections(newIntValue);
+                Ecdar.preferences.put("number_of_backend_sockets", Integer.toString(newIntValue));
+            }
+        });
+
+        menuBarOptionsNumberOfSocketsSlider.setValue(Ecdar.getBackendDriver().getMaxNumberOfSockets());
     }
 
     private void initializeEditMenu() {
@@ -792,6 +826,7 @@ public class MainController implements Initializable {
     @FXML
     private void closeDialog() {
         dialog.close();
+        queryDialog.close();
     }
 
     public static CanvasPresentation getActiveCanvasPresentation() {
@@ -1144,11 +1179,6 @@ public class MainController implements Initializable {
                 }
             }
         });
-    }
-
-    @FXML
-    private void closeQueryDialog() {
-        queryDialog.close();
     }
 
     public static void openQueryDialog(final Query query, final String text) {

@@ -20,6 +20,14 @@ public class RightSimPanePresentation extends StackPane {
     }
 
     /**
+     * Inserts an edge/inset at the bottom of the scrollView
+     * which is used to push up the elements of the scrollview
+     * @param shouldShow boolean indicating whether to push up the items
+     */
+    public void showBottomInset(final Boolean shouldShow) {
+        controller.queryPane.showBottomInset(shouldShow);
+    }
+    /**
      * Sets the background color of the ScrollPane Vbox
      */
     private void initializeBackground() {

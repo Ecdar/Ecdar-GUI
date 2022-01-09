@@ -2,6 +2,7 @@ package ecdar;
 
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Project;
+import ecdar.backend.BackendDriver;
 import ecdar.backend.BackendHelper;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.controllers.EcdarController;
@@ -28,18 +29,19 @@ import javafx.scene.layout.Priority;
 import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import jiconfont.icons.GoogleMaterialDesignIcons;
+import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 import jiconfont.javafx.IconFontFX;
 import org.apache.commons.io.FileUtils;
+
+import java.io.*;
 import java.util.prefs.Preferences;
 
-import java.io.File;
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.CodeSource;
 
 public class Ecdar extends Application {
-    public static Preferences preferences = Preferences.userRoot().node("ECDAR");;
+    public static Preferences preferences = Preferences.userRoot().node("ECDAR");
+    ;
     public static final String VERSION = "2.1";
     public static boolean serializationDone = false;
     private static Project project;
@@ -48,10 +50,12 @@ public class Ecdar extends Application {
     public static SimpleStringProperty projectDirectory = new SimpleStringProperty();
     private static BooleanProperty isUICached = new SimpleBooleanProperty();
     private static final BooleanProperty isSplit = new SimpleBooleanProperty(true); //Set to true to ensure correct behaviour at first toggle.
+    private static BackendDriver backendDriver;
     private Stage debugStage;
 
     /**
      * Gets the absolute path to the server folder
+     *
      * @return
      */
     public static String getServerPath() {
@@ -66,6 +70,7 @@ public class Ecdar extends Application {
 
     /**
      * Gets the path to the root directory.
+     *
      * @return the path to the root directory
      * @throws URISyntaxException if the source code location could not be converted to an URI
      */
@@ -81,13 +86,16 @@ public class Ecdar extends Application {
 
     /**
      * Gets the project.
+     *
      * @return the project
      */
     public static Project getProject() {
         return project;
     }
 
-    public static EcdarSimulationHandler getSimulationHandler() { return simulationHandler; }
+    public static EcdarSimulationHandler getSimulationHandler() {
+        return simulationHandler;
+    }
 
     public static MainPresentation getPresentation() {
         return presentation;
@@ -109,6 +117,7 @@ public class Ecdar extends Application {
      * Toggles whether to cache UI.
      * Caching reduces CPU usage on some devices.
      * It also increases GPU 3D engine usage on some devices.
+     *
      * @return the property specifying whether to cache
      */
     public static BooleanProperty toggleUICache() {
@@ -123,6 +132,7 @@ public class Ecdar extends Application {
 
     /**
      * Calls {@link EcdarPresentation#toggleGrid()}.
+     *
      * @return A Boolean Property that is true if the grid has been turned on and false if it is off
      */
     public static BooleanProperty toggleGrid() {
@@ -131,6 +141,7 @@ public class Ecdar extends Application {
 
     /**
      * Toggles whether to canvas is split or single.
+     *
      * @return the property specifying whether the canvas is split
      */
     public static BooleanProperty toggleCanvasSplit() {
@@ -141,15 +152,30 @@ public class Ecdar extends Application {
 
     /**
      * Opens or closes the left pane of the simulator. Calls {@see SimulatorPresentation#toggleLeftPane}
+     *
      * @return @return A Boolean Property that is true if the pane is open and false if it is closed
      */
-    public static BooleanProperty toggleLeftSimPane() { return presentation.toggleLeftSimPane(); }
+    public static BooleanProperty toggleLeftSimPane() {
+        return presentation.toggleLeftSimPane();
+    }
 
     /**
      * Opens or closes the right pane of the simulator. Calls {@see SimulatorPresentation#toggleRightPane}
+     *
      * @return @return A Boolean Property that is true if the pane is open and false if it is closed
      */
-    public static BooleanProperty toggleRightSimPane() { return presentation.toggleRightSimPane(); }
+    public static BooleanProperty toggleRightSimPane() {
+        return presentation.toggleRightSimPane();
+    }
+
+    /**
+     * Returns the backend driver used to execute queries and handle simulation
+     *
+     * @return BackendDriver
+     */
+    public static BackendDriver getBackendDriver() {
+        return backendDriver;
+    }
 
     private void forceCreateFolder(final String directoryPath) throws IOException {
         final File directory = new File(directoryPath);
@@ -168,6 +194,7 @@ public class Ecdar extends Application {
         // Load the fonts required for the project
         IconFontFX.register(GoogleMaterialDesignIcons.getIconFont());
         loadFonts();
+        loadPreferences();
 
         // Remove the classic decoration
         // kyrke - 2020-04-17: Disabled due to bug https://bugs.openjdk.java.net/browse/JDK-8154847
@@ -255,9 +282,25 @@ public class Ecdar extends Application {
         stage.setOnCloseRequest(event -> {
             BackendHelper.stopQueries();
 
+            try {
+                backendDriver.closeAllBackendConnections();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             Platform.exit();
             System.exit(0);
         });
+    }
+
+    private void loadPreferences() {
+        BackendHelper.defaultBackend = preferences.getInt("default_backend", BackendHelper.BackendNames.jEcdar.ordinal())
+                == BackendHelper.BackendNames.jEcdar.ordinal()
+                ? BackendHelper.BackendNames.jEcdar
+                : BackendHelper.BackendNames.Reveaal;
+
+        backendDriver = new BackendDriver(preferences.get("backend_host_address", "127.0.0.1"));
+        getBackendDriver().setMaxNumberOfConnections(preferences.getInt("number_of_backend_sockets", 5));
     }
 
     /**

@@ -10,8 +10,6 @@ import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.SelectHelper;
 import com.jfoenix.controls.JFXPopup;
 import com.jfoenix.controls.JFXRippler;
-import ecdar.utility.keyboard.Keybind;
-import ecdar.utility.keyboard.KeyboardTracker;
 import javafx.animation.*;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -20,10 +18,6 @@ import javafx.collections.ListChangeListener;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
-import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Circle;
 import javafx.util.Duration;
@@ -68,7 +62,7 @@ public class EcdarPresentation extends StackPane {
 
         // Open the file and query panel initially
         final BooleanProperty ranInitialToggle = new SimpleBooleanProperty(false);
-        controller.filePane.widthProperty().addListener((observable) -> {
+        controller.projectPanePresentation.widthProperty().addListener((observable) -> {
             if (ranInitialToggle.get()) return;
             toggleFilePane();
             ranInitialToggle.set(true);
@@ -231,10 +225,10 @@ public class EcdarPresentation extends StackPane {
 
         // Set the translation of the query pane to be equal to its width
         // Will hide the element, and force it in then the right side of the border pane is enlarged
-        controller.queryPane.translateXProperty().bind(controller.queryPane.widthProperty());
+        controller.rightSimPanePresentation.translateXProperty().bind(controller.rightSimPanePresentation.widthProperty());
 
         // Whenever the width of the query pane is updated, update the animations
-        controller.queryPane.widthProperty().addListener((observable) -> {
+        controller.rightSimPanePresentation.widthProperty().addListener((observable) -> {
             initializeOpenQueryPaneAnimation();
             initializeCloseQueryPaneAnimation();
         });
@@ -272,7 +266,7 @@ public class EcdarPresentation extends StackPane {
 
         openQueryPaneAnimation = new Timeline();
 
-        final KeyValue open = new KeyValue(queryPaneAnimationProperty, controller.queryPane.getWidth(), interpolator);
+        final KeyValue open = new KeyValue(queryPaneAnimationProperty, controller.rightSimPanePresentation.getWidth(), interpolator);
         final KeyValue closed = new KeyValue(queryPaneAnimationProperty, 0, interpolator);
 
         final KeyFrame kf1 = new KeyFrame(Duration.millis(0), open);
@@ -287,7 +281,7 @@ public class EcdarPresentation extends StackPane {
         closeQueryPaneAnimation = new Timeline();
 
         final KeyValue closed = new KeyValue(queryPaneAnimationProperty, 0, interpolator);
-        final KeyValue open = new KeyValue(queryPaneAnimationProperty, controller.queryPane.getWidth(), interpolator);
+        final KeyValue open = new KeyValue(queryPaneAnimationProperty, controller.rightSimPanePresentation.getWidth(), interpolator);
 
         final KeyFrame kf1 = new KeyFrame(Duration.millis(0), closed);
         final KeyFrame kf2 = new KeyFrame(Duration.millis(200), open);
@@ -298,10 +292,10 @@ public class EcdarPresentation extends StackPane {
     private void initializeToggleFilePaneFunctionality() {
         // Set the translation of the file pane to be equal to its width
         // Will hide the element, and force it in then the left side of the border pane is enlarged
-        controller.filePane.translateXProperty().bind(controller.filePane.widthProperty().multiply(-1));
+        controller.projectPanePresentation.translateXProperty().bind(controller.projectPanePresentation.widthProperty().multiply(-1));
 
         // Whenever the width of the file pane is updated, update the animations
-        controller.filePane.widthProperty().addListener((observable) -> {
+        controller.projectPanePresentation.widthProperty().addListener((observable) -> {
             initializeOpenFilePaneAnimation();
             initializeCloseFilePaneAnimation();
         });
@@ -318,7 +312,7 @@ public class EcdarPresentation extends StackPane {
 
         openFilePaneAnimation = new Timeline();
 
-        final KeyValue open = new KeyValue(filePaneAnimationProperty, controller.filePane.getWidth(), interpolator);
+        final KeyValue open = new KeyValue(filePaneAnimationProperty, controller.projectPanePresentation.getWidth(), interpolator);
         final KeyValue closed = new KeyValue(filePaneAnimationProperty, 0, interpolator);
 
         final KeyFrame kf1 = new KeyFrame(Duration.millis(0), open);
@@ -333,7 +327,7 @@ public class EcdarPresentation extends StackPane {
         closeFilePaneAnimation = new Timeline();
 
         final KeyValue closed = new KeyValue(filePaneAnimationProperty, 0, interpolator);
-        final KeyValue open = new KeyValue(filePaneAnimationProperty, controller.filePane.getWidth(), interpolator);
+        final KeyValue open = new KeyValue(filePaneAnimationProperty, controller.projectPanePresentation.getWidth(), interpolator);
 
         final KeyFrame kf1 = new KeyFrame(Duration.millis(0), closed);
         final KeyFrame kf2 = new KeyFrame(Duration.millis(200), open);

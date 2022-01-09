@@ -3,11 +3,10 @@ package ecdar.controllers;
 import ecdar.Debug;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
-import ecdar.backend.BackendDriverManager;
 import ecdar.backend.BackendException;
 import ecdar.backend.BackendHelper;
+import ecdar.backend.QueryListener;
 import ecdar.code_analysis.CodeAnalysis;
-import ecdar.mutation.models.MutationTestPlan;
 import ecdar.presentations.*;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
@@ -20,7 +19,6 @@ import ecdar.utility.keyboard.Nudgeable;
 import com.jfoenix.controls.*;
 import javafx.animation.Interpolator;
 import javafx.animation.Transition;
-import javafx.application.Platform;
 import javafx.beans.binding.When;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -30,16 +28,13 @@ import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.Insets;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.*;
-import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
-import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import javafx.util.Pair;
@@ -66,8 +61,8 @@ public class EcdarController implements Initializable, Presentable {
 
     // View stuff
     public StackPane root;
-    public RightSimPanePresentation queryPane;
-    public ProjectPanePresentation filePane;
+    public RightSimPanePresentation rightSimPanePresentation;
+    public ProjectPanePresentation projectPanePresentation;
     public StackPane toolbar;
     public Label queryPaneFillerElement;
     public Label filePaneFillerElement;
@@ -85,20 +80,6 @@ public class EcdarController implements Initializable, Presentable {
 
     public StackPane canvasPane;
 
-    private double expandHeight = 300;
-
-//    public final Transition expandMessagesContainer = new Transition() {
-//        {
-//            setInterpolator(Interpolator.SPLINE(0.645, 0.045, 0.355, 1));
-//            setCycleDuration(Duration.millis(200));
-//        }
-//
-//        @Override
-//        protected void interpolate(final double frac) {
-//            setMaxHeight(35 + frac * (expandHeight - 35));
-//        }
-//    };
-
     public static void runReachabilityAnalysis() {
         if (!reachabilityServiceEnabled) return;
 
@@ -114,32 +95,16 @@ public class EcdarController implements Initializable, Presentable {
         initializeEdgeStatusHandling();
         initializeKeybindings();
         initializeReachabilityAnalysisThread();
-
-        canvasPane.getChildren().clear();
-
-        CanvasShellPresentation canvasShellPresentation = new CanvasShellPresentation();
-        HighLevelModelObject model = MainController.getActiveCanvasPresentation().getController().getActiveModel();
-        if(model != null) {
-            canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(MainController.getActiveCanvasPresentation().getController().getActiveModel());
-        } else {
-            canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(Ecdar.getProject().getComponents().get(0));
-        }
-
-        canvasShellPresentation.getController().toolbar.setTranslateY(48);
-        canvasPane.getChildren().add(canvasShellPresentation);
-
-        MainController.setActiveCanvasPresentation(canvasShellPresentation.getController().canvasPresentation);
-
-//        filePane.getController().updateColorsOnFilePresentations();
+        setCanvasModeToSingular(false);
     }
 
     /**
      * Initializes the keybinding for:
-     *  - New component
-     *  - Nudging with arrow keys
-     *  - Nudging with WASD
-     *  - Deletion
-     *  - Colors
+     * - New component
+     * - Nudging with arrow keys
+     * - Nudging with WASD
+     * - Deletion
+     * - Colors
      */
     private void initializeKeybindings() {
         //Press ctrl+N or cmd+N to create a new component. The canvas changes to this new component
@@ -208,12 +173,12 @@ public class EcdarController implements Initializable, Presentable {
 
     /**
      * Handles the change of color on selected objects
-     * @param enabledColor The new color for the selected objects
+     *
+     * @param enabledColor  The new color for the selected objects
      * @param previousColor The color old color of the selected objects
      */
     public void changeColorOnSelectedElements(final EnabledColor enabledColor,
-                                              final List<Pair<SelectHelper.ItemSelectable, EnabledColor>> previousColor)
-    {
+                                              final List<Pair<SelectHelper.ItemSelectable, EnabledColor>> previousColor) {
         UndoRedoStack.pushAndPerform(() -> { // Perform
             SelectHelper.getSelectedElements()
                     .forEach(selectable -> selectable.color(enabledColor.color, enabledColor.intensity));
@@ -249,7 +214,6 @@ public class EcdarController implements Initializable, Presentable {
     private void initializeReachabilityAnalysisThread() {
         new Thread(() -> {
             while (true) {
-
                 // Wait for the reachability (the last time we changed the model) becomes smaller than the current time
                 while (reachabilityTime > System.currentTimeMillis()) {
                     try {
@@ -301,9 +265,13 @@ public class EcdarController implements Initializable, Presentable {
                         component.getLocations().forEach(location -> location.setReachability(Location.Reachability.EXCLUDED));
                     } else {
                         component.getLocations().forEach(location -> {
-                            final String locationReachableQuery = BackendDriverManager.getInstance().getLocationReachableQuery(location, component);
-                            final Thread verifyThread = BackendDriverManager.getInstance().getBackendThreadForQuery(
-                                    locationReachableQuery,
+                            final String locationReachableQuery = BackendHelper.getLocationReachableQuery(location, component);
+
+                            Query reachabilityQuery = new Query(locationReachableQuery, "", QueryState.UNKNOWN);
+                            reachabilityQuery.setType(QueryType.REACHABILITY);
+
+                            Ecdar.getBackendDriver().addQueryToExecutionQueue(locationReachableQuery,
+                                    BackendHelper.BackendNames.Reveaal,
                                     (result -> {
                                         if (result) {
                                             location.setReachability(Location.Reachability.REACHABLE);
@@ -316,14 +284,27 @@ public class EcdarController implements Initializable, Presentable {
                                         location.setReachability(Location.Reachability.UNKNOWN);
                                         Debug.removeThread(Thread.currentThread());
                                     },
-                                    2000
-                            );
+                                    new QueryListener(reachabilityQuery));
 
-                            if(verifyThread != null){
-                                verifyThread.setName(locationReachableQuery + " (" + verifyThread.getName() + ")");
-                                Debug.addThread(verifyThread);
-                                threads.add(verifyThread);
-                            }
+                            final Thread verifyThread = new Thread(() -> Ecdar.getBackendDriver().addQueryToExecutionQueue(locationReachableQuery,
+                                    BackendHelper.BackendNames.Reveaal,
+                                    (result -> {
+                                        if (result) {
+                                            location.setReachability(Location.Reachability.REACHABLE);
+                                        } else {
+                                            location.setReachability(Location.Reachability.UNREACHABLE);
+                                        }
+                                        Debug.removeThread(Thread.currentThread());
+                                    }),
+                                    (e) -> {
+                                        location.setReachability(Location.Reachability.UNKNOWN);
+                                        Debug.removeThread(Thread.currentThread());
+                                    },
+                                    new QueryListener(reachabilityQuery)));
+
+                            verifyThread.setName(locationReachableQuery + " (" + verifyThread.getName() + ")");
+                            Debug.addThread(verifyThread);
+                            threads.add(verifyThread);
                         });
                     }
                 });
@@ -333,75 +314,25 @@ public class EcdarController implements Initializable, Presentable {
         }).start();
     }
 
-//    public void expandMessagesIfNotExpanded() {
-//        if (tabPaneContainer.getMaxHeight() <= 35) {
-//            expandMessagesContainer.play();
-//        }
-//    }
-
-//    public void collapseMessagesIfNotCollapsed() {
-//        final Transition collapse = new Transition() {
-//            double height = tabPaneContainer.getMaxHeight();
-//
-//            {
-//                setInterpolator(Interpolator.SPLINE(0.645, 0.045, 0.355, 1));
-//                setCycleDuration(Duration.millis(200));
-//            }
-//
-//            @Override
-//            protected void interpolate(final double frac) {
-//                setMaxHeight(((height - 35) * (1 - frac)) + 35);
-//            }
-//        };
-//
-//        if (tabPaneContainer.getMaxHeight() > 35) {
-//            expandHeight = tabPaneContainer.getHeight();
-//            collapse.play();
-//        }
-//    }
-
-//    @FXML
-//    public void collapseMessagesClicked() {
-//        final Transition collapse = new Transition() {
-//            double height = tabPaneContainer.getMaxHeight();
-//
-//            {
-//                setInterpolator(Interpolator.SPLINE(0.645, 0.045, 0.355, 1));
-//                setCycleDuration(Duration.millis(200));
-//            }
-//
-//            @Override
-//            protected void interpolate(final double frac) {
-//                setMaxHeight(((height - 35) * (1 - frac)) + 35);
-//            }
-//        };
-//
-//        if (tabPaneContainer.getMaxHeight() > 35) {
-//            expandHeight = tabPaneContainer.getHeight();
-//            collapse.play();
-//        } else {
-//            expandMessagesContainer.play();
-//        }
-//    }
-
-//    /**
-//     * This method is used as a central place to decide whether the tabPane is opened or closed
-//     * @param height the value used to set the height of the tabPane
-//     */
-//    public void setMaxHeight(double height) {
-//        tabPaneContainer.setMaxHeight(height);
-//        if(height > 35) { //The tabpane is opened
-//            filePane.showBottomInset(false);
-//            queryPane.showBottomInset(false);
-//            CanvasPresentation.showBottomInset(false);
-//        } else {
-//            // When closed we push up the scrollviews in the filePane and queryPane as the tabPane
-//            // would otherwise cover some items in these views
-//            filePane.showBottomInset(true);
-//            queryPane.showBottomInset(true);
-//            CanvasPresentation.showBottomInset(true);
-//        }
-//    }
+    /**
+     * This method is used as a central place to decide whether the tabPane is opened or closed
+     *
+     * @param height the value used to set the height of the tabPane
+     */
+    public void setMaxHeight(double height) {
+        tabPaneContainer.setMaxHeight(height);
+        if (height > 35) { //The tabpane is opened
+            projectPanePresentation.showBottomInset(false);
+            rightSimPanePresentation.showBottomInset(false);
+            CanvasPresentation.showBottomInset(false);
+        } else {
+            // When closed we push up the scrollviews in the filePane and queryPane as the tabPane
+            // would otherwise cover some items in these views
+            projectPanePresentation.showBottomInset(true);
+            rightSimPanePresentation.showBottomInset(true);
+            CanvasPresentation.showBottomInset(true);
+        }
+    }
 
     private void nudgeSelected(final NudgeDirection direction) {
         final List<SelectHelper.ItemSelectable> selectedElements = SelectHelper.getSelectedElements();
@@ -423,7 +354,7 @@ public class EcdarController implements Initializable, Presentable {
                     });
 
                     // If some one was not able to nudge disallow the current nudge and remove from the undo stack
-                    if(foundUnNudgableElement[0]){
+                    if (foundUnNudgableElement[0]) {
                         nudgedElements.forEach(nudgedElement -> nudgedElement.nudge(direction.reverse()));
                         UndoRedoStack.forgetLast();
                     }
@@ -448,7 +379,9 @@ public class EcdarController implements Initializable, Presentable {
                 final DisplayableEdge edge = ((EdgeController) selectable).getEdge();
 
                 // Dont delete edge if it is locked
-                if(edge.getIsLockedProperty().getValue()){return;}
+                if (edge.getIsLockedProperty().getValue()) {
+                    return;
+                }
 
                 UndoRedoStack.pushAndPerform(() -> { // Perform
                     // Remove the edge
@@ -505,6 +438,7 @@ public class EcdarController implements Initializable, Presentable {
 
     /**
      * Sets the global edge status.
+     *
      * @param status the status
      */
     private void setGlobalEdgeStatus(EdgeStatus status) {
@@ -554,12 +488,13 @@ public class EcdarController implements Initializable, Presentable {
         if (shouldSplit) {
             setCanvasModeToSplit();
         } else {
-            setCanvasModeToSingular();
+            setCanvasModeToSingular(true);
         }
     }
 
     /**
      * Initialize a new CanvasShellPresentation and return it
+     *
      * @return new CanvasShellPresentation
      */
     private CanvasShellPresentation initializeNewCanvasShellPresentation() {
@@ -570,17 +505,19 @@ public class EcdarController implements Initializable, Presentable {
 
     /**
      * Initialize a new CanvasShellPresentation and set its active component to the next component encountered from the startIndex and return it
+     *
      * @param components the list of components for assigning active component of the CanvasPresentation
      * @param startIndex the index to start at when trying to find the component to set as active
      * @return new CanvasShellPresentation
      */
-    private CanvasShellPresentation initializeNewCanvasShellPresentationWithActiveComponent(ObservableList<Component> components, int startIndex) {
+    private CanvasShellPresentation initializeNewCanvasShellPresentationWithActiveComponent
+    (ObservableList<Component> components, int startIndex) {
         CanvasShellPresentation canvasShellPresentation = initializeNewCanvasShellPresentation();
 
         int numComponents = components.size();
         canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(null);
-        for(int currentCompNum = startIndex; currentCompNum < numComponents; currentCompNum++){
-            if(MainController.getActiveCanvasPresentation().getController().getActiveModel() != components.get(currentCompNum)) {
+        for (int currentCompNum = startIndex; currentCompNum < numComponents; currentCompNum++) {
+            if (MainController.getActiveCanvasPresentation().getController().getActiveModel() != components.get(currentCompNum)) {
                 canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(components.get(currentCompNum));
                 break;
             }
@@ -592,12 +529,12 @@ public class EcdarController implements Initializable, Presentable {
     /**
      * Removes the canvases and adds a new one, with the active component of the active canvasPresentation.
      */
-    private void setCanvasModeToSingular() {
+    private void setCanvasModeToSingular(boolean updateColorsOnFilePresentation) {
         canvasPane.getChildren().clear();
 
         CanvasShellPresentation canvasShellPresentation = new CanvasShellPresentation();
         HighLevelModelObject model = MainController.getActiveCanvasPresentation().getController().getActiveModel();
-        if(model != null) {
+        if (model != null) {
             canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(MainController.getActiveCanvasPresentation().getController().getActiveModel());
         } else {
             canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(Ecdar.getProject().getComponents().get(0));
@@ -608,7 +545,11 @@ public class EcdarController implements Initializable, Presentable {
 
         MainController.setActiveCanvasPresentation(canvasShellPresentation.getController().canvasPresentation);
 
-        filePane.getController().updateColorsOnFilePresentations();
+        // Project pane presentation is not ready on initialization,
+        // so in that case, we do not want to update the colors
+        if (updateColorsOnFilePresentation) {
+            projectPanePresentation.getController().updateColorsOnFilePresentations();
+        }
     }
 
     /**
@@ -654,6 +595,7 @@ public class EcdarController implements Initializable, Presentable {
 
         // Update the startIndex for the next canvasShellPresentation
         for (int i = 0; i < numComponents; i++) {
+
             if (canvasShellPresentation.getController().canvasPresentation.getController().getActiveModel() != null && canvasShellPresentation.getController().canvasPresentation.getController().getActiveModel().equals(components.get(i))) {
                 currentCompNum = i + 1;
             }
@@ -677,6 +619,6 @@ public class EcdarController implements Initializable, Presentable {
 
         canvasPane.getChildren().add(canvasGrid);
 
-        filePane.getController().updateColorsOnFilePresentations();
+        projectPanePresentation.getController().updateColorsOnFilePresentations();
     }
 }

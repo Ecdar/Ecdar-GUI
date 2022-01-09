@@ -1,6 +1,5 @@
 package ecdar.backend;
 
-import com.company.Main;
 import ecdar.abstractions.Query;
 import ecdar.abstractions.QueryState;
 import ecdar.controllers.EcdarController;
@@ -25,6 +24,10 @@ public class QueryListener {
 
     public void setCurrent(final int i) {
 
+    }
+
+    public Query getQuery() {
+        return query;
     }
 
     /*

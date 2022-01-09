@@ -1,13 +1,5 @@
 package ecdar.simulation;
 
-import com.uppaal.engine.Engine;
-import com.uppaal.engine.EngineException;
-import com.uppaal.model.core2.Document;
-import com.uppaal.model.system.SystemEdge;
-import com.uppaal.model.system.UppaalSystem;
-import com.uppaal.model.system.concrete.ConcreteState;
-import com.uppaal.model.system.concrete.ConcreteSuccessor;
-import com.uppaal.model.system.concrete.ConcreteTransition;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
@@ -21,7 +13,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.util.Pair;
-import models.Transition;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -54,8 +45,6 @@ public class EcdarSimulationHandler {
 
     /**
      * The constructor of the {@link EcdarSimulationHandler}.
-     * @throws IllegalArgumentException if the {@link Engine#getSystem()} is null and
-     *         a system has not been linked to the engine.
      */
     public EcdarSimulationHandler() {
         initializeSimulation();
