@@ -1,3 +1,13 @@
+#Engines
+lib/Reveaal.exe
+lib/Reveaal
+lib/libJDBM.so
+lib/libJDBM.dylib
+lib/JDBM.dll
+lib/j-ecdar.jar
+lib/*.dll
+
+
 #IntelliJ
 .idea/
 /out/
