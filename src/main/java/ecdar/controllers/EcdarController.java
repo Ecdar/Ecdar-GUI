@@ -3,9 +3,9 @@ package ecdar.controllers;
 import ecdar.Debug;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
-import ecdar.backend.BackendDriverManager;
 import ecdar.backend.BackendException;
 import ecdar.backend.BackendHelper;
+import ecdar.backend.QueryListener;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.presentations.*;
@@ -149,6 +149,10 @@ public class EcdarController implements Initializable {
     public MenuItem menuBarFileExportAsPng;
     public MenuItem menuBarFileExportAsPngNoBorder;
     public MenuItem menuBarOptionsCache;
+    public MenuItem menuBarOptionsDefaultBackend;
+    public HBox menuBarOptionsDefaultBackendContent;
+    public Tooltip menuBarOptionsDefaultBackendTooltip;
+    public JFXSlider menuBarOptionsNumberOfSocketsSlider;
     public MenuItem menuBarHelpHelp;
     public MenuItem menuBarHelpAbout;
     public MenuItem menuBarHelpTest;
@@ -213,16 +217,15 @@ public class EcdarController implements Initializable {
         initializeMessages();
         initializeMenuBar();
         initializeReachabilityAnalysisThread();
-
     }
 
     /**
      * Initializes the keybinding for:
-     *  - New component
-     *  - Nudging with arrow keys
-     *  - Nudging with WASD
-     *  - Deletion
-     *  - Colors
+     * - New component
+     * - Nudging with arrow keys
+     * - Nudging with WASD
+     * - Deletion
+     * - Colors
      */
     private void initializeKeybindings() {
         //Press ctrl+N or cmd+N to create a new component. The canvas changes to this new component
@@ -289,12 +292,12 @@ public class EcdarController implements Initializable {
 
     /**
      * Handles the change of color on selected objects
-     * @param enabledColor The new color for the selected objects
+     *
+     * @param enabledColor  The new color for the selected objects
      * @param previousColor The color old color of the selected objects
      */
     public void changeColorOnSelectedElements(final EnabledColor enabledColor,
-                                              final List<Pair<SelectHelper.ItemSelectable, EnabledColor>> previousColor)
-    {
+                                              final List<Pair<SelectHelper.ItemSelectable, EnabledColor>> previousColor) {
         UndoRedoStack.pushAndPerform(() -> { // Perform
             SelectHelper.getSelectedElements()
                     .forEach(selectable -> selectable.color(enabledColor.color, enabledColor.intensity));
@@ -330,7 +333,6 @@ public class EcdarController implements Initializable {
     private void initializeReachabilityAnalysisThread() {
         new Thread(() -> {
             while (true) {
-
                 // Wait for the reachability (the last time we changed the model) becomes smaller than the current time
                 while (reachabilityTime > System.currentTimeMillis()) {
                     try {
@@ -382,9 +384,13 @@ public class EcdarController implements Initializable {
                         component.getLocations().forEach(location -> location.setReachability(Location.Reachability.EXCLUDED));
                     } else {
                         component.getLocations().forEach(location -> {
-                            final String locationReachableQuery = BackendDriverManager.getInstance().getLocationReachableQuery(location, component);
-                            final Thread verifyThread = BackendDriverManager.getInstance().getBackendThreadForQuery(
-                                    locationReachableQuery,
+                            final String locationReachableQuery = BackendHelper.getLocationReachableQuery(location, component);
+
+                            Query reachabilityQuery = new Query(locationReachableQuery, "", QueryState.UNKNOWN);
+                            reachabilityQuery.setType(QueryType.REACHABILITY);
+
+                            Ecdar.getBackendDriver().addQueryToExecutionQueue(locationReachableQuery,
+                                    BackendHelper.BackendNames.Reveaal,
                                     (result -> {
                                         if (result) {
                                             location.setReachability(Location.Reachability.REACHABLE);
@@ -397,14 +403,27 @@ public class EcdarController implements Initializable {
                                         location.setReachability(Location.Reachability.UNKNOWN);
                                         Debug.removeThread(Thread.currentThread());
                                     },
-                                    2000
-                            );
+                                    new QueryListener(reachabilityQuery));
 
-                            if(verifyThread != null){
-                                verifyThread.setName(locationReachableQuery + " (" + verifyThread.getName() + ")");
-                                Debug.addThread(verifyThread);
-                                threads.add(verifyThread);
-                            }
+                            final Thread verifyThread = new Thread(() -> Ecdar.getBackendDriver().addQueryToExecutionQueue(locationReachableQuery,
+                                    BackendHelper.BackendNames.Reveaal,
+                                    (result -> {
+                                        if (result) {
+                                            location.setReachability(Location.Reachability.REACHABLE);
+                                        } else {
+                                            location.setReachability(Location.Reachability.UNREACHABLE);
+                                        }
+                                        Debug.removeThread(Thread.currentThread());
+                                    }),
+                                    (e) -> {
+                                        location.setReachability(Location.Reachability.UNKNOWN);
+                                        Debug.removeThread(Thread.currentThread());
+                                    },
+                                    new QueryListener(reachabilityQuery)));
+
+                            verifyThread.setName(locationReachableQuery + " (" + verifyThread.getName() + ")");
+                            Debug.addThread(verifyThread);
+                            threads.add(verifyThread);
                         });
                     }
                 });
@@ -433,7 +452,7 @@ public class EcdarController implements Initializable {
             public void onChanged(final Change<? extends Thread> c) {
                 while (c.next()) {
                     Platform.runLater(() -> {
-                        if(Debug.backgroundThreads.size() == 0) {
+                        if (Debug.backgroundThreads.size() == 0) {
                             queryStatusContainer.setOpacity(0);
                         } else {
                             queryStatusContainer.setOpacity(1);
@@ -465,7 +484,7 @@ public class EcdarController implements Initializable {
 
         initializeViewMenu();
 
-        initializeUICacheMenuElement();
+        initializeOptionsMenu();
 
         initializeHelpMenu();
     }
@@ -500,11 +519,43 @@ public class EcdarController implements Initializable {
     /**
      * Initializes the UI Cache menu element.
      */
-    private void initializeUICacheMenuElement() {
+    private void initializeOptionsMenu() {
         menuBarOptionsCache.setOnAction(event -> {
             final BooleanProperty isCached = Ecdar.toggleUICache();
             menuBarOptionsCache.getGraphic().opacityProperty().bind(new When(isCached).then(1).otherwise(0));
         });
+
+        menuBarOptionsDefaultBackendTooltip = new Tooltip("Change default backend to " +
+                (BackendHelper.defaultBackend.equals(BackendHelper.BackendNames.jEcdar)
+                        ? BackendHelper.BackendNames.Reveaal.name()
+                        : BackendHelper.BackendNames.jEcdar.name()));
+
+        Tooltip.install(menuBarOptionsDefaultBackendContent, menuBarOptionsDefaultBackendTooltip);
+
+        menuBarOptionsDefaultBackend.setOnAction(event -> {
+            menuBarOptionsDefaultBackendTooltip.setText("Change default backend to " + BackendHelper.defaultBackend.name());
+            BackendHelper.defaultBackend = (BackendHelper.defaultBackend.equals(BackendHelper.BackendNames.jEcdar)
+                    ? BackendHelper.BackendNames.Reveaal
+                    : BackendHelper.BackendNames.jEcdar);
+
+            Ecdar.showToast("The default backend was changed to " + BackendHelper.defaultBackend.name());
+            ((Text) menuBarOptionsDefaultBackendContent.getChildrenUnmodifiable().get(1)).setText("Default backend: " + BackendHelper.defaultBackend.name());
+
+            Ecdar.preferences.put("default_backend", Integer.toString(BackendHelper.defaultBackend.ordinal()));
+
+        });
+
+        ((Text) menuBarOptionsDefaultBackendContent.getChildrenUnmodifiable().get(1)).setText("Default backend: " + BackendHelper.defaultBackend.name());
+
+        menuBarOptionsNumberOfSocketsSlider.valueChangingProperty().addListener((observable, oldValue, newValue) -> {
+            if (oldValue && !newValue) {
+                int newIntValue = (int) Math.round(menuBarOptionsNumberOfSocketsSlider.getValue());
+                Ecdar.getBackendDriver().setMaxNumberOfConnections(newIntValue);
+                Ecdar.preferences.put("number_of_backend_sockets", Integer.toString(newIntValue));
+            }
+        });
+
+        menuBarOptionsNumberOfSocketsSlider.setValue(Ecdar.getBackendDriver().getMaxNumberOfSockets());
     }
 
     private void initializeEditMenu() {
@@ -569,7 +620,7 @@ public class EcdarController implements Initializable {
         menuBarViewCanvasSplit.getGraphic().setOpacity(1);
         menuBarViewCanvasSplit.setOnAction(event -> {
             final BooleanProperty isSplit = Ecdar.toggleCanvasSplit();
-            if(isSplit.get()) {
+            if (isSplit.get()) {
                 setCanvasModeToSingular();
                 menuBarViewCanvasSplit.setText("Split canvas");
             } else {
@@ -593,13 +644,13 @@ public class EcdarController implements Initializable {
             final File jarDir = new File(System.getProperty("java.class.path")).getAbsoluteFile().getParentFile();
 
             // If the file does not exist, we must be running it from a development environment, use an default location
-            if(jarDir.exists()) {
+            if (jarDir.exists()) {
                 projectPicker.setInitialDirectory(jarDir);
             }
 
             // Prompt the user to find a file (will halt the UI thread)
             final File file = projectPicker.showDialog(root.getScene().getWindow());
-            if(file != null) {
+            if (file != null) {
                 try {
                     Ecdar.projectDirectory.set(file.getAbsolutePath());
                     Ecdar.initializeProjectFolder();
@@ -644,6 +695,7 @@ public class EcdarController implements Initializable {
 
     /**
      * Save project at a given directory.
+     *
      * @param directory directory to save at
      */
     private static void save(final File directory) {
@@ -756,7 +808,7 @@ public class EcdarController implements Initializable {
             final ComponentPresentation presentation = canvas.getController().getActiveComponentPresentation();
 
             //If there is no active component
-            if (presentation == null){
+            if (presentation == null) {
                 Ecdar.showToast("No component to export.");
                 return;
             }
@@ -781,7 +833,7 @@ public class EcdarController implements Initializable {
 
         CanvasShellPresentation canvasShellPresentation = new CanvasShellPresentation();
         HighLevelModelObject model = activeCanvasPresentation.get().getController().getActiveModel();
-        if(model != null) {
+        if (model != null) {
             canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(activeCanvasPresentation.get().getController().getActiveModel());
         } else {
             canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(Ecdar.getProject().getComponents().get(0));
@@ -838,6 +890,7 @@ public class EcdarController implements Initializable {
 
         // Update the startIndex for the next canvasShellPresentation
         for (int i = 0; i < numComponents; i++) {
+
             if (canvasShellPresentation.getController().canvasPresentation.getController().getActiveModel() != null && canvasShellPresentation.getController().canvasPresentation.getController().getActiveModel().equals(components.get(i))) {
                 currentCompNum = i + 1;
             }
@@ -866,6 +919,7 @@ public class EcdarController implements Initializable {
 
     /**
      * Initialize a new CanvasShellPresentation and set its active component to the next component encountered from the startIndex and return it
+     *
      * @param components the list of components for assigning active component of the CanvasPresentation
      * @param startIndex the index to start at when trying to find the component to set as active
      * @return new CanvasShellPresentation
@@ -875,8 +929,8 @@ public class EcdarController implements Initializable {
 
         int numComponents = components.size();
         canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(null);
-        for(int currentCompNum = startIndex; currentCompNum < numComponents; currentCompNum++){
-            if(getActiveCanvasPresentation().getController().getActiveModel() != components.get(currentCompNum)) {
+        for (int currentCompNum = startIndex; currentCompNum < numComponents; currentCompNum++) {
+            if (getActiveCanvasPresentation().getController().getActiveModel() != components.get(currentCompNum)) {
                 canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(components.get(currentCompNum));
                 break;
             }
@@ -887,6 +941,7 @@ public class EcdarController implements Initializable {
 
     /**
      * Initialize a new CanvasShellPresentation and return it
+     *
      * @return new CanvasShellPresentation
      */
     private CanvasShellPresentation initializeNewCanvasShellPresentation() {
@@ -898,6 +953,7 @@ public class EcdarController implements Initializable {
     /**
      * Take a snapshot with the grid hidden.
      * The grid is put into its original state afterwards.
+     *
      * @return the snapshot
      */
     private WritableImage takeSnapshot(CanvasPresentation canvas) {
@@ -913,6 +969,7 @@ public class EcdarController implements Initializable {
     /**
      * Zooms in times 4 to get a higher resolution.
      * Then take snapshot and zoom to times 1 again.
+     *
      * @return the snapshot
      */
     private WritableImage scaleAndTakeSnapshot(CanvasPresentation canvas) {
@@ -928,6 +985,7 @@ public class EcdarController implements Initializable {
 
     /**
      * Crops and exports an image.
+     *
      * @param image the image
      */
     private void CropAndExportImage(final WritableImage image) {
@@ -953,12 +1011,12 @@ public class EcdarController implements Initializable {
         }
 
         final File file = filePicker.showSaveDialog(root.getScene().getWindow());
-        if (file != null){
+        if (file != null) {
             try {
                 ImageIO.write(finalImage, "png", file);
                 Ecdar.showToast("Export succeeded.");
             } catch (final IOException e) {
-                Ecdar.showToast("Export failed. "+ e.getMessage());
+                Ecdar.showToast("Export failed. " + e.getMessage());
             }
         } else {
             Ecdar.showToast("Export was cancelled.");
@@ -967,6 +1025,7 @@ public class EcdarController implements Initializable {
 
     /**
      * Crops an image so that the all-white borders are removed.
+     *
      * @param image the original image
      * @return the cropped image
      */
@@ -982,6 +1041,7 @@ public class EcdarController implements Initializable {
 
     /**
      * Gets the top y coordinate of an auto cropped image.
+     *
      * @param image the original image
      * @return the y coordinate
      */
@@ -999,6 +1059,7 @@ public class EcdarController implements Initializable {
 
     /**
      * Gets the left x coordinate of an auto cropped image.
+     *
      * @param image the original image
      * @return the x coordinate
      */
@@ -1016,6 +1077,7 @@ public class EcdarController implements Initializable {
 
     /**
      * Gets the bottom y coordinate of an auto cropped image.
+     *
      * @param image the original image
      * @return the y coordinate
      */
@@ -1033,6 +1095,7 @@ public class EcdarController implements Initializable {
 
     /**
      * Gets the right x coordinate of an auto cropped image.
+     *
      * @param image the original image
      * @return the x coordinate
      */
@@ -1229,11 +1292,12 @@ public class EcdarController implements Initializable {
 
     /**
      * This method is used as a central place to decide whether the tabPane is opened or closed
+     *
      * @param height the value used to set the height of the tabPane
      */
     public void setMaxHeight(double height) {
         tabPaneContainer.setMaxHeight(height);
-        if(height > 35) { //The tabpane is opened
+        if (height > 35) { //The tabpane is opened
             filePane.showBottomInset(false);
             queryPane.showBottomInset(false);
             CanvasPresentation.showBottomInset(false);
@@ -1266,7 +1330,7 @@ public class EcdarController implements Initializable {
                     });
 
                     // If some one was not able to nudge disallow the current nudge and remove from the undo stack
-                    if(foundUnNudgableElement[0]){
+                    if (foundUnNudgableElement[0]) {
                         nudgedElements.forEach(nudgedElement -> nudgedElement.nudge(direction.reverse()));
                         UndoRedoStack.forgetLast();
                     }
@@ -1291,7 +1355,9 @@ public class EcdarController implements Initializable {
                 final DisplayableEdge edge = ((EdgeController) selectable).getEdge();
 
                 // Dont delete edge if it is locked
-                if(edge.getIsLockedProperty().getValue()){return;}
+                if (edge.getIsLockedProperty().getValue()) {
+                    return;
+                }
 
                 UndoRedoStack.pushAndPerform(() -> { // Perform
                     // Remove the edge
@@ -1348,6 +1414,7 @@ public class EcdarController implements Initializable {
 
     /**
      * Sets the global edge status.
+     *
      * @param status the status
      */
     private void setGlobalEdgeStatus(EdgeStatus status) {

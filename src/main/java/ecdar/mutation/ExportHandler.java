@@ -4,8 +4,6 @@ import com.google.gson.GsonBuilder;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Project;
-import ecdar.abstractions.SimpleComponentsSystemDeclarations;
-import ecdar.backend.BackendDriverManager;
 import ecdar.backend.BackendException;
 import ecdar.backend.BackendHelper;
 import ecdar.mutation.models.MutationTestCase;
