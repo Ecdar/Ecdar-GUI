@@ -6,7 +6,6 @@ import ecdar.abstractions.*;
 import ecdar.backend.BackendException;
 import ecdar.backend.BackendHelper;
 import ecdar.backend.QueryListener;
-import ecdar.code_analysis.CodeAnalysis;
 import ecdar.presentations.*;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
@@ -17,38 +16,21 @@ import ecdar.utility.keyboard.KeyboardTracker;
 import ecdar.utility.keyboard.NudgeDirection;
 import ecdar.utility.keyboard.Nudgeable;
 import com.jfoenix.controls.*;
-import javafx.animation.Interpolator;
-import javafx.animation.Transition;
-import javafx.beans.binding.When;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.SnapshotParameters;
 import javafx.scene.control.*;
-import javafx.scene.image.WritableImage;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Text;
-import javafx.stage.FileChooser;
-import javafx.util.Duration;
 import javafx.util.Pair;
-import org.kordamp.ikonli.javafx.FontIcon;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Consumer;
 
 public class EcdarController implements Initializable, Presentable {
 
@@ -61,8 +43,8 @@ public class EcdarController implements Initializable, Presentable {
 
     // View stuff
     public StackPane root;
-    public RightSimPanePresentation rightSimPanePresentation;
-    public ProjectPanePresentation projectPanePresentation;
+    public RightSimPanePresentation queryPane;
+    public ProjectPanePresentation filePane;
     public StackPane toolbar;
     public Label queryPaneFillerElement;
     public Label filePaneFillerElement;
@@ -322,14 +304,14 @@ public class EcdarController implements Initializable, Presentable {
     public void setMaxHeight(double height) {
         tabPaneContainer.setMaxHeight(height);
         if (height > 35) { //The tabpane is opened
-            projectPanePresentation.showBottomInset(false);
-            rightSimPanePresentation.showBottomInset(false);
+            filePane.showBottomInset(false);
+            queryPane.showBottomInset(false);
             CanvasPresentation.showBottomInset(false);
         } else {
             // When closed we push up the scrollviews in the filePane and queryPane as the tabPane
             // would otherwise cover some items in these views
-            projectPanePresentation.showBottomInset(true);
-            rightSimPanePresentation.showBottomInset(true);
+            filePane.showBottomInset(true);
+            queryPane.showBottomInset(true);
             CanvasPresentation.showBottomInset(true);
         }
     }
@@ -548,7 +530,7 @@ public class EcdarController implements Initializable, Presentable {
         // Project pane presentation is not ready on initialization,
         // so in that case, we do not want to update the colors
         if (updateColorsOnFilePresentation) {
-            projectPanePresentation.getController().updateColorsOnFilePresentations();
+            filePane.getController().updateColorsOnFilePresentations();
         }
     }
 
@@ -619,6 +601,6 @@ public class EcdarController implements Initializable, Presentable {
 
         canvasPane.getChildren().add(canvasGrid);
 
-        projectPanePresentation.getController().updateColorsOnFilePresentations();
+        filePane.getController().updateColorsOnFilePresentations();
     }
 }

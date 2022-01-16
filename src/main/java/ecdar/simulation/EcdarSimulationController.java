@@ -76,9 +76,9 @@ public class EcdarSimulationController implements Initializable, Presentable {
                 return;
             }
         }
-
+        
         overviewPresentation.getController().addProcessesToGroup();
-        overviewPresentation.getController().highlightProcessState(sm.getCurrentState());
+//        overviewPresentation.getController().highlightProcessState(sm.getCurrentState());
     }
 
     /**

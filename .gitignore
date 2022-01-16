@@ -12,10 +12,6 @@ lib/*.dll
 .idea/
 /out/
 
-### Backends ###
-/src/Reveaal
-/src/jEcdar
-
 ### Gradle ###
 .gradle
 /build/

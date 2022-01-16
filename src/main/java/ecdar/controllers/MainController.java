@@ -268,16 +268,16 @@ public class MainController implements Initializable {
         initializeOptionsMenu();
         initializeHelpMenu();
 
-        //TODO change to match on macOS
-        menuBarZoomInSimulator.setAccelerator(new KeyCodeCombination(KeyCode.PLUS, KeyCombination.SHORTCUT_DOWN));
-        menuBarZoomInSimulator.setOnAction(event -> simulatorPresentation.getController().overviewPresentation.getController().zoomIn());
-
-        //TODO change to match on macOS
-        menuBarZoomOutSimulator.setAccelerator(new KeyCodeCombination(KeyCode.MINUS, KeyCombination.SHORTCUT_DOWN));
-        menuBarZoomOutSimulator.setOnAction(event -> simulatorPresentation.getController().overviewPresentation.getController().zoomOut());
-
-        menuBarZoomResetSimulator.setAccelerator(new KeyCodeCombination(KeyCode.DIGIT0, KeyCombination.SHORTCUT_DOWN));
-        menuBarZoomResetSimulator.setOnAction(event -> simulatorPresentation.getController().overviewPresentation.getController().resetZoom());
+//        //TODO change to match on macOS
+//        menuBarZoomInSimulator.setAccelerator(new KeyCodeCombination(KeyCode.PLUS, KeyCombination.SHORTCUT_DOWN));
+//        menuBarZoomInSimulator.setOnAction(event -> simulatorPresentation.getController().overviewPresentation.getController().zoomIn());
+//
+//        //TODO change to match on macOS
+//        menuBarZoomOutSimulator.setAccelerator(new KeyCodeCombination(KeyCode.MINUS, KeyCombination.SHORTCUT_DOWN));
+//        menuBarZoomOutSimulator.setOnAction(event -> simulatorPresentation.getController().overviewPresentation.getController().zoomOut());
+//
+//        menuBarZoomResetSimulator.setAccelerator(new KeyCodeCombination(KeyCode.DIGIT0, KeyCombination.SHORTCUT_DOWN));
+//        menuBarZoomResetSimulator.setOnAction(event -> simulatorPresentation.getController().overviewPresentation.getController().resetZoom());
     }
 
     private void initializeHelpMenu() {
@@ -1041,12 +1041,12 @@ public class MainController implements Initializable {
                 menuBarViewSimRightPanel.setDisable(true);
                 menuBarFileExportAsPngNoBorder.setDisable(false);
                 menuBarFileExportAsPng.setDisable(false);
-                menuBarZoomInSimulator.setDisable(true);
-                menuBarZoomOutSimulator.setDisable(true);
-                menuBarZoomResetSimulator.setDisable(true);
-                KeyboardTracker.unregisterKeybind(KeyboardTracker.ZOOM_IN);
-                KeyboardTracker.unregisterKeybind(KeyboardTracker.ZOOM_OUT);
-                KeyboardTracker.unregisterKeybind(KeyboardTracker.RESET_ZOOM);
+//                menuBarZoomInSimulator.setDisable(true);
+//                menuBarZoomOutSimulator.setDisable(true);
+//                menuBarZoomResetSimulator.setDisable(true);
+//                KeyboardTracker.unregisterKeybind(KeyboardTracker.ZOOM_IN);
+//                KeyboardTracker.unregisterKeybind(KeyboardTracker.ZOOM_OUT);
+//                KeyboardTracker.unregisterKeybind(KeyboardTracker.RESET_ZOOM);
                 break;
             case Simulator:
                 menuBarViewGrid.setDisable(true);
@@ -1056,10 +1056,10 @@ public class MainController implements Initializable {
                 menuBarFileExportAsPngNoBorder.setDisable(true);
                 menuBarFileExportAsPng.setDisable(true);
                 menuBarViewQueryPanel.setDisable(true);
-                menuBarZoomInSimulator.setDisable(false);
-                menuBarZoomOutSimulator.setDisable(false);
-                menuBarZoomResetSimulator.setDisable(false);
-                setExtraZoomKeybindings();
+//                menuBarZoomInSimulator.setDisable(false);
+//                menuBarZoomOutSimulator.setDisable(false);
+//                menuBarZoomResetSimulator.setDisable(false);
+//                setExtraZoomKeybindings();
                 break;
         }
 

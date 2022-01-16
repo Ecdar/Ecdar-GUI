@@ -62,7 +62,7 @@ public class EcdarPresentation extends StackPane {
 
         // Open the file and query panel initially
         final BooleanProperty ranInitialToggle = new SimpleBooleanProperty(false);
-        controller.projectPanePresentation.widthProperty().addListener((observable) -> {
+        controller.filePane.widthProperty().addListener((observable) -> {
             if (ranInitialToggle.get()) return;
             toggleFilePane();
             ranInitialToggle.set(true);
@@ -225,10 +225,10 @@ public class EcdarPresentation extends StackPane {
 
         // Set the translation of the query pane to be equal to its width
         // Will hide the element, and force it in then the right side of the border pane is enlarged
-        controller.rightSimPanePresentation.translateXProperty().bind(controller.rightSimPanePresentation.widthProperty());
+        controller.queryPane.translateXProperty().bind(controller.queryPane.widthProperty());
 
         // Whenever the width of the query pane is updated, update the animations
-        controller.rightSimPanePresentation.widthProperty().addListener((observable) -> {
+        controller.queryPane.widthProperty().addListener((observable) -> {
             initializeOpenQueryPaneAnimation();
             initializeCloseQueryPaneAnimation();
         });
@@ -266,7 +266,7 @@ public class EcdarPresentation extends StackPane {
 
         openQueryPaneAnimation = new Timeline();
 
-        final KeyValue open = new KeyValue(queryPaneAnimationProperty, controller.rightSimPanePresentation.getWidth(), interpolator);
+        final KeyValue open = new KeyValue(queryPaneAnimationProperty, controller.queryPane.getWidth(), interpolator);
         final KeyValue closed = new KeyValue(queryPaneAnimationProperty, 0, interpolator);
 
         final KeyFrame kf1 = new KeyFrame(Duration.millis(0), open);
@@ -281,7 +281,7 @@ public class EcdarPresentation extends StackPane {
         closeQueryPaneAnimation = new Timeline();
 
         final KeyValue closed = new KeyValue(queryPaneAnimationProperty, 0, interpolator);
-        final KeyValue open = new KeyValue(queryPaneAnimationProperty, controller.rightSimPanePresentation.getWidth(), interpolator);
+        final KeyValue open = new KeyValue(queryPaneAnimationProperty, controller.queryPane.getWidth(), interpolator);
 
         final KeyFrame kf1 = new KeyFrame(Duration.millis(0), closed);
         final KeyFrame kf2 = new KeyFrame(Duration.millis(200), open);
@@ -292,10 +292,10 @@ public class EcdarPresentation extends StackPane {
     private void initializeToggleFilePaneFunctionality() {
         // Set the translation of the file pane to be equal to its width
         // Will hide the element, and force it in then the left side of the border pane is enlarged
-        controller.projectPanePresentation.translateXProperty().bind(controller.projectPanePresentation.widthProperty().multiply(-1));
+        controller.filePane.translateXProperty().bind(controller.filePane.widthProperty().multiply(-1));
 
         // Whenever the width of the file pane is updated, update the animations
-        controller.projectPanePresentation.widthProperty().addListener((observable) -> {
+        controller.filePane.widthProperty().addListener((observable) -> {
             initializeOpenFilePaneAnimation();
             initializeCloseFilePaneAnimation();
         });
@@ -312,7 +312,7 @@ public class EcdarPresentation extends StackPane {
 
         openFilePaneAnimation = new Timeline();
 
-        final KeyValue open = new KeyValue(filePaneAnimationProperty, controller.projectPanePresentation.getWidth(), interpolator);
+        final KeyValue open = new KeyValue(filePaneAnimationProperty, controller.filePane.getWidth(), interpolator);
         final KeyValue closed = new KeyValue(filePaneAnimationProperty, 0, interpolator);
 
         final KeyFrame kf1 = new KeyFrame(Duration.millis(0), open);
@@ -327,7 +327,7 @@ public class EcdarPresentation extends StackPane {
         closeFilePaneAnimation = new Timeline();
 
         final KeyValue closed = new KeyValue(filePaneAnimationProperty, 0, interpolator);
-        final KeyValue open = new KeyValue(filePaneAnimationProperty, controller.projectPanePresentation.getWidth(), interpolator);
+        final KeyValue open = new KeyValue(filePaneAnimationProperty, controller.filePane.getWidth(), interpolator);
 
         final KeyFrame kf1 = new KeyFrame(Duration.millis(0), closed);
         final KeyFrame kf2 = new KeyFrame(Duration.millis(200), open);

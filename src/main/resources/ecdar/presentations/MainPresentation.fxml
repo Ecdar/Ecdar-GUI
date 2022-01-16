@@ -47,7 +47,6 @@
         <top>
             <!-- Menu bar for "file" etc (only visible on windows) -->
             <MenuBar fx:id="menuBar">
-
                 <Menu text="File">
                     <MenuItem fx:id="menuBarFileCreateNewProject" text="New Project">
                         <graphic>
@@ -121,12 +120,32 @@
 
 
                 <Menu text="View">
+                    <MenuItem fx:id="menuBarViewHome" text="Home">
+                        <graphic>
+                            <FontIcon iconLiteral="gmi-home" iconSize="24" fill="black"/>
+                        </graphic>
+                    </MenuItem>
+                    <MenuItem fx:id="menuBarViewSim" text="Simulator">
+                        <graphic>
+                            <FontIcon iconLiteral="gmi-timeline" iconSize="24" fill="black"/>
+                        </graphic>
+                    </MenuItem>
                     <MenuItem fx:id="menuBarViewFilePanel" text="Project Panel">
                         <graphic>
                             <FontIcon iconLiteral="gmi-check" iconSize="24" fill="black"/>
                         </graphic>
                     </MenuItem>
                     <MenuItem fx:id="menuBarViewQueryPanel" text="Query Panel">
+                        <graphic>
+                            <FontIcon iconLiteral="gmi-check" iconSize="24" fill="black"/>
+                        </graphic>
+                    </MenuItem>
+                    <MenuItem fx:id="menuBarViewSimLeftPanel" text="Project Panel">
+                        <graphic>
+                            <FontIcon iconLiteral="gmi-check" iconSize="24" fill="black"/>
+                        </graphic>
+                    </MenuItem>
+                    <MenuItem fx:id="menuBarViewSimRightPanel" text="Query Panel">
                         <graphic>
                             <FontIcon iconLiteral="gmi-check" iconSize="24" fill="black"/>
                         </graphic>
