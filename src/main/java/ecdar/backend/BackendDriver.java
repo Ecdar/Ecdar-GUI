@@ -300,7 +300,6 @@ public class BackendDriver {
 
         do {
             ProcessBuilder pb = new ProcessBuilder(backend.getBackendLocation(), "-p", hostAddress + ":" + portNumber).redirectErrorStream(true);
-
             try {
                 p = pb.start();
             } catch (IOException ioException) {
