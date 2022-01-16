@@ -291,30 +291,57 @@ public class BackendDriver {
     }
 
     private BackendConnection startNewBackendConnection(BackendInstance backend) {
-        Process p;
+        Process p = null;
         String hostAddress = (backend.isLocal() ? "127.0.0.1" : backend.getBackendLocation());
-        int portNumber = SocketUtils.findAvailableTcpPort(backend.getPortStart(), backend.getPortEnd());
+        int portNumber = 0;
+
+        try {
+             portNumber = SocketUtils.findAvailableTcpPort(backend.getPortStart(), backend.getPortEnd());
+        } catch (IllegalStateException e) {
+            // No free port could be found
+        }
 
         // ToDo NIELS: Check for the number of open connections to ensure that we do not exceed the number of desired backend
         // Possibly just try all ports in range and exiting after reaching the highest numbered port
 
-        do {
-            ProcessBuilder pb = new ProcessBuilder(backend.getBackendLocation(), "-p", hostAddress + ":" + portNumber).redirectErrorStream(true);
-            try {
-                p = pb.start();
-            } catch (IOException ioException) {
-                Ecdar.showToast("Unable to start backend instance. Check the error tab for more details.");
-                // ToDo NIELS: Add error to errors tab with text:
-                //  "The backend instance could not be started. Make sure that the following is correct:
-                //  - Path/address
-                //  - At least one port in the port range is free for the given address (localhost if backend is set to local)
-                //  - The backend is an executable or a .jar file
-                //  - The backend supports the '-p {host}:{port}' flag on startup
-                ioException.printStackTrace();
-                return null;
-            }
-            // If the process is not alive, it failed while starting up, try again
-        } while (!p.isAlive());
+        if (backend.isLocal()) {
+            do {
+                ProcessBuilder pb = new ProcessBuilder(backend.getBackendLocation(), "-p", hostAddress + ":" + portNumber).redirectErrorStream(true);
+//          ToDo NIELS: Find out if we should still use path search (BELOW IS FROM FIXED BACKEND IMPLEMENTATION)
+//            File engine = null;
+//            if (isReveaal) {
+//                List<File> searchPath = List.of (
+//                        new File("lib/Reveaal.exe"), new File("lib/Reveaal")
+//                );
+//                for (var f: searchPath){
+//                    if (f.exists()) {
+//                        engine = f;
+//                        break;
+//                    }
+//                }
+//                if (engine == null) {
+//                    throw new RuntimeException("Could not locate Reveaal engine");
+//                }
+//                pb = new ProcessBuilder(engine.getAbsolutePath(), "-p", this.hostAddress + ":" + portNumber);
+//            } else {
+//                pb = new ProcessBuilder("java", "-jar", "lib/j-Ecdar.jar", "-p" + portNumber );
+//            }
+                try {
+                    p = pb.start();
+                } catch (IOException ioException) {
+                    Ecdar.showToast("Unable to start backend instance. Check the error tab for more details.");
+                    // ToDo NIELS: Add error to errors tab with text:
+                    //  "The backend instance could not be started. Make sure that the following is correct:
+                    //  - Path/address
+                    //  - At least one port in the port range is free for the given address (localhost if backend is set to local)
+                    //  - The backend is an executable or a .jar file
+                    //  - The backend supports the '-p {host}:{port}' flag on startup
+                    ioException.printStackTrace();
+                    return null;
+                }
+                // If the process is not alive, it failed while starting up, try again
+            } while (!p.isAlive());
+        }
 
         ManagedChannel channel = ManagedChannelBuilder.forTarget(hostAddress + ":" + portNumber)
                 .usePlaintext()
