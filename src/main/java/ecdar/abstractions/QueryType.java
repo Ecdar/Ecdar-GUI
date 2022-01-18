@@ -1,6 +1,7 @@
 package ecdar.abstractions;
 
 public enum QueryType {
+    REACHABILITY("reachability", "E<>"),
     REFINEMENT("refinement", "<="),
     QUOTIENT("quotient", "\\"),
     SPECIFICATION("specification", "Spec"),
@@ -46,6 +47,8 @@ public enum QueryType {
             case "get":
             case "get-component":
                 return GET_COMPONENT;
+            case "reachability":
+                return REACHABILITY;
             default:
                 return null;
         }

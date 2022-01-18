@@ -26,7 +26,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import jiconfont.icons.GoogleMaterialDesignIcons;
+import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 import jiconfont.javafx.IconFontFX;
 import org.apache.commons.io.FileUtils;
 
@@ -256,25 +256,6 @@ public class Ecdar extends Application {
             Platform.exit();
             System.exit(0);
         });
-
-//        try {
-//            System.out.println("---------------------Connecting...---------------------");
-//            System.out.println();
-//            Socket socket = new Socket("127.0.0.1", 5141);
-//
-//            var reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-//            var writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-//
-//            writer.write("Hello from the client side");
-//
-//            int inte;
-//            while ((inte = reader.read()) != -1) {
-//                System.out.println(inte);
-//            }
-//
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
     }
 
     private void loadPreferences() {

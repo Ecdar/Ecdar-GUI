@@ -99,8 +99,7 @@ public class BackendDriver {
             private boolean error = false;
 
             @Override
-            public void onNext(Empty value) {
-            }
+            public void onNext(Empty value) {}
 
             @Override
             public void onError(Throwable t) {
@@ -671,15 +670,36 @@ public class BackendDriver {
 
                 do {
                     ProcessBuilder pb;
+
+                    File engine = null;
                     if (isReveaal) {
-                        pb = new ProcessBuilder("src/Reveaal", "-p", this.hostAddress + ":" + portNumber);
+                        List<File> searchPath = List.of (
+                                new File("lib/Reveaal.exe"), new File("lib/Reveaal")
+                        );
+                        for (var f: searchPath){
+                            if (f.exists()) {
+                                engine = f;
+                                break;
+                            }
+                        }
+                        if (engine == null) {
+                            throw new RuntimeException("Could not locate Reveaal engine");
+                        }
+
+                        pb = new ProcessBuilder(engine.getAbsolutePath(), "-p", this.hostAddress + ":" + portNumber);
                     } else {
-                        pb = new ProcessBuilder("java", "-jar", "src/libs/j-Ecdar.jar");
+                        pb = new ProcessBuilder("java", "-jar", "lib/j-Ecdar.jar", "-p" + portNumber );
                     }
+
+                    //DEBUG: Write process output to std out
+                    //pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+                    //pb.redirectError(ProcessBuilder.Redirect.INHERIT);
 
                     p = pb.start();
                     // If the process is not alive, it failed while starting up, try again
                 } while (!p.isAlive());
+
+
 
                 ManagedChannel channel = ManagedChannelBuilder.forTarget(this.hostAddress + ":" + portNumber)
                         .usePlaintext()

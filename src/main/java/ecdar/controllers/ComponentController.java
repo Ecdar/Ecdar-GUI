@@ -358,6 +358,7 @@ public class ComponentController extends ModelController implements Initializabl
 
                 // Add new query for this component
                 final Query query = new Query(deadlockQuery, deadlockComment, QueryState.UNKNOWN);
+                query.setType(QueryType.REACHABILITY);
                 Ecdar.getProject().getQueries().add(query);
                 query.run();
                 contextMenu.hide();
