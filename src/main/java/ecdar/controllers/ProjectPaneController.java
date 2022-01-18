@@ -55,14 +55,6 @@ public class ProjectPaneController implements Initializable {
         });
         filesList.getChildren().add(globalDclPresentation);
 
-        // Bind system declarations and add mouse event
-        final FilePresentation systemDclPresentation = new FilePresentation(Ecdar.getProject().getSystemDeclarations());
-        systemDclPresentation.setOnMousePressed(event -> {
-            event.consume();
-            EcdarController.getActiveCanvasPresentation().getController().setActiveModel(Ecdar.getProject().getSystemDeclarations());
-        });
-        filesList.getChildren().add(systemDclPresentation);
-
         Ecdar.getProject().getComponents().addListener(new ListChangeListener<Component>() {
             @Override
             public void onChanged(final Change<? extends Component> c) {

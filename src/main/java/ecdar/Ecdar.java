@@ -2,6 +2,7 @@ package ecdar;
 
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Project;
+import ecdar.backend.BackendDriver;
 import ecdar.backend.BackendHelper;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.controllers.EcdarController;
@@ -25,13 +26,13 @@ import javafx.scene.layout.Priority;
 import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import jiconfont.icons.GoogleMaterialDesignIcons;
+import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 import jiconfont.javafx.IconFontFX;
 import org.apache.commons.io.FileUtils;
+
+import java.io.*;
 import java.util.prefs.Preferences;
 
-import java.io.File;
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.CodeSource;
 
@@ -44,6 +45,7 @@ public class Ecdar extends Application {
     public static SimpleStringProperty projectDirectory = new SimpleStringProperty();
     private static BooleanProperty isUICached = new SimpleBooleanProperty();
     private static final BooleanProperty isSplit = new SimpleBooleanProperty(true); //Set to true to ensure correct behaviour at first toggle.
+    private static BackendDriver backendDriver;
     private Stage debugStage;
 
     /**
@@ -133,6 +135,14 @@ public class Ecdar extends Application {
         return isSplit;
     }
 
+    /**
+     * Returns the backend driver used to execute queries and handle simulation
+     * @return BackendDriver
+     */
+    public static BackendDriver getBackendDriver() {
+        return backendDriver;
+    }
+
     private void forceCreateFolder(final String directoryPath) throws IOException {
         final File directory = new File(directoryPath);
         FileUtils.forceMkdir(directory);
@@ -149,6 +159,7 @@ public class Ecdar extends Application {
         // Load the fonts required for the project
         IconFontFX.register(GoogleMaterialDesignIcons.getIconFont());
         loadFonts();
+        loadPreferences();
 
         // Remove the classic decoration
         // kyrke - 2020-04-17: Disabled due to bug https://bugs.openjdk.java.net/browse/JDK-8154847
@@ -236,9 +247,25 @@ public class Ecdar extends Application {
         stage.setOnCloseRequest(event -> {
             BackendHelper.stopQueries();
 
+            try {
+                backendDriver.closeAllBackendConnections();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             Platform.exit();
             System.exit(0);
         });
+    }
+
+    private void loadPreferences() {
+        BackendHelper.defaultBackend = preferences.getInt("default_backend", BackendHelper.BackendNames.jEcdar.ordinal())
+                == BackendHelper.BackendNames.jEcdar.ordinal()
+                ? BackendHelper.BackendNames.jEcdar
+                : BackendHelper.BackendNames.Reveaal;
+
+        backendDriver = new BackendDriver(preferences.get("backend_host_address", "127.0.0.1"));
+        getBackendDriver().setMaxNumberOfConnections(preferences.getInt("number_of_backend_sockets", 5));
     }
 
     /**

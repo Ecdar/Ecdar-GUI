@@ -3,11 +3,8 @@ package ecdar.mutation;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Project;
-import ecdar.abstractions.SimpleComponentsSystemDeclarations;
-import ecdar.backend.BackendDriverManager;
 import ecdar.backend.BackendException;
 import ecdar.backend.BackendHelper;
-import ecdar.backend.jECDARDriver;
 import ecdar.mutation.models.MutationTestCase;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.mutation.models.NonRefinementStrategy;
@@ -145,13 +142,12 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
     private void generateTestCase(final MutationTestCase testCase, final int tries) {
         final Component mutant = testCase.getMutant();
 
-        // make a project with the test model and the mutant
+        // Make a project with the test model and the mutant
         final Project project = new Project();
         mutant.setName(MutationTestPlanController.MUTANT_NAME);
         project.getComponents().addAll(testModel, mutant);
         project.setGlobalDeclarations(Ecdar.getProject().getGlobalDeclarations());
         mutant.updateIOList(); // Update io in order to get the right system declarations for the mutant
-        project.setSystemDeclarations(new SimpleComponentsSystemDeclarations(testModel, mutant));
 
         new Thread(() -> {
             try {
@@ -238,9 +234,10 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
      * @throws BackendException if the backend encounters an error
      */
     private Process startProcessToFetchStrategy(final String modelPath) throws BackendException {
+        // ToDo NIELS: not implemented after switch to thread pool
         // Run backend to check refinement and to fetch strategy if non-refinement
-        return ((jECDARDriver) BackendDriverManager.getInstance(BackendHelper.BackendNames.jEcdar))
-                .getJEcdarProcessForRefinementCheckAndStrategyIfNonRefinement(modelPath, queryFilePath);
+        // return ((jECDARDriver) BackendDriverManager.getInstance(BackendHelper.BackendNames.jEcdar)).getJEcdarProcessForRefinementCheckAndStrategyIfNonRefinement(modelPath, queryFilePath);
+        return null;
     }
 
     /**

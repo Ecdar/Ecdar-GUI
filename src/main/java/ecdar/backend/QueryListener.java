@@ -25,6 +25,10 @@ public class QueryListener {
 
     }
 
+    public Query getQuery() {
+        return query;
+    }
+
     /*
     public void setTrace(char c, String s, Vector<SymbolicTransition> vector, int i) {
 

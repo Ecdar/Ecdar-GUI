@@ -3,6 +3,7 @@ package ecdar.presentations;
 import com.jfoenix.controls.JFXSnackbarLayout;
 import ecdar.Ecdar;
 import ecdar.abstractions.Query;
+import ecdar.abstractions.Snackbar;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.controllers.EcdarController;
 import ecdar.utility.UndoRedoStack;
@@ -95,7 +96,7 @@ public class EcdarPresentation extends StackPane {
     }
 
     private void initializeSnackbar() {
-        controller.snackbar = new JFXSnackbar(controller.root);
+        controller.snackbar = new Snackbar(controller.root);
         controller.snackbar.setPrefWidth(568);
         controller.snackbar.autosize();
     }

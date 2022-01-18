@@ -9,7 +9,7 @@ public enum QueryType {
     LOCAL_CONSISTENCY("local-consistency", "lCon"),
     GLOBAL_CONSISTENCY("global-consistency", "gCon"),
     BISIM_MIN("bisim", "bsim"),
-    GET_NEW_COMPONENT("get-new-component", "get");
+    GET_COMPONENT("get-component", "get");
 
     private final String queryName;
     private final String symbol;
@@ -28,12 +28,29 @@ public enum QueryType {
     }
 
     public static QueryType fromString(String s) {
-        for (QueryType type : QueryType.values()) {
-            if (type.queryName.equals(s.toLowerCase()) || type.symbol.equals(s.toLowerCase())) {
-                return type;
-            }
+        switch (s.toLowerCase()) {
+            case "refinement":
+                return REFINEMENT;
+            case "quotient":
+                return QUOTIENT;
+            case "specification":
+                return SPECIFICATION;
+            case "implementation":
+                return IMPLEMENTATION;
+            case "consistency":
+            case "local-consistency":
+                return LOCAL_CONSISTENCY;
+            case "global-consistency":
+                return GLOBAL_CONSISTENCY;
+            case "bisim":
+                return BISIM_MIN;
+            case "get":
+            case "get-component":
+                return GET_COMPONENT;
+            case "reachability":
+                return REACHABILITY;
+            default:
+                return null;
         }
-
-        return null;
     }
 }

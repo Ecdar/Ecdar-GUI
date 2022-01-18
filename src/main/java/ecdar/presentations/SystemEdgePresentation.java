@@ -140,6 +140,16 @@ public class SystemEdgePresentation extends Group implements SelectHelper.ItemSe
         return yProperty().get();
     }
 
+    @Override
+    public double getSelectableWidth() {
+        return 0;
+    }
+
+    @Override
+    public double getSelectableHeight() {
+        return 0;
+    }
+
     /**
      * Calls select on all selectable children.
      */
