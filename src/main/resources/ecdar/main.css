@@ -1,106 +1,106 @@
 .display4{
 	-fx-font-family: "Roboto Light";
-	-fx-font-size: 112.0;
+	-fx-font-size: 7.0em; /* 112 */
 }
 .display3{
 	-fx-font-family: "Roboto";
-	-fx-font-size: 56.0;
+	-fx-font-size: 3.5em; /* 56 */
 }
 .display2{
 	-fx-font-family: "Roboto";
-	-fx-font-size: 45.0;
+	-fx-font-size: 3em; /* 45 */
 }
 .display1{
 	-fx-font-family: "Roboto";
-	-fx-font-size: 34.0;
+	-fx-font-size: 2em; /* 34 */
 }
 .headline{
 	-fx-font-family: "Roboto";
-	-fx-font-size: 24.0;
+	-fx-font-size: 1.5em; /* 24 */
 }
 .title{
 	-fx-font-family: "Roboto Medium";
-	-fx-font-size: 20.0;
+	-fx-font-size: 1.2em; ; /* 20 */
 }
 .subhead{
 	-fx-font-family: "Roboto";
-	-fx-font-size: 15.0;
+	-fx-font-size: 0.9em; /* 15 */
 }
 .body2{
 	-fx-font-family: "Roboto Medium";
-	-fx-font-size: 13.0;
+	-fx-font-size: 0.8em; /* 13 */
 }
 .body1{
 	-fx-font-family: "Roboto";
-	-fx-font-size: 13.0;
+	-fx-font-size: 0.8em; /* 13 */
 }
 .caption{
 	-fx-font-family: "Roboto";
-	-fx-font-size: 12.0;
+	-fx-font-size: 0.75em; /* 12 */
 }
 .sub-caption{
 	-fx-font-family: "Roboto";
-	-fx-font-size: 11.0;
+	-fx-font-size: 0.7em; /* 11 */
 }
 
 .sub-caption-mono{
 	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 10.0;
+	-fx-font-size: 0.6em; /* 10 */
 }
 
 .edge-property{
 	-fx-font-family: "Roboto Mono Medium";
-	-fx-font-size: 12.0;
+	-fx-font-size: 0.75em; /* 12 */
 }
 
 .button{
 	-fx-font-family: "Roboto Medium";
-	-fx-font-size: 14.0;
+	-fx-font-size: 0.8em; /* 14 */
 }
 
 .display4-mono{
 	-fx-font-family: "Roboto Mono Light";
-	-fx-font-size: 112.0;
+	-fx-font-size: 7.0em; /* 112 */
 }
 .display3-mono{
 	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 56.0;
+	-fx-font-size: 3.5em; /* 56 */
 }
 .display2-mono{
 	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 45.0;
+	-fx-font-size: 3em; /* 45 */
 }
 .display1-mono{
 	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 34.0;
+	-fx-font-size: 2em; /* 34 */
 }
 .headline-mono{
 	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 24.0;
+	-fx-font-size: 1.5em; /* 24 */
 }
 .title-mono{
 	-fx-font-family: "Roboto Mono Medium";
-	-fx-font-size: 20.0;
+	-fx-font-size: 1.2em; ; /* 20 */
 }
 .subhead-mono{
 	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 15.0;
+	-fx-font-size: 0.9em; /* 15*/
 }
 .body2-mono{
 	-fx-font-family: "Roboto Mono Medium";
-	-fx-font-size: 13.0;
+	-fx-font-size: 0.8em; /* 13 */
 }
 .body1-mono{
 	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 13.0;
+	-fx-font-size: 0.8em; /* 13 */
 }
 .caption-mono{
 	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 12.0;
+	-fx-font-size: 0.75em; /* 12 */
 }
 .button-mono{
 	-fx-font-family: "Roboto Mono Medium";
-	-fx-font-size: 14.0;
+	-fx-font-size: 0.8em; /* 14 */
 }
 
 .white-text {
@@ -112,39 +112,39 @@
 }
 
 .window-title {
- -fx-label-padding: 0 0 0 10px;
+	-fx-label-padding: 0em 0em 0em 0.6em;
 }
 
 .floating-action-button {
-	-fx-pref-width: 56;
-	-fx-pref-height: 56;
+	-fx-pref-width: 3.5em; /* 56 */
+	-fx-pref-height: 3.5em; /* 56 */
 	-fx-text-fill: white;
 }
 
 .titled-pane > .content {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
-    -fx-border-width: 0;
+    -fx-border-width: 0em;
 }
 
 .titled-pane > .title {
-    -fx-pref-height: 20;
+    -fx-pref-height: 1.2em; /* 20 */
 }
 
 .text-area {
-    -fx-background-insets: 0;
+    -fx-background-insets: 0em;
     -fx-background-color: white white white white;
-    -fx-background-radius: 0;
+    -fx-background-radius: 0em;
 }
 
 .text-area .content {
     -fx-background-color: white white white white;
-    -fx-background-radius: 0;
+    -fx-background-radius: 0em;
 }
 
 .text-area:focused .content {
     -fx-background-color: white white white white;
-    -fx-background-radius: 0;
+    -fx-background-radius: 0em;
 }
 
 .text-area:focused {
@@ -160,7 +160,7 @@
 .menu .label {
     -fx-text-fill: -white;
     -fx-font-family: "Roboto";
-    -fx-font-size: 13.0;
+    -fx-font-size: 0.8em; /* 13 */
 }
 
 .menu-item .label {
@@ -199,14 +199,13 @@
 .jfx-snackbar-content {
 	-fx-background-color: #323232;
 	-fx-font-family: "Roboto Medium";
-	-fx-font-size: 13.0;
+	-fx-font-size: 0.8em; /* 13 */
 }
 
 .jfx-snackbar-toast {
 	-fx-text-fill: WHITE;
-
-	-fx-padding-left: 24;
-	-fx-padding-right: 24;
+	-fx-padding-left: 1.5em; /* 24 */
+	-fx-padding-right: 1.5em; /* 24 */
 }
 
 .jfx-snackbar-action {
@@ -217,22 +216,22 @@
 	-fx-background-color: TRANSPARENT;
 	-fx-border-style: HIDDEN HIDDEN SOLID HIDDEN;
 	-fx-border-color: -divider-color;
-	-fx-pref-height: 30;
+	-fx-pref-height: 1.9em; /* 30 */
 }
 
 .titled-pane > .title > .arrow-button .arrow{
 	-fx-background-color: TRANSPARENT;
 	-fx-border-color: TRANSPARENT;
-	-fx-padding: 0 0 0 -10;
+	-fx-padding: 0em 0em 0em -0.6em; /* -10 */
 }
 
 .titled-pane > .content {
 	-fx-background-color: TRANSPARENT;
-	-fx-padding: 0 -1 -1 -1 ;
-	-fx-background-insets: 0 0 0 0;
+	-fx-padding: 0em -0.1em -0.1em -0.1em; /* -1 */
+	-fx-background-insets: 0em 0em 0em 0em;
 }
 
-<!-- Scroll pane related styling -->
+/* Scroll pane related styling */
 .scroll-bar:horizontal .track,
 .scroll-bar:vertical .track{
 	-fx-opacity: 0;
@@ -244,39 +243,39 @@
 .scroll-bar:horizontal .decrement-button {
 	visibility: hidden;
 	-fx-background-radius : 0.0em;
-	-fx-padding :0.0 0.0 4.0 0.0;
+	-fx-padding : 0.0em 0.0em 0.25em 0.0em;  /* 4 */
 }
 
 .scroll-bar:vertical .increment-button ,
 .scroll-bar:vertical .decrement-button {
 	visibility: hidden;
 	-fx-background-radius : 0.0em;
-	-fx-padding :0.0 4.0 0.0 0.0;
+	-fx-padding : 0.0em 0.25em 0.0em 0.0em;  /* 4 */
 }
 
 .scroll-bar .increment-arrow,
 .scroll-bar .decrement-arrow{
 	-fx-shape : " ";
-	-fx-padding :0.15em 0.0;
+	-fx-padding : 0.15em 0.0em;
 }
 
 .scroll-bar:vertical .increment-arrow,
 .scroll-bar:vertical .decrement-arrow{
 	-fx-shape : " ";
-	-fx-padding :0.0 0.15em;
+	-fx-padding : 0.0em 0.15em;
 }
 
 .scroll-bar:horizontal .thumb,
 .scroll-bar:vertical .thumb {
 	-fx-background-color : derive(-divider-color, 40.0%);
-	-fx-background-insets : 2.0, 0.0, 0.0;
+	-fx-background-insets : 0.2em, 0.0em, 0.0em;  /* 2 */
 	-fx-background-radius : 2.0em;
 }
 
 .scroll-bar:horizontal .thumb:hover,
 .scroll-bar:vertical .thumb:hover {
 	-fx-background-color : derive(-divider-color, 10.0%);
-	-fx-background-insets : 2.0, 0.0, 0.0;
+	-fx-background-insets : 0.2em 0.0em, 0.0em;  /* 2 */
 	-fx-background-radius : 2.0em;
 }
 
@@ -292,7 +291,7 @@
 }
 
 .jfx-slider {
-	-fx-pref-width: 60;
+	-fx-pref-width: 3.75em; /* 60 */
 }
 
 .jfx-slider > .track {
@@ -304,8 +303,8 @@
 }
 
 .jfx-slider > .thumb {
-	-fx-pref-width: 10;
-	-fx-background-radius: 3;
+	-fx-pref-width: 0.6em; /* 10 */
+	-fx-background-radius: 0.19em; /* 3 */
 }
 
 .jfx-slider > .slider-value {
