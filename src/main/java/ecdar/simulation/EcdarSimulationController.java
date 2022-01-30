@@ -59,7 +59,7 @@ public class EcdarSimulationController implements Initializable, Presentable {
 
         // ToDo NIELS: Handle the below check to check if the user has actually left
         // Have the user left a trace or is he simulating a query
-        if (false) {
+        if (false /* sm.traceLog.size() >= 2 || sm.getCurrentSimulation().contains(SimulationHandler.QUERY_PREFIX) */) {
             shouldSimulationBeReset = false;
         }
 
