@@ -139,7 +139,7 @@ public class BackendDriver {
 
         // Get available connection or start new
         final BackendConnection backendConnection = openBackendConnections.stream()
-                .filter((connection) -> connection.getBackendInstance().equals(executableQuery.backend))
+                .filter((connection) -> connection.getBackendInstance() != null && connection.getBackendInstance().equals(executableQuery.backend))
                 .findFirst()
                 .orElseGet(() -> startNewBackendConnection(executableQuery.backend));
 
