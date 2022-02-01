@@ -228,7 +228,7 @@
                         <content>
                             <HBox fx:id="menuBarOptionsDefaultBackendContent" spacing="5" alignment="CENTER">
                                 <FontIcon iconLiteral="gmi-autorenew" iconSize="24" fill="black"/>
-                                <Text>Backend</Text>
+                                <Text styleClass="body1">Backend</Text>
                             </HBox>
                         </content>
                     </CustomMenuItem>
@@ -240,7 +240,7 @@
                                     <Insets left="2" right="10"/>
                                 </padding>
                                 <FontIcon iconLiteral="gmi-settings-input-component" iconSize="20" fill="black"/>
-                                <Text>Backend Sockets: </Text>
+                                <Text styleClass="body1">Backend Sockets: </Text>
                                 <JFXSlider styleClass="jfx-slider" min="1" max="20"
                                            fx:id="menuBarOptionsNumberOfSocketsSlider"/>
                             </HBox>
