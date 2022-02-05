@@ -206,6 +206,24 @@
                         </graphic>
                     </MenuItem>
 
+                    <Menu text="Font Scaling" fx:id="menuViewMenuFontScaling">
+                        <fx:define>
+                            <ToggleGroup fx:id="fontScaling"/>
+                        </fx:define>
+                        <RadioMenuItem fx:id="fontScaleS" toggleGroup="$fontScaling" text="0.75x">
+                            <properties scale="0.75"/>
+                        </RadioMenuItem>
+                        <RadioMenuItem fx:id="fontScaleM" toggleGroup="$fontScaling" text="1.0x">
+                            <properties scale="1.0"/>
+                        </RadioMenuItem>
+                        <RadioMenuItem fx:id="fontScaleL" toggleGroup="$fontScaling" text="1.25x">
+                            <properties scale="1.25"/>
+                        </RadioMenuItem>
+                        <RadioMenuItem fx:id="fontScaleXL" toggleGroup="$fontScaling" text="1.5x">
+                            <properties scale="1.5"/>
+                        </RadioMenuItem>
+                    </Menu>
+
                     <SeparatorMenuItem/>
 
                     <MenuItem fx:id="menuBarViewCanvasSplit" text="Split canvas">
@@ -274,7 +292,7 @@
     <!-- Message container -->
     <StackPane fx:id="tabPaneContainer" maxHeight="35"
                StackPane.alignment="BOTTOM_CENTER"
-               style="-fx-padding: 0em 0em 1.4em 0em">
+               style="-fx-padding: 0em 0em 20 0em">
         <JFXTabPane fx:id="tabPane" style="-fx-background-color: -grey-200;">
 
             <Tab fx:id="backendErrorsTab" text="Backend Errors">

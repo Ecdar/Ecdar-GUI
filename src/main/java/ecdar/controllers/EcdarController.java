@@ -140,6 +140,12 @@ public class EcdarController implements Initializable {
     public MenuItem menuBarViewFilePanel;
     public MenuItem menuBarViewQueryPanel;
     public MenuItem menuBarViewGrid;
+    public Menu menuViewMenuFontScaling;
+    public ToggleGroup fontScaling;
+    public RadioMenuItem fontScaleS;
+    public RadioMenuItem fontScaleM;
+    public RadioMenuItem fontScaleL;
+    public RadioMenuItem fontScaleXL;
     public MenuItem menuBarViewCanvasSplit;
     public MenuItem menuBarFileCreateNewProject;
     public MenuItem menuBarFileOpenProject;
@@ -616,6 +622,12 @@ public class EcdarController implements Initializable {
             final BooleanProperty isOn = Ecdar.toggleGrid();
             menuBarViewGrid.getGraphic().opacityProperty().bind(new When(isOn).then(1).otherwise(0));
         });
+
+        fontScaling.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
+            double newScale = Double.parseDouble(newValue.getProperties().get("scale").toString()) * 13.0;
+            Ecdar.getPresentation().setStyle("-fx-font-size: " + newScale + "px;");
+        });
+        Platform.runLater(() -> fontScaling.selectToggle(fontScaleM));
 
         menuBarViewCanvasSplit.getGraphic().setOpacity(1);
         menuBarViewCanvasSplit.setOnAction(event -> {
