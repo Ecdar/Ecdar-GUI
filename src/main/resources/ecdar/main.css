@@ -1,82 +1,82 @@
 .display4{
 	-fx-font-family: "Roboto Light";
-	-fx-font-size: 7.0em; /* 112 */
+	-fx-font-size: 9.3em; /* 112 */
 }
 .display3{
 	-fx-font-family: "Roboto";
-	-fx-font-size: 3.5em; /* 56 */
+	-fx-font-size: 4.6em; /* 56 */
 }
 .display2{
 	-fx-font-family: "Roboto";
-	-fx-font-size: 3em; /* 45 */
+	-fx-font-size: 3.75em; /* 45 */
 }
 .display1{
 	-fx-font-family: "Roboto";
-	-fx-font-size: 2em; /* 34 */
+	-fx-font-size: 2.8em; /* 34 */
 }
 .headline{
 	-fx-font-family: "Roboto";
-	-fx-font-size: 1.5em; /* 24 */
+	-fx-font-size: 2.0em; /* 24 */
 }
 .title{
 	-fx-font-family: "Roboto Medium";
-	-fx-font-size: 1.2em; ; /* 20 */
+	-fx-font-size: 1.6em; /* 20 */
 }
 .subhead{
 	-fx-font-family: "Roboto";
-	-fx-font-size: 0.9em; /* 15 */
+	-fx-font-size: 1.25em; /* 15 */
 }
 .body2{
 	-fx-font-family: "Roboto Medium";
-	-fx-font-size: 0.8em; /* 13 */
+	-fx-font-size: 1.1em; /* 13 */
 }
 .body1{
 	-fx-font-family: "Roboto";
-	-fx-font-size: 0.8em; /* 13 */
+	-fx-font-size: 1.1em; /* 13 */
 }
 .caption{
 	-fx-font-family: "Roboto";
-	-fx-font-size: 0.75em; /* 12 */
+	-fx-font-size: 1.0em; /* 12 */
 }
 .sub-caption{
 	-fx-font-family: "Roboto";
-	-fx-font-size: 0.7em; /* 11 */
+	-fx-font-size: 0.9em; /* 11 */
 }
 
 .sub-caption-mono{
 	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 0.6em; /* 10 */
+	-fx-font-size: 0.8em; /* 10 */
 }
 
 .edge-property{
 	-fx-font-family: "Roboto Mono Medium";
-	-fx-font-size: 0.75em; /* 12 */
+	-fx-font-size: 1.0em; /* 12 */
 }
 
 .button{
 	-fx-font-family: "Roboto Medium";
-	-fx-font-size: 0.8em; /* 14 */
+	-fx-font-size: 1.2em; /* 14 */
 }
 
 .display4-mono{
 	-fx-font-family: "Roboto Mono Light";
-	-fx-font-size: 7.0em; /* 112 */
+	-fx-font-size: 9.3em; /* 112 */
 }
 .display3-mono{
 	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 3.5em; /* 56 */
+	-fx-font-size: 4.6em; /* 56 */
 }
 .display2-mono{
 	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 3em; /* 45 */
+	-fx-font-size: 3.75em; /* 45 */
 }
 .display1-mono{
 	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 2em; /* 34 */
+	-fx-font-size: 2.8em; /* 34 */
 }
 .headline-mono{
 	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 1.5em; /* 24 */
+	-fx-font-size: 2.0em; /* 24 */
 }
 .title-mono{
 	-fx-font-family: "Roboto Mono Medium";
@@ -84,23 +84,23 @@
 }
 .subhead-mono{
 	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 0.9em; /* 15*/
+	-fx-font-size: 1.25em; /* 15*/
 }
 .body2-mono{
 	-fx-font-family: "Roboto Mono Medium";
-	-fx-font-size: 0.8em; /* 13 */
+	-fx-font-size: 1.1em; /* 13 */
 }
 .body1-mono{
 	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 0.8em; /* 13 */
+	-fx-font-size: 1.1em; /* 13 */
 }
 .caption-mono{
 	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 0.75em; /* 12 */
+	-fx-font-size: 1.0em; /* 12 */
 }
 .button-mono{
 	-fx-font-family: "Roboto Mono Medium";
-	-fx-font-size: 0.8em; /* 14 */
+	-fx-font-size: 1.2em; /* 14 */
 }
 
 .white-text {
@@ -112,12 +112,12 @@
 }
 
 .window-title {
-	-fx-label-padding: 0em 0em 0em 0.6em;
+	-fx-label-padding: 0em 0em 0em 0.8em;
 }
 
 .floating-action-button {
-	-fx-pref-width: 3.5em; /* 56 */
-	-fx-pref-height: 3.5em; /* 56 */
+	-fx-pref-width: 4.6em; /* 56 */
+	-fx-pref-height: 4.6em; /* 56 */
 	-fx-text-fill: white;
 }
 
@@ -160,7 +160,7 @@
 .menu .label {
     -fx-text-fill: -white;
     -fx-font-family: "Roboto";
-    -fx-font-size: 0.8em; /* 13 */
+    -fx-font-size: 1.1em; /* 13 */
 }
 
 .menu-item .label {
@@ -199,13 +199,13 @@
 .jfx-snackbar-content {
 	-fx-background-color: #323232;
 	-fx-font-family: "Roboto Medium";
-	-fx-font-size: 0.8em; /* 13 */
+	-fx-font-size: 1.1em; /* 13 */
 }
 
 .jfx-snackbar-toast {
 	-fx-text-fill: WHITE;
-	-fx-padding-left: 1.5em; /* 24 */
-	-fx-padding-right: 1.5em; /* 24 */
+	-fx-padding-left: 2.0em; /* 24 */
+	-fx-padding-right: 2.0em; /* 24 */
 }
 
 .jfx-snackbar-action {
@@ -222,7 +222,7 @@
 .titled-pane > .title > .arrow-button .arrow{
 	-fx-background-color: TRANSPARENT;
 	-fx-border-color: TRANSPARENT;
-	-fx-padding: 0em 0em 0em -0.6em; /* -10 */
+	-fx-padding: 0em 0em 0em -0.8em; /* -10 */
 }
 
 .titled-pane > .content {
@@ -281,7 +281,7 @@
 
 .scroll-bar{
 	-fx-background-color: transparent;
-	-fx-background-radius: 2em;
+	-fx-background-radius: 2.8em;
 	-fx-focus-color: transparent;
 	-fx-faint-focus-color: transparent;
 }
@@ -303,7 +303,7 @@
 }
 
 .jfx-slider > .thumb {
-	-fx-pref-width: 0.6em; /* 10 */
+	-fx-pref-width: 0.8em; /* 10 */
 	-fx-background-radius: 0.19em; /* 3 */
 }
 
