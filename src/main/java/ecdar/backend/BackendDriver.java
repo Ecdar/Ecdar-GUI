@@ -289,7 +289,7 @@ public class BackendDriver {
             executableQuery.success.accept(false);
         }
     }
-
+ 
     private BackendConnection startNewBackendConnection(BackendInstance backend) {
         Process p = null;
         String hostAddress = (backend.isLocal() ? "127.0.0.1" : backend.getBackendLocation());
@@ -306,7 +306,7 @@ public class BackendDriver {
 
         if (backend.isLocal()) {
             do {
-                ProcessBuilder pb = new ProcessBuilder(backend.getBackendLocation(), "-p", hostAddress + ":" + portNumber).redirectErrorStream(true);
+                ProcessBuilder pb = new ProcessBuilder(backend.getBackendLocation(), "-p", "" + portNumber).redirectErrorStream(true);
 //          ToDo NIELS: Find out if we should still use path search (BELOW IS FROM FIXED BACKEND IMPLEMENTATION)
 //            File engine = null;
 //            if (isReveaal) {
@@ -326,6 +326,8 @@ public class BackendDriver {
 //            } else {
 //                pb = new ProcessBuilder("java", "-jar", "lib/j-Ecdar.jar", "-p" + portNumber );
 //            }
+                pb.inheritIO().redirectErrorStream(true);
+
                 try {
                     p = pb.start();
                 } catch (IOException ioException) {
