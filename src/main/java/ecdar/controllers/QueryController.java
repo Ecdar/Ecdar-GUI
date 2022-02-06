@@ -5,6 +5,7 @@ import com.jfoenix.controls.JFXRippler;
 import ecdar.abstractions.BackendInstance;
 import ecdar.abstractions.Query;
 import ecdar.abstractions.QueryType;
+import ecdar.backend.BackendHelper;
 import ecdar.utility.colors.Color;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -52,7 +53,11 @@ public class QueryController implements Initializable {
 
         backendsDropdown.setValue(query.getBackend());
         backendsDropdown.valueProperty().addListener((observable, oldValue, newValue) -> {
-            query.setBackend(newValue);
+            if (newValue != null) {
+                query.setBackend(newValue);
+            } else {
+                backendsDropdown.setValue(BackendHelper.getDefaultBackendInstance());
+            }
         });
     }
 

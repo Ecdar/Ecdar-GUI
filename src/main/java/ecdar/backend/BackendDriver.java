@@ -254,13 +254,6 @@ public class BackendDriver {
             default:
                 backendConnection.getExecutableQuery().queryListener.getQuery().setQueryState(QueryState.ERROR);
                 backendConnection.getExecutableQuery().failure.accept(new BackendException.QueryErrorException("The query failed and gave the following error: " + errorType));
-
-//                try {
-//                    backendConnection.close();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-
                 break;
         }
 
@@ -298,46 +291,17 @@ public class BackendDriver {
         try {
              portNumber = SocketUtils.findAvailableTcpPort(backend.getPortStart(), backend.getPortEnd());
         } catch (IllegalStateException e) {
-            // No free port could be found
+            Ecdar.showToast("No available port for " + backend.getName() + " with port range " + backend.getPortStart() + " - " + backend.getPortEnd());
         }
-
-        // ToDo NIELS: Check for the number of open connections to ensure that we do not exceed the number of desired backend
-        // Possibly just try all ports in range and exiting after reaching the highest numbered port
 
         if (backend.isLocal()) {
             do {
-                ProcessBuilder pb = new ProcessBuilder(backend.getBackendLocation(), "-p", "" + portNumber).redirectErrorStream(true);
-//          ToDo NIELS: Find out if we should still use path search (BELOW IS FROM FIXED BACKEND IMPLEMENTATION)
-//            File engine = null;
-//            if (isReveaal) {
-//                List<File> searchPath = List.of (
-//                        new File("lib/Reveaal.exe"), new File("lib/Reveaal")
-//                );
-//                for (var f: searchPath){
-//                    if (f.exists()) {
-//                        engine = f;
-//                        break;
-//                    }
-//                }
-//                if (engine == null) {
-//                    throw new RuntimeException("Could not locate Reveaal engine");
-//                }
-//                pb = new ProcessBuilder(engine.getAbsolutePath(), "-p", this.hostAddress + ":" + portNumber);
-//            } else {
-//                pb = new ProcessBuilder("java", "-jar", "lib/j-Ecdar.jar", "-p" + portNumber );
-//            }
-                pb.inheritIO().redirectErrorStream(true);
+                ProcessBuilder pb = new ProcessBuilder(backend.getBackendLocation(), "-p", hostAddress + ":" + portNumber);
 
                 try {
                     p = pb.start();
                 } catch (IOException ioException) {
-                    Ecdar.showToast("Unable to start backend instance. Check the error tab for more details.");
-                    // ToDo NIELS: Add error to errors tab with text:
-                    //  "The backend instance could not be started. Make sure that the following is correct:
-                    //  - Path/address
-                    //  - At least one port in the port range is free for the given address (localhost if backend is set to local)
-                    //  - The backend is an executable
-                    //  - The backend supports the '-p {host}:{port}' flag on startup
+                    Ecdar.showToast("Unable to start backend instance");
                     ioException.printStackTrace();
                     return null;
                 }
@@ -455,7 +419,7 @@ public class BackendDriver {
                 System.out.println("Tried to remove a connection not present in either connection list");
             }
 
-            // If the backend-instance is null, or it is a remote process, we do not need to destroy it
+            // If the backend-instance is null, or remote, there will be no process to destroy
             if (this.getBackendInstance() != null && !this.getBackendInstance().isLocal()) {
                 process.destroy();
             }

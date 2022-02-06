@@ -3,7 +3,7 @@
     "name": "Reveaal",
     "isLocal": "true",
     "isDefault": "true",
-    "location": "src/Reveaal",
+    "location": "lib/Reveaal",
     "portRangeStart": "5032",
     "portRangeEnd": "5040"
   },
@@ -11,7 +11,7 @@
     "name": "jECDAR",
     "isLocal": "True",
     "isDefault": "False",
-    "location": "src/libs/j-Ecdar.jar",
+    "location": "lib/j-Ecdar.bat",
     "portRangeStart": "5042",
     "portRangeEnd": "5050"
   }

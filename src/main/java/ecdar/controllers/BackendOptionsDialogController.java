@@ -48,20 +48,10 @@ public class BackendOptionsDialogController implements Initializable {
 
     private void initializeBackendInstanceList() {
         try {
-            // ToDo NIELS: Maybe use load JSON from file function instead of reading from file like this
-            File myObj = new File("src/main/resources/ecdar/default_backends.json");
-            Scanner myReader = new Scanner(myObj);
+            final JsonArray backends = getSavedBackendInstances();
 
-            StringBuilder defaultBackendInstanceList = new StringBuilder();
-            while (myReader.hasNextLine()) {
-                defaultBackendInstanceList.append(myReader.nextLine());
-            }
-            myReader.close();
-
-            final JsonArray backends = JsonParser.parseString(Ecdar.preferences.get("backend_instances", defaultBackendInstanceList.toString())).getAsJsonArray();
-
+            // Instantiate loaded backend instances
             ArrayList<BackendInstance> backendInstances = new ArrayList<>();
-
             backends.forEach((backend) -> {
                 BackendInstance newBackendInstance = new BackendInstance(backend.getAsJsonObject());
                 BackendInstancePresentation newBackendInstancePresentation = new BackendInstancePresentation(newBackendInstance);
@@ -71,7 +61,7 @@ public class BackendOptionsDialogController implements Initializable {
 
             BackendHelper.updateBackendInstances(backendInstances);
         } catch (FileNotFoundException e) {
-            System.out.println("An error occurred.");
+            Ecdar.showToast("Unable to load backends from either preferences or JSON with default backends");
             e.printStackTrace();
         }
 
@@ -81,6 +71,17 @@ public class BackendOptionsDialogController implements Initializable {
             BackendInstancePresentation newBackendInstancePresentation = new BackendInstancePresentation();
             addBackendInstancePresentationToList(newBackendInstancePresentation);
         });
+    }
+
+    private JsonArray getSavedBackendInstances() throws FileNotFoundException {
+        File myObj = new File("src/main/resources/ecdar/default_backends.json");
+        Scanner myReader = new Scanner(myObj);
+        StringBuilder defaultBackendInstanceList = new StringBuilder();
+        while (myReader.hasNextLine()) {
+            defaultBackendInstanceList.append(myReader.nextLine());
+        }
+        myReader.close();
+        return JsonParser.parseString(Ecdar.preferences.get("backend_instances", defaultBackendInstanceList.toString())).getAsJsonArray();
     }
 
     private void addBackendInstancePresentationToList(BackendInstancePresentation newBackendInstancePresentation) {
@@ -97,10 +98,10 @@ public class BackendOptionsDialogController implements Initializable {
 
     private void moveBackendInstance(BackendInstancePresentation newBackendInstance, int i) {
         int currentIndex = backendInstanceList.getChildren().indexOf(newBackendInstance);
-
-        // Math.max added to avoid index -1
-        int newIndex = Math.max(0, (currentIndex + i) % backendInstanceList.getChildren().size());
-        // ToDo NIELS: Prevent loop around for overflow or add for underflow
+        int newIndex = (currentIndex + i) % backendInstanceList.getChildren().size();
+        if (newIndex < 0) {
+            newIndex = backendInstanceList.getChildren().size() - 1;
+        }
 
         backendInstanceList.getChildren().remove(newBackendInstance);
         backendInstanceList.getChildren().add(newIndex, newBackendInstance);
@@ -117,7 +118,6 @@ public class BackendOptionsDialogController implements Initializable {
         for (Node child : backendInstanceList.getChildren()) {
             if (child instanceof BackendInstancePresentation) {
                 BackendInstanceController backendInstanceController = ((BackendInstancePresentation) child).getController();
-
                 error = backendNameIsErrorFree(backendInstanceController) && error;
                 error = portRangeIsErrorFree(backendInstanceController) && error;
                 error = backendInstanceLocationIsErrorFree(backendInstanceController) && error;
@@ -228,7 +228,6 @@ public class BackendOptionsDialogController implements Initializable {
                     errorFree = false;
                 } catch (IOException ioException) {
                     backendInstanceController.locationIssue.setText(ValidationErrorMessages.IO_EXCEPTION_WITH_HOST.toString());
-                    // ToDo NIELS: Log the following: ioException.getMessage();
                     errorFree = false;
                 }
             }

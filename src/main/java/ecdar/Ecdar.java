@@ -190,7 +190,6 @@ public class Ecdar extends Application {
         // Load the fonts required for the project
         IconFontFX.register(GoogleMaterialDesignIcons.getIconFont());
         loadFonts();
-        loadBackends();
 
         // Remove the classic decoration
         // kyrke - 2020-04-17: Disabled due to bug https://bugs.openjdk.java.net/browse/JDK-8154847
@@ -289,17 +288,6 @@ public class Ecdar extends Application {
             Platform.exit();
             System.exit(0);
         });
-    }
-
-    private void loadBackends() {
-        // ToDo NIELS: Load backends
-//        BackendHelper.defaultBackend = preferences.getInt("default_backend", BackendHelper.BackendNames.jEcdar.ordinal())
-//                == BackendHelper.BackendNames.jEcdar.ordinal()
-//                ? BackendHelper.BackendNames.jEcdar
-//                : BackendHelper.BackendNames.Reveaal;
-//
-//        backendDriver = new BackendDriver(preferences.get("backend_host_address", "127.0.0.1"));
-//        getBackendDriver().setMaxNumberOfConnections(preferences.getInt("number_of_backend_sockets", 5));
     }
 
     /**
