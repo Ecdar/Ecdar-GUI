@@ -293,6 +293,16 @@ public enum Color {
 
     private final HashMap<Intensity, ColorParser> colorMap = new HashMap<>();
 
+    /**
+     * Enum for defining colors with different intensity levels.
+     * SafeVarargs added to suppress notification. This should be safe, as instances of the enum are only
+     * created in this file and there are no chance of unexpected classes to be parsed as input.
+     * The issue is explained in more detail here:
+     * https://stackoverflow.com/questions/12462079/possible-heap-pollution-via-varargs-parameter
+     *
+     * @param colors array of Intensity - Color-parser pairs that allows for specifying intensity of each color
+     */
+    @SafeVarargs
     Color(Pair<Intensity, ColorParser>... colors) {
         // Make sure that the colors lists contains all intensities
         for (Intensity intensity : Intensity.values()) {

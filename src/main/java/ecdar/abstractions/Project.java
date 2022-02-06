@@ -186,15 +186,15 @@ public class Project {
      * @throws IOException if problems occurs when reading a file
      */
     private void deserializeFileHelper(final File file) throws IOException {
-        final String fileContent = Files.toString(file, Charset.defaultCharset());
+        final String fileContent = Files.asCharSource(file, Charset.defaultCharset()).read();
 
         switch (file.getName()) {
             case GLOBAL_DCL_FILENAME + JSON_FILENAME_EXTENSION:
-                final JsonObject globalJsonObj = new JsonParser().parse(fileContent).getAsJsonObject();
+                final JsonObject globalJsonObj = JsonParser.parseString(fileContent).getAsJsonObject();
                 setGlobalDeclarations(new Declarations(globalJsonObj));
                 break;
             case QUERIES_FILENAME + JSON_FILENAME_EXTENSION:
-                new JsonParser().parse(fileContent).getAsJsonArray().forEach(jsonElement -> {
+                JsonParser.parseString(fileContent).getAsJsonArray().forEach(jsonElement -> {
                     final Query newQuery = new Query((JsonObject) jsonElement);
                     getQueries().add(newQuery);
                 });
@@ -218,7 +218,7 @@ public class Project {
         for (final File file : files) {
             // If JSON file
             if (file.getName().endsWith(JSON_FILENAME_EXTENSION)) {
-                final String fileContent = Files.toString(file, Charset.defaultCharset());
+                final String fileContent = Files.asCharSource(file, Charset.defaultCharset()).read();
 
                 // Parse the file to an json object
                 final JsonObject jsonObject = JsonParser.parseString(fileContent).getAsJsonObject();
@@ -260,7 +260,7 @@ public class Project {
         for (final File file : files) {
             // If JSON file
             if (file.getName().endsWith(JSON_FILENAME_EXTENSION)) {
-                final String fileContent = Files.toString(file, Charset.defaultCharset());
+                final String fileContent = Files.asCharSource(file, Charset.defaultCharset()).read();
                 final JsonObject json = JsonParser.parseString(fileContent).getAsJsonObject();
                 final String name = json.get("name").getAsString();
                 nameJsonMap.put(name, json);
@@ -300,8 +300,8 @@ public class Project {
         for (final File file : files) {
             // If JSON file
             if (file.getName().endsWith(JSON_FILENAME_EXTENSION)) {
-                final String fileContent = Files.toString(file, Charset.defaultCharset());
-                final JsonObject json = new JsonParser().parse(fileContent).getAsJsonObject();
+                final String fileContent = Files.asCharSource(file, Charset.defaultCharset()).read();
+                final JsonObject json = JsonParser.parseString(fileContent).getAsJsonObject();
                 final String name = json.get("name").getAsString();
                 nameJsonMap.put(name, json);
             }
