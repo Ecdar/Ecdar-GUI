@@ -118,14 +118,12 @@ public class BackendInstanceController implements Initializable {
     private void handleLocalPropertyChanged() {
         if (isLocal.isSelected()) {
             address.setDisable(true);
-            address.setText("127.0.0.1");
             addressSection.setVisible(false);
             addressSection.setManaged(false);
             pathToBackendSection.setVisible(true);
             pathToBackendSection.setManaged(true);
         } else {
             address.setDisable(false);
-            address.setText("");
             addressSection.setVisible(true);
             addressSection.setManaged(true);
             pathToBackendSection.setVisible(false);

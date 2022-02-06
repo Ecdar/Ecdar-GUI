@@ -336,7 +336,7 @@ public class BackendDriver {
                     //  "The backend instance could not be started. Make sure that the following is correct:
                     //  - Path/address
                     //  - At least one port in the port range is free for the given address (localhost if backend is set to local)
-                    //  - The backend is an executable or a .jar file
+                    //  - The backend is an executable
                     //  - The backend supports the '-p {host}:{port}' flag on startup
                     ioException.printStackTrace();
                     return null;
@@ -455,7 +455,10 @@ public class BackendDriver {
                 System.out.println("Tried to remove a connection not present in either connection list");
             }
 
-            process.destroy();
+            // If the backend-instance is null, or it is a remote process, we do not need to destroy it
+            if (this.getBackendInstance() != null && !this.getBackendInstance().isLocal()) {
+                process.destroy();
+            }
         }
     }
 
