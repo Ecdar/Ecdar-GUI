@@ -248,3 +248,10 @@
 .input-violation {
 	-fx-text-fill: red;
 }
+
+.button-danger {
+	-fx-border-style: SOLID SOLID SOLID SOLID;
+	-fx-border-color: -red-900;
+	-fx-border-radius: 0.25em;
+	-fx-border-width: 0.1em;
+}

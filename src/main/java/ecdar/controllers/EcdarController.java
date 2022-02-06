@@ -212,6 +212,10 @@ public class EcdarController implements Initializable {
         initializeDialog(queryDialog, queryDialogContainer);
         initializeDialog(backendOptionsDialog, backendOptionsDialogContainer);
 
+        backendOptionsDialog.getController().resetBackendsButton.setOnMouseClicked(event -> {
+            backendOptionsDialog.getController().resetBackendsToDefault();
+        });
+
         backendOptionsDialog.getController().closeButton.setOnMouseClicked(event -> {
             backendOptionsDialog.getController().resetBackendOptions();
             dialog.close();
