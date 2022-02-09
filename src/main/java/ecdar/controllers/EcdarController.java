@@ -214,9 +214,7 @@ public class EcdarController implements Initializable {
         });
 
         initializeCanvasPane();
-
         initializeEdgeStatusHandling();
-
         initializeKeybindings();
         initializeTabPane();
         initializeStatusBar();
@@ -624,10 +622,29 @@ public class EcdarController implements Initializable {
         });
 
         fontScaling.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
-            double newScale = Double.parseDouble(newValue.getProperties().get("scale").toString()) * 13.0;
-            Ecdar.getPresentation().setStyle("-fx-font-size: " + newScale + "px;");
+            String rawNewScale = newValue.getProperties().get("scale").toString();
+            double calculatedNewScale = Double.parseDouble(rawNewScale) * 13.0;
+            Ecdar.getPresentation().setStyle("-fx-font-size: " + calculatedNewScale + "px;");
+
+            // Text do not scale on the canvas to avoid ugly elements,
+            // this zooms in on the component in order to get the "same font size"
+            EcdarController.getActiveCanvasPresentation().getController().zoomHelper.setZoomLevel(calculatedNewScale / 13);
+
+            Ecdar.preferences.put("font_scale", rawNewScale);
         });
-        Platform.runLater(() -> fontScaling.selectToggle(fontScaleM));
+
+        // On startup, set the font scaling to the value saved in preferences
+        Platform.runLater(() -> {
+            Object matchingToggle = fontScaleM;
+            for (Object i : fontScaling.getToggles()) {
+                if (Float.parseFloat(((RadioMenuItem) i).getProperties().get("scale").toString())
+                                == Ecdar.preferences.getFloat("font_scale", 1.0F)) {
+                    matchingToggle = i;
+                    break;
+                }
+            }
+            fontScaling.selectToggle((RadioMenuItem) matchingToggle);
+        });
 
         menuBarViewCanvasSplit.getGraphic().setOpacity(1);
         menuBarViewCanvasSplit.setOnAction(event -> {
