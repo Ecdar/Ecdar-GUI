@@ -1,106 +1,106 @@
 .display4{
 	-fx-font-family: "Roboto Light";
-	-fx-font-size: 8.6em; /* 112 */
+	-fx-font-size: 8.6em;
 }
 .display3{
 	-fx-font-family: "Roboto";
-	-fx-font-size: 4.3em; /* 56 */
+	-fx-font-size: 4.3em;
 }
 .display2{
 	-fx-font-family: "Roboto";
-	-fx-font-size: 3.5em; /* 45 */
+	-fx-font-size: 3.5em;
 }
 .display1{
 	-fx-font-family: "Roboto";
-	-fx-font-size: 2.6em; /* 34 */
+	-fx-font-size: 2.6em;
 }
 .headline{
 	-fx-font-family: "Roboto";
-	-fx-font-size: 1.8em; /* 24 */
+	-fx-font-size: 1.8em;
 }
 .title{
 	-fx-font-family: "Roboto Medium";
-	-fx-font-size: 1.5em; /* 20 */
+	-fx-font-size: 1.5em;
 }
 .subhead{
 	-fx-font-family: "Roboto";
-	-fx-font-size: 1.2em; /* 15 */
+	-fx-font-size: 1.2em;
 }
 .body2{
 	-fx-font-family: "Roboto Medium";
-	-fx-font-size: 1.0em; /* 13 */
+	-fx-font-size: 1.0em;
 }
 .body1{
 	-fx-font-family: "Roboto";
-	-fx-font-size: 1.0em; /* 13 */
+	-fx-font-size: 1.0em;
 }
 .caption{
 	-fx-font-family: "Roboto";
-	-fx-font-size: 0.9em; /* 12 */
+	-fx-font-size: 0.9em;
 }
 .sub-caption{
 	-fx-font-family: "Roboto";
-	-fx-font-size: 0.8em; /* 11 */
+	-fx-font-size: 0.8em;
 }
 
 .sub-caption-mono{
 	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 0.7em; /* 10 */
+	-fx-font-size: 0.7em;
 }
 
 .edge-property{
 	-fx-font-family: "Roboto Mono Medium";
-	-fx-font-size: 0.9em; /* 12 */
+	-fx-font-size: 0.9em;
 }
 
 .button{
 	-fx-font-family: "Roboto Medium";
-	-fx-font-size: 1.1em; /* 14 */
+	-fx-font-size: 1.1em;
 }
 
 .display4-mono{
 	-fx-font-family: "Roboto Mono Light";
-	-fx-font-size: 8.6em; /* 112 */
+	-fx-font-size: 8.6em;
 }
 .display3-mono{
 	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 4.3em; /* 56 */
+	-fx-font-size: 4.3em;
 }
 .display2-mono{
 	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 3.5em; /* 45 */
+	-fx-font-size: 3.5em;
 }
 .display1-mono{
 	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 2.6em; /* 34 */
+	-fx-font-size: 2.6em;
 }
 .headline-mono{
 	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 1.8em; /* 24 */
+	-fx-font-size: 1.8em;
 }
 .title-mono{
 	-fx-font-family: "Roboto Mono Medium";
-	-fx-font-size: 1.2em; ; /* 20 */
+	-fx-font-size: 1.2em; ;
 }
 .subhead-mono{
 	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 1.2em; /* 15*/
+	-fx-font-size: 1.2em;
 }
 .body2-mono{
 	-fx-font-family: "Roboto Mono Medium";
-	-fx-font-size: 1.0em; /* 13 */
+	-fx-font-size: 1.0em;
 }
 .body1-mono{
 	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 1.0em; /* 13 */
+	-fx-font-size: 1.0em;
 }
 .caption-mono{
 	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 0.9em; /* 12 */
+	-fx-font-size: 0.9em;
 }
 .button-mono{
 	-fx-font-family: "Roboto Mono Medium";
-	-fx-font-size: 1.1em; /* 14 */
+	-fx-font-size: 1.1em;
 }
 
 .white-text {
@@ -116,8 +116,8 @@
 }
 
 .floating-action-button {
-	-fx-pref-width: 4.3em; /* 56 */
-	-fx-pref-height: 4.3em; /* 56 */
+	-fx-pref-width: 4.3em;
+	-fx-pref-height: 4.3em;
 	-fx-text-fill: white;
 }
 
@@ -128,7 +128,7 @@
 }
 
 .titled-pane > .title {
-    -fx-pref-height: 1.2em; /* 20 */
+    -fx-pref-height: 1.2em;
 }
 
 .text-area {
@@ -160,7 +160,7 @@
 .menu .label {
     -fx-text-fill: -white;
     -fx-font-family: "Roboto";
-    -fx-font-size: 1.0em; /* 13 */
+    -fx-font-size: 1.0em;
 }
 
 .menu-item .label {
@@ -199,13 +199,13 @@
 .jfx-snackbar-content {
 	-fx-background-color: #323232;
 	-fx-font-family: "Roboto Medium";
-	-fx-font-size: 1.0em; /* 13 */
+	-fx-font-size: 1.0em;
 }
 
 .jfx-snackbar-toast {
 	-fx-text-fill: WHITE;
-	-fx-padding-left: 1.8em; /* 24 */
-	-fx-padding-right: 1.8em; /* 24 */
+	-fx-padding-left: 1.8em;
+	-fx-padding-right: 1.8em;
 }
 
 .jfx-snackbar-action {
@@ -216,7 +216,7 @@
 	-fx-background-color: TRANSPARENT;
 	-fx-border-style: HIDDEN HIDDEN SOLID HIDDEN;
 	-fx-border-color: -divider-color;
-	-fx-pref-height: 2.3em; /* 30 */
+	-fx-pref-height: 2.3em;
 }
 
 .titled-pane > .title > .arrow-button .arrow{
@@ -243,14 +243,14 @@
 .scroll-bar:horizontal .decrement-button {
 	visibility: hidden;
 	-fx-background-radius : 0.0em;
-	-fx-padding : 0.0em 0.0em 0.3em 0.0em;  /* 4 */
+	-fx-padding : 0.0em 0.0em 0.3em 0.0em;
 }
 
 .scroll-bar:vertical .increment-button ,
 .scroll-bar:vertical .decrement-button {
 	visibility: hidden;
 	-fx-background-radius : 0.0em;
-	-fx-padding : 0.0em 0.3em 0.0em 0.0em;  /* 4 */
+	-fx-padding : 0.0em 0.3em 0.0em 0.0em;
 }
 
 .scroll-bar .increment-arrow,
@@ -268,14 +268,14 @@
 .scroll-bar:horizontal .thumb,
 .scroll-bar:vertical .thumb {
 	-fx-background-color : derive(-divider-color, 40.0%);
-	-fx-background-insets : 0.15em, 0.0em, 0.0em;  /* 2 */
+	-fx-background-insets : 0.15em, 0.0em, 0.0em;
 	-fx-background-radius : 1.8em;
 }
 
 .scroll-bar:horizontal .thumb:hover,
 .scroll-bar:vertical .thumb:hover {
 	-fx-background-color : derive(-divider-color, 10.0%);
-	-fx-background-insets : 0.15em 0.0em, 0.0em;  /* 2 */
+	-fx-background-insets : 0.15em 0.0em, 0.0em;
 	-fx-background-radius : 1.8em;
 }
 
@@ -291,7 +291,7 @@
 }
 
 .jfx-slider {
-	-fx-pref-width: 4.6em; /* 60 */
+	-fx-pref-width: 4.6em;
 }
 
 .jfx-slider > .track {
@@ -303,8 +303,8 @@
 }
 
 .jfx-slider > .thumb {
-	-fx-pref-width: 0.7em; /* 10 */
-	-fx-background-radius: 0.2em; /* 3 */
+	-fx-pref-width: 0.7em;
+	-fx-background-radius: 0.2em;
 }
 
 .jfx-slider > .slider-value {
