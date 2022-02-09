@@ -623,7 +623,8 @@ public class EcdarController implements Initializable {
 
         fontScaling.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
             String rawNewScale = newValue.getProperties().get("scale").toString();
-            double calculatedNewScale = Double.parseDouble(rawNewScale) * 13.0;
+            double calculatedNewScale = (Double.parseDouble(rawNewScale) * Ecdar.getDpiScale()) * 13.0;
+
             Ecdar.getPresentation().setStyle("-fx-font-size: " + calculatedNewScale + "px;");
 
             // Text do not scale on the canvas to avoid ugly elements,

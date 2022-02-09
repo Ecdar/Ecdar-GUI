@@ -38,6 +38,7 @@ import java.security.CodeSource;
 
 public class Ecdar extends Application {
     public static Preferences preferences = Preferences.userRoot().node("ECDAR");
+    private static double dpi;
     public static final String VERSION = "2.1";
     public static boolean serializationDone = false;
     private static Project project;
@@ -143,6 +144,10 @@ public class Ecdar extends Application {
         return backendDriver;
     }
 
+    public static double getDpiScale() {
+        return (Math.floor((dpi - 96) / 24));
+    }
+
     private void forceCreateFolder(final String directoryPath) throws IOException {
         final File directory = new File(directoryPath);
         FileUtils.forceMkdir(directory);
@@ -176,6 +181,7 @@ public class Ecdar extends Application {
         final Screen screen = Screen.getPrimary();
         final Scene scene = new Scene(presentation, screen.getVisualBounds().getWidth() * 0.8, screen.getVisualBounds().getHeight() * 0.8);
         stage.setScene(scene);
+        dpi = screen.getDpi();
 
         // Load all .css files used todo: these should be loaded in the view classes (?)
         scene.getStylesheets().add("ecdar/main.css");
