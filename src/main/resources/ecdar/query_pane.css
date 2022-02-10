@@ -3,11 +3,11 @@
 }
 
 .query {
-    -fx-padding: 0 7 0 8;
-    -fx-border-width: 0 0 1 0;
+    -fx-padding: 0em 0.45em, 0em 0.5em;
+    -fx-border-width: 0em 0em 0.1em 0em;
     -fx-border-color: -grey-200;
 }
 
 .query .indicator-circle {
-    -fx-stroke-width: 2;
+    -fx-stroke-width: 0.2em;
 }

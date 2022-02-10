@@ -1,106 +1,106 @@
 .display4{
 	-fx-font-family: "Roboto Light";
-	-fx-font-size: 112.0;
+	-fx-font-size: 8.6em;
 }
 .display3{
 	-fx-font-family: "Roboto";
-	-fx-font-size: 56.0;
+	-fx-font-size: 4.3em;
 }
 .display2{
 	-fx-font-family: "Roboto";
-	-fx-font-size: 45.0;
+	-fx-font-size: 3.5em;
 }
 .display1{
 	-fx-font-family: "Roboto";
-	-fx-font-size: 34.0;
+	-fx-font-size: 2.6em;
 }
 .headline{
 	-fx-font-family: "Roboto";
-	-fx-font-size: 24.0;
+	-fx-font-size: 1.8em;
 }
 .title{
 	-fx-font-family: "Roboto Medium";
-	-fx-font-size: 20.0;
+	-fx-font-size: 1.5em;
 }
 .subhead{
 	-fx-font-family: "Roboto";
-	-fx-font-size: 15.0;
+	-fx-font-size: 1.2em;
 }
 .body2{
 	-fx-font-family: "Roboto Medium";
-	-fx-font-size: 13.0;
+	-fx-font-size: 1.0em;
 }
 .body1{
 	-fx-font-family: "Roboto";
-	-fx-font-size: 13.0;
+	-fx-font-size: 1.0em;
 }
 .caption{
 	-fx-font-family: "Roboto";
-	-fx-font-size: 12.0;
+	-fx-font-size: 0.9em;
 }
 .sub-caption{
 	-fx-font-family: "Roboto";
-	-fx-font-size: 11.0;
+	-fx-font-size: 0.8em;
 }
 
 .sub-caption-mono{
 	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 10.0;
+	-fx-font-size: 0.7em;
 }
 
 .edge-property{
 	-fx-font-family: "Roboto Mono Medium";
-	-fx-font-size: 12.0;
+	-fx-font-size: 0.9em;
 }
 
 .button{
 	-fx-font-family: "Roboto Medium";
-	-fx-font-size: 14.0;
+	-fx-font-size: 1.1em;
 }
 
 .display4-mono{
 	-fx-font-family: "Roboto Mono Light";
-	-fx-font-size: 112.0;
+	-fx-font-size: 8.6em;
 }
 .display3-mono{
 	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 56.0;
+	-fx-font-size: 4.3em;
 }
 .display2-mono{
 	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 45.0;
+	-fx-font-size: 3.5em;
 }
 .display1-mono{
 	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 34.0;
+	-fx-font-size: 2.6em;
 }
 .headline-mono{
 	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 24.0;
+	-fx-font-size: 1.8em;
 }
 .title-mono{
 	-fx-font-family: "Roboto Mono Medium";
-	-fx-font-size: 20.0;
+	-fx-font-size: 1.2em; ;
 }
 .subhead-mono{
 	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 15.0;
+	-fx-font-size: 1.2em;
 }
 .body2-mono{
 	-fx-font-family: "Roboto Mono Medium";
-	-fx-font-size: 13.0;
+	-fx-font-size: 1.0em;
 }
 .body1-mono{
 	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 13.0;
+	-fx-font-size: 1.0em;
 }
 .caption-mono{
 	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 12.0;
+	-fx-font-size: 0.9em;
 }
 .button-mono{
 	-fx-font-family: "Roboto Mono Medium";
-	-fx-font-size: 14.0;
+	-fx-font-size: 1.1em;
 }
 
 .white-text {
@@ -112,39 +112,39 @@
 }
 
 .window-title {
- -fx-label-padding: 0 0 0 10px;
+	-fx-label-padding: 0em 0em 0em 0.8em;
 }
 
 .floating-action-button {
-	-fx-pref-width: 56;
-	-fx-pref-height: 56;
+	-fx-pref-width: 4.3em;
+	-fx-pref-height: 4.3em;
 	-fx-text-fill: white;
 }
 
 .titled-pane > .content {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
-    -fx-border-width: 0;
+    -fx-border-width: 0em;
 }
 
 .titled-pane > .title {
-    -fx-pref-height: 20;
+    -fx-pref-height: 1.2em;
 }
 
 .text-area {
-    -fx-background-insets: 0;
+    -fx-background-insets: 0em;
     -fx-background-color: white white white white;
-    -fx-background-radius: 0;
+    -fx-background-radius: 0em;
 }
 
 .text-area .content {
     -fx-background-color: white white white white;
-    -fx-background-radius: 0;
+    -fx-background-radius: 0em;
 }
 
 .text-area:focused .content {
     -fx-background-color: white white white white;
-    -fx-background-radius: 0;
+    -fx-background-radius: 0em;
 }
 
 .text-area:focused {
@@ -160,7 +160,7 @@
 .menu .label {
     -fx-text-fill: -white;
     -fx-font-family: "Roboto";
-    -fx-font-size: 13.0;
+    -fx-font-size: 1.0em;
 }
 
 .menu-item .label {
@@ -199,14 +199,13 @@
 .jfx-snackbar-content {
 	-fx-background-color: #323232;
 	-fx-font-family: "Roboto Medium";
-	-fx-font-size: 13.0;
+	-fx-font-size: 1.0em;
 }
 
 .jfx-snackbar-toast {
 	-fx-text-fill: WHITE;
-
-	-fx-padding-left: 24;
-	-fx-padding-right: 24;
+	-fx-padding-left: 1.8em;
+	-fx-padding-right: 1.8em;
 }
 
 .jfx-snackbar-action {
@@ -217,22 +216,22 @@
 	-fx-background-color: TRANSPARENT;
 	-fx-border-style: HIDDEN HIDDEN SOLID HIDDEN;
 	-fx-border-color: -divider-color;
-	-fx-pref-height: 30;
+	-fx-pref-height: 2.3em;
 }
 
 .titled-pane > .title > .arrow-button .arrow{
 	-fx-background-color: TRANSPARENT;
 	-fx-border-color: TRANSPARENT;
-	-fx-padding: 0 0 0 -10;
+	-fx-padding: 0em 0em 0em -0.7em; /* -10 */
 }
 
 .titled-pane > .content {
 	-fx-background-color: TRANSPARENT;
-	-fx-padding: 0 -1 -1 -1 ;
-	-fx-background-insets: 0 0 0 0;
+	-fx-padding: 0em -0.1em -0.1em -0.1em; /* -1 */
+	-fx-background-insets: 0em 0em 0em 0em;
 }
 
-<!-- Scroll pane related styling -->
+/* Scroll pane related styling */
 .scroll-bar:horizontal .track,
 .scroll-bar:vertical .track{
 	-fx-opacity: 0;
@@ -244,45 +243,45 @@
 .scroll-bar:horizontal .decrement-button {
 	visibility: hidden;
 	-fx-background-radius : 0.0em;
-	-fx-padding :0.0 0.0 4.0 0.0;
+	-fx-padding : 0.0em 0.0em 0.3em 0.0em;
 }
 
 .scroll-bar:vertical .increment-button ,
 .scroll-bar:vertical .decrement-button {
 	visibility: hidden;
 	-fx-background-radius : 0.0em;
-	-fx-padding :0.0 4.0 0.0 0.0;
+	-fx-padding : 0.0em 0.3em 0.0em 0.0em;
 }
 
 .scroll-bar .increment-arrow,
 .scroll-bar .decrement-arrow{
 	-fx-shape : " ";
-	-fx-padding :0.15em 0.0;
+	-fx-padding : 0.15em 0.0em;
 }
 
 .scroll-bar:vertical .increment-arrow,
 .scroll-bar:vertical .decrement-arrow{
 	-fx-shape : " ";
-	-fx-padding :0.0 0.15em;
+	-fx-padding : 0.0em 0.15em;
 }
 
 .scroll-bar:horizontal .thumb,
 .scroll-bar:vertical .thumb {
 	-fx-background-color : derive(-divider-color, 40.0%);
-	-fx-background-insets : 2.0, 0.0, 0.0;
-	-fx-background-radius : 2.0em;
+	-fx-background-insets : 0.15em, 0.0em, 0.0em;
+	-fx-background-radius : 1.8em;
 }
 
 .scroll-bar:horizontal .thumb:hover,
 .scroll-bar:vertical .thumb:hover {
 	-fx-background-color : derive(-divider-color, 10.0%);
-	-fx-background-insets : 2.0, 0.0, 0.0;
-	-fx-background-radius : 2.0em;
+	-fx-background-insets : 0.15em 0.0em, 0.0em;
+	-fx-background-radius : 1.8em;
 }
 
 .scroll-bar{
 	-fx-background-color: transparent;
-	-fx-background-radius: 2em;
+	-fx-background-radius: 2.6em;
 	-fx-focus-color: transparent;
 	-fx-faint-focus-color: transparent;
 }
@@ -292,7 +291,7 @@
 }
 
 .jfx-slider {
-	-fx-pref-width: 60;
+	-fx-pref-width: 4.6em;
 }
 
 .jfx-slider > .track {
@@ -304,8 +303,8 @@
 }
 
 .jfx-slider > .thumb {
-	-fx-pref-width: 10;
-	-fx-background-radius: 3;
+	-fx-pref-width: 0.7em;
+	-fx-background-radius: 0.2em;
 }
 
 .jfx-slider > .slider-value {
