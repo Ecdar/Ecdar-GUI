@@ -126,7 +126,7 @@ public class BackendDriver {
     }
 
     /**
-     * Close all open backend connection
+     * Close all open backend connection and kill all locally running processes
      *
      * @throws IOException if any of the sockets do not respond
      */
@@ -139,7 +139,7 @@ public class BackendDriver {
 
         // Get available connection or start new
         final BackendConnection backendConnection = openBackendConnections.stream()
-                .filter((connection) -> connection.getBackendInstance() != null && connection.getBackendInstance().equals(executableQuery.backend))
+                .filter((connection) -> connection.getBackendInstance() == null || connection.getBackendInstance().equals(executableQuery.backend))
                 .findFirst()
                 .orElseGet(() -> startNewBackendConnection(executableQuery.backend));
 
@@ -176,12 +176,9 @@ public class BackendDriver {
 
             @Override
             public void onError(Throwable t) {
-                if (executableQuery.queryListener.getQuery().getQueryState() == QueryState.UNKNOWN)
-                    backendConnection.setExecutableQuery(null);
-                else {
-                    handleBackendError(t, backendConnection);
+                if (executableQuery.queryListener.getQuery().getQueryState() != QueryState.UNKNOWN) {
+                    handleBackendError(t, executableQuery);
                     error = true;
-                    backendConnection.setExecutableQuery(null);
                 }
             }
 
@@ -192,24 +189,26 @@ public class BackendDriver {
                         @Override
                         public void onNext(QueryProtos.QueryResponse value) {
                             if (executableQuery.queryListener.getQuery().getQueryState() != QueryState.UNKNOWN) {
-                                handleResponse(backendConnection.getExecutableQuery(), value);
+                                handleResponse(executableQuery, value);
                             }
-                            backendConnection.setExecutableQuery(null);
                         }
 
                         @Override
                         public void onError(Throwable t) {
                             if (executableQuery.queryListener.getQuery().getQueryState() != QueryState.UNKNOWN) {
-                                handleBackendError(t, backendConnection);
+                                handleBackendError(t, executableQuery);
                             }
-                            backendConnection.setExecutableQuery(null);
                         }
 
                         @Override
                         public void onCompleted() {
+                            backendConnection.setExecutableQuery(null);
                         }
                     };
-                    backendConnection.getStub().withDeadlineAfter(deadlineForResponses, TimeUnit.MILLISECONDS).sendQuery(QueryProtos.Query.newBuilder().setId(0).setQuery(backendConnection.getExecutableQuery().query).build(), responseObserver);
+
+                    backendConnection.getStub().withDeadlineAfter(deadlineForResponses, TimeUnit.MILLISECONDS).sendQuery(QueryProtos.Query.newBuilder().setId(0).setQuery(executableQuery.query).build(), responseObserver);
+                } else {
+                    backendConnection.setExecutableQuery(null);
                 }
             }
         };
@@ -217,19 +216,18 @@ public class BackendDriver {
         backendConnection.getStub().withDeadlineAfter(deadlineForResponses, TimeUnit.MILLISECONDS).updateComponents(componentsBuilder.build(), observer);
     }
 
-    private void handleBackendError(Throwable t, BackendConnection backendConnection) {
+    private void handleBackendError(Throwable t, ExecutableQuery query) {
         // Each error starts with a capitalized description of the error equal to the gRPC error type encountered
         String errorType = t.getMessage().split(":\\s+", 2)[0];
-        final ExecutableQuery query = backendConnection.getExecutableQuery();
 
         switch (errorType) {
             case "CANCELLED":
-                backendConnection.getExecutableQuery().queryListener.getQuery().setQueryState(QueryState.ERROR);
-                backendConnection.getExecutableQuery().failure.accept(new BackendException.QueryErrorException("The query was cancelled"));
+                query.queryListener.getQuery().setQueryState(QueryState.ERROR);
+                query.failure.accept(new BackendException.QueryErrorException("The query was cancelled"));
                 break;
             case "DEADLINE_EXCEEDED":
-                backendConnection.getExecutableQuery().queryListener.getQuery().setQueryState(QueryState.ERROR);
-                backendConnection.getExecutableQuery().failure.accept(new BackendException.QueryErrorException("The backend did not answer the request in time"));
+                query.queryListener.getQuery().setQueryState(QueryState.ERROR);
+                query.failure.accept(new BackendException.QueryErrorException("The backend did not answer the request in time"));
 
                 new Timer().schedule(new TimerTask() {
                     @Override
@@ -240,24 +238,26 @@ public class BackendDriver {
 
                 break;
             case "UNIMPLEMENTED":
-                backendConnection.getExecutableQuery().queryListener.getQuery().setQueryState(QueryState.SYNTAX_ERROR);
-                backendConnection.getExecutableQuery().failure.accept(new BackendException.QueryErrorException("The query type is not supported by the backend"));
+                query.queryListener.getQuery().setQueryState(QueryState.SYNTAX_ERROR);
+                query.failure.accept(new BackendException.QueryErrorException("The query type is not supported by the backend"));
                 break;
             case "INTERNAL":
-                backendConnection.getExecutableQuery().queryListener.getQuery().setQueryState(QueryState.ERROR);
-                backendConnection.getExecutableQuery().failure.accept(new BackendException.QueryErrorException("Reveaal was unable to execute this query:\n" + t.getMessage().split(": ", 2)[1]));
+                query.queryListener.getQuery().setQueryState(QueryState.ERROR);
+                query.failure.accept(new BackendException.QueryErrorException("Reveaal was unable to execute this query:\n" + t.getMessage().split(": ", 2)[1]));
                 break;
             case "UNKNOWN":
-                backendConnection.getExecutableQuery().queryListener.getQuery().setQueryState(QueryState.ERROR);
-                backendConnection.getExecutableQuery().failure.accept(new BackendException.QueryErrorException("The backend encountered an unknown error"));
+                query.queryListener.getQuery().setQueryState(QueryState.ERROR);
+                query.failure.accept(new BackendException.QueryErrorException("The backend encountered an unknown error"));
                 break;
             default:
-                backendConnection.getExecutableQuery().queryListener.getQuery().setQueryState(QueryState.ERROR);
-                backendConnection.getExecutableQuery().failure.accept(new BackendException.QueryErrorException("The query failed and gave the following error: " + errorType));
+                try {
+                    query.queryListener.getQuery().setQueryState(QueryState.ERROR);
+                    query.failure.accept(new BackendException.QueryErrorException("The query failed and gave the following error: " + errorType));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 break;
         }
-
-        backendConnection.setExecutableQuery(null);
     }
 
     private void handleResponse(ExecutableQuery executableQuery, QueryProtos.QueryResponse value) {
@@ -282,7 +282,7 @@ public class BackendDriver {
             executableQuery.success.accept(false);
         }
     }
- 
+
     private BackendConnection startNewBackendConnection(BackendInstance backend) {
         Process p = null;
         String hostAddress = (backend.isLocal() ? "127.0.0.1" : backend.getBackendLocation());
@@ -316,7 +316,7 @@ public class BackendDriver {
 
         EcdarBackendGrpc.EcdarBackendStub stub = EcdarBackendGrpc.newStub(channel);
 
-        BackendConnection newConnection = new BackendConnection(p, stub);
+        BackendConnection newConnection = new BackendConnection(backend, p, stub);
         this.openBackendConnections.add(newConnection);
         return newConnection;
     }
@@ -341,19 +341,21 @@ public class BackendDriver {
          * Execute the query using the backend driver
          */
         public void execute() {
-            executeQuery(this);
             tries++;
+            executeQuery(this);
         }
     }
 
     private class BackendConnection {
         private final Process process;
         private final EcdarBackendGrpc.EcdarBackendStub stub;
+        private final BackendInstance backendInstance;
         private ExecutableQuery executableQuery = null;
 
-        BackendConnection(Process process, EcdarBackendGrpc.EcdarBackendStub stub) {
+        BackendConnection(BackendInstance backendInstance, Process process, EcdarBackendGrpc.EcdarBackendStub stub) {
             this.process = process;
             this.stub = stub;
+            this.backendInstance = backendInstance;
         }
 
         /**
@@ -382,10 +384,7 @@ public class BackendDriver {
          * or null, if no executable query is currently associated
          */
         public BackendInstance getBackendInstance() {
-            if (executableQuery == null) {
-                return null;
-            }
-            return executableQuery.backend;
+            return backendInstance;
         }
 
         /**
@@ -416,11 +415,11 @@ public class BackendDriver {
             if (openBackendConnections.remove(this)) {
                 System.out.println("Successfully closed connection to backend");
             } else {
-                System.out.println("Tried to remove a connection not present in either connection list");
+                System.out.println("Tried to remove a connection not present in the connection list");
             }
 
-            // If the backend-instance is null, or remote, there will be no process to destroy
-            if (this.getBackendInstance() != null && !this.getBackendInstance().isLocal()) {
+            // If the backend-instance is remote, there will not be a process
+            if (process.isAlive()) {
                 process.destroy();
             }
         }
