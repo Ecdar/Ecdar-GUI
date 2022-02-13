@@ -265,19 +265,15 @@ public class BackendDriver {
             executableQuery.queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
             executableQuery.success.accept(true);
         } else if (value.hasConsistency() && value.getConsistency().getSuccess()) {
-            System.out.println("Consistency");
             executableQuery.queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
             executableQuery.success.accept(true);
         } else if (value.hasDeterminism() && value.getDeterminism().getSuccess()) {
-            System.out.println("Determinism");
             executableQuery.queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
             executableQuery.success.accept(true);
         } else if (value.hasComponent()) {
-            System.out.println("Component");
             executableQuery.queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
             executableQuery.success.accept(true);
         } else {
-            System.out.println(value.getError());
             executableQuery.queryListener.getQuery().setQueryState(QueryState.ERROR);
             executableQuery.success.accept(false);
         }
@@ -419,7 +415,7 @@ public class BackendDriver {
             }
 
             // If the backend-instance is remote, there will not be a process
-            if (process.isAlive()) {
+            if (process != null) {
                 process.destroy();
             }
         }
