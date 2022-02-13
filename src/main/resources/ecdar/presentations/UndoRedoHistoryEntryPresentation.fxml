@@ -10,7 +10,7 @@
          AnchorPane.leftAnchor="0" AnchorPane.RightAnchor="0">
 
     <JFXRippler id="rippler" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
-        <HBox style="-fx-padding: 0 8 0 16;"
+        <HBox style="-fx-padding: 0em 0.5em 0em 1em;"
               minHeight="48" maxHeight="48">
             <StackPane>
                 <Circle id="iconBackground" radius="18"/>
@@ -22,9 +22,6 @@
             <StackPane>
                 <Label id="label" styleClass="body1"/>
             </StackPane>
-
         </HBox>
     </JFXRippler>
-
-
 </fx:root>

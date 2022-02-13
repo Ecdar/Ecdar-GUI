@@ -13,7 +13,7 @@
 
     <HBox spacing="0" alignment="CENTER" >
         <VBox fx:id="inputSignatureContainer" maxHeight="40"  maxWidth="100" minWidth="100" spacing="10"
-              alignment="CENTER_RIGHT" style="-fx-padding: 50 0 0 0;" />
+              alignment="CENTER_RIGHT" style="-fx-padding: 3em 0em 0em 0em;" />
 
         <StackPane fx:id="componentPane">
             <Rectangle fx:id="background" StackPane.alignment="TOP_LEFT"/>
@@ -60,7 +60,7 @@
         </StackPane>
 
         <VBox fx:id="outputSignatureContainer" maxHeight="40" maxWidth="100" minWidth="100" spacing="10"
-              alignment="CENTER_LEFT" style="-fx-padding: 50 0 0 0;" />
+              alignment="CENTER_LEFT" style="-fx-padding: 3em 0em 0em 0em;" />
     </HBox>
 
 </fx:root>

@@ -4,7 +4,7 @@
 <?import javafx.scene.layout.Region?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
-         type="HBox" style="-fx-padding: 3;">
+         type="HBox" style="-fx-padding: 0.2em;">
 
     <Label styleClass="body2" fx:id="messageLabel"/>
 

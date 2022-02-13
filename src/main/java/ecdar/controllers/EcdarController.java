@@ -140,6 +140,12 @@ public class EcdarController implements Initializable {
     public MenuItem menuBarViewFilePanel;
     public MenuItem menuBarViewQueryPanel;
     public MenuItem menuBarViewGrid;
+    public Menu menuViewMenuFontScaling;
+    public ToggleGroup fontScaling;
+    public RadioMenuItem fontScaleS;
+    public RadioMenuItem fontScaleM;
+    public RadioMenuItem fontScaleL;
+    public RadioMenuItem fontScaleXL;
     public MenuItem menuBarViewCanvasSplit;
     public MenuItem menuBarFileCreateNewProject;
     public MenuItem menuBarFileOpenProject;
@@ -230,7 +236,7 @@ public class EcdarController implements Initializable {
         });
 
         // Set default backend instance
-        BackendInstance defaultBackend = BackendHelper.getBackendInstances().stream().filter(BackendInstance::isDefault).findFirst().get();
+        BackendInstance defaultBackend = BackendHelper.getBackendInstances().stream().filter(BackendInstance::isDefault).findFirst().orElse(BackendHelper.getBackendInstances().get(0));
         BackendHelper.setDefaultBackendInstance(defaultBackend);
     }
 
@@ -247,6 +253,8 @@ public class EcdarController implements Initializable {
             dialogContainer.setMouseTransparent(false);
         });
 
+        initializeCanvasPane();
+        initializeEdgeStatusHandling();
         initializeKeybindings();
         initializeTabPane();
         initializeStatusBar();
@@ -625,6 +633,31 @@ public class EcdarController implements Initializable {
         menuBarViewGrid.setOnAction(event -> {
             final BooleanProperty isOn = Ecdar.toggleGrid();
             menuBarViewGrid.getGraphic().opacityProperty().bind(new When(isOn).then(1).otherwise(0));
+        });
+
+        fontScaling.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
+            String rawNewScale = newValue.getProperties().get("scale").toString();
+            double calculatedNewScale = Double.parseDouble(rawNewScale) * 13.0;
+            Ecdar.getPresentation().setStyle("-fx-font-size: " + calculatedNewScale + "px;");
+
+            // Text do not scale on the canvas to avoid ugly elements,
+            // this zooms in on the component in order to get the "same font size"
+            EcdarController.getActiveCanvasPresentation().getController().zoomHelper.setZoomLevel(calculatedNewScale / 13);
+
+            Ecdar.preferences.put("font_scale", rawNewScale);
+        });
+
+        // On startup, set the font scaling to the value saved in preferences
+        Platform.runLater(() -> {
+            Object matchingToggle = fontScaleM;
+            for (Object i : fontScaling.getToggles()) {
+                if (Float.parseFloat(((RadioMenuItem) i).getProperties().get("scale").toString())
+                                == Ecdar.preferences.getFloat("font_scale", 1.0F)) {
+                    matchingToggle = i;
+                    break;
+                }
+            }
+            fontScaling.selectToggle((RadioMenuItem) matchingToggle);
         });
 
         menuBarViewCanvasSplit.getGraphic().setOpacity(1);

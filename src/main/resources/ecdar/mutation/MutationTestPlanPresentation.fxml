@@ -10,7 +10,7 @@
          type="StackPane"
          fx:id="root"
          fx:controller="ecdar.mutation.MutationTestPlanController">
-    <ScrollPane fx:id="scrollPane" style="-fx-font-size:13px;-fx-background-color:transparent;" hbarPolicy="NEVER" fitToWidth="true" fitToHeight="true">
+    <ScrollPane fx:id="scrollPane" styleClass="body1" style="-fx-background-color:transparent;" hbarPolicy="NEVER" fitToWidth="true" fitToHeight="true">
         <VBox fx:id="contentRegion" spacing="16">
             <padding><Insets top="25" right="25" bottom="25" left="25"/></padding>
 
@@ -29,7 +29,8 @@
 
                 <VBox spacing="16" fx:id="testDependentArea" managed="false" visible="false">
                     <JFXButton fx:id="selectSutButton" prefWidth="100" minHeight="40" maxHeight="40" buttonType="RAISED" text="Select SUT"
-                               style="-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;"
+                               styleClass="button"
+                               style="-fx-text-fill:WHITE;-fx-background-color:#4CAF50;"
                                onMousePressed="#onSelectSutButtonPressed"/>
 
                     <Label fx:id="sutPathLabel"/>
@@ -80,7 +81,8 @@
                         </HBox>
 
                         <JFXButton fx:id="testButton" prefWidth="100" minHeight="40" maxHeight="40" buttonType="RAISED" text="Test"
-                                   style="-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;"
+                                   styleClass="button"
+                                   style="-fx-text-fill:WHITE;-fx-background-color:#4CAF50;"
                                    onMousePressed="#onTestButtonPressed"/>
                     </VBox>
                 </VBox>
@@ -91,12 +93,14 @@
                     <JFXComboBox fx:id="formatPicker" promptText="Select Format"/>
 
                     <JFXButton fx:id="storeMutantsButton" prefWidth="100" prefHeight="40" buttonType="RAISED" text="Export"
-                               style="-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;"
+                               styleClass="button"
+                               style="-fx-text-fill:WHITE;-fx-background-color:#4CAF50;"
                                onMousePressed="#onExportButtonPressed"/>
                 </VBox>
 
                 <JFXButton fx:id="stopButton" prefWidth="100" prefHeight="40" buttonType="RAISED" text="Stop"
-                           style="-fx-text-fill:WHITE;-fx-background-color:#E53935;-fx-font-size:14px;"
+                           styleClass="button"
+                           style="-fx-text-fill:WHITE;-fx-background-color:#E53935;"
                            onMousePressed="#onStopButtonPressed"
                            managed="false" visible="false"/>
 
@@ -170,7 +174,8 @@
                     </HBox>
 
                     <JFXButton fx:id="retestButton" text="Retest Shown Results" prefWidth="170" managed="false" visible="false"
-                               style="-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;"
+                               styleClass="button"
+                               style="-fx-text-fill:WHITE;-fx-background-color:#4CAF50;"
                                onMousePressed="#onRetestButtonPressed"/>
 
                     <VBox fx:id="resultViews" spacing="8"/>
