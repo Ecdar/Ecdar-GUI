@@ -145,7 +145,7 @@ public class Ecdar extends Application {
     }
 
     public static double getDpiScale() {
-        return (Math.floor((dpi - 96) / 24));
+        return Math.floor(dpi / 96);
     }
 
     private void forceCreateFolder(final String directoryPath) throws IOException {
