@@ -17,7 +17,6 @@ import javafx.scene.layout.VBox;
 import org.apache.commons.lang3.Range;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URL;
@@ -26,8 +25,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
-import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class BackendOptionsDialogController implements Initializable {
     public VBox backendInstanceList;
@@ -42,52 +42,152 @@ public class BackendOptionsDialogController implements Initializable {
         initializeBackendInstanceList();
     }
 
-    public void resetBackendOptions() {
-        backendInstanceList.getChildren().clear();
+    /**
+     * Reverts any changes made to the backend options by reloading the options specified in the preference file,
+     * or to the default, if no backends are present in the preferences file
+     */
+    public void cancelBackendOptionsChanges() {
         initializeBackendInstanceList();
     }
 
+    /**
+     * Saves the changes made to the backend options to the preferences file and returns true
+     * if no errors where found in the backend instance definitions, otherwise false
+     *
+     * @return whether the changes could be saved,
+     * meaning that no errors where found in the changes made to the backend options
+     */
+    public boolean saveChangesToBackendOptions() {
+        if (this.backendInstanceListIsErrorFree()) {
+            ArrayList<BackendInstance> backendInstances = new ArrayList<>();
+            for (Node backendInstance : backendInstanceList.getChildren()) {
+                if (backendInstance instanceof BackendInstancePresentation) {
+                    backendInstances.add(((BackendInstancePresentation) backendInstance).getController().updateBackendInstance());
+                }
+            }
+
+            BackendHelper.updateBackendInstances(backendInstances);
+
+            JsonArray jsonArray = new JsonArray();
+            for (BackendInstance bi : backendInstances) {
+                jsonArray.add(bi.serialize());
+            }
+
+            Ecdar.preferences.put("backend_instances", jsonArray.toString());
+
+            BackendInstance defaultBackend = backendInstances.stream().filter(BackendInstance::isDefault).findFirst().orElse(backendInstances.get(0));
+            BackendHelper.setDefaultBackendInstance(defaultBackend);
+
+            String defaultBackendName = (defaultBackend.getName());
+            Ecdar.preferences.put("default_backend", defaultBackendName);
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
+    /**
+     * Resets the backends to the default backends present in the 'default_backends.json' file
+     */
+    public void resetBackendsToDefault() {
+        updateBackendsInGUI(getDefaultBackends());
+    }
+
     private void initializeBackendInstanceList() {
-        try {
-            setBackendsFromJsonArray(
-                    JsonParser.parseString(
-                            Ecdar.preferences.get("backend_instances", getDefaultBackends())
-                    ).getAsJsonArray());
-        } catch (FileNotFoundException e) {
-            Ecdar.showToast("Unable to load backends from either preferences or JSON with default backends");
-            e.printStackTrace();
+        ArrayList<BackendInstance> backends;
+
+        // Load backends from preferences or get default
+        var savedBackends = Ecdar.preferences.get("backend_instances", null);
+        if (savedBackends != null) {
+            backends = getBackendsFromJsonArray(
+                    JsonParser.parseString(savedBackends).getAsJsonArray());
+        } else {
+            backends = getDefaultBackends();
         }
 
+        // Style add backend button and handle click event
         HBox.setHgrow(addBackendButton, Priority.ALWAYS);
         addBackendButton.setMaxWidth(Double.MAX_VALUE);
         addBackendButton.setOnMouseClicked((event) -> {
             BackendInstancePresentation newBackendInstancePresentation = new BackendInstancePresentation();
             addBackendInstancePresentationToList(newBackendInstancePresentation);
         });
+
+        updateBackendsInGUI(backends);
     }
 
-    private String getDefaultBackends() throws FileNotFoundException {
-        File myObj = new File("src/main/resources/ecdar/default_backends.json");
-        Scanner myReader = new Scanner(myObj);
-        StringBuilder defaultBackendInstanceList = new StringBuilder();
-        while (myReader.hasNextLine()) {
-            defaultBackendInstanceList.append(myReader.nextLine());
-        }
-        myReader.close();
-        return defaultBackendInstanceList.toString();
+    private void updateBackendsInGUI(ArrayList<BackendInstance> backends) {
+        backendInstanceList.getChildren().clear();
+
+        backends.forEach((bi) -> {
+            BackendInstancePresentation newBackendInstancePresentation = new BackendInstancePresentation(bi);
+            addBackendInstancePresentationToList(newBackendInstancePresentation);
+        });
+
+        BackendHelper.updateBackendInstances(backends);
     }
 
-    private void setBackendsFromJsonArray(JsonArray backends) {
+    private ArrayList<BackendInstance> getBackendsFromJsonArray(JsonArray backends) {
         ArrayList<BackendInstance> backendInstances = new ArrayList<>();
         backendInstanceList.getChildren().clear();
         backends.forEach((backend) -> {
             BackendInstance newBackendInstance = new BackendInstance(backend.getAsJsonObject());
-            BackendInstancePresentation newBackendInstancePresentation = new BackendInstancePresentation(newBackendInstance);
-            addBackendInstancePresentationToList(newBackendInstancePresentation);
             backendInstances.add(newBackendInstance);
         });
 
-        BackendHelper.updateBackendInstances(backendInstances);
+        return backendInstances;
+    }
+
+
+    private ArrayList<BackendInstance> getDefaultBackends() {
+        ArrayList<BackendInstance> defaultBackends = new ArrayList<>();
+
+        // Add Reveaal engine
+        var reveaal = new BackendInstance();
+        reveaal.setName("Reveaal");
+        reveaal.setLocal(true);
+        reveaal.setDefault(true);
+        reveaal.setPortStart(5032);
+        reveaal.setPortEnd(5040);
+
+        List<File> searchPathForReveaal = List.of(
+                new File("lib/Reveaal.exe"), new File("lib/Reveaal")
+        );
+        getBackendPathIfExists(reveaal, searchPathForReveaal);
+        defaultBackends.add(reveaal);
+
+        // Add jECDAR engine
+        var jEcdar = new BackendInstance();
+        jEcdar.setName("jECDAR");
+        jEcdar.setLocal(true);
+        jEcdar.setDefault(false);
+        jEcdar.setPortStart(5042);
+        jEcdar.setPortEnd(5050);
+
+        List<File> searchPathForJEcdar = List.of(
+                new File("lib/j-Ecdar.exe"), new File("lib/j-Ecdar.bat")
+        );
+        getBackendPathIfExists(jEcdar, searchPathForJEcdar);
+        defaultBackends.add(jEcdar);
+
+        return defaultBackends;
+    }
+
+    private void getBackendPathIfExists(BackendInstance engine, List<File> searchPathForFile) {
+        engine.setBackendLocation("");
+
+        for (var f : searchPathForFile) {
+            if (f.exists()) {
+                engine.setBackendLocation(f.getAbsolutePath());
+                break;
+            }
+        }
+
+        if (engine.getBackendLocation().equals("")) {
+            throw new RuntimeException("Could not locate file for default engine, checked: " + searchPathForFile.stream().map(File::getPath).collect(Collectors.joining(", ")));
+        }
     }
 
     private void addBackendInstancePresentationToList(BackendInstancePresentation newBackendInstancePresentation) {
@@ -114,7 +214,7 @@ public class BackendOptionsDialogController implements Initializable {
     }
 
     /**
-     * Marks input fields in the backendInstanceList if any are present and returns whether any were found
+     * Marks input fields in the backendInstanceList that contains errors and returns whether any errors were found
      *
      * @return whether any errors were found
      */
@@ -242,52 +342,6 @@ public class BackendOptionsDialogController implements Initializable {
         backendInstanceController.locationIssue.setVisible(!errorFree);
 
         return errorFree;
-    }
-
-    /**
-     * Returns true if no errors where found in the backend instance definitions, otherwise false
-     *
-     * @return whether the changes could be saved
-     */
-    public boolean saveChangesToBackendOptions() {
-        if (this.backendInstanceListIsErrorFree()) {
-            ArrayList<BackendInstance> backendInstances = new ArrayList<>();
-            for (Node backendInstance : backendInstanceList.getChildren()) {
-                if (backendInstance instanceof BackendInstancePresentation) {
-                    backendInstances.add(((BackendInstancePresentation) backendInstance).getController().updateBackendInstance());
-                }
-            }
-
-            BackendHelper.updateBackendInstances(backendInstances);
-
-            JsonArray jsonArray = new JsonArray();
-            for (BackendInstance bi : backendInstances) {
-                jsonArray.add(bi.serialize());
-            }
-
-            Ecdar.preferences.put("backend_instances", jsonArray.toString());
-
-            BackendInstance defaultBackend = backendInstances.stream().filter(BackendInstance::isDefault).findFirst().orElse(backendInstances.get(0));
-            BackendHelper.setDefaultBackendInstance(defaultBackend);
-
-            String defaultBackendName = (defaultBackend.getName());
-            Ecdar.preferences.put("default_backend", defaultBackendName);
-
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * Resets the backends to the default backends present in the 'default_backends.json' file
-     */
-    public void resetBackendsToDefault() {
-        try {
-            setBackendsFromJsonArray(JsonParser.parseString(getDefaultBackends()).getAsJsonArray());
-        } catch (FileNotFoundException e) {
-            Ecdar.showToast("An error occurred while trying to read the JSON file containing the default backends");
-        }
     }
 
     private enum ValidationErrorMessages {

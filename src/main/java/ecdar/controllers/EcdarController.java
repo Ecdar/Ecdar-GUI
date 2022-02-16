@@ -223,7 +223,7 @@ public class EcdarController implements Initializable {
         });
 
         backendOptionsDialog.getController().closeButton.setOnMouseClicked(event -> {
-            backendOptionsDialog.getController().resetBackendOptions();
+            backendOptionsDialog.getController().cancelBackendOptionsChanges();
             dialog.close();
             backendOptionsDialog.close();
         });

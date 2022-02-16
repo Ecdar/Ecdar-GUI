@@ -101,6 +101,6 @@ public class BackendInstance implements Serializable {
 
     @Override
     public String toString() {
-        return name; // ToDo NIELS: Ask if port range should be included
+        return name;
     }
 }
