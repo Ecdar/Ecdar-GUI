@@ -87,7 +87,6 @@ public class BackendOptionsDialogController implements Initializable {
         }
     }
 
-
     /**
      * Resets the backends to the default backends present in the 'default_backends.json' file
      */
@@ -123,6 +122,8 @@ public class BackendOptionsDialogController implements Initializable {
 
         backends.forEach((bi) -> {
             BackendInstancePresentation newBackendInstancePresentation = new BackendInstancePresentation(bi);
+            newBackendInstancePresentation.getController().backendName.disableProperty().bind(bi.getLockedProperty());
+            newBackendInstancePresentation.getController().pathToBackend.disableProperty().bind(bi.getLockedProperty());
             addBackendInstancePresentationToList(newBackendInstancePresentation);
         });
 
@@ -140,7 +141,6 @@ public class BackendOptionsDialogController implements Initializable {
         return backendInstances;
     }
 
-
     private ArrayList<BackendInstance> getDefaultBackends() {
         ArrayList<BackendInstance> defaultBackends = new ArrayList<>();
 
@@ -151,11 +151,12 @@ public class BackendOptionsDialogController implements Initializable {
         reveaal.setDefault(true);
         reveaal.setPortStart(5032);
         reveaal.setPortEnd(5040);
+        reveaal.lockInstance();
 
         List<File> searchPathForReveaal = List.of(
                 new File("lib/Reveaal.exe"), new File("lib/Reveaal")
         );
-        getBackendPathIfExists(reveaal, searchPathForReveaal);
+        getBackendPathIfFileExists(reveaal, searchPathForReveaal);
         defaultBackends.add(reveaal);
 
         // Add jECDAR engine
@@ -165,17 +166,18 @@ public class BackendOptionsDialogController implements Initializable {
         jEcdar.setDefault(false);
         jEcdar.setPortStart(5042);
         jEcdar.setPortEnd(5050);
+        jEcdar.lockInstance();
 
         List<File> searchPathForJEcdar = List.of(
                 new File("lib/j-Ecdar.exe"), new File("lib/j-Ecdar.bat")
         );
-        getBackendPathIfExists(jEcdar, searchPathForJEcdar);
+        getBackendPathIfFileExists(jEcdar, searchPathForJEcdar);
         defaultBackends.add(jEcdar);
 
         return defaultBackends;
     }
 
-    private void getBackendPathIfExists(BackendInstance engine, List<File> searchPathForFile) {
+    private void getBackendPathIfFileExists(BackendInstance engine, List<File> searchPathForFile) {
         engine.setBackendLocation("");
 
         for (var f : searchPathForFile) {

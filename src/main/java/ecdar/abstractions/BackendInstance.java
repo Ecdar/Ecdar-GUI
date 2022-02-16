@@ -2,6 +2,7 @@ package ecdar.abstractions;
 
 import com.google.gson.JsonObject;
 import ecdar.utility.serialize.Serializable;
+import javafx.beans.property.SimpleBooleanProperty;
 
 public class BackendInstance implements Serializable {
     private static final String NAME = "name";
@@ -10,6 +11,7 @@ public class BackendInstance implements Serializable {
     private static final String LOCATION = "location";
     private static final String PORT_RANGE_START = "portRangeStart";
     private static final String PORT_RANGE_END = "portRangeEnd";
+    private static final String LOCKED = "locked";
 
     private String name;
     private boolean isLocal;
@@ -17,6 +19,7 @@ public class BackendInstance implements Serializable {
     private String backendLocation;
     private int portStart;
     private int portEnd;
+    private SimpleBooleanProperty locked = new SimpleBooleanProperty(false);
 
     public BackendInstance() {};
 
@@ -76,6 +79,14 @@ public class BackendInstance implements Serializable {
         return this.portEnd - this.portStart;
     }
 
+    public void lockInstance() {
+        locked.set(true);
+    }
+
+    public SimpleBooleanProperty getLockedProperty() {
+        return locked;
+    }
+
     @Override
     public JsonObject serialize() {
         final JsonObject result = new JsonObject();
@@ -85,6 +96,7 @@ public class BackendInstance implements Serializable {
         result.addProperty(LOCATION, getBackendLocation());
         result.addProperty(PORT_RANGE_START, getPortStart());
         result.addProperty(PORT_RANGE_END, getPortEnd());
+        result.addProperty(LOCKED, getLockedProperty().get());
 
         return result;
     }
@@ -97,6 +109,7 @@ public class BackendInstance implements Serializable {
         setBackendLocation(json.getAsJsonPrimitive(LOCATION).getAsString());
         setPortStart(json.getAsJsonPrimitive(PORT_RANGE_START).getAsInt());
         setPortEnd(json.getAsJsonPrimitive(PORT_RANGE_END).getAsInt());
+        if (json.getAsJsonPrimitive(LOCKED).getAsBoolean()) lockInstance();
     }
 
     @Override

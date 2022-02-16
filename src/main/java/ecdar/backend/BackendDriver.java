@@ -282,15 +282,15 @@ public class BackendDriver {
     private BackendConnection startNewBackendConnection(BackendInstance backend) {
         Process p = null;
         String hostAddress = (backend.isLocal() ? "127.0.0.1" : backend.getBackendLocation());
-        int portNumber = 0;
-
-        try {
-             portNumber = SocketUtils.findAvailableTcpPort(backend.getPortStart(), backend.getPortEnd());
-        } catch (IllegalStateException e) {
-            Ecdar.showToast("No available port for " + backend.getName() + " with port range " + backend.getPortStart() + " - " + backend.getPortEnd());
-        }
+        int portNumber = backend.getPortStart();
 
         if (backend.isLocal()) {
+            try {
+                portNumber = SocketUtils.findAvailableTcpPort(backend.getPortStart(), backend.getPortEnd());
+            } catch (IllegalStateException e) {
+                Ecdar.showToast("No available port for " + backend.getName() + " with port range " + backend.getPortStart() + " - " + backend.getPortEnd());
+            }
+
             do {
                 ProcessBuilder pb = new ProcessBuilder(backend.getBackendLocation(), "-p", hostAddress + ":" + portNumber);
 
