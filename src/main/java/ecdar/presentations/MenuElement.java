@@ -1,8 +1,12 @@
 package ecdar.presentations;
 
+import ecdar.Ecdar;
+import ecdar.controllers.EcdarController;
 import ecdar.utility.colors.Color;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableBooleanValue;
+import javafx.css.CssMetaData;
+import javafx.css.Styleable;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -11,6 +15,7 @@ import javafx.scene.layout.*;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 
+import java.util.List;
 import java.util.function.Consumer;
 
 import static javafx.scene.paint.Color.TRANSPARENT;
@@ -162,7 +167,7 @@ public class MenuElement {
         label.getStyleClass().add("body2");
 
         container = new HBox();
-        container.setStyle("-fx-padding: 8 16 8 16;");
+        container.setStyle("-fx-padding: 0.6em 1.2em 0.6em 1.2em;");
 
         spacer = new Region();
         spacer.setMinWidth(8);
@@ -176,7 +181,10 @@ public class MenuElement {
         icon = new FontIcon();
         icon.setIconLiteral(icon_string);
         icon.setFill(Color.GREY.getColor(Color.Intensity.I600));
-        icon.setIconSize(20);
+        List<CssMetaData<? extends Styleable, ?>> props =  Ecdar.getPresentation().getCssMetaData();
+        for (CssMetaData prop : props) {
+            System.out.println(prop.toString());
+        }
     }
 
     /**
@@ -194,7 +202,6 @@ public class MenuElement {
      * @return Returns the element itself
      */
     public MenuElement setDisableable(ObservableBooleanValue isDisabled) { // TODO should also create the rippler if not alraedy created (e.g. when calling this method before setClickable)
-
         this.isDisabled = isDisabled;
         final Consumer<Boolean> updateTransparency = (disabled) -> {
             if (disabled) {
