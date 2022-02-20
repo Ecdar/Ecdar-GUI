@@ -243,8 +243,7 @@ public class BackendDriver {
                 // If the process is not alive, it failed while starting up, try again
             } while (!p.isAlive());
         } else {
-            // ToDo NIELS: Needs more testing
-            // Filter active engines and map their used ports to an int stream
+            // Filter active instances of this engine and map their used ports to an int stream
             var activeEnginePorts = openBackendConnections.stream()
                     .filter((bi) -> bi.backendInstance.equals(backend))
                     .mapToInt((bi) -> Integer.parseInt(bi.getStub().getChannel().authority().split(":", 2)[1]));
