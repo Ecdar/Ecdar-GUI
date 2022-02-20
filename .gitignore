@@ -5,6 +5,7 @@ lib/libJDBM.so
 lib/libJDBM.dylib
 lib/JDBM.dll
 lib/j-ecdar.jar
+lib/j-Ecdar.bat
 lib/*.dll
 
 

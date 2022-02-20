@@ -15,6 +15,6 @@
     </Polygon>
 
     <Label fx:id="label" wrapText="true" styleClass="caption" mouseTransparent="true"
-           style="-fx-padding: 0 0 0 0"/>
+           style="-fx-padding: 0em 0em 0em 0em"/>
 
 </fx:root>

@@ -3,6 +3,7 @@
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="Pane"
+         style="-fx-font-size: 13px; /* Prevents scaling of text on canvas*/"
          fx:id="root"
          fx:controller="ecdar.controllers.CanvasController">
 </fx:root>

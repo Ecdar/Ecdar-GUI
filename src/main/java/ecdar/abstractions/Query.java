@@ -137,7 +137,7 @@ public class Query implements Serializable {
 
             errors.set("");
 
-            Ecdar.getBackendDriver().addQueryToExecutionQueue(getType().getQueryName() + ": " + getQuery().replaceAll("\\s", "") + " " + getIgnoredInputOutputsOnQuery(),
+            Ecdar.getBackendDriver().addQueryToExecutionQueue(getType().getQueryName() + ": " + getQuery() + " " + getIgnoredInputOutputsOnQuery(),
                     getBackend(),
                     aBoolean -> {
                         if (aBoolean) {
