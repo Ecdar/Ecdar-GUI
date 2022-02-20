@@ -9,7 +9,7 @@
 <?import javafx.scene.control.Label?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
-         type="AnchorPane" fx:controller="ecdar.controllers.QueryController" style="-fx-font-size: 13px;">
+         type="AnchorPane" fx:controller="ecdar.controllers.QueryController" style="-fx-font-size: 13px;"> <!-- ToDo NIELS: Remove sizing when scaling is working-->
     <fx:define>
         <!--Used for both the statusIndicator and the left anchor for elements to the right of the statusIndicator-->
         <Double fx:id="STATUS_INDICATOR_WIDTH" fx:value="50"/>
