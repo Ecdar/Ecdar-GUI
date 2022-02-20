@@ -31,6 +31,8 @@ import jiconfont.javafx.IconFontFX;
 import org.apache.commons.io.FileUtils;
 
 import java.io.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.prefs.Preferences;
 
 import java.net.URISyntaxException;
@@ -74,7 +76,36 @@ public class Ecdar extends Application {
         return jarFile.getParentFile().getPath();
     }
 
+    /**
+     * Suppresses warnings of illegal reflective access.
+     * jFoenix performs illegal reflection inorder to access private methods/fields in the JavaFX code.
+     * This comes with some performance benefits and is a technique used, allegedly, in many libraries.
+     * The warnings are unlikely to be solved or enforced in such a way that the system breaks, see:
+     * https://github.com/sshahine/JFoenix/issues/1170
+     * The solution is taken from this answer: https://stackoverflow.com/a/46551505
+     * All credit for this method goes to: Rafael Winterhalter
+     */
+    @SuppressWarnings("unchecked")
+    public static void disableAccessWarnings() {
+        try {
+            Class unsafeClass = Class.forName("sun.misc.Unsafe");
+            Field field = unsafeClass.getDeclaredField("theUnsafe");
+            field.setAccessible(true);
+            Object unsafe = field.get(null);
+
+            Method putObjectVolatile = unsafeClass.getDeclaredMethod("putObjectVolatile", Object.class, long.class, Object.class);
+            Method staticFieldOffset = unsafeClass.getDeclaredMethod("staticFieldOffset", Field.class);
+
+            Class loggerClass = Class.forName("jdk.internal.module.IllegalAccessLogger");
+            Field loggerField = loggerClass.getDeclaredField("logger");
+            Long offset = (Long) staticFieldOffset.invoke(unsafe, loggerField);
+            putObjectVolatile.invoke(unsafe, loggerClass, offset, null);
+        } catch (Exception ignored) {
+        }
+    }
+
     public static void main(final String[] args) {
+        disableAccessWarnings();
         launch(Ecdar.class, args);
     }
 
