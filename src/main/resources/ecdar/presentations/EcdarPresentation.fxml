@@ -35,7 +35,7 @@
                         <!-- UNDO -->
                         <JFXRippler fx:id="undo">
                             <StackPane minWidth="40" minHeight="40" onMouseClicked="#undoClicked">
-                                <FontIcon iconLiteral="gmi-undo" iconSize="24" fill="white"/>
+                                <FontIcon iconLiteral="gmi-undo" fill="white" styleClass="icon-size-medium"/>
                             </StackPane>
                         </JFXRippler>
 
@@ -44,7 +44,7 @@
                         <!-- REDO -->
                         <JFXRippler fx:id="redo">
                             <StackPane minWidth="40" minHeight="40" onMouseClicked="#redoClicked">
-                                <FontIcon iconLiteral="gmi-redo" iconSize="24" fill="white"/>
+                                <FontIcon iconLiteral="gmi-redo" fill="white" styleClass="icon-size-medium"/>
                             </StackPane>
                         </JFXRippler>
 
@@ -70,7 +70,7 @@
                         <!-- DELETE SELECTED -->
                         <JFXRippler fx:id="deleteSelected">
                             <StackPane minWidth="40" minHeight="40" onMouseClicked="#deleteSelectedClicked">
-                                <FontIcon iconLiteral="gmi-delete" iconSize="24" fill="white"/>
+                                <FontIcon iconLiteral="gmi-delete" fill="white" styleClass="icon-size-medium"/>
                             </StackPane>
                         </JFXRippler>
 
@@ -79,7 +79,7 @@
                         <!-- COLOR SELECTED -->
                         <JFXRippler fx:id="colorSelected">
                             <StackPane minWidth="40" minHeight="40">
-                                <FontIcon iconLiteral="gmi-color-lens" iconSize="24" fill="white"/>
+                                <FontIcon iconLiteral="gmi-color-lens" fill="white" styleClass="icon-size-medium"/>
                             </StackPane>
                         </JFXRippler>
                     </HBox>
@@ -120,12 +120,12 @@
                 <Menu text="File">
                     <MenuItem fx:id="menuBarFileCreateNewProject" text="New Project">
                         <graphic>
-                            <FontIcon iconLiteral="gmi-create-new-folder" iconSize="24" fill="black"/>
+                            <FontIcon iconLiteral="gmi-create-new-folder" fill="black" styleClass="icon-size-medium"/>
                         </graphic>
                     </MenuItem>
                     <MenuItem fx:id="menuBarFileOpenProject" text="Open Project">
                         <graphic>
-                            <FontIcon iconLiteral="gmi-folder-open" iconSize="24" fill="black"/>
+                            <FontIcon iconLiteral="gmi-folder-open" fill="black" styleClass="icon-size-medium"/>
                         </graphic>
                     </MenuItem>
 
@@ -133,12 +133,12 @@
 
                     <MenuItem fx:id="menuBarFileSave" text="Save Project">
                         <graphic>
-                            <FontIcon iconLiteral="gmi-save" iconSize="24" fill="black"/>
+                            <FontIcon iconLiteral="gmi-save" fill="black" styleClass="icon-size-medium"/>
                         </graphic>
                     </MenuItem>
                     <MenuItem fx:id="menuBarFileSaveAs" text="Save Project as">
                         <graphic>
-                            <FontIcon iconLiteral="gmi-save" iconSize="24" fill="black"/>
+                            <FontIcon iconLiteral="gmi-save" fill="black" styleClass="icon-size-medium"/>
                         </graphic>
                     </MenuItem>
 
@@ -146,7 +146,7 @@
 
                     <MenuItem fx:id="menuBarFileNewMutationTestObject" text="New Test Plan">
                         <graphic>
-                            <FontIcon iconLiteral="gmi-done-all" iconSize="24" fill="black"/>
+                            <FontIcon iconLiteral="gmi-done-all" fill="black" styleClass="icon-size-medium"/>
                         </graphic>
                     </MenuItem>
 
@@ -154,12 +154,12 @@
 
                     <MenuItem fx:id="menuBarFileExportAsPng" text="Export as Png">
                         <graphic>
-                            <FontIcon iconLiteral="gmi-image" iconSize="24" fill="black"/>
+                            <FontIcon iconLiteral="gmi-image" fill="black" styleClass="icon-size-medium"/>
                         </graphic>
                     </MenuItem>
                     <MenuItem fx:id="menuBarFileExportAsPngNoBorder" text="Export without border as Png">
                         <graphic>
-                            <FontIcon iconLiteral="gmi-image" iconSize="24" fill="black"/>
+                            <FontIcon iconLiteral="gmi-image" fill="black" styleClass="icon-size-medium"/>
                         </graphic>
                     </MenuItem>
                 </Menu>
@@ -168,22 +168,22 @@
                 <Menu text="Edit">
                     <MenuItem fx:id="menuEditMoveLeft" text="Move All Nodes Left">
                         <graphic>
-                            <FontIcon iconLiteral="gmi-keyboard-arrow-left" iconSize="24" fill="black"/>
+                            <FontIcon iconLiteral="gmi-keyboard-arrow-left" fill="black" styleClass="icon-size-medium"/>
                         </graphic>
                     </MenuItem>
                     <MenuItem fx:id="menuEditMoveUp" text="Move All Nodes Up">
                         <graphic>
-                            <FontIcon iconLiteral="gmi-keyboard-arrow-up" iconSize="24" fill="black"/>
+                            <FontIcon iconLiteral="gmi-keyboard-arrow-up" fill="black" styleClass="icon-size-medium"/>
                         </graphic>
                     </MenuItem>
                     <MenuItem fx:id="menuEditMoveRight" text="Move All Nodes Right">
                         <graphic>
-                            <FontIcon iconLiteral="gmi-keyboard-arrow-right" iconSize="24" fill="black"/>
+                            <FontIcon iconLiteral="gmi-keyboard-arrow-right" fill="black" styleClass="icon-size-medium"/>
                         </graphic>
                     </MenuItem>
                     <MenuItem fx:id="menuEditMoveDown" text="Move All Nodes Down">
                         <graphic>
-                            <FontIcon iconLiteral="gmi-keyboard-arrow-down" iconSize="24" fill="black"/>
+                            <FontIcon iconLiteral="gmi-keyboard-arrow-down" fill="black" styleClass="icon-size-medium"/>
                         </graphic>
                     </MenuItem>
                 </Menu>
@@ -192,17 +192,17 @@
                 <Menu text="View">
                     <MenuItem fx:id="menuBarViewFilePanel" text="Project Panel">
                         <graphic>
-                            <FontIcon iconLiteral="gmi-check" iconSize="24" fill="black"/>
+                            <FontIcon iconLiteral="gmi-check" fill="black" styleClass="icon-size-medium"/>
                         </graphic>
                     </MenuItem>
                     <MenuItem fx:id="menuBarViewQueryPanel" text="Query Panel">
                         <graphic>
-                            <FontIcon iconLiteral="gmi-check" iconSize="24" fill="black"/>
+                            <FontIcon iconLiteral="gmi-check" fill="black" styleClass="icon-size-medium"/>
                         </graphic>
                     </MenuItem>
                     <MenuItem fx:id="menuBarViewGrid" text="Grid">
                         <graphic>
-                            <FontIcon iconLiteral="gmi-check" iconSize="24" fill="black"/>
+                            <FontIcon iconLiteral="gmi-check" fill="black" styleClass="icon-size-medium"/>
                         </graphic>
                     </MenuItem>
 
@@ -228,7 +228,7 @@
 
                     <MenuItem fx:id="menuBarViewCanvasSplit" text="Split canvas">
                         <graphic>
-                            <FontIcon iconLiteral="gmi-border-all" iconSize="24" fill="black"/>
+                            <FontIcon iconLiteral="gmi-border-all" fill="black" styleClass="icon-size-medium"/>
                         </graphic>
                     </MenuItem>
                 </Menu>
@@ -236,7 +236,7 @@
                 <Menu text="Options">
                     <MenuItem fx:id="menuBarOptionsCache" text="UI Cache">
                         <graphic>
-                            <FontIcon iconLiteral="gmi-check" iconSize="24" fill="black"/>
+                            <FontIcon iconLiteral="gmi-check" fill="black" styleClass="icon-size-medium"/>
                         </graphic>
                     </MenuItem>
 
@@ -245,7 +245,7 @@
                     <CustomMenuItem hideOnClick="false" fx:id="menuBarOptionsDefaultBackend">
                         <content>
                             <HBox fx:id="menuBarOptionsDefaultBackendContent" spacing="5" alignment="CENTER">
-                                <FontIcon iconLiteral="gmi-autorenew" iconSize="24" fill="black"/>
+                                <FontIcon iconLiteral="gmi-autorenew" fill="black" styleClass="icon-size-medium"/>
                                 <Text styleClass="body1">Backend</Text>
                             </HBox>
                         </content>
@@ -257,7 +257,7 @@
                                 <padding>
                                     <Insets left="2" right="10"/>
                                 </padding>
-                                <FontIcon iconLiteral="gmi-settings-input-component" iconSize="20" fill="black"/>
+                                <FontIcon iconLiteral="gmi-settings-input-component" fill="black" styleClass="icon-size-small"/>
                                 <Text styleClass="body1">Backend Sockets: </Text>
                                 <JFXSlider styleClass="jfx-slider" min="1" max="20"
                                            fx:id="menuBarOptionsNumberOfSocketsSlider"/>
@@ -269,17 +269,17 @@
                 <Menu text="Help">
                     <MenuItem fx:id="menuBarHelpHelp" text="Modelling Help">
                         <graphic>
-                            <FontIcon iconLiteral="gmi-help" iconSize="24" fill="black"/>
+                            <FontIcon iconLiteral="gmi-help" fill="black" styleClass="icon-size-medium"/>
                         </graphic>
                     </MenuItem>
                     <MenuItem fx:id="menuBarHelpTest" text="Testing Help">
                         <graphic>
-                            <FontIcon iconLiteral="gmi-help" iconSize="24" fill="black"/>
+                            <FontIcon iconLiteral="gmi-help" fill="black" styleClass="icon-size-medium"/>
                         </graphic>
                     </MenuItem>
                     <MenuItem fx:id="menuBarHelpAbout" text="About">
                         <graphic>
-                            <FontIcon iconLiteral="gmi-info" iconSize="24" fill="black"/>
+                            <FontIcon iconLiteral="gmi-info" fill="black" styleClass="icon-size-medium"/>
                         </graphic>
                     </MenuItem>
                 </Menu>
@@ -329,7 +329,7 @@
                            onMouseClicked="#collapseMessagesClicked"
                            StackPane.alignment="TOP_RIGHT">
 
-                    <FontIcon fx:id="collapseMessagesIcon" iconLiteral="gmi-expand-less" iconSize="24" fill="white"/>
+                    <FontIcon fx:id="collapseMessagesIcon" iconLiteral="gmi-expand-less" fill="white" styleClass="icon-size-medium"/>
 
                 </StackPane>
             </JFXRippler>

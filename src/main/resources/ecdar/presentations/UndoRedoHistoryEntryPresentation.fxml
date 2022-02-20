@@ -14,7 +14,7 @@
               minHeight="48" maxHeight="48">
             <StackPane>
                 <Circle id="iconBackground" radius="18"/>
-                <FontIcon id="icon" iconLiteral="gmi-description" iconSize="24"/>
+                <FontIcon id="icon" iconLiteral="gmi-description" styleClass="icon-size-medium"/>
             </StackPane>
 
             <Region minWidth="16"/>

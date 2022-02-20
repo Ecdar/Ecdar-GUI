@@ -181,10 +181,6 @@ public class MenuElement {
         icon = new FontIcon();
         icon.setIconLiteral(icon_string);
         icon.setFill(Color.GREY.getColor(Color.Intensity.I600));
-        List<CssMetaData<? extends Styleable, ?>> props =  Ecdar.getPresentation().getCssMetaData();
-        for (CssMetaData prop : props) {
-            System.out.println(prop.toString());
-        }
     }
 
     /**

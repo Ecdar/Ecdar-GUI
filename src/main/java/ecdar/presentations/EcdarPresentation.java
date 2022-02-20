@@ -122,11 +122,9 @@ public class EcdarPresentation extends StackPane {
         controller.tabPaneContainer.maxHeightProperty().addListener((obs, oldHeight, newHeight) -> {
             if (newHeight.doubleValue() > 35) {
                 controller.collapseMessagesIcon.setIconLiteral("gmi-close");
-                controller.collapseMessagesIcon.setIconSize(24);
             } else {
                 controller.tabPane.getSelectionModel().clearSelection(); // Clear the currently selected tab (so that the view will open again when selecting a tab)
                 controller.collapseMessagesIcon.setIconLiteral("gmi-expand-less");
-                controller.collapseMessagesIcon.setIconSize(24);
             }
         });
 
@@ -202,6 +200,8 @@ public class EcdarPresentation extends StackPane {
                 collapseIfNoErrorsOrWarnings.run();
             }
         });
+
+        controller.collapseMessagesIcon.getStyleClass().add("icon-size-medium");
     }
 
     private void initializeUndoRedoButtons() {

@@ -130,7 +130,6 @@ public class QueryPresentation extends AnchorPane {
                     } else {
                         actionButtonIcon.setIconLiteral("gmi-play-arrow");
                     }
-                    actionButtonIcon.setIconSize(24);
                 });
             };
 

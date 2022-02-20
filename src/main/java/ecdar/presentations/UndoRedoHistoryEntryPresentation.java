@@ -69,7 +69,6 @@ public class UndoRedoHistoryEntryPresentation extends AnchorPane {
         if (command != null) {
             icon.setIconLiteral("gmi-" + command.getIcon());
         }
-        icon.setIconSize(24);
     }
 
     private void initializeBackground() {

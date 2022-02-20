@@ -222,13 +222,25 @@
 .titled-pane > .title > .arrow-button .arrow{
 	-fx-background-color: TRANSPARENT;
 	-fx-border-color: TRANSPARENT;
-	-fx-padding: 0em 0em 0em -0.7em; /* -10 */
+	-fx-padding: 0em 0em 0em -0.7em;
 }
 
 .titled-pane > .content {
 	-fx-background-color: TRANSPARENT;
-	-fx-padding: 0em -0.1em -0.1em -0.1em; /* -1 */
+	-fx-padding: 0em -0.1em -0.1em -0.1em;
 	-fx-background-insets: 0em 0em 0em 0em;
+}
+
+.icon-size-medium {
+	-fx-icon-size: 24;
+}
+
+.icon-size-small {
+	-fx-icon-size: 20;
+}
+
+.icon-size-x-small {
+	-fx-icon-size: 18;
 }
 
 /* Scroll pane related styling */

@@ -9,7 +9,7 @@
 <?import javafx.scene.control.Label?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
-         type="AnchorPane" fx:controller="ecdar.controllers.QueryController">
+         type="AnchorPane" fx:controller="ecdar.controllers.QueryController" style="-fx-font-size: 13px;">
     <fx:define>
         <!--Used for both the statusIndicator and the left anchor for elements to the right of the statusIndicator-->
         <Double fx:id="STATUS_INDICATOR_WIDTH" fx:value="50"/>
@@ -24,15 +24,15 @@
         <JFXRippler fx:id="queryTypeExpand" maxHeight="20">
             <HBox translateY="40" alignment="CENTER_RIGHT">
                 <StackPane alignment="CENTER_LEFT">
-                    <Text fx:id="queryTypeSymbol" style="-fx-font-size: 11; -fx-text-alignment: left;"/>
+                    <Text fx:id="queryTypeSymbol" styleClass="sub-caption" style="-fx-text-alignment: left;"/>
                 </StackPane>
                 <StackPane minWidth="15" maxWidth="15">
-                    <FontIcon id="queryTypeExpandIcon" iconLiteral="gmi-expand-more" iconSize="18"/>
+                    <FontIcon id="queryTypeExpandIcon" iconLiteral="gmi-expand-more" styleClass="icon-size-x-small"/>
                 </StackPane>
             </HBox>
         </JFXRippler>
         <StackPane minWidth="40" maxWidth="40" minHeight="40" maxHeight="40">
-            <FontIcon id="statusIcon" iconLiteral="gmi-hourglass-full" iconSize="24"/>
+            <FontIcon id="statusIcon" iconLiteral="gmi-hourglass-full" styleClass="icon-size-medium"/>
         </StackPane>
     </StackPane>
 
@@ -64,7 +64,7 @@
 
                     <JFXRippler fx:id="actionButton">
                         <StackPane minWidth="40" maxWidth="40" minHeight="40" maxHeight="40">
-                            <FontIcon id="actionButtonIcon" iconLiteral="gmi-play-arrow" iconSize="24"/>
+                            <FontIcon id="actionButtonIcon" iconLiteral="gmi-play-arrow"/>
                         </StackPane>
                     </JFXRippler>
                 </StackPane>
@@ -73,14 +73,14 @@
 
                 <JFXRippler AnchorPane.topAnchor="0" id="detailsButton">
                     <StackPane minWidth="40" maxWidth="40" minHeight="40" maxHeight="40">
-                        <FontIcon id="detailsButtonIcon" iconLiteral="gmi-more-vert" iconSize="24"/>
+                        <FontIcon id="detailsButtonIcon" iconLiteral="gmi-more-vert" styleClass="icon-size-medium"/>
                     </StackPane>
                 </JFXRippler>
             </HBox>
             <StackPane AnchorPane.leftAnchor="144" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0">
                 <JFXRippler id="swapBackendButton">
                     <VBox alignment="CENTER" minWidth="40" minHeight="40">
-                        <FontIcon iconLiteral="gmi-swap-horiz" iconSize="18"/>
+                        <FontIcon iconLiteral="gmi-swap-horiz" styleClass="icon-size-x-small"/>
                         <Label id="currentBackendLabel"/>
                     </VBox>
                 </JFXRippler>
@@ -91,7 +91,7 @@
     <TitledPane id="inputOutputPane" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="116"
                 AnchorPane.bottomAnchor="0.0" expanded="false" alignment="CENTER" visible="false">
         <graphic>
-            <FontIcon id="inputOutputPaneExpandIcon" iconLiteral="gmi-keyboard-arrow-down"  iconSize="18"/>
+            <FontIcon id="inputOutputPaneExpandIcon" iconLiteral="gmi-keyboard-arrow-down" styleClass="icon-size-x-small"/>
         </graphic>
         <GridPane AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"
                   AnchorPane.bottomAnchor="0.0">
@@ -112,7 +112,7 @@
 
                 <JFXRippler id="inputOutputPaneUpdateButton">
                     <StackPane minWidth="40" maxWidth="40" minHeight="40" maxHeight="40">
-                        <FontIcon id="inputOutputPaneUpdateButtonIcon" iconLiteral="gmi-autorenew" iconSize="24"/>
+                        <FontIcon id="inputOutputPaneUpdateButtonIcon" iconLiteral="gmi-autorenew" styleClass="icon-size-medium"/>
                     </StackPane>
                 </JFXRippler>
             </StackPane>
