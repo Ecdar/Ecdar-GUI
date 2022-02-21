@@ -20,19 +20,14 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.scene.text.TextAlignment;
 import org.kordamp.ikonli.javafx.FontIcon;
-
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
-
 import static javafx.scene.paint.Color.*;
 
 public class QueryPresentation extends AnchorPane {
-
     private final Tooltip tooltip = new Tooltip();
-    private Tooltip swapBackendButtonTooltip;
-    private Label currentBackendLabel;
-
+    private Tooltip backendDropdownTooltip;
     private final QueryController controller;
 
     public QueryPresentation(final Query query) {
@@ -45,8 +40,19 @@ public class QueryPresentation extends AnchorPane {
         initializeDetailsButton();
         initializeTextFields();
         initializeInputOutputPaneAndAddIgnoredInputOutputs();
-        initializeSwapBackendButton();
         initializeMoreInformationButtonAndQueryTypeSymbol();
+        initializeBackendsDropdown();
+    }
+
+    private void initializeBackendsDropdown() {
+        controller.backendsDropdown.setItems(BackendHelper.getBackendInstances());
+        BackendHelper.addBackendInstanceListener(() -> controller.backendsDropdown.setItems(BackendHelper.getBackendInstances()));
+
+        backendDropdownTooltip = new Tooltip();
+        backendDropdownTooltip.setText("Current backend used for the query");
+        JFXTooltip.install(controller.backendsDropdown, backendDropdownTooltip);
+
+        controller.backendsDropdown.setValue(BackendHelper.getDefaultBackendInstance());
     }
 
     private void initializeTextFields() {
@@ -271,9 +277,8 @@ public class QueryPresentation extends AnchorPane {
                 }
             });
 
-            // Change visibility of input/output Pane when backend is changed for the query
-            lookup("#swapBackendButton").setOnMousePressed(event -> changeTitledPaneVisibility.run());
-
+            // Change visibility of input/output Pane when backend is changed for the query ToDo NIELS
+            // lookup("#swapBackendButton").setOnMousePressed(event -> changeTitledPaneVisibility.accept(controller.getQuery().getQuery()));
             Platform.runLater(() -> addIgnoredInputOutputsFromQuery(inputOutputPane));
         });
     }
@@ -327,35 +332,9 @@ public class QueryPresentation extends AnchorPane {
         });
     }
 
-    private void initializeSwapBackendButton() {
-        Platform.runLater(() -> {
-            final JFXRippler swapBackendButton = (JFXRippler) lookup("#swapBackendButton");
-            final TitledPane inputOutputPane = (TitledPane) lookup("#inputOutputPane");
-            this.currentBackendLabel = (Label) lookup("#currentBackendLabel");
-
-            swapBackendButton.setCursor(Cursor.HAND);
-            swapBackendButton.setRipplerFill(Color.GREY.getColor(Color.Intensity.I500));
-            swapBackendButton.setMaskType(JFXRippler.RipplerMask.CIRCLE);
-            swapBackendButton.setOnMousePressed(event -> {
-                // Set the backend to the one not currently used and update GUI
-                final BackendHelper.BackendNames newBackend = (this.controller.getQuery().getBackend().equals(BackendHelper.BackendNames.jEcdar)
-                        ? BackendHelper.BackendNames.Reveaal
-                        : BackendHelper.BackendNames.jEcdar);
-
-                this.controller.getQuery().setBackend(newBackend);
-                setSwapBackendTooltipAndLabel(newBackend);
-                updateTitlePaneVisibility(inputOutputPane);
-            });
-
-            swapBackendButtonTooltip = new Tooltip();
-            setSwapBackendTooltipAndLabel(this.controller.getQuery().getBackend());
-            JFXTooltip.install(swapBackendButton, swapBackendButtonTooltip);
-        });
-    }
-
     private void updateTitlePaneVisibility(TitledPane inputOutputPane) {
-        // Check if the query is a refinement and that the backend supports ignored inputs and outputs
-        if (BackendHelper.backendSupportsInputOutputs(controller.getQuery().getBackend()) && controller.getQuery().getType().equals(QueryType.REFINEMENT)) {
+        // Check if the query is a refinement and that the engine is set to Reveaal
+        if (controller.getQuery().getQuery().startsWith("refinement") && BackendHelper.backendSupportsInputOutputs(controller.getQuery().getBackend())) {
             initiateResetInputOutputButton(inputOutputPane);
 
             // Make the input/output pane visible
@@ -377,7 +356,7 @@ public class QueryPresentation extends AnchorPane {
             clearIgnoredInputsAndOutputs(inputBox, outputBox);
         }
 
-        Ecdar.getBackendDriver().getInputOutputs(query);
+        Ecdar.getBackendDriver().getInputOutputs(query, controller.getQuery().getBackend());
     }
 
     private void clearIgnoredInputsAndOutputs(VBox inputBox, VBox outputBox) {
@@ -463,17 +442,10 @@ public class QueryPresentation extends AnchorPane {
         }
     }
 
-    private void setSwapBackendTooltipAndLabel(BackendHelper.BackendNames backend) {
-        boolean isReveaal;
-        if (backend == null) {
-            isReveaal = false;
-        } else {
-            isReveaal = backend.equals(BackendHelper.BackendNames.Reveaal);
-        }
-
-        swapBackendButtonTooltip.setText("Switch to the " + (isReveaal ? "jEcdar" : "Reveaal") + " backend");
-        currentBackendLabel.setText((isReveaal ? "Reveaal" : "jEcdar"));
-    }
+//    private void setSwapBackendTooltipAndLabel(BackendInstance backend) {
+//        swapBackendButtonTooltip.setText("Switch to the " + (isReveaal ? "jEcdar" : "Reveaal") + " backend");
+//        currentBackendLabel.setText((isReveaal ? "Reveaal" : "jEcdar"));
+//    }
 
     private void initializeMoreInformationButtonAndQueryTypeSymbol() {
         Platform.runLater(() -> {

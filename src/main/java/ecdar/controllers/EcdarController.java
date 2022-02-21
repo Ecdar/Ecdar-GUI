@@ -155,10 +155,7 @@ public class EcdarController implements Initializable {
     public MenuItem menuBarFileExportAsPng;
     public MenuItem menuBarFileExportAsPngNoBorder;
     public MenuItem menuBarOptionsCache;
-    public MenuItem menuBarOptionsDefaultBackend;
-    public HBox menuBarOptionsDefaultBackendContent;
-    public Tooltip menuBarOptionsDefaultBackendTooltip;
-    public JFXSlider menuBarOptionsNumberOfSocketsSlider;
+    public MenuItem menuBarOptionsBackendOptions;
     public MenuItem menuBarHelpHelp;
     public MenuItem menuBarHelpAbout;
     public MenuItem menuBarHelpTest;
@@ -173,6 +170,9 @@ public class EcdarController implements Initializable {
     public JFXDialog queryDialog;
     public Text queryTextResult;
     public Text queryTextQuery;
+
+    public StackPane backendOptionsDialogContainer;
+    public BackendOptionsDialogPresentation backendOptionsDialog;
 
     private static JFXDialog _queryDialog;
     private static Text _queryTextResult;
@@ -195,6 +195,18 @@ public class EcdarController implements Initializable {
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
+        initilizeDialogs();
+        initializeCanvasPane();
+        initializeEdgeStatusHandling();
+        initializeKeybindings();
+        initializeTabPane();
+        initializeStatusBar();
+        initializeMessages();
+        initializeMenuBar();
+        initializeReachabilityAnalysisThread();
+    }
+
+    private void initilizeDialogs() {
         dialog.setDialogContainer(dialogContainer);
         dialogContainer.opacityProperty().bind(dialog.getChildren().get(0).scaleXProperty());
         dialog.setOnDialogClosed(event -> dialogContainer.setVisible(false));
@@ -202,15 +214,43 @@ public class EcdarController implements Initializable {
         _queryDialog = queryDialog;
         _queryTextResult = queryTextResult;
         _queryTextQuery = queryTextQuery;
-        queryDialog.setDialogContainer(queryDialogContainer);
-        queryDialogContainer.opacityProperty().bind(queryDialog.getChildren().get(0).scaleXProperty());
-        queryDialog.setOnDialogClosed(event -> {
-            queryDialogContainer.setVisible(false);
-            queryDialogContainer.setMouseTransparent(true);
+
+        initializeDialog(queryDialog, queryDialogContainer);
+        initializeDialog(backendOptionsDialog, backendOptionsDialogContainer);
+
+        backendOptionsDialog.getController().resetBackendsButton.setOnMouseClicked(event -> {
+            backendOptionsDialog.getController().resetBackendsToDefault();
         });
-        queryDialog.setOnDialogOpened(event -> {
-            queryDialogContainer.setVisible(true);
-            queryDialogContainer.setMouseTransparent(false);
+
+        backendOptionsDialog.getController().closeButton.setOnMouseClicked(event -> {
+            backendOptionsDialog.getController().cancelBackendOptionsChanges();
+            dialog.close();
+            backendOptionsDialog.close();
+        });
+
+        backendOptionsDialog.getController().saveButton.setOnMouseClicked(event -> {
+            if (backendOptionsDialog.getController().saveChangesToBackendOptions()) {
+                dialog.close();
+                backendOptionsDialog.close();
+            }
+        });
+
+        // Set default backend instance
+        BackendInstance defaultBackend = BackendHelper.getBackendInstances().stream().filter(BackendInstance::isDefault).findFirst().orElse(BackendHelper.getBackendInstances().get(0));
+        BackendHelper.setDefaultBackendInstance(defaultBackend);
+    }
+
+    private void initializeDialog(JFXDialog dialog, StackPane dialogContainer) {
+        dialog.setDialogContainer(dialogContainer);
+        dialogContainer.opacityProperty().bind(dialog.getChildren().get(0).scaleXProperty());
+        dialogContainer.opacityProperty().bind(dialog.getChildren().get(0).scaleXProperty());
+        dialog.setOnDialogClosed(event -> {
+            dialogContainer.setVisible(false);
+            dialogContainer.setMouseTransparent(true);
+        });
+        dialog.setOnDialogOpened(event -> {
+            dialogContainer.setVisible(true);
+            dialogContainer.setMouseTransparent(false);
         });
 
         initializeCanvasPane();
@@ -394,7 +434,7 @@ public class EcdarController implements Initializable {
                             reachabilityQuery.setType(QueryType.REACHABILITY);
 
                             Ecdar.getBackendDriver().addQueryToExecutionQueue(locationReachableQuery,
-                                    BackendHelper.BackendNames.Reveaal,
+                                    BackendHelper.getDefaultBackendInstance(),
                                     (result -> {
                                         if (result) {
                                             location.setReachability(Location.Reachability.REACHABLE);
@@ -410,7 +450,7 @@ public class EcdarController implements Initializable {
                                     new QueryListener(reachabilityQuery));
 
                             final Thread verifyThread = new Thread(() -> Ecdar.getBackendDriver().addQueryToExecutionQueue(locationReachableQuery,
-                                    BackendHelper.BackendNames.Reveaal,
+                                    BackendHelper.getDefaultBackendInstance(),
                                     (result -> {
                                         if (result) {
                                             location.setReachability(Location.Reachability.REACHABLE);
@@ -529,37 +569,11 @@ public class EcdarController implements Initializable {
             menuBarOptionsCache.getGraphic().opacityProperty().bind(new When(isCached).then(1).otherwise(0));
         });
 
-        menuBarOptionsDefaultBackendTooltip = new Tooltip("Change default backend to " +
-                (BackendHelper.defaultBackend.equals(BackendHelper.BackendNames.jEcdar)
-                        ? BackendHelper.BackendNames.Reveaal.name()
-                        : BackendHelper.BackendNames.jEcdar.name()));
-
-        Tooltip.install(menuBarOptionsDefaultBackendContent, menuBarOptionsDefaultBackendTooltip);
-
-        menuBarOptionsDefaultBackend.setOnAction(event -> {
-            menuBarOptionsDefaultBackendTooltip.setText("Change default backend to " + BackendHelper.defaultBackend.name());
-            BackendHelper.defaultBackend = (BackendHelper.defaultBackend.equals(BackendHelper.BackendNames.jEcdar)
-                    ? BackendHelper.BackendNames.Reveaal
-                    : BackendHelper.BackendNames.jEcdar);
-
-            Ecdar.showToast("The default backend was changed to " + BackendHelper.defaultBackend.name());
-            ((Text) menuBarOptionsDefaultBackendContent.getChildrenUnmodifiable().get(1)).setText("Default backend: " + BackendHelper.defaultBackend.name());
-
-            Ecdar.preferences.put("default_backend", Integer.toString(BackendHelper.defaultBackend.ordinal()));
-
+        menuBarOptionsBackendOptions.setOnAction(event -> {
+            backendOptionsDialogContainer.setVisible(true);
+            backendOptionsDialog.show(backendOptionsDialogContainer);
+            backendOptionsDialog.setMouseTransparent(false);
         });
-
-        ((Text) menuBarOptionsDefaultBackendContent.getChildrenUnmodifiable().get(1)).setText("Default backend: " + BackendHelper.defaultBackend.name());
-
-        menuBarOptionsNumberOfSocketsSlider.valueChangingProperty().addListener((observable, oldValue, newValue) -> {
-            if (oldValue && !newValue) {
-                int newIntValue = (int) Math.round(menuBarOptionsNumberOfSocketsSlider.getValue());
-                Ecdar.getBackendDriver().setMaxNumberOfConnections(newIntValue);
-                Ecdar.preferences.put("number_of_backend_sockets", Integer.toString(newIntValue));
-            }
-        });
-
-        menuBarOptionsNumberOfSocketsSlider.setValue(Ecdar.getBackendDriver().getMaxNumberOfSockets());
     }
 
     private void initializeEditMenu() {
@@ -672,7 +686,7 @@ public class EcdarController implements Initializable {
             // The initial location for the file choosing dialog
             final File jarDir = new File(System.getProperty("java.class.path")).getAbsoluteFile().getParentFile();
 
-            // If the file does not exist, we must be running it from a development environment, use an default location
+            // If the file does not exist, we must be running it from a development environment, use default location
             if (jarDir.exists()) {
                 projectPicker.setInitialDirectory(jarDir);
             }
@@ -1451,7 +1465,7 @@ public class EcdarController implements Initializable {
     }
 
     @FXML
-    private void closeDialog() {
+    private void closeQueryDialog() {
         dialog.close();
         queryDialog.close();
     }

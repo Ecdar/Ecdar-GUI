@@ -2,10 +2,10 @@ package ecdar.backend;
 
 import com.uppaal.model.core2.Document;
 import ecdar.Ecdar;
-import ecdar.abstractions.Component;
-import ecdar.abstractions.Location;
-import ecdar.abstractions.Project;
-import ecdar.abstractions.Query;
+import ecdar.abstractions.*;
+import javafx.beans.property.SimpleListProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -17,11 +17,14 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public final class BackendHelper {
     final static String TEMP_DIRECTORY = "temporary";
     private static EcdarDocument ecdarDocument;
-    public static BackendHelper.BackendNames defaultBackend = BackendHelper.BackendNames.jEcdar;
+    private static BackendInstance defaultBackend = null;
+    private static ObservableList<BackendInstance> backendInstances = new SimpleListProperty<>();
+    private static List<Runnable> backendInstancesUpdatedListeners = new ArrayList<>();
 
     public static String storeBackendModel(Project project, String fileName) throws BackendException, IOException, URISyntaxException {
         return storeBackendModel(project, TEMP_DIRECTORY, fileName);
@@ -44,7 +47,7 @@ public final class BackendHelper {
         FileUtils.forceMkdir(new File(directoryPath));
 
         final String path = directoryPath + File.separator + fileName + ".xml";
-        storeEcdarFile(new EcdarDocument(project).toXmlDocument(),  path);
+        storeEcdarFile(new EcdarDocument(project).toXmlDocument(), path);
 
         return path;
     }
@@ -81,8 +84,8 @@ public final class BackendHelper {
      * @param backend the name of the backend to check
      * @return true if the backend supports ignored inputs and outputs, else false
      */
-    public static Boolean backendSupportsInputOutputs(BackendHelper.BackendNames backend) {
-        return backend == BackendHelper.BackendNames.Reveaal;
+    public static Boolean backendSupportsInputOutputs(BackendInstance backend) {
+        return true;
     }
 
     /**
@@ -101,7 +104,7 @@ public final class BackendHelper {
      * @throws BackendException if the document could not be built
      */
     public static void buildEcdarDocument() throws BackendException {
-        ecdarDocument = new EcdarDocument();
+        BackendHelper.ecdarDocument = new EcdarDocument();
     }
 
     /**
@@ -141,14 +144,57 @@ public final class BackendHelper {
     }
 
     /**
-     * Enum for the available backends. Used for saving and loading the queries.
+     * Returns the BackendInstance with the specified name, or null, if no such BackendInstance exists
+     *
+     * @param backendInstanceName Name of the BackendInstance to return
+     * @return The BackendInstance with matching name
+     * or the default backend instance, if no matching backendInstance exists
      */
-    public enum BackendNames {
-        jEcdar, Reveaal;
+    public static BackendInstance getBackendInstanceByName(String backendInstanceName) {
+        Optional<BackendInstance> backendInstance = BackendHelper.backendInstances.stream().filter(bi -> bi.getName().equals(backendInstanceName)).findFirst();
+        return backendInstance.orElse(BackendHelper.getDefaultBackendInstance());
+    }
 
-        @Override
-        public String toString() {
-            return this.ordinal() == 0 ? "jEcdar" : "Reveaal";
+    /**
+     * Returns the default BackendInstance
+     *
+     * @return The default BackendInstance
+     */
+    public static BackendInstance getDefaultBackendInstance() {
+        return defaultBackend;
+    }
+
+    /**
+     * Sets the list of BackendInstances to match the provided list
+     *
+     * @param updatedBackendInstances The list of BackendInstances that should be stored
+     */
+    public static void updateBackendInstances(ArrayList<BackendInstance> updatedBackendInstances) {
+        BackendHelper.backendInstances = FXCollections.observableList(updatedBackendInstances);
+        for (Runnable runnable : BackendHelper.backendInstancesUpdatedListeners) {
+            runnable.run();
         }
+    }
+
+    /**
+     * Returns the ObservableList of BackendInstances
+     *
+     * @return The ObservableList of BackendInstances
+     */
+    public static ObservableList<BackendInstance> getBackendInstances() {
+        return BackendHelper.backendInstances;
+    }
+
+    /**
+     * Sets the default BackendInstance to the provided object
+     *
+     * @param newDefaultBackend The new defaultBackend
+     */
+    public static void setDefaultBackendInstance(BackendInstance newDefaultBackend) {
+        BackendHelper.defaultBackend = newDefaultBackend;
+    }
+
+    public static void addBackendInstanceListener(Runnable runnable) {
+        BackendHelper.backendInstancesUpdatedListeners.add(runnable);
     }
 }

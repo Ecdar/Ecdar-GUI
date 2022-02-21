@@ -30,14 +30,14 @@ public class Query implements Serializable {
     private final SimpleBooleanProperty isPeriodic = new SimpleBooleanProperty(false);
     private final StringProperty errors = new SimpleStringProperty("");
     private final ObjectProperty<QueryType> type = new SimpleObjectProperty<>();
-    private BackendHelper.BackendNames backend;
+    private BackendInstance backend;
     private Consumer<Boolean> runQuery;
 
     public Query(final String query, final String comment, final QueryState queryState) {
         this.query.set(query);
         this.comment.set(comment);
         this.queryState.set(queryState);
-        setBackend(BackendHelper.defaultBackend);
+        setBackend(BackendHelper.getDefaultBackendInstance());
 
         initializeRunQuery();
     }
@@ -98,11 +98,11 @@ public class Query implements Serializable {
         this.isPeriodic.set(isPeriodic);
     }
 
-    public BackendHelper.BackendNames getBackend() {
+    public BackendInstance getBackend() {
         return backend;
     }
 
-    public void setBackend(BackendHelper.BackendNames backend) {
+    public void setBackend(BackendInstance backend) {
         this.backend = backend;
     }
 
@@ -179,7 +179,7 @@ public class Query implements Serializable {
         result.add(IGNORED_INPUTS, getHashMapAsJsonObject(ignoredInputs));
         result.add(IGNORED_OUTPUTS, getHashMapAsJsonObject(ignoredOutputs));
 
-        result.addProperty(BACKEND, backend.ordinal());
+        result.addProperty(BACKEND, backend.getName());
 
         return result;
     }
@@ -219,11 +219,9 @@ public class Query implements Serializable {
         }
 
         if(json.has(BACKEND)) {
-            setBackend(json.getAsJsonPrimitive(BACKEND).getAsInt() == BackendHelper.BackendNames.jEcdar.ordinal()
-                    ? BackendHelper.BackendNames.jEcdar
-                    : BackendHelper.BackendNames.Reveaal);
+            setBackend(BackendHelper.getBackendInstanceByName(json.getAsJsonPrimitive(BACKEND).getAsString()));
         } else {
-            setBackend(BackendHelper.defaultBackend);
+            setBackend(BackendHelper.getDefaultBackendInstance());
         }
     }
 
