@@ -211,7 +211,7 @@ public class MutationTestPlanController {
             jarDir = new File(Ecdar.projectDirectory.get());
 
 
-            // If the file does not exist, we must be running it from a development environment, use an default location
+            // If the file does not exist, we must be running it from a development environment, use a default location
             if (jarDir.exists()) {
                 fileChooser.setInitialDirectory(jarDir);
             }

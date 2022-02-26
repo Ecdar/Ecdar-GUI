@@ -48,7 +48,7 @@ public class Ecdar extends Application {
     public static SimpleStringProperty projectDirectory = new SimpleStringProperty();
     private static BooleanProperty isUICached = new SimpleBooleanProperty();
     private static final BooleanProperty isSplit = new SimpleBooleanProperty(true); //Set to true to ensure correct behaviour at first toggle.
-    private static BackendDriver backendDriver;
+    private static final BackendDriver backendDriver = new BackendDriver();
     private Stage debugStage;
 
     /**
@@ -195,7 +195,6 @@ public class Ecdar extends Application {
         // Load the fonts required for the project
         IconFontFX.register(GoogleMaterialDesignIcons.getIconFont());
         loadFonts();
-        loadPreferences();
 
         // Remove the classic decoration
         // kyrke - 2020-04-17: Disabled due to bug https://bugs.openjdk.java.net/browse/JDK-8154847
@@ -218,6 +217,8 @@ public class Ecdar extends Application {
         scene.getStylesheets().add("ecdar/main.css");
         scene.getStylesheets().add("ecdar/colors.css");
         scene.getStylesheets().add("ecdar/model_canvas.css");
+        scene.getStylesheets().add("ecdar/query_pane.css");
+        scene.getStylesheets().add("ecdar/scroll_pane.css");
 
         // Handle a mouse click as a deselection of all elements
         scene.setOnMousePressed(event -> {
@@ -293,16 +294,6 @@ public class Ecdar extends Application {
             Platform.exit();
             System.exit(0);
         });
-    }
-
-    private void loadPreferences() {
-        BackendHelper.defaultBackend = preferences.getInt("default_backend", BackendHelper.BackendNames.jEcdar.ordinal())
-                == BackendHelper.BackendNames.jEcdar.ordinal()
-                ? BackendHelper.BackendNames.jEcdar
-                : BackendHelper.BackendNames.Reveaal;
-
-        backendDriver = new BackendDriver(preferences.get("backend_host_address", "127.0.0.1"));
-        getBackendDriver().setMaxNumberOfConnections(preferences.getInt("number_of_backend_sockets", 5));
     }
 
     /**
@@ -387,6 +378,5 @@ public class Ecdar extends Application {
         Font.loadFont(getClass().getResourceAsStream("fonts/roboto_mono/RobotoMono-Regular.ttf"), 14);
         Font.loadFont(getClass().getResourceAsStream("fonts/roboto_mono/RobotoMono-Thin.ttf"), 14);
         Font.loadFont(getClass().getResourceAsStream("fonts/roboto_mono/RobotoMono-ThinItalic.ttf"), 14);
-
     }
 }

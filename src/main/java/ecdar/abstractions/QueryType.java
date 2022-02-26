@@ -5,7 +5,7 @@ public enum QueryType {
     QUOTIENT("quotient", "\\"),
     SPECIFICATION("specification", "Spec"),
     IMPLEMENTATION("implementation", "Imp"),
-    LOCAL_CONSISTENCY("local-consistency", "lCon"),
+    LOCAL_CONSISTENCY("consistency", "lCon"), // ToDo NIELS: Will become local-consistency
     GLOBAL_CONSISTENCY("global-consistency", "gCon"),
     BISIM_MIN("bisim", "bsim"),
     GET_COMPONENT("get-component", "get"),

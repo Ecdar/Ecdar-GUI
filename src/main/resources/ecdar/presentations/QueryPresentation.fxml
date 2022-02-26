@@ -73,12 +73,7 @@
                 </JFXRippler>
             </HBox>
             <StackPane AnchorPane.leftAnchor="144" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0">
-                <JFXRippler id="swapBackendButton">
-                    <VBox alignment="CENTER" minWidth="40" minHeight="40">
-                        <FontIcon iconLiteral="gmi-swap-horiz" styleClass="icon-size-x-small"/>
-                        <Label id="currentBackendLabel"/>
-                    </VBox>
-                </JFXRippler>
+                <JFXComboBox fx:id="backendsDropdown" maxWidth="100"/>
             </StackPane>
         </VBox>
     </StackPane>
