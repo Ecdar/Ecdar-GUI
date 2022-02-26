@@ -231,6 +231,7 @@
 	-fx-background-insets: 0em 0em 0em 0em;
 }
 
+/* Response sizing for elements */
 .icon-size-medium {
 	-fx-icon-size: 24;
 }
@@ -241,6 +242,21 @@
 
 .icon-size-x-small {
 	-fx-icon-size: 18;
+}
+
+.responsive-pane-sizing {
+	-fx-max-width: 22em;
+	-fx-min-width: 22em;
+}
+
+.responsive-text-area-sizing {
+	-fx-max-height: 2.5em;
+	-fx-min-height: 2.5em;
+}
+
+.responsive-query-sizing {
+	-fx-max-width: 7.4em;
+	-fx-min-width: 7.4em;
 }
 
 /* Scroll pane related styling */

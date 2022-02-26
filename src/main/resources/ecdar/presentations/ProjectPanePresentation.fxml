@@ -56,7 +56,7 @@
                     AnchorPane.rightAnchor="0"
                     styleClass="edge-to-edge" >
 
-            <VBox fx:id="filesList">
+            <VBox fx:id="filesList" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
                 <!-- Files goes here -->
             </VBox>
 

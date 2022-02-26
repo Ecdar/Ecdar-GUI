@@ -93,8 +93,7 @@
 
                 <ProjectPanePresentation
                         fx:id="filePane"
-                        StackPane.alignment="TOP_LEFT"
-                        maxWidth="300"/>
+                        StackPane.alignment="TOP_LEFT"/>
             </StackPane>
         </center>
 
@@ -116,7 +115,6 @@
         <top>
             <!-- Menu bar for "file" etc (only visible on windows) -->
             <MenuBar fx:id="menuBar">
-
                 <Menu text="File">
                     <MenuItem fx:id="menuBarFileCreateNewProject" text="New Project">
                         <graphic>
@@ -164,7 +162,6 @@
                     </MenuItem>
                 </Menu>
 
-
                 <Menu text="Edit">
                     <MenuItem fx:id="menuEditMoveLeft" text="Move All Nodes Left">
                         <graphic>
@@ -187,7 +184,6 @@
                         </graphic>
                     </MenuItem>
                 </Menu>
-
 
                 <Menu text="View">
                     <MenuItem fx:id="menuBarViewFilePanel" text="Project Panel">

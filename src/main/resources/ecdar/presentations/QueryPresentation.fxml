@@ -40,31 +40,26 @@
                   AnchorPane.topAnchor="8"
                   AnchorPane.rightAnchor="128"
                   AnchorPane.leftAnchor="$STATUS_INDICATOR_WIDTH"
-                  minHeight="32" maxHeight="32"
-                  style="-fx-unfocus-color:transparent;" styleClass="subhead"
+                  style="-fx-unfocus-color:transparent;" styleClass="subhead, responsive-text-area-sizing"
                   promptText="Query"/>
 
     <JFXTextField id="comment" HBox.hgrow="ALWAYS"
                   AnchorPane.topAnchor="42"
                   AnchorPane.rightAnchor="128"
                   AnchorPane.leftAnchor="$STATUS_INDICATOR_WIDTH"
-                  minHeight="32" maxHeight="32"
-                  style="-fx-unfocus-color:transparent;" styleClass="caption"
+                  style="-fx-unfocus-color:transparent;" styleClass="caption, responsive-text-area-sizing"
                   promptText="Comment"/>
 
-    <StackPane AnchorPane.topAnchor="8" AnchorPane.rightAnchor="16" minHeight="96"
-               maxHeight="96">
-        <VBox minHeight="96" maxHeight="96">
-
+    <StackPane AnchorPane.topAnchor="8" AnchorPane.rightAnchor="16" styleClass="responsive-query-sizing">
+        <VBox>
             <Region minHeight="10"/>
-
             <HBox AnchorPane.topAnchor="0" alignment="CENTER">
                 <StackPane>
                     <JFXSpinner id="progressIndicator" radius="20"/>
 
                     <JFXRippler fx:id="actionButton">
                         <StackPane minWidth="40" maxWidth="40" minHeight="40" maxHeight="40">
-                            <FontIcon id="actionButtonIcon" iconLiteral="gmi-play-arrow"/>
+                            <FontIcon id="actionButtonIcon" iconLiteral="gmi-play-arrow" styleClass="icon-size-medium"/>
                         </StackPane>
                     </JFXRippler>
                 </StackPane>

@@ -213,6 +213,11 @@ public class EcdarController implements Initializable {
             queryDialogContainer.setMouseTransparent(false);
         });
 
+        filePane.getStyleClass().add("responsive-pane-sizing");
+        filePaneFillerElement.getStyleClass().add("responsive-pane-sizing");
+        queryPane.getStyleClass().add("responsive-pane-sizing");
+        queryPaneFillerElement.getStyleClass().add("responsive-pane-sizing");
+
         initializeCanvasPane();
         initializeEdgeStatusHandling();
         initializeKeybindings();
