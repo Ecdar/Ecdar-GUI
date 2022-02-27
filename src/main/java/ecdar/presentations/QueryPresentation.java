@@ -172,7 +172,7 @@ public class QueryPresentation extends AnchorPane {
     private void initializeStateIndicator() {
         Platform.runLater(() -> {
             // Find the state indicator from the inflated xml
-            final StackPane stateIndicator = (StackPane) lookup("#stateIndicator");
+            final VBox stateIndicator = (VBox) lookup("#stateIndicator");
             final FontIcon statusIcon = (FontIcon) stateIndicator.lookup("#statusIcon");
             final FontIcon queryTypeExpandIcon = (FontIcon) stateIndicator.lookup("#queryTypeExpandIcon");
 
@@ -463,7 +463,7 @@ public class QueryPresentation extends AnchorPane {
 
             controller.queryTypeExpand.setOnMousePressed((e) -> {
                 e.consume();
-                queryTypeDropDown.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, 16, 64);
+                queryTypeDropDown.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, 16, 16);
             });
 
             controller.queryTypeSymbol.setText(controller.getQuery() != null && controller.getQuery().getType() != null ? controller.getQuery().getType().getSymbol() : "---");

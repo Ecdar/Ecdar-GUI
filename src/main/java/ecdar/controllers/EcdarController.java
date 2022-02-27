@@ -653,19 +653,6 @@ public class EcdarController implements Initializable {
             Ecdar.preferences.put("font_scale", rawNewScale);
         });
 
-        // On startup, set the font scaling to the value saved in preferences
-        Platform.runLater(() -> {
-            Object matchingToggle = fontScaleM;
-            for (Object i : fontScaling.getToggles()) {
-                if (Float.parseFloat(((RadioMenuItem) i).getProperties().get("scale").toString())
-                                == Ecdar.preferences.getFloat("font_scale", 1.0F)) {
-                    matchingToggle = i;
-                    break;
-                }
-            }
-            fontScaling.selectToggle((RadioMenuItem) matchingToggle);
-        });
-
         menuBarViewCanvasSplit.getGraphic().setOpacity(1);
         menuBarViewCanvasSplit.setOnAction(event -> {
             final BooleanProperty isSplit = Ecdar.toggleCanvasSplit();
@@ -677,6 +664,21 @@ public class EcdarController implements Initializable {
                 menuBarViewCanvasSplit.setText("Merge canvases");
             }
         });
+
+        // On startup, set the font scaling to the value saved in preferences
+        Platform.runLater(() -> {
+            Object matchingToggle = fontScaleM;
+            for (Object i : fontScaling.getToggles()) {
+                if (Float.parseFloat(((RadioMenuItem) i).getProperties().get("scale").toString())
+                        == Ecdar.preferences.getFloat("font_scale", 1.0F)) {
+                    matchingToggle = i;
+                    break;
+                }
+            }
+            fontScaling.selectToggle(fontScaleM); // Necessary to avoid project pane appearing off-screen
+            fontScaling.selectToggle((RadioMenuItem) matchingToggle);
+        });
+
     }
 
     /**

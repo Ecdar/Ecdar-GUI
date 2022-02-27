@@ -277,15 +277,15 @@
 
 /* Response sizing for elements */
 .icon-size-medium {
-    -fx-icon-size: 24;
+    -fx-icon-size: 24; /* 1.8em */
 }
 
 .icon-size-small {
-    -fx-icon-size: 20;
+    -fx-icon-size: 20; /* 1.5em */
 }
 
 .icon-size-x-small {
-    -fx-icon-size: 18;
+    -fx-icon-size: 18; /* 1.4em */
 }
 
 .responsive-pane-sizing {
@@ -298,7 +298,9 @@
     -fx-min-height: 2.5em;
 }
 
-.responsive-query-sizing {
-    -fx-max-width: 7.4em;
-    -fx-min-width: 7.4em;
+.responsive-icon-stack-pane-sizing {
+    -fx-min-width: 3em;
+    -fx-max-width: 3em;
+    -fx-min-height: 3em;
+    -fx-max-height: 3em;
 }
