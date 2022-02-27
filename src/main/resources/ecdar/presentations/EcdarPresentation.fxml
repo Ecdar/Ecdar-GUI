@@ -20,7 +20,6 @@
 
     <!-- Actual content of the view -->
     <BorderPane>
-
         <center>
             <StackPane>
                 <StackPane fx:id="canvasPane">
@@ -31,8 +30,10 @@
                            StackPane.alignment="TOP_CENTER"
                            minHeight="56" maxHeight="56">
 
-                    <HBox style="-fx-padding: 0em 1em 0em 1em;">
-
+                    <HBox>
+                        <padding>
+                            <Insets topRightBottomLeft="10"/>
+                        </padding>
                         <!-- UNDO -->
                         <JFXRippler fx:id="undo">
                             <StackPane minWidth="40" minHeight="40" onMouseClicked="#undoClicked">
@@ -241,7 +242,7 @@
 
                     <MenuItem fx:id="menuBarOptionsBackendOptions" text="Backend options">
                         <graphic>
-                            <FontIcon iconLiteral="gmi-settings-input-component" iconSize="24" fill="black"/>
+                            <FontIcon iconLiteral="gmi-settings-input-component" styleClass="icon-size-medium" fill="black"/>
                         </graphic>
                     </MenuItem>
                 </Menu>

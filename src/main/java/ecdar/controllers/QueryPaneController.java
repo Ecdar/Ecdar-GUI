@@ -32,7 +32,7 @@ public class QueryPaneController implements Initializable {
     public JFXRippler clearAllQueriesButton;
     public JFXRippler addButton;
 
-    private Map<Query, QueryPresentation> queryPresentationMap = new HashMap<>();
+    private final Map<Query, QueryPresentation> queryPresentationMap = new HashMap<>();
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
@@ -71,6 +71,7 @@ public class QueryPaneController implements Initializable {
         }
 
         Ecdar.getProject().getQueries().forEach(query -> {
+            if (query.getType() == null) return;
             query.cancel();
             query.run(false);
         });

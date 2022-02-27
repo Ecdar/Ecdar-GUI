@@ -5,14 +5,16 @@
 <?import javafx.scene.shape.Circle?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.geometry.Insets?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="AnchorPane"
          fx:controller="ecdar.controllers.FileController">
-
     <JFXRippler id="rippler" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
-        <HBox style="-fx-padding: 0em 0.5em 0em 0.5em;"
-              minHeight="48" maxHeight="48">
+        <HBox style="-fx-min-height: 3.7em; -fx-max-height: 3.7em">
+            <padding>
+                <Insets topRightBottomLeft="10"/>
+            </padding>
             <StackPane>
                 <Circle id="iconBackground" radius="16"/>
                 <StackPane fx:id="filePane" minWidth="14" maxWidth="14" minHeight="20" maxHeight="20">
@@ -32,8 +34,8 @@
 
             <!-- MORE INFORMATION -->
             <JFXRippler fx:id="moreInformation" visible="false">
-                <StackPane minWidth="40" minHeight="40">
-                    <FontIcon id="moreInformationIcon" iconLiteral="gmi-more-vert" iconSize="24" fill="white"/>
+                <StackPane styleClass="responsive-icon-stack-pane-sizing">
+                    <FontIcon id="moreInformationIcon" iconLiteral="gmi-more-vert" fill="white" styleClass="icon-size-medium"/>
                 </StackPane>
             </JFXRippler>
         </HBox>
