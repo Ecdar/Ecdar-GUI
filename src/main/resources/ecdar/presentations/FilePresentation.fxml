@@ -10,14 +10,14 @@
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="AnchorPane"
          fx:controller="ecdar.controllers.FileController">
-    <JFXRippler id="rippler" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+    <JFXRippler id="rippler">
         <HBox style="-fx-min-height: 3.7em; -fx-max-height: 3.7em">
             <padding>
-                <Insets topRightBottomLeft="10"/>
+                <Insets top="10" bottom="10" left="20" right="20"/>
             </padding>
             <StackPane>
-                <Circle id="iconBackground" radius="16"/>
-                <StackPane fx:id="filePane" minWidth="14" maxWidth="14" minHeight="20" maxHeight="20">
+                <Circle id="iconBackground" radius="1.25" styleClass="responsive-circle-radius"/>
+                <StackPane fx:id="filePane" styleClass="responsive-image-sizing">
                     <ImageView fx:id="fileImage"/>
                 </StackPane>
             </StackPane>
@@ -40,5 +40,4 @@
             </JFXRippler>
         </HBox>
     </JFXRippler>
-
 </fx:root>

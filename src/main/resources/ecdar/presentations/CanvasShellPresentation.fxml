@@ -2,20 +2,22 @@
 
 <?import javafx.scene.layout.*?>
 
-        <?import com.jfoenix.controls.JFXRippler?>
-        <?import org.kordamp.ikonli.javafx.FontIcon?>
-        <?import ecdar.presentations.CanvasPresentation?>
+<?import com.jfoenix.controls.JFXRippler?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import ecdar.presentations.CanvasPresentation?>
 <?import javafx.geometry.Insets?>
 <fx:root xmlns="http://javafx.com/javafx"
          xmlns:fx="http://javafx.com/fxml"
          type="StackPane"
          fx:id="root"
-         fx:controller="ecdar.controllers.CanvasShellController">
+         fx:controller="ecdar.controllers.CanvasShellController"
+         alignment="TOP_LEFT">
     <CanvasPresentation fx:id="canvasPresentation"/>
-    <StackPane fx:id="toolbar"
-               StackPane.alignment="TOP_LEFT"
-               minHeight="56" maxHeight="56" maxWidth="224">
-        <HBox alignment="CENTER">
+    <VBox style="-fx-max-width: 15em">
+        <padding>
+            <Insets top="20"/>
+        </padding>
+        <HBox fx:id="toolbar" StackPane.alignment="TOP_LEFT" alignment="CENTER">
             <padding>
                 <Insets topRightBottomLeft="10"/>
             </padding>
@@ -53,5 +55,5 @@
                 </StackPane>
             </JFXRippler>
         </HBox>
-    </StackPane>
+    </VBox>
 </fx:root>

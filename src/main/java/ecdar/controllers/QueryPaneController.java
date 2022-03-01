@@ -12,6 +12,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
@@ -23,7 +24,7 @@ import java.util.ResourceBundle;
 public class QueryPaneController implements Initializable {
 
     public Label toolbarTitle;
-    public AnchorPane toolbar;
+    public HBox toolbar;
     public VBox queriesList;
     public StackPane root;
     public ScrollPane scrollPane;

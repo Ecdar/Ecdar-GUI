@@ -29,7 +29,7 @@
                             <Text fx:id="queryTypeSymbol" styleClass="sub-caption"
                                   style="-fx-text-alignment: left;"/>
                         </StackPane>
-                        <StackPane style="-fx-min-width: 1.2em; -fx-max-width: 1.2em;" styleClass="icon-size-x-small">
+                        <StackPane styleClass="responsive-icon-stack-pane-sizing">
                             <FontIcon id="queryTypeExpandIcon" iconLiteral="gmi-expand-more"
                                       styleClass="icon-size-x-small"/>
                         </StackPane>

@@ -68,7 +68,7 @@ public class EcdarController implements Initializable {
     public StackPane root;
     public QueryPanePresentation queryPane;
     public ProjectPanePresentation filePane;
-    public StackPane toolbar;
+    public HBox toolbar;
     public Label queryPaneFillerElement;
     public Label filePaneFillerElement;
     public StackPane dialogContainer;

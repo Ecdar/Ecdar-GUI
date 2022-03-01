@@ -278,14 +278,20 @@
 /* Response sizing for elements */
 .icon-size-medium {
     -fx-icon-size: 24; /* 1.8em */
+    -fx-scale-x: 0.05em;
+    -fx-scale-y: 0.05em;
 }
 
 .icon-size-small {
     -fx-icon-size: 20; /* 1.5em */
+    -fx-scale-x: 0.05em;
+    -fx-scale-y: 0.05em;
 }
 
 .icon-size-x-small {
     -fx-icon-size: 18; /* 1.4em */
+    -fx-scale-x: 0.05em;
+    -fx-scale-y: 0.05em;
 }
 
 .responsive-pane-sizing {
@@ -303,4 +309,16 @@
     -fx-max-width: 3em;
     -fx-min-height: 3em;
     -fx-max-height: 3em;
+}
+
+.responsive-image-sizing {
+    -fx-max-width: 1.1em;
+    -fx-min-width: 1.1em;
+    -fx-max-height: 1.5em;
+    -fx-min-height: 1.5em;
+}
+
+.responsive-circle-radius {
+    -fx-scale-x: 1em;
+    -fx-scale-y: 1em;
 }
