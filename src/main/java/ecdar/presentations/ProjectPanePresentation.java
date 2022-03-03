@@ -35,7 +35,7 @@ public class ProjectPanePresentation extends StackPane {
                 new BorderWidths(0, 1, 0, 0)
         )));
 
-        showBottomInset(true);
+        showBottomInset(false);
     }
 
     private void initializeBackground() {

@@ -28,7 +28,7 @@ public class QueryPanePresentation extends StackPane {
                 new BorderWidths(0, 0, 0, 1)
         )));
 
-        showBottomInset(true);
+        showBottomInset(false);
     }
 
     private void initializeBackground() {

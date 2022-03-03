@@ -24,10 +24,9 @@
                 </StackPane>
                 <Region style="-fx-max-height: 1em; -fx-min-height: 1em"/>
                 <JFXRippler fx:id="queryTypeExpand" style="-fx-max-height: 1.5em;">
-                    <HBox alignment="CENTER_RIGHT">
-                        <StackPane alignment="CENTER_LEFT">
-                            <Text fx:id="queryTypeSymbol" styleClass="sub-caption"
-                                  style="-fx-text-alignment: left;"/>
+                    <HBox alignment="CENTER">
+                        <StackPane>
+                            <Text fx:id="queryTypeSymbol" styleClass="sub-caption"/>
                         </StackPane>
                         <StackPane styleClass="responsive-icon-stack-pane-sizing">
                             <FontIcon id="queryTypeExpandIcon" iconLiteral="gmi-expand-more"

@@ -42,6 +42,7 @@ def protocVersion = protobufVersion
 
 dependencies {
     implementation fileTree(dir: 'lib', include: ['*.jar'])
+    implementation 'junit:junit:4.13.1'
 
     testImplementation group: 'junit', name: 'junit', version: '4.13.2'
     implementation 'com.jfoenix:jfoenix:9.0.10'
