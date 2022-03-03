@@ -31,6 +31,7 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
@@ -649,8 +650,15 @@ public class EcdarController implements Initializable {
             // Text do not scale on the canvas to avoid ugly elements,
             // this zooms in on the component in order to get the "same font size"
             EcdarController.getActiveCanvasPresentation().getController().zoomHelper.setZoomLevel(calculatedNewScale / 13);
-
             Ecdar.preferences.put("font_scale", rawNewScale);
+
+            // Scale icons
+            Set<Node> mediumIcons = root.lookupAll(".icon-size-medium");
+            for (Node icon : mediumIcons) icon.setStyle("-fx-icon-size: " + Math.floor(calculatedNewScale / 13.0 * 24) + "px;");
+            Set<Node> smallIcons = root.lookupAll(".icon-size-small");
+            for (Node icon : smallIcons) icon.setStyle("-fx-icon-size: " + Math.floor(calculatedNewScale / 13.0 * 20) + "px;");
+            Set<Node> xSmallIcons = root.lookupAll(".icon-size-x-small");
+            for (Node icon : xSmallIcons) icon.setStyle("-fx-icon-size: " + Math.floor(calculatedNewScale / 13.0 * 18) + "px;");
         });
 
         menuBarViewCanvasSplit.getGraphic().setOpacity(1);

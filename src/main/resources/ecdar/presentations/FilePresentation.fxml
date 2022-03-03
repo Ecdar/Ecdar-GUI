@@ -17,7 +17,7 @@
             </padding>
             <StackPane>
                 <Circle id="iconBackground" radius="1.25" styleClass="responsive-circle-radius"/>
-                <StackPane fx:id="filePane" styleClass="responsive-image-sizing">
+                <StackPane fx:id="filePane" styleClass="responsive-small-image-sizing">
                     <ImageView fx:id="fileImage"/>
                 </StackPane>
             </StackPane>

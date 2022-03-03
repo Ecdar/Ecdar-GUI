@@ -27,7 +27,7 @@
                 <!-- CREATE SYSTEM -->
                 <JFXRippler fx:id="createSystem">
                     <StackPane styleClass="responsive-icon-stack-pane-sizing" onMouseClicked="#createSystemClicked">
-                        <StackPane fx:id="createSystemPane" minWidth="23" maxWidth="23" minHeight="30" maxHeight="30">
+                        <StackPane fx:id="createSystemPane" styleClass="responsive-medium-image-sizing">
                             <ImageView fx:id="createSystemImage"/>
                         </StackPane>
                     </StackPane>
@@ -36,7 +36,7 @@
                 <!-- CREATE COMPONENT -->
                 <JFXRippler fx:id="createComponent">
                     <StackPane styleClass="responsive-icon-stack-pane-sizing" onMouseClicked="#createComponentClicked">
-                        <StackPane fx:id="createComponentPane" minWidth="23" maxWidth="23" minHeight="30" maxHeight="30">
+                        <StackPane fx:id="createComponentPane" styleClass="responsive-medium-image-sizing">
                             <ImageView fx:id="createComponentImage"/>
                         </StackPane>
                     </StackPane>
