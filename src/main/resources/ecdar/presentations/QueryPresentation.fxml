@@ -2,19 +2,24 @@
 <?import com.jfoenix.controls.*?>
 <?import javafx.scene.layout.*?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
-<?import java.lang.Double?>
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.text.Text?>
-<?import javafx.scene.control.Label?>
 <?import javafx.geometry.Insets?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="AnchorPane"
-         fx:controller="ecdar.controllers.QueryController"> <!-- ToDo NIELS: Remove sizing when scaling is working style="-fx-font-size: 13px;"-->
+         fx:controller="ecdar.controllers.QueryController">
     <VBox alignment="CENTER">
-        <HBox>
-            <VBox id="stateIndicator" style="-fx-max-width: 3em">
+        <GridPane style="-fx-min-width: 20em; -fx-max-width: 20em;">
+            <columnConstraints>
+                <ColumnConstraints hgrow="NEVER" percentWidth="20.0" halignment="CENTER"/>
+                <ColumnConstraints hgrow="NEVER" percentWidth="5.0" halignment="CENTER"/>
+                <ColumnConstraints hgrow="ALWAYS" percentWidth="50.0" halignment="LEFT"/>
+                <ColumnConstraints hgrow="NEVER" percentWidth="5.0" halignment="CENTER"/>
+                <ColumnConstraints hgrow="NEVER" percentWidth="20.0" halignment="CENTER"/>
+            </columnConstraints>
+            <VBox id="stateIndicator" GridPane.columnIndex="0">
                 <padding>
                     <Insets topRightBottomLeft="10"/>
                 </padding>
@@ -23,19 +28,15 @@
                     <FontIcon id="statusIcon" iconLiteral="gmi-hourglass-full" styleClass="icon-size-medium"/>
                 </StackPane>
                 <Region style="-fx-max-height: 1em; -fx-min-height: 1em"/>
-                <JFXRippler fx:id="queryTypeExpand" style="-fx-max-height: 1.5em;">
+                <JFXRippler fx:id="queryTypeExpand">
                     <HBox alignment="CENTER">
-                        <StackPane>
-                            <Text fx:id="queryTypeSymbol" styleClass="sub-caption"/>
-                        </StackPane>
-                        <StackPane styleClass="responsive-icon-stack-pane-sizing">
-                            <FontIcon id="queryTypeExpandIcon" iconLiteral="gmi-expand-more"
-                                      styleClass="icon-size-x-small"/>
-                        </StackPane>
+                        <Text fx:id="queryTypeSymbol" styleClass="sub-caption"/>
+                        <FontIcon id="queryTypeExpandIcon" iconLiteral="gmi-expand-more"
+                                  styleClass="icon-size-x-small"/>
                     </HBox>
                 </JFXRippler>
             </VBox>
-            <VBox style="-fx-min-width: 9em; -fx-max-width: 9em" spacing="10">
+            <VBox GridPane.columnIndex="2" spacing="10" alignment="CENTER_LEFT">
                 <padding>
                     <Insets topRightBottomLeft="10"/>
                 </padding>
@@ -46,7 +47,7 @@
                               style="-fx-unfocus-color:transparent;" styleClass="caption, responsive-text-area-sizing"
                               HBox.hgrow="ALWAYS" promptText="Comment"/>
             </VBox>
-            <VBox>
+            <VBox GridPane.columnIndex="4" alignment="CENTER">
                 <padding>
                     <Insets topRightBottomLeft="10"/>
                 </padding>
@@ -74,11 +75,9 @@
                     <JFXComboBox fx:id="backendsDropdown" styleClass="caption, responsive-text-area-sizing"/>
                 </StackPane>
             </VBox>
-        </HBox>
+        </GridPane>
 
-        <TitledPane id="inputOutputPane" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                    AnchorPane.topAnchor="116"
-                    AnchorPane.bottomAnchor="0.0" expanded="false" alignment="CENTER" visible="false">
+        <TitledPane id="inputOutputPane" expanded="false" alignment="CENTER" visible="false">
             <graphic>
                 <FontIcon id="inputOutputPaneExpandIcon" iconLiteral="gmi-keyboard-arrow-down"
                           styleClass="icon-size-x-small"/>
