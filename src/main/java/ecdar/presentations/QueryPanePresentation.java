@@ -27,8 +27,6 @@ public class QueryPanePresentation extends StackPane {
                 CornerRadii.EMPTY,
                 new BorderWidths(0, 0, 0, 1)
         )));
-
-        showBottomInset(false);
     }
 
     private void initializeBackground() {

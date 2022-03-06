@@ -34,8 +34,6 @@ public class ProjectPanePresentation extends StackPane {
                 CornerRadii.EMPTY,
                 new BorderWidths(0, 1, 0, 0)
         )));
-
-        showBottomInset(false);
     }
 
     private void initializeBackground() {

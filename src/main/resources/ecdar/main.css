@@ -277,15 +277,15 @@
 
 /* Response sizing for elements */
 .icon-size-medium {
-    -fx-icon-size: 24; /* 1.8em */
+    -fx-icon-size: 24;
 }
 
 .icon-size-small {
-    -fx-icon-size: 20; /* 1.5em */
+    -fx-icon-size: 20;
 }
 
 .icon-size-x-small {
-    -fx-icon-size: 18; /* 1.4em */
+    -fx-icon-size: 18;
 }
 
 .responsive-pane-sizing {
