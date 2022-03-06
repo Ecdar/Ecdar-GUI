@@ -42,7 +42,7 @@
 
         <left>
             <VBox fx:id="inputContainer" minHeight="80" prefHeight="80" maxHeight="80"
-                  style="-fx-padding: 12 5 5 5;" spacing="6">
+                  style="-fx-padding: 0.9em 0.4em 0.4em 0.4em;" spacing="6">
                 <VBox fx:id="inputSignature" minHeight="60" prefHeight="60" maxHeight="60"/>
                 <Label fx:id="inputOverflowLabel" alignment="CENTER" opacity="0" maxWidth="90"
                        styleClass="caption" style="-fx-text-fill: -grey-500;"/>
@@ -51,7 +51,7 @@
 
         <right>
             <VBox fx:id="outputContainer" minHeight="80" prefHeight="80" maxHeight="80"
-                  style="-fx-padding: 12 5 5 5;" spacing="6">
+                  style="-fx-padding: 0.9em 0.4em 0.4em 0.4em;" spacing="6">
                 <VBox fx:id="outputSignature" minHeight="60" prefHeight="60" maxHeight="60"/>
                 <Label fx:id="outputOverflowLabel" alignment="CENTER" opacity="0" maxWidth="90"
                        styleClass="caption" style="-fx-text-fill: -grey-500;"/>

@@ -31,13 +31,15 @@ import jiconfont.javafx.IconFontFX;
 import org.apache.commons.io.FileUtils;
 
 import java.io.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.prefs.Preferences;
 
 import java.net.URISyntaxException;
 import java.security.CodeSource;
 
 public class Ecdar extends Application {
-    public static Preferences preferences = Preferences.userRoot().node("ECDAR");;
+    public static Preferences preferences = Preferences.userRoot().node("ECDAR");
     public static final String VERSION = "2.1";
     public static boolean serializationDone = false;
     private static Project project;
@@ -45,7 +47,7 @@ public class Ecdar extends Application {
     public static SimpleStringProperty projectDirectory = new SimpleStringProperty();
     private static BooleanProperty isUICached = new SimpleBooleanProperty();
     private static final BooleanProperty isSplit = new SimpleBooleanProperty(true); //Set to true to ensure correct behaviour at first toggle.
-    private static BackendDriver backendDriver;
+    private static final BackendDriver backendDriver = new BackendDriver();
     private Stage debugStage;
 
     /**
@@ -73,7 +75,36 @@ public class Ecdar extends Application {
         return jarFile.getParentFile().getPath();
     }
 
+    /**
+     * Suppresses warnings of illegal reflective access.
+     * jFoenix performs illegal reflection inorder to access private methods/fields in the JavaFX code.
+     * This comes with some performance benefits and is a technique used, allegedly, in many libraries.
+     * The warnings are unlikely to be solved or enforced in such a way that the system breaks, see:
+     * https://github.com/sshahine/JFoenix/issues/1170
+     * The solution is taken from this answer: https://stackoverflow.com/a/46551505
+     * All credit for this method goes to: Rafael Winterhalter
+     */
+    @SuppressWarnings("unchecked")
+    public static void disableAccessWarnings() {
+        try {
+            Class unsafeClass = Class.forName("sun.misc.Unsafe");
+            Field field = unsafeClass.getDeclaredField("theUnsafe");
+            field.setAccessible(true);
+            Object unsafe = field.get(null);
+
+            Method putObjectVolatile = unsafeClass.getDeclaredMethod("putObjectVolatile", Object.class, long.class, Object.class);
+            Method staticFieldOffset = unsafeClass.getDeclaredMethod("staticFieldOffset", Field.class);
+
+            Class loggerClass = Class.forName("jdk.internal.module.IllegalAccessLogger");
+            Field loggerField = loggerClass.getDeclaredField("logger");
+            Long offset = (Long) staticFieldOffset.invoke(unsafe, loggerField);
+            putObjectVolatile.invoke(unsafe, loggerClass, offset, null);
+        } catch (Exception ignored) {
+        }
+    }
+
     public static void main(final String[] args) {
+        disableAccessWarnings();
         launch(Ecdar.class, args);
     }
 
@@ -159,7 +190,6 @@ public class Ecdar extends Application {
         // Load the fonts required for the project
         IconFontFX.register(GoogleMaterialDesignIcons.getIconFont());
         loadFonts();
-        loadPreferences();
 
         // Remove the classic decoration
         // kyrke - 2020-04-17: Disabled due to bug https://bugs.openjdk.java.net/browse/JDK-8154847
@@ -181,6 +211,8 @@ public class Ecdar extends Application {
         scene.getStylesheets().add("ecdar/main.css");
         scene.getStylesheets().add("ecdar/colors.css");
         scene.getStylesheets().add("ecdar/model_canvas.css");
+        scene.getStylesheets().add("ecdar/query_pane.css");
+        scene.getStylesheets().add("ecdar/scroll_pane.css");
 
         // Handle a mouse click as a deselection of all elements
         scene.setOnMousePressed(event -> {
@@ -256,16 +288,6 @@ public class Ecdar extends Application {
             Platform.exit();
             System.exit(0);
         });
-    }
-
-    private void loadPreferences() {
-        BackendHelper.defaultBackend = preferences.getInt("default_backend", BackendHelper.BackendNames.jEcdar.ordinal())
-                == BackendHelper.BackendNames.jEcdar.ordinal()
-                ? BackendHelper.BackendNames.jEcdar
-                : BackendHelper.BackendNames.Reveaal;
-
-        backendDriver = new BackendDriver(preferences.get("backend_host_address", "127.0.0.1"));
-        getBackendDriver().setMaxNumberOfConnections(preferences.getInt("number_of_backend_sockets", 5));
     }
 
     /**
@@ -350,6 +372,5 @@ public class Ecdar extends Application {
         Font.loadFont(getClass().getResourceAsStream("fonts/roboto_mono/RobotoMono-Regular.ttf"), 14);
         Font.loadFont(getClass().getResourceAsStream("fonts/roboto_mono/RobotoMono-Thin.ttf"), 14);
         Font.loadFont(getClass().getResourceAsStream("fonts/roboto_mono/RobotoMono-ThinItalic.ttf"), 14);
-
     }
 }

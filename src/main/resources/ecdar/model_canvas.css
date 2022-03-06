@@ -1,5 +1,5 @@
 .component-frame {
-    -fx-stroke-width: 2;
+    -fx-stroke-width: 0.2em;
 }
 
 .component-frame.selected {
@@ -24,7 +24,7 @@
 }
 
 .location {
-    -fx-stroke-width: 1;
+    -fx-stroke-width: 0.1em;
     -fx-stroke-type: inside;
 }
 
@@ -35,7 +35,7 @@
 
 .initial-location-inner-circle {
     -fx-fill: rgba(0,0,0,0);
-    -fx-stroke-width: 2;
+    -fx-stroke-width: 0.2em;
 }
 
 .location-label {
@@ -49,7 +49,7 @@
 
 .link {
     -fx-stroke: -primary-color-darkest;
-    -fx-stroke-width: 1;
+    -fx-stroke-width: 0.1em;
 }
 
 .link.selected {
@@ -57,7 +57,7 @@
 }
 
 .nail {
-    -fx-stroke-width: 1;
+    -fx-stroke-width: 0.1em;
 }
 
 .nail.selected {
@@ -70,24 +70,24 @@
 }
 
 .component-label-container {
-    -fx-stroke-width: 1;
+    -fx-stroke-width: 0.1em;
 }
 
 .component-stroke {
-    -fx-stroke-width: 1;
+    -fx-stroke-width: 0.1em;
 }
 
 .channel-box {
     -fx-fill: -primary-color;
     -fx-stroke: -primary-color-darker;
-    -fx-stroke-width: 1;
+    -fx-stroke-width: 0.1em;
 }
 
 .edge-properties .icon-container .icon-background {
     -fx-fill: -primary-color;
     -fx-stroke: -primary-color-darker;
     -fx-stroke-type: centered;
-    -fx-stroke-width: 1;
+    -fx-stroke-width: 0.1em;
 }
 
 .edge-properties .icon-container .icon-label {
@@ -100,18 +100,18 @@
     -fx-fill: -white;
     -fx-stroke: -primary-color-darker;
     -fx-stroke-type: centered;
-    -fx-stroke-width: 1;
+    -fx-stroke-width: 0.1em;
 }
 
 .edge-properties .value-container .value-text-field{
     -fx-text-alignment: left;
     -fx-alignment: center-left;
     -fx-text-fill: -primary-text-color;
-    -fx-padding: 3 5 3 5;
+    -fx-padding: 0.19em 0.45em 0.19em 0.4em;
     -fx-background-color: white;
-    -fx-stroke-width: 0;
-    -fx-border-radius: 0 0 0 0;
-    -fx-background-radius: 0 0 0 0;
+    -fx-stroke-width: 0em;
+    -fx-border-radius: 0em 0em 0em 0em;
+    -fx-background-radius: 0em 0em 0em 0em;
     -fx-focus-color: -primary-color;
     -fx-unfocus-color: transparent;
 }
