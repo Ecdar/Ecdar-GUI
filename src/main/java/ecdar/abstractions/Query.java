@@ -5,16 +5,12 @@ import ecdar.backend.*;
 import ecdar.controllers.EcdarController;
 import ecdar.utility.serialize.Serializable;
 import com.google.gson.JsonObject;
-import com.uppaal.engine.Engine;
 import javafx.application.Platform;
 import javafx.beans.property.*;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Query implements Serializable {
     private static final String QUERY = "query";
@@ -143,6 +139,7 @@ public class Query implements Serializable {
             
             if (getQuery().isEmpty()) {
                 setQueryState(QueryState.SYNTAX_ERROR);
+                this.addError("Query is empty");
                 return;
             }
 
