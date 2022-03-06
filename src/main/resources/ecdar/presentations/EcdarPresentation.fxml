@@ -24,12 +24,13 @@
                 <StackPane fx:id="canvasPane">
                     <!-- Canvases go here -->
                 </StackPane>
+                <!-- Max height is set to -Infinity to avoid toolbar from intercepting all mouse events on the canvas -->
                 <VBox maxHeight="-Infinity">
-                    <HBox fx:id="toolbar" StackPane.alignment="TOP_CENTER">
+                    <HBox fx:id="toolbar" HBox.hgrow="ALWAYS">
                         <padding>
                             <Insets topRightBottomLeft="10"/>
                         </padding>
-                        <HBox>
+                        <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
                             <!-- UNDO -->
                             <JFXRippler fx:id="undo">
                                 <StackPane styleClass="responsive-icon-stack-pane-sizing" onMouseClicked="#undoClicked">
@@ -62,9 +63,8 @@
                                            onMouseClicked="#switchToOutputClicked"
                                            styleClass="button" style="-fx-padding: 0.5em 1em 0.5em 1em"/>
                             </HBox>
-
-                            <Region HBox.hgrow="ALWAYS"/>
-
+                        </HBox>
+                        <HBox alignment="CENTER_RIGHT">
                             <!-- DELETE SELECTED -->
                             <JFXRippler fx:id="deleteSelected">
                                 <StackPane styleClass="responsive-icon-stack-pane-sizing"

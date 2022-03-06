@@ -13,7 +13,7 @@
          fx:controller="ecdar.controllers.QueryPaneController">
     <VBox>
         <!-- Toolbar -->
-        <HBox fx:id="toolbar" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+        <HBox fx:id="toolbar">
             <padding>
                 <Insets topRightBottomLeft="10"/>
             </padding>
@@ -23,7 +23,7 @@
                        text="Queries"/>
             </HBox>
 
-            <HBox alignment="CENTER_RIGHT" maxHeight="-Infinity">
+            <HBox alignment="CENTER_RIGHT">
                 <!-- Add query -->
                 <JFXRippler fx:id="addButton">
                     <StackPane styleClass="responsive-icon-stack-pane-sizing" onMouseClicked="#addButtonClicked">
