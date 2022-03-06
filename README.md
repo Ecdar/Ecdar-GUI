@@ -5,13 +5,13 @@ This repo contains the source code for the graphical user interface, in order to
 j-ecdar and revaal executables.
 
 ## Dependencies
-This repository utilizes the Ecdar-Proto repository for structuring the communication between the GUI and the engines. This dependency is implemented as a submodule which needs to be pull and updated. If you have not yet cloned the code in this repository (the GUI), you can clone both the GUI and the Proto repository by running the command below:
+This repository utilizes the Ecdar-Proto repository for structuring the communication between the GUI and the engines. This dependency is implemented as a submodule which needs to be pulled and updated. If you have not yet cloned the code from this repository (the GUI), you can clone both the GUI and the submodule containing the Proto repository by running the following command:
 
 ``` sh
 git clone --recurse-submodules git@github.com:Ecdar/Ecdar-GUI.git
 ```
 
-If you have already cloned this repository, you can clone the Proto submodule by running the command below, from a terminal inside the cloned GUI repository:
+If you have already cloned this repository, you can clone the Proto submodule by running the following command, from a terminal inside the GUI repository directory:
 
 ``` sh
 git submodule update --init --recursive
