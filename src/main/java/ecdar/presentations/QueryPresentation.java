@@ -42,6 +42,9 @@ public class QueryPresentation extends AnchorPane {
         initializeInputOutputPaneAndAddIgnoredInputOutputs();
         initializeMoreInformationButtonAndQueryTypeSymbol();
         initializeBackendsDropdown();
+
+        // Ensure that the icons are scaled to current font scale
+        Platform.runLater(() -> Ecdar.getPresentation().getController().scaleIcons(this));
     }
 
     private void initializeBackendsDropdown() {

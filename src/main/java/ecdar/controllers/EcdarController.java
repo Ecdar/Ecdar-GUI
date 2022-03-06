@@ -194,6 +194,34 @@ public class EcdarController implements Initializable {
         return globalEdgeStatus.get();
     }
 
+    /**
+     * Finds and scales all icon nodes below the given node in accordance with the current font scaling, using -fx-icon-size
+     *
+     * @param node The "root" to start the search from
+     */
+    public void scaleIcons(Node node) {
+        Platform.runLater(() -> {
+            double calculatedNewScale = (Double.parseDouble(fontScaling.getSelectedToggle().getProperties().get("scale").toString()) *
+                    Ecdar.getDpiScale()) * 13.0;
+            scaleIcons(node, calculatedNewScale);
+        });
+    }
+
+    private void scaleIcons(Node node, double size) {
+        // Scale icons
+        Set<Node> mediumIcons = node.lookupAll(".icon-size-medium");
+        for (Node icon : mediumIcons)
+            icon.setStyle("-fx-icon-size: " + Math.floor(size / 13.0 * 24) + "px;");
+
+        Set<Node> smallIcons = node.lookupAll(".icon-size-small");
+        for (Node icon : smallIcons)
+            icon.setStyle("-fx-icon-size: " + Math.floor(size / 13.0 * 20) + "px;");
+
+        Set<Node> xSmallIcons = node.lookupAll(".icon-size-x-small");
+        for (Node icon : xSmallIcons)
+            icon.setStyle("-fx-icon-size: " + Math.floor(size / 13.0 * 18) + "px;");
+    }
+
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
         initilizeDialogs();
@@ -653,12 +681,7 @@ public class EcdarController implements Initializable {
             Ecdar.preferences.put("font_scale", rawNewScale);
 
             // Scale icons
-            Set<Node> mediumIcons = root.lookupAll(".icon-size-medium");
-            for (Node icon : mediumIcons) icon.setStyle("-fx-icon-size: " + Math.floor(calculatedNewScale / 13.0 * 24) + "px;");
-            Set<Node> smallIcons = root.lookupAll(".icon-size-small");
-            for (Node icon : smallIcons) icon.setStyle("-fx-icon-size: " + Math.floor(calculatedNewScale / 13.0 * 20) + "px;");
-            Set<Node> xSmallIcons = root.lookupAll(".icon-size-x-small");
-            for (Node icon : xSmallIcons) icon.setStyle("-fx-icon-size: " + Math.floor(calculatedNewScale / 13.0 * 18) + "px;");
+            scaleIcons(root, calculatedNewScale);
         });
 
         menuBarViewCanvasSplit.getGraphic().setOpacity(1);
