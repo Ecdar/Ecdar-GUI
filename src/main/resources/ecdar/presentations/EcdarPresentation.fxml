@@ -50,7 +50,7 @@
                             <Region minWidth="16"/>
 
                             <!-- Switch between input and output edges -->
-                            <HBox alignment="CENTER" spacing="-5">
+                            <HBox alignment="CENTER" spacing="-5" style="-fx-padding: -1em 0em -1em 0em;">
                                 <JFXButton fx:id="switchToInputButton" text="Input" textFill="white"
                                            onMouseClicked="#switchToInputClicked"
                                            styleClass="button" style="-fx-padding: 0.5em 1em 0.5em 1em"/>
