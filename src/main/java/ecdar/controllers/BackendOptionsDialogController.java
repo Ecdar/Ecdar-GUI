@@ -174,8 +174,7 @@ public class BackendOptionsDialogController implements Initializable {
         List<File> potentialFilesForReveaal = List.of(
                 new File("lib/Reveaal.exe"), new File("lib/Reveaal")
         );
-        setBackendPathIfFileExists(reveaal, potentialFilesForReveaal);
-        defaultBackends.add(reveaal);
+        if (setBackendPathIfFileExists(reveaal, potentialFilesForReveaal)) defaultBackends.add(reveaal);
 
         // Add jECDAR engine
         var jEcdar = new BackendInstance();
@@ -189,8 +188,7 @@ public class BackendOptionsDialogController implements Initializable {
         List<File> potentialFiledForJEcdar = List.of(
                 new File("lib/j-Ecdar.exe"), new File("lib/j-Ecdar.bat")
         );
-        setBackendPathIfFileExists(jEcdar, potentialFiledForJEcdar);
-        defaultBackends.add(jEcdar);
+        if (setBackendPathIfFileExists(jEcdar, potentialFiledForJEcdar)) defaultBackends.add(jEcdar);
 
         return defaultBackends;
     }
@@ -200,7 +198,7 @@ public class BackendOptionsDialogController implements Initializable {
      * @param engine         The backend instance of the engine to set the path for
      * @param potentialFiles List of potential files to use for the engine
      */
-    private void setBackendPathIfFileExists(BackendInstance engine, List<File> potentialFiles) {
+    private boolean setBackendPathIfFileExists(BackendInstance engine, List<File> potentialFiles) {
         engine.setBackendLocation("");
 
         for (var f : potentialFiles) {
@@ -211,8 +209,13 @@ public class BackendOptionsDialogController implements Initializable {
         }
 
         if (engine.getBackendLocation().equals("")) {
-            throw new RuntimeException("Could not locate file for default engine, checked: " + potentialFiles.stream().map(File::getPath).collect(Collectors.joining(", ")));
+            Ecdar.showToast("File for packaged backend: " + engine.getName() +
+                    " could not be loaded. Please make sure that at least one of the following files is placed in the 'lib' directory: " +
+                    potentialFiles.stream().map(File::getPath).collect(Collectors.joining(", ")));
+            return false;
         }
+
+        return true;
     }
 
     /**
