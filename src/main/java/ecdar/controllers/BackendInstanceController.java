@@ -6,7 +6,6 @@ import com.jfoenix.controls.JFXTextField;
 import ecdar.abstractions.BackendInstance;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.Property;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Cursor;
@@ -62,8 +61,8 @@ public class BackendInstanceController implements Initializable {
             moveBackendInstanceDownRippler.setCursor(Cursor.HAND);
             setHGrow();
 
-            coloredIconAsDisabledBasedOnProperty(removeBackendIcon, defaultBackendRadioButton.selectedProperty());
-            coloredIconAsDisabledBasedOnProperty(pickPathToBackendIcon, backendInstance.getLockedProperty());
+            colorIconAsDisabledBasedOnProperty(removeBackendIcon, defaultBackendRadioButton.selectedProperty());
+            colorIconAsDisabledBasedOnProperty(pickPathToBackendIcon, backendInstance.getLockedProperty());
         });
     }
 
@@ -72,7 +71,7 @@ public class BackendInstanceController implements Initializable {
      * @param icon The icon to change the color of
      * @param property The property to bind to
      */
-    private void coloredIconAsDisabledBasedOnProperty(FontIcon icon, BooleanProperty property) {
+    private void colorIconAsDisabledBasedOnProperty(FontIcon icon, BooleanProperty property) {
         // Disallow the user to pick new backend file location for locked backends
         property.addListener((observable, oldValue, newValue) -> {
             if (newValue) {
