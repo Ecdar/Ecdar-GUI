@@ -70,7 +70,7 @@
                                     <StackPane minWidth="20" minHeight="20"
                                                onMouseClicked="#openPathToBackendDialog"
                                                StackPane.alignment="TOP_RIGHT">
-                                        <FontIcon iconLiteral="gmi-open-in-new" iconSize="20" fill="black"/>
+                                        <FontIcon fx:id="pickPathToBackendIcon" iconLiteral="gmi-open-in-new" iconSize="20" fill="black"/>
                                     </StackPane>
                                 </JFXRippler>
                             </HBox>
