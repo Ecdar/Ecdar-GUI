@@ -275,6 +275,13 @@
     -fx-border-width: 0.1em;
 }
 
+.toggle-button {
+    -jfx-toggle-color:#dddddd;-jfx-untoggle-color:#dddddd;
+    -jfx-toggle-line-color:#7C8B92;-jfx-untoggle-line-color:#7C8B92;
+    -fx-padding: 0em 0em 0em 0em;
+    -fx-font-size: 1em;
+}
+
 /* Response sizing for elements */
 .icon-size-medium {
     -fx-icon-size: 24;

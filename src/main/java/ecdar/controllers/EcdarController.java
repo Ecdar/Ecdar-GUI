@@ -38,6 +38,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
@@ -143,10 +145,13 @@ public class EcdarController implements Initializable {
     public MenuItem menuBarViewGrid;
     public Menu menuViewMenuFontScaling;
     public ToggleGroup fontScaling;
+    public RadioMenuItem fontScaleXS;
     public RadioMenuItem fontScaleS;
     public RadioMenuItem fontScaleM;
     public RadioMenuItem fontScaleL;
     public RadioMenuItem fontScaleXL;
+    public RadioMenuItem fontScaleXXL;
+    public RadioMenuItem fontScaleXXXL;
     public MenuItem menuBarViewCanvasSplit;
     public MenuItem menuBarFileCreateNewProject;
     public MenuItem menuBarFileOpenProject;
@@ -220,6 +225,18 @@ public class EcdarController implements Initializable {
         Set<Node> xSmallIcons = node.lookupAll(".icon-size-x-small");
         for (Node icon : xSmallIcons)
             icon.setStyle("-fx-icon-size: " + Math.floor(size / 13.0 * 18) + "px;");
+    }
+
+    private void scaleEdgeStatusToggle(double size) {
+        Line edgeStatusToggleLine = (Line) ((StackPane) switchEdgeStatusButton.getChildrenUnmodifiable().get(0)).getChildren().get(0);
+        Circle edgeStatusToggleCircle = (Circle) ((StackPane) ((JFXRippler) switchEdgeStatusButton.lookup(".jfx-rippler")).getChildren().get(1)).getChildren().get(0);
+        edgeStatusToggleLine.setEndX(size / 13.0 * 20);
+        edgeStatusToggleLine.setStrokeWidth(size / 13.0 * 15);
+        edgeStatusToggleCircle.setRadius(size / 13.0 * 10);
+
+        // Toggle the edge status toggle to realign circle
+        switchEdgeStatusButton.setSelected(!switchEdgeStatusButton.isSelected());
+        switchEdgeStatusButton.setSelected(!switchEdgeStatusButton.isSelected());
     }
 
     @Override
@@ -406,6 +423,9 @@ public class EcdarController implements Initializable {
                 switchEdgeStatusButton.setSelected(true);
             }
         }));
+
+        // Ensure that the rippler is centered when scale is changed
+        Platform.runLater(() -> ((JFXRippler) switchEdgeStatusButton.lookup(".jfx-rippler")).setRipplerRecenter(true));
     }
 
     private void initializeReachabilityAnalysisThread() {
@@ -680,8 +700,8 @@ public class EcdarController implements Initializable {
             EcdarController.getActiveCanvasPresentation().getController().zoomHelper.setZoomLevel(calculatedNewScale / 13);
             Ecdar.preferences.put("font_scale", rawNewScale);
 
-            // Scale icons
             scaleIcons(root, calculatedNewScale);
+            scaleEdgeStatusToggle(calculatedNewScale);
         });
 
         menuBarViewCanvasSplit.getGraphic().setOpacity(1);

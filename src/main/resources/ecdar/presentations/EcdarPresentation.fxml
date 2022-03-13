@@ -56,9 +56,7 @@
                                            styleClass="button" style="-fx-padding: 0.5em 1em 0.5em 1em"/>
                                 <JFXToggleButton fx:id="switchEdgeStatusButton"
                                                  onMouseClicked="#switchEdgeStatusClicked"
-                                                 style="-jfx-toggle-color:#dddddd;-jfx-untoggle-color:#dddddd;
-                                             -jfx-toggle-line-color:#7C8B92;-jfx-untoggle-line-color:#7C8B92;
-                                             -fx-padding: 0em 0em 0em 0em"/>
+                                                 styleClass="toggle-button"/>
                                 <JFXButton fx:id="switchToOutputButton" text="Output" textFill="grey"
                                            onMouseClicked="#switchToOutputClicked"
                                            styleClass="button" style="-fx-padding: 0.5em 1em 0.5em 1em"/>
@@ -205,6 +203,9 @@
                         <fx:define>
                             <ToggleGroup fx:id="fontScaling"/>
                         </fx:define>
+                        <RadioMenuItem fx:id="fontScaleXS" toggleGroup="$fontScaling" text="0.5x">
+                            <properties scale="0.5"/>
+                        </RadioMenuItem>
                         <RadioMenuItem fx:id="fontScaleS" toggleGroup="$fontScaling" text="0.75x">
                             <properties scale="0.75"/>
                         </RadioMenuItem>
@@ -216,6 +217,12 @@
                         </RadioMenuItem>
                         <RadioMenuItem fx:id="fontScaleXL" toggleGroup="$fontScaling" text="1.5x">
                             <properties scale="1.5"/>
+                        </RadioMenuItem>
+                        <RadioMenuItem fx:id="fontScaleXXL" toggleGroup="$fontScaling" text="1.75x">
+                            <properties scale="1.75"/>
+                        </RadioMenuItem>
+                        <RadioMenuItem fx:id="fontScaleXXXL" toggleGroup="$fontScaling" text="2.0x">
+                            <properties scale="2.0"/>
                         </RadioMenuItem>
                     </Menu>
 
