@@ -11,7 +11,6 @@
          type="StackPane"
          fx:id="root"
          fx:controller="ecdar.controllers.CanvasShellController"
-         styleClass="canvas-shell"
          alignment="TOP_LEFT">
     <CanvasPresentation fx:id="canvasPresentation"/>
     <VBox maxHeight="-Infinity" style="-fx-max-width: 15em">

@@ -206,9 +206,7 @@ public class EcdarController implements Initializable {
      */
     public void scaleIcons(Node node) {
         Platform.runLater(() -> {
-            double calculatedNewScale = (Double.parseDouble(fontScaling.getSelectedToggle().getProperties().get("scale").toString()) *
-                    Ecdar.getDpiScale()) * 13.0;
-            scaleIcons(node, calculatedNewScale);
+            scaleIcons(node, getCalculatedNewScale());
         });
     }
 
@@ -227,14 +225,13 @@ public class EcdarController implements Initializable {
             icon.setStyle("-fx-icon-size: " + Math.floor(size / 13.0 * 18) + "px;");
     }
 
+    private double getCalculatedNewScale() {
+        return (Double.parseDouble(fontScaling.getSelectedToggle().getProperties().get("scale").toString()) * Ecdar.getDpiScale()) * 13.0;
+    }
+
     private void scaleEdgeStatusToggle(double size) {
         switchEdgeStatusButton.setScaleX(size / 13.0);
         switchEdgeStatusButton.setScaleY(size / 13.0);
-
-        Set<Node> canvasShells = canvasPane.lookupAll(".canvas-shell");
-        for (Node canvasShell : canvasShells) {
-            canvasShell.setTranslateY(Math.floor(size / 13.0 * 20));
-        }
     }
 
     @Override
@@ -688,15 +685,14 @@ public class EcdarController implements Initializable {
         });
 
         fontScaling.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
-            String rawNewScale = newValue.getProperties().get("scale").toString();
-            double calculatedNewScale = (Double.parseDouble(rawNewScale) * Ecdar.getDpiScale()) * 13.0;
+            double calculatedNewScale = getCalculatedNewScale();
 
             Ecdar.getPresentation().setStyle("-fx-font-size: " + calculatedNewScale + "px;");
 
             // Text do not scale on the canvas to avoid ugly elements,
             // this zooms in on the component in order to get the "same font size"
             EcdarController.getActiveCanvasPresentation().getController().zoomHelper.setZoomLevel(calculatedNewScale / 13);
-            Ecdar.preferences.put("font_scale", rawNewScale);
+            Ecdar.preferences.put("font_scale", newValue.getProperties().get("scale").toString());
 
             scaleIcons(root, calculatedNewScale);
             scaleEdgeStatusToggle(calculatedNewScale);
@@ -939,7 +935,6 @@ public class EcdarController implements Initializable {
             canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(Ecdar.getProject().getComponents().get(0));
         }
 
-        canvasShellPresentation.getController().toolbar.setTranslateY(48);
         canvasPane.getChildren().add(canvasShellPresentation);
         activeCanvasPresentation.set(canvasShellPresentation.getController().canvasPresentation);
         filePane.getController().updateColorsOnFilePresentations();
