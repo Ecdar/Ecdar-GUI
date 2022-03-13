@@ -11,12 +11,10 @@
          type="StackPane"
          fx:id="root"
          fx:controller="ecdar.controllers.CanvasShellController"
+         styleClass="canvas-shell"
          alignment="TOP_LEFT">
     <CanvasPresentation fx:id="canvasPresentation"/>
-    <VBox style="-fx-max-width: 15em">
-        <padding>
-            <Insets top="20"/>
-        </padding>
+    <VBox maxHeight="-Infinity" style="-fx-max-width: 15em">
         <HBox fx:id="toolbar" StackPane.alignment="TOP_LEFT" alignment="CENTER">
             <padding>
                 <Insets topRightBottomLeft="10"/>

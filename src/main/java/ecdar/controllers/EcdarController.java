@@ -228,15 +228,13 @@ public class EcdarController implements Initializable {
     }
 
     private void scaleEdgeStatusToggle(double size) {
-        Line edgeStatusToggleLine = (Line) ((StackPane) switchEdgeStatusButton.getChildrenUnmodifiable().get(0)).getChildren().get(0);
-        Circle edgeStatusToggleCircle = (Circle) ((StackPane) ((JFXRippler) switchEdgeStatusButton.lookup(".jfx-rippler")).getChildren().get(1)).getChildren().get(0);
-        edgeStatusToggleLine.setEndX(size / 13.0 * 20);
-        edgeStatusToggleLine.setStrokeWidth(size / 13.0 * 15);
-        edgeStatusToggleCircle.setRadius(size / 13.0 * 10);
+        switchEdgeStatusButton.setScaleX(size / 13.0);
+        switchEdgeStatusButton.setScaleY(size / 13.0);
 
-        // Toggle the edge status toggle to realign circle
-        switchEdgeStatusButton.setSelected(!switchEdgeStatusButton.isSelected());
-        switchEdgeStatusButton.setSelected(!switchEdgeStatusButton.isSelected());
+        Set<Node> canvasShells = canvasPane.lookupAll(".canvas-shell");
+        for (Node canvasShell : canvasShells) {
+            canvasShell.setTranslateY(Math.floor(size / 13.0 * 20));
+        }
     }
 
     @Override
@@ -943,9 +941,7 @@ public class EcdarController implements Initializable {
 
         canvasShellPresentation.getController().toolbar.setTranslateY(48);
         canvasPane.getChildren().add(canvasShellPresentation);
-
         activeCanvasPresentation.set(canvasShellPresentation.getController().canvasPresentation);
-
         filePane.getController().updateColorsOnFilePresentations();
     }
 
@@ -980,19 +976,16 @@ public class EcdarController implements Initializable {
         // Add the canvasShellPresentation at the top-left
         CanvasShellPresentation canvasShellPresentation = initializeNewCanvasShellPresentation();
         canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(getActiveCanvasPresentation().getController().getActiveModel());
-        canvasShellPresentation.getController().toolbar.setTranslateY(48);
         canvasGrid.add(canvasShellPresentation, 0, 0);
         setActiveCanvasPresentation(canvasShellPresentation.getController().canvasPresentation);
 
         // Add the canvasShellPresentation at the top-right
         canvasShellPresentation = initializeNewCanvasShellPresentationWithActiveComponent(components, currentCompNum);
-        canvasShellPresentation.getController().toolbar.setTranslateY(48);
         canvasShellPresentation.setOpacity(0.75);
         canvasGrid.add(canvasShellPresentation, 1, 0);
 
         // Update the startIndex for the next canvasShellPresentation
         for (int i = 0; i < numComponents; i++) {
-
             if (canvasShellPresentation.getController().canvasPresentation.getController().getActiveModel() != null && canvasShellPresentation.getController().canvasPresentation.getController().getActiveModel().equals(components.get(i))) {
                 currentCompNum = i + 1;
             }
@@ -1015,7 +1008,6 @@ public class EcdarController implements Initializable {
         canvasGrid.add(canvasShellPresentation, 1, 1);
 
         canvasPane.getChildren().add(canvasGrid);
-
         filePane.getController().updateColorsOnFilePresentations();
     }
 
