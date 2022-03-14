@@ -406,6 +406,7 @@ public class EcdarController implements Initializable {
 
         Tooltip.install(switchToInputButton, new Tooltip("Switch to input mode"));
         Tooltip.install(switchToOutputButton, new Tooltip("Switch to output mode"));
+        switchToInputButton.setDisableVisualFocus(true); // Hiding input button rippler on start-up
 
         globalEdgeStatus.addListener(((observable, oldValue, newValue) -> {
             if (newValue.equals(EdgeStatus.INPUT)) {
