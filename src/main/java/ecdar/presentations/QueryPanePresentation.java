@@ -27,6 +27,8 @@ public class QueryPanePresentation extends StackPane {
                 CornerRadii.EMPTY,
                 new BorderWidths(0, 0, 0, 1)
         )));
+
+        showBottomInset(true);
     }
 
     private void initializeBackground() {
@@ -85,7 +87,7 @@ public class QueryPanePresentation extends StackPane {
 
         controller.scrollPane.setBorder(new Border(new BorderStroke(
                 Color.GREY.getColor(Color.Intensity.I400),
-                BorderStrokeStyle.SOLID,
+                BorderStrokeStyle.NONE,
                 CornerRadii.EMPTY,
                 new BorderWidths(0, 1, bottomInsetWidth, 0)
         )));

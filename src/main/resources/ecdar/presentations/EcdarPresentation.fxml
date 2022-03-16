@@ -284,7 +284,6 @@
                StackPane.alignment="BOTTOM_CENTER"
                style="-fx-padding: 0em 0em 20 0em">
         <JFXTabPane fx:id="tabPane" style="-fx-background-color: -grey-200;">
-
             <Tab fx:id="backendErrorsTab" text="Backend Errors">
                 <ScrollPane fx:id="backendErrorsScrollPane"
                             fitToHeight="true" fitToWidth="true"

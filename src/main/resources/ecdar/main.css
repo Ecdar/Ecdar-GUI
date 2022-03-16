@@ -282,7 +282,7 @@
     -fx-font-size: 1em;
 }
 
-/* Response sizing for elements */
+/* Response sizing for elements (icons with these classes will be scaled when scaling changes) */
 .icon-size-medium {
     -fx-icon-size: 24;
 }
