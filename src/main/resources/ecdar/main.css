@@ -177,6 +177,10 @@
     -fx-highlight-text-fill: -white;
 }
 
+.component-declaration {
+    -fx-padding: 1.5em 0em 0em 0em;
+}
+
 .menu .label {
     -fx-text-fill: -white;
     -fx-font-family: "Roboto";
