@@ -13,17 +13,15 @@
     <JFXRippler id="rippler" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
         <HBox style="-fx-min-height: 3.7em; -fx-max-height: 3.7em" alignment="CENTER">
             <padding>
-                <Insets top="10" bottom="10" left="20" right="20"/>
+                <Insets top="10" bottom="10"/>
             </padding>
             <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
-                <StackPane>
+                <StackPane  style="-fx-padding: 0em 1em 0em 1em;">
                     <Circle id="iconBackground" radius="1.25" styleClass="responsive-circle-radius"/>
                     <StackPane fx:id="filePane" styleClass="responsive-small-image-sizing">
                         <ImageView fx:id="fileImage"/>
                     </StackPane>
                 </StackPane>
-
-                <Region minWidth="16"/>
 
                 <StackPane>
                     <Label id="fileName" styleClass="body1"/>
