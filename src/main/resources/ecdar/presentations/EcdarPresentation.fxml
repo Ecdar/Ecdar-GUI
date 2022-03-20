@@ -21,7 +21,8 @@
     <BorderPane>
         <center>
             <StackPane alignment="TOP_LEFT">
-                <VBox>
+                <VBox maxHeight="-Infinity">
+                    <!-- Max height is set to -Infinity to avoid toolbar from intercepting all mouse events on the canvas -->
                     <VBox maxHeight="-Infinity">
                         <HBox fx:id="toolbar" HBox.hgrow="ALWAYS">
                             <padding>
@@ -82,8 +83,7 @@
                             </HBox>
                         </HBox>
                     </VBox>
-                    <!-- Max height is set to -Infinity to avoid toolbar from intercepting all mouse events on the canvas -->
-                    <StackPane fx:id="canvasPane">
+                    <StackPane fx:id="canvasShellPane">
                         <!-- Canvases go here -->
                     </StackPane>
                 </VBox>

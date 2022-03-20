@@ -38,8 +38,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
@@ -112,7 +110,7 @@ public class EcdarController implements Initializable {
     public StackPane aboutContainer;
     public JFXDialog aboutDialog;
     public JFXButton aboutAcceptButton;
-    public StackPane canvasPane;
+    public StackPane canvasShellPane;
 
     private double expandHeight = 300;
 
@@ -187,7 +185,7 @@ public class EcdarController implements Initializable {
     private double tabPanePreviousY = 0;
     public boolean shouldISkipOpeningTheMessagesContainer = true;
 
-    private static final ObjectProperty<CanvasPresentation> activeCanvasPresentation = new SimpleObjectProperty<>(new CanvasPresentation());
+    private static final ObjectProperty<CanvasShellPresentation> activeCanvasShellPresentation = new SimpleObjectProperty<>(new CanvasShellPresentation());
 
     public static void runReachabilityAnalysis() {
         if (!reachabilityServiceEnabled) return;
@@ -328,7 +326,7 @@ public class EcdarController implements Initializable {
                 Ecdar.getProject().getComponents().remove(newComponent);
             }, "Created new component: " + newComponent.getName(), "add-circle");
 
-            getActiveCanvasPresentation().getController().setActiveModel(newComponent);
+            getActiveCanvasShellPresentation().getCanvasController().setActiveModel(newComponent);
         });
         KeyboardTracker.registerKeybind(KeyboardTracker.CREATE_COMPONENT, binding);
 
@@ -583,12 +581,16 @@ public class EcdarController implements Initializable {
         initializeHelpMenu();
     }
 
-    public static CanvasPresentation getActiveCanvasPresentation() {
-        return activeCanvasPresentation.get();
+    public static CanvasShellPresentation getActiveCanvasShellPresentation() {
+        return activeCanvasShellPresentation.get();
     }
 
-    public static void setActiveCanvasPresentation(CanvasPresentation newActiveCanvasPresentation) {
-        activeCanvasPresentation.set(newActiveCanvasPresentation);
+    public static void setActiveCanvasShellPresentation(CanvasShellPresentation newActiveCanvasPresentation) {
+        activeCanvasShellPresentation.set(newActiveCanvasPresentation);
+    }
+
+    public static void setActiveModelForActiveCanvas(HighLevelModelObject newActiveModel) {
+        EcdarController.getActiveCanvasShellPresentation().getCanvasController().setActiveModel(newActiveModel);
     }
 
     private void initializeHelpMenu() {
@@ -629,7 +631,7 @@ public class EcdarController implements Initializable {
     private void initializeEditMenu() {
         menuEditMoveLeft.setAccelerator(new KeyCodeCombination(KeyCode.LEFT, KeyCombination.CONTROL_DOWN));
         menuEditMoveLeft.setOnAction(event -> {
-            final HighLevelModelObject activeModel = getActiveCanvasPresentation().getController().getActiveModel();
+            final HighLevelModelObject activeModel = getActiveCanvasShellPresentation().getCanvasController().getActiveModel();
 
             if (activeModel instanceof Component) ((Component) activeModel).moveAllNodesLeft();
             else Ecdar.showToast("This can only be performed on components.");
@@ -637,7 +639,7 @@ public class EcdarController implements Initializable {
 
         menuEditMoveRight.setAccelerator(new KeyCodeCombination(KeyCode.RIGHT, KeyCombination.CONTROL_DOWN));
         menuEditMoveRight.setOnAction(event -> {
-            final HighLevelModelObject activeModel = getActiveCanvasPresentation().getController().getActiveModel();
+            final HighLevelModelObject activeModel = getActiveCanvasShellPresentation().getCanvasController().getActiveModel();
 
             if (activeModel instanceof Component) ((Component) activeModel).moveAllNodesRight();
             else Ecdar.showToast("This can only be performed on components.");
@@ -645,7 +647,7 @@ public class EcdarController implements Initializable {
 
         menuEditMoveUp.setAccelerator(new KeyCodeCombination(KeyCode.UP, KeyCombination.CONTROL_DOWN));
         menuEditMoveUp.setOnAction(event -> {
-            final HighLevelModelObject activeModel = getActiveCanvasPresentation().getController().getActiveModel();
+            final HighLevelModelObject activeModel = getActiveCanvasShellPresentation().getCanvasController().getActiveModel();
 
             if (activeModel instanceof Component) ((Component) activeModel).moveAllNodesUp();
             else Ecdar.showToast("This can only be performed on components.");
@@ -653,7 +655,7 @@ public class EcdarController implements Initializable {
 
         menuEditMoveDown.setAccelerator(new KeyCodeCombination(KeyCode.DOWN, KeyCombination.CONTROL_DOWN));
         menuEditMoveDown.setOnAction(event -> {
-            final HighLevelModelObject activeModel = getActiveCanvasPresentation().getController().getActiveModel();
+            final HighLevelModelObject activeModel = getActiveCanvasShellPresentation().getCanvasController().getActiveModel();
 
             if (activeModel instanceof Component) ((Component) activeModel).moveAllNodesDown();
             else Ecdar.showToast("This can only be performed on components.");
@@ -692,7 +694,7 @@ public class EcdarController implements Initializable {
 
             // Text do not scale on the canvas to avoid ugly elements,
             // this zooms in on the component in order to get the "same font size"
-            EcdarController.getActiveCanvasPresentation().getController().zoomHelper.setZoomLevel(calculatedNewScale / 13);
+            EcdarController.getActiveCanvasShellPresentation().getController().zoomHelper.setZoomLevel(calculatedNewScale / 13);
             Ecdar.preferences.put("font_scale", newValue.getProperties().get("scale").toString());
 
             scaleIcons(root, calculatedNewScale);
@@ -844,7 +846,7 @@ public class EcdarController implements Initializable {
 
             UndoRedoStack.pushAndPerform(() -> { // Perform
                 Ecdar.getProject().getTestPlans().add(newPlan);
-                getActiveCanvasPresentation().getController().setActiveModel(newPlan);
+                getActiveCanvasShellPresentation().getCanvasController().setActiveModel(newPlan);
             }, () -> { // Undo
                 Ecdar.getProject().getTestPlans().remove(newPlan);
             }, "Created new mutation test plan", "");
@@ -862,7 +864,7 @@ public class EcdarController implements Initializable {
         Ecdar.projectDirectory.set(null);
 
         Ecdar.getProject().reset();
-        getActiveCanvasPresentation().getController().setActiveModel(Ecdar.getProject().getComponents().get(0));
+        getActiveCanvasShellPresentation().getCanvasController().setActiveModel(Ecdar.getProject().getComponents().get(0));
 
         UndoRedoStack.clear();
 
@@ -876,12 +878,13 @@ public class EcdarController implements Initializable {
         menuBarFileExportAsPng.setAccelerator(new KeyCodeCombination(KeyCode.L, KeyCombination.SHORTCUT_DOWN));
         menuBarFileExportAsPng.setOnAction(event -> {
             // If there is no active component or system
-            if (!(getActiveCanvasPresentation().getController().getActiveModel() instanceof Component || getActiveCanvasPresentation().getController().getActiveModel() instanceof EcdarSystem)) {
+            if (!(getActiveCanvasShellPresentation().getCanvasController().getActiveModel() instanceof Component || getActiveCanvasShellPresentation().getCanvasController().getActiveModel() instanceof EcdarSystem)) {
                 Ecdar.showToast("No component or system to export.");
                 return;
             }
 
-            CanvasPresentation canvas = getActiveCanvasPresentation();
+            CanvasShellPresentation canvasShell = getActiveCanvasShellPresentation();
+            CanvasPresentation canvas = getActiveCanvasShellPresentation().getController().canvasPresentation;
 
             // If there was an active component, hide button for toggling declarations
             final ComponentPresentation presentation = canvas.getController().getActiveComponentPresentation();
@@ -889,7 +892,7 @@ public class EcdarController implements Initializable {
                 presentation.getController().toggleDeclarationButton.setVisible(false);
             }
 
-            final WritableImage image = takeSnapshot(canvas);
+            final WritableImage image = takeSnapshot(canvasShell);
 
             // If there was an active component, show the button again
             if (presentation != null) {
@@ -900,9 +903,9 @@ public class EcdarController implements Initializable {
         });
 
         menuBarFileExportAsPngNoBorder.setOnAction(event -> {
-            CanvasPresentation canvas = getActiveCanvasPresentation();
+            CanvasShellPresentation canvasShell = getActiveCanvasShellPresentation();
 
-            final ComponentPresentation presentation = canvas.getController().getActiveComponentPresentation();
+            final ComponentPresentation presentation = canvasShell.getCanvasController().getActiveComponentPresentation();
 
             //If there is no active component
             if (presentation == null) {
@@ -911,7 +914,7 @@ public class EcdarController implements Initializable {
             }
 
             presentation.getController().hideBorderAndBackground();
-            final WritableImage image = takeSnapshot(canvas);
+            final WritableImage image = takeSnapshot(canvasShell);
             presentation.getController().showBorderAndBackground();
 
             CropAndExportImage(image);
@@ -920,24 +923,30 @@ public class EcdarController implements Initializable {
 
     private void initializeCanvasPane() {
         Platform.runLater(this::setCanvasModeToSingular);
+        canvasShellPane.widthProperty().addListener((observable, oldValue, newValue) -> this.setClipForChildren());
+        canvasShellPane.heightProperty().addListener((observable, oldValue, newValue) -> this.setClipForChildren());
+    }
+
+    private void setClipForChildren() {
+        Platform.runLater(() -> canvasShellPane.setClip(new Rectangle(canvasShellPane.getWidth(), canvasShellPane.getHeight())));
     }
 
     /**
      * Removes the canvases and adds a new one, with the active component of the active canvasPresentation.
      */
     private void setCanvasModeToSingular() {
-        canvasPane.getChildren().clear();
+        canvasShellPane.getChildren().clear();
 
         CanvasShellPresentation canvasShellPresentation = new CanvasShellPresentation();
-        HighLevelModelObject model = activeCanvasPresentation.get().getController().getActiveModel();
+        HighLevelModelObject model = activeCanvasShellPresentation.get().getCanvasController().getActiveModel();
         if (model != null) {
-            canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(activeCanvasPresentation.get().getController().getActiveModel());
+            canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(activeCanvasShellPresentation.get().getCanvasController().getActiveModel());
         } else {
             canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(Ecdar.getProject().getComponents().get(0));
         }
 
-        canvasPane.getChildren().add(canvasShellPresentation);
-        activeCanvasPresentation.set(canvasShellPresentation.getController().canvasPresentation);
+        canvasShellPane.getChildren().add(canvasShellPresentation);
+        activeCanvasShellPresentation.set(canvasShellPresentation);
         filePane.getController().updateColorsOnFilePresentations();
     }
 
@@ -946,7 +955,7 @@ public class EcdarController implements Initializable {
      * the first being the one previously displayed on the single canvas.
      */
     private void setCanvasModeToSplit() {
-        canvasPane.getChildren().clear();
+        canvasShellPane.getChildren().clear();
 
         GridPane canvasGrid = new GridPane();
 
@@ -971,9 +980,9 @@ public class EcdarController implements Initializable {
 
         // Add the canvasShellPresentation at the top-left
         CanvasShellPresentation canvasShellPresentation = initializeNewCanvasShellPresentation();
-        canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(getActiveCanvasPresentation().getController().getActiveModel());
+        canvasShellPresentation.getCanvasController().setActiveModel(getActiveCanvasShellPresentation().getCanvasController().getActiveModel());
         canvasGrid.add(canvasShellPresentation, 0, 0);
-        setActiveCanvasPresentation(canvasShellPresentation.getController().canvasPresentation);
+        setActiveCanvasShellPresentation(canvasShellPresentation);
 
         // Add the canvasShellPresentation at the top-right
         canvasShellPresentation = initializeNewCanvasShellPresentationWithActiveComponent(components, currentCompNum);
@@ -982,7 +991,7 @@ public class EcdarController implements Initializable {
 
         // Update the startIndex for the next canvasShellPresentation
         for (int i = 0; i < numComponents; i++) {
-            if (canvasShellPresentation.getController().canvasPresentation.getController().getActiveModel() != null && canvasShellPresentation.getController().canvasPresentation.getController().getActiveModel().equals(components.get(i))) {
+            if (canvasShellPresentation.getCanvasController().getActiveModel() != null && canvasShellPresentation.getCanvasController().getActiveModel().equals(components.get(i))) {
                 currentCompNum = i + 1;
             }
         }
@@ -994,7 +1003,7 @@ public class EcdarController implements Initializable {
 
         // Update the startIndex for the next canvasShellPresentation
         for (int i = 0; i < numComponents; i++)
-            if (canvasShellPresentation.getController().canvasPresentation.getController().getActiveModel() != null && canvasShellPresentation.getController().canvasPresentation.getController().getActiveModel().equals(components.get(i))) {
+            if (canvasShellPresentation.getCanvasController().getActiveModel() != null && canvasShellPresentation.getCanvasController().getActiveModel().equals(components.get(i))) {
                 currentCompNum = i + 1;
             }
 
@@ -1003,7 +1012,7 @@ public class EcdarController implements Initializable {
         canvasShellPresentation.setOpacity(0.75);
         canvasGrid.add(canvasShellPresentation, 1, 1);
 
-        canvasPane.getChildren().add(canvasGrid);
+        canvasShellPane.getChildren().add(canvasGrid);
         filePane.getController().updateColorsOnFilePresentations();
     }
 
@@ -1018,10 +1027,10 @@ public class EcdarController implements Initializable {
         CanvasShellPresentation canvasShellPresentation = initializeNewCanvasShellPresentation();
 
         int numComponents = components.size();
-        canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(null);
+        canvasShellPresentation.getCanvasController().setActiveModel(null);
         for (int currentCompNum = startIndex; currentCompNum < numComponents; currentCompNum++) {
-            if (getActiveCanvasPresentation().getController().getActiveModel() != components.get(currentCompNum)) {
-                canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(components.get(currentCompNum));
+            if (getActiveCanvasShellPresentation().getCanvasController().getActiveModel() != components.get(currentCompNum)) {
+                canvasShellPresentation.getCanvasController().setActiveModel(components.get(currentCompNum));
                 break;
             }
         }
@@ -1046,12 +1055,12 @@ public class EcdarController implements Initializable {
      *
      * @return the snapshot
      */
-    private WritableImage takeSnapshot(CanvasPresentation canvas) {
+    private WritableImage takeSnapshot(CanvasShellPresentation canvasShell) {
         final WritableImage image;
 
-        canvas.getController().disallowGrid();
-        image = scaleAndTakeSnapshot(canvas);
-        canvas.getController().allowGrid();
+        canvasShell.getController().disallowGrid();
+        image = scaleAndTakeSnapshot(canvasShell);
+        canvasShell.getController().allowGrid();
 
         return image;
     }
@@ -1062,7 +1071,7 @@ public class EcdarController implements Initializable {
      *
      * @return the snapshot
      */
-    private WritableImage scaleAndTakeSnapshot(CanvasPresentation canvas) {
+    private WritableImage scaleAndTakeSnapshot(CanvasShellPresentation canvas) {
         final WritableImage image;
         Double zoomLevel = canvas.getController().zoomHelper.getZoomLevel();
         canvas.getController().zoomHelper.zoomToFit();
@@ -1079,7 +1088,7 @@ public class EcdarController implements Initializable {
      * @param image the image
      */
     private void CropAndExportImage(final WritableImage image) {
-        final String name = getActiveCanvasPresentation().getController().getActiveModel().getName();
+        final String name = getActiveCanvasShellPresentation().getCanvasController().getActiveModel().getName();
 
         final FileChooser filePicker = new FileChooser();
         filePicker.setTitle("Export png");

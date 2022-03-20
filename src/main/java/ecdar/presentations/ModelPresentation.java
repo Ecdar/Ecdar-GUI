@@ -80,7 +80,7 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
 
         // Center the text vertically and aff a left padding of CORNER_SIZE
         controller.name.setPadding(new Insets(2, 0, 0, Grid.CORNER_SIZE));
-        controller.name.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
+        controller.name.setOnKeyPressed(EcdarController.getActiveCanvasShellPresentation().getCanvasController().getLeaveTextAreaKeyHandler());
     }
 
     /**

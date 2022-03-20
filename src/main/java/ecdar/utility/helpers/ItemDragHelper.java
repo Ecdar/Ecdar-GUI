@@ -125,8 +125,8 @@ public class ItemDragHelper {
 
             final DragBounds dragBounds = getDragBounds.get();
 
-            final double mouseSubjectNewX = EcdarController.getActiveCanvasPresentation().mouseTracker.getGridX() - ((Boxed) EcdarController.getActiveCanvasPresentation().getController().getActiveModel()).getBox().getX();
-            final double mouseSubjectNewY = EcdarController.getActiveCanvasPresentation().mouseTracker.getGridY() - ((Boxed) EcdarController.getActiveCanvasPresentation().getController().getActiveModel()).getBox().getY();
+            final double mouseSubjectNewX = EcdarController.getActiveCanvasShellPresentation().getController().canvasPresentation.mouseTracker.getGridX() - ((Boxed) EcdarController.getActiveCanvasShellPresentation().getCanvasController().getActiveModel()).getBox().getX();
+            final double mouseSubjectNewY = EcdarController.getActiveCanvasShellPresentation().getController().canvasPresentation.mouseTracker.getGridY() - ((Boxed) EcdarController.getActiveCanvasShellPresentation().getCanvasController().getActiveModel()).getBox().getY();
 
             final double unRoundedX = dragBounds.trimX(mouseSubjectNewX - xDiff.get());
             final double unRoundedY = dragBounds.trimY(mouseSubjectNewY - yDiff.get());

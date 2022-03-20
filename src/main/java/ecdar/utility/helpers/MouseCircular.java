@@ -10,7 +10,7 @@ public class MouseCircular implements Circular {
     private final DoubleProperty y = new SimpleDoubleProperty(0d);
     private final DoubleProperty radius = new SimpleDoubleProperty(10);
     private final SimpleDoubleProperty scale = new SimpleDoubleProperty(1d);
-    private final MouseTracker mouseTracker = EcdarController.getActiveCanvasPresentation().mouseTracker;
+    private final MouseTracker mouseTracker = EcdarController.getActiveCanvasShellPresentation().getController().canvasPresentation.mouseTracker;
 
     public MouseCircular(){
         //Set the initial x and y coordinates of the circular

@@ -7,7 +7,6 @@ import ecdar.abstractions.EcdarSystem;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.mutation.MutationTestPlanPresentation;
 import ecdar.presentations.*;
-import ecdar.utility.helpers.ZoomHelper;
 import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.event.EventHandler;
@@ -30,17 +29,11 @@ public class CanvasController implements Initializable {
 
     public Pane root;
 
-    public final ZoomHelper zoomHelper = new ZoomHelper();
-
     private final ObjectProperty<HighLevelModelObject> activeModel = new SimpleObjectProperty<>(null);
     private final HashMap<HighLevelModelObject, Pair<Double, Double>> ModelObjectTranslateMap = new HashMap<>();
 
     private DoubleProperty width, height;
     private BooleanProperty insetShouldShow;
-
-    // This is whether to allow the user to turn on/off the grid.
-    // While this is false, the grid is always hidden, no matter the user option.
-    private BooleanProperty allowGrid = new SimpleBooleanProperty(true);
 
     public DoubleProperty getWidthProperty() {
         return width;
@@ -64,7 +57,7 @@ public class CanvasController implements Initializable {
      */
     public void setActiveModel(final HighLevelModelObject model) {
         activeModel.set(model);
-        Platform.runLater(EcdarController.getActiveCanvasPresentation().getController()::leaveTextAreas);
+        Platform.runLater(EcdarController.getActiveCanvasShellPresentation().getCanvasController()::leaveTextAreas);
     }
 
     public ObjectProperty<HighLevelModelObject> activeComponentProperty() {
@@ -123,7 +116,7 @@ public class CanvasController implements Initializable {
         }
 
         // if old object is a mutation test plan, and new object is not, allow grid to show
-        if (oldObject instanceof MutationTestPlan && !(newObject instanceof  MutationTestPlan)) allowGrid();
+        if (oldObject instanceof MutationTestPlan && !(newObject instanceof  MutationTestPlan)) ((CanvasShellPresentation) this.root.getParent()).getController().allowGrid();
 
         // We should not add the new object if it is null (e.g. when clearing the view)
         if (newObject == null) return;
@@ -137,7 +130,7 @@ public class CanvasController implements Initializable {
             root.getChildren().add(activeComponentPresentation);
 
             // To avoid NullPointerException on initial model
-            if (oldObject != null) zoomHelper.resetZoom();
+            if (oldObject != null) ((CanvasShellPresentation) this.root.getParent()).getController().zoomHelper.resetZoom();
             
         } else if (newObject instanceof Declarations) {
             root.setTranslateX(0);
@@ -153,7 +146,7 @@ public class CanvasController implements Initializable {
             root.setTranslateX(0);
             root.setTranslateY(DECLARATION_Y_MARGIN);
 
-            disallowGrid();
+            ((CanvasShellPresentation) this.root.getParent()).getController().disallowGrid();
 
             activeComponentPresentation = null;
             root.getChildren().add(new MutationTestPlanPresentation((MutationTestPlan) newObject));
@@ -191,29 +184,5 @@ public class CanvasController implements Initializable {
      */
     ComponentPresentation getActiveComponentPresentation() {
         return activeComponentPresentation;
-    }
-
-    /**
-     * Allows the user to turn the grid on/off.
-     * If the user has currently chosen on, then this method also shows the grid.
-     */
-    public void allowGrid() {
-        allowGrid.set(true);
-    }
-
-    /**
-     * Disallows the user to turn the grid on/off.
-     * Also hides the grid.
-     */
-    public void disallowGrid() {
-        allowGrid.set(false);
-    }
-
-    public BooleanProperty allowGridProperty() {
-        return allowGrid;
-    }
-
-    public boolean isGridAllowed() {
-        return allowGrid.get();
     }
 }

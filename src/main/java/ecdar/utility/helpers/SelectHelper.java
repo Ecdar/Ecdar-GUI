@@ -1,7 +1,6 @@
 package ecdar.utility.helpers;
 
 import ecdar.code_analysis.Nearable;
-import ecdar.controllers.CanvasController;
 import ecdar.controllers.EcdarController;
 import ecdar.utility.colors.Color;
 import javafx.collections.FXCollections;
@@ -19,7 +18,7 @@ public class SelectHelper {
 
     public static void select(final ItemSelectable selectable) {
 
-        EcdarController.getActiveCanvasPresentation().getController().leaveTextAreas();
+        EcdarController.getActiveCanvasShellPresentation().getCanvasController().leaveTextAreas();
 
         // Check if the element is already selected
         if (selectedElements.contains(selectable)) return;

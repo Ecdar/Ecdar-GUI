@@ -1,6 +1,5 @@
 package ecdar.presentations;
 
-import com.jfoenix.controls.JFXTextField;
 import ecdar.abstractions.Edge;
 import ecdar.abstractions.GroupedEdge;
 import ecdar.controllers.EcdarController;
@@ -137,7 +136,7 @@ public class MultiSyncTagPresentation extends TagPresentation {
 
         for (Node child : controller.syncList.getChildren()) {
             ((SyncTextFieldPresentation) child).getController().textField
-                    .setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController()
+                    .setOnKeyPressed(EcdarController.getActiveCanvasShellPresentation().getCanvasController()
                             .getLeaveTextAreaKeyHandler((keyEvent) -> {
 
                 if (keyEvent.getCode().equals(KeyCode.ENTER)) {
@@ -153,13 +152,13 @@ public class MultiSyncTagPresentation extends TagPresentation {
     }
 
     private void updateColorAndMouseShape() {
-        EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation.getController().getComponent().colorProperty().addListener((observable, oldValue, newValue) -> {
+        EcdarController.getActiveCanvasShellPresentation().getCanvasController().activeComponentPresentation.getController().getComponent().colorProperty().addListener((observable, oldValue, newValue) -> {
             controller.frame.setBackground(new Background(new BackgroundFill(newValue.getColor(
-                    EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation.getController().getComponent().getColorIntensity()), new CornerRadii(0), Insets.EMPTY)));
+                    EcdarController.getActiveCanvasShellPresentation().getCanvasController().activeComponentPresentation.getController().getComponent().getColorIntensity()), new CornerRadii(0), Insets.EMPTY)));
         });
 
-        Color color = EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation.getController().getComponent().getColor().getColor(
-                EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation.getController().getComponent().getColorIntensity());
+        Color color = EcdarController.getActiveCanvasShellPresentation().getCanvasController().activeComponentPresentation.getController().getComponent().getColor().getColor(
+                EcdarController.getActiveCanvasShellPresentation().getCanvasController().activeComponentPresentation.getController().getComponent().getColorIntensity());
 
         controller.frame.setBackground(new Background(new BackgroundFill(color, new CornerRadii(0), Insets.EMPTY)));
 
@@ -177,10 +176,10 @@ public class MultiSyncTagPresentation extends TagPresentation {
         controller.frame.setOnMouseDragged(event -> {
             event.consume();
 
-            final double newX = EcdarController.getActiveCanvasPresentation().mouseTracker.gridXProperty().subtract(getComponent().getBox().getXProperty()).subtract(getLocationAware().xProperty()).subtract(getWidth() / 2).doubleValue();
+            final double newX = EcdarController.getActiveCanvasShellPresentation().getController().canvasPresentation.mouseTracker.gridXProperty().subtract(getComponent().getBox().getXProperty()).subtract(getLocationAware().xProperty()).subtract(getWidth() / 2).doubleValue();
             setTranslateX(newX);
 
-            final double newY = EcdarController.getActiveCanvasPresentation().mouseTracker.gridYProperty().subtract(getComponent().getBox().getYProperty()).subtract(getLocationAware().yProperty()).subtract(controller.topbar.getHeight() / 2).doubleValue();
+            final double newY = EcdarController.getActiveCanvasShellPresentation().getController().canvasPresentation.mouseTracker.gridYProperty().subtract(getComponent().getBox().getYProperty()).subtract(getLocationAware().yProperty()).subtract(controller.topbar.getHeight() / 2).doubleValue();
             setTranslateY(newY - 2);
 
             // Tell the mouse release action that we can store an update

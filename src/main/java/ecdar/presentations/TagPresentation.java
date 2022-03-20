@@ -56,7 +56,7 @@ public class TagPresentation extends StackPane {
             textFieldFocusProperty().addListener((observable, oldValue, newValue) -> {
                 if(!hadInitialFocus && newValue) {
                     hadInitialFocus = true;
-                    EcdarController.getActiveCanvasPresentation().getController().leaveTextAreas();
+                    EcdarController.getActiveCanvasShellPresentation().getCanvasController().leaveTextAreas();
                 }
             });
         });
@@ -105,10 +105,10 @@ public class TagPresentation extends StackPane {
         this.setOnMouseDragged(event -> {
             event.consume();
 
-            final double newX = EcdarController.getActiveCanvasPresentation().mouseTracker.gridXProperty().subtract(getComponent().getBox().getXProperty()).subtract(getLocationAware().xProperty()).doubleValue() - getMinWidth() / 2;
+            final double newX = EcdarController.getActiveCanvasShellPresentation().getController().canvasPresentation.mouseTracker.gridXProperty().subtract(getComponent().getBox().getXProperty()).subtract(getLocationAware().xProperty()).doubleValue() - getMinWidth() / 2;
             setTranslateX(newX);
 
-            final double newY = EcdarController.getActiveCanvasPresentation().mouseTracker.gridYProperty().subtract(getComponent().getBox().getYProperty()).subtract(getLocationAware().yProperty()).doubleValue() - getHeight() / 2;
+            final double newY = EcdarController.getActiveCanvasShellPresentation().getController().canvasPresentation.mouseTracker.gridYProperty().subtract(getComponent().getBox().getYProperty()).subtract(getLocationAware().yProperty()).doubleValue() - getHeight() / 2;
             setTranslateY(newY - 2);
 
             // Tell the mouse release action that we can store an update
@@ -171,7 +171,7 @@ public class TagPresentation extends StackPane {
         });
 
         // When enter or escape is pressed release focus
-        textField.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
+        textField.setOnKeyPressed(EcdarController.getActiveCanvasShellPresentation().getCanvasController().getLeaveTextAreaKeyHandler());
     }
 
     void initializeLabel() {

@@ -73,7 +73,7 @@ public class SystemController extends ModelController implements Initializable {
      */
     @FXML
     private void modelContainerPressed(final MouseEvent event) {
-        EcdarController.getActiveCanvasPresentation().getController().leaveTextAreas();
+        EcdarController.getActiveCanvasShellPresentation().getCanvasController().leaveTextAreas();
         SelectHelper.clearSelectedElements();
 
         if (event.isSecondaryButtonDown()) {
