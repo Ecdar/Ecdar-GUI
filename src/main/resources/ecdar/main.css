@@ -282,6 +282,14 @@
     -fx-font-size: 1em;
 }
 
+.canvas-shell-presentation {
+    -fx-background-color: blue;
+}
+
+.canvas-presentation {
+    -fx-background-color: red;
+}
+
 /* Response sizing for elements (icons with these classes will be scaled when scaling changes) */
 .icon-size-medium {
     -fx-icon-size: 24;

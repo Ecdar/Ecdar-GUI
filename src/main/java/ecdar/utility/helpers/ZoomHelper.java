@@ -155,6 +155,9 @@ public class ZoomHelper {
         double xOffset = newScale * canvasPresentation.getWidth() * 1.0f / 2 - newScale * modelPresentation.getWidth() * 1.0f / 2;
         double yOffset = newScale * canvasPresentation.getHeight() * 1.0f / 2 - newScale * modelPresentation.getHeight() * 1.0f / 2;
 
+        modelPresentation.setTranslateX(xOffset);
+        modelPresentation.setTranslateY(yOffset);
+
         // Redraw the grid based on the new scale and canvas size
         grid.updateGrid(newScale);
     }

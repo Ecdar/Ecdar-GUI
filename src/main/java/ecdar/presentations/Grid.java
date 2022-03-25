@@ -53,7 +53,7 @@ public class Grid extends Parent {
      */
     public void updateGrid(double zoomLevel) {
         // The given size of the canvas divided by the given zoomLevel (multiplied by 6 to ensure that the grid covers the full canvas)
-        double screenWidth = (int) Grid.snap(EcdarController.getActiveCanvasShellPresentation().getWidth() / zoomLevel); // ToDo Grid: Possible add multiplier
+        double screenWidth = (int) Grid.snap(EcdarController.getActiveCanvasShellPresentation().getWidth() / zoomLevel); // ToDo Grid: Possibly add multiplier
         double screenHeight = (int) Grid.snap(EcdarController.getActiveCanvasShellPresentation().getHeight() / zoomLevel);
 //
 //        if (this.getTranslateX() != Grid.snap(this.getTranslateX())) {
@@ -73,7 +73,7 @@ public class Grid extends Parent {
             }
 
             // Add new vertical lines to cover the screen at the current zoom level
-            int i = (int) -screenHeight / (GRID_SIZE * 4);
+            int i = (int) -screenHeight / GRID_SIZE;
             int numberOfLine = (int) screenWidth / GRID_SIZE;
             while (i < numberOfLine) {
                 Line line = new Line(i * GRID_SIZE, -screenHeight, i * GRID_SIZE, screenHeight);
@@ -92,7 +92,7 @@ public class Grid extends Parent {
             }
 
             // Add new horizontal lines to cover the screen at the current zoom level
-            i = (int) -screenHeight / (GRID_SIZE * 4);
+            i = (int) -screenHeight / GRID_SIZE;
             numberOfLine = (int) screenHeight / GRID_SIZE;
             while (i < numberOfLine) {
                 Line line = new Line(-screenWidth, i * GRID_SIZE, screenWidth, i * GRID_SIZE);

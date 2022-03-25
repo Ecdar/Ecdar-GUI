@@ -21,8 +21,6 @@ public class CanvasShellPresentation extends StackPane {
         controller = new EcdarFXMLLoader().loadAndGetController("CanvasShellPresentation.fxml", this);
 
         getController().root.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
-            EcdarController.getActiveCanvasShellPresentation().getParent().setOpacity(0.75);
-            this.setOpacity(1);
             EcdarController.setActiveCanvasShellPresentation(this);
         });
 
@@ -33,6 +31,8 @@ public class CanvasShellPresentation extends StackPane {
             if (newValue && gridToggle.get()) showGrid();
             else hideGrid();
         });
+
+        getStyleClass().add("canvas-shell-presentation");
     }
 
     /**

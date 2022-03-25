@@ -34,6 +34,8 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
 
         CanvasDragHelper.makeDraggable(this, mouseEvent -> mouseEvent.getButton().equals(MouseButton.SECONDARY));
         mouseTracker.registerOnMousePressedEventHandler(this::startDragSelect);
+
+        getStyleClass().add("canvas-presentation");
     }
 
     /**
