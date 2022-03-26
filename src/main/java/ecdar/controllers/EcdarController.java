@@ -74,6 +74,7 @@ public class EcdarController implements Initializable {
     public HBox toolbar;
     public Label queryPaneFillerElement;
     public Label filePaneFillerElement;
+    public MessageTabPanePresentation messageTabPane;
     public StackPane dialogContainer;
     public JFXDialog dialog;
     public StackPane modalBar;
@@ -86,8 +87,6 @@ public class EcdarController implements Initializable {
     public JFXTabPane tabPane;
     public Tab errorsTab;
     public Tab warningsTab;
-    public Rectangle tabPaneResizeElement;
-    public StackPane tabPaneContainer;
 
     public ImageView helpInitialImage;
     public StackPane helpInitialPane;
@@ -116,27 +115,7 @@ public class EcdarController implements Initializable {
 
     private double expandHeight = 300;
 
-    public final Transition expandMessagesContainer = new Transition() {
-        {
-            setInterpolator(Interpolator.SPLINE(0.645, 0.045, 0.355, 1));
-            setCycleDuration(Duration.millis(200));
-        }
-
-        @Override
-        protected void interpolate(final double frac) {
-            setMaxHeight(35 + frac * (expandHeight - 35));
-        }
-    };
     public Rectangle bottomFillerElement;
-    public JFXRippler collapseMessages;
-    public FontIcon collapseMessagesIcon;
-    public ScrollPane errorsScrollPane;
-    public VBox errorsList;
-    public ScrollPane warningsScrollPane;
-    public VBox warningsList;
-    public Tab backendErrorsTab;
-    public ScrollPane backendErrorsScrollPane;
-    public VBox backendErrorsList;
 
     // The program top menu
     public MenuBar menuBar;
@@ -184,7 +163,6 @@ public class EcdarController implements Initializable {
     private static Text _queryTextResult;
     private static Text _queryTextQuery;
 
-    private double tabPanePreviousY = 0;
     public boolean shouldISkipOpeningTheMessagesContainer = true;
 
     private static final ObjectProperty<CanvasPresentation> activeCanvasPresentation = new SimpleObjectProperty<>(new CanvasPresentation());
@@ -240,11 +218,17 @@ public class EcdarController implements Initializable {
         initializeCanvasPane();
         initializeEdgeStatusHandling();
         initializeKeybindings();
-        initializeTabPane();
         initializeStatusBar();
-        initializeMessages();
         initializeMenuBar();
         initializeReachabilityAnalysisThread();
+
+        bottomFillerElement.heightProperty().bind(messageTabPane.maxHeightProperty());
+        messageTabPane.getController().setRunnableForOpeningAndClosingMessageTabPane(new Runnable() {
+            @Override
+            public void run() {
+                changeInsetsOfFileAndQueryPanes();
+            }
+        });
     }
 
     private void initilizeDialogs() {
@@ -302,9 +286,7 @@ public class EcdarController implements Initializable {
         initializeCanvasPane();
         initializeEdgeStatusHandling();
         initializeKeybindings();
-        initializeTabPane();
         initializeStatusBar();
-        initializeMessages();
         initializeMenuBar();
         initializeReachabilityAnalysisThread();
     }
@@ -571,15 +553,10 @@ public class EcdarController implements Initializable {
         menuBarFileSaveAs.setOnAction(event -> saveAs());
 
         initializeNewMutationTestObjectMenuItem();
-
         initializeFileExportAsPng();
-
         initializeEditMenu();
-
         initializeViewMenu();
-
         initializeOptionsMenu();
-
         initializeHelpMenu();
     }
 
@@ -1201,199 +1178,16 @@ public class EcdarController implements Initializable {
         throw new IllegalArgumentException("Image is all white");
     }
 
-    private void initializeMessages() {
-        final Map<Component, MessageCollectionPresentation> componentMessageCollectionPresentationMapForErrors = new HashMap<>();
-        final Map<Component, MessageCollectionPresentation> componentMessageCollectionPresentationMapForWarnings = new HashMap<>();
-
-        final Consumer<Component> addComponent = (component) -> {
-            final MessageCollectionPresentation messageCollectionPresentationErrors = new MessageCollectionPresentation(component, CodeAnalysis.getErrors(component));
-            componentMessageCollectionPresentationMapForErrors.put(component, messageCollectionPresentationErrors);
-            errorsList.getChildren().add(messageCollectionPresentationErrors);
-
-            final Runnable addIfErrors = () -> {
-                if (CodeAnalysis.getErrors(component).size() == 0) {
-                    errorsList.getChildren().remove(messageCollectionPresentationErrors);
-                } else if (!errorsList.getChildren().contains(messageCollectionPresentationErrors)) {
-                    errorsList.getChildren().add(messageCollectionPresentationErrors);
-                }
-            };
-
-            addIfErrors.run();
-            CodeAnalysis.getErrors(component).addListener(new ListChangeListener<CodeAnalysis.Message>() {
-                @Override
-                public void onChanged(final Change<? extends CodeAnalysis.Message> c) {
-                    while (c.next()) {
-                        addIfErrors.run();
-                    }
-                }
-            });
-
-            final MessageCollectionPresentation messageCollectionPresentationWarnings = new MessageCollectionPresentation(component, CodeAnalysis.getWarnings(component));
-            componentMessageCollectionPresentationMapForWarnings.put(component, messageCollectionPresentationWarnings);
-            warningsList.getChildren().add(messageCollectionPresentationWarnings);
-
-            final Runnable addIfWarnings = () -> {
-                if (CodeAnalysis.getWarnings(component).size() == 0) {
-                    warningsList.getChildren().remove(messageCollectionPresentationWarnings);
-                } else if (!warningsList.getChildren().contains(messageCollectionPresentationWarnings)) {
-                    warningsList.getChildren().add(messageCollectionPresentationWarnings);
-                }
-            };
-
-            addIfWarnings.run();
-            CodeAnalysis.getWarnings(component).addListener(new ListChangeListener<CodeAnalysis.Message>() {
-                @Override
-                public void onChanged(final Change<? extends CodeAnalysis.Message> c) {
-                    while (c.next()) {
-                        addIfWarnings.run();
-                    }
-                }
-            });
-        };
-
-        // Add error that is project wide but not a backend error
-        addComponent.accept(null);
-
-        Ecdar.getProject().getComponents().forEach(addComponent);
-        Ecdar.getProject().getComponents().addListener(new ListChangeListener<Component>() {
-            @Override
-            public void onChanged(final Change<? extends Component> c) {
-                while (c.next()) {
-                    c.getAddedSubList().forEach(addComponent::accept);
-
-                    c.getRemoved().forEach(component -> {
-                        errorsList.getChildren().remove(componentMessageCollectionPresentationMapForErrors.get(component));
-                        componentMessageCollectionPresentationMapForErrors.remove(component);
-
-                        warningsList.getChildren().remove(componentMessageCollectionPresentationMapForWarnings.get(component));
-                        componentMessageCollectionPresentationMapForWarnings.remove(component);
-                    });
-                }
-            }
-        });
-
-        final Map<CodeAnalysis.Message, MessagePresentation> messageMessagePresentationHashMap = new HashMap<>();
-
-        CodeAnalysis.getBackendErrors().addListener(new ListChangeListener<CodeAnalysis.Message>() {
-            @Override
-            public void onChanged(final Change<? extends CodeAnalysis.Message> c) {
-                while (c.next()) {
-                    c.getAddedSubList().forEach(addedMessage -> {
-                        final MessagePresentation messagePresentation = new MessagePresentation(addedMessage);
-                        backendErrorsList.getChildren().add(messagePresentation);
-                        messageMessagePresentationHashMap.put(addedMessage, messagePresentation);
-                    });
-
-                    c.getRemoved().forEach(removedMessage -> {
-                        backendErrorsList.getChildren().remove(messageMessagePresentationHashMap.get(removedMessage));
-                        messageMessagePresentationHashMap.remove(removedMessage);
-                    });
-                }
-            }
-        });
-    }
-
-    private void initializeTabPane() {
-        bottomFillerElement.heightProperty().bind(tabPaneContainer.maxHeightProperty());
-
-        tabPane.getSelectionModel().selectedIndexProperty().addListener((obs, oldSelected, newSelected) -> {
-            if (newSelected.intValue() < 0 || tabPaneContainer.getMaxHeight() > 35) return;
-
-            if (shouldISkipOpeningTheMessagesContainer) {
-                tabPane.getSelectionModel().clearSelection();
-                shouldISkipOpeningTheMessagesContainer = false;
-            } else {
-                expandMessagesIfNotExpanded();
-            }
-        });
-
-        tabPane.getSelectionModel().clearSelection();
-
-        tabPane.setTabMinHeight(35);
-        tabPane.setTabMaxHeight(35);
-    }
-
-    @FXML
-    private void tabPaneResizeElementPressed(final MouseEvent event) {
-        tabPanePreviousY = event.getScreenY();
-    }
-
-    @FXML
-    private void tabPaneResizeElementDragged(final MouseEvent event) {
-        final double mouseY = event.getScreenY();
-        double newHeight = tabPaneContainer.getMaxHeight() - (mouseY - tabPanePreviousY);
-        newHeight = Math.max(35, newHeight);
-
-        setMaxHeight(newHeight);
-        tabPanePreviousY = mouseY;
-
-    }
-
-    public void expandMessagesIfNotExpanded() {
-        if (tabPaneContainer.getMaxHeight() <= 35) {
-            expandMessagesContainer.play();
-        }
-    }
-
-    public void collapseMessagesIfNotCollapsed() {
-        final Transition collapse = new Transition() {
-            double height = tabPaneContainer.getMaxHeight();
-
-            {
-                setInterpolator(Interpolator.SPLINE(0.645, 0.045, 0.355, 1));
-                setCycleDuration(Duration.millis(200));
-            }
-
-            @Override
-            protected void interpolate(final double frac) {
-                setMaxHeight(((height - 35) * (1 - frac)) + 35);
-            }
-        };
-
-        if (tabPaneContainer.getMaxHeight() > 35) {
-            expandHeight = tabPaneContainer.getHeight();
-            collapse.play();
-        }
-    }
-
-    @FXML
-    public void collapseMessagesClicked() {
-        final Transition collapse = new Transition() {
-            double height = tabPaneContainer.getMaxHeight();
-
-            {
-                setInterpolator(Interpolator.SPLINE(0.645, 0.045, 0.355, 1));
-                setCycleDuration(Duration.millis(200));
-            }
-
-            @Override
-            protected void interpolate(final double frac) {
-                setMaxHeight(((height - 35) * (1 - frac)) + 35);
-            }
-        };
-
-        if (tabPaneContainer.getMaxHeight() > 35) {
-            expandHeight = tabPaneContainer.getHeight();
-            collapse.play();
-        } else {
-            expandMessagesContainer.play();
-        }
-    }
-
     /**
-     * This method is used as a central place to decide whether the tabPane is opened or closed
+     * This method is used to push the contents of the file and query panes when the tab pane is opened
      *
-     * @param height the value used to set the height of the tabPane
      */
-    public void setMaxHeight(double height) {
-        tabPaneContainer.setMaxHeight(height);
-        if (height > 35) { //The tabpane is opened
+    public void changeInsetsOfFileAndQueryPanes() {
+        if (messageTabPane.getController().isOpen()) {
             filePane.showBottomInset(false);
             queryPane.showBottomInset(false);
             CanvasPresentation.showBottomInset(false);
         } else {
-            // When closed we push up the scrollviews in the filePane and queryPane as the tabPane
-            // would otherwise cover some items in these views
             filePane.showBottomInset(true);
             queryPane.showBottomInset(true);
             CanvasPresentation.showBottomInset(true);

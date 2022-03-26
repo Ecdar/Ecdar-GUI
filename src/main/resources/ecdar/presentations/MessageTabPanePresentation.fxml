@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.scene.shape.Rectangle?>
+<?import com.jfoenix.controls.JFXRippler?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import com.jfoenix.controls.JFXTabPane?>
+<fx:root xmlns="http://javafx.com/javafx"
+         xmlns:fx="http://javafx.com/fxml"
+         fx:controller="ecdar.controllers.MessageTabPaneController"
+         prefHeight="400.0" prefWidth="600.0" type="StackPane"
+         fx:id="tabPaneContainer" maxHeight="35"
+         StackPane.alignment="BOTTOM_CENTER"
+         style="-fx-padding: 0em 0em 20 0em">
+    <JFXTabPane fx:id="tabPane" style="-fx-background-color: -grey-200;">
+        <Tab fx:id="backendErrorsTab" text="Backend Errors">
+            <ScrollPane fx:id="backendErrorsScrollPane"
+                        fitToHeight="true" fitToWidth="true"
+                        styleClass="edge-to-edge">
+                <VBox fx:id="backendErrorsList" style="-fx-padding: 0.8em"/>
+            </ScrollPane>
+        </Tab>
+        <Tab fx:id="errorsTab" text="Errors">
+            <ScrollPane fx:id="errorsScrollPane"
+                        fitToHeight="true" fitToWidth="true"
+                        styleClass="edge-to-edge">
+                <VBox fx:id="errorsList" style="-fx-padding: 0.8em"/>
+            </ScrollPane>
+        </Tab>
+        <Tab fx:id="warningsTab" text="Warnings">
+            <ScrollPane fx:id="warningsScrollPane"
+                        fitToHeight="true" fitToWidth="true"
+                        styleClass="edge-to-edge">
+                <VBox fx:id="warningsList" style="-fx-padding: 0.8em"/>
+            </ScrollPane>
+        </Tab>
+    </JFXTabPane>
+
+    <HBox maxHeight="35" StackPane.alignment="TOP_CENTER" pickOnBounds="false">
+        <Region HBox.hgrow="ALWAYS" mouseTransparent="true"/>
+        <JFXRippler fx:id="collapseMessages">
+            <StackPane minWidth="50" minHeight="35"
+                       onMouseClicked="#collapseMessagesClicked"
+                       StackPane.alignment="TOP_RIGHT">
+                <FontIcon fx:id="collapseMessagesIcon" iconLiteral="gmi-expand-less" fill="white"
+                          styleClass="icon-size-medium"/>
+            </StackPane>
+        </JFXRippler>
+    </HBox>
+
+    <Rectangle fx:id="tabPaneResizeElement"
+               onMousePressed="#tabPaneResizeElementPressed"
+               onMouseDragged="#tabPaneResizeElementDragged"
+               width="500" height="3"
+               fill="transparent" StackPane.alignment="TOP_CENTER"/>
+</fx:root>

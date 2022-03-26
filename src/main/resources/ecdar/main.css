@@ -203,6 +203,10 @@
     -fx-background: #ffffff00; /** Transparent **/
 }
 
+.tab .tab-label {
+    -fx-font-size: 1.2em;
+}
+
 .comment {
     -fx-fill: -grey-500;
 }
