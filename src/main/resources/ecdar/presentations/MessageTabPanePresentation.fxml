@@ -8,10 +8,8 @@
 <?import com.jfoenix.controls.JFXTabPane?>
 <fx:root xmlns="http://javafx.com/javafx"
          xmlns:fx="http://javafx.com/fxml"
-         fx:controller="ecdar.controllers.MessageTabPaneController"
-         prefHeight="400.0" prefWidth="600.0" type="StackPane"
-         fx:id="tabPaneContainer" maxHeight="35"
-         StackPane.alignment="BOTTOM_CENTER"
+         fx:controller="ecdar.controllers.MessageTabPaneController" type="StackPane"
+         fx:id="tabPaneContainer" StackPane.alignment="BOTTOM_CENTER"
          style="-fx-padding: 0em 0em 20 0em">
     <JFXTabPane fx:id="tabPane" style="-fx-background-color: -grey-200;">
         <Tab fx:id="backendErrorsTab" text="Backend Errors">
