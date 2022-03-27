@@ -1,9 +1,11 @@
 package ecdar.presentations;
 
 import com.jfoenix.controls.JFXRippler;
+import ecdar.Ecdar;
 import ecdar.abstractions.BackendInstance;
 import ecdar.controllers.BackendInstanceController;
 import ecdar.utility.colors.Color;
+import javafx.application.Platform;
 import javafx.scene.Cursor;
 import javafx.scene.layout.StackPane;
 
@@ -13,6 +15,9 @@ public class BackendInstancePresentation extends StackPane {
     public BackendInstancePresentation(BackendInstance backendInstance) {
         this();
         controller.setBackendInstance(backendInstance);
+
+        // Ensure that the icons are scaled to current font scale
+        Platform.runLater(() -> Ecdar.getPresentation().getController().scaleIcons(this));
     }
 
     public BackendInstancePresentation() {

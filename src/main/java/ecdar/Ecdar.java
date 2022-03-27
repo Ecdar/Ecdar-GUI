@@ -40,11 +40,14 @@ import java.security.CodeSource;
 
 public class Ecdar extends Application {
     public static Preferences preferences = Preferences.userRoot().node("ECDAR");
+    public static BooleanProperty autoScalingEnabled = new SimpleBooleanProperty(false);
     public static final String VERSION = "2.1";
     public static boolean serializationDone = false;
+    public static SimpleStringProperty projectDirectory = new SimpleStringProperty();
+
+    private static double dpi;
     private static Project project;
     private static EcdarPresentation presentation;
-    public static SimpleStringProperty projectDirectory = new SimpleStringProperty();
     private static BooleanProperty isUICached = new SimpleBooleanProperty();
     private static final BooleanProperty isSplit = new SimpleBooleanProperty(true); //Set to true to ensure correct behaviour at first toggle.
     private static final BackendDriver backendDriver = new BackendDriver();
@@ -174,6 +177,12 @@ public class Ecdar extends Application {
         return backendDriver;
     }
 
+    public static double getDpiScale() {
+        if (!autoScalingEnabled.getValue())
+            return 1;
+        return Math.floor(dpi / 96);
+    }
+
     private void forceCreateFolder(final String directoryPath) throws IOException {
         final File directory = new File(directoryPath);
         FileUtils.forceMkdir(directory);
@@ -206,6 +215,7 @@ public class Ecdar extends Application {
         final Screen screen = Screen.getPrimary();
         final Scene scene = new Scene(presentation, screen.getVisualBounds().getWidth() * 0.8, screen.getVisualBounds().getHeight() * 0.8);
         stage.setScene(scene);
+        dpi = screen.getDpi();
 
         // Load all .css files used todo: these should be loaded in the view classes (?)
         scene.getStylesheets().add("ecdar/main.css");

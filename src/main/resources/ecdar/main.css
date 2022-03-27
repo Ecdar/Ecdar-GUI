@@ -207,6 +207,10 @@
     -fx-background: #ffffff00; /** Transparent **/
 }
 
+.tab .tab-label {
+    -fx-font-size: 1.2em;
+}
+
 .comment {
     -fx-fill: -grey-500;
 }
@@ -243,16 +247,16 @@
     -fx-pref-height: 2.3em;
 }
 
-.titled-pane > .title > .arrow-button .arrow {
-    -fx-background-color: TRANSPARENT;
-    -fx-border-color: TRANSPARENT;
-    -fx-padding: 0em 0em 0em -0.7em; /* -10 */
+.titled-pane > .title > .arrow-button .arrow{
+	-fx-background-color: TRANSPARENT;
+	-fx-border-color: TRANSPARENT;
+	-fx-padding: 0em 0em 0em -0.7em;
 }
 
 .titled-pane > .content {
-    -fx-background-color: TRANSPARENT;
-    -fx-padding: 0em -0.1em -0.1em -0.1em; /* -1 */
-    -fx-background-insets: 0em 0em 0em 0em;
+	-fx-background-color: TRANSPARENT;
+	-fx-padding: 0em -0.1em -0.1em -0.1em;
+	-fx-background-insets: 0em 0em 0em 0em;
 }
 
 .backend-instances-list {
@@ -277,4 +281,67 @@
     -fx-border-color: -red-900;
     -fx-border-radius: 0.25em;
     -fx-border-width: 0.1em;
+}
+
+.toggle-button {
+    -jfx-toggle-color:#dddddd;-jfx-untoggle-color:#dddddd;
+    -jfx-toggle-line-color:#7C8B92;-jfx-untoggle-line-color:#7C8B92;
+    -fx-padding: 0em 0em 0em 0em;
+    -fx-font-size: 1em;
+}
+
+/* Response sizing for elements (icons with these classes will be scaled when scaling changes) */
+.icon-size-medium {
+    -fx-icon-size: 24;
+}
+
+.icon-size-small {
+    -fx-icon-size: 20;
+}
+
+.icon-size-x-small {
+    -fx-icon-size: 18;
+}
+
+.responsive-pane-sizing {
+    -fx-max-width: 22em;
+    -fx-min-width: 22em;
+}
+
+.responsive-text-area-sizing {
+    -fx-max-height: 2.5em;
+    -fx-min-height: 2.5em;
+}
+
+.responsive-icon-stack-pane-sizing {
+    -fx-min-width: 3em;
+    -fx-max-width: 3em;
+    -fx-min-height: 3em;
+    -fx-max-height: 3em;
+}
+
+.responsive-small-image-sizing {
+    -fx-max-width: 1.1em;
+    -fx-min-width: 1.1em;
+    -fx-max-height: 1.5em;
+    -fx-min-height: 1.5em;
+}
+
+.responsive-medium-image-sizing {
+    -fx-max-width: 1.8em;
+    -fx-min-width: 1.8em;
+    -fx-max-height: 2.3em;
+    -fx-min-height: 2.3em;
+}
+
+.responsive-large-image-sizing {
+    -fx-max-width: 4.6em;
+    -fx-min-width: 4.6em;
+    -fx-max-height: 2.3em;
+    -fx-min-height: 2.3em;
+}
+
+.responsive-circle-radius {
+    -fx-scale-x: 1em;
+    -fx-scale-y: 1em;
 }

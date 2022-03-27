@@ -17,13 +17,13 @@
             <JFXRippler fx:id="moveBackendInstanceUpRippler" alignment="CENTER_RIGHT">
                 <StackPane minWidth="40" minHeight="40"
                            StackPane.alignment="CENTER_LEFT">
-                    <FontIcon iconLiteral="gmi-expand-less" iconSize="20" fill="white"/>
+                    <FontIcon iconLiteral="gmi-expand-less" styleClass="icon-size-small" fill="white"/>
                 </StackPane>
             </JFXRippler>
             <JFXRippler fx:id="moveBackendInstanceDownRippler" alignment="CENTER_RIGHT">
                 <StackPane minWidth="40" minHeight="40"
                            StackPane.alignment="CENTER_LEFT">
-                    <FontIcon iconLiteral="gmi-expand-more" iconSize="20" fill="white"/>
+                    <FontIcon iconLiteral="gmi-expand-more" styleClass="icon-size-small" fill="white"/>
                 </StackPane>
             </JFXRippler>
         </VBox>
@@ -40,13 +40,13 @@
                     <StackPane minWidth="40" minHeight="40"
                                onMouseClicked="#expansionClicked"
                                StackPane.alignment="CENTER">
-                        <FontIcon fx:id="expansionIcon" iconLiteral="gmi-expand-less" iconSize="20" fill="black"/>
+                        <FontIcon fx:id="expansionIcon" iconLiteral="gmi-expand-less" styleClass="icon-size-small" fill="black"/>
                     </StackPane>
                 </JFXRippler>
                 <JFXRippler fx:id="removeBackendRippler" alignment="CENTER_RIGHT">
                     <StackPane minWidth="40" minHeight="40"
                                StackPane.alignment="TOP_RIGHT">
-                        <FontIcon fx:id="removeBackendIcon" iconLiteral="gmi-delete" iconSize="20" fill="black"/>
+                        <FontIcon fx:id="removeBackendIcon" iconLiteral="gmi-delete" styleClass="icon-size-small" fill="black"/>
                     </StackPane>
                 </JFXRippler>
             </HBox>

@@ -2,23 +2,26 @@
 
 <?import javafx.scene.layout.*?>
 
-        <?import com.jfoenix.controls.JFXRippler?>
-        <?import org.kordamp.ikonli.javafx.FontIcon?>
-        <?import ecdar.presentations.CanvasPresentation?>
+<?import com.jfoenix.controls.JFXRippler?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import ecdar.presentations.CanvasPresentation?>
+<?import javafx.geometry.Insets?>
 <fx:root xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      type="StackPane"
-      fx:id="root"
-      fx:controller="ecdar.controllers.CanvasShellController">
+         xmlns:fx="http://javafx.com/fxml"
+         type="StackPane"
+         fx:id="root"
+         fx:controller="ecdar.controllers.CanvasShellController"
+         alignment="TOP_LEFT">
     <CanvasPresentation fx:id="canvasPresentation"/>
-    <StackPane fx:id="toolbar"
-               StackPane.alignment="TOP_LEFT"
-               minHeight="56" maxHeight="56" maxWidth="224">
-        <HBox style="-fx-padding: 0em 1em 0em 1em;" alignment="CENTER">
+    <VBox maxHeight="-Infinity" style="-fx-max-width: 15em">
+        <HBox fx:id="toolbar" StackPane.alignment="TOP_LEFT" alignment="CENTER">
+            <padding>
+                <Insets topRightBottomLeft="10"/>
+            </padding>
             <!-- ZOOM IN -->
             <JFXRippler fx:id="zoomIn">
-                <StackPane minWidth="40" minHeight="40" onMouseClicked="#zoomInClicked">
-                    <FontIcon iconLiteral="gmi-zoom-in" iconSize="24" fill="white"/>
+                <StackPane styleClass="responsive-icon-stack-pane-sizing" onMouseClicked="#zoomInClicked">
+                    <FontIcon iconLiteral="gmi-zoom-in" styleClass="icon-size-medium" fill="white"/>
                 </StackPane>
             </JFXRippler>
 
@@ -26,8 +29,8 @@
 
             <!-- ZOOM OUT -->
             <JFXRippler fx:id="zoomOut">
-                <StackPane minWidth="40" minHeight="40" onMouseClicked="#zoomOutClicked">
-                    <FontIcon iconLiteral="gmi-zoom-out" iconSize="24" fill="white"/>
+                <StackPane styleClass="responsive-icon-stack-pane-sizing" onMouseClicked="#zoomOutClicked">
+                    <FontIcon iconLiteral="gmi-zoom-out" styleClass="icon-size-medium" fill="white"/>
                 </StackPane>
             </JFXRippler>
 
@@ -35,8 +38,8 @@
 
             <!-- ZOOM TO FIT -->
             <JFXRippler fx:id="zoomToFit">
-                <StackPane minWidth="40" minHeight="40" onMouseClicked="#zoomToFitClicked">
-                    <FontIcon iconLiteral="gmi-zoom-out-map" iconSize="24" fill="white"/>
+                <StackPane styleClass="responsive-icon-stack-pane-sizing" onMouseClicked="#zoomToFitClicked">
+                    <FontIcon iconLiteral="gmi-zoom-out-map" styleClass="icon-size-medium" fill="white"/>
                 </StackPane>
             </JFXRippler>
 
@@ -44,10 +47,10 @@
 
             <!-- RESET ZOOM -->
             <JFXRippler fx:id="resetZoom">
-                <StackPane minWidth="40" minHeight="40" onMouseClicked="#resetZoomClicked">
-                    <FontIcon iconLiteral="gmi-crop-original" iconSize="24" fill="white"/>
+                <StackPane styleClass="responsive-icon-stack-pane-sizing" onMouseClicked="#resetZoomClicked">
+                    <FontIcon iconLiteral="gmi-crop-original" styleClass="icon-size-medium" fill="white"/>
                 </StackPane>
             </JFXRippler>
         </HBox>
-    </StackPane>
+    </VBox>
 </fx:root>

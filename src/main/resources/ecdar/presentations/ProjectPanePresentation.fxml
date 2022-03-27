@@ -5,62 +5,57 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.geometry.Insets?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="StackPane"
          fx:id="root"
-         fx:controller="ecdar.controllers.ProjectPaneController"
-         minWidth="300">
+         fx:controller="ecdar.controllers.ProjectPaneController">
 
-    <AnchorPane>
-
+    <VBox>
         <!-- Toolbar -->
-        <AnchorPane fx:id="toolbar" minHeight="56" maxHeight="56"
-                    AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
-
-            <StackPane AnchorPane.leftAnchor="16" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0">
+        <HBox fx:id="toolbar" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+            <padding>
+                <Insets topRightBottomLeft="10"/>
+            </padding>
+            <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
                 <Label fx:id="toolbarTitle"
                        styleClass="title"
                        text="Project"/>
-            </StackPane>
-
-            <HBox AnchorPane.rightAnchor="48" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0">
+            </HBox>
+            <HBox alignment="CENTER_RIGHT">
                 <!-- CREATE SYSTEM -->
                 <JFXRippler fx:id="createSystem">
-                    <StackPane minWidth="40" maxHeight="40" onMouseClicked="#createSystemClicked">
-                        <StackPane fx:id="createSystemPane" minWidth="23" maxWidth="23" minHeight="30" maxHeight="30">
-                            <ImageView fx:id="createSystemImage" />
+                    <StackPane styleClass="responsive-icon-stack-pane-sizing" onMouseClicked="#createSystemClicked">
+                        <StackPane fx:id="createSystemPane" styleClass="responsive-medium-image-sizing">
+                            <ImageView fx:id="createSystemImage"/>
                         </StackPane>
                     </StackPane>
                 </JFXRippler>
-            </HBox>
 
-            <HBox AnchorPane.rightAnchor="8" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0">
                 <!-- CREATE COMPONENT -->
                 <JFXRippler fx:id="createComponent">
-                    <StackPane minWidth="40" maxHeight="40" onMouseClicked="#createComponentClicked">
-                        <StackPane fx:id="createComponentPane" minWidth="23" maxWidth="23" minHeight="30" maxHeight="30">
-                            <ImageView fx:id="createComponentImage" />
+                    <StackPane styleClass="responsive-icon-stack-pane-sizing" onMouseClicked="#createComponentClicked">
+                        <StackPane fx:id="createComponentPane" styleClass="responsive-medium-image-sizing">
+                            <ImageView fx:id="createComponentImage"/>
                         </StackPane>
                     </StackPane>
                 </JFXRippler>
             </HBox>
-
-        </AnchorPane>
+        </HBox>
 
         <ScrollPane fx:id="scrollPane"
                     fitToHeight="true" fitToWidth="true"
-                    AnchorPane.topAnchor="56"
+                    AnchorPane.topAnchor="0"
                     AnchorPane.bottomAnchor="0"
                     AnchorPane.leftAnchor="0"
                     AnchorPane.rightAnchor="0"
-                    styleClass="edge-to-edge" >
+                    styleClass="edge-to-edge">
 
-            <VBox fx:id="filesList">
+            <VBox fx:id="filesList" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0"
+                  AnchorPane.rightAnchor="0">
                 <!-- Files goes here -->
             </VBox>
-
         </ScrollPane>
-
-    </AnchorPane>
+    </VBox>
 </fx:root>

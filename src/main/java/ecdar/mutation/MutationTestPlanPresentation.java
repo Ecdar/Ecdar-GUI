@@ -510,7 +510,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
         // Add a retest button
         final JFXButton retestButton = new JFXButton("Retest");
         retestButton.setPrefWidth(65);
-        retestButton.setStyle("-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:14px;");
+        retestButton.setStyle("-fx-text-fill:WHITE;-fx-background-color:#4CAF50;-fx-font-size:1.1em;");
         retestButton.setOnMousePressed(event -> {
             getPlan().getResults().remove(testResult);
             controller.getTestingHandler().retest(testResult.getTestCase());
@@ -653,7 +653,7 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
      * Shows some UI elements.
      */
     private void showSutArea() {
-        controller.selectSutButton.setStyle("-fx-text-fill:WHITE;-fx-background-color:#9E9E9E;-fx-font-size:14px;");
+        controller.selectSutButton.setStyle("-fx-text-fill:WHITE;-fx-background-color:#9E9E9E;-fx-font-size:1.1em;");
         VisibilityHelper.show(controller.sutDependentArea);
     }
 
