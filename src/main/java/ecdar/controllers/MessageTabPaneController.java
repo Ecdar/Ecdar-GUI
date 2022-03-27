@@ -49,6 +49,7 @@ public class MessageTabPaneController implements Initializable {
 
     private double tabPanePreviousY = 0;
     private double expandHeight = 300;
+    private double collapseHeight = 35;
     private final Property<Boolean> isOpen = new SimpleBooleanProperty(false);
     private Runnable openCloseExternalAction;
     public boolean shouldISkipOpeningTheMessagesContainer = true;
@@ -61,10 +62,9 @@ public class MessageTabPaneController implements Initializable {
 
         @Override
         protected void interpolate(final double frac) {
-            tabPaneContainer.setMaxHeight(35 + frac * (expandHeight - 35));
+            tabPaneContainer.setMaxHeight(collapseHeight + frac * (expandHeight - collapseHeight));
         }
     };
-
     private Transition collapseMessagesContainer;
 
     @Override
@@ -78,7 +78,7 @@ public class MessageTabPaneController implements Initializable {
 
                 @Override
                 protected void interpolate(final double frac) {
-                    tabPaneContainer.setMaxHeight(((tabPaneContainer.getMaxHeight() - 35) * (1 - frac)) + 35);
+                    tabPaneContainer.setMaxHeight(((tabPaneContainer.getMaxHeight() - collapseHeight) * (1 - frac)) + collapseHeight);
                 }
             };
 
@@ -102,9 +102,6 @@ public class MessageTabPaneController implements Initializable {
         });
 
         tabPane.getSelectionModel().clearSelection();
-        tabPane.setTabMinHeight(35);
-        tabPane.setTabMaxHeight(35);
-
         isOpen.addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 collapseMessagesIcon.setIconLiteral("gmi-close");
@@ -221,6 +218,27 @@ public class MessageTabPaneController implements Initializable {
         return isOpen.getValue();
     }
 
+    /**
+     * Update the scale of root and all children
+     *
+     * @param scale the new scale of the tab pane
+     */
+    public void updateScale(double scale) {
+        final double heightScaled = 35 * scale;
+
+        collapseHeight = heightScaled;
+        tabPane.setTabMinHeight(heightScaled);
+        tabPane.setTabMaxHeight(heightScaled);
+        ((StackPane) collapseMessagesIcon.getParent()).setMinHeight(heightScaled);
+        ((StackPane) collapseMessagesIcon.getParent()).setMaxHeight(heightScaled);
+        ((StackPane) collapseMessagesIcon.getParent()).setMinWidth(heightScaled);
+        ((StackPane) collapseMessagesIcon.getParent()).setMaxWidth(heightScaled);
+
+        if (!isOpen()) {
+            collapseMessagesContainer.play();
+        }
+    }
+
     @FXML
     public void collapseMessagesClicked() {
         if (isOpen()) {
@@ -244,7 +262,7 @@ public class MessageTabPaneController implements Initializable {
 
         final double mouseY = event.getScreenY();
         double newHeight = tabPaneContainer.getMaxHeight() - (mouseY - tabPanePreviousY);
-        newHeight = Math.max(35, newHeight);
+        newHeight = Math.max(collapseHeight, newHeight);
 
         tabPaneContainer.setMaxHeight(newHeight);
 

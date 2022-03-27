@@ -35,12 +35,11 @@
         </Tab>
     </JFXTabPane>
 
-    <HBox maxHeight="35" StackPane.alignment="TOP_CENTER" pickOnBounds="false">
+    <HBox StackPane.alignment="TOP_CENTER" pickOnBounds="false">
         <Region HBox.hgrow="ALWAYS" mouseTransparent="true"/>
         <JFXRippler fx:id="collapseMessages">
-            <StackPane minWidth="50" minHeight="35"
-                       onMouseClicked="#collapseMessagesClicked"
-                       StackPane.alignment="TOP_RIGHT">
+            <StackPane minWidth="35" onMouseClicked="#collapseMessagesClicked"
+                       StackPane.alignment="TOP_CENTER">
                 <FontIcon fx:id="collapseMessagesIcon" iconLiteral="gmi-expand-less" fill="white"
                           styleClass="icon-size-medium"/>
             </StackPane>

@@ -18,8 +18,6 @@ import ecdar.utility.keyboard.KeyboardTracker;
 import ecdar.utility.keyboard.NudgeDirection;
 import ecdar.utility.keyboard.Nudgeable;
 import com.jfoenix.controls.*;
-import javafx.animation.Interpolator;
-import javafx.animation.Transition;
 import javafx.application.Platform;
 import javafx.beans.binding.When;
 import javafx.beans.property.BooleanProperty;
@@ -38,15 +36,11 @@ import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
-import javafx.util.Duration;
 import javafx.util.Pair;
-import org.kordamp.ikonli.javafx.FontIcon;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -56,7 +50,6 @@ import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Consumer;
 
 public class EcdarController implements Initializable {
 
@@ -84,9 +77,6 @@ public class EcdarController implements Initializable {
     public JFXRippler deleteSelected;
     public JFXRippler undo;
     public JFXRippler redo;
-    public JFXTabPane tabPane;
-    public Tab errorsTab;
-    public Tab warningsTab;
 
     public ImageView helpInitialImage;
     public StackPane helpInitialPane;
@@ -112,8 +102,6 @@ public class EcdarController implements Initializable {
     public JFXDialog aboutDialog;
     public JFXButton aboutAcceptButton;
     public StackPane canvasPane;
-
-    private double expandHeight = 300;
 
     public Rectangle bottomFillerElement;
 
@@ -162,8 +150,6 @@ public class EcdarController implements Initializable {
     private static JFXDialog _queryDialog;
     private static Text _queryTextResult;
     private static Text _queryTextQuery;
-
-    public boolean shouldISkipOpeningTheMessagesContainer = true;
 
     private static final ObjectProperty<CanvasPresentation> activeCanvasPresentation = new SimpleObjectProperty<>(new CanvasPresentation());
 
@@ -669,6 +655,7 @@ public class EcdarController implements Initializable {
 
             scaleIcons(root, calculatedNewScale);
             scaleEdgeStatusToggle(calculatedNewScale);
+            messageTabPane.getController().updateScale(Double.parseDouble(newValue.getProperties().get("scale").toString()));
         });
 
         menuBarViewCanvasSplit.getGraphic().setOpacity(1);
