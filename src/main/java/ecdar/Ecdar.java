@@ -40,12 +40,14 @@ import java.security.CodeSource;
 
 public class Ecdar extends Application {
     public static Preferences preferences = Preferences.userRoot().node("ECDAR");
-    private static double dpi;
+    public static BooleanProperty autoScalingEnabled = new SimpleBooleanProperty(false);
     public static final String VERSION = "2.1";
     public static boolean serializationDone = false;
+    public static SimpleStringProperty projectDirectory = new SimpleStringProperty();
+
+    private static double dpi;
     private static Project project;
     private static EcdarPresentation presentation;
-    public static SimpleStringProperty projectDirectory = new SimpleStringProperty();
     private static BooleanProperty isUICached = new SimpleBooleanProperty();
     private static final BooleanProperty isSplit = new SimpleBooleanProperty(true); //Set to true to ensure correct behaviour at first toggle.
     private static final BackendDriver backendDriver = new BackendDriver();
@@ -176,6 +178,8 @@ public class Ecdar extends Application {
     }
 
     public static double getDpiScale() {
+        if (!autoScalingEnabled.getValue())
+            return 1;
         return Math.floor(dpi / 96);
     }
 

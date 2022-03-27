@@ -202,30 +202,35 @@
                             <FontIcon iconLiteral="gmi-check" fill="black" styleClass="icon-size-medium"/>
                         </graphic>
                     </MenuItem>
+                    <MenuItem fx:id="menuBarAutoscaling" text="Autoscaling">
+                        <graphic>
+                            <FontIcon iconLiteral="gmi-check" fill="black" styleClass="icon-size-medium"/>
+                        </graphic>
+                    </MenuItem>
 
-                    <Menu text="Font Scaling" fx:id="menuViewMenuFontScaling">
+                    <Menu text="Scaling" fx:id="menuViewMenuScaling">
                         <fx:define>
-                            <ToggleGroup fx:id="fontScaling"/>
+                            <ToggleGroup fx:id="scaling"/>
                         </fx:define>
-                        <RadioMenuItem fx:id="fontScaleXS" toggleGroup="$fontScaling" text="0.5x">
+                        <RadioMenuItem fx:id="scaleXS" toggleGroup="$scaling" text="0.5x">
                             <properties scale="0.5"/>
                         </RadioMenuItem>
-                        <RadioMenuItem fx:id="fontScaleS" toggleGroup="$fontScaling" text="0.75x">
+                        <RadioMenuItem fx:id="scaleS" toggleGroup="$scaling" text="0.75x">
                             <properties scale="0.75"/>
                         </RadioMenuItem>
-                        <RadioMenuItem fx:id="fontScaleM" toggleGroup="$fontScaling" text="1.0x">
+                        <RadioMenuItem fx:id="scaleM" toggleGroup="$scaling" text="1.0x">
                             <properties scale="1.0"/>
                         </RadioMenuItem>
-                        <RadioMenuItem fx:id="fontScaleL" toggleGroup="$fontScaling" text="1.25x">
+                        <RadioMenuItem fx:id="scaleL" toggleGroup="$scaling" text="1.25x">
                             <properties scale="1.25"/>
                         </RadioMenuItem>
-                        <RadioMenuItem fx:id="fontScaleXL" toggleGroup="$fontScaling" text="1.5x">
+                        <RadioMenuItem fx:id="scaleXL" toggleGroup="$scaling" text="1.5x">
                             <properties scale="1.5"/>
                         </RadioMenuItem>
-                        <RadioMenuItem fx:id="fontScaleXXL" toggleGroup="$fontScaling" text="1.75x">
+                        <RadioMenuItem fx:id="scaleXXL" toggleGroup="$scaling" text="1.75x">
                             <properties scale="1.75"/>
                         </RadioMenuItem>
-                        <RadioMenuItem fx:id="fontScaleXXXL" toggleGroup="$fontScaling" text="2.0x">
+                        <RadioMenuItem fx:id="scaleXXXL" toggleGroup="$scaling" text="2.0x">
                             <properties scale="2.0"/>
                         </RadioMenuItem>
                     </Menu>
