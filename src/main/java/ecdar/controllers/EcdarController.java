@@ -110,15 +110,16 @@ public class EcdarController implements Initializable {
     public MenuItem menuBarViewFilePanel;
     public MenuItem menuBarViewQueryPanel;
     public MenuItem menuBarViewGrid;
-    public Menu menuViewMenuFontScaling;
-    public ToggleGroup fontScaling;
-    public RadioMenuItem fontScaleXS;
-    public RadioMenuItem fontScaleS;
-    public RadioMenuItem fontScaleM;
-    public RadioMenuItem fontScaleL;
-    public RadioMenuItem fontScaleXL;
-    public RadioMenuItem fontScaleXXL;
-    public RadioMenuItem fontScaleXXXL;
+    public MenuItem menuBarAutoscaling;
+    public Menu menuViewMenuScaling;
+    public ToggleGroup scaling;
+    public RadioMenuItem scaleXS;
+    public RadioMenuItem scaleS;
+    public RadioMenuItem scaleM;
+    public RadioMenuItem scaleL;
+    public RadioMenuItem scaleXL;
+    public RadioMenuItem scaleXXL;
+    public RadioMenuItem scaleXXXL;
     public MenuItem menuBarViewCanvasSplit;
     public MenuItem menuBarFileCreateNewProject;
     public MenuItem menuBarFileOpenProject;
@@ -164,7 +165,7 @@ public class EcdarController implements Initializable {
     }
 
     /**
-     * Finds and scales all icon nodes below the given node in accordance with the current font scaling, using -fx-icon-size
+     * Finds and scales all icon nodes below the given node in accordance with the current scaling, using -fx-icon-size
      *
      * @param node The "root" to start the search from
      */
@@ -190,7 +191,7 @@ public class EcdarController implements Initializable {
     }
 
     private double getCalculatedNewScale() {
-        return (Double.parseDouble(fontScaling.getSelectedToggle().getProperties().get("scale").toString()) * Ecdar.getDpiScale()) * 13.0;
+        return (Double.parseDouble(scaling.getSelectedToggle().getProperties().get("scale").toString()) * Ecdar.getDpiScale()) * 13.0;
     }
 
     private void scaleEdgeStatusToggle(double size) {
@@ -209,12 +210,7 @@ public class EcdarController implements Initializable {
         initializeReachabilityAnalysisThread();
 
         bottomFillerElement.heightProperty().bind(messageTabPane.maxHeightProperty());
-        messageTabPane.getController().setRunnableForOpeningAndClosingMessageTabPane(new Runnable() {
-            @Override
-            public void run() {
-                changeInsetsOfFileAndQueryPanes();
-            }
-        });
+        messageTabPane.getController().setRunnableForOpeningAndClosingMessageTabPane(this::changeInsetsOfFileAndQueryPanes);
     }
 
     private void initilizeDialogs() {
@@ -539,15 +535,10 @@ public class EcdarController implements Initializable {
         menuBarFileSaveAs.setOnAction(event -> saveAs());
 
         initializeNewMutationTestObjectMenuItem();
-
         initializeFileExportAsPng();
-
         initializeEditMenu();
-
         initializeViewMenu();
-
         initializeOptionsMenu();
-
         initializeHelpMenu();
     }
 
@@ -659,19 +650,17 @@ public class EcdarController implements Initializable {
             menuBarViewGrid.getGraphic().opacityProperty().bind(new When(isOn).then(1).otherwise(0));
         });
 
-        fontScaling.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
-            double calculatedNewScale = getCalculatedNewScale();
-
-            Ecdar.getPresentation().setStyle("-fx-font-size: " + calculatedNewScale + "px;");
-
-            // Text do not scale on the canvas to avoid ugly elements,
-            // this zooms in on the component in order to get the "same font size"
-            EcdarController.getActiveCanvasShellPresentation().getController().zoomHelper.setZoomLevel(calculatedNewScale / 13);
-            Ecdar.preferences.put("font_scale", newValue.getProperties().get("scale").toString());
-
-            scaleIcons(root, calculatedNewScale);
-            scaleEdgeStatusToggle(calculatedNewScale);
+        menuBarAutoscaling.getGraphic().setOpacity(Ecdar.autoScalingEnabled.getValue() ? 1 : 0);
+        menuBarAutoscaling.setOnAction(event -> {
+            Ecdar.autoScalingEnabled.setValue(!Ecdar.autoScalingEnabled.getValue());
+            updateScaling(getCalculatedNewScale() / 13);
+            Ecdar.preferences.put("autoscaling", String.valueOf(Ecdar.autoScalingEnabled.getValue()));
         });
+        Ecdar.autoScalingEnabled.addListener((observable, oldValue, newValue) -> {
+            menuBarAutoscaling.getGraphic().opacityProperty().setValue(newValue ? 1 : 0);
+        });
+
+        scaling.selectedToggleProperty().addListener((observable, oldValue, newValue) -> updateScaling(Double.parseDouble(newValue.getProperties().get("scale").toString())));
 
         menuBarViewCanvasSplit.getGraphic().setOpacity(1);
         menuBarViewCanvasSplit.setOnAction(event -> {
@@ -685,20 +674,37 @@ public class EcdarController implements Initializable {
             }
         });
 
-        // On startup, set the font scaling to the value saved in preferences
+        // On startup, set the scaling to the values saved in preferences
         Platform.runLater(() -> {
-            Object matchingToggle = fontScaleM;
-            for (Object i : fontScaling.getToggles()) {
+            Ecdar.autoScalingEnabled.setValue(Ecdar.preferences.getBoolean("autoscaling", true));
+
+            Object matchingToggle = scaleM;
+            for (Object i : scaling.getToggles()) {
                 if (Float.parseFloat(((RadioMenuItem) i).getProperties().get("scale").toString())
-                        == Ecdar.preferences.getFloat("font_scale", 1.0F)) {
+                        == Ecdar.preferences.getFloat("scale", 1.0F)) {
                     matchingToggle = i;
                     break;
                 }
             }
-            fontScaling.selectToggle(fontScaleM); // Necessary to avoid project pane appearing off-screen
-            fontScaling.selectToggle((RadioMenuItem) matchingToggle);
+            scaling.selectToggle(scaleM); // Necessary to avoid project pane appearing off-screen
+            scaling.selectToggle((RadioMenuItem) matchingToggle);
         });
 
+    }
+
+    private void updateScaling(double newScale) {
+        double calculatedNewScale = getCalculatedNewScale();
+
+        Ecdar.getPresentation().setStyle("-fx-font-size: " + calculatedNewScale + "px;");
+
+        // Text do not scale on the canvas to avoid ugly elements,
+        // this zooms in on the component in order to get the "same font size"
+        EcdarController.getActiveCanvasShellPresentation().getController().zoomHelper.setZoomLevel(calculatedNewScale / 13);
+        Ecdar.preferences.put("scale", String.valueOf(newScale));
+
+        scaleIcons(root, calculatedNewScale);
+        scaleEdgeStatusToggle(calculatedNewScale);
+        messageTabPane.getController().updateScale(newScale);
     }
 
     /**

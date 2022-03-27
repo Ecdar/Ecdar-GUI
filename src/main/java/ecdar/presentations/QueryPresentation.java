@@ -255,7 +255,6 @@ public class QueryPresentation extends AnchorPane {
         Platform.runLater(() -> {
             final TitledPane inputOutputPane = (TitledPane) lookup("#inputOutputPane");
             inputOutputPane.setAnimated(true);
-
             final Runnable changeTitledPaneVisibility = () -> updateTitlePaneVisibility(inputOutputPane);
 
             // Run the consumer to ensure that the input/output pane is displayed for existing refinement queries
@@ -342,7 +341,6 @@ public class QueryPresentation extends AnchorPane {
             // Make the input/output pane visible
             inputOutputPaneVisibility(true);
         } else {
-            // Hide the input/output pane
             inputOutputPaneVisibility(false);
         }
     }

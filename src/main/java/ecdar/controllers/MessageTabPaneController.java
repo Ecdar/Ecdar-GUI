@@ -9,6 +9,7 @@ import ecdar.presentations.MessageCollectionPresentation;
 import ecdar.presentations.MessagePresentation;
 import javafx.animation.Interpolator;
 import javafx.animation.Transition;
+import javafx.application.Platform;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ListChangeListener;
@@ -48,11 +49,12 @@ public class MessageTabPaneController implements Initializable {
 
     private double tabPanePreviousY = 0;
     private double expandHeight = 300;
+    private double collapseHeight = 35;
     private final Property<Boolean> isOpen = new SimpleBooleanProperty(false);
     private Runnable openCloseExternalAction;
     public boolean shouldISkipOpeningTheMessagesContainer = true;
 
-    public final Transition expandMessagesContainer = new Transition() {
+    private final Transition expandMessagesContainer = new Transition() {
         {
             setInterpolator(Interpolator.SPLINE(0.645, 0.045, 0.355, 1));
             setCycleDuration(Duration.millis(200));
@@ -60,14 +62,57 @@ public class MessageTabPaneController implements Initializable {
 
         @Override
         protected void interpolate(final double frac) {
-            openCloseExternalAction.run();
+            tabPaneContainer.setMaxHeight(collapseHeight + frac * (expandHeight - collapseHeight));
         }
     };
+    private Transition collapseMessagesContainer;
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
-        initializeTabPane();
-        initializeMessages();
+        Platform.runLater(() -> {
+            collapseMessagesContainer = new Transition() {
+                {
+                    setInterpolator(Interpolator.SPLINE(0.645, 0.045, 0.355, 1));
+                    setCycleDuration(Duration.millis(200));
+                }
+
+                @Override
+                protected void interpolate(final double frac) {
+                    tabPaneContainer.setMaxHeight(((tabPaneContainer.getMaxHeight() - collapseHeight) * (1 - frac)) + collapseHeight);
+                }
+            };
+
+            initializeTabPane();
+            initializeMessages();
+
+            collapseMessagesContainer.play();
+        });
+    }
+
+    private void initializeTabPane() {
+        tabPane.getSelectionModel().selectedIndexProperty().addListener((obs, oldSelected, newSelected) -> {
+            if (newSelected.intValue() < 0 || isOpen.getValue()) return;
+
+            if (shouldISkipOpeningTheMessagesContainer) {
+                tabPane.getSelectionModel().clearSelection();
+                shouldISkipOpeningTheMessagesContainer = false;
+            } else {
+                expandMessagesIfNotExpanded();
+            }
+        });
+
+        tabPane.getSelectionModel().clearSelection();
+        isOpen.addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                collapseMessagesIcon.setIconLiteral("gmi-close");
+            } else {
+                collapseMessagesIcon.setIconLiteral("gmi-expand-less");
+            }
+
+            openCloseExternalAction.run();
+        });
+
+        isOpen.setValue(false);
     }
 
     private void initializeMessages() {
@@ -88,12 +133,9 @@ public class MessageTabPaneController implements Initializable {
             };
 
             addIfErrors.run();
-            CodeAnalysis.getErrors(component).addListener(new ListChangeListener<CodeAnalysis.Message>() {
-                @Override
-                public void onChanged(final Change<? extends CodeAnalysis.Message> c) {
-                    while (c.next()) {
-                        addIfErrors.run();
-                    }
+            CodeAnalysis.getErrors(component).addListener((ListChangeListener<CodeAnalysis.Message>) c -> {
+                while (c.next()) {
+                    addIfErrors.run();
                 }
             });
 
@@ -110,12 +152,9 @@ public class MessageTabPaneController implements Initializable {
             };
 
             addIfWarnings.run();
-            CodeAnalysis.getWarnings(component).addListener(new ListChangeListener<CodeAnalysis.Message>() {
-                @Override
-                public void onChanged(final Change<? extends CodeAnalysis.Message> c) {
-                    while (c.next()) {
-                        addIfWarnings.run();
-                    }
+            CodeAnalysis.getWarnings(component).addListener((ListChangeListener<CodeAnalysis.Message>) c -> {
+                while (c.next()) {
+                    addIfWarnings.run();
                 }
             });
         };
@@ -124,86 +163,49 @@ public class MessageTabPaneController implements Initializable {
         addComponent.accept(null);
 
         Ecdar.getProject().getComponents().forEach(addComponent);
-        Ecdar.getProject().getComponents().addListener(new ListChangeListener<Component>() {
-            @Override
-            public void onChanged(final Change<? extends Component> c) {
-                while (c.next()) {
-                    c.getAddedSubList().forEach(addComponent::accept);
+        Ecdar.getProject().getComponents().addListener((ListChangeListener<Component>) c -> {
+            while (c.next()) {
+                c.getAddedSubList().forEach(addComponent::accept);
 
-                    c.getRemoved().forEach(component -> {
-                        errorsList.getChildren().remove(componentMessageCollectionPresentationMapForErrors.get(component));
-                        componentMessageCollectionPresentationMapForErrors.remove(component);
+                c.getRemoved().forEach(component -> {
+                    errorsList.getChildren().remove(componentMessageCollectionPresentationMapForErrors.get(component));
+                    componentMessageCollectionPresentationMapForErrors.remove(component);
 
-                        warningsList.getChildren().remove(componentMessageCollectionPresentationMapForWarnings.get(component));
-                        componentMessageCollectionPresentationMapForWarnings.remove(component);
-                    });
-                }
+                    warningsList.getChildren().remove(componentMessageCollectionPresentationMapForWarnings.get(component));
+                    componentMessageCollectionPresentationMapForWarnings.remove(component);
+                });
             }
         });
 
         final Map<CodeAnalysis.Message, MessagePresentation> messageMessagePresentationHashMap = new HashMap<>();
 
-        CodeAnalysis.getBackendErrors().addListener(new ListChangeListener<CodeAnalysis.Message>() {
-            @Override
-            public void onChanged(final Change<? extends CodeAnalysis.Message> c) {
-                while (c.next()) {
-                    c.getAddedSubList().forEach(addedMessage -> {
-                        final MessagePresentation messagePresentation = new MessagePresentation(addedMessage);
-                        backendErrorsList.getChildren().add(messagePresentation);
-                        messageMessagePresentationHashMap.put(addedMessage, messagePresentation);
-                    });
+        CodeAnalysis.getBackendErrors().addListener((ListChangeListener<CodeAnalysis.Message>) c -> {
+            while (c.next()) {
+                c.getAddedSubList().forEach(addedMessage -> {
+                    final MessagePresentation messagePresentation = new MessagePresentation(addedMessage);
+                    backendErrorsList.getChildren().add(messagePresentation);
+                    messageMessagePresentationHashMap.put(addedMessage, messagePresentation);
+                });
 
-                    c.getRemoved().forEach(removedMessage -> {
-                        backendErrorsList.getChildren().remove(messageMessagePresentationHashMap.get(removedMessage));
-                        messageMessagePresentationHashMap.remove(removedMessage);
-                    });
-                }
+                c.getRemoved().forEach(removedMessage -> {
+                    backendErrorsList.getChildren().remove(messageMessagePresentationHashMap.get(removedMessage));
+                    messageMessagePresentationHashMap.remove(removedMessage);
+                });
             }
         });
-    }
-
-    private void initializeTabPane() {
-        tabPane.getSelectionModel().selectedIndexProperty().addListener((obs, oldSelected, newSelected) -> {
-            if (newSelected.intValue() < 0 || isOpen.getValue()) return;
-
-            if (shouldISkipOpeningTheMessagesContainer) {
-                tabPane.getSelectionModel().clearSelection();
-                shouldISkipOpeningTheMessagesContainer = false;
-            } else {
-                expandMessagesIfNotExpanded();
-            }
-        });
-
-        tabPane.getSelectionModel().clearSelection();
-
-        tabPane.setTabMinHeight(35);
-        tabPane.setTabMaxHeight(35);
     }
 
     public void expandMessagesIfNotExpanded() {
         if (!isOpen.getValue()) {
             expandMessagesContainer.play();
+            isOpen.setValue(true);
         }
     }
 
     public void collapseMessagesIfNotCollapsed() {
-        final Transition collapse = new Transition() {
-            double height = tabPaneContainer.getMaxHeight();
-
-            {
-                setInterpolator(Interpolator.SPLINE(0.645, 0.045, 0.355, 1));
-                setCycleDuration(Duration.millis(200));
-            }
-
-            @Override
-            protected void interpolate(final double frac) {
-                openCloseExternalAction.run();
-            }
-        };
-
         if (isOpen.getValue()) {
             expandHeight = tabPaneContainer.getHeight();
-            collapse.play();
+            collapseMessagesContainer.play();
             isOpen.setValue(false);
         }
     }
@@ -216,23 +218,32 @@ public class MessageTabPaneController implements Initializable {
         return isOpen.getValue();
     }
 
+    /**
+     * Update the scale of root and all children
+     *
+     * @param scale the new scale of the tab pane
+     */
+    public void updateScale(double scale) {
+        final double heightScaled = 35 * scale;
+
+        collapseHeight = heightScaled;
+        tabPane.setTabMinHeight(heightScaled);
+        tabPane.setTabMaxHeight(heightScaled);
+        ((StackPane) collapseMessagesIcon.getParent()).setMinHeight(heightScaled);
+        ((StackPane) collapseMessagesIcon.getParent()).setMaxHeight(heightScaled);
+        ((StackPane) collapseMessagesIcon.getParent()).setMinWidth(heightScaled);
+        ((StackPane) collapseMessagesIcon.getParent()).setMaxWidth(heightScaled);
+
+        if (!isOpen()) {
+            collapseMessagesContainer.play();
+        }
+    }
+
     @FXML
     public void collapseMessagesClicked() {
-        final Transition collapse = new Transition() {
-            {
-                setInterpolator(Interpolator.SPLINE(0.645, 0.045, 0.355, 1));
-                setCycleDuration(Duration.millis(200));
-            }
-
-            @Override
-            protected void interpolate(final double frac) {
-                openCloseExternalAction.run();
-            }
-        };
-
-        if (isOpen.getValue()) {
+        if (isOpen()) {
             expandHeight = tabPaneContainer.getHeight();
-            collapse.play();
+            collapseMessagesContainer.play();
         } else {
             expandMessagesContainer.play();
         }
@@ -247,7 +258,14 @@ public class MessageTabPaneController implements Initializable {
 
     @FXML
     public void tabPaneResizeElementDragged(final MouseEvent event) {
+        expandMessagesIfNotExpanded();
+
         final double mouseY = event.getScreenY();
+        double newHeight = tabPaneContainer.getMaxHeight() - (mouseY - tabPanePreviousY);
+        newHeight = Math.max(collapseHeight, newHeight);
+
+        tabPaneContainer.setMaxHeight(newHeight);
+
         openCloseExternalAction.run();
         this.tabPanePreviousY = mouseY;
     }

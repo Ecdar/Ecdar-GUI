@@ -112,6 +112,7 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
         // Set a hover effect for the controller.toggleDeclarationButton
         controller.toggleDeclarationButton.setOnMouseEntered(event -> controller.toggleDeclarationButton.setCursor(Cursor.HAND));
         controller.toggleDeclarationButton.setOnMouseExited(event -> controller.toggleDeclarationButton.setCursor(Cursor.DEFAULT));
+        controller.toggleDeclarationButton.setOnMousePressed(controller::toggleDeclaration);
 
     }
 

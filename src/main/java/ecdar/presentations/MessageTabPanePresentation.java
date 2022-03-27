@@ -7,8 +7,6 @@ import javafx.beans.Observable;
 import javafx.scene.Cursor;
 import javafx.scene.layout.StackPane;
 
-import java.util.EventListener;
-
 public class MessageTabPanePresentation extends StackPane {
     private final MessageTabPaneController controller;
 
@@ -38,15 +36,6 @@ public class MessageTabPanePresentation extends StackPane {
 
         // Resize cursor
         controller.tabPaneResizeElement.setCursor(Cursor.N_RESIZE);
-
-        controller.tabPaneContainer.maxHeightProperty().addListener((obs, oldHeight, newHeight) -> {
-            if (newHeight.doubleValue() > 35) {
-                controller.collapseMessagesIcon.setIconLiteral("gmi-close");
-            } else {
-                controller.tabPane.getSelectionModel().clearSelection(); // Clear the currently selected tab (so that the view will open again when selecting a tab)
-                controller.collapseMessagesIcon.setIconLiteral("gmi-expand-less");
-            }
-        });
 
         // Remove the background of the scroll panes
         controller.errorsScrollPane.setStyle("-fx-background-color: transparent;");

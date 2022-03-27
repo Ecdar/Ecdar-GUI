@@ -5,7 +5,6 @@ import ecdar.backend.*;
 import ecdar.controllers.EcdarController;
 import ecdar.utility.serialize.Serializable;
 import com.google.gson.JsonObject;
-import com.uppaal.engine.Engine;
 import javafx.application.Platform;
 import javafx.beans.property.*;
 
@@ -130,12 +129,19 @@ public class Query implements Serializable {
                     BackendHelper.buildEcdarDocument();
                 } catch (final BackendException e) {
                     Ecdar.showToast("Could not build XML document. I got the error: " + e.getMessage());
+                    setQueryState(QueryState.SYNTAX_ERROR);
                     e.printStackTrace();
                     return;
                 }
             }
 
             errors.set("");
+            
+            if (getQuery().isEmpty()) {
+                setQueryState(QueryState.SYNTAX_ERROR);
+                this.addError("Query is empty");
+                return;
+            }
 
             Ecdar.getBackendDriver().addQueryToExecutionQueue(getType().getQueryName() + ": " + getQuery().replaceAll("\\s", "") + " " + getIgnoredInputOutputsOnQuery(),
                     getBackend(),
@@ -151,6 +157,10 @@ public class Query implements Serializable {
                             setQueryState(QueryState.UNKNOWN);
                         } else {
                             setQueryState(QueryState.SYNTAX_ERROR);
+                            if (e instanceof BackendException.MissingFileQueryException) {
+                                Ecdar.showToast("Please save the project before trying to run queries");
+                            }
+
                             this.addError(e.getMessage());
                             final Throwable cause = e.getCause();
                             if (cause != null) {

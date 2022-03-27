@@ -14,6 +14,7 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import org.apache.commons.lang3.Range;
 
 import java.io.File;
@@ -44,7 +45,7 @@ public class BackendOptionsDialogController implements Initializable {
 
     /**
      * Reverts any changes made to the backend options by reloading the options specified in the preference file,
-     * or to the default, if no backends are present in the preferences file
+     * or to the default, if no backends are present in the preferences file.
      */
     public void cancelBackendOptionsChanges() {
         initializeBackendInstanceList();
@@ -52,8 +53,7 @@ public class BackendOptionsDialogController implements Initializable {
 
     /**
      * Saves the changes made to the backend options to the preferences file and returns true
-     * if no errors where found in the backend instance definitions, otherwise false
-     *
+     * if no errors where found in the backend instance definitions, otherwise false.
      * @return whether the changes could be saved,
      * meaning that no errors where found in the changes made to the backend options
      */
@@ -88,10 +88,10 @@ public class BackendOptionsDialogController implements Initializable {
     }
 
     /**
-     * Resets the backends to the default backends present in the 'default_backends.json' file
+     * Resets the backends to the default backends present in the 'default_backends.json' file.
      */
     public void resetBackendsToDefault() {
-        updateBackendsInGUI(getDefaultBackends());
+        updateBackendsInGUI(getPackagedBackends());
     }
 
     private void initializeBackendInstanceList() {
@@ -103,7 +103,7 @@ public class BackendOptionsDialogController implements Initializable {
             backends = getBackendsFromJsonArray(
                     JsonParser.parseString(savedBackends).getAsJsonArray());
         } else {
-            backends = getDefaultBackends();
+            backends = getPackagedBackends();
         }
 
         // Style add backend button and handle click event
@@ -117,19 +117,32 @@ public class BackendOptionsDialogController implements Initializable {
         updateBackendsInGUI(backends);
     }
 
+    /**
+     * Clear the backend instance list and add the newly defined backends to it.
+     * @param backends The new list of backends
+     */
     private void updateBackendsInGUI(ArrayList<BackendInstance> backends) {
         backendInstanceList.getChildren().clear();
 
         backends.forEach((bi) -> {
             BackendInstancePresentation newBackendInstancePresentation = new BackendInstancePresentation(bi);
+
+            // Bind input fields that should not be changed for packaged backends to the locked property of the backend instance
             newBackendInstancePresentation.getController().backendName.disableProperty().bind(bi.getLockedProperty());
             newBackendInstancePresentation.getController().pathToBackend.disableProperty().bind(bi.getLockedProperty());
+            newBackendInstancePresentation.getController().pickPathToBackend.disableProperty().bind(bi.getLockedProperty());
+            newBackendInstancePresentation.getController().isLocal.disableProperty().bind(bi.getLockedProperty());
             addBackendInstancePresentationToList(newBackendInstancePresentation);
         });
 
         BackendHelper.updateBackendInstances(backends);
     }
 
+    /**
+     * Instantiate backends defined in the given JsonArray.
+     * @param backends The JsonArray containing the backends
+     * @return An ArrayList of the instantiated backends
+     */
     private ArrayList<BackendInstance> getBackendsFromJsonArray(JsonArray backends) {
         ArrayList<BackendInstance> backendInstances = new ArrayList<>();
         backendInstanceList.getChildren().clear();
@@ -141,7 +154,12 @@ public class BackendOptionsDialogController implements Initializable {
         return backendInstances;
     }
 
-    private ArrayList<BackendInstance> getDefaultBackends() {
+    /**
+     * Checks a set of paths to the packaged engines, j-Ecdar and Reveaal, and instantiates them
+     * if one of the related files exists.
+     * @return Backend instances of the packaged engines
+     */
+    private ArrayList<BackendInstance> getPackagedBackends() {
         ArrayList<BackendInstance> defaultBackends = new ArrayList<>();
 
         // Add Reveaal engine
@@ -153,11 +171,10 @@ public class BackendOptionsDialogController implements Initializable {
         reveaal.setPortEnd(5040);
         reveaal.lockInstance();
 
-        List<File> searchPathForReveaal = List.of(
+        List<File> potentialFilesForReveaal = List.of(
                 new File("lib/Reveaal.exe"), new File("lib/Reveaal")
         );
-        getBackendPathIfFileExists(reveaal, searchPathForReveaal);
-        defaultBackends.add(reveaal);
+        if (setBackendPathIfFileExists(reveaal, potentialFilesForReveaal)) defaultBackends.add(reveaal);
 
         // Add jECDAR engine
         var jEcdar = new BackendInstance();
@@ -168,19 +185,23 @@ public class BackendOptionsDialogController implements Initializable {
         jEcdar.setPortEnd(5050);
         jEcdar.lockInstance();
 
-        List<File> searchPathForJEcdar = List.of(
+        List<File> potentialFiledForJEcdar = List.of(
                 new File("lib/j-Ecdar.exe"), new File("lib/j-Ecdar.bat")
         );
-        getBackendPathIfFileExists(jEcdar, searchPathForJEcdar);
-        defaultBackends.add(jEcdar);
+        if (setBackendPathIfFileExists(jEcdar, potentialFiledForJEcdar)) defaultBackends.add(jEcdar);
 
         return defaultBackends;
     }
 
-    private void getBackendPathIfFileExists(BackendInstance engine, List<File> searchPathForFile) {
+    /**
+     * Sets the path to the backend instance if one of the potential files exists
+     * @param engine         The backend instance of the engine to set the path for
+     * @param potentialFiles List of potential files to use for the engine
+     */
+    private boolean setBackendPathIfFileExists(BackendInstance engine, List<File> potentialFiles) {
         engine.setBackendLocation("");
 
-        for (var f : searchPathForFile) {
+        for (var f : potentialFiles) {
             if (f.exists()) {
                 engine.setBackendLocation(f.getAbsolutePath());
                 break;
@@ -188,14 +209,25 @@ public class BackendOptionsDialogController implements Initializable {
         }
 
         if (engine.getBackendLocation().equals("")) {
-            throw new RuntimeException("Could not locate file for default engine, checked: " + searchPathForFile.stream().map(File::getPath).collect(Collectors.joining(", ")));
+            Ecdar.showToast("File for packaged backend: " + engine.getName() +
+                    " could not be loaded. Please make sure that at least one of the following files is placed in the 'lib' directory: " +
+                    potentialFiles.stream().map(File::getPath).collect(Collectors.joining(", ")));
+            return false;
         }
+
+        return true;
     }
 
+    /**
+     * Add the new backend instance presentation to the backend options dialog
+     * @param newBackendInstancePresentation The presentation of the new backend instance
+     */
     private void addBackendInstancePresentationToList(BackendInstancePresentation newBackendInstancePresentation) {
         backendInstanceList.getChildren().add(newBackendInstancePresentation);
         newBackendInstancePresentation.getController().moveBackendInstanceUpRippler.setOnMouseClicked((mouseEvent) -> moveBackendInstance(newBackendInstancePresentation, -1));
         newBackendInstancePresentation.getController().moveBackendInstanceDownRippler.setOnMouseClicked((mouseEvent) -> moveBackendInstance(newBackendInstancePresentation, +1));
+
+        // Set remove backend action to only fire if the backend is not locked
         newBackendInstancePresentation.getController().removeBackendRippler.setOnMouseClicked((mouseEvent) -> {
             if (!newBackendInstancePresentation.getController().defaultBackendRadioButton.isSelected()) {
                 backendInstanceList.getChildren().remove(newBackendInstancePresentation);
@@ -204,20 +236,28 @@ public class BackendOptionsDialogController implements Initializable {
         newBackendInstancePresentation.getController().defaultBackendRadioButton.setToggleGroup(defaultBackendToggleGroup);
     }
 
-    private void moveBackendInstance(BackendInstancePresentation newBackendInstance, int i) {
-        int currentIndex = backendInstanceList.getChildren().indexOf(newBackendInstance);
+    /**
+     * Calculated the location new position of the backend instance, i places further down, in the backend instance list.
+     * The backend instance presentation is removed at added to the new position.
+     * Given a negative value, the instance is moved up. This function uses loop-around, meaning that:
+     * - If the instance is moved down while already at the bottom of the list, it is placed at the top.
+     * - If the instance is moved up while already at the top of the list, it is placed at the bottom.
+     * @param backendInstancePresentation The backend instance presentation to move
+     * @param i                           The number of steps to move the backend instance down
+     */
+    private void moveBackendInstance(BackendInstancePresentation backendInstancePresentation, int i) {
+        int currentIndex = backendInstanceList.getChildren().indexOf(backendInstancePresentation);
         int newIndex = (currentIndex + i) % backendInstanceList.getChildren().size();
         if (newIndex < 0) {
             newIndex = backendInstanceList.getChildren().size() - 1;
         }
 
-        backendInstanceList.getChildren().remove(newBackendInstance);
-        backendInstanceList.getChildren().add(newIndex, newBackendInstance);
+        backendInstanceList.getChildren().remove(backendInstancePresentation);
+        backendInstanceList.getChildren().add(newIndex, backendInstancePresentation);
     }
 
     /**
      * Marks input fields in the backendInstanceList that contains errors and returns whether any errors were found
-     *
      * @return whether any errors were found
      */
     private boolean backendInstanceListIsErrorFree() {

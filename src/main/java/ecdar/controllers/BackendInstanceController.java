@@ -5,7 +5,7 @@ import com.jfoenix.controls.JFXRippler;
 import com.jfoenix.controls.JFXTextField;
 import ecdar.abstractions.BackendInstance;
 import javafx.application.Platform;
-import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.BooleanProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Cursor;
@@ -15,7 +15,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import org.kordamp.ikonli.javafx.FontIcon;
 
@@ -26,26 +25,32 @@ import java.util.ResourceBundle;
 public class BackendInstanceController implements Initializable {
     private BackendInstance backendInstance = new BackendInstance();
 
-    public JFXTextField backendName;
+    /* Design elements */
     public Label backendNameIssue;
-    public FontIcon expansionIcon;
     public JFXRippler removeBackendRippler;
     public FontIcon removeBackendIcon;
+    public FontIcon expansionIcon;
     public StackPane content;
     public JFXCheckBox isLocal;
     public HBox addressSection;
-    public JFXTextField address;
     public HBox pathToBackendSection;
     public JFXRippler pickPathToBackend;
-    public JFXTextField pathToBackend;
-    public Label locationIssue;
-    public JFXTextField portRangeStart;
-    public Label portRangeStartIssue;
-    public JFXTextField portRangeEnd;
-    public Label portRangeEndIssue;
-    public Label portRangeIssue;
+    public FontIcon pickPathToBackendIcon;
     public StackPane moveBackendInstanceUpRippler;
     public StackPane moveBackendInstanceDownRippler;
+
+    // Labels for showing potential issues
+    public Label locationIssue;
+    public Label portRangeStartIssue;
+    public Label portRangeEndIssue;
+    public Label portRangeIssue;
+
+    /* Input fields */
+    public JFXTextField backendName;
+    public JFXTextField address;
+    public JFXTextField pathToBackend;
+    public JFXTextField portRangeStart;
+    public JFXTextField portRangeEnd;
     public RadioButton defaultBackendRadioButton;
 
     @Override
@@ -56,21 +61,30 @@ public class BackendInstanceController implements Initializable {
             moveBackendInstanceDownRippler.setCursor(Cursor.HAND);
             setHGrow();
 
-            // Prevent deletion of default backend instance
-            defaultBackendRadioButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
-                if (newValue) {
-                    removeBackendIcon.setFill(Color.GREY);
-                } else {
-                    removeBackendIcon.setFill(Color.BLACK);
-                }
-            });
-
-            if (defaultBackendRadioButton.isSelected()) removeBackendIcon.setFill(Color.GREY);
+            colorIconAsDisabledBasedOnProperty(removeBackendIcon, defaultBackendRadioButton.selectedProperty());
+            colorIconAsDisabledBasedOnProperty(pickPathToBackendIcon, backendInstance.getLockedProperty());
         });
     }
 
+    /**
+     * Binds the color of the given icon to the value of BooleanProperty.
+     * @param icon The icon to change the color of
+     * @param property The property to bind to
+     */
+    private void colorIconAsDisabledBasedOnProperty(FontIcon icon, BooleanProperty property) {
+        // Disallow the user to pick new backend file location for locked backends
+        property.addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                icon.setFill(Color.GREY);
+            } else {
+                icon.setFill(Color.BLACK);
+            }
+        });
+        if (property.getValue()) icon.setFill(Color.GREY);
+    }
+
     /***
-     * Sets the BackendInstance object and overrides the current settings shown in the GUI
+     * Sets the backend instance and overrides the current values of the input fields in the GUI.
      * @param instance the new BackendInstance
      */
     public void setBackendInstance(BackendInstance instance) {
@@ -91,6 +105,10 @@ public class BackendInstanceController implements Initializable {
         this.portRangeEnd.setText(String.valueOf(instance.getPortEnd()));
     }
 
+    /**
+     * Updates the values of the backend instance to the values from the input fields.
+     * @return The updated backend instance
+     */
     public BackendInstance updateBackendInstance() {
         backendInstance.setName(backendName.getText());
         backendInstance.setLocal(isLocal.isSelected());

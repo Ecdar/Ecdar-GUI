@@ -771,6 +771,7 @@ public class ComponentController extends ModelController implements Initializabl
     private void initializeDeclarations() {
         // Initially style the declarations
         declarationTextArea.setStyleSpans(0, ComponentPresentation.computeHighlighting(getComponent().getDeclarationsText()));
+        declarationTextArea.getStyleClass().add("component-declaration");
 
         final Circle circle = new Circle(0);
         if (getComponent().isDeclarationOpen()) {
