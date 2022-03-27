@@ -647,8 +647,11 @@ public class EcdarController implements Initializable {
         menuBarAutoscaling.getGraphic().setOpacity(Ecdar.autoScalingEnabled.getValue() ? 1 : 0);
         menuBarAutoscaling.setOnAction(event -> {
             Ecdar.autoScalingEnabled.setValue(!Ecdar.autoScalingEnabled.getValue());
-            menuBarAutoscaling.getGraphic().opacityProperty().setValue(Ecdar.autoScalingEnabled.getValue() ? 1 : 0);
             updateScaling(getCalculatedNewScale() / 13);
+            Ecdar.preferences.put("autoscaling", String.valueOf(Ecdar.autoScalingEnabled.getValue()));
+        });
+        Ecdar.autoScalingEnabled.addListener((observable, oldValue, newValue) -> {
+            menuBarAutoscaling.getGraphic().opacityProperty().setValue(newValue ? 1 : 0);
         });
 
         scaling.selectedToggleProperty().addListener((observable, oldValue, newValue) -> updateScaling(Double.parseDouble(newValue.getProperties().get("scale").toString())));
@@ -665,8 +668,10 @@ public class EcdarController implements Initializable {
             }
         });
 
-        // On startup, set the scaling to the value saved in preferences
+        // On startup, set the scaling to the values saved in preferences
         Platform.runLater(() -> {
+            Ecdar.autoScalingEnabled.setValue(Ecdar.preferences.getBoolean("autoscaling", true));
+
             Object matchingToggle = scaleM;
             for (Object i : scaling.getToggles()) {
                 if (Float.parseFloat(((RadioMenuItem) i).getProperties().get("scale").toString())
