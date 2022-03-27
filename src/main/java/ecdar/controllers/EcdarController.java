@@ -223,12 +223,7 @@ public class EcdarController implements Initializable {
         initializeReachabilityAnalysisThread();
 
         bottomFillerElement.heightProperty().bind(messageTabPane.maxHeightProperty());
-        messageTabPane.getController().setRunnableForOpeningAndClosingMessageTabPane(new Runnable() {
-            @Override
-            public void run() {
-                changeInsetsOfFileAndQueryPanes();
-            }
-        });
+        messageTabPane.getController().setRunnableForOpeningAndClosingMessageTabPane(this::changeInsetsOfFileAndQueryPanes);
     }
 
     private void initilizeDialogs() {
@@ -1182,7 +1177,7 @@ public class EcdarController implements Initializable {
      * This method is used to push the contents of the file and query panes when the tab pane is opened
      *
      */
-    public void changeInsetsOfFileAndQueryPanes() {
+    private void changeInsetsOfFileAndQueryPanes() {
         if (messageTabPane.getController().isOpen()) {
             filePane.showBottomInset(false);
             queryPane.showBottomInset(false);

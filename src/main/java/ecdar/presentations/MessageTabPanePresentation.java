@@ -37,15 +37,6 @@ public class MessageTabPanePresentation extends StackPane {
         // Resize cursor
         controller.tabPaneResizeElement.setCursor(Cursor.N_RESIZE);
 
-        controller.setRunnableForOpeningAndClosingMessageTabPane(() -> {
-            if (controller.isOpen()) {
-                controller.collapseMessagesIcon.setIconLiteral("gmi-close");
-            } else {
-                controller.tabPane.getSelectionModel().clearSelection(); // Clear the currently selected tab (so that the view will open again when selecting a tab)
-                controller.collapseMessagesIcon.setIconLiteral("gmi-expand-less");
-            }
-        });
-
         // Remove the background of the scroll panes
         controller.errorsScrollPane.setStyle("-fx-background-color: transparent;");
         controller.warningsScrollPane.setStyle("-fx-background-color: transparent;");

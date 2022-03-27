@@ -61,7 +61,6 @@ public class MessageTabPaneController implements Initializable {
 
         @Override
         protected void interpolate(final double frac) {
-            openCloseExternalAction.run();
             tabPaneContainer.setMaxHeight(35 + frac * (expandHeight - 35));
         }
     };
@@ -72,8 +71,6 @@ public class MessageTabPaneController implements Initializable {
     public void initialize(final URL location, final ResourceBundle resources) {
         Platform.runLater(() -> {
             collapseMessagesContainer = new Transition() {
-                final double height = tabPaneContainer.getMaxHeight();
-
                 {
                     setInterpolator(Interpolator.SPLINE(0.645, 0.045, 0.355, 1));
                     setCycleDuration(Duration.millis(200));
@@ -81,12 +78,14 @@ public class MessageTabPaneController implements Initializable {
 
                 @Override
                 protected void interpolate(final double frac) {
-                    openCloseExternalAction.run();
-                    tabPaneContainer.setMaxHeight(((height - 35) * (1 - frac)) + 35);
+                    tabPaneContainer.setMaxHeight(((tabPaneContainer.getMaxHeight() - 35) * (1 - frac)) + 35);
                 }
             };
+
             initializeTabPane();
             initializeMessages();
+
+            collapseMessagesContainer.play();
         });
     }
 
@@ -112,6 +111,8 @@ public class MessageTabPaneController implements Initializable {
             } else {
                 collapseMessagesIcon.setIconLiteral("gmi-expand-less");
             }
+
+            openCloseExternalAction.run();
         });
 
         isOpen.setValue(false);
@@ -239,7 +240,14 @@ public class MessageTabPaneController implements Initializable {
 
     @FXML
     public void tabPaneResizeElementDragged(final MouseEvent event) {
+        expandMessagesIfNotExpanded();
+
         final double mouseY = event.getScreenY();
+        double newHeight = tabPaneContainer.getMaxHeight() - (mouseY - tabPanePreviousY);
+        newHeight = Math.max(35, newHeight);
+
+        tabPaneContainer.setMaxHeight(newHeight);
+
         openCloseExternalAction.run();
         this.tabPanePreviousY = mouseY;
     }
