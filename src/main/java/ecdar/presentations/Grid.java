@@ -21,8 +21,8 @@ public class Grid extends Parent {
     private final ArrayList<Line> verticalLines = new ArrayList<>();
 
     public Grid() {
-        setTranslateX(GRID_SIZE * 0.5);
-        setTranslateY(GRID_SIZE * 0.5);
+//        setTranslateX(GRID_SIZE * 0.5);
+//        setTranslateY(GRID_SIZE * 0.5);
 
         // When the scene changes (goes from null to something) set update the grid
         sceneProperty().addListener((observable, oldValue, newValue) -> {
@@ -73,7 +73,7 @@ public class Grid extends Parent {
             }
 
             // Add new vertical lines to cover the screen at the current zoom level
-            int i = (int) -screenHeight / GRID_SIZE;
+            int i = (int) -screenWidth / GRID_SIZE;
             int numberOfLine = (int) screenWidth / GRID_SIZE;
             while (i < numberOfLine) {
                 Line line = new Line(i * GRID_SIZE, -screenHeight, i * GRID_SIZE, screenHeight);

@@ -9,10 +9,8 @@
 <?import ecdar.presentations.Grid?>
 <fx:root xmlns="http://javafx.com/javafx"
          xmlns:fx="http://javafx.com/fxml"
-         type="StackPane"
-         fx:id="root"
-         fx:controller="ecdar.controllers.CanvasShellController"
-         alignment="TOP_LEFT">
+         type="StackPane" fx:id="root" alignment="TOP_LEFT"
+         fx:controller="ecdar.controllers.CanvasShellController">
     <Grid fx:id="grid"/>
     <CanvasPresentation fx:id="canvasPresentation"/>
     <VBox maxHeight="-Infinity" style="-fx-max-width: 15em">

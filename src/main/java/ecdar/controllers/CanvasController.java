@@ -158,14 +158,16 @@ public class CanvasController implements Initializable {
     }
 
     private void setTranslateOfBox(final HighLevelModelObject newObject) {
-        if (ModelObjectTranslateMap.containsKey(newObject)) {
-            final Pair<Double, Double> restoreCoordinates = ModelObjectTranslateMap.get(newObject);
-            root.setTranslateX(restoreCoordinates.getKey());
-            root.setTranslateY(restoreCoordinates.getValue());
-        } else {
-            root.setTranslateX(GRID_SIZE * 12);
-            root.setTranslateY(GRID_SIZE * 8);
-        }
+        Platform.runLater(() -> {
+            if (ModelObjectTranslateMap.containsKey(newObject)) {
+                final Pair<Double, Double> restoreCoordinates = ModelObjectTranslateMap.get(newObject);
+                root.setTranslateX(restoreCoordinates.getKey());
+                root.setTranslateY(restoreCoordinates.getValue());
+            } else {
+                root.getChildren().get(0).setTranslateX(root.getWidth() / 2);
+                root.getChildren().get(0).setTranslateY(root.getHeight() / 2);
+            }
+        });
     }
 
     /**

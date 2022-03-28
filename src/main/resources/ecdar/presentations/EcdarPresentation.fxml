@@ -83,10 +83,10 @@
                             </HBox>
                         </HBox>
                     </VBox>
-                    <StackPane fx:id="canvasShellPane">
-                        <!-- Canvases go here -->
-                    </StackPane>
                 </VBox>
+                <StackPane fx:id="canvasShellPane">
+                    <!-- Canvases go here -->
+                </StackPane>
                 <QueryPanePresentation
                         fx:id="queryPane"
                         StackPane.alignment="TOP_RIGHT"/>

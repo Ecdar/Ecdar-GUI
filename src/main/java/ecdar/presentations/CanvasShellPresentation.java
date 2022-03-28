@@ -96,8 +96,8 @@ public class CanvasShellPresentation extends StackPane {
         button.setRipplerFill(color.getTextColor(colorIntensity));
         button.setPosition(JFXRippler.RipplerPos.BACK);
 
-        widthProperty().addListener((width) -> setClipForChildren());
-        heightProperty().addListener((height) -> setClipForChildren());
+//        widthProperty().addListener((width) -> setClipForChildren());
+//        heightProperty().addListener((height) -> setClipForChildren());
     }
 
     private void setClipForChildren() {

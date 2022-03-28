@@ -10,9 +10,12 @@ import ecdar.utility.helpers.MouseTrackable;
 import ecdar.utility.helpers.SelectHelper;
 import ecdar.utility.mouse.MouseTracker;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Bounds;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.input.MouseButton;
@@ -31,9 +34,51 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
     public CanvasPresentation() {
         mouseTracker = new MouseTracker(this);
         controller = new EcdarFXMLLoader().loadAndGetController("CanvasPresentation.fxml", this);
-
-        CanvasDragHelper.makeDraggable(this, mouseEvent -> mouseEvent.getButton().equals(MouseButton.SECONDARY));
         mouseTracker.registerOnMousePressedEventHandler(this::startDragSelect);
+
+        final double[] dragXOffset = {0d};
+        final double[] dragYOffset = {0d};
+        final double[] previousXTranslation = {0d};
+        final double[] previousYTranslation = {0d};
+
+        final BooleanProperty presWasAllowed = new SimpleBooleanProperty(false);
+        final BooleanProperty isBeingDragged = new SimpleBooleanProperty(false);
+
+        mouseTracker.registerOnMousePressedEventHandler(event -> {
+            presWasAllowed.set(event.getButton().equals(MouseButton.SECONDARY));
+            if (!presWasAllowed.get()) return;
+            isBeingDragged.set(true);
+            event.consume();
+
+            dragXOffset[0] = event.getSceneX();
+            dragYOffset[0] = event.getSceneY();
+            previousXTranslation[0] = controller.root.getChildren().get(0).getTranslateX();
+            previousYTranslation[0] = controller.root.getChildren().get(0).getTranslateY();
+
+            controller.root.setCursor(Cursor.MOVE);
+        });
+
+        mouseTracker.registerOnMouseDraggedEventHandler(event -> {
+            if (!presWasAllowed.get() || !isBeingDragged.get()) return;
+            event.consume();
+
+            final double dragDistanceX = Grid.snap(event.getSceneX() - dragXOffset[0]);
+            final double dragDistanceY = Grid.snap(event.getSceneY() - dragYOffset[0]);
+            final double newX = previousXTranslation[0] + dragDistanceX;
+            final double newY = previousYTranslation[0] + dragDistanceY;
+
+            controller.root.getChildren().get(0).setTranslateX(newX);
+            controller.root.getChildren().get(0).setTranslateY(newY);
+        });
+
+        mouseTracker.registerOnMouseReleasedEventHandler(event -> {
+            controller.root.setCursor(Cursor.DEFAULT);
+            dragXOffset[0] = controller.root.getChildren().get(0).getTranslateX() - event.getSceneX();
+            dragYOffset[0] = controller.root.getChildren().get(0).getTranslateY() - event.getSceneY();
+            previousXTranslation[0] = controller.root.getChildren().get(0).getTranslateX();
+            previousYTranslation[0] = controller.root.getChildren().get(0).getTranslateY();
+            isBeingDragged.setValue(false);
+        });
 
         getStyleClass().add("canvas-presentation");
     }
