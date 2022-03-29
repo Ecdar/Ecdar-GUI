@@ -22,11 +22,10 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 public class QueryPaneController implements Initializable {
-
+    public StackPane root;
     public Label toolbarTitle;
     public HBox toolbar;
     public VBox queriesList;
-    public StackPane root;
     public ScrollPane scrollPane;
 
     public JFXRippler runAllQueriesButton;

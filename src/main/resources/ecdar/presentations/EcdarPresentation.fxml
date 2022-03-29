@@ -21,6 +21,9 @@
     <BorderPane>
         <center>
             <StackPane alignment="TOP_LEFT">
+                <StackPane fx:id="canvasShellPane">
+                    <!-- Canvases go here -->
+                </StackPane>
                 <VBox maxHeight="-Infinity">
                     <!-- Max height is set to -Infinity to avoid toolbar from intercepting all mouse events on the canvas -->
                     <VBox maxHeight="-Infinity">
@@ -84,9 +87,6 @@
                         </HBox>
                     </VBox>
                 </VBox>
-                <StackPane fx:id="canvasShellPane">
-                    <!-- Canvases go here -->
-                </StackPane>
                 <QueryPanePresentation
                         fx:id="queryPane"
                         StackPane.alignment="TOP_RIGHT"/>
