@@ -901,15 +901,7 @@ public class EcdarController implements Initializable {
 
     private void initializeCanvasShellPane() {
         Platform.runLater(this::setCanvasModeToSingular);
-        canvasShellPane.widthProperty().addListener((observable, oldValue, newValue) -> this.setClipForChildren());
-        canvasShellPane.heightProperty().addListener((observable, oldValue, newValue) -> this.setClipForChildren());
     }
-
-    private void setClipForChildren() {
-        Platform.runLater(() -> canvasShellPane.setClip(new Rectangle(root.getWidth(), root.getHeight())));
-        Platform.runLater(() -> ((CanvasShellPresentation) canvasShellPane.getChildren().get(0)).getController().grid.setClip(new Rectangle(root.getWidth(), root.getHeight())));
-    }
-
     /**
      * Removes the canvases and adds a new one, with the active component of the active canvasPresentation.
      */

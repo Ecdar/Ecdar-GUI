@@ -52,6 +52,9 @@ public class Grid extends Parent {
      * @param zoomLevel the scale in which to draw the grid
      */
     public void updateGrid(double zoomLevel) {
+        setScaleX(zoomLevel);
+        setScaleY(zoomLevel);
+
         // The given size of the canvas divided by the given zoomLevel (multiplied by 6 to ensure that the grid covers the full canvas)
         double screenWidth = (int) Grid.snap(EcdarController.getActiveCanvasShellPresentation().getWidth() / zoomLevel); // ToDo Grid: Possibly add multiplier
         double screenHeight = (int) Grid.snap(EcdarController.getActiveCanvasShellPresentation().getHeight() / zoomLevel);

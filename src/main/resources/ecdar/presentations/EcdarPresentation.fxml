@@ -16,8 +16,6 @@
          type="StackPane"
          fx:id="root"
          fx:controller="ecdar.controllers.EcdarController">
-
-    <!-- Actual content of the view -->
     <BorderPane>
         <center>
             <StackPane alignment="TOP_LEFT">
@@ -278,10 +276,8 @@
                         </graphic>
                     </MenuItem>
                 </Menu>
-
             </MenuBar>
         </top>
-
     </BorderPane>
 
     <!-- Message container -->
@@ -309,7 +305,6 @@
                 <Label fx:id="queryLabel" styleClass="sub-caption"/>
             </StackPane>
         </HBox>
-
     </HBox>
 
     <!-- Query Result Dialog -->
@@ -321,7 +316,6 @@
 
                 <!-- Content -->
                 <VBox>
-
                     <VBox style="-fx-padding: 1.6em;">
                         <Text text="Query Result" styleClass="title"/>
 
@@ -334,27 +328,21 @@
 
                         <Text text="Result" styleClass="body2"/>
                         <Text fx:id="queryTextResult" text="No result" styleClass="body1"/>
-
                     </VBox>
 
                     <HBox style="-fx-padding: 0.5em;">
                         <Region HBox.hgrow="ALWAYS"/>
                         <JFXButton text="CLOSE" onMouseClicked="#closeQueryDialog"/>
                     </HBox>
-
                 </VBox>
-
             </VBox>
-
         </JFXDialog>
     </StackPane>
 
     <!-- Modelling help dialog -->
     <StackPane fx:id="dialogContainer" style="-fx-background-color: #0000007F;" visible="false">
         <JFXDialog fx:id="dialog">
-
             <VBox>
-
                 <!-- Scale dialog -->
                 <Region minWidth="400"/>
 
@@ -364,7 +352,6 @@
 
                 <!-- Content -->
                 <VBox>
-
                     <VBox style="-fx-padding: 1.6em;">
                         <Text text="Help" styleClass="title"/>
 
@@ -443,11 +430,8 @@
                         <Region HBox.hgrow="ALWAYS"/>
                         <JFXButton text="CLOSE" onMouseClicked="#closeQueryDialog"/>
                     </HBox>
-
                 </VBox>
-
             </VBox>
-
         </JFXDialog>
     </StackPane>
 
