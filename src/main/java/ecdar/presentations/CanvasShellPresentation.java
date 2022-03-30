@@ -86,6 +86,9 @@ public class CanvasShellPresentation extends StackPane {
         initializeToolbarButton(controller.zoomOut);
         initializeToolbarButton(controller.zoomToFit);
         initializeToolbarButton(controller.resetZoom);
+
+        widthProperty().addListener((width) -> setClipForChildren());
+        heightProperty().addListener((height) -> setClipForChildren());
     }
 
     private void initializeToolbarButton(final JFXRippler button) {
@@ -95,9 +98,6 @@ public class CanvasShellPresentation extends StackPane {
         button.setMaskType(JFXRippler.RipplerMask.CIRCLE);
         button.setRipplerFill(color.getTextColor(colorIntensity));
         button.setPosition(JFXRippler.RipplerPos.BACK);
-
-//        widthProperty().addListener((width) -> setClipForChildren());
-//        heightProperty().addListener((height) -> setClipForChildren());
     }
 
     private void setClipForChildren() {

@@ -202,7 +202,7 @@ public class EcdarController implements Initializable {
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
         initilizeDialogs();
-        initializeCanvasPane();
+        initializeCanvasShellPane();
         initializeEdgeStatusHandling();
         initializeKeybindings();
         initializeStatusBar();
@@ -265,7 +265,7 @@ public class EcdarController implements Initializable {
         queryPane.getStyleClass().add("responsive-pane-sizing");
         queryPaneFillerElement.getStyleClass().add("responsive-pane-sizing");
 
-        initializeCanvasPane();
+        initializeCanvasShellPane();
         initializeEdgeStatusHandling();
         initializeKeybindings();
         initializeStatusBar();
@@ -899,7 +899,7 @@ public class EcdarController implements Initializable {
         });
     }
 
-    private void initializeCanvasPane() {
+    private void initializeCanvasShellPane() {
         Platform.runLater(this::setCanvasModeToSingular);
         canvasShellPane.widthProperty().addListener((observable, oldValue, newValue) -> this.setClipForChildren());
         canvasShellPane.heightProperty().addListener((observable, oldValue, newValue) -> this.setClipForChildren());
