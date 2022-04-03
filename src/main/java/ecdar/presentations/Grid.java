@@ -2,13 +2,7 @@ package ecdar.presentations;
 
 import ecdar.controllers.EcdarController;
 import javafx.application.Platform;
-import javafx.geometry.Insets;
 import javafx.scene.Parent;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 
 import java.util.ArrayList;
@@ -56,16 +50,8 @@ public class Grid extends Parent {
         setScaleY(zoomLevel);
 
         // The given size of the canvas divided by the given zoomLevel (multiplied by 6 to ensure that the grid covers the full canvas)
-        double screenWidth = (int) Grid.snap(EcdarController.getActiveCanvasShellPresentation().getWidth() / zoomLevel); // ToDo Grid: Possibly add multiplier
-        double screenHeight = (int) Grid.snap(EcdarController.getActiveCanvasShellPresentation().getHeight() / zoomLevel);
-//
-//        if (this.getTranslateX() != Grid.snap(this.getTranslateX())) {
-//            this.setTranslateX(Grid.snap(this.getTranslateX()) + GRID_SIZE * 0.5);
-//        }
-//
-//        if (this.getTranslateY() != Grid.snap(this.getTranslateY())) {
-//            this.setTranslateY(Grid.snap(this.getTranslateY()) + GRID_SIZE * 0.5);
-//        }
+        double screenWidth = (int) Grid.snap(EcdarController.getActiveCanvasPresentation().getWidth() / zoomLevel); // ToDo Grid: Possibly add multiplier
+        double screenHeight = (int) Grid.snap(EcdarController.getActiveCanvasPresentation().getHeight() / zoomLevel);
 
         Platform.runLater(() -> {
             // Remove old vertical lines

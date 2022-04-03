@@ -41,20 +41,20 @@ public class DeclarationsController implements Initializable {
      */
     private void initializeWidthAndHeight() {
         // Fetch width and height of canvas and update
-        root.setMinWidth(EcdarController.getActiveCanvasShellPresentation().getCanvasController().getWidthProperty().doubleValue());
-        canvasHeight = EcdarController.getActiveCanvasShellPresentation().getCanvasController().getHeightProperty().doubleValue();
-        updateOffset(EcdarController.getActiveCanvasShellPresentation().getCanvasController().getInsetShouldShow().get());
+        root.setMinWidth(EcdarController.getActiveCanvasPresentation().getController().getWidthProperty().doubleValue());
+        canvasHeight = EcdarController.getActiveCanvasPresentation().getController().getHeightProperty().doubleValue();
+        updateOffset(EcdarController.getActiveCanvasPresentation().getController().getInsetShouldShow().get());
         updateHeight();
 
-        EcdarController.getActiveCanvasShellPresentation().getCanvasController().getWidthProperty().addListener((observable, oldValue, newValue) -> {
+        EcdarController.getActiveCanvasPresentation().getController().getWidthProperty().addListener((observable, oldValue, newValue) -> {
             root.setMinWidth(newValue.doubleValue());
             root.setMaxWidth(newValue.doubleValue());
         });
-        EcdarController.getActiveCanvasShellPresentation().getCanvasController().getHeightProperty().addListener((observable, oldValue, newValue) -> {
+        EcdarController.getActiveCanvasPresentation().getController().getHeightProperty().addListener((observable, oldValue, newValue) -> {
             canvasHeight = newValue.doubleValue();
             updateHeight();
         });
-        EcdarController.getActiveCanvasShellPresentation().getCanvasController().getInsetShouldShow().addListener((observable, oldValue, newValue) -> {
+        EcdarController.getActiveCanvasPresentation().getController().getInsetShouldShow().addListener((observable, oldValue, newValue) -> {
             updateOffset(newValue);
             updateHeight();
         });

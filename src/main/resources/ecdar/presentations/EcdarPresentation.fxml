@@ -19,7 +19,7 @@
     <BorderPane>
         <center>
             <StackPane alignment="TOP_LEFT">
-                <StackPane fx:id="canvasShellPane">
+                <StackPane fx:id="canvasPane">
                     <!-- Canvases go here -->
                 </StackPane>
                 <VBox maxHeight="-Infinity">

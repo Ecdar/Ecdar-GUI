@@ -9,6 +9,7 @@ import javafx.scene.Node;
 
 public class ZoomHelper {
     private CanvasPresentation canvasPresentation;
+    private ModelPresentation model;
     private Grid grid;
     private boolean active = true;
 
@@ -21,19 +22,20 @@ public class ZoomHelper {
      */
     public void setCanvas(CanvasPresentation newCanvasPresentation) {
         canvasPresentation = newCanvasPresentation;
-        // ToDo grid: Currently results in the canvas moving out of view and push everything away
+        model = canvasPresentation.getController().getActiveComponentPresentation();
+        // ToDo grid: Currently results in crash
 //        canvasPresentation.widthProperty().addListener((observable -> centerComponentAndUpdateGrid(canvasPresentation.scaleXProperty().doubleValue())));
 //        canvasPresentation.heightProperty().addListener((observable -> centerComponentAndUpdateGrid(canvasPresentation.scaleYProperty().doubleValue())));
     }
 
     public Double getZoomLevel() {
-        return canvasPresentation.getScaleX();
+        return model.getScaleX();
     }
 
     public void setZoomLevel(Double zoomLevel) {
         if (active) {
-            canvasPresentation.setScaleX(zoomLevel);
-            canvasPresentation.setScaleY(zoomLevel);
+            model.setScaleX(zoomLevel);
+            model.setScaleY(zoomLevel);
             centerComponentAndUpdateGrid(zoomLevel);
         }
     }
@@ -48,17 +50,14 @@ public class ZoomHelper {
     public void zoomIn() {
         if (active) {
             double delta = 1.2;
-            double newScale = canvasPresentation.getScaleX() * delta;
+            double newScale = model.getScaleX() * delta;
 
             //Limit for zooming in
             if (newScale > maxZoomFactor) {
                 return;
             }
 
-            //Scale canvas
-            canvasPresentation.setScaleX(newScale);
-            canvasPresentation.setScaleY(newScale);
-
+            scaleModel(newScale);
             centerComponentAndUpdateGrid(newScale);
         }
     }
@@ -69,17 +68,14 @@ public class ZoomHelper {
     public void zoomOut() {
         if (active) {
             double delta = 1.2;
-            double newScale = canvasPresentation.getScaleX() / delta;
+            double newScale = model.getScaleX() / delta;
 
             //Limit for zooming out
             if (newScale < minZoomFactor) {
                 return;
             }
 
-            //Scale canvas
-            canvasPresentation.setScaleX(newScale);
-            canvasPresentation.setScaleY(newScale);
-
+            scaleModel(newScale);
             centerComponentAndUpdateGrid(newScale);
         }
     }
@@ -89,10 +85,7 @@ public class ZoomHelper {
      */
     public void resetZoom() {
         if (active) {
-            canvasPresentation.setScaleX(1);
-            canvasPresentation.setScaleY(1);
-
-            //Center component
+            scaleModel(1);
             centerComponentAndUpdateGrid(1);
         }
     }
@@ -102,16 +95,13 @@ public class ZoomHelper {
      */
     public void zoomToFit() {
         if (active) {
-            if (EcdarController.getActiveCanvasShellPresentation().getCanvasController().activeComponentPresentation == null) {
+            if (EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation == null) {
                 resetZoom();
                 return;
             }
-            double newScale = Math.min(canvasPresentation.getWidth() / EcdarController.getActiveCanvasShellPresentation().getCanvasController().activeComponentPresentation.getWidth() - 0.1, canvasPresentation.getHeight() / EcdarController.getActiveCanvasShellPresentation().getCanvasController().activeComponentPresentation.getHeight() - 0.2); //0.1 for width and 0.2 for height added for margin
+            double newScale = Math.min(canvasPresentation.getWidth() / EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation.getWidth() - 0.1, canvasPresentation.getHeight() / EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation.getHeight() - 0.2); //0.1 for width and 0.2 for height added for margin
 
-            //Scale canvas
-            canvasPresentation.setScaleX(newScale);
-            canvasPresentation.setScaleY(newScale);
-
+            scaleModel(newScale);
             centerComponentAndUpdateGrid(newScale);
         }
     }
@@ -129,13 +119,13 @@ public class ZoomHelper {
      */
     private void centerComponentAndUpdateGrid(double newScale){
         // Check added to avoid NullPointerException
-        if(EcdarController.getActiveCanvasShellPresentation().getCanvasController().activeComponentPresentation != null){
-            updateGrid(newScale, EcdarController.getActiveCanvasShellPresentation().getCanvasController().activeComponentPresentation);
-        } else if (EcdarController.getActiveCanvasShellPresentation().getCanvasController().getActiveModel() != null) {
+        if(EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation != null){
+            updateGrid(newScale, EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation);
+        } else if (EcdarController.getActiveCanvasPresentation().getController().getActiveModel() != null) {
             // The canvas is currently showing an EcdarSystem object, so wee need to find the SystemPresentation in order to center it on screen
             SystemPresentation systemPresentation = null;
 
-            for (Node node : EcdarController.getActiveCanvasShellPresentation().getCanvasController().root.getChildren()) {
+            for (Node node : EcdarController.getActiveCanvasPresentation().getController().modelPane.getChildren()) {
                 if (node instanceof SystemPresentation) {
                     systemPresentation = (SystemPresentation) node;
                     break;
@@ -150,8 +140,13 @@ public class ZoomHelper {
         }
     }
 
+    private void scaleModel(double newScale) {
+        model.setScaleX(newScale);
+        model.setScaleY(newScale);
+    }
+
     private void updateGrid(double newScale, ModelPresentation modelPresentation) {
-        // Calculate the new x and y offsets needed to center the component
+        // Calculate the new x and y offsets needed to center the model
         double xOffset = newScale * canvasPresentation.getWidth() * 1.0f / 2 - newScale * modelPresentation.getWidth() * 1.0f / 2;
         double yOffset = newScale * canvasPresentation.getHeight() * 1.0f / 2 - newScale * modelPresentation.getHeight() * 1.0f / 2;
 

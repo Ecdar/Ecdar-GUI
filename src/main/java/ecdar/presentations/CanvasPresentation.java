@@ -5,7 +5,6 @@ import com.jfoenix.skins.ValidationPane;
 import ecdar.controllers.CanvasController;
 import ecdar.controllers.EcdarController;
 import ecdar.utility.colors.Color;
-import ecdar.utility.helpers.CanvasDragHelper;
 import ecdar.utility.helpers.MouseTrackable;
 import ecdar.utility.helpers.SelectHelper;
 import ecdar.utility.mouse.MouseTracker;
@@ -15,6 +14,7 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.Bounds;
+import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -23,19 +23,40 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
 
-public class CanvasPresentation extends Pane implements MouseTrackable {
+public class CanvasPresentation extends StackPane implements MouseTrackable {
     public MouseTracker mouseTracker;
 
     private final DoubleProperty x = new SimpleDoubleProperty(0);
     private final DoubleProperty y = new SimpleDoubleProperty(0);
 
     private final CanvasController controller;
+    private final BooleanProperty gridToggle = new SimpleBooleanProperty(false);
 
     public CanvasPresentation() {
         mouseTracker = new MouseTracker(this);
         controller = new EcdarFXMLLoader().loadAndGetController("CanvasPresentation.fxml", this);
         mouseTracker.registerOnMousePressedEventHandler(this::startDragSelect);
 
+        initializeModelDrag();
+
+        getController().root.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
+            EcdarController.setActiveCanvasPresentation(this);
+        });
+
+        initializeGrid();
+        initializeToolbar();
+
+        controller.allowGridProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue && gridToggle.get()) showGrid();
+            else hideGrid();
+        });
+
+        Platform.runLater(this::initializeZoomHelper);
+
+        getStyleClass().add("canvas-presentation");
+    }
+
+    private void initializeModelDrag() {
         final double[] dragXOffset = {0d};
         final double[] dragYOffset = {0d};
         final double[] previousXTranslation = {0d};
@@ -52,8 +73,8 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
 
             dragXOffset[0] = event.getSceneX();
             dragYOffset[0] = event.getSceneY();
-            previousXTranslation[0] = controller.root.getChildren().get(0).getTranslateX();
-            previousYTranslation[0] = controller.root.getChildren().get(0).getTranslateY();
+            previousXTranslation[0] = controller.modelPane.getTranslateX();
+            previousYTranslation[0] = controller.modelPane.getTranslateY();
 
             controller.root.setCursor(Cursor.MOVE);
         });
@@ -67,20 +88,85 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
             final double newX = previousXTranslation[0] + dragDistanceX;
             final double newY = previousYTranslation[0] + dragDistanceY;
 
-            controller.root.getChildren().get(0).setTranslateX(newX);
-            controller.root.getChildren().get(0).setTranslateY(newY);
+            controller.modelPane.setTranslateX(newX);
+            controller.modelPane.setTranslateY(newY);
         });
 
         mouseTracker.registerOnMouseReleasedEventHandler(event -> {
             controller.root.setCursor(Cursor.DEFAULT);
-            dragXOffset[0] = controller.root.getChildren().get(0).getTranslateX() - event.getSceneX();
-            dragYOffset[0] = controller.root.getChildren().get(0).getTranslateY() - event.getSceneY();
-            previousXTranslation[0] = controller.root.getChildren().get(0).getTranslateX();
-            previousYTranslation[0] = controller.root.getChildren().get(0).getTranslateY();
+            dragXOffset[0] = controller.modelPane.getTranslateX() - event.getSceneX();
+            dragYOffset[0] = controller.modelPane.getTranslateY() - event.getSceneY();
+            previousXTranslation[0] = controller.modelPane.getTranslateX();
+            previousYTranslation[0] = controller.modelPane.getTranslateY();
+            previousYTranslation[0] = controller.modelPane.getTranslateY();
             isBeingDragged.setValue(false);
         });
+    }
 
-        getStyleClass().add("canvas-presentation");
+    private void initializeGrid() {
+        gridToggle.setValue(true);
+        controller.allowGridProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue && gridToggle.get()) showGrid();
+            else hideGrid();
+        });
+    }
+
+    private void initializeToolbar() {
+        final Color color = Color.GREY_BLUE;
+        final Color.Intensity intensity = Color.Intensity.I700;
+
+        // Set the background for the top toolbar
+        controller.toolbar.setBackground(
+                new Background(new BackgroundFill(color.getColor(intensity),
+                        CornerRadii.EMPTY,
+                        Insets.EMPTY)
+                ));
+
+        initializeToolbarButton(controller.zoomIn);
+        initializeToolbarButton(controller.zoomOut);
+        initializeToolbarButton(controller.zoomToFit);
+        initializeToolbarButton(controller.resetZoom);
+
+        widthProperty().addListener((width) -> Platform.runLater(() -> setClip(new Rectangle(getWidth(), getHeight()))));
+        heightProperty().addListener((height) -> Platform.runLater(() -> setClip(new Rectangle(getWidth(), getHeight()))));
+    }
+
+    private void initializeToolbarButton(final JFXRippler button) {
+        final Color color = Color.GREY_BLUE;
+        final Color.Intensity colorIntensity = Color.Intensity.I800;
+
+        button.setMaskType(JFXRippler.RipplerMask.CIRCLE);
+        button.setRipplerFill(color.getTextColor(colorIntensity));
+        button.setPosition(JFXRippler.RipplerPos.BACK);
+    }
+
+    private void initializeZoomHelper() {
+        controller.zoomHelper.setGrid(controller.grid);
+        controller.zoomHelper.setCanvas(this);
+    }
+
+    /**
+     * Toggles the user option for whether or not to show the grid on components and system views.
+     * @return a Boolean property that is true if the grid has been turned on and false if the grid has been turned off
+     */
+    public BooleanProperty toggleGridUi() {
+        if (gridToggle.get()) {
+            if (controller.isGridAllowed()) hideGrid();
+
+            gridToggle.setValue(false);
+        } else {
+            showGrid();
+            gridToggle.setValue(true);
+        }
+        return gridToggle;
+    }
+
+    private void showGrid() {
+        controller.grid.setOpacity(1);
+    }
+
+    private void hideGrid() {
+        controller.grid.setOpacity(0);
     }
 
     /**
@@ -88,7 +174,7 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
      * @param shouldShow true iff views should show an inset
      */
     public static void showBottomInset(final Boolean shouldShow) {
-        EcdarController.getActiveCanvasShellPresentation().getCanvasController().updateOffset(shouldShow);
+        EcdarController.getActiveCanvasPresentation().getController().updateOffset(shouldShow);
     }
 
     @Override
@@ -134,6 +220,10 @@ public class CanvasPresentation extends Pane implements MouseTrackable {
                 selectionRectangle.setWidth(Math.abs(e.getX() - mouseDownX));
                 selectionRectangle.setY(Math.min(e.getY(), mouseDownY));
                 selectionRectangle.setHeight(Math.abs(e.getY() - mouseDownY));
+
+                // We need to update the translation coordinates to display the selection rectangle in the right place
+                selectionRectangle.setTranslateX(Math.min(e.getX(), mouseDownX));
+                selectionRectangle.setTranslateY(Math.min(e.getY(), mouseDownY));
 
                 SelectHelper.clearSelectedElements();
 

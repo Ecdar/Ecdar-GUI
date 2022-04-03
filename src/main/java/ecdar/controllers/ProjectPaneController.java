@@ -246,7 +246,7 @@ public class ProjectPaneController implements Initializable {
 
 
         // If we remove the model active on the canvas
-        if (EcdarController.getActiveCanvasShellPresentation().getCanvasController().getActiveModel() == model) {
+        if (EcdarController.getActiveCanvasPresentation().getController().getActiveModel() == model) {
             if (Ecdar.getProject().getComponents().size() > 0) {
                 // Find the first available component and show it instead of the removed one
                 final Component component = Ecdar.getProject().getComponents().get(0);
