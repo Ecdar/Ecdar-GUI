@@ -37,12 +37,9 @@ public class CanvasPresentation extends StackPane implements MouseTrackable {
         controller = new EcdarFXMLLoader().loadAndGetController("CanvasPresentation.fxml", this);
         mouseTracker.registerOnMousePressedEventHandler(this::startDragSelect);
 
+        getController().root.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> EcdarController.setActiveCanvasPresentation(this));
+
         initializeModelDrag();
-
-        getController().root.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
-            EcdarController.setActiveCanvasPresentation(this);
-        });
-
         initializeGrid();
         initializeToolbar();
 
@@ -52,7 +49,6 @@ public class CanvasPresentation extends StackPane implements MouseTrackable {
         });
 
         Platform.runLater(this::initializeZoomHelper);
-
         getStyleClass().add("canvas-presentation");
     }
 

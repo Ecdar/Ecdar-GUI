@@ -134,7 +134,6 @@ public class EcdarPresentation extends StackPane {
     }
 
     private void initializeColorSelector() {
-
         final JFXPopup popup = new JFXPopup();
 
         final double listWidth = 136;

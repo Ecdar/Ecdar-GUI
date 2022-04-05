@@ -33,7 +33,7 @@ public class ZoomHelper {
     }
 
     public void setZoomLevel(Double zoomLevel) {
-        if (active) {
+        if (active && model != null) {
             model.setScaleX(zoomLevel);
             model.setScaleY(zoomLevel);
             centerComponentAndUpdateGrid(zoomLevel);
