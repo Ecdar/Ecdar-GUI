@@ -122,9 +122,6 @@ public class CanvasPresentation extends StackPane implements MouseTrackable {
         initializeToolbarButton(controller.zoomOut);
         initializeToolbarButton(controller.zoomToFit);
         initializeToolbarButton(controller.resetZoom);
-
-        widthProperty().addListener((width) -> Platform.runLater(() -> setClip(new Rectangle(getWidth(), getHeight()))));
-        heightProperty().addListener((height) -> Platform.runLater(() -> setClip(new Rectangle(getWidth(), getHeight()))));
     }
 
     private void initializeToolbarButton(final JFXRippler button) {

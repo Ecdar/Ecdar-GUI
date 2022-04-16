@@ -17,15 +17,13 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.*;
+import javafx.scene.shape.Rectangle;
 import javafx.util.Pair;
 
 import java.net.URL;
 import java.util.HashMap;
 import java.util.ResourceBundle;
-import java.util.Stack;
 import java.util.function.Consumer;
 
 import static ecdar.presentations.Grid.GRID_SIZE;
@@ -111,10 +109,9 @@ public class CanvasController implements Initializable {
 
         root.widthProperty().addListener((observable, oldValue, newValue) -> width.setValue(newValue));
         root.heightProperty().addListener((observable, oldValue, newValue) -> height.setValue(newValue));
+        root.setPadding(new Insets(toolbar.getHeight()));
 
         activeModel.addListener((obs, oldModel, newModel) -> onActiveModelChanged(oldModel, newModel));
-
-        root.setPadding(new Insets(toolbar.getHeight()));
 
         leaveTextAreas = () -> root.requestFocus();
         leaveOnEnterPressed = (keyEvent) -> {
@@ -179,7 +176,6 @@ public class CanvasController implements Initializable {
         modelPane.getChildren().removeIf(node -> node instanceof HighLevelModelPresentation);
 
         if (newObject instanceof Component) {
-            setTranslateOfBox(newObject);
             activeComponentPresentation = new ComponentPresentation((Component) newObject);
             modelPane.getChildren().add(activeComponentPresentation);
 
@@ -190,7 +186,6 @@ public class CanvasController implements Initializable {
             activeComponentPresentation = null;
             modelPane.getChildren().add(new DeclarationPresentation((Declarations) newObject));
         } else if (newObject instanceof EcdarSystem) {
-            setTranslateOfBox(newObject);
             activeComponentPresentation = null;
             modelPane.getChildren().add(new SystemPresentation((EcdarSystem) newObject));
         } else if (newObject instanceof MutationTestPlan) {
@@ -207,19 +202,6 @@ public class CanvasController implements Initializable {
         zoomHelper.setActive(shouldZoomBeActive);
 
         root.requestFocus();
-    }
-
-    private void setTranslateOfBox(final HighLevelModelObject newObject) {
-        Platform.runLater(() -> {
-            if (ModelObjectTranslateMap.containsKey(newObject)) {
-                final Pair<Double, Double> restoreCoordinates = ModelObjectTranslateMap.get(newObject);
-                modelPane.setTranslateX(restoreCoordinates.getKey());
-                modelPane.setTranslateY(restoreCoordinates.getValue());
-            } else {
-                modelPane.setTranslateX(root.getWidth() / 2);
-                modelPane.setTranslateY(root.getHeight() / 2);
-            }
-        });
     }
 
     /**

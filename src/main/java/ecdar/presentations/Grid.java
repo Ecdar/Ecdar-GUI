@@ -15,19 +15,19 @@ public class Grid extends Parent {
     private final ArrayList<Line> verticalLines = new ArrayList<>();
 
     public Grid() {
-//        setTranslateX(GRID_SIZE * 0.5);
-//        setTranslateY(GRID_SIZE * 0.5);
+        setTranslateX(snap(this.getTranslateX()));
+        setTranslateY(snap(this.getTranslateY()));
 
         // When the scene changes (goes from null to something) set update the grid
         sceneProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
-                updateGrid(1);
                 Platform.runLater(() -> {
                     newValue.widthProperty().addListener((observable1 -> this.updateGrid(getScaleX())));
                     newValue.heightProperty().addListener((observable1 -> this.updateGrid(getScaleY())));
                 });
             }
         });
+        updateGrid(getScaleX());
     }
 
     /**
@@ -49,23 +49,29 @@ public class Grid extends Parent {
         setScaleX(zoomLevel);
         setScaleY(zoomLevel);
 
-        // The given size of the canvas divided by the given zoomLevel (multiplied by 6 to ensure that the grid covers the full canvas)
-        double screenWidth = (int) Grid.snap(EcdarController.getActiveCanvasPresentation().getWidth() / zoomLevel); // ToDo Grid: Possibly add multiplier
-        double screenHeight = (int) Grid.snap(EcdarController.getActiveCanvasPresentation().getHeight() / zoomLevel);
+        // Remove old vertical lines
+        while (!verticalLines.isEmpty()) {
+            final Line removeLine = verticalLines.get(0);
+            getChildren().remove(removeLine);
+            verticalLines.remove(removeLine);
+        }
+
+        // Remove old horizontal lines
+        while (!horizontalLines.isEmpty()) {
+            final Line removeLine = horizontalLines.get(0);
+            getChildren().remove(removeLine);
+            horizontalLines.remove(removeLine);
+        }
 
         Platform.runLater(() -> {
-            // Remove old vertical lines
-            while (!verticalLines.isEmpty()) {
-                final Line removeLine = verticalLines.get(0);
-                getChildren().remove(removeLine);
-                verticalLines.remove(removeLine);
-            }
+            double screenWidth = (int) snap(EcdarController.getActiveCanvasPresentation().getWidth() / zoomLevel);
+            double screenHeight = (int) snap(EcdarController.getActiveCanvasPresentation().getHeight() / zoomLevel);
 
             // Add new vertical lines to cover the screen at the current zoom level
-            int i = (int) -screenWidth / GRID_SIZE;
+            int i = 0;
             int numberOfLine = (int) screenWidth / GRID_SIZE;
             while (i < numberOfLine) {
-                Line line = new Line(i * GRID_SIZE, -screenHeight, i * GRID_SIZE, screenHeight);
+                Line line = new Line(i * GRID_SIZE, 0, i * GRID_SIZE, screenHeight);
                 line.getStyleClass().add("grid-line");
 
                 verticalLines.add(line);
@@ -73,18 +79,11 @@ public class Grid extends Parent {
                 i++;
             }
 
-            // Remove old horizontal lines
-            while (!horizontalLines.isEmpty()) {
-                final Line removeLine = horizontalLines.get(0);
-                getChildren().remove(removeLine);
-                horizontalLines.remove(removeLine);
-            }
-
             // Add new horizontal lines to cover the screen at the current zoom level
-            i = (int) -screenHeight / GRID_SIZE;
+            i = 0;
             numberOfLine = (int) screenHeight / GRID_SIZE;
             while (i < numberOfLine) {
-                Line line = new Line(-screenWidth, i * GRID_SIZE, screenWidth, i * GRID_SIZE);
+                Line line = new Line(0, i * GRID_SIZE, screenWidth, i * GRID_SIZE);
                 line.getStyleClass().add("grid-line");
 
                 horizontalLines.add(line);

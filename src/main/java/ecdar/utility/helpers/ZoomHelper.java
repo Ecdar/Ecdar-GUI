@@ -23,9 +23,9 @@ public class ZoomHelper {
     public void setCanvas(CanvasPresentation newCanvasPresentation) {
         canvasPresentation = newCanvasPresentation;
         model = canvasPresentation.getController().getActiveComponentPresentation();
-        // ToDo grid: Currently results in crash
-//        canvasPresentation.widthProperty().addListener((observable -> centerComponentAndUpdateGrid(canvasPresentation.scaleXProperty().doubleValue())));
-//        canvasPresentation.heightProperty().addListener((observable -> centerComponentAndUpdateGrid(canvasPresentation.scaleYProperty().doubleValue())));
+
+        canvasPresentation.widthProperty().addListener((observable -> centerComponentAndUpdateGrid(canvasPresentation.scaleXProperty().doubleValue())));
+        canvasPresentation.heightProperty().addListener((observable -> centerComponentAndUpdateGrid(canvasPresentation.scaleYProperty().doubleValue())));
     }
 
     public Double getZoomLevel() {
@@ -120,7 +120,8 @@ public class ZoomHelper {
     private void centerComponentAndUpdateGrid(double newScale){
         // Check added to avoid NullPointerException
         if(EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation != null){
-            updateGrid(newScale, EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation);
+            grid.updateGrid(newScale);
+            centerComponent(newScale, EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation);
         } else if (EcdarController.getActiveCanvasPresentation().getController().getActiveModel() != null) {
             // The canvas is currently showing an EcdarSystem object, so wee need to find the SystemPresentation in order to center it on screen
             SystemPresentation systemPresentation = null;
@@ -136,7 +137,8 @@ public class ZoomHelper {
                 return;
             }
 
-            updateGrid(newScale, systemPresentation);
+            grid.updateGrid(newScale);
+            centerComponent(newScale, systemPresentation);
         }
     }
 
@@ -145,15 +147,11 @@ public class ZoomHelper {
         model.setScaleY(newScale);
     }
 
-    private void updateGrid(double newScale, ModelPresentation modelPresentation) {
-        // Calculate the new x and y offsets needed to center the model
-        double xOffset = newScale * canvasPresentation.getWidth() * 1.0f / 2 - newScale * modelPresentation.getWidth() * 1.0f / 2;
-        double yOffset = newScale * canvasPresentation.getHeight() * 1.0f / 2 - newScale * modelPresentation.getHeight() * 1.0f / 2;
+    private void centerComponent(double newScale, ModelPresentation modelPresentation) {
+        double xOffset = Grid.snap(newScale * canvasPresentation.getWidth() * 1.0f / 2 - newScale * modelPresentation.getWidth() * 1.0f / 2);
+        double yOffset = Grid.snap(newScale * canvasPresentation.getHeight() * 1.0f / 2 - newScale * modelPresentation.getHeight() * 1.0f / 2);
 
         modelPresentation.setTranslateX(xOffset);
         modelPresentation.setTranslateY(yOffset);
-
-        // Redraw the grid based on the new scale and canvas size
-        grid.updateGrid(newScale);
     }
 }

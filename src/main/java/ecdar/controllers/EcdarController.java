@@ -62,11 +62,16 @@ public class EcdarController implements Initializable {
 
     // View stuff
     public StackPane root;
+    public BorderPane borderPane;
+    public StackPane canvasPane;
+    public StackPane leftPane;
+    public StackPane centerPane;
+    public StackPane rightPane;
     public QueryPanePresentation queryPane;
     public ProjectPanePresentation filePane;
-    public HBox toolbar;
     public Label queryPaneFillerElement;
     public Label filePaneFillerElement;
+    public HBox toolbar;
     public MessageTabPanePresentation messageTabPane;
     public StackPane dialogContainer;
     public JFXDialog dialog;
@@ -101,7 +106,6 @@ public class EcdarController implements Initializable {
     public StackPane aboutContainer;
     public JFXDialog aboutDialog;
     public JFXButton aboutAcceptButton;
-    public StackPane canvasPane;
 
     public Rectangle bottomFillerElement;
 
@@ -202,7 +206,7 @@ public class EcdarController implements Initializable {
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
         initilizeDialogs();
-        initializeCanvasShellPane();
+        initializeCanvasPane();
         initializeEdgeStatusHandling();
         initializeKeybindings();
         initializeStatusBar();
@@ -265,7 +269,6 @@ public class EcdarController implements Initializable {
         queryPane.getStyleClass().add("responsive-pane-sizing");
         queryPaneFillerElement.getStyleClass().add("responsive-pane-sizing");
 
-        initializeCanvasShellPane();
         initializeEdgeStatusHandling();
         initializeKeybindings();
         initializeStatusBar();
@@ -899,9 +902,10 @@ public class EcdarController implements Initializable {
         });
     }
 
-    private void initializeCanvasShellPane() {
+    private void initializeCanvasPane() {
         Platform.runLater(this::setCanvasModeToSingular);
     }
+
     /**
      * Removes the canvases and adds a new one, with the active component of the active canvasPresentation.
      */
@@ -1183,7 +1187,6 @@ public class EcdarController implements Initializable {
 
     /**
      * This method is used to push the contents of the file and query panes when the tab pane is opened
-     *
      */
     public void changeInsetsOfFileAndQueryPanes() {
         if (messageTabPane.getController().isOpen()) {

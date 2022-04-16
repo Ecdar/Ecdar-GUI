@@ -16,9 +16,9 @@
          type="StackPane"
          fx:id="root"
          fx:controller="ecdar.controllers.EcdarController">
-    <BorderPane>
+    <BorderPane fx:id="borderPane">
         <center>
-            <StackPane alignment="TOP_LEFT">
+            <StackPane fx:id="centerPane" alignment="TOP_LEFT">
                 <StackPane fx:id="canvasPane">
                     <!-- Canvases go here -->
                 </StackPane>
@@ -85,25 +85,28 @@
                         </HBox>
                     </VBox>
                 </VBox>
-                <QueryPanePresentation
-                        fx:id="queryPane"
-                        StackPane.alignment="TOP_RIGHT"/>
-
-                <ProjectPanePresentation
-                        fx:id="filePane"
-                        StackPane.alignment="TOP_LEFT"/>
             </StackPane>
         </center>
 
-        <!-- Query pane -->
-        <right>
-            <Label fx:id="queryPaneFillerElement"/>
-        </right>
-
         <!-- File pane -->
         <left>
-            <Label fx:id="filePaneFillerElement"/>
+            <StackPane fx:id="leftPane">
+                <Label fx:id="filePaneFillerElement"/>
+                <ProjectPanePresentation
+                fx:id="filePane"
+                StackPane.alignment="TOP_LEFT"/>
+            </StackPane>
         </left>
+
+        <!-- Query pane -->
+        <right>
+            <StackPane fx:id="rightPane">
+                <Label fx:id="queryPaneFillerElement"/>
+                <QueryPanePresentation
+                        fx:id="queryPane"
+                        StackPane.alignment="TOP_RIGHT"/>
+            </StackPane>
+        </right>
 
         <!-- Message container -->
         <bottom>
