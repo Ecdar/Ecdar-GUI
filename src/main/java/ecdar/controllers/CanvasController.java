@@ -109,7 +109,7 @@ public class CanvasController implements Initializable {
 
         root.widthProperty().addListener((observable, oldValue, newValue) -> width.setValue(newValue));
         root.heightProperty().addListener((observable, oldValue, newValue) -> height.setValue(newValue));
-        root.setPadding(new Insets(toolbar.getHeight()));
+        root.setPadding(new Insets(toolbar.getHeight(), 0,0,0));
 
         activeModel.addListener((obs, oldModel, newModel) -> onActiveModelChanged(oldModel, newModel));
 

@@ -69,8 +69,6 @@ public class EcdarController implements Initializable {
     public StackPane rightPane;
     public QueryPanePresentation queryPane;
     public ProjectPanePresentation filePane;
-    public Label queryPaneFillerElement;
-    public Label filePaneFillerElement;
     public HBox toolbar;
     public MessageTabPanePresentation messageTabPane;
     public StackPane dialogContainer;
@@ -265,9 +263,7 @@ public class EcdarController implements Initializable {
         });
 
         filePane.getStyleClass().add("responsive-pane-sizing");
-        filePaneFillerElement.getStyleClass().add("responsive-pane-sizing");
         queryPane.getStyleClass().add("responsive-pane-sizing");
-        queryPaneFillerElement.getStyleClass().add("responsive-pane-sizing");
 
         initializeEdgeStatusHandling();
         initializeKeybindings();
@@ -904,12 +900,6 @@ public class EcdarController implements Initializable {
 
     private void initializeCanvasPane() {
         Platform.runLater(this::setCanvasModeToSingular);
-
-        filePane.minWidthProperty().bind(filePaneFillerElement.widthProperty());
-        filePane.maxWidthProperty().bind(filePaneFillerElement.widthProperty());
-
-        queryPane.minWidthProperty().bind(queryPaneFillerElement.widthProperty());
-        queryPane.maxWidthProperty().bind(queryPaneFillerElement.widthProperty());
     }
 
     /**

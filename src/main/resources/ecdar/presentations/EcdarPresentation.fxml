@@ -91,17 +91,15 @@
         <!-- File pane -->
         <left>
             <StackPane fx:id="leftPane" alignment="TOP_LEFT">
-                <Label fx:id="filePaneFillerElement"/>
                 <ProjectPanePresentation
-                fx:id="filePane"
-                StackPane.alignment="TOP_LEFT"/>
+                        fx:id="filePane"
+                        StackPane.alignment="TOP_LEFT"/>
             </StackPane>
         </left>
 
         <!-- Query pane -->
         <right>
             <StackPane fx:id="rightPane" alignment="TOP_RIGHT">
-                <Label fx:id="queryPaneFillerElement"/>
                 <QueryPanePresentation
                         fx:id="queryPane"
                         StackPane.alignment="TOP_RIGHT"/>

@@ -16,7 +16,7 @@
     <StackPane fx:id="modelPane" style="-fx-font-size: 13px; /* Prevents scaling of text on canvas*/">
     </StackPane>
     <VBox maxHeight="-Infinity" style="-fx-max-width: 15em">
-        <HBox fx:id="toolbar" StackPane.alignment="TOP_LEFT" alignment="CENTER">
+        <HBox fx:id="toolbar" StackPane.alignment="CENTER" alignment="CENTER">
             <padding>
                 <Insets topRightBottomLeft="10"/>
             </padding>

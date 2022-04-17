@@ -78,9 +78,6 @@ public class EcdarPresentation extends StackPane {
             toggleFilePane();
             toggleQueryPane();
 
-            controller.centerPane.minWidthProperty().bind(controller.root.widthProperty().subtract(filePaneAnimationProperty.add(queryPaneAnimationProperty)));
-            controller.centerPane.maxWidthProperty().bind(controller.root.widthProperty().subtract(filePaneAnimationProperty.add(queryPaneAnimationProperty)));
-
             // Set clip of canvas to avoid children resizing beyond bounds
             Rectangle clip = new Rectangle();
             clip.widthProperty().bind(controller.centerPane.widthProperty());
@@ -88,6 +85,10 @@ public class EcdarPresentation extends StackPane {
             clip.setArcWidth(1);
             clip.setArcHeight(1);
             controller.centerPane.setClip(clip);
+
+            // Bind sizing of sides and center panes to ensure correct sizing
+            controller.centerPane.minWidthProperty().bind(controller.root.widthProperty().subtract(filePaneAnimationProperty.add(queryPaneAnimationProperty)));
+            controller.centerPane.maxWidthProperty().bind(controller.root.widthProperty().subtract(filePaneAnimationProperty.add(queryPaneAnimationProperty)));
 
             controller.leftPane.minWidthProperty().bind(filePaneAnimationProperty);
             controller.leftPane.maxWidthProperty().bind(filePaneAnimationProperty);

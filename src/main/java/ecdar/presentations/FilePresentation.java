@@ -4,6 +4,7 @@ import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.EcdarSystem;
 import ecdar.abstractions.HighLevelModelObject;
+import ecdar.controllers.EcdarController;
 import ecdar.controllers.FileController;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.utility.colors.Color;
@@ -137,7 +138,7 @@ public class FilePresentation extends AnchorPane {
                 activeComponents.add(((CanvasPresentation) child).getController().getActiveModel());
             }
         } else {
-            activeComponents.add(((CanvasPresentation) canvasPaneFirstChild).getController().getActiveModel());
+            activeComponents.add(EcdarController.getActiveCanvasPresentation().getController().getActiveModel());
         }
 
         return activeComponents;
