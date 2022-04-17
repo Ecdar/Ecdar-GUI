@@ -21,6 +21,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
@@ -82,11 +83,17 @@ public class EcdarPresentation extends StackPane {
 
             // Set clip of canvas to avoid children resizing beyond bounds
             Rectangle clip = new Rectangle();
-            clip.widthProperty().bind(controller.centerPane.maxWidthProperty());
+            clip.widthProperty().bind(controller.centerPane.widthProperty());
             clip.heightProperty().bind(controller.root.heightProperty());
             clip.setArcWidth(1);
             clip.setArcHeight(1);
             controller.centerPane.setClip(clip);
+
+            controller.leftPane.minWidthProperty().bind(filePaneAnimationProperty);
+            controller.leftPane.maxWidthProperty().bind(filePaneAnimationProperty);
+
+            controller.rightPane.minWidthProperty().bind(queryPaneAnimationProperty);
+            controller.rightPane.maxWidthProperty().bind(queryPaneAnimationProperty);
         });
 
         initializeHelpImages();
@@ -279,7 +286,6 @@ public class EcdarPresentation extends StackPane {
         final KeyFrame kf2 = new KeyFrame(Duration.millis(200), closed);
 
         closeFilePaneAnimation.getKeyFrames().addAll(kf1, kf2);
-        closeFilePaneAnimation.setOnFinished(event -> controller.borderPane.setLeft(null));
     }
 
     private void initializeOpenFilePaneAnimation() {
@@ -336,7 +342,6 @@ public class EcdarPresentation extends StackPane {
         final KeyFrame kf2 = new KeyFrame(Duration.millis(200), closed);
 
         closeQueryPaneAnimation.getKeyFrames().addAll(kf1, kf2);
-        closeQueryPaneAnimation.setOnFinished(event -> controller.borderPane.setRight(null));
     }
 
     private void initializeOpenQueryPaneAnimation() {
@@ -407,7 +412,6 @@ public class EcdarPresentation extends StackPane {
             closeFilePaneAnimation.play();
         } else {
             openFilePaneAnimation.play();
-            controller.borderPane.setLeft(controller.leftPane);
         }
 
         // Toggle the open state
@@ -421,7 +425,6 @@ public class EcdarPresentation extends StackPane {
             closeQueryPaneAnimation.play();
         } else {
             openQueryPaneAnimation.play();
-            controller.borderPane.setRight(controller.rightPane);
         }
 
         // Toggle the open state

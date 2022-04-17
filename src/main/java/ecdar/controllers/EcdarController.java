@@ -904,6 +904,12 @@ public class EcdarController implements Initializable {
 
     private void initializeCanvasPane() {
         Platform.runLater(this::setCanvasModeToSingular);
+
+        filePane.minWidthProperty().bind(filePaneFillerElement.widthProperty());
+        filePane.maxWidthProperty().bind(filePaneFillerElement.widthProperty());
+
+        queryPane.minWidthProperty().bind(queryPaneFillerElement.widthProperty());
+        queryPane.maxWidthProperty().bind(queryPaneFillerElement.widthProperty());
     }
 
     /**

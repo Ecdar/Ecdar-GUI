@@ -18,7 +18,7 @@
          fx:controller="ecdar.controllers.EcdarController">
     <BorderPane fx:id="borderPane">
         <center>
-            <StackPane fx:id="centerPane" alignment="TOP_LEFT">
+            <StackPane fx:id="centerPane" alignment="TOP_CENTER">
                 <StackPane fx:id="canvasPane">
                     <!-- Canvases go here -->
                 </StackPane>
@@ -90,7 +90,7 @@
 
         <!-- File pane -->
         <left>
-            <StackPane fx:id="leftPane">
+            <StackPane fx:id="leftPane" alignment="TOP_LEFT">
                 <Label fx:id="filePaneFillerElement"/>
                 <ProjectPanePresentation
                 fx:id="filePane"
@@ -100,7 +100,7 @@
 
         <!-- Query pane -->
         <right>
-            <StackPane fx:id="rightPane">
+            <StackPane fx:id="rightPane" alignment="TOP_RIGHT">
                 <Label fx:id="queryPaneFillerElement"/>
                 <QueryPanePresentation
                         fx:id="queryPane"
