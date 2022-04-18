@@ -65,8 +65,8 @@ public class EcdarController implements Initializable {
     public BorderPane borderPane;
     public StackPane canvasPane;
     public StackPane leftPane;
-    public StackPane centerPane;
     public StackPane rightPane;
+    public Rectangle bottomFillerElement;
     public QueryPanePresentation queryPane;
     public ProjectPanePresentation filePane;
     public HBox toolbar;
@@ -104,8 +104,6 @@ public class EcdarController implements Initializable {
     public StackPane aboutContainer;
     public JFXDialog aboutDialog;
     public JFXButton aboutAcceptButton;
-
-    public Rectangle bottomFillerElement;
 
     // The program top menu
     public MenuBar menuBar;
@@ -919,6 +917,16 @@ public class EcdarController implements Initializable {
         canvasPane.getChildren().add(canvasPresentation);
         activeCanvasPresentation.set(canvasPresentation);
         filePane.getController().updateColorsOnFilePresentations();
+
+        Rectangle clip = new Rectangle();
+        clip.setArcWidth(1);
+        clip.setArcHeight(1);
+        clip.widthProperty().bind(canvasPane.widthProperty());
+        clip.heightProperty().bind(canvasPane.heightProperty());
+        canvasPresentation.getController().zoomablePane.setClip(clip);
+
+        canvasPresentation.getController().zoomablePane.minWidthProperty().bind(canvasPane.widthProperty());
+        canvasPresentation.getController().zoomablePane.maxWidthProperty().bind(canvasPane.widthProperty());
     }
 
     /**

@@ -285,11 +285,11 @@ public class ComponentController extends ModelController implements Initializabl
                 final Location newLocation = new Location();
                 newLocation.initialize();
 
-                double x = DropDownMenu.x / EcdarController.getActiveCanvasPresentation().getScaleX() - LocationPresentation.RADIUS / 2;
+                double x = DropDownMenu.x / EcdarController.getActiveCanvasPresentation().getController().zoomHelper.getZoomLevel() - LocationPresentation.RADIUS / 2;
                 x = Grid.snap(x);
                 newLocation.setX(x);
 
-                double y = DropDownMenu.y / EcdarController.getActiveCanvasPresentation().getScaleY() - LocationPresentation.RADIUS / 2;
+                double y = DropDownMenu.y / EcdarController.getActiveCanvasPresentation().getController().zoomHelper.getZoomLevel() - LocationPresentation.RADIUS / 2;
                 y = Grid.snap(y);
                 newLocation.setY(y);
 

@@ -21,7 +21,6 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
@@ -31,7 +30,6 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 import javafx.util.Pair;
 
@@ -78,17 +76,11 @@ public class EcdarPresentation extends StackPane {
             toggleFilePane();
             toggleQueryPane();
 
-            // Set clip of canvas to avoid children resizing beyond bounds
-            Rectangle clip = new Rectangle();
-            clip.widthProperty().bind(controller.centerPane.widthProperty());
-            clip.heightProperty().bind(controller.root.heightProperty());
-            clip.setArcWidth(1);
-            clip.setArcHeight(1);
-            controller.centerPane.setClip(clip);
-
             // Bind sizing of sides and center panes to ensure correct sizing
-            controller.centerPane.minWidthProperty().bind(controller.root.widthProperty().subtract(filePaneAnimationProperty.add(queryPaneAnimationProperty)));
-            controller.centerPane.maxWidthProperty().bind(controller.root.widthProperty().subtract(filePaneAnimationProperty.add(queryPaneAnimationProperty)));
+            controller.canvasPane.minWidthProperty().bind(controller.root.widthProperty().subtract(filePaneAnimationProperty.add(queryPaneAnimationProperty)));
+            controller.canvasPane.maxWidthProperty().bind(controller.root.widthProperty().subtract(filePaneAnimationProperty.add(queryPaneAnimationProperty)));
+            controller.canvasPane.minHeightProperty().bind(controller.root.heightProperty().subtract(controller.menuBar.heightProperty().add(controller.bottomFillerElement.heightProperty())));
+            controller.canvasPane.maxHeightProperty().bind(controller.root.heightProperty().subtract(controller.menuBar.heightProperty().add(controller.bottomFillerElement.heightProperty())));
 
             controller.leftPane.minWidthProperty().bind(filePaneAnimationProperty);
             controller.leftPane.maxWidthProperty().bind(filePaneAnimationProperty);
@@ -266,6 +258,7 @@ public class EcdarPresentation extends StackPane {
     }
 
     private void initializeToggleFilePaneFunctionality() {
+        // Translate the x coordinate to create the open/close animations
         controller.filePane.translateXProperty().bind(filePaneAnimationProperty.subtract(controller.filePane.widthProperty()));
 
         // Whenever the width of the file pane is updated, update the animations
@@ -304,6 +297,7 @@ public class EcdarPresentation extends StackPane {
     }
 
     private void initializeToggleQueryPaneFunctionality() {
+        // Translate the x coordinate to create the open/close animations
         controller.queryPane.translateXProperty().bind(queryPaneAnimationProperty.multiply(-1).add(controller.queryPane.widthProperty()));
 
         // Whenever the width of the query pane is updated, update the animations

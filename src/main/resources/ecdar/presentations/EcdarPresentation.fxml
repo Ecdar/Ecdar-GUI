@@ -18,74 +18,72 @@
          fx:controller="ecdar.controllers.EcdarController">
     <BorderPane fx:id="borderPane">
         <center>
-            <StackPane fx:id="centerPane" alignment="TOP_CENTER">
-                <StackPane fx:id="canvasPane">
-                    <!-- Canvases go here -->
-                </StackPane>
+            <VBox alignment="TOP_CENTER">
+                <!-- Max height is set to -Infinity to avoid toolbar from intercepting all mouse events on the canvas -->
                 <VBox maxHeight="-Infinity">
-                    <!-- Max height is set to -Infinity to avoid toolbar from intercepting all mouse events on the canvas -->
-                    <VBox maxHeight="-Infinity">
-                        <HBox fx:id="toolbar" HBox.hgrow="ALWAYS">
-                            <padding>
-                                <Insets topRightBottomLeft="10"/>
-                            </padding>
-                            <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
-                                <!-- UNDO -->
-                                <JFXRippler fx:id="undo">
-                                    <StackPane styleClass="responsive-icon-stack-pane-sizing"
-                                               onMouseClicked="#undoClicked">
-                                        <FontIcon iconLiteral="gmi-undo" fill="white" styleClass="icon-size-medium"/>
-                                    </StackPane>
-                                </JFXRippler>
+                    <HBox fx:id="toolbar" HBox.hgrow="ALWAYS">
+                        <padding>
+                            <Insets topRightBottomLeft="10"/>
+                        </padding>
+                        <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+                            <!-- UNDO -->
+                            <JFXRippler fx:id="undo">
+                                <StackPane styleClass="responsive-icon-stack-pane-sizing"
+                                           onMouseClicked="#undoClicked">
+                                    <FontIcon iconLiteral="gmi-undo" fill="white" styleClass="icon-size-medium"/>
+                                </StackPane>
+                            </JFXRippler>
 
-                                <Region minWidth="8"/>
+                            <Region minWidth="8"/>
 
-                                <!-- REDO -->
-                                <JFXRippler fx:id="redo">
-                                    <StackPane styleClass="responsive-icon-stack-pane-sizing"
-                                               onMouseClicked="#redoClicked">
-                                        <FontIcon iconLiteral="gmi-redo" fill="white" styleClass="icon-size-medium"/>
-                                    </StackPane>
-                                </JFXRippler>
+                            <!-- REDO -->
+                            <JFXRippler fx:id="redo">
+                                <StackPane styleClass="responsive-icon-stack-pane-sizing"
+                                           onMouseClicked="#redoClicked">
+                                    <FontIcon iconLiteral="gmi-redo" fill="white" styleClass="icon-size-medium"/>
+                                </StackPane>
+                            </JFXRippler>
 
-                                <Region minWidth="16"/>
+                            <Region minWidth="16"/>
 
-                                <!-- Switch between input and output edges -->
-                                <HBox alignment="CENTER" spacing="-5" style="-fx-padding: -1em 0em -1em 0em;">
-                                    <JFXButton fx:id="switchToInputButton" text="Input" textFill="white"
-                                               onMouseClicked="#switchToInputClicked"
-                                               styleClass="button" style="-fx-padding: 0.5em 1em 0.5em 1em"/>
-                                    <JFXToggleButton fx:id="switchEdgeStatusButton"
-                                                     onMouseClicked="#switchEdgeStatusClicked"
-                                                     styleClass="toggle-button"/>
-                                    <JFXButton fx:id="switchToOutputButton" text="Output" textFill="grey"
-                                               onMouseClicked="#switchToOutputClicked"
-                                               styleClass="button" style="-fx-padding: 0.5em 1em 0.5em 1em"/>
-                                </HBox>
-                            </HBox>
-                            <HBox alignment="CENTER_RIGHT">
-                                <!-- DELETE SELECTED -->
-                                <JFXRippler fx:id="deleteSelected">
-                                    <StackPane styleClass="responsive-icon-stack-pane-sizing"
-                                               onMouseClicked="#deleteSelectedClicked">
-                                        <FontIcon iconLiteral="gmi-delete" fill="white" styleClass="icon-size-medium"/>
-                                    </StackPane>
-                                </JFXRippler>
-
-                                <Region minWidth="8"/>
-
-                                <!-- COLOR SELECTED -->
-                                <JFXRippler fx:id="colorSelected">
-                                    <StackPane styleClass="responsive-icon-stack-pane-sizing">
-                                        <FontIcon iconLiteral="gmi-color-lens" fill="white"
-                                                  styleClass="icon-size-medium"/>
-                                    </StackPane>
-                                </JFXRippler>
+                            <!-- Switch between input and output edges -->
+                            <HBox alignment="CENTER" spacing="-5" style="-fx-padding: -1em 0em -1em 0em;">
+                                <JFXButton fx:id="switchToInputButton" text="Input" textFill="white"
+                                           onMouseClicked="#switchToInputClicked"
+                                           styleClass="button" style="-fx-padding: 0.5em 1em 0.5em 1em"/>
+                                <JFXToggleButton fx:id="switchEdgeStatusButton"
+                                                 onMouseClicked="#switchEdgeStatusClicked"
+                                                 styleClass="toggle-button"/>
+                                <JFXButton fx:id="switchToOutputButton" text="Output" textFill="grey"
+                                           onMouseClicked="#switchToOutputClicked"
+                                           styleClass="button" style="-fx-padding: 0.5em 1em 0.5em 1em"/>
                             </HBox>
                         </HBox>
-                    </VBox>
+                        <HBox alignment="CENTER_RIGHT">
+                            <!-- DELETE SELECTED -->
+                            <JFXRippler fx:id="deleteSelected">
+                                <StackPane styleClass="responsive-icon-stack-pane-sizing"
+                                           onMouseClicked="#deleteSelectedClicked">
+                                    <FontIcon iconLiteral="gmi-delete" fill="white" styleClass="icon-size-medium"/>
+                                </StackPane>
+                            </JFXRippler>
+
+                            <Region minWidth="8"/>
+
+                            <!-- COLOR SELECTED -->
+                            <JFXRippler fx:id="colorSelected">
+                                <StackPane styleClass="responsive-icon-stack-pane-sizing">
+                                    <FontIcon iconLiteral="gmi-color-lens" fill="white"
+                                              styleClass="icon-size-medium"/>
+                                </StackPane>
+                            </JFXRippler>
+                        </HBox>
+                    </HBox>
                 </VBox>
-            </StackPane>
+                <StackPane fx:id="canvasPane" VBox.vgrow="ALWAYS">
+                    <!-- Canvases go here -->
+                </StackPane>
+            </VBox>
         </center>
 
         <!-- File pane -->

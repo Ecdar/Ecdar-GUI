@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.geometry.Insets?>
@@ -10,13 +11,15 @@
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="StackPane" fx:id="root"
-         alignment="TOP_LEFT"
-         fx:controller="ecdar.controllers.CanvasController">
-    <Grid fx:id="grid"/>
-    <StackPane fx:id="modelPane" style="-fx-font-size: 13px; /* Prevents scaling of text on canvas*/">
+         alignment="TOP_LEFT" fx:controller="ecdar.controllers.CanvasController">
+    <StackPane fx:id="zoomablePane"
+               AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0"
+               AnchorPane.rightAnchor="0.0" AnchorPane.bottomAnchor="0.0">
+        <Grid fx:id="grid"/>
+        <StackPane fx:id="modelPane" style="-fx-font-size: 13px; /* Prevents scaling of text on canvas*/"/>
     </StackPane>
     <VBox maxHeight="-Infinity" style="-fx-max-width: 15em">
-        <HBox fx:id="toolbar" StackPane.alignment="CENTER" alignment="CENTER">
+        <HBox fx:id="toolbar" alignment="CENTER">
             <padding>
                 <Insets topRightBottomLeft="10"/>
             </padding>

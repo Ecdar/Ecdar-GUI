@@ -14,11 +14,9 @@ import javafx.beans.property.*;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.Insets;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
-import javafx.scene.shape.Rectangle;
 import javafx.util.Pair;
 
 import java.net.URL;
@@ -29,10 +27,8 @@ import java.util.function.Consumer;
 import static ecdar.presentations.Grid.GRID_SIZE;
 
 public class CanvasController implements Initializable {
-    public final double DECLARATION_Y_MARGIN = GRID_SIZE * 5.5;
-    public ComponentPresentation activeComponentPresentation;
-
     public StackPane root;
+    public StackPane zoomablePane;
     public Grid grid;
     public StackPane modelPane;
     public HBox toolbar;
@@ -41,15 +37,15 @@ public class CanvasController implements Initializable {
     public JFXRippler zoomOut;
     public JFXRippler zoomToFit;
     public JFXRippler resetZoom;
-
     public final ZoomHelper zoomHelper = new ZoomHelper();
+    public final double DECLARATION_Y_MARGIN = GRID_SIZE * 5.5;
+    public ComponentPresentation activeComponentPresentation;
+
     // This is whether to allow the user to turn on/off the grid.
     // While this is false, the grid is always hidden, no matter the user option.
     private final BooleanProperty allowGrid = new SimpleBooleanProperty(true);
-
     private final ObjectProperty<HighLevelModelObject> activeModel = new SimpleObjectProperty<>(null);
     private final HashMap<HighLevelModelObject, Pair<Double, Double>> ModelObjectTranslateMap = new HashMap<>();
-
     private DoubleProperty width, height;
     private BooleanProperty insetShouldShow;
 
@@ -109,7 +105,6 @@ public class CanvasController implements Initializable {
 
         root.widthProperty().addListener((observable, oldValue, newValue) -> width.setValue(newValue));
         root.heightProperty().addListener((observable, oldValue, newValue) -> height.setValue(newValue));
-        root.setPadding(new Insets(toolbar.getHeight(), 0,0,0));
 
         activeModel.addListener((obs, oldModel, newModel) -> onActiveModelChanged(oldModel, newModel));
 
@@ -119,6 +114,12 @@ public class CanvasController implements Initializable {
                 leaveTextAreas();
             }
         };
+
+        // Enable zoom
+        grid.scaleXProperty().bind(zoomHelper.currentZoomFactor);
+        grid.scaleYProperty().bind(zoomHelper.currentZoomFactor);
+        modelPane.scaleXProperty().bind(zoomHelper.currentZoomFactor);
+        modelPane.scaleYProperty().bind(zoomHelper.currentZoomFactor);
     }
 
     /**
