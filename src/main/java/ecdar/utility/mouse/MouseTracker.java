@@ -1,5 +1,6 @@
 package ecdar.utility.mouse;
 
+import ecdar.controllers.EcdarController;
 import ecdar.presentations.Grid;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.DoubleProperty;
@@ -11,7 +12,6 @@ import javafx.scene.input.MouseEvent;
 import java.util.ArrayList;
 
 public class MouseTracker {
-
     private final DoubleProperty xProperty = new SimpleDoubleProperty(0);
     private final DoubleProperty yProperty = new SimpleDoubleProperty(0);
     private final ArrayList<EventHandler<MouseEvent>> onMouseMovedEventHandlers = new ArrayList<>();
@@ -30,7 +30,7 @@ public class MouseTracker {
 
         @Override
         protected double computeValue() {
-            return xProperty().get() - (xProperty().get() % Grid.GRID_SIZE) + Grid.GRID_SIZE * 0.5;
+            return Grid.snap(xProperty().get());
         }
     };
     private final DoubleBinding gridY = new DoubleBinding() {
@@ -40,7 +40,7 @@ public class MouseTracker {
 
         @Override
         protected double computeValue() {
-            return yProperty().get() - (yProperty().get() % Grid.GRID_SIZE) + Grid.GRID_SIZE * 0.5;
+            return Grid.snap(yProperty().get());
         }
     };
 

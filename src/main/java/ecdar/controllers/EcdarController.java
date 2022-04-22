@@ -543,6 +543,8 @@ public class EcdarController implements Initializable {
         return activeCanvasPresentation.get();
     }
 
+    public static double getActiveCanvasZoomFactor() { return getActiveCanvasPresentation().getController().zoomHelper.currentZoomFactor.get(); }
+
     public static void setActiveCanvasPresentation(CanvasPresentation newActiveCanvasPresentation) {
         activeCanvasPresentation.get().setOpacity(0.75);
         newActiveCanvasPresentation.setOpacity(1);
@@ -927,6 +929,8 @@ public class EcdarController implements Initializable {
 
         canvasPresentation.getController().zoomablePane.minWidthProperty().bind(canvasPane.widthProperty());
         canvasPresentation.getController().zoomablePane.maxWidthProperty().bind(canvasPane.widthProperty());
+        canvasPresentation.getController().zoomablePane.minHeightProperty().bind(canvasPane.heightProperty());
+        canvasPresentation.getController().zoomablePane.maxHeightProperty().bind(canvasPane.heightProperty());
     }
 
     /**

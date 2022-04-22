@@ -81,9 +81,7 @@ public class Component extends HighLevelModelObject implements Boxed {
         initialLocation.setY(Grid.snap(box.getY() + box.getHeight() / 2));
 
         locations.add(initialLocation);
-
         initializeIOListeners();
-
         bindReachabilityAnalysis();
     }
 
@@ -91,10 +89,8 @@ public class Component extends HighLevelModelObject implements Boxed {
         setFirsTimeShown(true);
 
         deserialize(json);
-
         initializeIOListeners();
         updateIOList();
-
         bindReachabilityAnalysis();
     }
 
@@ -110,9 +106,7 @@ public class Component extends HighLevelModelObject implements Boxed {
     public Component cloneForVerification() {
         final Component clone = new Component();
         clone.addVerificationObjects(this);
-
         clone.setIncludeInPeriodicCheck(false);
-
         clone.inputStrings.addAll(getInputStrings());
         clone.outputStrings.addAll(getOutputStrings());
         clone.setName(getName());
@@ -130,7 +124,6 @@ public class Component extends HighLevelModelObject implements Boxed {
         }
 
         getListOfEdgesFromDisplayableEdges(original.getDisplayableEdges()).forEach(edge -> addEdge((edge).cloneForVerification(this)));
-
         setDeclarationsText(original.getDeclarationsText());
     }
 
@@ -147,7 +140,6 @@ public class Component extends HighLevelModelObject implements Boxed {
                     edge -> edge.getStatus().equals(EdgeStatus.INPUT) &&
                             edge.getSync().equals(input)).collect(Collectors.toList()
             );
-
 
             // If no such edges, add a self loop without a guard
             if (matchingEdges.isEmpty()) {
@@ -182,13 +174,11 @@ public class Component extends HighLevelModelObject implements Boxed {
      */
     private Expression<String> getNegatedEdgeExpression(final List<Edge> edges) {
         final List<String> clocks = getClocks();
-
         return ExpressionHelper.simplifyNegatedSimpleExpressions(
                 RuleSet.toDNF(RuleSet.simplify(Not.of(Or.of(edges.stream()
                         .map(edge -> {
                                     final List<String> clocksToReset = ExpressionHelper.getUpdateSides(edge.getUpdate())
                                             .keySet().stream().filter(clocks::contains).collect(Collectors.toList());
-
                                     return And.of(
                                             ExpressionHelper.parseGuard(edge.getGuard()),
                                             ExpressionHelper.parseInvariantButIgnore(edge.getTargetLocation().getInvariant(), clocksToReset)
@@ -241,7 +231,7 @@ public class Component extends HighLevelModelObject implements Boxed {
                 addEdge(edge);
                 break;
             case Or.EXPR_TYPE:
-                ((Or<String>) guardExpression).getChildren().forEach(child -> createAngelicSelfLoops(location, input, child));
+                guardExpression.getChildren().forEach(child -> createAngelicSelfLoops(location, input, child));
                 break;
             default:
                 throw new RuntimeException("Type of expression " + guardExpression + " not accepted");
@@ -619,7 +609,6 @@ public class Component extends HighLevelModelObject implements Boxed {
     @Override
     public JsonObject serialize() {
         final JsonObject result = super.serialize();
-
         result.addProperty(DECLARATIONS, getDeclarationsText());
 
         final JsonArray locations = new JsonArray();
@@ -630,13 +619,9 @@ public class Component extends HighLevelModelObject implements Boxed {
         getListOfEdgesFromDisplayableEdges(this.edges).forEach(edge -> edges.add(edge.serialize()));
 
         result.add(EDGES, edges);
-
         result.addProperty(DESCRIPTION, getDescription());
-
         box.addProperties(result);
-
         result.addProperty(COLOR, EnabledColor.getIdentifier(getColor()));
-
         result.addProperty(INCLUDE_IN_PERIODIC_CHECK, isIncludeInPeriodicCheck());
 
         return result;
@@ -688,11 +673,9 @@ public class Component extends HighLevelModelObject implements Boxed {
             } else {
                 edges.add(newEdge);
             }
-
         });
 
         setDescription(json.getAsJsonPrimitive(DESCRIPTION).getAsString());
-
         box.setProperties(json);
 
         final EnabledColor enabledColor = EnabledColor.fromIdentifier(json.getAsJsonPrimitive(COLOR).getAsString());

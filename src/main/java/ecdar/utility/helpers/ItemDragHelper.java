@@ -133,11 +133,6 @@ public class ItemDragHelper {
             double mouseSubjectFinalNewX = unRoundedX - unRoundedX % GRID_SIZE;
             double mouseSubjectFinalNewY = unRoundedY - unRoundedY % GRID_SIZE;
 
-            if (mouseSubject instanceof ComponentPresentation) {
-                mouseSubjectFinalNewX -= 0.5 * GRID_SIZE;
-                mouseSubjectFinalNewY -= 0.5 * GRID_SIZE;
-            }
-
             mouseSubject.setLayoutX(mouseSubjectFinalNewX);
             mouseSubject.setLayoutY(mouseSubjectFinalNewY);
 
@@ -154,11 +149,6 @@ public class ItemDragHelper {
                     final double itemUnRoundedY = dragBounds.trimY(itemNewY);
                     double itemFinalNewX = itemUnRoundedX - itemUnRoundedX % GRID_SIZE;
                     double itemFinalNewY = itemUnRoundedY - itemUnRoundedY % GRID_SIZE;
-
-                    if (item instanceof ComponentPresentation) {
-                        itemFinalNewX -= 0.5 * GRID_SIZE;
-                        itemFinalNewY -= 0.5 * GRID_SIZE;
-                    }
 
                     // The x and y properties of any ComponentOperatorPresentation is bound and must therefore be set this way instead
                     if (item instanceof ComponentOperatorPresentation) {

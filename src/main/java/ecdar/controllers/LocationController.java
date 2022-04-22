@@ -317,9 +317,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
     @FXML
     private void mouseEntered() {
         if(!this.root.isInteractable()) return;
-
         circle.setCursor(Cursor.HAND);
-
         this.root.animateHoverEntered();
 
         // Keybind for making location urgent
@@ -348,21 +346,16 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
         if(!locationPresentation.isInteractable()) return;
 
         circle.setCursor(Cursor.DEFAULT);
-
         locationPresentation.animateHoverExited();
-
         KeyboardTracker.unregisterKeybind(KeyboardTracker.MAKE_LOCATION_URGENT);
     }
 
     private void initializeMouseControls() {
-
         final Consumer<MouseEvent> mouseClicked = (event) -> {
             event.consume();
 
             final Component component = getComponent();
-
             if (isAnyEdgeWithoutSource()) return;
-
             if (root.isPlaced()) {
                 final DisplayableEdge unfinishedEdge = component.getUnfinishedEdge();
 
@@ -421,14 +414,8 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                     }
                 }
             } else {
-
-                // Allowed x and y coordinates
-                final double minX = GRID_SIZE * 2;
-                final double maxX = getComponent().getBox().getWidth() - GRID_SIZE * 2;
-                final double minY = Grid.TOOL_BAR_HEIGHT + GRID_SIZE * 2;
-                final double maxY = getComponent().getBox().getHeight() - GRID_SIZE * 2;
-
-                if(root.getLayoutX() >= minX && root.getLayoutX() <= maxX && root.getLayoutY() >= minY && root.getLayoutY() <= maxY) {
+                // Ensure that location is within layout bounds
+                if(getDragBounds().trimX(root.getLayoutX()) == root.getLayoutX() && getDragBounds().trimY(root.getLayoutY()) == root.getLayoutY()) {
                     // Unbind presentation root x and y coordinates (bind the view properly to enable dragging)
                     root.layoutXProperty().unbind();
                     root.layoutYProperty().unbind();
@@ -444,20 +431,14 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                 } else {
                     root.shake();
                 }
-
             }
-
         };
 
         locationProperty().addListener((obs, oldLocation, newLocation) -> {
             if(newLocation == null) return;
-
             root.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseClicked::accept);
-
             ItemDragHelper.makeDraggable(root, this::getDragBounds);
         });
-
-
     }
 
     /**
@@ -482,7 +463,6 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                 final Nail nail = new Nail(edgeWithoutSource.getNails().get(0).getX(), edgeWithoutSource.getNails().get(0).getY() + 2 *GRID_SIZE);
                 edgeWithoutSource.addNail(nail);
             }
-
             return true;
         }
 

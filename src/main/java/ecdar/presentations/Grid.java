@@ -18,22 +18,20 @@ public class Grid extends Parent {
     private final DoubleProperty height = new SimpleDoubleProperty();
 
     public Grid() {
-        // When the scene changes (goes from null to something) set update the grid
+        // Update grid when scene size changes
         sceneProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 Platform.runLater(() -> {
-                    newValue.widthProperty().addListener((observable1, oldValue1, newValue1) -> {
-                        updateGrid();
-                        width.set(newValue1.doubleValue());
-                    });
-                    newValue.heightProperty().addListener((observable1, oldValue1, newValue1) -> {
-                        updateGrid();
-                        height.set(newValue1.doubleValue());
-                    });
+                    newValue.widthProperty().addListener(observable1 -> updateGrid());
+                    newValue.heightProperty().addListener(observable1 -> updateGrid());
                 });
             }
         });
 
+        // Update grid when scaling/zoom is changed
+        this.scaleXProperty().addListener(observable -> updateGrid());
+
+        setTranslateX(GRID_SIZE * 0.5);
         updateGrid();
     }
 
@@ -44,7 +42,7 @@ public class Grid extends Parent {
      * @return the value after being snapped
      */
     public static double snap(final double raw) {
-        return Math.round(raw / GRID_SIZE) * GRID_SIZE;
+        return raw - raw % GRID_SIZE;
     }
 
     /**
@@ -66,14 +64,14 @@ public class Grid extends Parent {
         }
 
         Platform.runLater(() -> {
-            double scaledWidth = (int) snap(width.get() / getScaleX());
-            double scaledHeight = (int) snap(height.get() / getScaleX());
+            int scaledWidth = (int) snap(width.get() / getScaleX());
+            int scaledHeight = (int) snap(height.get() / getScaleY());
 
             // Add new vertical lines to cover the screen at the current zoom level
-            int i = 0;
-            int numberOfLine = (int) scaledWidth / GRID_SIZE;
+            int i = -scaledWidth / GRID_SIZE;
+            int numberOfLine = scaledWidth / GRID_SIZE;
             while (i < numberOfLine) {
-                Line line = new Line(i * GRID_SIZE, 0, i * GRID_SIZE, scaledHeight);
+                Line line = new Line(i * GRID_SIZE, -scaledHeight, i * GRID_SIZE, scaledHeight);
                 line.getStyleClass().add("grid-line");
 
                 verticalLines.add(line);
@@ -82,10 +80,10 @@ public class Grid extends Parent {
             }
 
             // Add new horizontal lines to cover the screen at the current zoom level
-            i = 0;
-            numberOfLine = (int) scaledHeight / GRID_SIZE;
+            i = -scaledHeight / GRID_SIZE;
+            numberOfLine = scaledHeight / GRID_SIZE;
             while (i < numberOfLine) {
-                Line line = new Line(0, i * GRID_SIZE, scaledWidth, i * GRID_SIZE);
+                Line line = new Line(-scaledWidth, i * GRID_SIZE, scaledWidth, i * GRID_SIZE);
                 line.getStyleClass().add("grid-line");
 
                 horizontalLines.add(line);
@@ -93,5 +91,10 @@ public class Grid extends Parent {
                 i++;
             }
         });
+    }
+
+    public void bindSize(DoubleProperty width, DoubleProperty height) {
+        this.width.bind(width.multiply(4));
+        this.height.bind(height.multiply(4));
     }
 }

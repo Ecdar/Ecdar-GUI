@@ -5,6 +5,7 @@ import ecdar.presentations.CanvasPresentation;
 import ecdar.presentations.Grid;
 import ecdar.presentations.ModelPresentation;
 import ecdar.presentations.SystemPresentation;
+import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.Node;
@@ -26,6 +27,7 @@ public class ZoomHelper {
     public void setCanvas(CanvasPresentation newCanvasPresentation) {
         canvasPresentation = newCanvasPresentation;
         model = canvasPresentation.getController().getActiveComponentPresentation();
+        Platform.runLater(this::resetZoom);
     }
 
     public Double getZoomLevel() {
@@ -57,7 +59,6 @@ public class ZoomHelper {
             }
 
             currentZoomFactor.set(newScale);
-            centerComponentAndUpdateGrid();
         }
     }
 
@@ -75,7 +76,6 @@ public class ZoomHelper {
             }
 
             currentZoomFactor.set(newScale);
-            centerComponentAndUpdateGrid();
         }
     }
 
@@ -85,7 +85,6 @@ public class ZoomHelper {
     public void resetZoom() {
         if (active) {
             currentZoomFactor.set(1);
-            centerComponentAndUpdateGrid();
         }
     }
 
@@ -98,7 +97,7 @@ public class ZoomHelper {
                 resetZoom();
                 return;
             }
-            double newScale = Math.min(canvasPresentation.getWidth() / model.getWidth() - 0.1, canvasPresentation.getHeight() / model.getHeight() - 0.2); //0.1 for width and 0.2 for height added for margin
+            double newScale = Math.min(canvasPresentation.getWidth() / model.getWidth() - 0.1, canvasPresentation.getHeight() / model.getHeight() - 0.2); //0.1 for width and 0.2 for height subtracted for margin
 
             currentZoomFactor.set(newScale);
             centerComponentAndUpdateGrid();
@@ -142,6 +141,6 @@ public class ZoomHelper {
 
     private void centerComponent(ModelPresentation modelPresentation) {
         modelPresentation.setTranslateX(0);
-        modelPresentation.setTranslateY(0);
+        modelPresentation.setTranslateY(-Grid.GRID_SIZE * 2); // 0 is slightly below center, this looks better
     }
 }

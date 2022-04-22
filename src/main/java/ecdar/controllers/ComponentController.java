@@ -111,7 +111,6 @@ public class ComponentController extends ModelController implements Initializabl
 
         // The root view have been inflated, initialize the mouse tracker on it
         mouseTracker = new MouseTracker(root);
-
         initializeContextMenu();
 
         component.addListener((obs, old, component) -> {
@@ -285,11 +284,11 @@ public class ComponentController extends ModelController implements Initializabl
                 final Location newLocation = new Location();
                 newLocation.initialize();
 
-                double x = DropDownMenu.x / EcdarController.getActiveCanvasPresentation().getController().zoomHelper.getZoomLevel() - LocationPresentation.RADIUS / 2;
+                double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
                 x = Grid.snap(x);
                 newLocation.setX(x);
 
-                double y = DropDownMenu.y / EcdarController.getActiveCanvasPresentation().getController().zoomHelper.getZoomLevel() - LocationPresentation.RADIUS / 2;
+                double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
                 y = Grid.snap(y);
                 newLocation.setY(y);
 
@@ -383,7 +382,6 @@ public class ComponentController extends ModelController implements Initializabl
     }
 
     private void initializeFinishEdgeContextMenu(final DisplayableEdge unfinishedEdge) {
-
         final Consumer<Component> initializeDropDownMenu = (component) -> {
             if (component == null) {
                 return;
@@ -686,7 +684,6 @@ public class ComponentController extends ModelController implements Initializabl
             };
 
             newLocationPresentation.layoutXProperty().addListener(locationPlacementChangedListener);
-
             newLocationPresentation.layoutYProperty().addListener(locationPlacementChangedListener);
 
             locationPresentationMap.put(loc, newLocationPresentation);
@@ -828,7 +825,6 @@ public class ComponentController extends ModelController implements Initializabl
     @FXML
     private void modelContainerPressed(final MouseEvent event) {
         EcdarController.getActiveCanvasPresentation().getController().leaveTextAreas();
-
         final DisplayableEdge unfinishedEdge = getComponent().getUnfinishedEdge();
 
         if ((event.isShiftDown() && event.isPrimaryButtonDown()) || event.isMiddleButtonDown()) {
@@ -874,15 +870,12 @@ public class ComponentController extends ModelController implements Initializabl
                 // If we have an edge without a source location set the new location as its source
                 locationPresentationMap.get(location).getController().isAnyEdgeWithoutSource();
             });
-
-
-
         } else if (event.isSecondaryButtonDown()) {
             if (unfinishedEdge == null) {
-                contextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX() * EcdarController.getActiveCanvasPresentation().getScaleX(), event.getY() * EcdarController.getActiveCanvasPresentation().getScaleY());
+                contextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX() * EcdarController.getActiveCanvasZoomFactor(), event.getY() * EcdarController.getActiveCanvasZoomFactor());
             } else {
                 initializeFinishEdgeContextMenu(unfinishedEdge);
-                finishEdgeContextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX() * EcdarController.getActiveCanvasPresentation().getScaleX(), event.getY() * EcdarController.getActiveCanvasPresentation().getScaleY());
+                finishEdgeContextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX() * EcdarController.getActiveCanvasZoomFactor(), event.getY() * EcdarController.getActiveCanvasZoomFactor());
             }
         } else if (event.isPrimaryButtonDown()) {
             // We are drawing an edge

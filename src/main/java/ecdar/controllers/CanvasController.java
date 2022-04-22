@@ -120,6 +120,7 @@ public class CanvasController implements Initializable {
         grid.scaleYProperty().bind(zoomHelper.currentZoomFactor);
         modelPane.scaleXProperty().bind(zoomHelper.currentZoomFactor);
         modelPane.scaleYProperty().bind(zoomHelper.currentZoomFactor);
+        grid.bindSize(width, height);
     }
 
     /**
