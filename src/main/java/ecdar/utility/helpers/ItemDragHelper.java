@@ -100,8 +100,8 @@ public class ItemDragHelper {
 
         final ArrayList<Pair<Double, Double>> previousLocations = new ArrayList<>();
 
-        final DoubleProperty xDiff = new SimpleDoubleProperty();
-        final DoubleProperty yDiff = new SimpleDoubleProperty();
+        final DoubleProperty pressEventX = new SimpleDoubleProperty();
+        final DoubleProperty pressEventY = new SimpleDoubleProperty();
 
         mouseSubject.addEventHandler(MouseEvent.MOUSE_PRESSED, event -> {
             if(!event.isPrimaryButtonDown()) return;
@@ -109,8 +109,8 @@ public class ItemDragHelper {
             
             mouseSubjectPreviousX.set(mouseSubject.getLayoutX());
             mouseSubjectPreviousY.set(mouseSubject.getLayoutY());
-            xDiff.set(event.getX());
-            yDiff.set(event.getY());
+            pressEventX.set(EcdarController.getActiveCanvasPresentation().mouseTracker.getGridX());
+            pressEventY.set(EcdarController.getActiveCanvasPresentation().mouseTracker.getGridY());
 
             previousLocations.clear();
 
@@ -125,11 +125,11 @@ public class ItemDragHelper {
 
             final DragBounds dragBounds = getDragBounds.get();
 
-            final double mouseSubjectNewX = EcdarController.getActiveCanvasPresentation().mouseTracker.getGridX() - ((Boxed) EcdarController.getActiveCanvasPresentation().getController().getActiveModel()).getBox().getX();
-            final double mouseSubjectNewY = EcdarController.getActiveCanvasPresentation().mouseTracker.getGridY() - ((Boxed) EcdarController.getActiveCanvasPresentation().getController().getActiveModel()).getBox().getY();
+            final double dragDistanceX = EcdarController.getActiveCanvasPresentation().mouseTracker.getGridX() - pressEventX.get();
+            final double dragDistanceY = EcdarController.getActiveCanvasPresentation().mouseTracker.getGridY() - pressEventY.get();
 
-            final double unRoundedX = dragBounds.trimX(mouseSubjectNewX - xDiff.get());
-            final double unRoundedY = dragBounds.trimY(mouseSubjectNewY - yDiff.get());
+            final double unRoundedX = dragBounds.trimX(mouseSubjectPreviousX.get() + dragDistanceX);
+            final double unRoundedY = dragBounds.trimY(mouseSubjectPreviousY.get() + dragDistanceY);
             double mouseSubjectFinalNewX = unRoundedX - unRoundedX % GRID_SIZE;
             double mouseSubjectFinalNewY = unRoundedY - unRoundedY % GRID_SIZE;
 
@@ -194,7 +194,6 @@ public class ItemDragHelper {
             // Reset the was dragged boolean
             wasDragged.set(false);
         });
-
     }
 
     private static void placeSelectedItems(Node mouseSubject, double currentX, double currentY, ArrayList<Pair<Double, Double>> currentLocations, ArrayList<SelectHelper.ItemSelectable> selectedItems) {

@@ -241,7 +241,7 @@ public class MouseTracker {
     }
 
     public double getGridX() {
-        return gridX.get();
+        return gridX.get() / EcdarController.getActiveCanvasZoomFactor();
     }
 
     public DoubleBinding gridXProperty() {
@@ -249,7 +249,7 @@ public class MouseTracker {
     }
 
     public double getGridY() {
-        return gridY.get();
+        return gridY.get() / EcdarController.getActiveCanvasZoomFactor();
     }
 
     public DoubleBinding gridYProperty() {
