@@ -30,7 +30,7 @@ public class MouseTracker {
 
         @Override
         protected double computeValue() {
-            return Grid.snap(xProperty().get());
+            return Grid.snap(xProperty().divide(EcdarController.getActiveCanvasZoomFactor()).get());
         }
     };
     private final DoubleBinding gridY = new DoubleBinding() {
@@ -40,7 +40,7 @@ public class MouseTracker {
 
         @Override
         protected double computeValue() {
-            return Grid.snap(yProperty().get());
+            return Grid.snap(yProperty().divide(EcdarController.getActiveCanvasZoomFactor()).get());
         }
     };
 
@@ -241,7 +241,7 @@ public class MouseTracker {
     }
 
     public double getGridX() {
-        return gridX.get() / EcdarController.getActiveCanvasZoomFactor();
+        return gridX.get();
     }
 
     public DoubleBinding gridXProperty() {
@@ -249,7 +249,7 @@ public class MouseTracker {
     }
 
     public double getGridY() {
-        return gridY.get() / EcdarController.getActiveCanvasZoomFactor();
+        return gridY.get();
     }
 
     public DoubleBinding gridYProperty() {
