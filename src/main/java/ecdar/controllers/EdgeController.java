@@ -87,9 +87,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
         });
 
         initializeLinksListener();
-
         ensureNailsInFront();
-
         initializeSelectListener();
     }
 

@@ -28,11 +28,11 @@ public class Grid extends Parent {
             }
         });
 
-        // Update grid when scaling/zoom is changed
-        this.scaleXProperty().addListener(observable -> updateGrid());
-
-        setTranslateX(GRID_SIZE * 0.5);
-        updateGrid();
+        Platform.runLater(() -> {
+            // Update grid when scaling/zoom is changed
+            this.scaleXProperty().addListener(observable -> updateGrid());
+            setTranslateX(GRID_SIZE * 0.5);
+        });
     }
 
     /**

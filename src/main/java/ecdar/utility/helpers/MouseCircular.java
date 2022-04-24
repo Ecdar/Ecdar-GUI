@@ -14,20 +14,8 @@ public class MouseCircular implements Circular {
 
     public MouseCircular(){
         //Set the initial x and y coordinates of the circular
-        x.set(mouseTracker.getGridX());
-        y.set(mouseTracker.getGridY());
-
-        //Make sure that the circular follows the mouse after the mouse button is released
-        mouseTracker.registerOnMouseMovedEventHandler(event -> {
-            x.set(mouseTracker.getGridX());
-            y.set(mouseTracker.getGridY());
-        });
-
-        //Make sure that the circular follows the mouse if the mouse button is not released
-        mouseTracker.registerOnMouseDraggedEventHandler(event -> {
-            x.set(mouseTracker.getGridX());
-            y.set(mouseTracker.getGridY());
-        });
+        x.bind(mouseTracker.xProperty());
+        y.bind(mouseTracker.yProperty());
     }
 
     @Override
