@@ -124,7 +124,9 @@ public class Ecdar extends Application {
     }
 
     public static void showToast(final String message) {
-        presentation.showSnackbarMessage(message);
+        Platform.runLater(() -> {
+            presentation.showSnackbarMessage(message);
+        });
     }
 
     public static void showHelp() {

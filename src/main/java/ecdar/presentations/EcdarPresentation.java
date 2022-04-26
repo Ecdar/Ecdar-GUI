@@ -258,6 +258,9 @@ public class EcdarPresentation extends StackPane {
     }
 
     private void initializeToggleFilePaneFunctionality() {
+        initializeOpenFilePaneAnimation();
+        initializeCloseFilePaneAnimation();
+
         // Translate the x coordinate to create the open/close animations
         controller.filePane.translateXProperty().bind(filePaneAnimationProperty.subtract(controller.filePane.widthProperty()));
 
@@ -297,6 +300,9 @@ public class EcdarPresentation extends StackPane {
     }
 
     private void initializeToggleQueryPaneFunctionality() {
+        initializeOpenQueryPaneAnimation();
+        initializeCloseQueryPaneAnimation();
+
         // Translate the x coordinate to create the open/close animations
         controller.queryPane.translateXProperty().bind(queryPaneAnimationProperty.multiply(-1).add(controller.queryPane.widthProperty()));
 
@@ -445,7 +451,7 @@ public class EcdarPresentation extends StackPane {
 
     public void showSnackbarMessage(final String message) {
         JFXSnackbarLayout content = new JFXSnackbarLayout(message);
-        controller.snackbar.enqueue(new JFXSnackbar.SnackbarEvent(content, new Duration(3000)));
+        controller.snackbar.enqueue(new JFXSnackbar.SnackbarEvent(content, new Duration(5000)));
     }
 
     public void showHelp() {
