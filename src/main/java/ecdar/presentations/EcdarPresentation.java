@@ -255,6 +255,9 @@ public class EcdarPresentation extends StackPane {
     }
 
     private void initializeToggleQueryPaneFunctionality() {
+        initializeOpenQueryPaneAnimation();
+        initializeCloseQueryPaneAnimation();
+
         // Set the translation of the query pane to be equal to its width
         // Will hide the element, and force it in then the right side of the border pane is enlarged
         controller.queryPane.translateXProperty().bind(controller.queryPane.widthProperty());
@@ -322,6 +325,9 @@ public class EcdarPresentation extends StackPane {
     }
 
     private void initializeToggleFilePaneFunctionality() {
+        initializeOpenFilePaneAnimation();
+        initializeCloseFilePaneAnimation();
+
         // Set the translation of the file pane to be equal to its width
         // Will hide the element, and force it in then the left side of the border pane is enlarged
         controller.filePane.translateXProperty().bind(controller.filePane.widthProperty().multiply(-1));
@@ -459,7 +465,7 @@ public class EcdarPresentation extends StackPane {
 
     public void showSnackbarMessage(final String message) {
         JFXSnackbarLayout content = new JFXSnackbarLayout(message);
-        controller.snackbar.enqueue(new JFXSnackbar.SnackbarEvent(content, new Duration(3000)));
+        controller.snackbar.enqueue(new JFXSnackbar.SnackbarEvent(content, new Duration(5000)));
     }
 
     public void showHelp() {
