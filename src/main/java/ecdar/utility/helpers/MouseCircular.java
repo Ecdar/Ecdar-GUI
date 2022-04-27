@@ -14,8 +14,8 @@ public class MouseCircular implements Circular {
 
     public MouseCircular(){
         //Set the initial x and y coordinates of the circular
-        x.bind(mouseTracker.xProperty());
-        y.bind(mouseTracker.yProperty());
+        x.bind(mouseTracker.xProperty().subtract(EcdarController.getActiveCanvasPresentation().getController().zoomablePane.getParent().getParent().getParent().getBoundsInParent().getMinX()).divide(EcdarController.getActiveCanvasZoomFactor()));
+        y.bind(mouseTracker.yProperty().subtract(EcdarController.getActiveCanvasPresentation().getController().zoomablePane.getParent().getParent().getParent().getBoundsInParent().getMinY()).divide(EcdarController.getActiveCanvasZoomFactor()));
     }
 
     @Override
