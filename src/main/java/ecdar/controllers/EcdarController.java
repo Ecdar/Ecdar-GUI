@@ -242,9 +242,12 @@ public class EcdarController implements Initializable {
             }
         });
 
-        // Set default backend instance
-        BackendInstance defaultBackend = BackendHelper.getBackendInstances().stream().filter(BackendInstance::isDefault).findFirst().orElse(BackendHelper.getBackendInstances().get(0));
-        BackendHelper.setDefaultBackendInstance(defaultBackend);
+        if (BackendHelper.getBackendInstances().size() < 1) {
+            Ecdar.showToast("No engines were found. Download j-Ecdar or Reveaal, or add another engine to fix this. No queries can be executed without engines.");
+        } else {
+            BackendInstance defaultBackend = BackendHelper.getBackendInstances().stream().filter(BackendInstance::isDefault).findFirst().orElse(BackendHelper.getBackendInstances().get(0));
+            BackendHelper.setDefaultBackendInstance(defaultBackend);
+        }
     }
 
     private void initializeDialog(JFXDialog dialog, StackPane dialogContainer) {
@@ -660,10 +663,10 @@ public class EcdarController implements Initializable {
         menuBarViewCanvasSplit.setOnAction(event -> {
             final BooleanProperty isSplit = Ecdar.toggleCanvasSplit();
             if (isSplit.get()) {
-                setCanvasModeToSingular();
+                Platform.runLater(this::setCanvasModeToSingular);
                 menuBarViewCanvasSplit.setText("Split canvas");
             } else {
-                setCanvasModeToSplit();
+                Platform.runLater(this::setCanvasModeToSplit);
                 menuBarViewCanvasSplit.setText("Merge canvases");
             }
         });
@@ -907,7 +910,8 @@ public class EcdarController implements Initializable {
         if (model != null) {
             canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(activeCanvasPresentation.get().getController().getActiveModel());
         } else {
-            canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(Ecdar.getProject().getComponents().get(0));
+            // If no components where found, the project has not been initialized. The active model will be updated when the project is initialized
+            canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(Ecdar.getProject().getComponents().stream().findFirst().orElse(null));
         }
 
         canvasPane.getChildren().add(canvasShellPresentation);
@@ -1177,7 +1181,6 @@ public class EcdarController implements Initializable {
 
     /**
      * This method is used to push the contents of the file and query panes when the tab pane is opened
-     *
      */
     private void changeInsetsOfFileAndQueryPanes() {
         if (messageTabPane.getController().isOpen()) {
