@@ -19,6 +19,16 @@ public class BackendException extends Exception {
         }
     }
 
+    public static class MissingFileQueryException extends BackendException {
+        public MissingFileQueryException(final String s) {
+            super(s);
+        }
+
+        public MissingFileQueryException(final String s, final Exception cause) {
+            super(s, cause);
+        }
+    }
+
     public static class QueryErrorException extends BackendException {
 
         public QueryErrorException(final String message) {

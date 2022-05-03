@@ -21,6 +21,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import org.kordamp.ikonli.javafx.FontIcon;
@@ -33,7 +34,7 @@ import java.util.ResourceBundle;
 
 public class ProjectPaneController implements Initializable {
     public StackPane root;
-    public AnchorPane toolbar;
+    public HBox toolbar;
     public Label toolbarTitle;
     public AnchorPane generatedComponentsDivider;
     public Label generatedComponentsDividerText;

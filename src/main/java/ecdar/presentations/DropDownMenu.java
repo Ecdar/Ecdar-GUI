@@ -281,7 +281,7 @@ public class DropDownMenu extends JFXPopup {
             final FontIcon icon = new FontIcon();
             icon.setIconLiteral("gmi-done");
             icon.setFill(color.color.getTextColor(color.intensity));
-            icon.setIconSize(20);
+            icon.getStyleClass().add("icon-size-small");
             icon.visibleProperty().bind(new When(hasColor.colorProperty().isEqualTo(color.color)).then(true).otherwise(false));
 
             final StackPane child = new StackPane(circle, icon);
@@ -441,7 +441,7 @@ public class DropDownMenu extends JFXPopup {
         final FontIcon icon = new FontIcon();
         icon.setIconLiteral("gmi-chevron-right");
         icon.setFill(Color.GREY.getColor(Color.Intensity.I600));
-        icon.setIconSize(20);
+        icon.getStyleClass().add("icon-size-small");
 
         final StackPane iconContainer = new StackPane(icon);
         iconContainer.setMaxWidth(20);

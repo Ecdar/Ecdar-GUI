@@ -8,6 +8,7 @@ import ecdar.controllers.FileController;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.utility.colors.Color;
 import com.jfoenix.controls.JFXRippler;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
@@ -39,6 +40,9 @@ public class FilePresentation extends AnchorPane {
         initializeColors();
         initializeRippler();
         initializeMoreInformationButton();
+
+        // Ensure that the icons are scaled to current font scale
+        Platform.runLater(() -> Ecdar.getPresentation().getController().scaleIcons(this));
     }
 
     private void initializeMoreInformationButton() {

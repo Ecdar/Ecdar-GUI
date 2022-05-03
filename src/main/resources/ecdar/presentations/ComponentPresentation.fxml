@@ -37,7 +37,7 @@
 
                         <right>
                             <JFXRippler fx:id="toggleDeclarationButton" style="-fx-background-color: pink;" minWidth="25" minHeight="20">
-                                <StackPane onMouseClicked="#toggleDeclaration">
+                                <StackPane>
                                     <FontIcon iconLiteral="gmi-code" iconSize="17" fill="white"/>
                                 </StackPane>
                             </JFXRippler>

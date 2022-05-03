@@ -153,7 +153,7 @@ public class ZoomHelper {
     private void updateGrid(double newScale, ModelPresentation modelPresentation) {
         // Calculate the new x and y offsets needed to center the component
         double xOffset = newScale * canvasPresentation.getWidth() * 1.0f / 2 - newScale * modelPresentation.getWidth() * 1.0f / 2;
-        double yOffset = newScale * canvasPresentation.getHeight() * 1.0f / 3 - newScale * modelPresentation.getHeight() * 1.0f / 3 + newScale * Grid.TOOL_BAR_HEIGHT * 1.0f / 3;
+        double yOffset = newScale * canvasPresentation.getHeight() * 1.0f / 2 - newScale * modelPresentation.getHeight() * 1.0f / 2;
 
         // Center the component based on the offsets
         canvasPresentation.setTranslateX(Grid.snap(xOffset));

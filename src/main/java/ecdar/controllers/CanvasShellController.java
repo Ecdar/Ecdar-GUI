@@ -7,6 +7,7 @@ import ecdar.abstractions.EcdarSystem;
 import ecdar.presentations.CanvasPresentation;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 
@@ -16,7 +17,7 @@ import java.util.ResourceBundle;
 public class CanvasShellController implements Initializable {
     public Pane root;
 
-    public StackPane toolbar;
+    public HBox toolbar;
     public JFXRippler zoomIn;
     public JFXRippler zoomOut;
     public JFXRippler zoomToFit;

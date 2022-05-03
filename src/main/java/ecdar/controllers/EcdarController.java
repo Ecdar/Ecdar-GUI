@@ -18,8 +18,6 @@ import ecdar.utility.keyboard.KeyboardTracker;
 import ecdar.utility.keyboard.NudgeDirection;
 import ecdar.utility.keyboard.Nudgeable;
 import com.jfoenix.controls.*;
-import javafx.animation.Interpolator;
-import javafx.animation.Transition;
 import javafx.application.Platform;
 import javafx.beans.binding.When;
 import javafx.beans.property.BooleanProperty;
@@ -31,6 +29,7 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
@@ -41,9 +40,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
-import javafx.util.Duration;
 import javafx.util.Pair;
-import org.kordamp.ikonli.javafx.FontIcon;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -53,7 +50,6 @@ import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Consumer;
 
 public class EcdarController implements Initializable {
 
@@ -68,9 +64,10 @@ public class EcdarController implements Initializable {
     public StackPane root;
     public QueryPanePresentation queryPane;
     public ProjectPanePresentation filePane;
-    public StackPane toolbar;
+    public HBox toolbar;
     public Label queryPaneFillerElement;
     public Label filePaneFillerElement;
+    public MessageTabPanePresentation messageTabPane;
     public StackPane dialogContainer;
     public JFXDialog dialog;
     public StackPane modalBar;
@@ -80,11 +77,6 @@ public class EcdarController implements Initializable {
     public JFXRippler deleteSelected;
     public JFXRippler undo;
     public JFXRippler redo;
-    public JFXTabPane tabPane;
-    public Tab errorsTab;
-    public Tab warningsTab;
-    public Rectangle tabPaneResizeElement;
-    public StackPane tabPaneContainer;
 
     public ImageView helpInitialImage;
     public StackPane helpInitialPane;
@@ -111,41 +103,23 @@ public class EcdarController implements Initializable {
     public JFXButton aboutAcceptButton;
     public StackPane canvasPane;
 
-    private double expandHeight = 300;
-
-    public final Transition expandMessagesContainer = new Transition() {
-        {
-            setInterpolator(Interpolator.SPLINE(0.645, 0.045, 0.355, 1));
-            setCycleDuration(Duration.millis(200));
-        }
-
-        @Override
-        protected void interpolate(final double frac) {
-            setMaxHeight(35 + frac * (expandHeight - 35));
-        }
-    };
     public Rectangle bottomFillerElement;
-    public JFXRippler collapseMessages;
-    public FontIcon collapseMessagesIcon;
-    public ScrollPane errorsScrollPane;
-    public VBox errorsList;
-    public ScrollPane warningsScrollPane;
-    public VBox warningsList;
-    public Tab backendErrorsTab;
-    public ScrollPane backendErrorsScrollPane;
-    public VBox backendErrorsList;
 
     // The program top menu
     public MenuBar menuBar;
     public MenuItem menuBarViewFilePanel;
     public MenuItem menuBarViewQueryPanel;
     public MenuItem menuBarViewGrid;
-    public Menu menuViewMenuFontScaling;
-    public ToggleGroup fontScaling;
-    public RadioMenuItem fontScaleS;
-    public RadioMenuItem fontScaleM;
-    public RadioMenuItem fontScaleL;
-    public RadioMenuItem fontScaleXL;
+    public MenuItem menuBarAutoscaling;
+    public Menu menuViewMenuScaling;
+    public ToggleGroup scaling;
+    public RadioMenuItem scaleXS;
+    public RadioMenuItem scaleS;
+    public RadioMenuItem scaleM;
+    public RadioMenuItem scaleL;
+    public RadioMenuItem scaleXL;
+    public RadioMenuItem scaleXXL;
+    public RadioMenuItem scaleXXXL;
     public MenuItem menuBarViewCanvasSplit;
     public MenuItem menuBarFileCreateNewProject;
     public MenuItem menuBarFileOpenProject;
@@ -155,10 +129,7 @@ public class EcdarController implements Initializable {
     public MenuItem menuBarFileExportAsPng;
     public MenuItem menuBarFileExportAsPngNoBorder;
     public MenuItem menuBarOptionsCache;
-    public MenuItem menuBarOptionsDefaultBackend;
-    public HBox menuBarOptionsDefaultBackendContent;
-    public Tooltip menuBarOptionsDefaultBackendTooltip;
-    public JFXSlider menuBarOptionsNumberOfSocketsSlider;
+    public MenuItem menuBarOptionsBackendOptions;
     public MenuItem menuBarHelpHelp;
     public MenuItem menuBarHelpAbout;
     public MenuItem menuBarHelpTest;
@@ -174,13 +145,13 @@ public class EcdarController implements Initializable {
     public Text queryTextResult;
     public Text queryTextQuery;
 
+    public StackPane backendOptionsDialogContainer;
+    public BackendOptionsDialogPresentation backendOptionsDialog;
+
     private static JFXDialog _queryDialog;
     private static Text _queryTextResult;
     private static Text _queryTextQuery;
     private static final Text temporaryComponentWatermark = new Text("Temporary component");
-
-    private double tabPanePreviousY = 0;
-    public boolean shouldISkipOpeningTheMessagesContainer = true;
 
     private static final ObjectProperty<CanvasPresentation> activeCanvasPresentation = new SimpleObjectProperty<>(new CanvasPresentation());
 
@@ -198,8 +169,57 @@ public class EcdarController implements Initializable {
         temporaryComponentWatermark.setVisible(visibility);
     }
 
+    /**
+     * Finds and scales all icon nodes below the given node in accordance with the current scaling, using -fx-icon-size
+     *
+     * @param node The "root" to start the search from
+     */
+    public void scaleIcons(Node node) {
+        Platform.runLater(() -> {
+            scaleIcons(node, getCalculatedNewScale());
+        });
+    }
+
+    private void scaleIcons(Node node, double size) {
+        // Scale icons
+        Set<Node> mediumIcons = node.lookupAll(".icon-size-medium");
+        for (Node icon : mediumIcons)
+            icon.setStyle("-fx-icon-size: " + Math.floor(size / 13.0 * 24) + "px;");
+
+        Set<Node> smallIcons = node.lookupAll(".icon-size-small");
+        for (Node icon : smallIcons)
+            icon.setStyle("-fx-icon-size: " + Math.floor(size / 13.0 * 20) + "px;");
+
+        Set<Node> xSmallIcons = node.lookupAll(".icon-size-x-small");
+        for (Node icon : xSmallIcons)
+            icon.setStyle("-fx-icon-size: " + Math.floor(size / 13.0 * 18) + "px;");
+    }
+
+    private double getCalculatedNewScale() {
+        return (Double.parseDouble(scaling.getSelectedToggle().getProperties().get("scale").toString()) * Ecdar.getDpiScale()) * 13.0;
+    }
+
+    private void scaleEdgeStatusToggle(double size) {
+        switchEdgeStatusButton.setScaleX(size / 13.0);
+        switchEdgeStatusButton.setScaleY(size / 13.0);
+    }
+
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
+        initilizeDialogs();
+        initializeCanvasPane();
+        initializeEdgeStatusHandling();
+        initializeKeybindings();
+        initializeStatusBar();
+        initializeMenuBar();
+        initializeReachabilityAnalysisThread();
+        intitializeTemporaryComponentWatermark();
+
+        bottomFillerElement.heightProperty().bind(messageTabPane.maxHeightProperty());
+        messageTabPane.getController().setRunnableForOpeningAndClosingMessageTabPane(this::changeInsetsOfFileAndQueryPanes);
+    }
+
+    private void initilizeDialogs() {
         dialog.setDialogContainer(dialogContainer);
         dialogContainer.opacityProperty().bind(dialog.getChildren().get(0).scaleXProperty());
         dialog.setOnDialogClosed(event -> dialogContainer.setVisible(false));
@@ -207,24 +227,57 @@ public class EcdarController implements Initializable {
         _queryDialog = queryDialog;
         _queryTextResult = queryTextResult;
         _queryTextQuery = queryTextQuery;
-        queryDialog.setDialogContainer(queryDialogContainer);
-        queryDialogContainer.opacityProperty().bind(queryDialog.getChildren().get(0).scaleXProperty());
-        queryDialog.setOnDialogClosed(event -> {
-            queryDialogContainer.setVisible(false);
-            queryDialogContainer.setMouseTransparent(true);
+
+        initializeDialog(queryDialog, queryDialogContainer);
+        initializeDialog(backendOptionsDialog, backendOptionsDialogContainer);
+
+        backendOptionsDialog.getController().resetBackendsButton.setOnMouseClicked(event -> {
+            backendOptionsDialog.getController().resetBackendsToDefault();
         });
-        queryDialog.setOnDialogOpened(event -> {
-            queryDialogContainer.setVisible(true);
-            queryDialogContainer.setMouseTransparent(false);
+
+        backendOptionsDialog.getController().closeButton.setOnMouseClicked(event -> {
+            backendOptionsDialog.getController().cancelBackendOptionsChanges();
+            dialog.close();
+            backendOptionsDialog.close();
         });
+
+        backendOptionsDialog.getController().saveButton.setOnMouseClicked(event -> {
+            if (backendOptionsDialog.getController().saveChangesToBackendOptions()) {
+                dialog.close();
+                backendOptionsDialog.close();
+            }
+        });
+
+        if (BackendHelper.getBackendInstances().size() < 1) {
+            Ecdar.showToast("No engines were found. Download j-Ecdar or Reveaal, or add another engine to fix this. No queries can be executed without engines.");
+        } else {
+            BackendInstance defaultBackend = BackendHelper.getBackendInstances().stream().filter(BackendInstance::isDefault).findFirst().orElse(BackendHelper.getBackendInstances().get(0));
+            BackendHelper.setDefaultBackendInstance(defaultBackend);
+        }
+    }
+
+    private void initializeDialog(JFXDialog dialog, StackPane dialogContainer) {
+        dialog.setDialogContainer(dialogContainer);
+        dialogContainer.opacityProperty().bind(dialog.getChildren().get(0).scaleXProperty());
+        dialogContainer.opacityProperty().bind(dialog.getChildren().get(0).scaleXProperty());
+        dialog.setOnDialogClosed(event -> {
+            dialogContainer.setVisible(false);
+            dialogContainer.setMouseTransparent(true);
+        });
+        dialog.setOnDialogOpened(event -> {
+            dialogContainer.setVisible(true);
+            dialogContainer.setMouseTransparent(false);
+        });
+
+        filePane.getStyleClass().add("responsive-pane-sizing");
+        filePaneFillerElement.getStyleClass().add("responsive-pane-sizing");
+        queryPane.getStyleClass().add("responsive-pane-sizing");
+        queryPaneFillerElement.getStyleClass().add("responsive-pane-sizing");
 
         initializeCanvasPane();
         initializeEdgeStatusHandling();
-        intitializeTemporaryComponentWatermark();
         initializeKeybindings();
-        initializeTabPane();
         initializeStatusBar();
-        initializeMessages();
         initializeMenuBar();
         initializeReachabilityAnalysisThread();
     }
@@ -338,6 +391,7 @@ public class EcdarController implements Initializable {
 
         Tooltip.install(switchToInputButton, new Tooltip("Switch to input mode"));
         Tooltip.install(switchToOutputButton, new Tooltip("Switch to output mode"));
+        switchToInputButton.setDisableVisualFocus(true); // Hiding input button rippler on start-up
 
         globalEdgeStatus.addListener(((observable, oldValue, newValue) -> {
             if (newValue.equals(EdgeStatus.INPUT)) {
@@ -350,6 +404,9 @@ public class EcdarController implements Initializable {
                 switchEdgeStatusButton.setSelected(true);
             }
         }));
+
+        // Ensure that the rippler is centered when scale is changed
+        Platform.runLater(() -> ((JFXRippler) switchEdgeStatusButton.lookup(".jfx-rippler")).setRipplerRecenter(true));
     }
 
     private void initializeReachabilityAnalysisThread() {
@@ -412,7 +469,7 @@ public class EcdarController implements Initializable {
                             reachabilityQuery.setType(QueryType.REACHABILITY);
 
                             Ecdar.getBackendDriver().addQueryToExecutionQueue(locationReachableQuery,
-                                    BackendHelper.BackendNames.Reveaal,
+                                    BackendHelper.getDefaultBackendInstance(),
                                     (result -> {
                                         if (result) {
                                             location.setReachability(Location.Reachability.REACHABLE);
@@ -428,7 +485,7 @@ public class EcdarController implements Initializable {
                                     new QueryListener(reachabilityQuery));
 
                             final Thread verifyThread = new Thread(() -> Ecdar.getBackendDriver().addQueryToExecutionQueue(locationReachableQuery,
-                                    BackendHelper.BackendNames.Reveaal,
+                                    BackendHelper.getDefaultBackendInstance(),
                                     (result -> {
                                         if (result) {
                                             location.setReachability(Location.Reachability.REACHABLE);
@@ -499,15 +556,10 @@ public class EcdarController implements Initializable {
         menuBarFileSaveAs.setOnAction(event -> saveAs());
 
         initializeNewMutationTestObjectMenuItem();
-
         initializeFileExportAsPng();
-
         initializeEditMenu();
-
         initializeViewMenu();
-
         initializeOptionsMenu();
-
         initializeHelpMenu();
     }
 
@@ -547,37 +599,11 @@ public class EcdarController implements Initializable {
             menuBarOptionsCache.getGraphic().opacityProperty().bind(new When(isCached).then(1).otherwise(0));
         });
 
-        menuBarOptionsDefaultBackendTooltip = new Tooltip("Change default backend to " +
-                (BackendHelper.defaultBackend.equals(BackendHelper.BackendNames.jEcdar)
-                        ? BackendHelper.BackendNames.Reveaal.name()
-                        : BackendHelper.BackendNames.jEcdar.name()));
-
-        Tooltip.install(menuBarOptionsDefaultBackendContent, menuBarOptionsDefaultBackendTooltip);
-
-        menuBarOptionsDefaultBackend.setOnAction(event -> {
-            menuBarOptionsDefaultBackendTooltip.setText("Change default backend to " + BackendHelper.defaultBackend.name());
-            BackendHelper.defaultBackend = (BackendHelper.defaultBackend.equals(BackendHelper.BackendNames.jEcdar)
-                    ? BackendHelper.BackendNames.Reveaal
-                    : BackendHelper.BackendNames.jEcdar);
-
-            Ecdar.showToast("The default backend was changed to " + BackendHelper.defaultBackend.name());
-            ((Text) menuBarOptionsDefaultBackendContent.getChildrenUnmodifiable().get(1)).setText("Default backend: " + BackendHelper.defaultBackend.name());
-
-            Ecdar.preferences.put("default_backend", Integer.toString(BackendHelper.defaultBackend.ordinal()));
-
+        menuBarOptionsBackendOptions.setOnAction(event -> {
+            backendOptionsDialogContainer.setVisible(true);
+            backendOptionsDialog.show(backendOptionsDialogContainer);
+            backendOptionsDialog.setMouseTransparent(false);
         });
-
-        ((Text) menuBarOptionsDefaultBackendContent.getChildrenUnmodifiable().get(1)).setText("Default backend: " + BackendHelper.defaultBackend.name());
-
-        menuBarOptionsNumberOfSocketsSlider.valueChangingProperty().addListener((observable, oldValue, newValue) -> {
-            if (oldValue && !newValue) {
-                int newIntValue = (int) Math.round(menuBarOptionsNumberOfSocketsSlider.getValue());
-                Ecdar.getBackendDriver().setMaxNumberOfConnections(newIntValue);
-                Ecdar.preferences.put("number_of_backend_sockets", Integer.toString(newIntValue));
-            }
-        });
-
-        menuBarOptionsNumberOfSocketsSlider.setValue(Ecdar.getBackendDriver().getMaxNumberOfSockets());
     }
 
     private void initializeEditMenu() {
@@ -639,42 +665,61 @@ public class EcdarController implements Initializable {
             menuBarViewGrid.getGraphic().opacityProperty().bind(new When(isOn).then(1).otherwise(0));
         });
 
-        fontScaling.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
-            String rawNewScale = newValue.getProperties().get("scale").toString();
-            double calculatedNewScale = Double.parseDouble(rawNewScale) * 13.0;
-            Ecdar.getPresentation().setStyle("-fx-font-size: " + calculatedNewScale + "px;");
-
-            // Text do not scale on the canvas to avoid ugly elements,
-            // this zooms in on the component in order to get the "same font size"
-            EcdarController.getActiveCanvasPresentation().getController().zoomHelper.setZoomLevel(calculatedNewScale / 13);
-
-            Ecdar.preferences.put("font_scale", rawNewScale);
+        menuBarAutoscaling.getGraphic().setOpacity(Ecdar.autoScalingEnabled.getValue() ? 1 : 0);
+        menuBarAutoscaling.setOnAction(event -> {
+            Ecdar.autoScalingEnabled.setValue(!Ecdar.autoScalingEnabled.getValue());
+            updateScaling(getCalculatedNewScale() / 13);
+            Ecdar.preferences.put("autoscaling", String.valueOf(Ecdar.autoScalingEnabled.getValue()));
+        });
+        Ecdar.autoScalingEnabled.addListener((observable, oldValue, newValue) -> {
+            menuBarAutoscaling.getGraphic().opacityProperty().setValue(newValue ? 1 : 0);
         });
 
-        // On startup, set the font scaling to the value saved in preferences
-        Platform.runLater(() -> {
-            Object matchingToggle = fontScaleM;
-            for (Object i : fontScaling.getToggles()) {
-                if (Float.parseFloat(((RadioMenuItem) i).getProperties().get("scale").toString())
-                                == Ecdar.preferences.getFloat("font_scale", 1.0F)) {
-                    matchingToggle = i;
-                    break;
-                }
-            }
-            fontScaling.selectToggle((RadioMenuItem) matchingToggle);
-        });
+        scaling.selectedToggleProperty().addListener((observable, oldValue, newValue) -> updateScaling(Double.parseDouble(newValue.getProperties().get("scale").toString())));
 
         menuBarViewCanvasSplit.getGraphic().setOpacity(1);
         menuBarViewCanvasSplit.setOnAction(event -> {
             final BooleanProperty isSplit = Ecdar.toggleCanvasSplit();
             if (isSplit.get()) {
-                setCanvasModeToSingular();
+                Platform.runLater(this::setCanvasModeToSingular);
                 menuBarViewCanvasSplit.setText("Split canvas");
             } else {
-                setCanvasModeToSplit();
+                Platform.runLater(this::setCanvasModeToSplit);
                 menuBarViewCanvasSplit.setText("Merge canvases");
             }
         });
+
+        // On startup, set the scaling to the values saved in preferences
+        Platform.runLater(() -> {
+            Ecdar.autoScalingEnabled.setValue(Ecdar.preferences.getBoolean("autoscaling", true));
+
+            Object matchingToggle = scaleM;
+            for (Object i : scaling.getToggles()) {
+                if (Float.parseFloat(((RadioMenuItem) i).getProperties().get("scale").toString())
+                        == Ecdar.preferences.getFloat("scale", 1.0F)) {
+                    matchingToggle = i;
+                    break;
+                }
+            }
+            scaling.selectToggle(scaleM); // Necessary to avoid project pane appearing off-screen
+            scaling.selectToggle((RadioMenuItem) matchingToggle);
+        });
+
+    }
+
+    private void updateScaling(double newScale) {
+        double calculatedNewScale = getCalculatedNewScale();
+
+        Ecdar.getPresentation().setStyle("-fx-font-size: " + calculatedNewScale + "px;");
+
+        // Text do not scale on the canvas to avoid ugly elements,
+        // this zooms in on the component in order to get the "same font size"
+        EcdarController.getActiveCanvasPresentation().getController().zoomHelper.setZoomLevel(calculatedNewScale / 13);
+        Ecdar.preferences.put("scale", String.valueOf(newScale));
+
+        scaleIcons(root, calculatedNewScale);
+        scaleEdgeStatusToggle(calculatedNewScale);
+        messageTabPane.getController().updateScale(newScale);
     }
 
     /**
@@ -690,7 +735,7 @@ public class EcdarController implements Initializable {
             // The initial location for the file choosing dialog
             final File jarDir = new File(System.getProperty("java.class.path")).getAbsoluteFile().getParentFile();
 
-            // If the file does not exist, we must be running it from a development environment, use an default location
+            // If the file does not exist, we must be running it from a development environment, use default location
             if (jarDir.exists()) {
                 projectPicker.setInitialDirectory(jarDir);
             }
@@ -883,14 +928,12 @@ public class EcdarController implements Initializable {
         if (model != null) {
             canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(activeCanvasPresentation.get().getController().getActiveModel());
         } else {
-            canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(Ecdar.getProject().getComponents().get(0));
+            // If no components where found, the project has not been initialized. The active model will be updated when the project is initialized
+            canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(Ecdar.getProject().getComponents().stream().findFirst().orElse(null));
         }
 
-        canvasShellPresentation.getController().toolbar.setTranslateY(48);
         canvasPane.getChildren().add(canvasShellPresentation);
-
         activeCanvasPresentation.set(canvasShellPresentation.getController().canvasPresentation);
-
         filePane.getController().updateColorsOnFilePresentations();
     }
 
@@ -925,19 +968,16 @@ public class EcdarController implements Initializable {
         // Add the canvasShellPresentation at the top-left
         CanvasShellPresentation canvasShellPresentation = initializeNewCanvasShellPresentation();
         canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(getActiveCanvasPresentation().getController().getActiveModel());
-        canvasShellPresentation.getController().toolbar.setTranslateY(48);
         canvasGrid.add(canvasShellPresentation, 0, 0);
         setActiveCanvasPresentation(canvasShellPresentation.getController().canvasPresentation);
 
         // Add the canvasShellPresentation at the top-right
         canvasShellPresentation = initializeNewCanvasShellPresentationWithActiveComponent(components, currentCompNum);
-        canvasShellPresentation.getController().toolbar.setTranslateY(48);
         canvasShellPresentation.setOpacity(0.75);
         canvasGrid.add(canvasShellPresentation, 1, 0);
 
         // Update the startIndex for the next canvasShellPresentation
         for (int i = 0; i < numComponents; i++) {
-
             if (canvasShellPresentation.getController().canvasPresentation.getController().getActiveModel() != null && canvasShellPresentation.getController().canvasPresentation.getController().getActiveModel().equals(components.get(i))) {
                 currentCompNum = i + 1;
             }
@@ -960,7 +1000,6 @@ public class EcdarController implements Initializable {
         canvasGrid.add(canvasShellPresentation, 1, 1);
 
         canvasPane.getChildren().add(canvasGrid);
-
         filePane.getController().updateColorsOnFilePresentations();
     }
 
@@ -1158,199 +1197,15 @@ public class EcdarController implements Initializable {
         throw new IllegalArgumentException("Image is all white");
     }
 
-    private void initializeMessages() {
-        final Map<Component, MessageCollectionPresentation> componentMessageCollectionPresentationMapForErrors = new HashMap<>();
-        final Map<Component, MessageCollectionPresentation> componentMessageCollectionPresentationMapForWarnings = new HashMap<>();
-
-        final Consumer<Component> addComponent = (component) -> {
-            final MessageCollectionPresentation messageCollectionPresentationErrors = new MessageCollectionPresentation(component, CodeAnalysis.getErrors(component));
-            componentMessageCollectionPresentationMapForErrors.put(component, messageCollectionPresentationErrors);
-            errorsList.getChildren().add(messageCollectionPresentationErrors);
-
-            final Runnable addIfErrors = () -> {
-                if (CodeAnalysis.getErrors(component).size() == 0) {
-                    errorsList.getChildren().remove(messageCollectionPresentationErrors);
-                } else if (!errorsList.getChildren().contains(messageCollectionPresentationErrors)) {
-                    errorsList.getChildren().add(messageCollectionPresentationErrors);
-                }
-            };
-
-            addIfErrors.run();
-            CodeAnalysis.getErrors(component).addListener(new ListChangeListener<CodeAnalysis.Message>() {
-                @Override
-                public void onChanged(final Change<? extends CodeAnalysis.Message> c) {
-                    while (c.next()) {
-                        addIfErrors.run();
-                    }
-                }
-            });
-
-            final MessageCollectionPresentation messageCollectionPresentationWarnings = new MessageCollectionPresentation(component, CodeAnalysis.getWarnings(component));
-            componentMessageCollectionPresentationMapForWarnings.put(component, messageCollectionPresentationWarnings);
-            warningsList.getChildren().add(messageCollectionPresentationWarnings);
-
-            final Runnable addIfWarnings = () -> {
-                if (CodeAnalysis.getWarnings(component).size() == 0) {
-                    warningsList.getChildren().remove(messageCollectionPresentationWarnings);
-                } else if (!warningsList.getChildren().contains(messageCollectionPresentationWarnings)) {
-                    warningsList.getChildren().add(messageCollectionPresentationWarnings);
-                }
-            };
-
-            addIfWarnings.run();
-            CodeAnalysis.getWarnings(component).addListener(new ListChangeListener<CodeAnalysis.Message>() {
-                @Override
-                public void onChanged(final Change<? extends CodeAnalysis.Message> c) {
-                    while (c.next()) {
-                        addIfWarnings.run();
-                    }
-                }
-            });
-        };
-
-        // Add error that is project wide but not a backend error
-        addComponent.accept(null);
-
-        Ecdar.getProject().getComponents().forEach(addComponent);
-        Ecdar.getProject().getComponents().addListener(new ListChangeListener<Component>() {
-            @Override
-            public void onChanged(final Change<? extends Component> c) {
-                while (c.next()) {
-                    c.getAddedSubList().forEach(addComponent::accept);
-
-                    c.getRemoved().forEach(component -> {
-                        errorsList.getChildren().remove(componentMessageCollectionPresentationMapForErrors.get(component));
-                        componentMessageCollectionPresentationMapForErrors.remove(component);
-
-                        warningsList.getChildren().remove(componentMessageCollectionPresentationMapForWarnings.get(component));
-                        componentMessageCollectionPresentationMapForWarnings.remove(component);
-                    });
-                }
-            }
-        });
-
-        final Map<CodeAnalysis.Message, MessagePresentation> messageMessagePresentationHashMap = new HashMap<>();
-
-        CodeAnalysis.getBackendErrors().addListener(new ListChangeListener<CodeAnalysis.Message>() {
-            @Override
-            public void onChanged(final Change<? extends CodeAnalysis.Message> c) {
-                while (c.next()) {
-                    c.getAddedSubList().forEach(addedMessage -> {
-                        final MessagePresentation messagePresentation = new MessagePresentation(addedMessage);
-                        backendErrorsList.getChildren().add(messagePresentation);
-                        messageMessagePresentationHashMap.put(addedMessage, messagePresentation);
-                    });
-
-                    c.getRemoved().forEach(removedMessage -> {
-                        backendErrorsList.getChildren().remove(messageMessagePresentationHashMap.get(removedMessage));
-                        messageMessagePresentationHashMap.remove(removedMessage);
-                    });
-                }
-            }
-        });
-    }
-
-    private void initializeTabPane() {
-        bottomFillerElement.heightProperty().bind(tabPaneContainer.maxHeightProperty());
-
-        tabPane.getSelectionModel().selectedIndexProperty().addListener((obs, oldSelected, newSelected) -> {
-            if (newSelected.intValue() < 0 || tabPaneContainer.getMaxHeight() > 35) return;
-
-            if (shouldISkipOpeningTheMessagesContainer) {
-                tabPane.getSelectionModel().clearSelection();
-                shouldISkipOpeningTheMessagesContainer = false;
-            } else {
-                expandMessagesIfNotExpanded();
-            }
-        });
-
-        tabPane.getSelectionModel().clearSelection();
-
-        tabPane.setTabMinHeight(35);
-        tabPane.setTabMaxHeight(35);
-    }
-
-    @FXML
-    private void tabPaneResizeElementPressed(final MouseEvent event) {
-        tabPanePreviousY = event.getScreenY();
-    }
-
-    @FXML
-    private void tabPaneResizeElementDragged(final MouseEvent event) {
-        final double mouseY = event.getScreenY();
-        double newHeight = tabPaneContainer.getMaxHeight() - (mouseY - tabPanePreviousY);
-        newHeight = Math.max(35, newHeight);
-
-        setMaxHeight(newHeight);
-        tabPanePreviousY = mouseY;
-
-    }
-
-    public void expandMessagesIfNotExpanded() {
-        if (tabPaneContainer.getMaxHeight() <= 35) {
-            expandMessagesContainer.play();
-        }
-    }
-
-    public void collapseMessagesIfNotCollapsed() {
-        final Transition collapse = new Transition() {
-            double height = tabPaneContainer.getMaxHeight();
-
-            {
-                setInterpolator(Interpolator.SPLINE(0.645, 0.045, 0.355, 1));
-                setCycleDuration(Duration.millis(200));
-            }
-
-            @Override
-            protected void interpolate(final double frac) {
-                setMaxHeight(((height - 35) * (1 - frac)) + 35);
-            }
-        };
-
-        if (tabPaneContainer.getMaxHeight() > 35) {
-            expandHeight = tabPaneContainer.getHeight();
-            collapse.play();
-        }
-    }
-
-    @FXML
-    public void collapseMessagesClicked() {
-        final Transition collapse = new Transition() {
-            double height = tabPaneContainer.getMaxHeight();
-
-            {
-                setInterpolator(Interpolator.SPLINE(0.645, 0.045, 0.355, 1));
-                setCycleDuration(Duration.millis(200));
-            }
-
-            @Override
-            protected void interpolate(final double frac) {
-                setMaxHeight(((height - 35) * (1 - frac)) + 35);
-            }
-        };
-
-        if (tabPaneContainer.getMaxHeight() > 35) {
-            expandHeight = tabPaneContainer.getHeight();
-            collapse.play();
-        } else {
-            expandMessagesContainer.play();
-        }
-    }
-
     /**
-     * This method is used as a central place to decide whether the tabPane is opened or closed
-     *
-     * @param height the value used to set the height of the tabPane
+     * This method is used to push the contents of the file and query panes when the tab pane is opened
      */
-    public void setMaxHeight(double height) {
-        tabPaneContainer.setMaxHeight(height);
-        if (height > 35) { //The tabpane is opened
+    private void changeInsetsOfFileAndQueryPanes() {
+        if (messageTabPane.getController().isOpen()) {
             filePane.showBottomInset(false);
             queryPane.showBottomInset(false);
             CanvasPresentation.showBottomInset(false);
         } else {
-            // When closed we push up the scrollviews in the filePane and queryPane as the tabPane
-            // would otherwise cover some items in these views
             filePane.showBottomInset(true);
             queryPane.showBottomInset(true);
             CanvasPresentation.showBottomInset(true);
@@ -1469,7 +1324,7 @@ public class EcdarController implements Initializable {
     }
 
     @FXML
-    private void closeDialog() {
+    private void closeQueryDialog() {
         dialog.close();
         queryDialog.close();
     }

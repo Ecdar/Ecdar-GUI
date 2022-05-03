@@ -4,7 +4,6 @@ import com.jfoenix.controls.JFXSnackbarLayout;
 import ecdar.Ecdar;
 import ecdar.abstractions.Query;
 import ecdar.abstractions.Snackbar;
-import ecdar.code_analysis.CodeAnalysis;
 import ecdar.controllers.EcdarController;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
@@ -16,15 +15,11 @@ import com.jfoenix.controls.JFXSnackbar;
 import ecdar.utility.keyboard.Keybind;
 import ecdar.utility.keyboard.KeyboardTracker;
 import javafx.animation.*;
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.Insets;
-import javafx.scene.Cursor;
-import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
@@ -75,7 +70,6 @@ public class EcdarPresentation extends StackPane {
         initializeToolbarButton(controller.redo);
         initializeUndoRedoButtons();
 
-        initializeMessageContainer();
         initializeSnackbar();
 
         // Open the file and query panel initially
@@ -99,109 +93,6 @@ public class EcdarPresentation extends StackPane {
         controller.snackbar = new Snackbar(controller.root);
         controller.snackbar.setPrefWidth(568);
         controller.snackbar.autosize();
-    }
-
-    private void initializeMessageContainer() {
-        // The element of which you drag to resize should be equal to the width of the window (main stage)
-        controller.tabPaneResizeElement.sceneProperty().addListener((observableScene, oldScene, newScene) -> {
-            if (oldScene == null && newScene != null) {
-                // scene is set for the first time. Now its the time to listen stage changes.
-                newScene.windowProperty().addListener((observableWindow, oldWindow, newWindow) -> {
-                    if (oldWindow == null && newWindow != null) {
-                        newWindow.widthProperty().addListener((observableWidth, oldWidth, newWidth) -> {
-                            controller.tabPaneResizeElement.setWidth(newWidth.doubleValue() - 30);
-                        });
-                    }
-                });
-            }
-        });
-
-        // Resize cursor
-        controller.tabPaneResizeElement.setCursor(Cursor.N_RESIZE);
-
-        controller.tabPaneContainer.maxHeightProperty().addListener((obs, oldHeight, newHeight) -> {
-            if (newHeight.doubleValue() > 35) {
-                controller.collapseMessagesIcon.setIconLiteral("gmi-close");
-                controller.collapseMessagesIcon.setIconSize(24);
-            } else {
-                controller.tabPane.getSelectionModel().clearSelection(); // Clear the currently selected tab (so that the view will open again when selecting a tab)
-                controller.collapseMessagesIcon.setIconLiteral("gmi-expand-less");
-                controller.collapseMessagesIcon.setIconSize(24);
-            }
-        });
-
-        // Remove the background of the scroll panes
-        controller.errorsScrollPane.setStyle("-fx-background-color: transparent;");
-        controller.warningsScrollPane.setStyle("-fx-background-color: transparent;");
-
-        final Runnable collapseIfNoErrorsOrWarnings = () -> {
-            new Thread(() -> {
-                // Wait for a second to check if new warnings or errors occur
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                // Check if any warnings or errors occurred
-                if (CodeAnalysis.getBackendErrors().size() + CodeAnalysis.getErrors().size() + CodeAnalysis.getWarnings().size() == 0) {
-                    controller.collapseMessagesIfNotCollapsed();
-                }
-            }).start();
-        };
-
-        // Update the tab-text and expand/collapse the view
-        CodeAnalysis.getBackendErrors().addListener(new InvalidationListener() {
-            @Override
-            public void invalidated(final Observable observable) {
-                final int errors = CodeAnalysis.getBackendErrors().size();
-                if (errors == 0) {
-                    controller.backendErrorsTab.setText("Backend Errors");
-                } else {
-                    controller.backendErrorsTab.setText("Backend Errors (" + errors + ")");
-                    controller.expandMessagesIfNotExpanded();
-                    controller.tabPane.getSelectionModel().select(controller.backendErrorsTab);
-                }
-
-                collapseIfNoErrorsOrWarnings.run();
-            }
-        });
-
-        // Update the tab-text and expand/collapse the view
-        CodeAnalysis.getErrors().addListener(new InvalidationListener() {
-            @Override
-            public void invalidated(final Observable observable) {
-                final int errors = CodeAnalysis.getErrors().size();
-                if (errors == 0) {
-                    controller.errorsTab.setText("Errors");
-                } else {
-                    controller.errorsTab.setText("Errors (" + errors + ")");
-                    controller.expandMessagesIfNotExpanded();
-                    controller.tabPane.getSelectionModel().select(controller.errorsTab);
-                }
-
-                collapseIfNoErrorsOrWarnings.run();
-            }
-        });
-
-
-        // Update the tab-text and expand/collapse the view
-        CodeAnalysis.getWarnings().addListener(new InvalidationListener() {
-            @Override
-            public void invalidated(final Observable observable) {
-                final int warnings = CodeAnalysis.getWarnings().size();
-                if (warnings == 0) {
-                    controller.warningsTab.setText("Warnings");
-                } else {
-                    controller.warningsTab.setText("Warnings (" + warnings + ")");
-                    //We must select the warnings tab but we don't want the messages areas to open
-                    controller.shouldISkipOpeningTheMessagesContainer = true;
-                    controller.tabPane.getSelectionModel().select(controller.warningsTab);
-                }
-
-                collapseIfNoErrorsOrWarnings.run();
-            }
-        });
     }
 
     private void initializeUndoRedoButtons() {
@@ -359,6 +250,9 @@ public class EcdarPresentation extends StackPane {
     }
 
     private void initializeToggleQueryPaneFunctionality() {
+        initializeOpenQueryPaneAnimation();
+        initializeCloseQueryPaneAnimation();
+
         // Set the translation of the query pane to be equal to its width
         // Will hide the element, and force it in then the right side of the border pane is enlarged
         controller.queryPane.translateXProperty().bind(controller.queryPane.widthProperty());
@@ -426,6 +320,9 @@ public class EcdarPresentation extends StackPane {
     }
 
     private void initializeToggleFilePaneFunctionality() {
+        initializeOpenFilePaneAnimation();
+        initializeCloseFilePaneAnimation();
+
         // Set the translation of the file pane to be equal to its width
         // Will hide the element, and force it in then the left side of the border pane is enlarged
         controller.filePane.translateXProperty().bind(controller.filePane.widthProperty().multiply(-1));
@@ -563,7 +460,7 @@ public class EcdarPresentation extends StackPane {
 
     public void showSnackbarMessage(final String message) {
         JFXSnackbarLayout content = new JFXSnackbarLayout(message);
-        controller.snackbar.enqueue(new JFXSnackbar.SnackbarEvent(content, new Duration(3000)));
+        controller.snackbar.enqueue(new JFXSnackbar.SnackbarEvent(content, new Duration(5000)));
     }
 
     public void showHelp() {

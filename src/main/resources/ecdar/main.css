@@ -1,106 +1,126 @@
-.display4{
-	-fx-font-family: "Roboto Light";
-	-fx-font-size: 8.6em;
-}
-.display3{
-	-fx-font-family: "Roboto";
-	-fx-font-size: 4.3em;
-}
-.display2{
-	-fx-font-family: "Roboto";
-	-fx-font-size: 3.5em;
-}
-.display1{
-	-fx-font-family: "Roboto";
-	-fx-font-size: 2.6em;
-}
-.headline{
-	-fx-font-family: "Roboto";
-	-fx-font-size: 1.8em;
-}
-.title{
-	-fx-font-family: "Roboto Medium";
-	-fx-font-size: 1.5em;
-}
-.subhead{
-	-fx-font-family: "Roboto";
-	-fx-font-size: 1.2em;
-}
-.body2{
-	-fx-font-family: "Roboto Medium";
-	-fx-font-size: 1.0em;
-}
-.body1{
-	-fx-font-family: "Roboto";
-	-fx-font-size: 1.0em;
-}
-.caption{
-	-fx-font-family: "Roboto";
-	-fx-font-size: 0.9em;
-}
-.sub-caption{
-	-fx-font-family: "Roboto";
-	-fx-font-size: 0.8em;
+.display4 {
+    -fx-font-family: "Roboto Light";
+    -fx-font-size: 8.6em;
 }
 
-.sub-caption-mono{
-	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 0.7em;
+.display3 {
+    -fx-font-family: "Roboto";
+    -fx-font-size: 4.3em;
 }
 
-.edge-property{
-	-fx-font-family: "Roboto Mono Medium";
-	-fx-font-size: 0.9em;
+.display2 {
+    -fx-font-family: "Roboto";
+    -fx-font-size: 3.5em;
 }
 
-.button{
-	-fx-font-family: "Roboto Medium";
-	-fx-font-size: 1.1em;
+.display1 {
+    -fx-font-family: "Roboto";
+    -fx-font-size: 2.6em;
 }
 
-.display4-mono{
-	-fx-font-family: "Roboto Mono Light";
-	-fx-font-size: 8.6em;
+.headline {
+    -fx-font-family: "Roboto";
+    -fx-font-size: 1.8em;
 }
-.display3-mono{
-	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 4.3em;
+
+.title {
+    -fx-font-family: "Roboto Medium";
+    -fx-font-size: 1.5em;
 }
-.display2-mono{
-	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 3.5em;
+
+.subhead {
+    -fx-font-family: "Roboto";
+    -fx-font-size: 1.2em;
 }
-.display1-mono{
-	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 2.6em;
+
+.body2 {
+    -fx-font-family: "Roboto Medium";
+    -fx-font-size: 1.0em;
 }
-.headline-mono{
-	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 1.8em;
+
+.body1 {
+    -fx-font-family: "Roboto";
+    -fx-font-size: 1.0em;
 }
-.title-mono{
-	-fx-font-family: "Roboto Mono Medium";
-	-fx-font-size: 1.2em; ;
+
+.caption {
+    -fx-font-family: "Roboto";
+    -fx-font-size: 0.9em;
 }
-.subhead-mono{
-	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 1.2em;
+
+.sub-caption {
+    -fx-font-family: "Roboto";
+    -fx-font-size: 0.8em;
 }
-.body2-mono{
-	-fx-font-family: "Roboto Mono Medium";
-	-fx-font-size: 1.0em;
+
+.sub-caption-mono {
+    -fx-font-family: "Roboto Mono";
+    -fx-font-size: 0.7em;
 }
-.body1-mono{
-	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 1.0em;
+
+.edge-property {
+    -fx-font-family: "Roboto Mono Medium";
+    -fx-font-size: 0.9em;
 }
-.caption-mono{
-	-fx-font-family: "Roboto Mono";
-	-fx-font-size: 0.9em;
+
+.button {
+    -fx-font-family: "Roboto Medium";
+    -fx-font-size: 1.1em;
 }
-.button-mono{
-	-fx-font-family: "Roboto Mono Medium";
-	-fx-font-size: 1.1em;
+
+.display4-mono {
+    -fx-font-family: "Roboto Mono Light";
+    -fx-font-size: 8.6em;
+}
+
+.display3-mono {
+    -fx-font-family: "Roboto Mono";
+    -fx-font-size: 4.3em;
+}
+
+.display2-mono {
+    -fx-font-family: "Roboto Mono";
+    -fx-font-size: 3.5em;
+}
+
+.display1-mono {
+    -fx-font-family: "Roboto Mono";
+    -fx-font-size: 2.6em;
+}
+
+.headline-mono {
+    -fx-font-family: "Roboto Mono";
+    -fx-font-size: 1.8em;
+}
+
+.title-mono {
+    -fx-font-family: "Roboto Mono Medium";
+    -fx-font-size: 1.2em;;
+}
+
+.subhead-mono {
+    -fx-font-family: "Roboto Mono";
+    -fx-font-size: 1.2em;
+}
+
+.body2-mono {
+    -fx-font-family: "Roboto Mono Medium";
+    -fx-font-size: 1.0em;
+}
+
+.body1-mono {
+    -fx-font-family: "Roboto Mono";
+    -fx-font-size: 1.0em;
+}
+
+.caption-mono {
+    -fx-font-family: "Roboto Mono";
+    -fx-font-size: 0.9em;
+}
+
+.button-mono {
+    -fx-font-family: "Roboto Mono Medium";
+    -fx-font-size: 1.1em;
 }
 
 .white-text {
@@ -112,13 +132,13 @@
 }
 
 .window-title {
-	-fx-label-padding: 0em 0em 0em 0.8em;
+    -fx-label-padding: 0em 0em 0em 0.8em;
 }
 
 .floating-action-button {
-	-fx-pref-width: 4.3em;
-	-fx-pref-height: 4.3em;
-	-fx-text-fill: white;
+    -fx-pref-width: 4.3em;
+    -fx-pref-height: 4.3em;
+    -fx-text-fill: white;
 }
 
 .titled-pane > .content {
@@ -157,6 +177,10 @@
     -fx-highlight-text-fill: -white;
 }
 
+.component-declaration {
+    -fx-padding: 1.5em 0em 0em 0em;
+}
+
 .menu .label {
     -fx-text-fill: -white;
     -fx-font-family: "Roboto";
@@ -180,146 +204,144 @@
 }
 
 .jfx-tab-pane .scroll-pane {
-   -fx-background: #ffffff00; /** Transparent **/
+    -fx-background: #ffffff00; /** Transparent **/
+}
+
+.tab .tab-label {
+    -fx-font-size: 1.2em;
 }
 
 .comment {
-	-fx-fill: -grey-500;
+    -fx-fill: -grey-500;
 }
 
 .uppaal-keyword {
-	-fx-fill: -blue-700;
+    -fx-fill: -blue-700;
 }
 
 .c-keyword {
-	-fx-fill: -green-700;
-	-fx-font-weight: bold;
+    -fx-fill: -green-700;
+    -fx-font-weight: bold;
 }
 
 .jfx-snackbar-content {
-	-fx-background-color: #323232;
-	-fx-font-family: "Roboto Medium";
-	-fx-font-size: 1.0em;
+    -fx-background-color: #323232;
+    -fx-font-family: "Roboto Medium";
+    -fx-font-size: 1.0em;
 }
 
 .jfx-snackbar-toast {
-	-fx-text-fill: WHITE;
-	-fx-padding-left: 1.8em;
-	-fx-padding-right: 1.8em;
+    -fx-text-fill: WHITE;
+    -fx-padding-left: 1.8em;
+    -fx-padding-right: 1.8em;
 }
 
 .jfx-snackbar-action {
-	-fx-text-fill: WHITE;
+    -fx-text-fill: WHITE;
 }
 
 .titled-pane > .title {
-	-fx-background-color: TRANSPARENT;
-	-fx-border-style: HIDDEN HIDDEN SOLID HIDDEN;
-	-fx-border-color: -divider-color;
-	-fx-pref-height: 2.3em;
+    -fx-background-color: TRANSPARENT;
+    -fx-border-style: HIDDEN HIDDEN SOLID HIDDEN;
+    -fx-border-color: -divider-color;
+    -fx-pref-height: 2.3em;
 }
 
 .titled-pane > .title > .arrow-button .arrow{
 	-fx-background-color: TRANSPARENT;
 	-fx-border-color: TRANSPARENT;
-	-fx-padding: 0em 0em 0em -0.7em; /* -10 */
+	-fx-padding: 0em 0em 0em -0.7em;
 }
 
 .titled-pane > .content {
 	-fx-background-color: TRANSPARENT;
-	-fx-padding: 0em -0.1em -0.1em -0.1em; /* -1 */
+	-fx-padding: 0em -0.1em -0.1em -0.1em;
 	-fx-background-insets: 0em 0em 0em 0em;
 }
 
-/* Scroll pane related styling */
-.scroll-bar:horizontal .track,
-.scroll-bar:vertical .track{
-	-fx-opacity: 0;
-	-fx-border-color: transparent;
-	-fx-focus-color: transparent;
+.backend-instances-list {
+    -fx-padding: 5;
+    -fx-border-style: SOLID HIDDEN SOLID HIDDEN;
+    -fx-border-color: -divider-color;
+    -fx-border-width: 2px;
 }
 
-.scroll-bar:horizontal .increment-button ,
-.scroll-bar:horizontal .decrement-button {
-	visibility: hidden;
-	-fx-background-radius : 0.0em;
-	-fx-padding : 0.0em 0.0em 0.3em 0.0em;
+.backend-instance {
+    -fx-border-style: SOLID SOLID SOLID SOLID;
+    -fx-border-color: -divider-color;
+    -fx-border-width: 1px;
 }
 
-.scroll-bar:vertical .increment-button ,
-.scroll-bar:vertical .decrement-button {
-	visibility: hidden;
-	-fx-background-radius : 0.0em;
-	-fx-padding : 0.0em 0.3em 0.0em 0.0em;
+.input-violation {
+    -fx-text-fill: red;
 }
 
-.scroll-bar .increment-arrow,
-.scroll-bar .decrement-arrow{
-	-fx-shape : " ";
-	-fx-padding : 0.15em 0.0em;
+.button-danger {
+    -fx-border-style: SOLID SOLID SOLID SOLID;
+    -fx-border-color: -red-900;
+    -fx-border-radius: 0.25em;
+    -fx-border-width: 0.1em;
 }
 
-.scroll-bar:vertical .increment-arrow,
-.scroll-bar:vertical .decrement-arrow{
-	-fx-shape : " ";
-	-fx-padding : 0.0em 0.15em;
+.toggle-button {
+    -jfx-toggle-color:#dddddd;-jfx-untoggle-color:#dddddd;
+    -jfx-toggle-line-color:#7C8B92;-jfx-untoggle-line-color:#7C8B92;
+    -fx-padding: 0em 0em 0em 0em;
+    -fx-font-size: 1em;
 }
 
-.scroll-bar:horizontal .thumb,
-.scroll-bar:vertical .thumb {
-	-fx-background-color : derive(-divider-color, 40.0%);
-	-fx-background-insets : 0.15em, 0.0em, 0.0em;
-	-fx-background-radius : 1.8em;
+/* Response sizing for elements (icons with these classes will be scaled when scaling changes) */
+.icon-size-medium {
+    -fx-icon-size: 24;
 }
 
-.scroll-bar:horizontal .thumb:hover,
-.scroll-bar:vertical .thumb:hover {
-	-fx-background-color : derive(-divider-color, 10.0%);
-	-fx-background-insets : 0.15em 0.0em, 0.0em;
-	-fx-background-radius : 1.8em;
+.icon-size-small {
+    -fx-icon-size: 20;
 }
 
-.scroll-bar{
-	-fx-background-color: transparent;
-	-fx-background-radius: 2.6em;
-	-fx-focus-color: transparent;
-	-fx-faint-focus-color: transparent;
+.icon-size-x-small {
+    -fx-icon-size: 18;
 }
 
-.scroll-bar:vertical:focused {
-	-fx-background-color: transparent;
+.responsive-pane-sizing {
+    -fx-max-width: 22em;
+    -fx-min-width: 22em;
 }
 
-.jfx-slider {
-	-fx-pref-width: 4.6em;
+.responsive-text-area-sizing {
+    -fx-max-height: 2.5em;
+    -fx-min-height: 2.5em;
 }
 
-.jfx-slider > .track {
-	-fx-background-color: -divider-color;
+.responsive-icon-stack-pane-sizing {
+    -fx-min-width: 3em;
+    -fx-max-width: 3em;
+    -fx-min-height: 3em;
+    -fx-max-height: 3em;
 }
 
-.jfx-slider > .thumb, .jfx-slider > .animated-thumb, .jfx-slider > .colored-track{
-	-fx-background-color: -primary-color;
+.responsive-small-image-sizing {
+    -fx-max-width: 1.1em;
+    -fx-min-width: 1.1em;
+    -fx-max-height: 1.5em;
+    -fx-min-height: 1.5em;
 }
 
-.jfx-slider > .thumb {
-	-fx-pref-width: 0.7em;
-	-fx-background-radius: 0.2em;
+.responsive-medium-image-sizing {
+    -fx-max-width: 1.8em;
+    -fx-min-width: 1.8em;
+    -fx-max-height: 2.3em;
+    -fx-min-height: 2.3em;
 }
 
-.jfx-slider > .slider-value {
-	-fx-fill: -primary-color-darker;
-	-fx-stroke: -primary-color-darker;
+.responsive-large-image-sizing {
+    -fx-max-width: 4.6em;
+    -fx-min-width: 4.6em;
+    -fx-max-height: 2.3em;
+    -fx-min-height: 2.3em;
 }
 
-.menu-item-embedded-control {
-
-}
-
-.menu-item-embedded-control:hover {
-	-fx-background-color: none;
-}
-
-.menu-item-embedded-control:selected {
-	-fx-background-color: none;
+.responsive-circle-radius {
+    -fx-scale-x: 1em;
+    -fx-scale-y: 1em;
 }

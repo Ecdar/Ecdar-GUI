@@ -62,12 +62,12 @@ public class Grid extends Parent {
 
     /**
      * Redraw the grid in center of the screen
-     * @param scale the scale in which to draw the grid
+     * @param zoomLevel the scale in which to draw the grid
      */
-    public void updateGrid(double scale) {
-        // The given size of the canvas divided by the given scale
-        double screenWidth = (int) Grid.snap(((CanvasShellPresentation) getParent().getParent()).getWidth() / scale * 4);
-        double screenHeight = (int) Grid.snap(((CanvasShellPresentation) getParent().getParent()).getHeight() / scale * 4);
+    public void updateGrid(double zoomLevel) {
+        // The given size of the canvas divided by the given zoomLevel (multiplied by 6 to ensure that the grid covers the full canvas)
+        double screenWidth = (int) Grid.snap(((CanvasShellPresentation) getParent().getParent()).getWidth() / zoomLevel * 6);
+        double screenHeight = (int) Grid.snap(((CanvasShellPresentation) getParent().getParent()).getHeight() / zoomLevel * 6);
 
         if (this.getTranslateX() != Grid.snap(this.getTranslateX())) {
             this.setTranslateX(Grid.snap(this.getTranslateX()) + GRID_SIZE * 0.5);

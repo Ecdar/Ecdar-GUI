@@ -175,7 +175,7 @@ public class Project {
                 deserializeFileHelper(file);
             }
         }
-        // Now we have gone though all the files in the directory we can now deserialize folders
+        // Now we have gone through all the files in the directory we can now deserialize folders
         if(componentFolder != null || systemFolder != null) {
             deserializeComponents(componentFolder);
             deserializeSystems(systemFolder);
