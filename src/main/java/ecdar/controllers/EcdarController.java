@@ -21,6 +21,7 @@ import com.jfoenix.controls.*;
 import javafx.application.Platform;
 import javafx.beans.binding.When;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ListChangeListener;
@@ -546,8 +547,8 @@ public class EcdarController implements Initializable {
         return activeCanvasPresentation.get();
     }
 
-    public static double getActiveCanvasZoomFactor() {
-        return getActiveCanvasPresentation().getController().zoomHelper.currentZoomFactor.get();
+    public static DoubleProperty getActiveCanvasZoomFactor() {
+        return getActiveCanvasPresentation().getController().zoomHelper.currentZoomFactor;
     }
 
     public static void setActiveCanvasPresentation(CanvasPresentation newActiveCanvasPresentation) {

@@ -701,7 +701,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
 
             if (!closestToTarget) {
                 // Set the source to a new MouseCircular, which will follow the mouse and handle setting the new source
-                newEdge.sourceCircularProperty().set(new MouseCircular());
+                newEdge.sourceCircularProperty().set(new MouseCircular(newEdge.sourceCircularProperty().get()));
                 newEdge.setTargetLocation(target);
             }
 
