@@ -65,6 +65,7 @@ public class EcdarController implements Initializable {
     public StackPane root;
     public BorderPane borderPane;
     public StackPane canvasPane;
+    public StackPane topPane;
     public StackPane leftPane;
     public StackPane rightPane;
     public Rectangle bottomFillerElement;

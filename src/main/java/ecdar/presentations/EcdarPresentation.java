@@ -87,6 +87,9 @@ public class EcdarPresentation extends StackPane {
 
             controller.rightPane.minWidthProperty().bind(queryPaneAnimationProperty);
             controller.rightPane.maxWidthProperty().bind(queryPaneAnimationProperty);
+
+            controller.topPane.minHeightProperty().bind(controller.menuBar.heightProperty());
+            controller.topPane.maxHeightProperty().bind(controller.menuBar.heightProperty());
         });
 
         initializeHelpImages();
