@@ -22,6 +22,7 @@ public class ZoomHelper {
 
     /**
      * Set the CanvasPresentation of the grid and add listeners for both the width and height of the new CanvasPresentation
+     *
      * @param newCanvasPresentation the new CanvasPresentation
      */
     public void setCanvas(CanvasPresentation newCanvasPresentation) {
@@ -37,7 +38,7 @@ public class ZoomHelper {
     public void setZoomLevel(Double zoomLevel) {
         if (active && model != null) {
             currentZoomFactor.set(zoomLevel);
-            centerComponentAndUpdateGrid();
+            grid.updateGrid();
         }
     }
 
@@ -83,9 +84,7 @@ public class ZoomHelper {
      * Set the zoom multiplier to 1
      */
     public void resetZoom() {
-        if (active) {
-            currentZoomFactor.set(1);
-        }
+        currentZoomFactor.set(1);
     }
 
     /**
@@ -93,7 +92,7 @@ public class ZoomHelper {
      */
     public void zoomToFit() {
         if (active) {
-            if (EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation == null) {
+            if (EcdarController.getActiveCanvasPresentation().getController().getActiveModel() == null) {
                 resetZoom();
                 return;
             }
@@ -109,38 +108,23 @@ public class ZoomHelper {
      */
     public void setActive(boolean activeState) {
         this.active = activeState;
+        if (!activeState) {
+            // If zoom has been disabled, reset the zoom level
+            resetZoom();
+        }
     }
 
     /**
      * Method for centering the active component on screen and redrawing the grid to fill the screen
      */
-    private void centerComponentAndUpdateGrid(){
+    private void centerComponentAndUpdateGrid() {
         // Check added to avoid NullPointerException
-        if(EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation != null){
-            grid.updateGrid();
-            centerComponent(EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation);
-        } else if (EcdarController.getActiveCanvasPresentation().getController().getActiveModel() != null) {
-            // The canvas is currently showing an EcdarSystem object, so wee need to find the SystemPresentation in order to center it on screen
-            SystemPresentation systemPresentation = null;
-
-            for (Node node : EcdarController.getActiveCanvasPresentation().getController().modelPane.getChildren()) {
-                if (node instanceof SystemPresentation) {
-                    systemPresentation = (SystemPresentation) node;
-                    break;
-                }
-            }
-
-            if (systemPresentation == null) {
-                return;
-            }
-
-            grid.updateGrid();
-            centerComponent(systemPresentation);
-        }
+        grid.updateGrid();
+        centerComponent(EcdarController.getActiveCanvasPresentation().getController().modelPane);
     }
 
-    private void centerComponent(ModelPresentation modelPresentation) {
-        modelPresentation.setTranslateX(0);
-        modelPresentation.setTranslateY(-Grid.GRID_SIZE * 2); // 0 is slightly below center, this looks better
+    private void centerComponent(Node presentation) {
+        presentation.setTranslateX(0);
+        presentation.setTranslateY(-Grid.GRID_SIZE * 2); // 0 is slightly below center, this looks better
     }
 }

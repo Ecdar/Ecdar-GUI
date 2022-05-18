@@ -79,8 +79,11 @@ public class EcdarPresentation extends StackPane {
             // Bind sizing of sides and center panes to ensure correct sizing
             controller.canvasPane.minWidthProperty().bind(controller.root.widthProperty().subtract(filePaneAnimationProperty.add(queryPaneAnimationProperty)));
             controller.canvasPane.maxWidthProperty().bind(controller.root.widthProperty().subtract(filePaneAnimationProperty.add(queryPaneAnimationProperty)));
-            controller.canvasPane.minHeightProperty().bind(controller.root.heightProperty().subtract(controller.menuBar.heightProperty().add(controller.bottomFillerElement.heightProperty())));
-            controller.canvasPane.maxHeightProperty().bind(controller.root.heightProperty().subtract(controller.menuBar.heightProperty().add(controller.bottomFillerElement.heightProperty())));
+
+            // Bind the height to ensure that both the top and bottom panes are shown
+            // The height of the top pane is multiplied by as the UI does not account for the height otherwise
+            controller.canvasPane.minHeightProperty().bind(controller.root.heightProperty().subtract(controller.topPane.heightProperty().multiply(4).add(controller.bottomFillerElement.heightProperty())));
+            controller.canvasPane.maxHeightProperty().bind(controller.root.heightProperty().subtract(controller.topPane.heightProperty().multiply(4).add(controller.bottomFillerElement.heightProperty())));
 
             controller.leftPane.minWidthProperty().bind(filePaneAnimationProperty);
             controller.leftPane.maxWidthProperty().bind(filePaneAnimationProperty);
@@ -332,6 +335,11 @@ public class EcdarPresentation extends StackPane {
                 });
             }
         });
+
+        controller.scalingProperty.addListener(observable -> {
+            // ToDO: Side panes should be closed and opened if open to handle the GUI
+            // ToDo: Consider just changing the width of the side panes
+        });
     }
 
     private void initializeCloseQueryPaneAnimation() {
@@ -446,9 +454,10 @@ public class EcdarPresentation extends StackPane {
 
     /**
      * Calls {@link CanvasPresentation#toggleGridUi()}.
+     *
      * @return A Boolean Property that is true if the grid has been turned on and false if it is off
      */
-    public BooleanProperty toggleGrid(){
+    public BooleanProperty toggleGrid() {
         return EcdarController.getActiveCanvasPresentation().toggleGridUi();
     }
 

@@ -20,10 +20,7 @@ import ecdar.utility.keyboard.Nudgeable;
 import com.jfoenix.controls.*;
 import javafx.application.Platform;
 import javafx.beans.binding.When;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
@@ -150,17 +147,19 @@ public class EcdarController implements Initializable {
     public StackPane backendOptionsDialogContainer;
     public BackendOptionsDialogPresentation backendOptionsDialog;
 
+    public DoubleProperty scalingProperty = new SimpleDoubleProperty();
+
     private static JFXDialog _queryDialog;
     private static Text _queryTextResult;
     private static Text _queryTextQuery;
-
-    private static final ObjectProperty<CanvasPresentation> activeCanvasPresentation = new SimpleObjectProperty<>(new CanvasPresentation());
 
     public static void runReachabilityAnalysis() {
         if (!reachabilityServiceEnabled) return;
 
         reachabilityTime = System.currentTimeMillis() + 500;
     }
+
+    private static final ObjectProperty<CanvasPresentation> activeCanvasPresentation = new SimpleObjectProperty<>(new CanvasPresentation());
 
     public static EdgeStatus getGlobalEdgeStatus() {
         return globalEdgeStatus.get();
@@ -173,7 +172,7 @@ public class EcdarController implements Initializable {
      */
     public void scaleIcons(Node node) {
         Platform.runLater(() -> {
-            scaleIcons(node, getCalculatedNewScale());
+            scaleIcons(node, getNewCalculatedScale());
         });
     }
 
@@ -192,7 +191,7 @@ public class EcdarController implements Initializable {
             icon.setStyle("-fx-icon-size: " + Math.floor(size / 13.0 * 18) + "px;");
     }
 
-    private double getCalculatedNewScale() {
+    private double getNewCalculatedScale() {
         return (Double.parseDouble(scaling.getSelectedToggle().getProperties().get("scale").toString()) * Ecdar.getDpiScale()) * 13.0;
     }
 
@@ -659,7 +658,7 @@ public class EcdarController implements Initializable {
         menuBarAutoscaling.getGraphic().setOpacity(Ecdar.autoScalingEnabled.getValue() ? 1 : 0);
         menuBarAutoscaling.setOnAction(event -> {
             Ecdar.autoScalingEnabled.setValue(!Ecdar.autoScalingEnabled.getValue());
-            updateScaling(getCalculatedNewScale() / 13);
+            updateScaling(getNewCalculatedScale() / 13);
             Ecdar.preferences.put("autoscaling", String.valueOf(Ecdar.autoScalingEnabled.getValue()));
         });
         Ecdar.autoScalingEnabled.addListener((observable, oldValue, newValue) -> {
@@ -699,7 +698,7 @@ public class EcdarController implements Initializable {
     }
 
     private void updateScaling(double newScale) {
-        double calculatedNewScale = getCalculatedNewScale();
+        double calculatedNewScale = getNewCalculatedScale();
         Ecdar.getPresentation().setStyle("-fx-font-size: " + calculatedNewScale + "px;");
 
         // Text do not scale on the canvas to avoid ugly elements,
@@ -710,6 +709,9 @@ public class EcdarController implements Initializable {
         scaleIcons(root, calculatedNewScale);
         scaleEdgeStatusToggle(calculatedNewScale);
         messageTabPane.getController().updateScale(newScale);
+
+        // Update listeners of UI scale
+        scalingProperty.set(calculatedNewScale);
     }
 
     /**

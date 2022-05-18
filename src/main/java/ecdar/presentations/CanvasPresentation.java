@@ -94,7 +94,6 @@ public class CanvasPresentation extends StackPane implements MouseTrackable {
             dragYOffset[0] = controller.modelPane.getTranslateY() - event.getSceneY();
             previousXTranslation[0] = controller.modelPane.getTranslateX();
             previousYTranslation[0] = controller.modelPane.getTranslateY();
-            previousYTranslation[0] = controller.modelPane.getTranslateY();
             isBeingDragged.setValue(false);
         });
     }
