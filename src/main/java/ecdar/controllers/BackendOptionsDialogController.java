@@ -14,8 +14,8 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.Range;
+import org.apache.commons.lang3.SystemUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -173,19 +173,31 @@ public class BackendOptionsDialogController implements Initializable {
         reveaal.setPortEnd(5040);
         reveaal.lockInstance();
 
-        List<String> potentialFilesForReveaal = List.of("Reveaal", "Reveaal.exe");
+        // Load correct Reveaal executable based on OS
+        List<String> potentialFilesForReveaal = new ArrayList<>();
+        if (SystemUtils.IS_OS_WINDOWS) {
+            potentialFilesForReveaal.add("Reveaal.exe");
+        } else {
+            potentialFilesForReveaal.add("Reveaal");
+        }
         if (setBackendPathIfFileExists(reveaal, potentialFilesForReveaal)) defaultBackends.add(reveaal);
 
         // Add jECDAR engine
         var jEcdar = new BackendInstance();
-        jEcdar.setName("jECDAR");
+        jEcdar.setName("j-Ecdar");
         jEcdar.setLocal(true);
         jEcdar.setDefault(false);
         jEcdar.setPortStart(5042);
         jEcdar.setPortEnd(5050);
         jEcdar.lockInstance();
 
-        List<String> potentialFiledForJEcdar = List.of("j-Ecdar", "j-Ecdar.bat");
+        // Load correct j-Ecdar executable based on OS
+        List<String> potentialFiledForJEcdar = new ArrayList<>();
+        if (SystemUtils.IS_OS_WINDOWS) {
+            potentialFiledForJEcdar.add("j-Ecdar.bat");
+        } else {
+            potentialFiledForJEcdar.add("j-Ecdar");
+        }
         if (setBackendPathIfFileExists(jEcdar, potentialFiledForJEcdar)) defaultBackends.add(jEcdar);
 
         return defaultBackends;
@@ -206,17 +218,19 @@ public class BackendOptionsDialogController implements Initializable {
             // Get directory containing the bin and lib folders for the executing program
             String pathToEcdarDirectory = new File(getClass().getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getPath();
 
-            var files = FileUtils.listFiles(new File(pathToEcdarDirectory), null, true);
-            for (Object o : files) {
-                File file = (File) o;
-                if (potentialFiles.contains(file.getName())) {
-                    engine.setBackendLocation(file.getAbsolutePath());
+            List<File> files = List.of(Objects.requireNonNull(new File(pathToEcdarDirectory).listFiles()));
+            for (File f : files) {
+                if (potentialFiles.contains(f.getName())) {
+                    engine.setBackendLocation(f.getAbsolutePath());
                     return true;
                 }
             }
         } catch (URISyntaxException e) {
             e.printStackTrace();
             Ecdar.showToast("Unable to get URI of parent directory: \"" + getClass().getProtectionDomain().getCodeSource().getLocation() + "\" due to: " + e.getMessage());
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            Ecdar.showToast("Encountered null reference when trying to get path of executing program");
         }
 
         return !engine.getBackendLocation().equals("");

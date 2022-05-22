@@ -33,6 +33,7 @@ import org.apache.commons.io.FileUtils;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Objects;
 import java.util.prefs.Preferences;
 
 import java.net.URISyntaxException;
@@ -83,8 +84,8 @@ public class Ecdar extends Application {
      * jFoenix performs illegal reflection inorder to access private methods/fields in the JavaFX code.
      * This comes with some performance benefits and is a technique used, allegedly, in many libraries.
      * The warnings are unlikely to be solved or enforced in such a way that the system breaks, see:
-     * https://github.com/sshahine/JFoenix/issues/1170
-     * The solution is taken from this answer: https://stackoverflow.com/a/46551505
+     * <a href="https://github.com/sshahine/JFoenix/issues/1170">https://github.com/sshahine/JFoenix/issues/1170</a>
+     * The solution is taken from this answer: <a href="https://stackoverflow.com/a/46551505">https://stackoverflow.com/a/46551505</a>
      * All credit for this method goes to: Rafael Winterhalter
      */
     @SuppressWarnings("unchecked")
@@ -236,13 +237,12 @@ public class Ecdar extends Application {
         scene.setOnKeyPressed(KeyboardTracker.handleKeyPress);
 
         // Set the icon for the application
-        stage.getIcons().addAll(
-                new Image(getClass().getResource("ic_launcher/mipmap-hdpi/ic_launcher.png").toExternalForm()),
-                new Image(getClass().getResource("ic_launcher/mipmap-mdpi/ic_launcher.png").toExternalForm()),
-                new Image(getClass().getResource("ic_launcher/mipmap-xhdpi/ic_launcher.png").toExternalForm()),
-                new Image(getClass().getResource("ic_launcher/mipmap-xxhdpi/ic_launcher.png").toExternalForm()),
-                new Image(getClass().getResource("ic_launcher/mipmap-xxxhdpi/ic_launcher.png").toExternalForm())
-        );
+        try {
+            stage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResource("ic_launcher/Edgar.png")).toExternalForm()));
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            Ecdar.showToast("The application icon could not be loaded");
+        }
 
         // We're now ready! Let the curtains fall!
         stage.show();
