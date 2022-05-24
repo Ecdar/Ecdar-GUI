@@ -258,8 +258,8 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
             BindingHelper.bind(controller.invariantTagLine, controller.invariantTag);
         };
 
-        controller.nicknameTag.setOnKeyPressed(EcdarController.getActiveCanvasShellPresentation().getCanvasController().getLeaveTextAreaKeyHandler());
-        controller.invariantTag.setOnKeyPressed(EcdarController.getActiveCanvasShellPresentation().getCanvasController().getLeaveTextAreaKeyHandler());
+        controller.nicknameTag.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
+        controller.invariantTag.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
 
         // Update the tags when the loc updates
         controller.locationProperty().addListener(observable -> updateTags.accept(loc));

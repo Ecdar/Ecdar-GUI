@@ -18,7 +18,7 @@ public class SelectHelper {
 
     public static void select(final ItemSelectable selectable) {
 
-        EcdarController.getActiveCanvasShellPresentation().getCanvasController().leaveTextAreas();
+        EcdarController.getActiveCanvasPresentation().getController().leaveTextAreas();
 
         // Check if the element is already selected
         if (selectedElements.contains(selectable)) return;

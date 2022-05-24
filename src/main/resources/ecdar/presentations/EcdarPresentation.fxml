@@ -16,94 +16,93 @@
          type="StackPane"
          fx:id="root"
          fx:controller="ecdar.controllers.EcdarController">
-    <BorderPane>
+    <BorderPane fx:id="borderPane">
         <center>
-            <StackPane alignment="TOP_LEFT">
-                <StackPane fx:id="canvasShellPane">
-                    <!-- Canvases go here -->
-                </StackPane>
+            <VBox alignment="TOP_CENTER">
+                <!-- Max height is set to -Infinity to avoid toolbar from intercepting all mouse events on the canvas -->
                 <VBox maxHeight="-Infinity">
-                    <!-- Max height is set to -Infinity to avoid toolbar from intercepting all mouse events on the canvas -->
-                    <VBox maxHeight="-Infinity">
-                        <HBox fx:id="toolbar" HBox.hgrow="ALWAYS">
-                            <padding>
-                                <Insets topRightBottomLeft="10"/>
-                            </padding>
-                            <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
-                                <!-- UNDO -->
-                                <JFXRippler fx:id="undo">
-                                    <StackPane styleClass="responsive-icon-stack-pane-sizing"
-                                               onMouseClicked="#undoClicked">
-                                        <FontIcon iconLiteral="gmi-undo" fill="white" styleClass="icon-size-medium"/>
-                                    </StackPane>
-                                </JFXRippler>
+                    <HBox fx:id="toolbar" HBox.hgrow="ALWAYS">
+                        <padding>
+                            <Insets topRightBottomLeft="10"/>
+                        </padding>
+                        <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+                            <!-- UNDO -->
+                            <JFXRippler fx:id="undo">
+                                <StackPane styleClass="responsive-icon-stack-pane-sizing"
+                                           onMouseClicked="#undoClicked">
+                                    <FontIcon iconLiteral="gmi-undo" fill="white" styleClass="icon-size-medium"/>
+                                </StackPane>
+                            </JFXRippler>
 
-                                <Region minWidth="8"/>
+                            <Region minWidth="8"/>
 
-                                <!-- REDO -->
-                                <JFXRippler fx:id="redo">
-                                    <StackPane styleClass="responsive-icon-stack-pane-sizing"
-                                               onMouseClicked="#redoClicked">
-                                        <FontIcon iconLiteral="gmi-redo" fill="white" styleClass="icon-size-medium"/>
-                                    </StackPane>
-                                </JFXRippler>
+                            <!-- REDO -->
+                            <JFXRippler fx:id="redo">
+                                <StackPane styleClass="responsive-icon-stack-pane-sizing"
+                                           onMouseClicked="#redoClicked">
+                                    <FontIcon iconLiteral="gmi-redo" fill="white" styleClass="icon-size-medium"/>
+                                </StackPane>
+                            </JFXRippler>
 
-                                <Region minWidth="16"/>
+                            <Region minWidth="16"/>
 
-                                <!-- Switch between input and output edges -->
-                                <HBox alignment="CENTER" spacing="-5" style="-fx-padding: -1em 0em -1em 0em;">
-                                    <JFXButton fx:id="switchToInputButton" text="Input" textFill="white"
-                                               onMouseClicked="#switchToInputClicked"
-                                               styleClass="button" style="-fx-padding: 0.5em 1em 0.5em 1em"/>
-                                    <JFXToggleButton fx:id="switchEdgeStatusButton"
-                                                     onMouseClicked="#switchEdgeStatusClicked"
-                                                     styleClass="toggle-button"/>
-                                    <JFXButton fx:id="switchToOutputButton" text="Output" textFill="grey"
-                                               onMouseClicked="#switchToOutputClicked"
-                                               styleClass="button" style="-fx-padding: 0.5em 1em 0.5em 1em"/>
-                                </HBox>
-                            </HBox>
-                            <HBox alignment="CENTER_RIGHT">
-                                <!-- DELETE SELECTED -->
-                                <JFXRippler fx:id="deleteSelected">
-                                    <StackPane styleClass="responsive-icon-stack-pane-sizing"
-                                               onMouseClicked="#deleteSelectedClicked">
-                                        <FontIcon iconLiteral="gmi-delete" fill="white" styleClass="icon-size-medium"/>
-                                    </StackPane>
-                                </JFXRippler>
-
-                                <Region minWidth="8"/>
-
-                                <!-- COLOR SELECTED -->
-                                <JFXRippler fx:id="colorSelected">
-                                    <StackPane styleClass="responsive-icon-stack-pane-sizing">
-                                        <FontIcon iconLiteral="gmi-color-lens" fill="white"
-                                                  styleClass="icon-size-medium"/>
-                                    </StackPane>
-                                </JFXRippler>
+                            <!-- Switch between input and output edges -->
+                            <HBox alignment="CENTER" spacing="-5" style="-fx-padding: -1em 0em -1em 0em;">
+                                <JFXButton fx:id="switchToInputButton" text="Input" textFill="white"
+                                           onMouseClicked="#switchToInputClicked"
+                                           styleClass="button" style="-fx-padding: 0.5em 1em 0.5em 1em"/>
+                                <JFXToggleButton fx:id="switchEdgeStatusButton"
+                                                 onMouseClicked="#switchEdgeStatusClicked"
+                                                 styleClass="toggle-button"/>
+                                <JFXButton fx:id="switchToOutputButton" text="Output" textFill="grey"
+                                           onMouseClicked="#switchToOutputClicked"
+                                           styleClass="button" style="-fx-padding: 0.5em 1em 0.5em 1em"/>
                             </HBox>
                         </HBox>
-                    </VBox>
-                </VBox>
-                <QueryPanePresentation
-                        fx:id="queryPane"
-                        StackPane.alignment="TOP_RIGHT"/>
+                        <HBox alignment="CENTER_RIGHT">
+                            <!-- DELETE SELECTED -->
+                            <JFXRippler fx:id="deleteSelected">
+                                <StackPane styleClass="responsive-icon-stack-pane-sizing"
+                                           onMouseClicked="#deleteSelectedClicked">
+                                    <FontIcon iconLiteral="gmi-delete" fill="white" styleClass="icon-size-medium"/>
+                                </StackPane>
+                            </JFXRippler>
 
+                            <Region minWidth="8"/>
+
+                            <!-- COLOR SELECTED -->
+                            <JFXRippler fx:id="colorSelected">
+                                <StackPane styleClass="responsive-icon-stack-pane-sizing">
+                                    <FontIcon iconLiteral="gmi-color-lens" fill="white"
+                                              styleClass="icon-size-medium"/>
+                                </StackPane>
+                            </JFXRippler>
+                        </HBox>
+                    </HBox>
+                </VBox>
+                <StackPane fx:id="canvasPane" VBox.vgrow="ALWAYS">
+                    <!-- Canvases go here -->
+                </StackPane>
+            </VBox>
+        </center>
+
+        <!-- File pane -->
+        <left>
+            <StackPane fx:id="leftPane" alignment="TOP_LEFT">
                 <ProjectPanePresentation
                         fx:id="filePane"
                         StackPane.alignment="TOP_LEFT"/>
             </StackPane>
-        </center>
+        </left>
 
         <!-- Query pane -->
         <right>
-            <Label fx:id="queryPaneFillerElement"/>
+            <StackPane fx:id="rightPane" alignment="TOP_RIGHT">
+                <QueryPanePresentation
+                        fx:id="queryPane"
+                        StackPane.alignment="TOP_RIGHT"/>
+            </StackPane>
         </right>
-
-        <!-- File pane -->
-        <left>
-            <Label fx:id="filePaneFillerElement"/>
-        </left>
 
         <!-- Message container -->
         <bottom>
@@ -111,172 +110,174 @@
         </bottom>
 
         <top>
-            <!-- Menu bar for "file" etc (only visible on windows) -->
-            <MenuBar fx:id="menuBar">
-                <Menu text="File">
-                    <MenuItem fx:id="menuBarFileCreateNewProject" text="New Project">
-                        <graphic>
-                            <FontIcon iconLiteral="gmi-create-new-folder" fill="black" styleClass="icon-size-medium"/>
-                        </graphic>
-                    </MenuItem>
-                    <MenuItem fx:id="menuBarFileOpenProject" text="Open Project">
-                        <graphic>
-                            <FontIcon iconLiteral="gmi-folder-open" fill="black" styleClass="icon-size-medium"/>
-                        </graphic>
-                    </MenuItem>
+            <StackPane fx:id="topPane" alignment="BOTTOM_CENTER">
+                <!-- Menu bar for "file" etc (only visible on windows) -->
+                <MenuBar fx:id="menuBar">
+                    <Menu text="File">
+                        <MenuItem fx:id="menuBarFileCreateNewProject" text="New Project">
+                            <graphic>
+                                <FontIcon iconLiteral="gmi-create-new-folder" fill="black" styleClass="icon-size-medium"/>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem fx:id="menuBarFileOpenProject" text="Open Project">
+                            <graphic>
+                                <FontIcon iconLiteral="gmi-folder-open" fill="black" styleClass="icon-size-medium"/>
+                            </graphic>
+                        </MenuItem>
 
-                    <SeparatorMenuItem/>
+                        <SeparatorMenuItem/>
 
-                    <MenuItem fx:id="menuBarFileSave" text="Save Project">
-                        <graphic>
-                            <FontIcon iconLiteral="gmi-save" fill="black" styleClass="icon-size-medium"/>
-                        </graphic>
-                    </MenuItem>
-                    <MenuItem fx:id="menuBarFileSaveAs" text="Save Project as">
-                        <graphic>
-                            <FontIcon iconLiteral="gmi-save" fill="black" styleClass="icon-size-medium"/>
-                        </graphic>
-                    </MenuItem>
+                        <MenuItem fx:id="menuBarFileSave" text="Save Project">
+                            <graphic>
+                                <FontIcon iconLiteral="gmi-save" fill="black" styleClass="icon-size-medium"/>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem fx:id="menuBarFileSaveAs" text="Save Project as">
+                            <graphic>
+                                <FontIcon iconLiteral="gmi-save" fill="black" styleClass="icon-size-medium"/>
+                            </graphic>
+                        </MenuItem>
 
-                    <SeparatorMenuItem/>
+                        <SeparatorMenuItem/>
 
-                    <MenuItem fx:id="menuBarFileNewMutationTestObject" text="New Test Plan">
-                        <graphic>
-                            <FontIcon iconLiteral="gmi-done-all" fill="black" styleClass="icon-size-medium"/>
-                        </graphic>
-                    </MenuItem>
+                        <MenuItem fx:id="menuBarFileNewMutationTestObject" text="New Test Plan">
+                            <graphic>
+                                <FontIcon iconLiteral="gmi-done-all" fill="black" styleClass="icon-size-medium"/>
+                            </graphic>
+                        </MenuItem>
 
-                    <SeparatorMenuItem/>
+                        <SeparatorMenuItem/>
 
-                    <MenuItem fx:id="menuBarFileExportAsPng" text="Export as Png">
-                        <graphic>
-                            <FontIcon iconLiteral="gmi-image" fill="black" styleClass="icon-size-medium"/>
-                        </graphic>
-                    </MenuItem>
-                    <MenuItem fx:id="menuBarFileExportAsPngNoBorder" text="Export without border as Png">
-                        <graphic>
-                            <FontIcon iconLiteral="gmi-image" fill="black" styleClass="icon-size-medium"/>
-                        </graphic>
-                    </MenuItem>
-                </Menu>
-
-                <Menu text="Edit">
-                    <MenuItem fx:id="menuEditMoveLeft" text="Move All Nodes Left">
-                        <graphic>
-                            <FontIcon iconLiteral="gmi-keyboard-arrow-left" fill="black" styleClass="icon-size-medium"/>
-                        </graphic>
-                    </MenuItem>
-                    <MenuItem fx:id="menuEditMoveUp" text="Move All Nodes Up">
-                        <graphic>
-                            <FontIcon iconLiteral="gmi-keyboard-arrow-up" fill="black" styleClass="icon-size-medium"/>
-                        </graphic>
-                    </MenuItem>
-                    <MenuItem fx:id="menuEditMoveRight" text="Move All Nodes Right">
-                        <graphic>
-                            <FontIcon iconLiteral="gmi-keyboard-arrow-right" fill="black"
-                                      styleClass="icon-size-medium"/>
-                        </graphic>
-                    </MenuItem>
-                    <MenuItem fx:id="menuEditMoveDown" text="Move All Nodes Down">
-                        <graphic>
-                            <FontIcon iconLiteral="gmi-keyboard-arrow-down" fill="black" styleClass="icon-size-medium"/>
-                        </graphic>
-                    </MenuItem>
-                </Menu>
-
-                <Menu text="View">
-                    <MenuItem fx:id="menuBarViewFilePanel" text="Project Panel">
-                        <graphic>
-                            <FontIcon iconLiteral="gmi-check" fill="black" styleClass="icon-size-medium"/>
-                        </graphic>
-                    </MenuItem>
-                    <MenuItem fx:id="menuBarViewQueryPanel" text="Query Panel">
-                        <graphic>
-                            <FontIcon iconLiteral="gmi-check" fill="black" styleClass="icon-size-medium"/>
-                        </graphic>
-                    </MenuItem>
-                    <MenuItem fx:id="menuBarViewGrid" text="Grid">
-                        <graphic>
-                            <FontIcon iconLiteral="gmi-check" fill="black" styleClass="icon-size-medium"/>
-                        </graphic>
-                    </MenuItem>
-                    <MenuItem fx:id="menuBarAutoscaling" text="Autoscaling">
-                        <graphic>
-                            <FontIcon iconLiteral="gmi-check" fill="black" styleClass="icon-size-medium"/>
-                        </graphic>
-                    </MenuItem>
-
-                    <Menu text="Scaling" fx:id="menuViewMenuScaling">
-                        <fx:define>
-                            <ToggleGroup fx:id="scaling"/>
-                        </fx:define>
-                        <RadioMenuItem fx:id="scaleXS" toggleGroup="$scaling" text="0.5x">
-                            <properties scale="0.5"/>
-                        </RadioMenuItem>
-                        <RadioMenuItem fx:id="scaleS" toggleGroup="$scaling" text="0.75x">
-                            <properties scale="0.75"/>
-                        </RadioMenuItem>
-                        <RadioMenuItem fx:id="scaleM" toggleGroup="$scaling" text="1.0x">
-                            <properties scale="1.0"/>
-                        </RadioMenuItem>
-                        <RadioMenuItem fx:id="scaleL" toggleGroup="$scaling" text="1.25x">
-                            <properties scale="1.25"/>
-                        </RadioMenuItem>
-                        <RadioMenuItem fx:id="scaleXL" toggleGroup="$scaling" text="1.5x">
-                            <properties scale="1.5"/>
-                        </RadioMenuItem>
-                        <RadioMenuItem fx:id="scaleXXL" toggleGroup="$scaling" text="1.75x">
-                            <properties scale="1.75"/>
-                        </RadioMenuItem>
-                        <RadioMenuItem fx:id="scaleXXXL" toggleGroup="$scaling" text="2.0x">
-                            <properties scale="2.0"/>
-                        </RadioMenuItem>
+                        <MenuItem fx:id="menuBarFileExportAsPng" text="Export as Png">
+                            <graphic>
+                                <FontIcon iconLiteral="gmi-image" fill="black" styleClass="icon-size-medium"/>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem fx:id="menuBarFileExportAsPngNoBorder" text="Export without border as Png">
+                            <graphic>
+                                <FontIcon iconLiteral="gmi-image" fill="black" styleClass="icon-size-medium"/>
+                            </graphic>
+                        </MenuItem>
                     </Menu>
 
-                    <SeparatorMenuItem/>
+                    <Menu text="Edit">
+                        <MenuItem fx:id="menuEditMoveLeft" text="Move All Nodes Left">
+                            <graphic>
+                                <FontIcon iconLiteral="gmi-keyboard-arrow-left" fill="black" styleClass="icon-size-medium"/>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem fx:id="menuEditMoveUp" text="Move All Nodes Up">
+                            <graphic>
+                                <FontIcon iconLiteral="gmi-keyboard-arrow-up" fill="black" styleClass="icon-size-medium"/>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem fx:id="menuEditMoveRight" text="Move All Nodes Right">
+                            <graphic>
+                                <FontIcon iconLiteral="gmi-keyboard-arrow-right" fill="black"
+                                          styleClass="icon-size-medium"/>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem fx:id="menuEditMoveDown" text="Move All Nodes Down">
+                            <graphic>
+                                <FontIcon iconLiteral="gmi-keyboard-arrow-down" fill="black" styleClass="icon-size-medium"/>
+                            </graphic>
+                        </MenuItem>
+                    </Menu>
 
-                    <MenuItem fx:id="menuBarViewCanvasSplit" text="Split canvas">
-                        <graphic>
-                            <FontIcon iconLiteral="gmi-border-all" fill="black" styleClass="icon-size-medium"/>
-                        </graphic>
-                    </MenuItem>
-                </Menu>
+                    <Menu text="View">
+                        <MenuItem fx:id="menuBarViewFilePanel" text="Project Panel">
+                            <graphic>
+                                <FontIcon iconLiteral="gmi-check" fill="black" styleClass="icon-size-medium"/>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem fx:id="menuBarViewQueryPanel" text="Query Panel">
+                            <graphic>
+                                <FontIcon iconLiteral="gmi-check" fill="black" styleClass="icon-size-medium"/>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem fx:id="menuBarViewGrid" text="Grid">
+                            <graphic>
+                                <FontIcon iconLiteral="gmi-check" fill="black" styleClass="icon-size-medium"/>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem fx:id="menuBarAutoscaling" text="Autoscaling">
+                            <graphic>
+                                <FontIcon iconLiteral="gmi-check" fill="black" styleClass="icon-size-medium"/>
+                            </graphic>
+                        </MenuItem>
 
-                <Menu text="Options">
-                    <MenuItem fx:id="menuBarOptionsCache" text="UI Cache">
-                        <graphic>
-                            <FontIcon iconLiteral="gmi-check" fill="black" styleClass="icon-size-medium"/>
-                        </graphic>
-                    </MenuItem>
+                        <Menu text="Scaling" fx:id="menuViewMenuScaling">
+                            <fx:define>
+                                <ToggleGroup fx:id="scaling"/>
+                            </fx:define>
+                            <RadioMenuItem fx:id="scaleXS" toggleGroup="$scaling" text="0.5x">
+                                <properties scale="0.5"/>
+                            </RadioMenuItem>
+                            <RadioMenuItem fx:id="scaleS" toggleGroup="$scaling" text="0.75x">
+                                <properties scale="0.75"/>
+                            </RadioMenuItem>
+                            <RadioMenuItem fx:id="scaleM" toggleGroup="$scaling" text="1.0x">
+                                <properties scale="1.0"/>
+                            </RadioMenuItem>
+                            <RadioMenuItem fx:id="scaleL" toggleGroup="$scaling" text="1.25x">
+                                <properties scale="1.25"/>
+                            </RadioMenuItem>
+                            <RadioMenuItem fx:id="scaleXL" toggleGroup="$scaling" text="1.5x">
+                                <properties scale="1.5"/>
+                            </RadioMenuItem>
+                            <RadioMenuItem fx:id="scaleXXL" toggleGroup="$scaling" text="1.75x">
+                                <properties scale="1.75"/>
+                            </RadioMenuItem>
+                            <RadioMenuItem fx:id="scaleXXXL" toggleGroup="$scaling" text="2.0x">
+                                <properties scale="2.0"/>
+                            </RadioMenuItem>
+                        </Menu>
 
-                    <SeparatorMenuItem/>
+                        <SeparatorMenuItem/>
 
-                    <MenuItem fx:id="menuBarOptionsBackendOptions" text="Backend options">
-                        <graphic>
-                            <FontIcon iconLiteral="gmi-settings-input-component" styleClass="icon-size-medium"
-                                      fill="black"/>
-                        </graphic>
-                    </MenuItem>
-                </Menu>
+                        <MenuItem fx:id="menuBarViewCanvasSplit" text="Split canvas">
+                            <graphic>
+                                <FontIcon iconLiteral="gmi-border-all" fill="black" styleClass="icon-size-medium"/>
+                            </graphic>
+                        </MenuItem>
+                    </Menu>
 
-                <Menu text="Help">
-                    <MenuItem fx:id="menuBarHelpHelp" text="Modelling Help">
-                        <graphic>
-                            <FontIcon iconLiteral="gmi-help" fill="black" styleClass="icon-size-medium"/>
-                        </graphic>
-                    </MenuItem>
-                    <MenuItem fx:id="menuBarHelpTest" text="Testing Help">
-                        <graphic>
-                            <FontIcon iconLiteral="gmi-help" fill="black" styleClass="icon-size-medium"/>
-                        </graphic>
-                    </MenuItem>
-                    <MenuItem fx:id="menuBarHelpAbout" text="About">
-                        <graphic>
-                            <FontIcon iconLiteral="gmi-info" fill="black" styleClass="icon-size-medium"/>
-                        </graphic>
-                    </MenuItem>
-                </Menu>
-            </MenuBar>
+                    <Menu text="Options">
+                        <MenuItem fx:id="menuBarOptionsCache" text="UI Cache">
+                            <graphic>
+                                <FontIcon iconLiteral="gmi-check" fill="black" styleClass="icon-size-medium"/>
+                            </graphic>
+                        </MenuItem>
+
+                        <SeparatorMenuItem/>
+
+                        <MenuItem fx:id="menuBarOptionsBackendOptions" text="Backend options">
+                            <graphic>
+                                <FontIcon iconLiteral="gmi-settings-input-component" styleClass="icon-size-medium"
+                                          fill="black"/>
+                            </graphic>
+                        </MenuItem>
+                    </Menu>
+
+                    <Menu text="Help">
+                        <MenuItem fx:id="menuBarHelpHelp" text="Modelling Help">
+                            <graphic>
+                                <FontIcon iconLiteral="gmi-help" fill="black" styleClass="icon-size-medium"/>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem fx:id="menuBarHelpTest" text="Testing Help">
+                            <graphic>
+                                <FontIcon iconLiteral="gmi-help" fill="black" styleClass="icon-size-medium"/>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem fx:id="menuBarHelpAbout" text="About">
+                            <graphic>
+                                <FontIcon iconLiteral="gmi-info" fill="black" styleClass="icon-size-medium"/>
+                            </graphic>
+                        </MenuItem>
+                    </Menu>
+                </MenuBar>
+            </StackPane>
         </top>
     </BorderPane>
 

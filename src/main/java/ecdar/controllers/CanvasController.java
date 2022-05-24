@@ -1,5 +1,6 @@
 package ecdar.controllers;
 
+import com.jfoenix.controls.JFXRippler;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Declarations;
 import ecdar.abstractions.HighLevelModelObject;
@@ -7,13 +8,15 @@ import ecdar.abstractions.EcdarSystem;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.mutation.MutationTestPlanPresentation;
 import ecdar.presentations.*;
+import ecdar.utility.helpers.ZoomHelper;
 import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.event.EventHandler;
+import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.*;
 import javafx.util.Pair;
 
 import java.net.URL;
@@ -24,14 +27,25 @@ import java.util.function.Consumer;
 import static ecdar.presentations.Grid.GRID_SIZE;
 
 public class CanvasController implements Initializable {
+    public StackPane root;
+    public StackPane zoomablePane;
+    public Grid grid;
+    public StackPane modelPane;
+    public HBox toolbar;
+
+    public JFXRippler zoomIn;
+    public JFXRippler zoomOut;
+    public JFXRippler zoomToFit;
+    public JFXRippler resetZoom;
+    public final ZoomHelper zoomHelper = new ZoomHelper();
     public final double DECLARATION_Y_MARGIN = GRID_SIZE * 5.5;
     public ComponentPresentation activeComponentPresentation;
 
-    public Pane root;
-
+    // This is whether to allow the user to turn on/off the grid.
+    // While this is false, the grid is always hidden, no matter the user option.
+    private final BooleanProperty allowGrid = new SimpleBooleanProperty(true);
     private final ObjectProperty<HighLevelModelObject> activeModel = new SimpleObjectProperty<>(null);
     private final HashMap<HighLevelModelObject, Pair<Double, Double>> ModelObjectTranslateMap = new HashMap<>();
-
     private DoubleProperty width, height;
     private BooleanProperty insetShouldShow;
 
@@ -57,7 +71,7 @@ public class CanvasController implements Initializable {
      */
     public void setActiveModel(final HighLevelModelObject model) {
         activeModel.set(model);
-        Platform.runLater(EcdarController.getActiveCanvasShellPresentation().getCanvasController()::leaveTextAreas);
+        Platform.runLater(EcdarController.getActiveCanvasPresentation().getController()::leaveTextAreas);
     }
 
     public ObjectProperty<HighLevelModelObject> activeComponentProperty() {
@@ -95,79 +109,42 @@ public class CanvasController implements Initializable {
         activeModel.addListener((obs, oldModel, newModel) -> onActiveModelChanged(oldModel, newModel));
 
         leaveTextAreas = () -> root.requestFocus();
-
         leaveOnEnterPressed = (keyEvent) -> {
             if (keyEvent.getCode().equals(KeyCode.ENTER) || keyEvent.getCode().equals(KeyCode.ESCAPE)) {
                 leaveTextAreas();
             }
         };
+
+        // Enable zoom
+        grid.scaleXProperty().bind(zoomHelper.currentZoomFactor);
+        grid.scaleYProperty().bind(zoomHelper.currentZoomFactor);
+        modelPane.scaleXProperty().bind(zoomHelper.currentZoomFactor);
+        modelPane.scaleYProperty().bind(zoomHelper.currentZoomFactor);
+        grid.bindSize(width, height);
     }
 
     /**
-     * Updates the component translate map with the old object.
-     * Then removes old object from view and shows the new one.
-     * @param oldObject old object
-     * @param newObject new object
+     * Allows the user to turn the grid on/off.
+     * If the user has currently chosen on, then this method also shows the grid.
      */
-    private void onActiveModelChanged(final HighLevelModelObject oldObject, final HighLevelModelObject newObject) {
-        // If old object is a component or system, add to map in order to remember coordinate
-        if (oldObject != null && (oldObject instanceof Component || oldObject instanceof EcdarSystem)) {
-            ModelObjectTranslateMap.put(oldObject, new Pair<>(root.getTranslateX(), root.getTranslateY()));
-        }
-
-        // if old object is a mutation test plan, and new object is not, allow grid to show
-        if (oldObject instanceof MutationTestPlan && !(newObject instanceof  MutationTestPlan)) ((CanvasShellPresentation) this.root.getParent()).getController().allowGrid();
-
-        // We should not add the new object if it is null (e.g. when clearing the view)
-        if (newObject == null) return;
-
-        // Remove old object from view
-        root.getChildren().removeIf(node -> node instanceof HighLevelModelPresentation);
-
-        if (newObject instanceof Component) {
-            setTranslateOfBox(newObject);
-            activeComponentPresentation = new ComponentPresentation((Component) newObject);
-            root.getChildren().add(activeComponentPresentation);
-
-            // To avoid NullPointerException on initial model
-            if (oldObject != null) ((CanvasShellPresentation) this.root.getParent()).getController().zoomHelper.resetZoom();
-            
-        } else if (newObject instanceof Declarations) {
-            root.setTranslateX(0);
-            root.setTranslateY(DECLARATION_Y_MARGIN);
-
-            activeComponentPresentation = null;
-            root.getChildren().add(new DeclarationPresentation((Declarations) newObject));
-        } else if (newObject instanceof EcdarSystem) {
-            setTranslateOfBox(newObject);
-            activeComponentPresentation = null;
-            root.getChildren().add(new SystemPresentation((EcdarSystem) newObject));
-        } else if (newObject instanceof MutationTestPlan) {
-            root.setTranslateX(0);
-            root.setTranslateY(DECLARATION_Y_MARGIN);
-
-            ((CanvasShellPresentation) this.root.getParent()).getController().disallowGrid();
-
-            activeComponentPresentation = null;
-            root.getChildren().add(new MutationTestPlanPresentation((MutationTestPlan) newObject));
-        } else {
-            throw new IllegalStateException("Type of object is not supported.");
-        }
-
-        root.requestFocus();
+    public void allowGrid() {
+        allowGrid.set(true);
     }
 
-    private void setTranslateOfBox(final HighLevelModelObject newObject) {
-        Platform.runLater(() -> {
-            if (ModelObjectTranslateMap.containsKey(newObject)) {
-                final Pair<Double, Double> restoreCoordinates = ModelObjectTranslateMap.get(newObject);
-                root.setTranslateX(restoreCoordinates.getKey());
-                root.setTranslateY(restoreCoordinates.getValue());
-            } else {
-                root.getChildren().get(0).setTranslateX(root.getWidth() / 2);
-                root.getChildren().get(0).setTranslateY(root.getHeight() / 2);
-            }
-        });
+    /**
+     * Disallows the user to turn the grid on/off.
+     * Also hides the grid.
+     */
+    public void disallowGrid() {
+        allowGrid.set(false);
+    }
+
+    public BooleanProperty allowGridProperty() {
+        return allowGrid;
+    }
+
+    public boolean isGridAllowed() {
+        return allowGrid.get();
     }
 
     /**
@@ -180,11 +157,81 @@ public class CanvasController implements Initializable {
     }
 
     /**
+     * Updates the component translate map with the old object.
+     * Then removes old object from view and shows the new one.
+     * @param oldObject old object
+     * @param newObject new object
+     */
+    private void onActiveModelChanged(final HighLevelModelObject oldObject, final HighLevelModelObject newObject) {
+        // If old object is a component or system, add to map in order to remember coordinate
+        if (oldObject != null && (oldObject instanceof Component || oldObject instanceof EcdarSystem)) {
+            ModelObjectTranslateMap.put(oldObject, new Pair<>(modelPane.getTranslateX(), modelPane.getTranslateY()));
+        }
+
+        // if old object is a mutation test plan, and new object is not, allow grid to show
+        if (oldObject instanceof MutationTestPlan && !(newObject instanceof  MutationTestPlan)) allowGrid();
+
+        // We should not add the new object if it is null (e.g. when clearing the view)
+        if (newObject == null) return;
+
+        // Remove old object from view
+        modelPane.getChildren().removeIf(node -> node instanceof HighLevelModelPresentation);
+
+        if (newObject instanceof Component) {
+            activeComponentPresentation = new ComponentPresentation((Component) newObject);
+            modelPane.getChildren().add(activeComponentPresentation);
+
+            // To avoid NullPointerException on initial model
+            if (oldObject != null) zoomHelper.resetZoom();
+
+        } else if (newObject instanceof Declarations) {
+            activeComponentPresentation = null;
+            modelPane.getChildren().add(new DeclarationPresentation((Declarations) newObject));
+        } else if (newObject instanceof EcdarSystem) {
+            activeComponentPresentation = null;
+            modelPane.getChildren().add(new SystemPresentation((EcdarSystem) newObject));
+        } else if (newObject instanceof MutationTestPlan) {
+            this.disallowGrid();
+
+            activeComponentPresentation = null;
+            modelPane.getChildren().add(new MutationTestPlanPresentation((MutationTestPlan) newObject));
+        } else {
+            throw new IllegalStateException("Type of object is not supported.");
+        }
+
+        boolean shouldZoomBeActive = newObject instanceof Component || newObject instanceof EcdarSystem;
+        toolbar.setVisible(shouldZoomBeActive);
+        zoomHelper.setActive(shouldZoomBeActive);
+
+        root.requestFocus();
+    }
+
+    /**
      * Gets the active component presentation.
      * This is null, if the declarations presentation is shown instead.
      * @return the active component presentation
      */
-    ComponentPresentation getActiveComponentPresentation() {
+    public ComponentPresentation getActiveComponentPresentation() {
         return activeComponentPresentation;
+    }
+
+    @FXML
+    private void zoomInClicked() {
+        zoomHelper.zoomIn();
+    }
+
+    @FXML
+    private void zoomOutClicked() {
+        zoomHelper.zoomOut();
+    }
+
+    @FXML
+    private void zoomToFitClicked() {
+        zoomHelper.zoomToFit();
+    }
+
+    @FXML
+    private void resetZoomClicked() {
+        zoomHelper.resetZoom();
     }
 }

@@ -70,7 +70,7 @@ public class QueryPresentation extends AnchorPane {
             controller.getQuery().commentProperty().bind(commentTextField.textProperty());
 
 
-            queryTextField.setOnKeyPressed(EcdarController.getActiveCanvasShellPresentation().getCanvasController().getLeaveTextAreaKeyHandler(keyEvent -> {
+            queryTextField.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler(keyEvent -> {
                 Platform.runLater(() -> {
                     if (keyEvent.getCode().equals(KeyCode.ENTER)) {
                         runQuery();
@@ -78,7 +78,7 @@ public class QueryPresentation extends AnchorPane {
                 });
             }));
 
-            commentTextField.setOnKeyPressed(EcdarController.getActiveCanvasShellPresentation().getCanvasController().getLeaveTextAreaKeyHandler());
+            commentTextField.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
         });
     }
 

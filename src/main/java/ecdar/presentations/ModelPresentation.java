@@ -80,7 +80,7 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
 
         // Center the text vertically and aff a left padding of CORNER_SIZE
         controller.name.setPadding(new Insets(2, 0, 0, Grid.CORNER_SIZE));
-        controller.name.setOnKeyPressed(EcdarController.getActiveCanvasShellPresentation().getCanvasController().getLeaveTextAreaKeyHandler());
+        controller.name.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
     }
 
     /**
@@ -142,6 +142,9 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
 
             final double newWidth = prevWidth.get() + diff;
             final double minWidth = getDragAnchorMinWidth();
+
+            // Move the model left or right to account for new height (needed because model is centered in parent)
+            setTranslateX(getTranslateX() + (Math.max(newWidth, minWidth) - box.getWidth()) / 2);
             box.setWidth(Math.max(newWidth, minWidth));
             wasResized.set(true);
         });
@@ -199,6 +202,8 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
             final double newHeight = prevHeight.get() + diff;
             final double minHeight = getDragAnchorMinHeight();
 
+            // Move the model up or down to account for new height (needed because model is centered in parent)
+            setTranslateY(getTranslateY() + (Math.max(newHeight, minHeight) - box.getHeight()) / 2);
             box.setHeight(Math.max(newHeight, minHeight));
             wasResized.set(true);
         });

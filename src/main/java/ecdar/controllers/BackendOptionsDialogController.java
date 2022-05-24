@@ -208,14 +208,7 @@ public class BackendOptionsDialogController implements Initializable {
             }
         }
 
-        if (engine.getBackendLocation().equals("")) {
-            Ecdar.showToast("File for packaged backend: " + engine.getName() +
-                    " could not be loaded. Please make sure that at least one of the following files is placed in the 'lib' directory: " +
-                    potentialFiles.stream().map(File::getPath).collect(Collectors.joining(", ")));
-            return false;
-        }
-
-        return true;
+        return !engine.getBackendLocation().equals("");
     }
 
     /**

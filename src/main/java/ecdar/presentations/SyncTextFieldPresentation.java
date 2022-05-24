@@ -22,7 +22,7 @@ public class SyncTextFieldPresentation extends StackPane {
                     controller.textField.setTranslateY(2);
                 } else {
                     controller.textField.setTranslateY(0);
-                    EcdarController.getActiveCanvasShellPresentation().getCanvasController().leaveTextAreas();
+                    EcdarController.getActiveCanvasPresentation().getController().leaveTextAreas();
                 }
             });
 
