@@ -36,6 +36,8 @@ public class MouseCircular implements Circular {
                 originalX.get() - (newValue.doubleValue() - oldValue.doubleValue()) / EcdarController.getActiveCanvasZoomFactor().get()));
         EcdarController.getActiveCanvasPresentation().getController().modelPane.translateYProperty().addListener((observable, oldValue, newValue) -> originalY.set(
                 originalY.get() - (newValue.doubleValue() - oldValue.doubleValue()) / EcdarController.getActiveCanvasZoomFactor().get()));
+
+        // ToDo NIELS: When the width or height of the scene is changed, the coordinates should be updated
     }
 
     private void updatePosition() {
