@@ -112,7 +112,6 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
     }
 
     private void ensureNailsInFront() {
-
         // When ever changes happens to the children of the edge root force nails in front and other elements to back
         edgeRoot.getChildren().addListener((ListChangeListener<? super Node>) c -> {
             while (c.next()) {
@@ -141,7 +140,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                 edgeRoot.getChildren().addAll(link, simpleArrowHead);
 
                 // Bind the first link and the arrowhead from the source location to the mouse
-                BindingHelper.bind(link, simpleArrowHead, newEdge.getSourceCircular(), newComponent.getBox().getXProperty(), newComponent.getBox().getYProperty());
+                BindingHelper.bind(link, simpleArrowHead, newEdge.getSourceCircular(), new MouseCircular(newEdge.getSourceCircular()));
             } else if (newEdge.getTargetCircular() != null) {
 
                 edgeRoot.getChildren().add(simpleArrowHead);
@@ -185,7 +184,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                     nailNailPresentationMap.put(newNail, newNailPresentation);
                     edgeRoot.getChildren().addAll(newNailPresentation);
 
-                    if (newEdge.getTargetCircular() != null) {
+                    if (getComponent().getUnfinishedEdge() == null) {
                         final int indexOfNewNail = edge.get().getNails().indexOf(newNail);
 
                         final Link newLink = new Link();
@@ -223,7 +222,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                         final Link lastLink = links.get(links.size() - 1);
 
                         // If the nail is the first in the list, bind it to the source location
-                        // otherwise, bind it the the previous nail
+                        // otherwise, bind it to the previous nail
                         final int nailIndex = edge.get().getNails().indexOf(newNail);
                         if (nailIndex == 0) {
                             BindingHelper.bind(lastLink, newEdge.getSourceCircular(), newNail);
@@ -236,7 +235,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                         final Link newLink = new Link();
                         if (newEdge.getStatus() == EdgeStatus.OUTPUT) newLink.makeDashed();
                         links.add(newLink);
-                        BindingHelper.bind(newLink, simpleArrowHead, newNail, newComponent.getBox().getXProperty(), newComponent.getBox().getYProperty());
+                        BindingHelper.bind(newLink, simpleArrowHead, newNail, new MouseCircular(newNail));
                         edgeRoot.getChildren().add(newLink);
                     }
                 });
@@ -399,14 +398,10 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
             @Override
             public void onChanged(final Change<? extends Link> c) {
                 links.forEach((link) -> link.setOnMousePressed(event -> {
-
                     if (event.isSecondaryButtonDown() && getComponent().getUnfinishedEdge() == null) {
                         event.consume();
 
-                        final DropDownMenu dropDownMenu = new DropDownMenu(
-                                dropDownMenuHelperCircle
-                        );
-
+                        final DropDownMenu dropDownMenu = new DropDownMenu(dropDownMenuHelperCircle);
 
                         dropDownMenu.addMenuElement(getChangeStatusMenuElement(dropDownMenu));
 
@@ -417,7 +412,6 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                         addEdgePropertyRow(dropDownMenu, "Add Update", Edge.PropertyType.UPDATE, link);
 
                         dropDownMenu.addSpacerElement();
-
                         dropDownMenu.addClickableAndDisableableListElement("Add Nail", getEdge().getIsLockedProperty(), mouseEvent -> {
                             final double nailX = Math.round((DropDownMenu.x - getComponent().getBox().getX()) / GRID_SIZE) * GRID_SIZE;
                             final double nailY = Math.round((DropDownMenu.y - getComponent().getBox().getY()) / GRID_SIZE) * GRID_SIZE;
@@ -706,7 +700,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
             }
 
             addNewEdgeAndRemoveOld(oldEdge, newEdge);
-            setStateOfNewEdgeToTheStateOfTheOld(oldEdge, newEdge);
+            setStateOfNewEdgeToStateOfOld(oldEdge, newEdge);
         }
     }
 
@@ -742,7 +736,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
         }, "Updated edge", "update");
     }
 
-    private void setStateOfNewEdgeToTheStateOfTheOld(DisplayableEdge oldEdge, DisplayableEdge newEdge) {
+    private void setStateOfNewEdgeToStateOfOld(DisplayableEdge oldEdge, DisplayableEdge newEdge) {
         newEdge.setColor(getColor());
         newEdge.setColorIntensity(getColorIntensity());
         newEdge.selectProperty().set(oldEdge.getSelect());

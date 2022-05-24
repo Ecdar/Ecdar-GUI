@@ -1,5 +1,6 @@
 package ecdar.presentations;
 
+import ecdar.controllers.EcdarController;
 import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -42,7 +43,7 @@ public class Grid extends Parent {
      * @return the value after being snapped
      */
     public static double snap(final double raw) {
-        return raw - raw % GRID_SIZE;
+        return raw - raw % (GRID_SIZE * EcdarController.getActiveCanvasZoomFactor().get());
     }
 
     /**
@@ -94,7 +95,7 @@ public class Grid extends Parent {
     }
 
     public void bindSize(DoubleProperty width, DoubleProperty height) {
-        this.width.bind(width.multiply(4));
-        this.height.bind(height.multiply(4));
+        this.width.bind(width);
+        this.height.bind(height);
     }
 }

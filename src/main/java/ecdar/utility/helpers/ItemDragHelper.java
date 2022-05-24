@@ -125,8 +125,8 @@ public class ItemDragHelper {
 
             final DragBounds dragBounds = getDragBounds.get();
 
-            final double dragDistanceX = EcdarController.getActiveCanvasPresentation().mouseTracker.getGridX() - pressEventX.get();
-            final double dragDistanceY = EcdarController.getActiveCanvasPresentation().mouseTracker.getGridY() - pressEventY.get();
+            final double dragDistanceX = (EcdarController.getActiveCanvasPresentation().mouseTracker.getGridX() - pressEventX.get()) / EcdarController.getActiveCanvasZoomFactor().get();
+            final double dragDistanceY = (EcdarController.getActiveCanvasPresentation().mouseTracker.getGridY() - pressEventY.get()) / EcdarController.getActiveCanvasZoomFactor().get();
 
             final double unRoundedX = dragBounds.trimX(mouseSubjectPreviousX.get() + dragDistanceX);
             final double unRoundedY = dragBounds.trimY(mouseSubjectPreviousY.get() + dragDistanceY);
@@ -145,8 +145,8 @@ public class ItemDragHelper {
                     final double itemNewX = previousLocations.get(i).getKey() + mouseSubjectFinalNewX - mouseSubjectPreviousX.doubleValue();
                     final double itemNewY = previousLocations.get(i).getValue() + mouseSubjectFinalNewY - mouseSubjectPreviousY.doubleValue();
 
-                    final double itemUnRoundedX = dragBounds.trimX(itemNewX);
-                    final double itemUnRoundedY = dragBounds.trimY(itemNewY);
+                    final double itemUnRoundedX = dragBounds.trimX(itemNewX / EcdarController.getActiveCanvasZoomFactor().get());
+                    final double itemUnRoundedY = dragBounds.trimY(itemNewY / EcdarController.getActiveCanvasZoomFactor().get());
                     double itemFinalNewX = itemUnRoundedX - itemUnRoundedX % GRID_SIZE;
                     double itemFinalNewY = itemUnRoundedY - itemUnRoundedY % GRID_SIZE;
 

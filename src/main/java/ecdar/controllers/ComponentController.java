@@ -880,9 +880,9 @@ public class ComponentController extends ModelController implements Initializabl
         } else if (event.isPrimaryButtonDown()) {
             // We are drawing an edge
             if (unfinishedEdge != null) {
-                // Calculate the position for the new nail (based on the component position and the canvas mouse tracker)
-                final DoubleBinding x = EcdarController.getActiveCanvasPresentation().mouseTracker.gridXProperty().subtract(getComponent().getBox().getXProperty());
-                final DoubleBinding y = EcdarController.getActiveCanvasPresentation().mouseTracker.gridYProperty().subtract(getComponent().getBox().getYProperty());
+                // Get coordinates of new nail on grid
+                final double x = Grid.snap(event.getX());
+                final double y = Grid.snap(event.getY());
 
                 // Create the abstraction for the new nail and add it to the unfinished edge
                 final Nail newNail = new Nail(x, y);

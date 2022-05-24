@@ -19,28 +19,31 @@ public class MouseCircular implements Circular {
     private final SimpleDoubleProperty scale = new SimpleDoubleProperty(1d);
     private final MouseTracker mouseTracker = EcdarController.getActiveCanvasPresentation().mouseTracker;
 
-    public MouseCircular(Circular initLocation){
+    public MouseCircular(Circular initLocation) {
         //Set the initial x and y coordinates of the circular
         originalX.set(initLocation.getX());
         originalY.set(initLocation.getY());
-        originalMouseX.set(mouseTracker.xProperty().get());
-        originalMouseY.set(mouseTracker.yProperty().get());
+        x.set(initLocation.getX());
+        y.set(initLocation.getY());
+        originalMouseX.set(mouseTracker.getGridX());
+        originalMouseY.set(mouseTracker.getGridY());
 
-        mouseTracker.registerOnMouseMovedEventHandler(event -> {
-            final double dragDistanceX = mouseTracker.xProperty().get() - originalMouseX.get();
-            final double dragDistanceY = mouseTracker.yProperty().get() - originalMouseY.get();
+        mouseTracker.registerOnMouseMovedEventHandler(event -> updatePosition());
+        mouseTracker.registerOnMouseDraggedEventHandler(event -> updatePosition());
 
-            x.set(originalX.get() + dragDistanceX - EcdarController.getActiveCanvasPresentation().getController().modelPane.getTranslateX());
-            y.set(originalY.get() + dragDistanceY - EcdarController.getActiveCanvasPresentation().getController().modelPane.getTranslateY());
-        });
+        // If the component is dragged while we are drawing an edge, update the coordinates accordingly
+        EcdarController.getActiveCanvasPresentation().getController().modelPane.translateXProperty().addListener((observable, oldValue, newValue) -> originalX.set(
+                originalX.get() - (newValue.doubleValue() - oldValue.doubleValue()) / EcdarController.getActiveCanvasZoomFactor().get()));
+        EcdarController.getActiveCanvasPresentation().getController().modelPane.translateYProperty().addListener((observable, oldValue, newValue) -> originalY.set(
+                originalY.get() - (newValue.doubleValue() - oldValue.doubleValue()) / EcdarController.getActiveCanvasZoomFactor().get()));
+    }
 
-        mouseTracker.registerOnMouseDraggedEventHandler(event -> {
-            final double dragDistanceX = mouseTracker.xProperty().get() - originalMouseX.get();
-            final double dragDistanceY = mouseTracker.yProperty().get() - originalMouseY.get();
+    private void updatePosition() {
+        final double dragDistanceX = mouseTracker.getGridX() - originalMouseX.get();
+        final double dragDistanceY = mouseTracker.getGridY() - originalMouseY.get();
 
-            x.set(originalX.get() + dragDistanceX - EcdarController.getActiveCanvasPresentation().getController().modelPane.getTranslateX());
-            y.set(originalY.get() + dragDistanceY - EcdarController.getActiveCanvasPresentation().getController().modelPane.getTranslateY());
-        });
+        x.set(originalX.get() + dragDistanceX / EcdarController.getActiveCanvasZoomFactor().get());
+        y.set(originalY.get() + dragDistanceY / EcdarController.getActiveCanvasZoomFactor().get());
     }
 
     @Override
