@@ -186,6 +186,12 @@ public class BackendDriver {
 
             @Override
             public void onCompleted() {
+                // The query has been cancelled, stop execution
+                if (executableQuery.queryListener.getQuery().getQueryState() == QueryState.UNKNOWN) {
+                    backendConnection.setExecutableQuery(null);
+                    return;
+                }
+
                 if (!error) {
                     StreamObserver<EcdarProtoBuf.QueryProtos.QueryResponse> responseObserver = new StreamObserver<>() {
                         @Override
