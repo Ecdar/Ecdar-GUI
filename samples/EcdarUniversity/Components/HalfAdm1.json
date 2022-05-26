@@ -33,6 +33,8 @@
   ],
   "edges": [
     {
+      "id": "E5",
+      "group": "",
       "sourceLocation": "L12",
       "targetLocation": "L13",
       "status": "INPUT",
@@ -40,6 +42,7 @@
       "guard": "",
       "update": "x\u003d0",
       "sync": "grant",
+      "isLocked": false,
       "nails": [
         {
           "x": 150.0,
@@ -58,6 +61,8 @@
       ]
     },
     {
+      "id": "E5",
+      "group": "",
       "sourceLocation": "L13",
       "targetLocation": "L12",
       "status": "OUTPUT",
@@ -65,6 +70,7 @@
       "guard": "",
       "update": "",
       "sync": "coin",
+      "isLocked": false,
       "nails": [
         {
           "x": 110.0,
@@ -76,6 +82,8 @@
       ]
     },
     {
+      "id": "E5",
+      "group": "",
       "sourceLocation": "L13",
       "targetLocation": "L13",
       "status": "OUTPUT",
@@ -83,6 +91,7 @@
       "guard": "",
       "update": "",
       "sync": "patent",
+      "isLocked": false,
       "nails": [
         {
           "x": 80.0,
@@ -101,6 +110,8 @@
       ]
     },
     {
+      "id": "E5",
+      "group": "",
       "sourceLocation": "L13",
       "targetLocation": "L13",
       "status": "INPUT",
@@ -108,6 +119,7 @@
       "guard": "",
       "update": "",
       "sync": "pub",
+      "isLocked": false,
       "nails": [
         {
           "x": 120.0,
@@ -126,6 +138,8 @@
       ]
     },
     {
+      "id": "E5",
+      "group": "",
       "sourceLocation": "L13",
       "targetLocation": "L13",
       "status": "INPUT",
@@ -133,6 +147,7 @@
       "guard": "",
       "update": "",
       "sync": "grant",
+      "isLocked": false,
       "nails": [
         {
           "x": 170.0,
@@ -151,6 +166,8 @@
       ]
     },
     {
+      "id": "E5",
+      "group": "",
       "sourceLocation": "L12",
       "targetLocation": "L12",
       "status": "INPUT",
@@ -158,6 +175,7 @@
       "guard": "",
       "update": "",
       "sync": "pub",
+      "isLocked": false,
       "nails": [
         {
           "x": 90.0,
@@ -176,6 +194,8 @@
       ]
     },
     {
+      "id": "E5",
+      "group": "",
       "sourceLocation": "L12",
       "targetLocation": "L12",
       "status": "OUTPUT",
@@ -183,6 +203,7 @@
       "guard": "",
       "update": "",
       "sync": "patent",
+      "isLocked": false,
       "nails": [
         {
           "x": 170.0,

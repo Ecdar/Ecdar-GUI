@@ -238,7 +238,7 @@ public class Ecdar extends Application {
 
         // Set the icon for the application
         try {
-            stage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResource("ic_launcher/Edgar.png")).toExternalForm()));
+            stage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResource("ic_launcher/Ecdar_logo.png")).toExternalForm()));
         } catch (NullPointerException e) {
             e.printStackTrace();
             Ecdar.showToast("The application icon could not be loaded");

@@ -33,6 +33,8 @@
   ],
   "edges": [
     {
+      "id": "E2",
+      "group": "",
       "sourceLocation": "L11",
       "targetLocation": "L10",
       "status": "INPUT",
@@ -40,6 +42,7 @@
       "guard": "",
       "update": "",
       "sync": "coin",
+      "isLocked": false,
       "nails": [
         {
           "x": 140.0,
@@ -51,6 +54,8 @@
       ]
     },
     {
+      "id": "E2",
+      "group": "",
       "sourceLocation": "L10",
       "targetLocation": "L10",
       "status": "INPUT",
@@ -58,6 +63,7 @@
       "guard": "",
       "update": "",
       "sync": "coin",
+      "isLocked": false,
       "nails": [
         {
           "x": 100.0,
@@ -76,6 +82,8 @@
       ]
     },
     {
+      "id": "E2",
+      "group": "",
       "sourceLocation": "L11",
       "targetLocation": "L11",
       "status": "OUTPUT",
@@ -83,6 +91,7 @@
       "guard": "",
       "update": "",
       "sync": "tea",
+      "isLocked": false,
       "nails": [
         {
           "x": 120.0,
@@ -101,6 +110,8 @@
       ]
     },
     {
+      "id": "E2",
+      "group": "",
       "sourceLocation": "L10",
       "targetLocation": "L11",
       "status": "OUTPUT",
@@ -108,6 +119,7 @@
       "guard": "",
       "update": "",
       "sync": "cof",
+      "isLocked": false,
       "nails": [
         {
           "x": 100.0,
