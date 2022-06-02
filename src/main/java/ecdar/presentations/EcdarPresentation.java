@@ -274,6 +274,11 @@ public class EcdarPresentation extends StackPane {
         controller.filePane.widthProperty().addListener((observable) -> {
             initializeOpenFilePaneAnimation();
             initializeCloseFilePaneAnimation();
+
+            // If the scaling has changed and the file pane is open, trigger animation to ensure correct width
+            if (filePaneOpen.get()) {
+                openFilePaneAnimation.play();
+            }
         });
     }
 
@@ -316,6 +321,11 @@ public class EcdarPresentation extends StackPane {
         controller.queryPane.widthProperty().addListener((observable) -> {
             initializeOpenQueryPaneAnimation();
             initializeCloseQueryPaneAnimation();
+
+            // If the scaling has changed and the query pane is open, trigger animation to ensure correct width
+            if (queryPaneOpen.get()) {
+                openQueryPaneAnimation.play();
+            }
         });
 
         // When new queries are added, make sure that the query pane is open
