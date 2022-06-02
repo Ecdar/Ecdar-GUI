@@ -77,8 +77,8 @@ public class Component extends HighLevelModelObject implements Boxed {
         initialLocation.setColor(getColor());
 
         // Place in center
-        initialLocation.setX(Grid.snap(box.getX() + box.getWidth() / 2));
-        initialLocation.setY(Grid.snap(box.getY() + box.getHeight() / 2));
+        initialLocation.setX(box.getX() + box.getWidth() / 2);
+        initialLocation.setY(box.getY() + box.getHeight() / 2);
 
         locations.add(initialLocation);
         initializeIOListeners();
@@ -727,6 +727,9 @@ public class Component extends HighLevelModelObject implements Boxed {
     }
 
     private void bindReachabilityAnalysis() {
+        // If there is no EcdarPresentation, we are running tests and EcdarController calls will fail
+        if (Ecdar.getPresentation() == null) return;
+
         locations.addListener((ListChangeListener<? super Location>) c -> EcdarController.runReachabilityAnalysis());
         edges.addListener((ListChangeListener<? super DisplayableEdge>) c -> EcdarController.runReachabilityAnalysis());
         declarationsTextProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
