@@ -698,20 +698,20 @@ public class EcdarController implements Initializable {
     }
 
     private void updateScaling(double newScale) {
-        double calculatedNewScale = getNewCalculatedScale();
-        Ecdar.getPresentation().setStyle("-fx-font-size: " + calculatedNewScale + "px;");
+        double newCalculatedScale = getNewCalculatedScale();
+        Ecdar.getPresentation().setStyle("-fx-font-size: " + newCalculatedScale + "px;");
 
         // Text do not scale on the canvas to avoid ugly elements,
         // this zooms in on the component in order to get the "same font size"
-        EcdarController.getActiveCanvasPresentation().getController().zoomHelper.setZoomLevel(calculatedNewScale / 13);
+        EcdarController.getActiveCanvasPresentation().getController().zoomHelper.setZoomLevel(newCalculatedScale / 13);
         Ecdar.preferences.put("scale", String.valueOf(newScale));
 
-        scaleIcons(root, calculatedNewScale);
-        scaleEdgeStatusToggle(calculatedNewScale);
+        scaleIcons(root, newCalculatedScale);
+        scaleEdgeStatusToggle(newCalculatedScale);
         messageTabPane.getController().updateScale(newScale);
 
         // Update listeners of UI scale
-        scalingProperty.set(calculatedNewScale);
+        scalingProperty.set(newCalculatedScale);
     }
 
     /**
@@ -868,7 +868,6 @@ public class EcdarController implements Initializable {
                 return;
             }
 
-            CanvasPresentation canvasShell = getActiveCanvasPresentation();
             CanvasPresentation canvas = getActiveCanvasPresentation();
 
             // If there was an active component, hide button for toggling declarations
@@ -877,7 +876,7 @@ public class EcdarController implements Initializable {
                 presentation.getController().toggleDeclarationButton.setVisible(false);
             }
 
-            final WritableImage image = takeSnapshot(canvasShell);
+            final WritableImage image = takeSnapshot(canvas);
 
             // If there was an active component, show the button again
             if (presentation != null) {
@@ -1204,7 +1203,7 @@ public class EcdarController implements Initializable {
     /**
      * This method is used to push the contents of the file and query panes when the tab pane is opened
      */
-    public void changeInsetsOfFileAndQueryPanes() {
+    private void changeInsetsOfFileAndQueryPanes() {
         if (messageTabPane.getController().isOpen()) {
             filePane.showBottomInset(false);
             queryPane.showBottomInset(false);

@@ -345,11 +345,6 @@ public class EcdarPresentation extends StackPane {
                 });
             }
         });
-
-        controller.scalingProperty.addListener(observable -> {
-            // ToDO: Side panes should be closed and opened if open to handle the GUI
-            // ToDo: Consider just changing the width of the side panes
-        });
     }
 
     private void initializeCloseQueryPaneAnimation() {
