@@ -11,7 +11,7 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.Node;
 
 public class ZoomHelper {
-    public DoubleProperty currentZoomFactor = new SimpleDoubleProperty();
+    public DoubleProperty currentZoomFactor = new SimpleDoubleProperty(1);
     public double minZoomFactor = 0.4;
     public double maxZoomFactor = 4;
 

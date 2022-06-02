@@ -34,6 +34,8 @@ public class Grid extends Parent {
             this.scaleXProperty().addListener(observable -> updateGrid());
             setTranslateX(GRID_SIZE * 0.5);
         });
+
+        updateGrid();
     }
 
     /**
