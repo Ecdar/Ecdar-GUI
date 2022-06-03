@@ -80,7 +80,7 @@
                         </HBox>
                     </HBox>
                 </VBox>
-                <StackPane fx:id="canvasPane" VBox.vgrow="ALWAYS">
+                <StackPane fx:id="canvasPane" HBox.hgrow="NEVER" VBox.vgrow="NEVER">
                     <!-- Canvases go here -->
                 </StackPane>
             </VBox>

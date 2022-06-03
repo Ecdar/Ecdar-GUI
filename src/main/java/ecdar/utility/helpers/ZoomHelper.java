@@ -28,6 +28,15 @@ public class ZoomHelper {
     public void setCanvas(CanvasPresentation newCanvasPresentation) {
         canvasPresentation = newCanvasPresentation;
         model = canvasPresentation.getController().getActiveComponentPresentation();
+
+        // Update the model whenever the component is updated
+        canvasPresentation.getController().activeComponentProperty().addListener((observable) -> {
+            // Run later to ensure that the active component presentation is up-to-date
+            Platform.runLater(() -> {
+                model = canvasPresentation.getController().getActiveComponentPresentation();
+            });
+        });
+
         Platform.runLater(this::resetZoom);
     }
 
@@ -96,6 +105,7 @@ public class ZoomHelper {
                 resetZoom();
                 return;
             }
+
             double newScale = Math.min(canvasPresentation.getWidth() / model.getWidth() - 0.1, canvasPresentation.getHeight() / model.getHeight() - 0.2); //0.1 for width and 0.2 for height subtracted for margin
 
             currentZoomFactor.set(newScale);

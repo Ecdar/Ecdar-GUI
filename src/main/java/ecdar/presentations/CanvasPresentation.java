@@ -208,14 +208,19 @@ public class CanvasPresentation extends StackPane implements MouseTrackable {
             Rectangle selectionRectangle = initializeRectangleForSelectionBox(mouseDownX, mouseDownY);
 
             mouseTracker.registerOnMouseDraggedEventHandler(e -> {
-                selectionRectangle.setX(Math.min(e.getX(), mouseDownX));
-                selectionRectangle.setWidth(Math.abs(e.getX() - mouseDownX));
-                selectionRectangle.setY(Math.min(e.getY(), mouseDownY));
-                selectionRectangle.setHeight(Math.abs(e.getY() - mouseDownY));
+                // Make sure that the rectangle does not grow beyond the horizontal limits of the canvas
+                selectionRectangle.setX(Math.max(Math.min(e.getX(), mouseDownX), 0));
+                double newWidth = Math.abs(e.getX() - mouseDownX);
+                selectionRectangle.setWidth(newWidth + selectionRectangle.getX() < getWidth() ? newWidth : getWidth() - mouseDownX);
+
+                // Make sure that the rectangle does not grow beyond the vertical limits of the canvas
+                selectionRectangle.setY(Math.max(Math.min(e.getY(), mouseDownY), 0));
+                double newHeight = Math.abs(e.getY() - mouseDownY);
+                selectionRectangle.setHeight(newHeight + selectionRectangle.getY() < getHeight() ? newHeight : getHeight() - mouseDownY);
 
                 // We need to update the translation coordinates to display the selection rectangle in the right place
-                selectionRectangle.setTranslateX(Math.min(e.getX(), mouseDownX));
-                selectionRectangle.setTranslateY(Math.min(e.getY(), mouseDownY));
+                selectionRectangle.setTranslateX(Math.max(Math.min(e.getX(), mouseDownX), 0));
+                selectionRectangle.setTranslateY(Math.max(Math.min(e.getY(), mouseDownY), 0));
 
                 SelectHelper.clearSelectedElements();
 

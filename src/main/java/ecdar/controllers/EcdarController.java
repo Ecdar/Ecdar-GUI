@@ -1029,14 +1029,27 @@ public class EcdarController implements Initializable {
     }
 
     /**
-     * Initialize a new CanvasShellPresentation and return it
+     * Initialize a new CanvasPresentation and return it
      *
-     * @return new CanvasShellPresentation
+     * @return new CanvasPresentation
      */
     private CanvasPresentation initializeNewCanvasPresentation() {
-        CanvasPresentation canvasShellPresentation = new CanvasPresentation();
-        canvasShellPresentation.setBorder(new Border(new BorderStroke(Color.GREY.getColor(Color.Intensity.I500), BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderStroke.THIN)));
-        return canvasShellPresentation;
+        CanvasPresentation canvasPresentation = new CanvasPresentation();
+        canvasPresentation.setBorder(new Border(new BorderStroke(Color.GREY.getColor(Color.Intensity.I500), BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderStroke.THIN)));
+
+        Rectangle clip = new Rectangle();
+        clip.setArcWidth(1);
+        clip.setArcHeight(1);
+        clip.widthProperty().bind(canvasPane.widthProperty().divide(2));
+        clip.heightProperty().bind(canvasPane.heightProperty().divide(2));
+        canvasPresentation.getController().zoomablePane.setClip(clip);
+
+        canvasPresentation.getController().zoomablePane.minWidthProperty().bind(canvasPane.widthProperty().divide(2));
+        canvasPresentation.getController().zoomablePane.maxWidthProperty().bind(canvasPane.widthProperty().divide(2));
+        canvasPresentation.getController().zoomablePane.minHeightProperty().bind(canvasPane.heightProperty().divide(2));
+        canvasPresentation.getController().zoomablePane.maxHeightProperty().bind(canvasPane.heightProperty().divide(2));
+
+        return canvasPresentation;
     }
 
     /**
