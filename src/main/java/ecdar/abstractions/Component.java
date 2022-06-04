@@ -510,6 +510,7 @@ public class Component extends HighLevelModelObject implements Boxed {
     }
 
     public boolean addEdge(final DisplayableEdge edge) {
+        if (edges.contains(edge)) return false;
         return edges.add(edge);
     }
 

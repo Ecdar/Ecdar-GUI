@@ -40,15 +40,11 @@ public class UndoRedoStack {
         final Command item = new Command(perform, undo, description, icon);
 
         // Empty the redo stack (new changes may be conflicting with redoing)
-        while (!redoStack.isEmpty()) {
-            redoStack.pop();
-        }
-
+        clearRedos();
         final Command command = undoStack.push(item);
         command.perform();
 
         updateState();
-
         return command;
     }
 
@@ -66,10 +62,9 @@ public class UndoRedoStack {
         final Command item = new Command(redo, undo, description, icon);
 
         // Empty the redo stack (new changes may be conflicting with redoing)
-        while (!redoStack.isEmpty()) {
-            redoStack.pop();
-        }
+        clearRedos();
         final Command command = undoStack.push(item);
+
         updateState();
         return command;
     }
@@ -121,17 +116,8 @@ public class UndoRedoStack {
     }
 
     private static void updateState() {
-        if (undoStack.isEmpty()) {
-            canUndo.set(false);
-        } else {
-            canUndo.set(true);
-        }
-
-        if (redoStack.isEmpty()) {
-            canRedo.set(false);
-        } else {
-            canRedo.set(true);
-        }
+        canUndo.set(!undoStack.isEmpty());
+        canRedo.set(!redoStack.isEmpty());
 
         debugRunnable.accept(undoStack, redoStack);
     }
@@ -150,6 +136,13 @@ public class UndoRedoStack {
 
     public static SimpleBooleanProperty canRedoProperty() {
         return canRedo;
+    }
+
+    public static void clearRedos() {
+        while (!redoStack.isEmpty()) {
+            redoStack.pop();
+        }
+        updateState();
     }
 
     public static class Command {

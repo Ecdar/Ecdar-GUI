@@ -731,6 +731,8 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
     private void addNewEdgeAndRemoveOld(DisplayableEdge oldEdge, DisplayableEdge newEdge) {
         KeyboardTracker.registerKeybind(KeyboardTracker.ABANDON_EDGE, new Keybind(new KeyCodeCombination(KeyCode.ESCAPE), () -> {
             UndoRedoStack.undo();
+            // Clear redo stack to prevent dangling edge
+            UndoRedoStack.clearRedos();
         }));
 
         UndoRedoStack.pushAndPerform(() -> { // Perform
