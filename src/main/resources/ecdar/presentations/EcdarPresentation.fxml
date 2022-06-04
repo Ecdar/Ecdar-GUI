@@ -126,6 +126,11 @@
                             <FontIcon iconLiteral="gmi-folder-open" fill="black" styleClass="icon-size-medium"/>
                         </graphic>
                     </MenuItem>
+                    <Menu fx:id="menuBarFileRecentProjects" text="Recent Projects">
+                        <graphic>
+                            <FontIcon iconLiteral="gmi-folder-open" fill="black" styleClass="icon-size-medium"/>
+                        </graphic>
+                    </Menu>
 
                     <SeparatorMenuItem/>
 
