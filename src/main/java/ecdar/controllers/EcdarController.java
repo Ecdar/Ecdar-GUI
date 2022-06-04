@@ -1037,6 +1037,8 @@ public class EcdarController implements Initializable {
         CanvasPresentation canvasPresentation = new CanvasPresentation();
         canvasPresentation.setBorder(new Border(new BorderStroke(Color.GREY.getColor(Color.Intensity.I500), BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderStroke.THIN)));
 
+        // Set th clip of the zoomable pane to be half of the canvasPane,
+        // to ensure a 2 by 2 grid without overflowing borders
         Rectangle clip = new Rectangle();
         clip.setArcWidth(1);
         clip.setArcHeight(1);
