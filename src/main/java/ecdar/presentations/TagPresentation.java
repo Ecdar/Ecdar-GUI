@@ -183,12 +183,11 @@ public class TagPresentation extends StackPane {
         textField.setPadding(insets);
         label.setPadding(insets);
 
-        final int padding = 0;
 
         label.layoutBoundsProperty().addListener((obs, oldBounds, newBounds) -> {
+            final int padding = 5;
             double newWidth = Math.max(newBounds.getWidth(), 10);
-            final double res = GRID_SIZE * 2 - (newWidth % (GRID_SIZE * 2));
-            newWidth += res;
+            newWidth += padding;
 
             textField.setMinWidth(newWidth);
             textField.setMaxWidth(newWidth);
