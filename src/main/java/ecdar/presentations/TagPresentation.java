@@ -13,6 +13,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableBooleanValue;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
@@ -183,31 +184,21 @@ public class TagPresentation extends StackPane {
         textField.setPadding(insets);
         label.setPadding(insets);
 
-        final int padding = 0;
+        textField.setMinHeight(TAG_HEIGHT);
+        textField.setMaxHeight(TAG_HEIGHT);
+        textField.focusedProperty().addListener((observable, oldFocused, newFocused) -> {
+            if (newFocused) {
+                shape.setTranslateY(2);
+                textField.setTranslateY(2);
+            }
+        });
 
         label.layoutBoundsProperty().addListener((obs, oldBounds, newBounds) -> {
-            double newWidth = Math.max(newBounds.getWidth(), 10);
-            final double res = GRID_SIZE * 2 - (newWidth % (GRID_SIZE * 2));
-            newWidth += res;
+            // Set limit for minimum width and add 2 for padding (text is not using full width without padding)
+            double newWidth = Math.max(newBounds.getWidth() + 2, 20);
 
             textField.setMinWidth(newWidth);
             textField.setMaxWidth(newWidth);
-
-            l2.setX(newWidth + padding);
-            l3.setX(newWidth + padding);
-
-            setMinWidth(newWidth + padding);
-            setMaxWidth(newWidth + padding);
-
-            textField.setMinHeight(TAG_HEIGHT);
-            textField.setMaxHeight(TAG_HEIGHT);
-
-            textField.focusedProperty().addListener((observable, oldFocused, newFocused) -> {
-                if (newFocused) {
-                    shape.setTranslateY(2);
-                    textField.setTranslateY(2);
-                }
-            });
 
             if (getWidth() >= 1000) {
                 setWidth(newWidth);
@@ -223,6 +214,10 @@ public class TagPresentation extends StackPane {
         });
 
         label.textProperty().bind(new When(textField.textProperty().isNotEmpty()).then(textField.textProperty()).otherwise(textField.promptTextProperty()));
+
+        // Ensure that the line to the nail is anchored to the center of the tag
+        l2.xProperty().bind(textField.widthProperty());
+        l3.xProperty().bind(textField.widthProperty());
     }
 
     public void bindToColor(final ObjectProperty<Color> color, final ObjectProperty<Color.Intensity> intensity) {
