@@ -8,74 +8,66 @@
 <?import javafx.geometry.Insets?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
-         type="AnchorPane"
+         type="HBox"
+         HBox.hgrow="ALWAYS"
+         alignment="CENTER"
          fx:controller="ecdar.controllers.QueryController">
-    <VBox alignment="CENTER">
-        <GridPane style="-fx-min-width: 20em; -fx-max-width: 20em;">
-            <columnConstraints>
-                <ColumnConstraints hgrow="NEVER" percentWidth="20.0" halignment="CENTER"/>
-                <ColumnConstraints hgrow="NEVER" percentWidth="5.0" halignment="CENTER"/>
-                <ColumnConstraints hgrow="ALWAYS" percentWidth="50.0" halignment="LEFT"/>
-                <ColumnConstraints hgrow="NEVER" percentWidth="5.0" halignment="CENTER"/>
-                <ColumnConstraints hgrow="NEVER" percentWidth="20.0" halignment="CENTER"/>
-            </columnConstraints>
-            <VBox id="stateIndicator" GridPane.columnIndex="0">
-                <padding>
-                    <Insets topRightBottomLeft="10"/>
-                </padding>
-                <Region style="-fx-max-height: 2em; -fx-min-height: 2em"/>
-                <StackPane styleClass="responsive-icon-stack-pane-sizing">
-                    <FontIcon id="statusIcon" iconLiteral="gmi-hourglass-full" styleClass="icon-size-medium"/>
-                </StackPane>
-                <Region style="-fx-max-height: 1em; -fx-min-height: 1em"/>
-                <JFXRippler fx:id="queryTypeExpand">
-                    <HBox alignment="CENTER">
-                        <Text fx:id="queryTypeSymbol" styleClass="sub-caption"/>
-                        <FontIcon id="queryTypeExpandIcon" iconLiteral="gmi-expand-more"
-                                  styleClass="icon-size-x-small"/>
-                    </HBox>
-                </JFXRippler>
-            </VBox>
-            <VBox GridPane.columnIndex="2" spacing="10" alignment="CENTER_LEFT">
-                <padding>
-                    <Insets topRightBottomLeft="10"/>
-                </padding>
-                <JFXTextField id="query"
-                              style="-fx-unfocus-color:transparent;" styleClass="subhead, responsive-text-area-sizing"
-                              HBox.hgrow="ALWAYS" promptText="Query"/>
-                <JFXTextField id="comment"
-                              style="-fx-unfocus-color:transparent;" styleClass="caption, responsive-text-area-sizing"
-                              HBox.hgrow="ALWAYS" promptText="Comment"/>
-            </VBox>
-            <VBox GridPane.columnIndex="4" alignment="CENTER">
-                <padding>
-                    <Insets topRightBottomLeft="10"/>
-                </padding>
+        <VBox id="stateIndicator">
+            <padding>
+                <Insets topRightBottomLeft="10"/>
+            </padding>
+            <Region style="-fx-max-height: 2em; -fx-min-height: 2em"/>
+            <StackPane styleClass="responsive-icon-stack-pane-sizing">
+                <FontIcon id="statusIcon" iconLiteral="gmi-hourglass-full" styleClass="icon-size-medium"/>
+            </StackPane>
+            <Region style="-fx-max-height: 1em; -fx-min-height: 1em"/>
+            <JFXRippler fx:id="queryTypeExpand">
                 <HBox alignment="CENTER">
-                    <StackPane>
-                        <JFXSpinner id="progressIndicator" radius="20"/>
-                        <JFXRippler fx:id="actionButton">
-                            <StackPane styleClass="responsive-icon-stack-pane-sizing">
-                                <FontIcon id="actionButtonIcon" iconLiteral="gmi-play-arrow"
-                                          styleClass="icon-size-medium"/>
-                            </StackPane>
-                        </JFXRippler>
-                    </StackPane>
-
-                    <Region minWidth="10"/>
-
-                    <JFXRippler id="detailsButton">
+                    <Text fx:id="queryTypeSymbol" styleClass="sub-caption"/>
+                    <FontIcon id="queryTypeExpandIcon" iconLiteral="gmi-expand-more"
+                              styleClass="icon-size-x-small"/>
+                </HBox>
+            </JFXRippler>
+        </VBox>
+        <VBox HBox.hgrow="ALWAYS" spacing="10" alignment="CENTER_LEFT">
+            <padding>
+                <Insets topRightBottomLeft="10"/>
+            </padding>
+            <JFXTextField id="query"
+                          style="-fx-unfocus-color:transparent;" styleClass="subhead, responsive-text-area-sizing"
+                          HBox.hgrow="ALWAYS" promptText="Query"/>
+            <JFXTextField id="comment"
+                          style="-fx-unfocus-color:transparent;" styleClass="caption, responsive-text-area-sizing"
+                          HBox.hgrow="ALWAYS" promptText="Comment"/>
+        </VBox>
+        <VBox alignment="CENTER">
+            <padding>
+                <Insets topRightBottomLeft="10"/>
+            </padding>
+            <HBox alignment="CENTER">
+                <StackPane>
+                    <JFXSpinner id="progressIndicator" radius="20"/>
+                    <JFXRippler fx:id="actionButton">
                         <StackPane styleClass="responsive-icon-stack-pane-sizing">
-                            <FontIcon id="detailsButtonIcon" iconLiteral="gmi-more-vert"
+                            <FontIcon id="actionButtonIcon" iconLiteral="gmi-play-arrow"
                                       styleClass="icon-size-medium"/>
                         </StackPane>
                     </JFXRippler>
-                </HBox>
-                <StackPane style="-fx-min-width: 6.5em; -fx-max-width: 6.5em;">
-                    <JFXComboBox fx:id="backendsDropdown" styleClass="caption, responsive-text-area-sizing"/>
                 </StackPane>
-            </VBox>
-        </GridPane>
+
+                <Region minWidth="10"/>
+
+                <JFXRippler id="detailsButton">
+                    <StackPane styleClass="responsive-icon-stack-pane-sizing">
+                        <FontIcon id="detailsButtonIcon" iconLiteral="gmi-more-vert"
+                                  styleClass="icon-size-medium"/>
+                    </StackPane>
+                </JFXRippler>
+            </HBox>
+            <StackPane style="-fx-min-width: 6.5em; -fx-max-width: 6.5em;">
+                <JFXComboBox fx:id="backendsDropdown" styleClass="caption, responsive-text-area-sizing"/>
+            </StackPane>
+        </VBox>
 
         <TitledPane id="inputOutputPane" expanded="false" alignment="CENTER" visible="false">
             <graphic>
@@ -137,5 +129,4 @@
 
         <StackPane prefHeight="1" style="-fx-background-color:-grey-300;" AnchorPane.rightAnchor="0"
                    AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" minHeight="1" maxHeight="1"/>
-    </VBox>
 </fx:root>

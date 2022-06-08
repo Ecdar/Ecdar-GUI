@@ -50,7 +50,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class EcdarController implements Initializable {
-
     // Reachability analysis
     public static boolean reachabilityServiceEnabled = false;
     private static long reachabilityTime = Long.MAX_VALUE;
@@ -147,7 +146,7 @@ public class EcdarController implements Initializable {
     public StackPane backendOptionsDialogContainer;
     public BackendOptionsDialogPresentation backendOptionsDialog;
 
-    public DoubleProperty scalingProperty = new SimpleDoubleProperty();
+    public final DoubleProperty scalingProperty = new SimpleDoubleProperty();
 
     private static JFXDialog _queryDialog;
     private static Text _queryTextResult;
@@ -711,7 +710,7 @@ public class EcdarController implements Initializable {
         messageTabPane.getController().updateScale(newScale);
 
         // Update listeners of UI scale
-        scalingProperty.set(newCalculatedScale);
+        scalingProperty.set(newScale);
     }
 
     /**
