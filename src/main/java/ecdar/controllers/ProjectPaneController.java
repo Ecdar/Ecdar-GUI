@@ -20,7 +20,6 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -52,7 +51,7 @@ public class ProjectPaneController implements Initializable {
         final FilePresentation globalDclPresentation = new FilePresentation(Ecdar.getProject().getGlobalDeclarations());
         globalDclPresentation.setOnMousePressed(event -> {
             event.consume();
-            EcdarController.getActiveCanvasPresentation().getController().setActiveModel(Ecdar.getProject().getGlobalDeclarations());
+            EcdarController.setActiveModelForActiveCanvas(Ecdar.getProject().getGlobalDeclarations());
         });
         filesList.getChildren().add(globalDclPresentation);
 
@@ -235,7 +234,7 @@ public class ProjectPaneController implements Initializable {
         // Open the component if the presentation is pressed
         filePresentation.setOnMousePressed(event -> {
             event.consume();
-            EcdarController.getActiveCanvasPresentation().getController().setActiveModel(model);
+            EcdarController.setActiveModelForActiveCanvas(model);
             updateColorsOnFilePresentations();
         });
         model.nameProperty().addListener(obs -> sortPresentations());
@@ -251,11 +250,11 @@ public class ProjectPaneController implements Initializable {
             if (Ecdar.getProject().getComponents().size() > 0) {
                 // Find the first available component and show it instead of the removed one
                 final Component component = Ecdar.getProject().getComponents().get(0);
-                EcdarController.getActiveCanvasPresentation().getController().setActiveModel(component);
+                EcdarController.setActiveModelForActiveCanvas(component);
                 updateColorsOnFilePresentations();
             } else {
                 // Show no components (since there are none in the project)
-                EcdarController.getActiveCanvasPresentation().getController().setActiveModel(null);
+                EcdarController.setActiveModelForActiveCanvas(null);
             }
         }
     }
@@ -284,7 +283,7 @@ public class ProjectPaneController implements Initializable {
             Ecdar.getProject().getComponents().remove(newComponent);
         }, "Created new component: " + newComponent.getName(), "add-circle");
 
-        EcdarController.getActiveCanvasPresentation().getController().setActiveModel(newComponent);
+        EcdarController.setActiveModelForActiveCanvas(newComponent);
         updateColorsOnFilePresentations();
     }
 
@@ -301,6 +300,6 @@ public class ProjectPaneController implements Initializable {
             Ecdar.getProject().getSystemsProperty().remove(newSystem);
         }, "Created new system: " + newSystem.getName(), "add-circle");
 
-        EcdarController.getActiveCanvasPresentation().getController().setActiveModel(newSystem);
+        EcdarController.setActiveModelForActiveCanvas(newSystem);
     }
 }

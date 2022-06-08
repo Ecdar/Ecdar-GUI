@@ -1,7 +1,6 @@
 package ecdar.utility.helpers;
 
 import ecdar.code_analysis.Nearable;
-import ecdar.controllers.CanvasController;
 import ecdar.controllers.EcdarController;
 import ecdar.utility.colors.Color;
 import javafx.collections.FXCollections;

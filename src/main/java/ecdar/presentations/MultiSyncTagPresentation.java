@@ -1,6 +1,5 @@
 package ecdar.presentations;
 
-import com.jfoenix.controls.JFXTextField;
 import ecdar.abstractions.Edge;
 import ecdar.abstractions.GroupedEdge;
 import ecdar.controllers.EcdarController;

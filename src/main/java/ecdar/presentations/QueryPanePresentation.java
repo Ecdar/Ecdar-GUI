@@ -9,7 +9,6 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.*;
 
 public class QueryPanePresentation extends StackPane {
-
     private final QueryPaneController controller;
 
     public QueryPanePresentation() {

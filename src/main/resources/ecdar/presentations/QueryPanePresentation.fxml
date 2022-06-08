@@ -8,8 +8,7 @@
 <?import javafx.geometry.Insets?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
-         type="StackPane"
-         fx:id="root"
+         type="StackPane" fx:id="root"
          fx:controller="ecdar.controllers.QueryPaneController">
     <VBox>
         <!-- Toolbar -->
@@ -22,7 +21,6 @@
                        styleClass="title"
                        text="Queries"/>
             </HBox>
-
             <HBox alignment="CENTER_RIGHT">
                 <!-- Add query -->
                 <JFXRippler fx:id="addButton">
