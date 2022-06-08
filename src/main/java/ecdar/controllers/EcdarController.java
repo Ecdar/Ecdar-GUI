@@ -50,7 +50,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class EcdarController implements Initializable {
-
     // Reachability analysis
     public static boolean reachabilityServiceEnabled = false;
     private static long reachabilityTime = Long.MAX_VALUE;

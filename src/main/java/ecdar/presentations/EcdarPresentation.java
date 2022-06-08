@@ -96,6 +96,21 @@ public class EcdarPresentation extends StackPane {
                 toggleFilePane();
                 toggleQueryPane();
             });
+
+            Ecdar.getPresentation().controller.scalingProperty.addListener((observable, oldValue, newValue) -> {
+                // If the scaling has changed trigger animations for open panes to update width
+                Platform.runLater(() -> {
+                    if (filePaneOpen.get()) {
+                        openFilePaneAnimation.play();
+                    }
+                    if (queryPaneOpen.get()) {
+                        openQueryPaneAnimation.play();
+                    }
+                });
+
+                // Make sure that the grid covers the canvas even when the side panes are shrunk
+                EcdarController.getActiveCanvasPresentation().getController().grid.updateGrid();
+            });
         });
 
         initializeHelpImages();
@@ -321,18 +336,6 @@ public class EcdarPresentation extends StackPane {
         controller.queryPane.widthProperty().addListener((observable) -> {
             initializeOpenQueryPaneAnimation();
             initializeCloseQueryPaneAnimation();
-        });
-
-        Platform.runLater(() -> {
-            Ecdar.getPresentation().controller.scalingProperty.addListener(observable -> {
-                // If the scaling has changed trigger animations for open panes to update width
-                if (queryPaneOpen.get()) {
-                    openQueryPaneAnimation.play();
-                }
-                if (filePaneOpen.get()) {
-                    openFilePaneAnimation.play();
-                }
-            });
         });
 
         // When new queries are added, make sure that the query pane is open
