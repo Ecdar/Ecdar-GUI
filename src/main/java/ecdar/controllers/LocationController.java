@@ -355,13 +355,29 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
     }
 
     private void initializeMouseControls() {
-
         final Consumer<MouseEvent> mouseClicked = (event) -> {
             event.consume();
 
             final Component component = getComponent();
 
-            if (isAnyEdgeWithoutSource()) return;
+            if (isAnyEdgeWithoutSource()) {
+                final DisplayableEdge unfinishedEdge = component.getUnfinishedEdge();
+                // Make self-loop pretty if needed
+                if (unfinishedEdge.getTargetLocation().equals(getLocation()) && unfinishedEdge.getNails().size() == 1) {
+                    final Nail nail = new Nail(unfinishedEdge.getNails().get(0).getX(), unfinishedEdge.getNails().get(0).getY() + 2 * GRID_SIZE);
+                    unfinishedEdge.addNail(nail);
+                }
+                unfinishedEdge.setSourceLocation(getLocation());
+
+                final Location prevSourceLocation = component.previousLocationForDraggedEdge;
+                UndoRedoStack.push(() -> { // Perform
+                    unfinishedEdge.setSourceLocation(getLocation());
+                }, () -> { // Undo
+                    unfinishedEdge.setSourceLocation(prevSourceLocation);
+                }, "Dragged edge source to be location " + getLocation().getNickname(), "add-circle");
+                component.previousLocationForDraggedEdge = null;
+                return;
+            }
 
             if (root.isPlaced()) {
                 final DisplayableEdge unfinishedEdge = component.getUnfinishedEdge();
@@ -389,12 +405,13 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                         unfinishedEdge.addNail(nail);
                     }
 
+                    final Location previousTarget = component.previousLocationForDraggedEdge;
                     UndoRedoStack.push(() -> { // Perform
-                        component.addEdge(unfinishedEdge);
+                        unfinishedEdge.setTargetLocation(getLocation());
                     }, () -> { // Undo
-                        component.removeEdge(unfinishedEdge);
+                        unfinishedEdge.setTargetLocation(previousTarget);
                     }, "Created edge starting from location " + getLocation().getNickname(), "add-circle");
-
+                    component.previousLocationForDraggedEdge = null;
                 } else {
                     // If shift is being held down, start drawing a new edge
                     if (canCreateEdgeShortcut(event)) {
@@ -421,7 +438,6 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                     }
                 }
             } else {
-
                 // Allowed x and y coordinates
                 final double minX = GRID_SIZE * 2;
                 final double maxX = getComponent().getBox().getWidth() - GRID_SIZE * 2;
@@ -444,9 +460,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                 } else {
                     root.shake();
                 }
-
             }
-
         };
 
         locationProperty().addListener((obs, oldLocation, newLocation) -> {
@@ -474,19 +488,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
             }
         }
 
-        if (edgeWithoutSource != null) {
-            edgeWithoutSource.setSourceLocation(getLocation());
-
-            // Make self-loop pretty if needed
-            if (edgeWithoutSource.getTargetLocation().equals(getLocation()) && edgeWithoutSource.getNails().size() == 1) {
-                final Nail nail = new Nail(edgeWithoutSource.getNails().get(0).getX(), edgeWithoutSource.getNails().get(0).getY() + 2 *GRID_SIZE);
-                edgeWithoutSource.addNail(nail);
-            }
-
-            return true;
-        }
-
-        return false;
+        return edgeWithoutSource != null;
     }
 
     @Override

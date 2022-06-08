@@ -12,6 +12,7 @@ import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.Boxed;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import ecdar.utility.helpers.MouseCircular;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -50,6 +51,8 @@ public class Component extends HighLevelModelObject implements Boxed {
     private final Box box = new Box();
     private final BooleanProperty declarationOpen = new SimpleBooleanProperty(false);
     private final BooleanProperty firsTimeShown = new SimpleBooleanProperty(false);
+
+    public Location previousLocationForDraggedEdge;
 
     /**
      * Constructs an empty component
@@ -587,7 +590,9 @@ public class Component extends HighLevelModelObject implements Boxed {
 
     public DisplayableEdge getUnfinishedEdge() {
         for (final DisplayableEdge edge : edges) {
-            if (edge.getTargetLocation() == null)
+            if (edge.getTargetLocation() == null
+                    || edge.getSourceCircular() instanceof MouseCircular
+                    || edge.getTargetCircular() instanceof MouseCircular)
                 return edge;
         }
         return null;

@@ -63,22 +63,10 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
             newEdge.targetCircularProperty().addListener(getNewTargetCircularListener(newEdge));
             component.addListener(getComponentChangeListener(newEdge));
 
-            // Invalidate the list of edges (to update UI and errors)
-            newEdge.sourceCircularProperty().addListener(observable -> {
-                getComponent().removeEdge(getEdge());
-                getComponent().addEdge(getEdge());
-            });
-
-            // Invalidate the list of edges (to update UI and errors)
-            newEdge.targetCircularProperty().addListener(observable -> {
-                getComponent().removeEdge(getEdge());
-                getComponent().addEdge(getEdge());
-            });
-
             // When an edge updates highlight property,
             // we want to update the view to reflect current highlight property
             edge.get().isHighlightedProperty().addListener(v -> {
-                if(edge.get().getIsHighlighted()) {
+                if (edge.get().getIsHighlighted()) {
                     this.highlight();
                 } else {
                     this.unhighlight();
@@ -87,9 +75,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
         });
 
         initializeLinksListener();
-
         ensureNailsInFront();
-
         initializeSelectListener();
     }
 
@@ -114,7 +100,6 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
     }
 
     private void ensureNailsInFront() {
-
         // When ever changes happens to the children of the edge root force nails in front and other elements to back
         edgeRoot.getChildren().addListener((ListChangeListener<? super Node>) c -> {
             while (c.next()) {
@@ -290,12 +275,12 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
 
                     // Find the new first link (updated by adding nails to the collection) and bind it from the last nail to the target location
                     final Link newFirstLink = links.get(0);
-                    BindingHelper.bind(newFirstLink, simpleArrowHead, newSourceCircular, nail1);
+                    BindingHelper.bind(newFirstLink, newSourceCircular, nail1);
                 } else {
-                    BindingHelper.bind(firstLink, simpleArrowHead, newEdge.getSourceCircular(), newEdge.getTargetCircular());
+                    BindingHelper.bind(firstLink, newEdge.getSourceCircular(), newEdge.getTargetCircular());
                 }
             } else {
-                BindingHelper.bind(firstLink, simpleArrowHead, newEdge.getSourceCircular(), nails.get(0));
+                BindingHelper.bind(firstLink, newEdge.getSourceCircular(), nails.get(0));
             }
 
             KeyboardTracker.unregisterKeybind(KeyboardTracker.ABANDON_EDGE);
@@ -435,7 +420,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                         });
                         dropDownMenu.addSpacerElement();
 
-                        dropDownMenu.addClickableAndDisableableListElement("Delete",getEdge().getIsLockedProperty(), mouseEvent -> {
+                        dropDownMenu.addClickableAndDisableableListElement("Delete", getEdge().getIsLockedProperty(), mouseEvent -> {
                             UndoRedoStack.pushAndPerform(() -> { // Perform
                                 getComponent().removeEdge(getEdge());
                             }, () -> { // Undo
@@ -516,8 +501,9 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
     /**
      * Updates the synchronization label and tag.
      * The update depends on the edge I/O status.
+     *
      * @param nailPresentation NailPresentation to update label of
-     * @param propertyTag Property tag to update
+     * @param propertyTag      Property tag to update
      */
     private void updateSyncLabelOnNail(final NailPresentation nailPresentation, final TagPresentation propertyTag) {
         final Label propertyLabel = nailPresentation.getController().propertyLabel;
@@ -550,9 +536,11 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
 
         int i = 0;
         for (final Nail nail : getEdge().getNails()) {
-            if (nail.getPropertyType().equals(Edge.PropertyType.SELECTION)) data[Edge.PropertyType.SELECTION.getI()] = i;
+            if (nail.getPropertyType().equals(Edge.PropertyType.SELECTION))
+                data[Edge.PropertyType.SELECTION.getI()] = i;
             if (nail.getPropertyType().equals(Edge.PropertyType.GUARD)) data[Edge.PropertyType.GUARD.getI()] = i;
-            if (nail.getPropertyType().equals(Edge.PropertyType.SYNCHRONIZATION)) data[Edge.PropertyType.SYNCHRONIZATION.getI()] = i;
+            if (nail.getPropertyType().equals(Edge.PropertyType.SYNCHRONIZATION))
+                data[Edge.PropertyType.SYNCHRONIZATION.getI()] = i;
             if (nail.getPropertyType().equals(Edge.PropertyType.UPDATE)) data[Edge.PropertyType.UPDATE.getI()] = i;
 
             if ((getEdge().getIsLockedProperty().getValue()) || nail.getPropertyType().equals(type)) {
@@ -637,6 +625,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
         getEdge().getNails().forEach(enlargeNail);
     }
 
+    @FXML
     public void edgeExited() {
         isHoveringEdge.set(false);
     }
@@ -658,20 +647,21 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
         }
     }
 
-    public void edgeDragged(final MouseEvent event){
+    @FXML
+    public void edgeDragged(final MouseEvent event) {
         // Check if the edge is selected to ensure that the drag is not targeting a nail
-        if(SelectHelper.getSelectedElements().size() == 0 || SelectHelper.getSelectedElements().get(0) == this){
-            DisplayableEdge oldEdge = edge.get();
+        if (SelectHelper.getSelectedElements().size() == 0 || SelectHelper.getSelectedElements().get(0) == this) {
+            DisplayableEdge draggedEdge = edge.get();
             Location source, target;
 
-            if(oldEdge.getSourceLocation() != null) {
-                source = oldEdge.getSourceLocation();
+            if (draggedEdge.getSourceLocation() != null) {
+                source = draggedEdge.getSourceLocation();
             } else {
                 return;
             }
 
-            if(oldEdge.getTargetLocation() != null) {
-                target = oldEdge.getTargetLocation();
+            if (draggedEdge.getTargetLocation() != null) {
+                target = draggedEdge.getTargetLocation();
             } else {
                 return;
             }
@@ -680,10 +670,10 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
             boolean closestToTarget = getDistance(event.getX(), event.getY(), target.getX(), target.getY()) < getDistance(event.getX(), event.getY(), source.getX(), source.getY());
 
             // Handle drag closer to nails than locations
-            if(edge.get().getNails().size() > 0){
+            if (edge.get().getNails().size() > 0) {
                 boolean dragIsCloserToNail;
 
-                if(!closestToTarget){
+                if (!closestToTarget) {
                     // Check if the drag is closer to the first nail than to source
                     Nail firstNail = edge.get().getNails().get(0);
                     dragIsCloserToNail = getDistance(event.getX(), event.getY(), firstNail.getX(), firstNail.getY()) < getDistance(event.getX(), event.getY(), source.getX(), source.getY());
@@ -694,69 +684,24 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                 }
 
                 // If the drag is closer to a nail than the locations, no drag should be initiated
-                if(dragIsCloserToNail){
+                if (dragIsCloserToNail) {
                     return;
                 }
             }
 
-            final DisplayableEdge newEdge = getNewDisplayableEdgeBasedOnOld(oldEdge);
-
             if (!closestToTarget) {
-                // Set the source to a new MouseCircular, which will follow the mouse and handle setting the new source
-                newEdge.sourceCircularProperty().set(new MouseCircular());
-                newEdge.setTargetLocation(target);
-            }
+                getComponent().previousLocationForDraggedEdge = source;
+                draggedEdge.setSourceLocation(null);
 
-            addNewEdgeAndRemoveOld(oldEdge, newEdge);
-            setStateOfNewEdgeToTheStateOfTheOld(oldEdge, newEdge);
-        }
-    }
-
-    private DisplayableEdge getNewDisplayableEdgeBasedOnOld(DisplayableEdge oldEdge) {
-        final DisplayableEdge newEdge;
-
-        if (oldEdge instanceof Edge) {
-            newEdge = new Edge(oldEdge.getSourceLocation(), oldEdge.getStatus());
-        } else {
-            if (((GroupedEdge) oldEdge).getEdges().size() > 0) {
-                newEdge = new GroupedEdge(((GroupedEdge) oldEdge).getEdges());
+                KeyboardTracker.registerKeybind(KeyboardTracker.ABANDON_EDGE,
+                        new Keybind(new KeyCodeCombination(KeyCode.ESCAPE), () -> draggedEdge.setSourceLocation(getComponent().previousLocationForDraggedEdge)));
             } else {
-                newEdge = new GroupedEdge(new Edge(oldEdge.getSourceLocation(), oldEdge.getStatus()));
+                getComponent().previousLocationForDraggedEdge = target;
+                draggedEdge.setTargetLocation(null);
+
+                KeyboardTracker.registerKeybind(KeyboardTracker.ABANDON_EDGE,
+                        new Keybind(new KeyCodeCombination(KeyCode.ESCAPE), () -> draggedEdge.setTargetLocation(getComponent().previousLocationForDraggedEdge)));
             }
-        }
-
-        return newEdge;
-    }
-
-    private void addNewEdgeAndRemoveOld(DisplayableEdge oldEdge, DisplayableEdge newEdge) {
-        KeyboardTracker.registerKeybind(KeyboardTracker.ABANDON_EDGE, new Keybind(new KeyCodeCombination(KeyCode.ESCAPE), () -> {
-            UndoRedoStack.undo();
-            // Clear redo stack to prevent dangling edge
-            UndoRedoStack.clearRedos();
-        }));
-
-        UndoRedoStack.pushAndPerform(() -> { // Perform
-            getComponent().removeEdge(oldEdge);
-            getComponent().addEdge(newEdge);
-        }, () -> { // Undo
-            getComponent().removeEdge(newEdge);
-            getComponent().addEdge(oldEdge);
-        }, "Updated edge", "update");
-    }
-
-    private void setStateOfNewEdgeToTheStateOfTheOld(DisplayableEdge oldEdge, DisplayableEdge newEdge) {
-        newEdge.setColor(getColor());
-        newEdge.setColorIntensity(getColorIntensity());
-        newEdge.selectProperty().set(oldEdge.getSelect());
-        newEdge.guardProperty().set(oldEdge.getGuard());
-        newEdge.updateProperty().set(oldEdge.getUpdate());
-
-        if(oldEdge instanceof Edge && newEdge instanceof Edge) {
-            ((Edge) newEdge).syncProperty().set(((Edge) oldEdge).getSync());
-        }
-
-        for (Nail n : oldEdge.getNails()) {
-            newEdge.addNail(n);
         }
     }
 
@@ -810,7 +755,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
         // Clear the currently selected elements, so we don't have multiple things highlighted/selected
         SelectHelper.clearSelectedElements();
         edgeRoot.getChildren().forEach(node -> {
-            if(node instanceof Highlightable) {
+            if (node instanceof Highlightable) {
                 ((Highlightable) node).highlight();
             }
         });
@@ -822,7 +767,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
     @Override
     public void unhighlight() {
         edgeRoot.getChildren().forEach(node -> {
-            if(node instanceof Highlightable) {
+            if (node instanceof Highlightable) {
                 ((Highlightable) node).unhighlight();
             }
         });
@@ -858,7 +803,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
         return 0;
     }
 
-    private double getDistance(double x1, double y1, double x2, double y2){
+    private double getDistance(double x1, double y1, double x2, double y2) {
         return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
     }
 }

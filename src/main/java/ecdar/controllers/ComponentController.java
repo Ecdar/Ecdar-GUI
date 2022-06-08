@@ -741,7 +741,7 @@ public class ComponentController extends ModelController implements Initializabl
             modelContainerEdge.getChildren().add(edgePresentation);
 
             final Consumer<Circular> updateMouseTransparency = (newCircular) -> {
-                edgePresentation.setMouseTransparent(newCircular == null);
+                edgePresentation.setMouseTransparent(newCircular == null || newCircular instanceof MouseCircular);
             };
 
             edge.targetCircularProperty().addListener((obs1, oldTarget, newTarget) -> updateMouseTransparency.accept(newTarget));
