@@ -25,7 +25,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import static javafx.scene.paint.Color.*;
 
-public class QueryPresentation extends AnchorPane {
+public class QueryPresentation extends HBox {
     private final Tooltip tooltip = new Tooltip();
     private Tooltip backendDropdownTooltip;
     private final QueryController controller;
@@ -441,11 +441,6 @@ public class QueryPresentation extends AnchorPane {
             addInputOrOutput(entry.getKey(), entry.getValue(), controller.getQuery().ignoredOutputs, outputBox);
         }
     }
-
-//    private void setSwapBackendTooltipAndLabel(BackendInstance backend) {
-//        swapBackendButtonTooltip.setText("Switch to the " + (isReveaal ? "jEcdar" : "Reveaal") + " backend");
-//        currentBackendLabel.setText((isReveaal ? "Reveaal" : "jEcdar"));
-//    }
 
     private void initializeMoreInformationButtonAndQueryTypeSymbol() {
         Platform.runLater(() -> {

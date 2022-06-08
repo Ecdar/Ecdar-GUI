@@ -10,55 +10,61 @@
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="StackPane" fx:id="root"
          fx:controller="ecdar.controllers.QueryPaneController">
-    <VBox>
-        <!-- Toolbar -->
-        <HBox fx:id="toolbar">
-            <padding>
-                <Insets topRightBottomLeft="10"/>
-            </padding>
-            <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
-                <Label fx:id="toolbarTitle"
-                       styleClass="title"
-                       text="Queries"/>
+        <VBox HBox.hgrow="ALWAYS">
+            <!-- Toolbar -->
+            <HBox fx:id="toolbar">
+                <padding>
+                    <Insets topRightBottomLeft="10"/>
+                </padding>
+                <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+                    <Label fx:id="toolbarTitle"
+                           styleClass="title"
+                           text="Queries"/>
+                </HBox>
+                <HBox alignment="CENTER_RIGHT">
+                    <!-- Add query -->
+                    <JFXRippler fx:id="addButton">
+                        <StackPane styleClass="responsive-icon-stack-pane-sizing" onMouseClicked="#addButtonClicked">
+                            <FontIcon iconLiteral="gmi-add" styleClass="icon-size-medium" fill="white"/>
+                        </StackPane>
+                    </JFXRippler>
+
+                    <JFXRippler fx:id="runAllQueriesButton">
+                        <StackPane styleClass="responsive-icon-stack-pane-sizing"
+                                   onMouseClicked="#runAllQueriesButtonClicked">
+                            <FontIcon iconLiteral="gmi-play-arrow" styleClass="icon-size-medium" fill="white"/>
+                        </StackPane>
+                    </JFXRippler>
+
+                    <Region minWidth="8"/>
+
+                    <JFXRippler fx:id="clearAllQueriesButton">
+                        <StackPane styleClass="responsive-icon-stack-pane-sizing"
+                                   onMouseClicked="#clearAllQueriesButtonClicked">
+                            <FontIcon iconLiteral="gmi-clear-all" styleClass="icon-size-medium" fill="white"/>
+                        </StackPane>
+                    </JFXRippler>
+                </HBox>
             </HBox>
-            <HBox alignment="CENTER_RIGHT">
-                <!-- Add query -->
-                <JFXRippler fx:id="addButton">
-                    <StackPane styleClass="responsive-icon-stack-pane-sizing" onMouseClicked="#addButtonClicked">
-                        <FontIcon iconLiteral="gmi-add" styleClass="icon-size-medium" fill="white"/>
-                    </StackPane>
-                </JFXRippler>
 
-                <JFXRippler fx:id="runAllQueriesButton">
-                    <StackPane styleClass="responsive-icon-stack-pane-sizing"
-                               onMouseClicked="#runAllQueriesButtonClicked">
-                        <FontIcon iconLiteral="gmi-play-arrow" styleClass="icon-size-medium" fill="white"/>
-                    </StackPane>
-                </JFXRippler>
+            <HBox HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
+                <StackPane VBox.vgrow="ALWAYS" fx:id="resizeAnchor">
+                    <FontIcon iconLiteral="gmi-code" styleClass="icon-size-x-small" style="-fx-fill: -primary-color;"/>
+                </StackPane>
+                <ScrollPane fx:id="scrollPane"
+                            HBox.hgrow="ALWAYS"
+                            fitToHeight="true" fitToWidth="true"
+                            AnchorPane.topAnchor="0"
+                            AnchorPane.bottomAnchor="0"
+                            AnchorPane.leftAnchor="0"
+                            AnchorPane.rightAnchor="0"
+                            styleClass="edge-to-edge">
 
-                <Region minWidth="8"/>
-
-                <JFXRippler fx:id="clearAllQueriesButton">
-                    <StackPane styleClass="responsive-icon-stack-pane-sizing"
-                               onMouseClicked="#clearAllQueriesButtonClicked">
-                        <FontIcon iconLiteral="gmi-clear-all" styleClass="icon-size-medium" fill="white"/>
-                    </StackPane>
-                </JFXRippler>
+                    <VBox fx:id="queriesList" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0"
+                          AnchorPane.rightAnchor="0">
+                        <!-- Queries goes here -->
+                    </VBox>
+                </ScrollPane>
             </HBox>
-        </HBox>
-
-        <ScrollPane fx:id="scrollPane"
-                    fitToHeight="true" fitToWidth="true"
-                    AnchorPane.topAnchor="0"
-                    AnchorPane.bottomAnchor="0"
-                    AnchorPane.leftAnchor="0"
-                    AnchorPane.rightAnchor="0"
-                    styleClass="edge-to-edge">
-
-            <VBox fx:id="queriesList" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0"
-                  AnchorPane.rightAnchor="0">
-                <!-- Queries goes here -->
-            </VBox>
-        </ScrollPane>
-    </VBox>
+        </VBox>
 </fx:root>

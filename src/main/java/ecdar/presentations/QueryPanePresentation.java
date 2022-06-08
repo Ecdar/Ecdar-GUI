@@ -91,4 +91,8 @@ public class QueryPanePresentation extends StackPane {
                 new BorderWidths(0, 1, bottomInsetWidth, 0)
         )));
     }
+
+    public QueryPaneController getController() {
+        return controller;
+    }
 }

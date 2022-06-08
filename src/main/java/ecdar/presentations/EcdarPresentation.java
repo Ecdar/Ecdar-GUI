@@ -17,6 +17,7 @@ import ecdar.utility.keyboard.KeyboardTracker;
 import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.ListChangeListener;
@@ -73,15 +74,12 @@ public class EcdarPresentation extends StackPane {
 
         // Open the file and query panel initially
         Platform.runLater(() -> {
-            toggleFilePane();
-            toggleQueryPane();
-
             // Bind sizing of sides and center panes to ensure correct sizing
             controller.canvasPane.minWidthProperty().bind(controller.root.widthProperty().subtract(filePaneAnimationProperty.add(queryPaneAnimationProperty)));
             controller.canvasPane.maxWidthProperty().bind(controller.root.widthProperty().subtract(filePaneAnimationProperty.add(queryPaneAnimationProperty)));
 
             // Bind the height to ensure that both the top and bottom panes are shown
-            // The height of the top pane is multiplied by as the UI does not account for the height otherwise
+            // The height of the top pane is multiplied by 4 as the UI does not account for the height otherwise
             controller.canvasPane.minHeightProperty().bind(controller.root.heightProperty().subtract(controller.topPane.heightProperty().multiply(4).add(controller.bottomFillerElement.heightProperty())));
             controller.canvasPane.maxHeightProperty().bind(controller.root.heightProperty().subtract(controller.topPane.heightProperty().multiply(4).add(controller.bottomFillerElement.heightProperty())));
 
@@ -93,6 +91,11 @@ public class EcdarPresentation extends StackPane {
 
             controller.topPane.minHeightProperty().bind(controller.menuBar.heightProperty());
             controller.topPane.maxHeightProperty().bind(controller.menuBar.heightProperty());
+
+            Platform.runLater(() -> {
+                toggleFilePane();
+                toggleQueryPane();
+            });
         });
 
         initializeHelpImages();
@@ -102,6 +105,8 @@ public class EcdarPresentation extends StackPane {
         KeyboardTracker.registerKeybind(KeyboardTracker.RESET_ZOOM, new Keybind(new KeyCodeCombination(KeyCode.DIGIT0, KeyCombination.SHORTCUT_DOWN), () -> EcdarController.getActiveCanvasPresentation().getController().zoomHelper.resetZoom()));
         KeyboardTracker.registerKeybind(KeyboardTracker.UNDO, new Keybind(new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN), UndoRedoStack::undo));
         KeyboardTracker.registerKeybind(KeyboardTracker.REDO, new Keybind(new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN), UndoRedoStack::redo));
+
+        initializeResizeQueryPane();
     }
 
     private void initializeSnackbar() {
@@ -274,11 +279,6 @@ public class EcdarPresentation extends StackPane {
         controller.filePane.widthProperty().addListener((observable) -> {
             initializeOpenFilePaneAnimation();
             initializeCloseFilePaneAnimation();
-
-            // If the scaling has changed and the file pane is open, trigger animation to ensure correct width
-            if (filePaneOpen.get()) {
-                openFilePaneAnimation.play();
-            }
         });
     }
 
@@ -321,11 +321,18 @@ public class EcdarPresentation extends StackPane {
         controller.queryPane.widthProperty().addListener((observable) -> {
             initializeOpenQueryPaneAnimation();
             initializeCloseQueryPaneAnimation();
+        });
 
-            // If the scaling has changed and the query pane is open, trigger animation to ensure correct width
-            if (queryPaneOpen.get()) {
-                openQueryPaneAnimation.play();
-            }
+        Platform.runLater(() -> {
+            Ecdar.getPresentation().controller.scalingProperty.addListener(observable -> {
+                // If the scaling has changed trigger animations for open panes to update width
+                if (queryPaneOpen.get()) {
+                    openQueryPaneAnimation.play();
+                }
+                if (filePaneOpen.get()) {
+                    openFilePaneAnimation.play();
+                }
+            });
         });
 
         // When new queries are added, make sure that the query pane is open
@@ -423,6 +430,30 @@ public class EcdarPresentation extends StackPane {
         controller.helpOutputImage.setImage(new Image(Ecdar.class.getResource("ic_help_output.png").toExternalForm()));
         fitSizeWhenAvailable(controller.helpOutputImage, controller.helpOutputPane);
     }
+
+    private void initializeResizeQueryPane() {
+        final DoubleProperty prevX = new SimpleDoubleProperty();
+        final DoubleProperty prevWidth = new SimpleDoubleProperty();
+
+        controller.queryPane.getController().resizeAnchor.setOnMousePressed(event -> {
+            event.consume();
+
+            prevX.set(event.getScreenX());
+            prevWidth.set(controller.queryPane.getWidth());
+        });
+
+        controller.queryPane.getController().resizeAnchor.setOnMouseDragged(event -> {
+            double diff = prevX.get() - event.getScreenX();
+
+            // Set bounds for resizing to be between 280px and half the screen width
+            final double newWidth = Math.min(Math.max(prevWidth.get() + diff, 280), controller.root.getWidth() / 2);
+
+            queryPaneAnimationProperty.set(newWidth);
+            controller.queryPane.setMaxWidth(newWidth);
+            controller.queryPane.setMinWidth(newWidth);
+        });
+    }
+
 
     public BooleanProperty toggleFilePane() {
         if (filePaneOpen.get()) {
