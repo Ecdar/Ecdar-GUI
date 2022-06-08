@@ -14,6 +14,7 @@ public abstract class ModelController {
     public StackPane root;
     public Rectangle background;
     public BorderPane frame;
+    public Rectangle cornerAnchor;
     public Rectangle rightAnchor;
     public Rectangle bottomAnchor;
     public Line topLeftLine;

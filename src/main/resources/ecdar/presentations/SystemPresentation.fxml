@@ -36,7 +36,7 @@
         <Pane fx:id="systemRootContainer" translateY="1" pickOnBounds="false"/>
     </StackPane>
 
+    <Rectangle opacity="0" fx:id="cornerAnchor" StackPane.alignment="BOTTOM_RIGHT"/>
     <Rectangle opacity="0" fx:id="bottomAnchor" StackPane.alignment="BOTTOM_LEFT"/>
     <Rectangle opacity="0" fx:id="rightAnchor" StackPane.alignment="TOP_RIGHT"/>
-
 </fx:root>

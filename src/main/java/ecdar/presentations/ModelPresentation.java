@@ -40,6 +40,7 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
         initializeDimensions(box);
         initializesBottomDragAnchor(box);
         initializesRightDragAnchor(box);
+        initializesCornerDragAnchor(box);
     }
 
     /**
@@ -217,6 +218,73 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
                         box.setHeight(previousHeight);
                     },
                     "Component height resized",
+                    "settings-overscan"
+            );
+
+            wasResized.set(false);
+        });
+    }
+
+    private void initializesCornerDragAnchor(final Box box) {
+        final BooleanProperty wasResized = new SimpleBooleanProperty(false);
+
+        final Rectangle cornerAnchor = getModelController().cornerAnchor;
+        cornerAnchor.setCursor(Cursor.SE_RESIZE);
+
+        // Bind the place and size of bottom anchor
+        cornerAnchor.setWidth(10);
+        cornerAnchor.setHeight(10);
+
+        final DoubleProperty prevX = new SimpleDoubleProperty();
+        final DoubleProperty prevY = new SimpleDoubleProperty();
+        final DoubleProperty prevWidth = new SimpleDoubleProperty();
+        final DoubleProperty prevHeight = new SimpleDoubleProperty();
+
+        cornerAnchor.setOnMousePressed(event -> {
+            event.consume();
+
+            prevX.set(event.getScreenX());
+            prevWidth.set(box.getWidth());
+            prevY.set(event.getScreenY());
+            prevHeight.set(box.getHeight());
+        });
+
+        cornerAnchor.setOnMouseDragged(event -> {
+            double xDiff = event.getScreenX() - prevX.get();
+            xDiff -= xDiff % Grid.GRID_SIZE;
+
+            final double newWidth = prevWidth.get() + xDiff;
+            final double minWidth = getDragAnchorMinWidth();
+            box.setWidth(Math.max(newWidth, minWidth));
+
+            double yDiff = event.getScreenY() - prevY.get();
+            yDiff -= yDiff % Grid.GRID_SIZE;
+
+            final double newHeight = prevHeight.get() + yDiff;
+            final double minHeight = getDragAnchorMinHeight();
+            box.setHeight(Math.max(newHeight, minHeight));
+
+            wasResized.set(true);
+        });
+
+        cornerAnchor.setOnMouseReleased(event -> {
+            if (!wasResized.get()) return;
+            final double previousWidth = prevWidth.doubleValue();
+            final double currentWidth = box.getWidth();
+            final double previousHeight = prevHeight.doubleValue();
+            final double currentHeight = box.getHeight();
+
+            // If no difference do not save change
+            if (previousWidth == currentWidth && previousHeight == currentHeight) return;
+
+            UndoRedoStack.pushAndPerform(() -> { // Perform
+                        box.setWidth(currentWidth);
+                        box.setHeight(currentHeight);
+                    }, () -> { // Undo
+                        box.setWidth(previousWidth);
+                        box.setHeight(previousHeight);
+                    },
+                    "Component resized",
                     "settings-overscan"
             );
 
