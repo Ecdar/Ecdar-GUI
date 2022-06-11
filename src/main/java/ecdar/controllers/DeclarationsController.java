@@ -1,5 +1,6 @@
 package ecdar.controllers;
 
+import ecdar.Ecdar;
 import ecdar.abstractions.Declarations;
 import ecdar.presentations.ComponentPresentation;
 import javafx.beans.property.ObjectProperty;
@@ -19,7 +20,7 @@ public class DeclarationsController implements Initializable {
     public StyleClassedTextArea textArea;
     public StackPane root;
 
-    private double offSet, canvasHeight;
+    private double offSet;
     private final ObjectProperty<Declarations> declarations;
 
     public DeclarationsController() {
@@ -41,22 +42,14 @@ public class DeclarationsController implements Initializable {
      */
     private void initializeWidthAndHeight() {
         // Fetch width and height of canvas and update
-        root.setMinWidth(EcdarController.getActiveCanvasPresentation().getController().getWidthProperty().doubleValue());
-        canvasHeight = EcdarController.getActiveCanvasPresentation().getController().getHeightProperty().doubleValue();
-        updateOffset(EcdarController.getActiveCanvasPresentation().getController().getInsetShouldShow().get());
-        updateHeight();
+        root.minWidthProperty().bind(Ecdar.getPresentation().getController().canvasPane.minWidthProperty());
+        root.maxWidthProperty().bind(Ecdar.getPresentation().getController().canvasPane.maxWidthProperty());
+        root.minHeightProperty().bind(Ecdar.getPresentation().getController().canvasPane.minHeightProperty());
+        root.maxHeightProperty().bind(Ecdar.getPresentation().getController().canvasPane.maxHeightProperty());
 
-        EcdarController.getActiveCanvasPresentation().getController().getWidthProperty().addListener((observable, oldValue, newValue) -> {
-            root.setMinWidth(newValue.doubleValue());
-            root.setMaxWidth(newValue.doubleValue());
-        });
-        EcdarController.getActiveCanvasPresentation().getController().getHeightProperty().addListener((observable, oldValue, newValue) -> {
-            canvasHeight = newValue.doubleValue();
-            updateHeight();
-        });
+        updateOffset(EcdarController.getActiveCanvasPresentation().getController().getInsetShouldShow().get());
         EcdarController.getActiveCanvasPresentation().getController().getInsetShouldShow().addListener((observable, oldValue, newValue) -> {
             updateOffset(newValue);
-            updateHeight();
         });
     }
 
@@ -96,15 +89,5 @@ public class DeclarationsController implements Initializable {
         } else {
             offSet = 0;
         }
-    }
-
-    /**
-     * Updates the height of the view.
-     */
-    private void updateHeight() {
-        final double value = canvasHeight - EcdarController.getActiveCanvasPresentation().getController().DECLARATION_Y_MARGIN - offSet;
-
-        root.setMinHeight(value);
-        root.setMaxHeight(value);
     }
 }

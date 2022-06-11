@@ -10,7 +10,6 @@
          type="StackPane"
          fx:id="root"
          fx:controller="ecdar.controllers.ComponentController">
-
     <HBox spacing="0" alignment="CENTER" >
         <VBox fx:id="inputSignatureContainer" maxHeight="40"  maxWidth="100" minWidth="100" spacing="10"
               alignment="CENTER_RIGHT" style="-fx-padding: 3em 0em 0em 0em;" />
@@ -57,6 +56,7 @@
 
             <Rectangle opacity="0" fx:id="bottomAnchor" StackPane.alignment="BOTTOM_LEFT"/>
             <Rectangle opacity="0" fx:id="rightAnchor" StackPane.alignment="TOP_RIGHT"/>
+            <Rectangle opacity="0" fx:id="cornerAnchor" StackPane.alignment="BOTTOM_RIGHT"/>
         </StackPane>
 
         <VBox fx:id="outputSignatureContainer" maxHeight="40" maxWidth="100" minWidth="100" spacing="10"

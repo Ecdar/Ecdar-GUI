@@ -5,7 +5,6 @@ import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXTextField;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
-import ecdar.controllers.CanvasController;
 import ecdar.controllers.EcdarController;
 import ecdar.mutation.models.ExpandableContent;
 import ecdar.mutation.models.MutationTestPlan;

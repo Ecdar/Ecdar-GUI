@@ -22,9 +22,7 @@ import ecdar.utility.keyboard.Nudgeable;
 import com.jfoenix.controls.*;
 import javafx.application.Platform;
 import javafx.beans.binding.When;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
@@ -54,7 +52,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class EcdarController implements Initializable {
-
     // Reachability analysis
     public static boolean reachabilityServiceEnabled = false;
     private static long reachabilityTime = Long.MAX_VALUE;
@@ -64,11 +61,15 @@ public class EcdarController implements Initializable {
 
     // View stuff
     public StackPane root;
+    public BorderPane borderPane;
+    public StackPane canvasPane;
+    public StackPane topPane;
+    public StackPane leftPane;
+    public StackPane rightPane;
+    public Rectangle bottomFillerElement;
     public QueryPanePresentation queryPane;
     public ProjectPanePresentation filePane;
     public HBox toolbar;
-    public Label queryPaneFillerElement;
-    public Label filePaneFillerElement;
     public MessageTabPanePresentation messageTabPane;
     public StackPane dialogContainer;
     public JFXDialog dialog;
@@ -103,9 +104,6 @@ public class EcdarController implements Initializable {
     public StackPane aboutContainer;
     public JFXDialog aboutDialog;
     public JFXButton aboutAcceptButton;
-    public StackPane canvasPane;
-
-    public Rectangle bottomFillerElement;
 
     // The program top menu
     public MenuBar menuBar;
@@ -151,17 +149,19 @@ public class EcdarController implements Initializable {
     public StackPane backendOptionsDialogContainer;
     public BackendOptionsDialogPresentation backendOptionsDialog;
 
+    public final DoubleProperty scalingProperty = new SimpleDoubleProperty();
+
     private static JFXDialog _queryDialog;
     private static Text _queryTextResult;
     private static Text _queryTextQuery;
-
-    private static final ObjectProperty<CanvasPresentation> activeCanvasPresentation = new SimpleObjectProperty<>(new CanvasPresentation());
 
     public static void runReachabilityAnalysis() {
         if (!reachabilityServiceEnabled) return;
 
         reachabilityTime = System.currentTimeMillis() + 500;
     }
+
+    private static final ObjectProperty<CanvasPresentation> activeCanvasPresentation = new SimpleObjectProperty<>(new CanvasPresentation());
 
     public static EdgeStatus getGlobalEdgeStatus() {
         return globalEdgeStatus.get();
@@ -174,7 +174,7 @@ public class EcdarController implements Initializable {
      */
     public void scaleIcons(Node node) {
         Platform.runLater(() -> {
-            scaleIcons(node, getCalculatedNewScale());
+            scaleIcons(node, getNewCalculatedScale());
         });
     }
 
@@ -193,7 +193,7 @@ public class EcdarController implements Initializable {
             icon.setStyle("-fx-icon-size: " + Math.floor(size / 13.0 * 18) + "px;");
     }
 
-    private double getCalculatedNewScale() {
+    private double getNewCalculatedScale() {
         return (Double.parseDouble(scaling.getSelectedToggle().getProperties().get("scale").toString()) * Ecdar.getDpiScale()) * 13.0;
     }
 
@@ -267,11 +267,8 @@ public class EcdarController implements Initializable {
         });
 
         filePane.getStyleClass().add("responsive-pane-sizing");
-        filePaneFillerElement.getStyleClass().add("responsive-pane-sizing");
         queryPane.getStyleClass().add("responsive-pane-sizing");
-        queryPaneFillerElement.getStyleClass().add("responsive-pane-sizing");
 
-        initializeCanvasPane();
         initializeEdgeStatusHandling();
         initializeKeybindings();
         initializeStatusBar();
@@ -552,8 +549,18 @@ public class EcdarController implements Initializable {
         return activeCanvasPresentation.get();
     }
 
+    public static DoubleProperty getActiveCanvasZoomFactor() {
+        return getActiveCanvasPresentation().getController().zoomHelper.currentZoomFactor;
+    }
+
     public static void setActiveCanvasPresentation(CanvasPresentation newActiveCanvasPresentation) {
+        activeCanvasPresentation.get().setOpacity(0.75);
+        newActiveCanvasPresentation.setOpacity(1);
         activeCanvasPresentation.set(newActiveCanvasPresentation);
+    }
+
+    public static void setActiveModelForActiveCanvas(HighLevelModelObject newActiveModel) {
+        EcdarController.getActiveCanvasPresentation().getController().setActiveModel(newActiveModel);
     }
 
     private void initializeHelpMenu() {
@@ -653,7 +660,7 @@ public class EcdarController implements Initializable {
         menuBarAutoscaling.getGraphic().setOpacity(Ecdar.autoScalingEnabled.getValue() ? 1 : 0);
         menuBarAutoscaling.setOnAction(event -> {
             Ecdar.autoScalingEnabled.setValue(!Ecdar.autoScalingEnabled.getValue());
-            updateScaling(getCalculatedNewScale() / 13);
+            updateScaling(getNewCalculatedScale() / 13);
             Ecdar.preferences.put("autoscaling", String.valueOf(Ecdar.autoScalingEnabled.getValue()));
         });
         Ecdar.autoScalingEnabled.addListener((observable, oldValue, newValue) -> {
@@ -693,18 +700,20 @@ public class EcdarController implements Initializable {
     }
 
     private void updateScaling(double newScale) {
-        double calculatedNewScale = getCalculatedNewScale();
-
-        Ecdar.getPresentation().setStyle("-fx-font-size: " + calculatedNewScale + "px;");
+        double newCalculatedScale = getNewCalculatedScale();
+        Ecdar.getPresentation().setStyle("-fx-font-size: " + newCalculatedScale + "px;");
 
         // Text do not scale on the canvas to avoid ugly elements,
         // this zooms in on the component in order to get the "same font size"
-        EcdarController.getActiveCanvasPresentation().getController().zoomHelper.setZoomLevel(calculatedNewScale / 13);
+        EcdarController.getActiveCanvasPresentation().getController().zoomHelper.setZoomLevel(newCalculatedScale / 13);
         Ecdar.preferences.put("scale", String.valueOf(newScale));
 
-        scaleIcons(root, calculatedNewScale);
-        scaleEdgeStatusToggle(calculatedNewScale);
+        scaleIcons(root, newCalculatedScale);
+        scaleEdgeStatusToggle(newCalculatedScale);
         messageTabPane.getController().updateScale(newScale);
+
+        // Update listeners of UI scale
+        scalingProperty.set(newScale);
     }
 
     /**
@@ -975,19 +984,30 @@ public class EcdarController implements Initializable {
      */
     private void setCanvasModeToSingular() {
         canvasPane.getChildren().clear();
-
-        CanvasShellPresentation canvasShellPresentation = new CanvasShellPresentation();
+        CanvasPresentation canvasPresentation = new CanvasPresentation();
         HighLevelModelObject model = activeCanvasPresentation.get().getController().getActiveModel();
         if (model != null) {
-            canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(activeCanvasPresentation.get().getController().getActiveModel());
+            canvasPresentation.getController().setActiveModel(activeCanvasPresentation.get().getController().getActiveModel());
         } else {
             // If no components where found, the project has not been initialized. The active model will be updated when the project is initialized
-            canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(Ecdar.getProject().getComponents().stream().findFirst().orElse(null));
+            canvasPresentation.getController().setActiveModel(Ecdar.getProject().getComponents().stream().findFirst().orElse(null));
         }
 
-        canvasPane.getChildren().add(canvasShellPresentation);
-        activeCanvasPresentation.set(canvasShellPresentation.getController().canvasPresentation);
+        canvasPane.getChildren().add(canvasPresentation);
+        activeCanvasPresentation.set(canvasPresentation);
         filePane.getController().updateColorsOnFilePresentations();
+
+        Rectangle clip = new Rectangle();
+        clip.setArcWidth(1);
+        clip.setArcHeight(1);
+        clip.widthProperty().bind(canvasPane.widthProperty());
+        clip.heightProperty().bind(canvasPane.heightProperty());
+        canvasPresentation.getController().zoomablePane.setClip(clip);
+
+        canvasPresentation.getController().zoomablePane.minWidthProperty().bind(canvasPane.widthProperty());
+        canvasPresentation.getController().zoomablePane.maxWidthProperty().bind(canvasPane.widthProperty());
+        canvasPresentation.getController().zoomablePane.minHeightProperty().bind(canvasPane.heightProperty());
+        canvasPresentation.getController().zoomablePane.maxHeightProperty().bind(canvasPane.heightProperty());
     }
 
     /**
@@ -1018,39 +1038,39 @@ public class EcdarController implements Initializable {
         ObservableList<Component> components = Ecdar.getProject().getComponents();
         int currentCompNum = 0, numComponents = components.size();
 
-        // Add the canvasShellPresentation at the top-left
-        CanvasShellPresentation canvasShellPresentation = initializeNewCanvasShellPresentation();
-        canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(getActiveCanvasPresentation().getController().getActiveModel());
-        canvasGrid.add(canvasShellPresentation, 0, 0);
-        setActiveCanvasPresentation(canvasShellPresentation.getController().canvasPresentation);
+        // Add the canvasPresentation at the top-left
+        CanvasPresentation canvasPresentation = initializeNewCanvasPresentation();
+        canvasPresentation.getController().setActiveModel(getActiveCanvasPresentation().getController().getActiveModel());
+        canvasGrid.add(canvasPresentation, 0, 0);
+        setActiveCanvasPresentation(canvasPresentation);
 
-        // Add the canvasShellPresentation at the top-right
-        canvasShellPresentation = initializeNewCanvasShellPresentationWithActiveComponent(components, currentCompNum);
-        canvasShellPresentation.setOpacity(0.75);
-        canvasGrid.add(canvasShellPresentation, 1, 0);
+        // Add the canvasPresentation at the top-right
+        canvasPresentation = initializeNewCanvasPresentationWithActiveComponent(components, currentCompNum);
+        canvasPresentation.setOpacity(0.75);
+        canvasGrid.add(canvasPresentation, 1, 0);
 
-        // Update the startIndex for the next canvasShellPresentation
+        // Update the startIndex for the next canvasPresentation
         for (int i = 0; i < numComponents; i++) {
-            if (canvasShellPresentation.getController().canvasPresentation.getController().getActiveModel() != null && canvasShellPresentation.getController().canvasPresentation.getController().getActiveModel().equals(components.get(i))) {
+            if (canvasPresentation.getController().getActiveModel() != null && canvasPresentation.getController().getActiveModel().equals(components.get(i))) {
                 currentCompNum = i + 1;
             }
         }
 
-        // Add the canvasShellPresentation at the bottom-left
-        canvasShellPresentation = initializeNewCanvasShellPresentationWithActiveComponent(components, currentCompNum);
-        canvasShellPresentation.setOpacity(0.75);
-        canvasGrid.add(canvasShellPresentation, 0, 1);
+        // Add the canvasPresentation at the bottom-left
+        canvasPresentation = initializeNewCanvasPresentationWithActiveComponent(components, currentCompNum);
+        canvasPresentation.setOpacity(0.75);
+        canvasGrid.add(canvasPresentation, 0, 1);
 
-        // Update the startIndex for the next canvasShellPresentation
+        // Update the startIndex for the next canvasPresentation
         for (int i = 0; i < numComponents; i++)
-            if (canvasShellPresentation.getController().canvasPresentation.getController().getActiveModel() != null && canvasShellPresentation.getController().canvasPresentation.getController().getActiveModel().equals(components.get(i))) {
+            if (canvasPresentation.getController().getActiveModel() != null && canvasPresentation.getController().getActiveModel().equals(components.get(i))) {
                 currentCompNum = i + 1;
             }
 
-        // Add the canvasShellPresentation at the bottom-right
-        canvasShellPresentation = initializeNewCanvasShellPresentationWithActiveComponent(components, currentCompNum);
-        canvasShellPresentation.setOpacity(0.75);
-        canvasGrid.add(canvasShellPresentation, 1, 1);
+        // Add the canvasPresentation at the bottom-right
+        canvasPresentation = initializeNewCanvasPresentationWithActiveComponent(components, currentCompNum);
+        canvasPresentation.setOpacity(0.75);
+        canvasGrid.add(canvasPresentation, 1, 1);
 
         canvasPane.getChildren().add(canvasGrid);
         filePane.getController().updateColorsOnFilePresentations();
@@ -1063,30 +1083,45 @@ public class EcdarController implements Initializable {
      * @param startIndex the index to start at when trying to find the component to set as active
      * @return new CanvasShellPresentation
      */
-    private CanvasShellPresentation initializeNewCanvasShellPresentationWithActiveComponent(ObservableList<Component> components, int startIndex) {
-        CanvasShellPresentation canvasShellPresentation = initializeNewCanvasShellPresentation();
+    private CanvasPresentation initializeNewCanvasPresentationWithActiveComponent(ObservableList<Component> components, int startIndex) {
+        CanvasPresentation canvasPresentation = initializeNewCanvasPresentation();
 
         int numComponents = components.size();
-        canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(null);
+        canvasPresentation.getController().setActiveModel(null);
         for (int currentCompNum = startIndex; currentCompNum < numComponents; currentCompNum++) {
             if (getActiveCanvasPresentation().getController().getActiveModel() != components.get(currentCompNum)) {
-                canvasShellPresentation.getController().canvasPresentation.getController().setActiveModel(components.get(currentCompNum));
+                canvasPresentation.getController().setActiveModel(components.get(currentCompNum));
                 break;
             }
         }
 
-        return canvasShellPresentation;
+        return canvasPresentation;
     }
 
     /**
-     * Initialize a new CanvasShellPresentation and return it
+     * Initialize a new CanvasPresentation and return it
      *
-     * @return new CanvasShellPresentation
+     * @return new CanvasPresentation
      */
-    private CanvasShellPresentation initializeNewCanvasShellPresentation() {
-        CanvasShellPresentation canvasShellPresentation = new CanvasShellPresentation();
-        canvasShellPresentation.setBorder(new Border(new BorderStroke(Color.GREY.getColor(Color.Intensity.I500), BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderStroke.THIN)));
-        return canvasShellPresentation;
+    private CanvasPresentation initializeNewCanvasPresentation() {
+        CanvasPresentation canvasPresentation = new CanvasPresentation();
+        canvasPresentation.setBorder(new Border(new BorderStroke(Color.GREY.getColor(Color.Intensity.I500), BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderStroke.THIN)));
+
+        // Set th clip of the zoomable pane to be half of the canvasPane,
+        // to ensure a 2 by 2 grid without overflowing borders
+        Rectangle clip = new Rectangle();
+        clip.setArcWidth(1);
+        clip.setArcHeight(1);
+        clip.widthProperty().bind(canvasPane.widthProperty().divide(2));
+        clip.heightProperty().bind(canvasPane.heightProperty().divide(2));
+        canvasPresentation.getController().zoomablePane.setClip(clip);
+
+        canvasPresentation.getController().zoomablePane.minWidthProperty().bind(canvasPane.widthProperty().divide(2));
+        canvasPresentation.getController().zoomablePane.maxWidthProperty().bind(canvasPane.widthProperty().divide(2));
+        canvasPresentation.getController().zoomablePane.minHeightProperty().bind(canvasPane.heightProperty().divide(2));
+        canvasPresentation.getController().zoomablePane.maxHeightProperty().bind(canvasPane.heightProperty().divide(2));
+
+        return canvasPresentation;
     }
 
     /**

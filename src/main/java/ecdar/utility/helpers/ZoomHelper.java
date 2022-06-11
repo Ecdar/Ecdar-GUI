@@ -5,36 +5,49 @@ import ecdar.presentations.CanvasPresentation;
 import ecdar.presentations.Grid;
 import ecdar.presentations.ModelPresentation;
 import ecdar.presentations.SystemPresentation;
+import javafx.application.Platform;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.Node;
 
 public class ZoomHelper {
-    private CanvasPresentation canvasPresentation;
-    private Grid grid;
-    private boolean active = true;
-
+    public DoubleProperty currentZoomFactor = new SimpleDoubleProperty(1);
     public double minZoomFactor = 0.4;
     public double maxZoomFactor = 4;
 
+    private CanvasPresentation canvasPresentation;
+    private ModelPresentation model;
+    private Grid grid;
+    private boolean active = true;
+
     /**
      * Set the CanvasPresentation of the grid and add listeners for both the width and height of the new CanvasPresentation
+     *
      * @param newCanvasPresentation the new CanvasPresentation
      */
     public void setCanvas(CanvasPresentation newCanvasPresentation) {
         canvasPresentation = newCanvasPresentation;
+        model = canvasPresentation.getController().getActiveComponentPresentation();
 
-        canvasPresentation.heightProperty().addListener((observable -> centerComponentAndUpdateGrid(canvasPresentation.scaleXProperty().doubleValue())));
-        canvasPresentation.widthProperty().addListener((observable -> centerComponentAndUpdateGrid(canvasPresentation.scaleXProperty().doubleValue())));
+        // Update the model whenever the component is updated
+        canvasPresentation.getController().activeComponentProperty().addListener((observable) -> {
+            // Run later to ensure that the active component presentation is up-to-date
+            Platform.runLater(() -> {
+                model = canvasPresentation.getController().getActiveComponentPresentation();
+            });
+        });
+
+        Platform.runLater(this::resetZoom);
     }
 
     public Double getZoomLevel() {
-        return canvasPresentation.getScaleX();
+        return currentZoomFactor.get();
     }
 
     public void setZoomLevel(Double zoomLevel) {
-        if (active) {
-            canvasPresentation.setScaleX(zoomLevel);
-            canvasPresentation.setScaleY(zoomLevel);
-            centerComponentAndUpdateGrid(zoomLevel);
+        if (active && model != null) {
+            currentZoomFactor.set(zoomLevel);
+            grid.updateGrid();
         }
     }
 
@@ -48,18 +61,14 @@ public class ZoomHelper {
     public void zoomIn() {
         if (active) {
             double delta = 1.2;
-            double newScale = canvasPresentation.getScaleX() * delta;
+            double newScale = currentZoomFactor.get() * delta;
 
             //Limit for zooming in
             if (newScale > maxZoomFactor) {
                 return;
             }
 
-            //Scale canvas
-            canvasPresentation.setScaleX(newScale);
-            canvasPresentation.setScaleY(newScale);
-
-            centerComponentAndUpdateGrid(newScale);
+            currentZoomFactor.set(newScale);
         }
     }
 
@@ -69,18 +78,14 @@ public class ZoomHelper {
     public void zoomOut() {
         if (active) {
             double delta = 1.2;
-            double newScale = canvasPresentation.getScaleX() / delta;
+            double newScale = currentZoomFactor.get() / delta;
 
             //Limit for zooming out
             if (newScale < minZoomFactor) {
                 return;
             }
 
-            //Scale canvas
-            canvasPresentation.setScaleX(newScale);
-            canvasPresentation.setScaleY(newScale);
-
-            centerComponentAndUpdateGrid(newScale);
+            currentZoomFactor.set(newScale);
         }
     }
 
@@ -88,13 +93,7 @@ public class ZoomHelper {
      * Set the zoom multiplier to 1
      */
     public void resetZoom() {
-        if (active) {
-            canvasPresentation.setScaleX(1);
-            canvasPresentation.setScaleY(1);
-
-            //Center component
-            centerComponentAndUpdateGrid(1);
-        }
+        currentZoomFactor.set(1);
     }
 
     /**
@@ -102,17 +101,15 @@ public class ZoomHelper {
      */
     public void zoomToFit() {
         if (active) {
-            if (EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation == null) {
+            if (EcdarController.getActiveCanvasPresentation().getController().getActiveModel() == null) {
                 resetZoom();
                 return;
             }
-            double newScale = Math.min(canvasPresentation.getWidth() / EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation.getWidth() - 0.1, canvasPresentation.getHeight() / EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation.getHeight() - 0.2); //0.1 for width and 0.2 for height added for margin
 
-            //Scale canvas
-            canvasPresentation.setScaleX(newScale);
-            canvasPresentation.setScaleY(newScale);
+            double newScale = Math.min(canvasPresentation.getWidth() / model.getWidth() - 0.1, canvasPresentation.getHeight() / model.getHeight() - 0.2); //0.1 for width and 0.2 for height subtracted for margin
 
-            centerComponentAndUpdateGrid(newScale);
+            currentZoomFactor.set(newScale);
+            centerComponentAndUpdateGrid();
         }
     }
 
@@ -121,45 +118,23 @@ public class ZoomHelper {
      */
     public void setActive(boolean activeState) {
         this.active = activeState;
+        if (!activeState) {
+            // If zoom has been disabled, reset the zoom level
+            resetZoom();
+        }
     }
 
     /**
      * Method for centering the active component on screen and redrawing the grid to fill the screen
-     * @param newScale the scale in which to redraw the grid and place the component based on
      */
-    private void centerComponentAndUpdateGrid(double newScale){
+    private void centerComponentAndUpdateGrid() {
         // Check added to avoid NullPointerException
-        if(EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation != null){
-            updateGrid(newScale, EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation);
-        } else if (EcdarController.getActiveCanvasPresentation().getController().getActiveModel() != null) {
-            // The canvas is currently showing an EcdarSystem object, so wee need to find the SystemPresentation in order to center it on screen
-            SystemPresentation systemPresentation = null;
-
-            for (Node node : EcdarController.getActiveCanvasPresentation().getController().root.getChildren()) {
-                if (node instanceof SystemPresentation) {
-                    systemPresentation = (SystemPresentation) node;
-                    break;
-                }
-            }
-
-            if (systemPresentation == null) {
-                return;
-            }
-
-            updateGrid(newScale, systemPresentation);
-        }
+        grid.updateGrid();
+        centerComponent(EcdarController.getActiveCanvasPresentation().getController().modelPane);
     }
 
-    private void updateGrid(double newScale, ModelPresentation modelPresentation) {
-        // Calculate the new x and y offsets needed to center the component
-        double xOffset = newScale * canvasPresentation.getWidth() * 1.0f / 2 - newScale * modelPresentation.getWidth() * 1.0f / 2;
-        double yOffset = newScale * canvasPresentation.getHeight() * 1.0f / 2 - newScale * modelPresentation.getHeight() * 1.0f / 2;
-
-        // Center the component based on the offsets
-        canvasPresentation.setTranslateX(Grid.snap(xOffset));
-        canvasPresentation.setTranslateY(Grid.snap(yOffset));
-
-        // Redraw the grid based on the new scale and canvas size
-        grid.updateGrid(newScale);
+    private void centerComponent(Node presentation) {
+        presentation.setTranslateX(0);
+        presentation.setTranslateY(-Grid.GRID_SIZE * 2); // 0 is slightly below center, this looks better
     }
 }
