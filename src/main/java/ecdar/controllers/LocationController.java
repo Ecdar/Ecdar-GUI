@@ -317,9 +317,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
     @FXML
     private void mouseEntered() {
         if(!this.root.isInteractable()) return;
-
         circle.setCursor(Cursor.HAND);
-
         this.root.animateHoverEntered();
 
         // Keybind for making location urgent
@@ -348,9 +346,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
         if(!locationPresentation.isInteractable()) return;
 
         circle.setCursor(Cursor.DEFAULT);
-
         locationPresentation.animateHoverExited();
-
         KeyboardTracker.unregisterKeybind(KeyboardTracker.MAKE_LOCATION_URGENT);
     }
 
@@ -360,7 +356,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
             final Component component = getComponent();
 
-            if (isAnyEdgeWithoutSource()) {
+            if (component.isAnyEdgeWithoutSource()) {
                 final DisplayableEdge unfinishedEdge = component.getUnfinishedEdge();
                 // Make self-loop pretty if needed
                 if (unfinishedEdge.getTargetLocation().equals(getLocation()) && unfinishedEdge.getNails().size() == 1) {
@@ -465,30 +461,9 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
         locationProperty().addListener((obs, oldLocation, newLocation) -> {
             if(newLocation == null) return;
-
             root.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseClicked::accept);
-
             ItemDragHelper.makeDraggable(root, this::getDragBounds);
         });
-
-
-    }
-
-    /**
-     * Checks if there is currently an edge without a source location.
-     * If there is, set the source location to this location and return true, else return false.
-     */
-    public boolean isAnyEdgeWithoutSource() {
-        DisplayableEdge edgeWithoutSource = null;
-
-        for (DisplayableEdge edge : getComponent().getDisplayableEdges()) {
-            if (edge.sourceCircularProperty().get() instanceof MouseCircular) {
-                edgeWithoutSource = edge;
-                break;
-            }
-        }
-
-        return edgeWithoutSource != null;
     }
 
     @Override

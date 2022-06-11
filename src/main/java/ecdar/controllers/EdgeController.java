@@ -128,7 +128,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                 edgeRoot.getChildren().addAll(link, simpleArrowHead);
 
                 // Bind the first link and the arrowhead from the source location to the mouse
-                BindingHelper.bind(link, simpleArrowHead, newEdge.getSourceCircular(), newComponent.getBox().getXProperty(), newComponent.getBox().getYProperty());
+                BindingHelper.bind(link, simpleArrowHead, newEdge.getSourceCircular(), new MouseCircular(newEdge.getSourceCircular()));
             } else if (newEdge.getTargetCircular() != null) {
 
                 edgeRoot.getChildren().add(simpleArrowHead);
@@ -172,7 +172,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                     nailNailPresentationMap.put(newNail, newNailPresentation);
                     edgeRoot.getChildren().addAll(newNailPresentation);
 
-                    if (newEdge.getTargetCircular() != null) {
+                    if (getComponent().getUnfinishedEdge() == null) {
                         final int indexOfNewNail = edge.get().getNails().indexOf(newNail);
 
                         final Link newLink = new Link();
@@ -206,25 +206,47 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                         }
 
                     } else {
-                        // The previous last link must end in the new nail
-                        final Link lastLink = links.get(links.size() - 1);
+                        if (getComponent().isAnyEdgeWithoutSource()) {
+                            // The previous last link must end in the new nail
+                            final Link firstLink = links.get(0);
 
-                        // If the nail is the first in the list, bind it to the source location
-                        // otherwise, bind it the the previous nail
-                        final int nailIndex = edge.get().getNails().indexOf(newNail);
-                        if (nailIndex == 0) {
-                            BindingHelper.bind(lastLink, newEdge.getSourceCircular(), newNail);
+                            // If the nail is the last in the list, bind it to the target location
+                            // otherwise, bind it to the next nail
+                            final int nailIndex = edge.get().getNails().indexOf(newNail);
+                            if (nailIndex == edge.get().getNails().size() - 1) {
+                                BindingHelper.bind(firstLink, newNail, newEdge.getTargetCircular());
+                            } else {
+                                final Nail nextNail = edge.get().getNails().get(nailIndex + 1);
+                                BindingHelper.bind(firstLink, newNail, nextNail);
+                            }
+
+                            // Create a new link that will bind from the new nail to the mouse
+                            final Link newLink = new Link();
+                            if (newEdge.getStatus() == EdgeStatus.OUTPUT) newLink.makeDashed();
+                            links.add(0, newLink);
+                            BindingHelper.bind(newLink, newNail, new MouseCircular(newNail));
+                            edgeRoot.getChildren().add(newLink);
                         } else {
-                            final Nail previousNail = edge.get().getNails().get(nailIndex - 1);
-                            BindingHelper.bind(lastLink, previousNail, newNail);
-                        }
+                            // The previous last link must end in the new nail
+                            final Link lastLink = links.get(links.size() - 1);
 
-                        // Create a new link that will bind from the new nail to the mouse
-                        final Link newLink = new Link();
-                        if (newEdge.getStatus() == EdgeStatus.OUTPUT) newLink.makeDashed();
-                        links.add(newLink);
-                        BindingHelper.bind(newLink, simpleArrowHead, newNail, newComponent.getBox().getXProperty(), newComponent.getBox().getYProperty());
-                        edgeRoot.getChildren().add(newLink);
+                            // If the nail is the first in the list, bind it to the source location
+                            // otherwise, bind it to the previous nail
+                            final int nailIndex = edge.get().getNails().indexOf(newNail);
+                            if (nailIndex == 0) {
+                                BindingHelper.bind(lastLink, newEdge.getSourceCircular(), newNail);
+                            } else {
+                                final Nail previousNail = edge.get().getNails().get(nailIndex - 1);
+                                BindingHelper.bind(lastLink, previousNail, newNail);
+                            }
+
+                            // Create a new link that will bind from the new nail to the mouse
+                            final Link newLink = new Link();
+                            if (newEdge.getStatus() == EdgeStatus.OUTPUT) newLink.makeDashed();
+                            links.add(newLink);
+                            BindingHelper.bind(newLink, simpleArrowHead, newNail, new MouseCircular(newNail));
+                            edgeRoot.getChildren().add(newLink);
+                        }
                     }
                 });
 
@@ -386,14 +408,10 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
             @Override
             public void onChanged(final Change<? extends Link> c) {
                 links.forEach((link) -> link.setOnMousePressed(event -> {
-
                     if (event.isSecondaryButtonDown() && getComponent().getUnfinishedEdge() == null) {
                         event.consume();
 
-                        final DropDownMenu dropDownMenu = new DropDownMenu(
-                                dropDownMenuHelperCircle
-                        );
-
+                        final DropDownMenu dropDownMenu = new DropDownMenu(dropDownMenuHelperCircle);
 
                         dropDownMenu.addMenuElement(getChangeStatusMenuElement(dropDownMenu));
 
@@ -404,7 +422,6 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                         addEdgePropertyRow(dropDownMenu, "Add Update", Edge.PropertyType.UPDATE, link);
 
                         dropDownMenu.addSpacerElement();
-
                         dropDownMenu.addClickableAndDisableableListElement("Add Nail", getEdge().getIsLockedProperty(), mouseEvent -> {
                             final double nailX = Math.round((DropDownMenu.x - getComponent().getBox().getX()) / GRID_SIZE) * GRID_SIZE;
                             final double nailY = Math.round((DropDownMenu.y - getComponent().getBox().getY()) / GRID_SIZE) * GRID_SIZE;

@@ -222,6 +222,8 @@ public class Edge extends DisplayableEdge implements Serializable {
     }
 
     private void bindReachabilityAnalysis() {
+        // If there is no EcdarPresentation, we are running tests and EcdarController calls will fail
+        if (Ecdar.getPresentation() == null) return;
         selectProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
         guardProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
         syncProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());

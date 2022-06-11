@@ -9,7 +9,6 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.*;
 
 public class QueryPanePresentation extends StackPane {
-
     private final QueryPaneController controller;
 
     public QueryPanePresentation() {
@@ -91,5 +90,9 @@ public class QueryPanePresentation extends StackPane {
                 CornerRadii.EMPTY,
                 new BorderWidths(0, 1, bottomInsetWidth, 0)
         )));
+    }
+
+    public QueryPaneController getController() {
+        return controller;
     }
 }

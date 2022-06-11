@@ -191,7 +191,7 @@ public abstract class DisplayableEdge implements Nearable {
         if(getSourceLocation() != null) {
             sourceCircular.set(getSourceLocation());
         } else {
-            sourceCircular.set(new MouseCircular());
+            sourceCircular.set(new MouseCircular(sourceCircular.get()));
         }
     }
 
@@ -199,7 +199,7 @@ public abstract class DisplayableEdge implements Nearable {
         if(getTargetLocation() != null) {
             targetCircular.set(getTargetLocation());
         } else {
-            targetCircular.set(new MouseCircular());
+            targetCircular.set(new MouseCircular(targetCircular.get()));
         }
     }
 

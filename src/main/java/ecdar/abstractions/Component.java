@@ -80,13 +80,11 @@ public class Component extends HighLevelModelObject implements Boxed {
         initialLocation.setColor(getColor());
 
         // Place in center
-        initialLocation.setX(Grid.snap(box.getX() + box.getWidth() / 2));
-        initialLocation.setY(Grid.snap(box.getY() + box.getHeight() / 2));
+        initialLocation.setX(box.getX() + box.getWidth() / 2);
+        initialLocation.setY(box.getY() + box.getHeight() / 2);
 
         locations.add(initialLocation);
-
         initializeIOListeners();
-
         bindReachabilityAnalysis();
     }
 
@@ -94,10 +92,8 @@ public class Component extends HighLevelModelObject implements Boxed {
         setFirsTimeShown(true);
 
         deserialize(json);
-
         initializeIOListeners();
         updateIOList();
-
         bindReachabilityAnalysis();
     }
 
@@ -113,9 +109,7 @@ public class Component extends HighLevelModelObject implements Boxed {
     public Component cloneForVerification() {
         final Component clone = new Component();
         clone.addVerificationObjects(this);
-
         clone.setIncludeInPeriodicCheck(false);
-
         clone.inputStrings.addAll(getInputStrings());
         clone.outputStrings.addAll(getOutputStrings());
         clone.setName(getName());
@@ -133,7 +127,6 @@ public class Component extends HighLevelModelObject implements Boxed {
         }
 
         getListOfEdgesFromDisplayableEdges(original.getDisplayableEdges()).forEach(edge -> addEdge((edge).cloneForVerification(this)));
-
         setDeclarationsText(original.getDeclarationsText());
     }
 
@@ -150,7 +143,6 @@ public class Component extends HighLevelModelObject implements Boxed {
                     edge -> edge.getStatus().equals(EdgeStatus.INPUT) &&
                             edge.getSync().equals(input)).collect(Collectors.toList()
             );
-
 
             // If no such edges, add a self loop without a guard
             if (matchingEdges.isEmpty()) {
@@ -185,13 +177,11 @@ public class Component extends HighLevelModelObject implements Boxed {
      */
     private Expression<String> getNegatedEdgeExpression(final List<Edge> edges) {
         final List<String> clocks = getClocks();
-
         return ExpressionHelper.simplifyNegatedSimpleExpressions(
                 RuleSet.toDNF(RuleSet.simplify(Not.of(Or.of(edges.stream()
                         .map(edge -> {
                                     final List<String> clocksToReset = ExpressionHelper.getUpdateSides(edge.getUpdate())
                                             .keySet().stream().filter(clocks::contains).collect(Collectors.toList());
-
                                     return And.of(
                                             ExpressionHelper.parseGuard(edge.getGuard()),
                                             ExpressionHelper.parseInvariantButIgnore(edge.getTargetLocation().getInvariant(), clocksToReset)
@@ -244,7 +234,7 @@ public class Component extends HighLevelModelObject implements Boxed {
                 addEdge(edge);
                 break;
             case Or.EXPR_TYPE:
-                ((Or<String>) guardExpression).getChildren().forEach(child -> createAngelicSelfLoops(location, input, child));
+                guardExpression.getChildren().forEach(child -> createAngelicSelfLoops(location, input, child));
                 break;
             default:
                 throw new RuntimeException("Type of expression " + guardExpression + " not accepted");
@@ -622,10 +612,26 @@ public class Component extends HighLevelModelObject implements Boxed {
         this.includeInPeriodicCheck.set(includeInPeriodicCheck);
     }
 
+    /**
+     * Checks if there is currently an edge without a source location.
+     * If there is, set the source location to this location and return true, else return false.
+     */
+    public boolean isAnyEdgeWithoutSource() {
+        DisplayableEdge edgeWithoutSource = null;
+
+        for (DisplayableEdge edge : getDisplayableEdges()) {
+            if (edge.sourceCircularProperty().get() instanceof MouseCircular) {
+                edgeWithoutSource = edge;
+                break;
+            }
+        }
+
+        return edgeWithoutSource != null;
+    }
+
     @Override
     public JsonObject serialize() {
         final JsonObject result = super.serialize();
-
         result.addProperty(DECLARATIONS, getDeclarationsText());
 
         final JsonArray locations = new JsonArray();
@@ -636,13 +642,9 @@ public class Component extends HighLevelModelObject implements Boxed {
         getListOfEdgesFromDisplayableEdges(this.edges).forEach(edge -> edges.add(edge.serialize()));
 
         result.add(EDGES, edges);
-
         result.addProperty(DESCRIPTION, getDescription());
-
         box.addProperties(result);
-
         result.addProperty(COLOR, EnabledColor.getIdentifier(getColor()));
-
         result.addProperty(INCLUDE_IN_PERIODIC_CHECK, isIncludeInPeriodicCheck());
 
         return result;
@@ -694,11 +696,9 @@ public class Component extends HighLevelModelObject implements Boxed {
             } else {
                 edges.add(newEdge);
             }
-
         });
 
         setDescription(json.getAsJsonPrimitive(DESCRIPTION).getAsString());
-
         box.setProperties(json);
 
         final EnabledColor enabledColor = EnabledColor.fromIdentifier(json.getAsJsonPrimitive(COLOR).getAsString());
@@ -750,6 +750,9 @@ public class Component extends HighLevelModelObject implements Boxed {
     }
 
     private void bindReachabilityAnalysis() {
+        // If there is no EcdarPresentation, we are running tests and EcdarController calls will fail
+        if (Ecdar.getPresentation() == null) return;
+
         locations.addListener((ListChangeListener<? super Location>) c -> EcdarController.runReachabilityAnalysis());
         edges.addListener((ListChangeListener<? super DisplayableEdge>) c -> EcdarController.runReachabilityAnalysis());
         declarationsTextProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
