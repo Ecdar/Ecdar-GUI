@@ -614,7 +614,6 @@ public class Component extends HighLevelModelObject implements Boxed {
 
     /**
      * Checks if there is currently an edge without a source location.
-     * If there is, set the source location to this location and return true, else return false.
      */
     public boolean isAnyEdgeWithoutSource() {
         DisplayableEdge edgeWithoutSource = null;
