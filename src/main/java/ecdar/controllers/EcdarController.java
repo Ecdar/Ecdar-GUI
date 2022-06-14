@@ -1,5 +1,7 @@
 package ecdar.controllers;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import ecdar.Debug;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
@@ -121,6 +123,7 @@ public class EcdarController implements Initializable {
     public MenuItem menuBarViewCanvasSplit;
     public MenuItem menuBarFileCreateNewProject;
     public MenuItem menuBarFileOpenProject;
+    public Menu menuBarFileRecentProjects;
     public MenuItem menuBarFileSave;
     public MenuItem menuBarFileSaveAs;
     public MenuItem menuBarFileNewMutationTestObject;
@@ -269,7 +272,6 @@ public class EcdarController implements Initializable {
         initializeEdgeStatusHandling();
         initializeKeybindings();
         initializeStatusBar();
-        initializeMenuBar();
         initializeReachabilityAnalysisThread();
     }
 
@@ -527,6 +529,7 @@ public class EcdarController implements Initializable {
 
         initializeCreateNewProjectMenuItem();
         initializeOpenProjectMenuItem();
+        initializeRecentProjectsMenu();
 
         menuBarFileSave.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN));
         menuBarFileSave.setOnAction(event -> save());
@@ -738,11 +741,49 @@ public class EcdarController implements Initializable {
                     Ecdar.projectDirectory.set(file.getAbsolutePath());
                     Ecdar.initializeProjectFolder();
                     UndoRedoStack.clear();
+                    addProjectToRecentProjects(file.getAbsolutePath());
                 } catch (final IOException e) {
                     e.printStackTrace();
                 }
             }
         });
+    }
+
+    /**
+     * Initializes the "Recent projects" menu item.
+     */
+    private void initializeRecentProjectsMenu() {
+        ArrayList<String> recentProjects = loadRecentProjects();
+        recentProjects.forEach((path) -> {
+            MenuItem item = new MenuItem(path);
+
+            item.setOnAction(event -> {
+                try {
+                    Ecdar.projectDirectory.set(path);
+                    Ecdar.initializeProjectFolder();
+                } catch (IOException ex) {
+                    Ecdar.showToast("Unable to load project: \"" + path + "\"");
+                }
+            });
+
+            menuBarFileRecentProjects.getItems().add(item);
+        });
+
+        MenuItem item;
+        if (!recentProjects.isEmpty()){
+            item = new MenuItem("Clear recent projects");
+
+            item.setOnAction(event -> {
+                Ecdar.preferences.put("recent_project", "[]");
+                menuBarFileRecentProjects.getItems().clear();
+                initializeRecentProjectsMenu();
+            });
+        } else {
+            item = new MenuItem("- No recent projects -");
+            item.setDisable(true);
+        }
+
+        menuBarFileRecentProjects.getItems().add(item);
     }
 
     /**
@@ -771,9 +812,40 @@ public class EcdarController implements Initializable {
         if (file != null) {
             Ecdar.projectDirectory.setValue(file.getPath());
             save(file);
+            addProjectToRecentProjects(file.getPath());
         } else {
             Ecdar.showToast("The project was not saved.");
         }
+    }
+
+    private void addProjectToRecentProjects(String projectPath) {
+        ArrayList<String> recentProjectPaths = loadRecentProjects();
+
+        // Remove if already present to update order
+        recentProjectPaths.remove(projectPath);
+
+        if (recentProjectPaths.size() > 4) {
+            recentProjectPaths.remove(4);
+        }
+
+        recentProjectPaths.add(projectPath);
+        Ecdar.preferences.put("recent_project", new Gson().toJson(recentProjectPaths));
+
+        // Update current recent projects list
+        menuBarFileRecentProjects.getItems().clear();
+        initializeRecentProjectsMenu();
+    }
+
+    private ArrayList<String> loadRecentProjects() {
+        String recentProjectsJson = Ecdar.preferences.get("recent_project", "[]");
+        ArrayList<String> recentProjectPaths = new ArrayList<>();
+
+        Gson gson = new Gson();
+        JsonArray recentProjects = gson.fromJson(recentProjectsJson, JsonArray.class);
+        recentProjects.forEach((e) -> recentProjectPaths.add(e.getAsString()));
+
+        Collections.reverse(recentProjectPaths);
+        return recentProjectPaths;
     }
 
     /**
@@ -796,7 +868,6 @@ public class EcdarController implements Initializable {
     private void initializeCreateNewProjectMenuItem() {
         menuBarFileCreateNewProject.setAccelerator(new KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN));
         menuBarFileCreateNewProject.setOnAction(event -> {
-
             final ButtonType yesButton = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
             final ButtonType noButton = new ButtonType("Don't save", ButtonBar.ButtonData.NO);
             final ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
