@@ -17,55 +17,57 @@ public class UndoRedoStack {
     private static BiConsumer<Stack<Command>, Stack<Command>> debugRunnable = (c1, c2) -> {
     };
 
+    /**
+     * Add debug BiConsumer accepting the Undo stack as the first argument and the Redo stack as the second.
+     * This will to be executed every time changed are made to either stack.
+     *
+     * @param debugRunnable the BiConsumer accepting the Undo and Redo stacks
+     */
     public static void setDebugRunnable(final BiConsumer<Stack<Command>, Stack<Command>> debugRunnable) {
         UndoRedoStack.debugRunnable = debugRunnable;
     }
 
     /**
      * Pushes to the stack and performs the redo action once.
-     * @param perform the redo action
-     * @param undo the undo action
+     *
+     * @param perform     the redo action
+     * @param undo        the undo action
      * @param description a description of the actions
-     * @param icon icon of the redo-undo command
+     * @param icon        icon of the redo-undo command
      * @return the command created
      */
     public static Command pushAndPerform(final Runnable perform, final Runnable undo, final String description, final String icon) {
         final Command item = new Command(perform, undo, description, icon);
 
         // Empty the redo stack (new changes may be conflicting with redoing)
-        while (!redoStack.isEmpty()) {
-            redoStack.pop();
-        }
-
+        clearRedos();
         final Command command = undoStack.push(item);
         command.perform();
 
         updateState();
-
         return command;
     }
 
     /**
      * Pushes changes to the undoredo stack without performing them,
      * useful when there must be a change between the first perform and the redo and undo
-     * @param redo the code to be run when redoing
-     * @param undo the code to be run when undoing
+     *
+     * @param redo        the code to be run when redoing
+     * @param undo        the code to be run when undoing
      * @param description the description of this set of redo/undo commands
-     * @param icon icon of the redo-undo command
+     * @param icon        icon of the redo-undo command
      * @return a command with information for code to run when redoing, undoing, description and icon
      */
     public static Command push(final Runnable redo, final Runnable undo, final String description, final String icon) {
         final Command item = new Command(redo, undo, description, icon);
 
         // Empty the redo stack (new changes may be conflicting with redoing)
-        while (!redoStack.isEmpty()) {
-            redoStack.pop();
-        }
+        clearRedos();
         final Command command = undoStack.push(item);
+
         updateState();
         return command;
     }
-
 
 
     /**
@@ -114,17 +116,8 @@ public class UndoRedoStack {
     }
 
     private static void updateState() {
-        if (undoStack.isEmpty()) {
-            canUndo.set(false);
-        } else {
-            canUndo.set(true);
-        }
-
-        if (redoStack.isEmpty()) {
-            canRedo.set(false);
-        } else {
-            canRedo.set(true);
-        }
+        canUndo.set(!undoStack.isEmpty());
+        canRedo.set(!redoStack.isEmpty());
 
         debugRunnable.accept(undoStack, redoStack);
     }
@@ -143,6 +136,13 @@ public class UndoRedoStack {
 
     public static SimpleBooleanProperty canRedoProperty() {
         return canRedo;
+    }
+
+    public static void clearRedos() {
+        while (!redoStack.isEmpty()) {
+            redoStack.pop();
+        }
+        updateState();
     }
 
     public static class Command {

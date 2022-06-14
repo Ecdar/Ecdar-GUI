@@ -409,7 +409,11 @@ public class ComponentController extends ModelController implements Initializabl
                 location.setColorIntensity(getComponent().getColorIntensity());
                 location.setColor(getComponent().getColor());
 
-                unfinishedEdge.setTargetLocation(location);
+                if (component.isAnyEdgeWithoutSource()) {
+                    unfinishedEdge.setSourceLocation(location);
+                } else {
+                    unfinishedEdge.setTargetLocation(location);
+                }
 
                 setCoordinates.accept(location);
 
@@ -442,7 +446,11 @@ public class ComponentController extends ModelController implements Initializabl
                 final Edge outputEdge = newLocation.addRightEdge("*", EdgeStatus.OUTPUT);
                 outputEdge.setIsLocked(true);
 
-                unfinishedEdge.setTargetLocation(newLocation);
+                if (component.isAnyEdgeWithoutSource()) {
+                    unfinishedEdge.setSourceLocation(newLocation);
+                } else {
+                    unfinishedEdge.setTargetLocation(newLocation);
+                }
 
                 setCoordinates.accept(newLocation);
 
@@ -474,7 +482,11 @@ public class ComponentController extends ModelController implements Initializabl
 
                 final Location newLocation = new Location(component, Location.Type.INCONSISTENT, x, y);
 
-                unfinishedEdge.setTargetLocation(newLocation);
+                if (component.isAnyEdgeWithoutSource()) {
+                    unfinishedEdge.setSourceLocation(newLocation);
+                } else {
+                    unfinishedEdge.setTargetLocation(newLocation);
+                }
 
                 setCoordinates.accept(newLocation);
 
@@ -738,7 +750,7 @@ public class ComponentController extends ModelController implements Initializabl
             modelContainerEdge.getChildren().add(edgePresentation);
 
             final Consumer<Circular> updateMouseTransparency = (newCircular) -> {
-                edgePresentation.setMouseTransparent(newCircular == null);
+                edgePresentation.setMouseTransparent(newCircular == null || newCircular instanceof MouseCircular);
             };
 
             edge.targetCircularProperty().addListener((obs1, oldTarget, newTarget) -> updateMouseTransparency.accept(newTarget));
@@ -838,7 +850,11 @@ public class ComponentController extends ModelController implements Initializabl
             location.setColor(getComponent().getColor());
 
             if (unfinishedEdge != null) {
-                unfinishedEdge.setTargetLocation(location);
+                if (getComponent().isAnyEdgeWithoutSource()) {
+                    unfinishedEdge.setSourceLocation(location);
+                } else {
+                    unfinishedEdge.setTargetLocation(location);
+                }
 
                 // If no sync nail, add one
                 if (!unfinishedEdge.hasSyncNail()) unfinishedEdge.makeSyncNailBetweenLocations();
@@ -866,9 +882,6 @@ public class ComponentController extends ModelController implements Initializabl
                         getComponent().removeEdge(unfinishedEdge);
                     }
                 }, "Finished edge '" + unfinishedEdge + "' by adding '" + location + "' to component '" + component.getName() + "'", "add-circle");
-
-                // If we have an edge without a source location set the new location as its source
-                locationPresentationMap.get(location).getController().isAnyEdgeWithoutSource();
             });
         } else if (event.isSecondaryButtonDown()) {
             if (unfinishedEdge == null) {
@@ -892,7 +905,11 @@ public class ComponentController extends ModelController implements Initializabl
                     newNail.setPropertyType(Edge.PropertyType.SYNCHRONIZATION);
                 }
 
-                unfinishedEdge.addNail(newNail);
+                if (getComponent().isAnyEdgeWithoutSource()) {
+                    unfinishedEdge.getNails().add(0, newNail);
+                } else {
+                    unfinishedEdge.addNail(newNail);
+                }
             } else {
                 contextMenu.hide();
             }
