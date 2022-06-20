@@ -4,11 +4,9 @@ import ecdar.controllers.EcdarController;
 import ecdar.presentations.CanvasPresentation;
 import ecdar.presentations.Grid;
 import ecdar.presentations.ModelPresentation;
-import ecdar.presentations.SystemPresentation;
 import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.scene.Node;
 
 public class ZoomHelper {
     public DoubleProperty currentZoomFactor = new SimpleDoubleProperty(1);
@@ -106,7 +104,10 @@ public class ZoomHelper {
                 return;
             }
 
-            double newScale = Math.min(canvasPresentation.getWidth() / model.getWidth() - 0.1, canvasPresentation.getHeight() / model.getHeight() - 0.2); //0.1 for width and 0.2 for height subtracted for margin
+            double neededWidth = canvasPresentation.getWidth() / (model.getWidth()
+                    + canvasPresentation.getController().getActiveComponentPresentation().getController().inputSignatureContainer.getWidth()
+                    + canvasPresentation.getController().getActiveComponentPresentation().getController().outputSignatureContainer.getWidth());
+            double newScale = Math.min(neededWidth, canvasPresentation.getHeight() / model.getHeight() - 0.2); //0.1 for width and 0.2 for height subtracted for margin
 
             currentZoomFactor.set(newScale);
             centerComponentAndUpdateGrid();
@@ -128,13 +129,16 @@ public class ZoomHelper {
      * Method for centering the active component on screen and redrawing the grid to fill the screen
      */
     private void centerComponentAndUpdateGrid() {
-        // Check added to avoid NullPointerException
         grid.updateGrid();
-        centerComponent(EcdarController.getActiveCanvasPresentation().getController().modelPane);
+        centerComponent();
     }
 
-    private void centerComponent(Node presentation) {
-        presentation.setTranslateX(0);
-        presentation.setTranslateY(-Grid.GRID_SIZE * 2); // 0 is slightly below center, this looks better
+    private void centerComponent() {
+        EcdarController.getActiveCanvasPresentation().getController().modelPane.setTranslateX(0);
+        EcdarController.getActiveCanvasPresentation().getController().modelPane.setTranslateY(-Grid.GRID_SIZE * 2); // 0 is slightly below center, this looks better
+
+        // Center the model within the modelPane to account for resized model
+        model.setTranslateX(0);
+        model.setTranslateY(0);
     }
 }

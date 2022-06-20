@@ -255,19 +255,17 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
         });
 
         cornerAnchor.setOnMouseDragged(event -> {
-            double xDiff = event.getScreenX() - prevX.get();
+            double xDiff = (event.getScreenX() - prevX.get()) / EcdarController.getActiveCanvasZoomFactor().get();
             xDiff -= xDiff % Grid.GRID_SIZE;
 
-            final double newWidth = prevWidth.get() + xDiff;
-            final double minWidth = getDragAnchorMinWidth();
-            box.setWidth(Math.max(newWidth, minWidth));
+            final double newWidth = Math.max(prevWidth.get() + xDiff, getDragAnchorMinWidth());
+            box.setWidth(newWidth);
 
-            double yDiff = event.getScreenY() - prevY.get();
+            double yDiff = (event.getScreenY() - prevY.get()) / EcdarController.getActiveCanvasZoomFactor().get();
             yDiff -= yDiff % Grid.GRID_SIZE;
 
-            final double newHeight = prevHeight.get() + yDiff;
-            final double minHeight = getDragAnchorMinHeight();
-            box.setHeight(Math.max(newHeight, minHeight));
+            final double newHeight = Math.max(prevHeight.get() + yDiff, getDragAnchorMinHeight());
+            box.setHeight(newHeight);
 
             wasResized.set(true);
         });
