@@ -561,6 +561,9 @@ public class EcdarController implements Initializable {
 
     public static void setActiveModelForActiveCanvas(HighLevelModelObject newActiveModel) {
         EcdarController.getActiveCanvasPresentation().getController().setActiveModel(newActiveModel);
+
+        // Change zoom level to fit new active model
+        Platform.runLater(() -> EcdarController.getActiveCanvasPresentation().getController().zoomHelper.zoomToFit());
     }
 
     private void initializeHelpMenu() {
@@ -770,7 +773,7 @@ public class EcdarController implements Initializable {
         });
 
         MenuItem item;
-        if (!recentProjects.isEmpty()){
+        if (!recentProjects.isEmpty()) {
             item = new MenuItem("Clear recent projects");
 
             item.setOnAction(event -> {
