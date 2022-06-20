@@ -250,9 +250,7 @@ public class Ecdar extends Application {
         project.reset();
 
         // Set active model
-        Platform.runLater(() -> {
-            EcdarController.setActiveModelForActiveCanvas(Ecdar.getProject().getComponents().get(0));
-        });
+        Platform.runLater(() -> EcdarController.setActiveModelForActiveCanvas(Ecdar.getProject().getComponents().get(0)));
 
         EcdarController.reachabilityServiceEnabled = true;
 
