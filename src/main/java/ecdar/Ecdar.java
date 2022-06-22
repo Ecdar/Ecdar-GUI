@@ -248,7 +248,9 @@ public class Ecdar extends Application {
         stage.show();
 
         project.reset();
-        EcdarController.getActiveCanvasPresentation().getController().setActiveModel(Ecdar.getProject().getComponents().get(0));
+
+        // Set active model
+        Platform.runLater(() -> EcdarController.setActiveModelForActiveCanvas(Ecdar.getProject().getComponents().get(0)));
 
         EcdarController.reachabilityServiceEnabled = true;
 
@@ -344,12 +346,12 @@ public class Ecdar extends Application {
             if (initialShownComponent == null) {
                 initialShownComponent = component;
             }
-            EcdarController.getActiveCanvasPresentation().getController().setActiveModel(component);
+            EcdarController.setActiveModelForActiveCanvas(component);
         }
 
         // If we found a component set that as active
         if (initialShownComponent != null) {
-            EcdarController.getActiveCanvasPresentation().getController().setActiveModel(initialShownComponent);
+            EcdarController.setActiveModelForActiveCanvas(initialShownComponent);
         }
         serializationDone = true;
     }

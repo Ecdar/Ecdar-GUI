@@ -5,6 +5,7 @@ import ecdar.code_analysis.Nearable;
 import ecdar.presentations.Grid;
 import ecdar.utility.colors.Color;
 import ecdar.utility.helpers.Circular;
+import ecdar.utility.helpers.MouseCircular;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -179,28 +180,26 @@ public abstract class DisplayableEdge implements Nearable {
     }
 
     public Circular getSourceCircular() {
-        if(sourceCircular != null) {
-            return sourceCircular.get();
-        }
-        return null;
+        return sourceCircular.get();
     }
 
     public Circular getTargetCircular() {
-        if(targetCircular != null) {
-            return targetCircular.get();
-        }
-        return null;
+        return targetCircular.get();
     }
 
     protected void updateSourceCircular() {
         if(getSourceLocation() != null) {
             sourceCircular.set(getSourceLocation());
+        } else {
+            sourceCircular.set(new MouseCircular(sourceCircular.get()));
         }
     }
 
     protected void updateTargetCircular() {
         if(getTargetLocation() != null) {
             targetCircular.set(getTargetLocation());
+        } else {
+            targetCircular.set(new MouseCircular(targetCircular.get()));
         }
     }
 

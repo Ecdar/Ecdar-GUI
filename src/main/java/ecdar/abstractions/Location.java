@@ -189,7 +189,8 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     }
 
     public void setUrgency(final Urgency urgency) {
-        EcdarController.runReachabilityAnalysis();
+        // If there is no EcdarPresentation, we are running tests and EcdarController calls will fail
+        if (Ecdar.getPresentation() != null) EcdarController.runReachabilityAnalysis();
         this.urgency.set(urgency);
     }
 
@@ -304,7 +305,8 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     }
 
     public void setInvariantY(final double invariantY) {
-        EcdarController.runReachabilityAnalysis();
+        // If there is no EcdarPresentation, we are running tests and EcdarController calls will fail
+        if (Ecdar.getPresentation() != null) EcdarController.runReachabilityAnalysis();
         this.invariantY.set(invariantY);
     }
 

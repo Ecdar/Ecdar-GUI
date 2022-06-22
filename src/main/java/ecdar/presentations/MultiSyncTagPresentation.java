@@ -1,12 +1,13 @@
 package ecdar.presentations;
 
-import com.jfoenix.controls.JFXTextField;
 import ecdar.abstractions.Edge;
 import ecdar.abstractions.GroupedEdge;
 import ecdar.controllers.EcdarController;
 import ecdar.controllers.MultiSyncTagController;
 import ecdar.utility.UndoRedoStack;
 import javafx.application.Platform;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ObservableBooleanValue;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.Insets;
@@ -26,9 +27,8 @@ import static ecdar.presentations.Grid.GRID_SIZE;
 public class MultiSyncTagPresentation extends TagPresentation {
     private final MultiSyncTagController controller;
     private String placeholder = "";
-    private Label widestLabel;
     private final GroupedEdge edge;
-    private double widthNeededForSyncs = 60;
+    private final DoubleProperty syncsWidth = new SimpleDoubleProperty(80);
     private final SyncTextFieldPresentation emptySyncTextField;
 
     public MultiSyncTagPresentation(GroupedEdge edge, Runnable updateIOStatusOfSubEdges) {
@@ -83,9 +83,6 @@ public class MultiSyncTagPresentation extends TagPresentation {
 
                 l2.setY(newHeight);
                 l3.setY(newHeight);
-
-                setMinHeight(newHeight);
-                setMaxHeight(newHeight);
             }
         });
     }
@@ -273,23 +270,15 @@ public class MultiSyncTagPresentation extends TagPresentation {
     }
 
     private void initializeLabelForSync(SyncTextFieldPresentation syncTextField) {
+        // Bind the width of the label and add 2 for padding
+        syncTextField.getController().textField.minWidthProperty().bind(syncsWidth.add(2));
+        syncTextField.getController().textField.maxWidthProperty().bind(syncsWidth.add(2));
+
         syncTextField.getController().label.layoutBoundsProperty().addListener((obs, oldBounds, newBounds) -> {
-            final int padding = 5;
-            double newWidth = Math.max(newBounds.getWidth(), 60);
-            final double resWidth = GRID_SIZE * 2 - (newWidth % (GRID_SIZE * 2));
-            newWidth += resWidth;
-
-            this.updateNeededWidth();
-
-            if (syncTextField.getController().label.equals(widestLabel) && newWidth + padding > widthNeededForSyncs) {
-                setMinWidth(newWidth + padding);
-                setMaxWidth(newWidth + padding);
-
-                controller.syncList.setMinWidth(newWidth + padding);
-                controller.syncList.setMaxWidth(newWidth + padding);
-
-                Platform.runLater(this::ensureTagIsWithinComponent);
-            }
+            // Set limit for minimum width and add 2 for padding (text is not using full width without padding)
+            double newWidth = Math.max(newBounds.getWidth() + 2, 80);
+            this.updateNeededWidth(newWidth);
+            Platform.runLater(this::ensureTagIsWithinComponent);
 
             if (getWidth() >= 1000) {
                 setWidth(newWidth);
@@ -333,17 +322,16 @@ public class MultiSyncTagPresentation extends TagPresentation {
         this.requestTextFieldFocus();
     }
 
-    private void updateNeededWidth() {
-        double neededLengthForTextField = 0;
+    private void updateNeededWidth(double newWidth) {
+        double neededLengthForTextField = newWidth;
         for (Node child : controller.syncList.getChildren()) {
             Label currentLabel = ((SyncTextFieldPresentation) child).getController().label;
 
             if (currentLabel.getWidth() > neededLengthForTextField) {
                 neededLengthForTextField = currentLabel.getWidth();
-                widestLabel = currentLabel;
             }
         }
 
-        widthNeededForSyncs = neededLengthForTextField;
+        syncsWidth.set(neededLengthForTextField);
     }
 }
