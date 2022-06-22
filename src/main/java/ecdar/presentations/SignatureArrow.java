@@ -33,7 +33,7 @@ public class SignatureArrow extends Group implements Highlightable {
         controller.setSyncText(edgeName);
 
         drawArrow(edgeName, edgeStatus);
-
+        unhighlight();
         initializeMouseEvents();
     }
 
@@ -111,7 +111,15 @@ public class SignatureArrow extends Group implements Highlightable {
      */
     @Override
     public void unhighlight() {
-        Color color = Color.GREY_BLUE;
+        Color color;
+        // If sync is both input and output within component, make the arrow red
+        if (controller.getComponent().getInputStrings().contains(controller.getSyncText())
+                && controller.getComponent().getOutputStrings().contains(controller.getSyncText())) {
+            color = Color.RED;
+        } else {
+            color = Color.GREY_BLUE;
+        } // ToDo Niels make sure the corresponding channel in the opposite list is also changed to red
+
         Color.Intensity intensity = Color.Intensity.I800;
 
         this.colorArrowComponents(color, intensity);
