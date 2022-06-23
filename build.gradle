@@ -11,7 +11,7 @@ javafx {
 }
 
 group 'ecdar'
-version '2.3.1-beta'
+version '2.3.1'
 
 mainClassName = 'ECDAR'
 
