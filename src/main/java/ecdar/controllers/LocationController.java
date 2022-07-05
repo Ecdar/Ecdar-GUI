@@ -107,9 +107,6 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
     }
 
     public void initializeDropDownMenu() {
-        if (dropDownMenuInitialized) return;
-        dropDownMenuInitialized = true;
-
         dropDownMenu = new DropDownMenu(root);
 
         dropDownMenu.addClickableAndDisableableListElement("Draw Edge", getLocation().getIsLocked(),
@@ -134,15 +131,26 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                 }
         );
 
-        dropDownMenu.addClickableAndDisableableListElement("Add Invariant",
-                getLocation().invariantProperty().isNotEmpty().or(invariantTag.textFieldFocusProperty()).or(getLocation().getIsLocked()),
-                event -> {
-                    invariantTag.setOpacity(1);
-                    invariantTag.requestTextFieldFocus();
-                    invariantTag.requestTextFieldFocus(); // Requesting it twice is needed for some reason
-                    dropDownMenu.hide();
-                }
-        );
+        if (invariantTag.getOpacity() == 0) {
+            dropDownMenu.addClickableAndDisableableListElement("Add Invariant",
+                    getLocation().invariantProperty().isNotEmpty().or(invariantTag.textFieldFocusProperty()).or(getLocation().getIsLocked()),
+                    event -> {
+                        invariantTag.setOpacity(1);
+                        invariantTag.requestTextFieldFocus();
+                        invariantTag.requestTextFieldFocus(); // Requesting it twice is needed for some reason
+                        dropDownMenu.hide();
+                    }
+            );
+        } else {
+            dropDownMenu.addClickableAndDisableableListElement("Remove Invariant",
+                    getLocation().invariantProperty().isEmpty().or(getLocation().getIsLocked()),
+                    event -> {
+                        invariantTag.clear();
+                        invariantTag.setOpacity(0);
+                        dropDownMenu.hide();
+                    }
+            );
+        }
 
         // For when non-initial
         dropDownMenu.addClickableAndDisableableListElement("Make Initial",

@@ -55,7 +55,7 @@ public class TagPresentation extends StackPane {
         Platform.runLater(() -> {
             // When a label is loaded do not request focus initially
             textFieldFocusProperty().addListener((observable, oldValue, newValue) -> {
-                if(!hadInitialFocus && newValue) {
+                if (!hadInitialFocus && newValue) {
                     hadInitialFocus = true;
                     EcdarController.getActiveCanvasPresentation().getController().leaveTextAreas();
                 }
@@ -139,21 +139,21 @@ public class TagPresentation extends StackPane {
 
                 // Reset the was dragged boolean
                 wasDragged = false;
-            } else if(event.getClickCount() == 2){
+            } else if (event.getClickCount() == 2) {
                 textField.setMouseTransparent(false);
                 textField.requestFocus();
                 textField.requestFocus(); // This needs to be done twice because of reasons
             }
 
             //Handle the horizontal placement of the tag
-            if(getTranslateX() + locationAware.getValue().getX() + textField.getWidth() * 2 > getComponent().getBox().getX() + getComponent().getBox().getWidth()) {
+            if (getTranslateX() + locationAware.getValue().getX() + textField.getWidth() * 2 > getComponent().getBox().getX() + getComponent().getBox().getWidth()) {
                 setTranslateX(getComponent().getBox().getX() + getComponent().getBox().getWidth() - locationAware.getValue().getX() - textField.getWidth() * 2);
             } else if (getTranslateX() + locationAware.getValue().getX() < getComponent().getBox().getX()) {
                 setTranslateX(getComponent().getBox().getX() - locationAware.getValue().getX());
             }
 
             //Handle the vertical placement of the tag
-            if(getTranslateY() + locationAware.getValue().getY() + textField.getHeight() * 2 > getComponent().getBox().getY() + getComponent().getBox().getHeight()) {
+            if (getTranslateY() + locationAware.getValue().getY() + textField.getHeight() * 2 > getComponent().getBox().getY() + getComponent().getBox().getHeight()) {
                 setTranslateY(getComponent().getBox().getY() + getComponent().getBox().getHeight() - locationAware.getValue().getY() - textField.getHeight() * 2);
             } else if (getTranslateY() + locationAware.getValue().getY() < getComponent().getBox().getY() + GRID_SIZE * 2) {
                 setTranslateY(getComponent().getBox().getY() - locationAware.getValue().getY() + GRID_SIZE * 2);
@@ -163,7 +163,7 @@ public class TagPresentation extends StackPane {
         });
 
         textField.focusedProperty().addListener((observable, oldValue, newValue) -> {
-            if(newValue) {
+            if (newValue) {
                 shape.setCursor(Cursor.TEXT);
             } else {
                 textField.setMouseTransparent(true);
@@ -180,7 +180,7 @@ public class TagPresentation extends StackPane {
         final JFXTextField textField = (JFXTextField) lookup("#textField");
         final Path shape = (Path) lookup("#shape");
 
-        final Insets insets = new Insets(0,2,0,2);
+        final Insets insets = new Insets(0, 2, 0, 2);
         textField.setPadding(insets);
         label.setPadding(insets);
 
@@ -298,8 +298,15 @@ public class TagPresentation extends StackPane {
         this.locationAware.set(locationAware);
     }
 
-    public void setDisabledText(boolean bool){
+    public void setDisabledText(boolean bool) {
         final JFXTextField textField = (JFXTextField) lookup("#textField");
         textField.setDisable(true);
+    }
+
+    /**
+     * Clears the string value of the tag
+     */
+    public void clear() {
+        ((JFXTextField) lookup("#textField")).clear();
     }
 }
