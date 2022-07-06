@@ -4,19 +4,22 @@ import ecdar.abstractions.Component;
 import ecdar.controllers.EcdarController;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
+import ecdar.utility.helpers.ItemDragHelper;
 import ecdar.utility.helpers.LocationAware;
 import com.jfoenix.controls.JFXTextField;
+import ecdar.utility.helpers.SelectHelper;
 import javafx.application.Platform;
 import javafx.beans.binding.When;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 import javafx.beans.value.ObservableBooleanValue;
+import javafx.beans.value.ObservableDoubleValue;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.control.Label;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
+import javafx.scene.robot.Robot;
 import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
@@ -35,9 +38,6 @@ public class TagPresentation extends StackPane {
 
     LineTo l2;
     LineTo l3;
-    double previousX;
-    double previousY;
-    boolean wasDragged;
     boolean hadInitialFocus = false;
 
     static double TAG_HEIGHT = 1.6 * GRID_SIZE;
@@ -49,6 +49,20 @@ public class TagPresentation extends StackPane {
         initializeLabel();
         initializeMouseTransparency();
         initializeTextFocusHandler();
+
+        layoutXProperty().addListener((observable, oldValue, newValue) -> {
+            final double trimmedX = getDragBounds().trimX(newValue.doubleValue());
+            if (trimmedX != newValue.doubleValue()) {
+                layoutXProperty().set(trimmedX);
+            }
+        });
+
+        layoutYProperty().addListener((observable, oldValue, newValue) -> {
+            final double trimmedY = getDragBounds().trimY(newValue.doubleValue());
+            if (trimmedY != newValue.doubleValue()) {
+                layoutXProperty().set(trimmedY);
+            }
+        });
     }
 
     void initializeTextFocusHandler() {
@@ -80,8 +94,8 @@ public class TagPresentation extends StackPane {
         final int WIDTH = 5000;
         final double HEIGHT = TAG_HEIGHT;
 
+        final JFXTextField textField = (JFXTextField) lookup("#textField");
         final Path shape = (Path) lookup("#shape");
-
         final MoveTo start = new MoveTo(0, 0);
 
         l2 = new LineTo(WIDTH, 0);
@@ -93,74 +107,9 @@ public class TagPresentation extends StackPane {
 
         shape.setFill(backgroundColor.getColor(backgroundColorIntensity));
         shape.setStroke(backgroundColor.getColor(backgroundColorIntensity.next(4)));
-
-        final JFXTextField textField = (JFXTextField) lookup("#textField");
         shape.setCursor(Cursor.OPEN_HAND);
 
-        shape.setOnMousePressed(event -> {
-            previousX = getTranslateX();
-            previousY = getTranslateY();
-            shape.setCursor(Cursor.CLOSED_HAND);
-        });
-
-        this.setOnMouseDragged(event -> {
-            event.consume();
-
-            final double newX = EcdarController.getActiveCanvasPresentation().mouseTracker.gridXProperty().subtract(getComponent().getBox().getXProperty()).subtract(getLocationAware().xProperty()).doubleValue() - getMinWidth() / 2;
-            setTranslateX(newX);
-
-            final double newY = EcdarController.getActiveCanvasPresentation().mouseTracker.gridYProperty().subtract(getComponent().getBox().getYProperty()).subtract(getLocationAware().yProperty()).doubleValue() - getHeight() / 2;
-            setTranslateY(newY - 2);
-
-            // Tell the mouse release action that we can store an update
-            wasDragged = true;
-        });
-
-        shape.setOnMouseReleased(event -> {
-            if (wasDragged) {
-                // Add to undo redo stack
-                final double currentX = getTranslateX();
-                final double currentY = getTranslateY();
-                final double storePreviousX = previousX;
-                final double storePreviousY = previousY;
-
-                UndoRedoStack.pushAndPerform(
-                        () -> {
-                            setTranslateX(currentX);
-                            setTranslateY(currentY);
-                        },
-                        () -> {
-                            setTranslateX(storePreviousX);
-                            setTranslateY(storePreviousY);
-                        },
-                        String.format("Moved tag from (%f,%f) to (%f,%f)", currentX, currentY, storePreviousX, storePreviousY),
-                        "pin-drop"
-                );
-
-                // Reset the was dragged boolean
-                wasDragged = false;
-            } else if (event.getClickCount() == 2) {
-                textField.setMouseTransparent(false);
-                textField.requestFocus();
-                textField.requestFocus(); // This needs to be done twice because of reasons
-            }
-
-            //Handle the horizontal placement of the tag
-            if (getTranslateX() + locationAware.getValue().getX() + textField.getWidth() * 2 > getComponent().getBox().getX() + getComponent().getBox().getWidth()) {
-                setTranslateX(getComponent().getBox().getX() + getComponent().getBox().getWidth() - locationAware.getValue().getX() - textField.getWidth() * 2);
-            } else if (getTranslateX() + locationAware.getValue().getX() < getComponent().getBox().getX()) {
-                setTranslateX(getComponent().getBox().getX() - locationAware.getValue().getX());
-            }
-
-            //Handle the vertical placement of the tag
-            if (getTranslateY() + locationAware.getValue().getY() + textField.getHeight() * 2 > getComponent().getBox().getY() + getComponent().getBox().getHeight()) {
-                setTranslateY(getComponent().getBox().getY() + getComponent().getBox().getHeight() - locationAware.getValue().getY() - textField.getHeight() * 2);
-            } else if (getTranslateY() + locationAware.getValue().getY() < getComponent().getBox().getY() + GRID_SIZE * 2) {
-                setTranslateY(getComponent().getBox().getY() - locationAware.getValue().getY() + GRID_SIZE * 2);
-            }
-
-            shape.setCursor(Cursor.OPEN_HAND);
-        });
+        initializeDragging(textField, shape);
 
         textField.focusedProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {
@@ -173,6 +122,83 @@ public class TagPresentation extends StackPane {
 
         // When enter or escape is pressed release focus
         textField.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
+    }
+
+    private void initializeDragging(JFXTextField textField, Path shape) {
+        final DoubleProperty draggablePreviousX = new SimpleDoubleProperty();
+        final DoubleProperty draggablePreviousY = new SimpleDoubleProperty();
+        final DoubleProperty dragOffsetX = new SimpleDoubleProperty();
+        final DoubleProperty dragOffsetY = new SimpleDoubleProperty();
+        final BooleanProperty wasDragged = new SimpleBooleanProperty();
+
+        shape.addEventHandler(MouseEvent.MOUSE_PRESSED, event -> {
+            event.consume();
+
+            SelectHelper.clearSelectedElements();
+
+            draggablePreviousX.set(getTranslateX());
+            draggablePreviousY.set(getTranslateY());
+            dragOffsetX.set(event.getSceneX());
+            dragOffsetY.set(event.getSceneY());
+
+            // Abandon edge, if drag edge is registered instead of tag drag ToDo: Fix so this is not needed
+            Platform.runLater(() -> {
+                Robot robot = new Robot();
+                robot.keyType(KeyCode.ESCAPE);
+            });
+
+            shape.setCursor(Cursor.CLOSED_HAND);
+        });
+
+        shape.addEventHandler(MouseEvent.MOUSE_DRAGGED, event -> {
+            event.consume();
+
+            final double dragDistanceX = Grid.snap(event.getSceneX() - dragOffsetX.get()) / EcdarController.getActiveCanvasZoomFactor().get();
+            final double dragDistanceY = Grid.snap(event.getSceneY() - dragOffsetY.get()) / EcdarController.getActiveCanvasZoomFactor().get();
+            double draggableNewX = getDragBounds().trimX(draggablePreviousX.get() + dragDistanceX);
+            double draggableNewY = getDragBounds().trimY(draggablePreviousY.get() + dragDistanceY);
+
+            setTranslateX(draggableNewX);
+            setTranslateY(draggableNewY);
+
+            wasDragged.set(true);
+        });
+
+        shape.addEventHandler(MouseEvent.MOUSE_RELEASED, event -> {
+            event.consume();
+            if (wasDragged.get()) {
+                final double draggableCurrentX = getTranslateX();
+                final double draggableCurrentY = getTranslateY();
+                final double previousX = draggablePreviousX.get();
+                final double previousY = draggablePreviousY.get();
+
+
+                if(draggableCurrentX != previousX || draggableCurrentY != previousY) {
+                    UndoRedoStack.pushAndPerform(
+                            () -> {
+                                setTranslateX(draggableCurrentX);
+                                setTranslateY(draggableCurrentY);
+                            },
+                            () -> {
+                                setTranslateX(previousX);
+                                setTranslateY(previousY);
+                            },
+                            String.format("Moved " + this.getClass() + " from (%f,%f) to (%f,%f)", draggableCurrentX, draggableCurrentY, previousX, previousY),
+                            "pin-drop"
+                    );
+                }
+
+                // Reset the was dragged boolean
+                wasDragged.set(false);
+                shape.setCursor(Cursor.OPEN_HAND);
+            }
+
+            if (event.getClickCount() == 2) {
+                textField.setMouseTransparent(false);
+                textField.requestFocus();
+                textField.requestFocus(); // This needs to be done twice because of reasons
+            }
+        });
     }
 
     void initializeLabel() {
@@ -301,6 +327,23 @@ public class TagPresentation extends StackPane {
     public void setDisabledText(boolean bool) {
         final JFXTextField textField = (JFXTextField) lookup("#textField");
         textField.setDisable(true);
+    }
+
+    /**
+     * Get the drag bounds for the tag within the Component
+     * @return drag bounds of the tag within the Component
+     */
+    public ItemDragHelper.DragBounds getDragBounds() {
+        final JFXTextField textField = (JFXTextField) lookup("#textField");
+
+        final ObservableDoubleValue minX = locationAware.get().xProperty().multiply(-1).add(GRID_SIZE);
+        final ObservableDoubleValue maxX = getComponent().getBox().getWidthProperty()
+                .subtract(locationAware.get().xProperty().add(textField.widthProperty()).add(GRID_SIZE));
+        final ObservableDoubleValue minY = locationAware.get().yProperty().multiply(-1).add(GRID_SIZE * 2);
+        final ObservableDoubleValue maxY = getComponent().getBox().getHeightProperty()
+                .subtract(locationAware.get().yProperty().add(textField.heightProperty()).add(GRID_SIZE));
+
+        return new ItemDragHelper.DragBounds(minX, maxX, minY, maxY);
     }
 
     /**

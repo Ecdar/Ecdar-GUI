@@ -1,14 +1,22 @@
 package ecdar.presentations;
 
+import com.jfoenix.controls.JFXTextField;
+import ecdar.abstractions.DisplayableEdge;
 import ecdar.abstractions.Edge;
 import ecdar.abstractions.GroupedEdge;
+import ecdar.abstractions.Nail;
 import ecdar.controllers.EcdarController;
 import ecdar.controllers.MultiSyncTagController;
 import ecdar.utility.UndoRedoStack;
+import ecdar.utility.helpers.ItemDragHelper;
+import ecdar.utility.helpers.SelectHelper;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ObservableBooleanValue;
+import javafx.beans.value.ObservableDoubleValue;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
@@ -16,6 +24,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -38,9 +47,18 @@ public class MultiSyncTagPresentation extends TagPresentation {
         edge.ioStatus.addListener((observable) -> updateIOStatusOfSubEdges.run());
 
         Platform.runLater(() -> {
+            // Added to avoid NullPointer exception for location aware and component in getDragBounds method
+            Nail syncNail = edge.getNails().stream().filter(n -> n.getPropertyType().equals(DisplayableEdge.PropertyType.SYNCHRONIZATION)).findFirst().orElse(null);
+            if (syncNail != null) {
+                setLocationAware(syncNail);
+            }
+            setComponent(EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation.getController().getComponent());
+
+
             updateTopBorder();
             initializeMouseTransparency();
             initializeTextFocusHandler();
+            initializeDragging();
 
             widthProperty().addListener((observable) -> updateTopBorder());
             heightProperty().addListener((observable) -> updateTopBorder());
@@ -124,13 +142,38 @@ public class MultiSyncTagPresentation extends TagPresentation {
         }
     }
 
+    @Override
+    public ItemDragHelper.DragBounds getDragBounds() {
+        final JFXTextField textField = (JFXTextField) lookup("#textField");
+        double syncListWidth;
+        double syncListHeight;
+
+        // Added to avoid null pointer when first sync is added
+        if (controller.syncList == null || controller.syncList.getParent() == null || controller.syncList.getParent().getParent() == null) {
+            syncListWidth = textField.getWidth() + GRID_SIZE * 2;
+            syncListHeight = textField.getHeight() + GRID_SIZE;
+        } else {
+            syncListWidth = ((ScrollPane) controller.syncList.getParent().getParent().getParent()).getViewportBounds().getWidth();
+            syncListHeight = ((ScrollPane) controller.syncList.getParent().getParent().getParent()).getViewportBounds().getHeight();
+        }
+
+        final ObservableDoubleValue minX = locationAware.get().xProperty().multiply(-1).add(GRID_SIZE);
+        final ObservableDoubleValue maxX = getComponent().getBox().getWidthProperty()
+                .subtract(locationAware.get().xProperty().add(syncListWidth + GRID_SIZE));
+
+        final ObservableDoubleValue minY = locationAware.get().yProperty().multiply(-1).add(textField.heightProperty().multiply(2));
+        final ObservableDoubleValue maxY = getComponent().getBox().getHeightProperty()
+                .subtract(locationAware.get().yProperty().add(syncListHeight + TAG_HEIGHT * 2));
+
+        return new ItemDragHelper.DragBounds(minX, maxX, minY, maxY);
+    }
+
     public MultiSyncTagController getController() {
         return controller;
     }
 
     private void updateTopBorder() {
         updateColorAndMouseShape();
-        updateMouseInteractions();
 
         for (Node child : controller.syncList.getChildren()) {
             ((SyncTextFieldPresentation) child).getController().textField
@@ -163,55 +206,68 @@ public class MultiSyncTagPresentation extends TagPresentation {
         controller.frame.setCursor(Cursor.OPEN_HAND);
     }
 
-    private void updateMouseInteractions() {
-        controller.frame.setOnMousePressed(event -> {
-            previousX = getTranslateX();
-            previousY = getTranslateY();
+    private void initializeDragging() {
+        final DoubleProperty draggablePreviousX = new SimpleDoubleProperty();
+        final DoubleProperty draggablePreviousY = new SimpleDoubleProperty();
+        final DoubleProperty dragOffsetX = new SimpleDoubleProperty();
+        final DoubleProperty dragOffsetY = new SimpleDoubleProperty();
+        final BooleanProperty wasDragged = new SimpleBooleanProperty();
+
+        controller.frame.addEventHandler(MouseEvent.MOUSE_PRESSED, event -> {
+            event.consume();
+
+            SelectHelper.clearSelectedElements();
+
+            draggablePreviousX.set(getTranslateX());
+            draggablePreviousY.set(getTranslateY());
+            dragOffsetX.set(event.getSceneX());
+            dragOffsetY.set(event.getSceneY());
 
             controller.frame.setCursor(Cursor.CLOSED_HAND);
         });
 
-        controller.frame.setOnMouseDragged(event -> {
+        controller.frame.addEventHandler(MouseEvent.MOUSE_DRAGGED, event -> {
             event.consume();
 
-            final double newX = EcdarController.getActiveCanvasPresentation().mouseTracker.gridXProperty().subtract(getComponent().getBox().getXProperty()).subtract(getLocationAware().xProperty()).subtract(getWidth() / 2).doubleValue();
-            setTranslateX(newX);
+            Platform.runLater(() -> {
+                final double dragDistanceX = Grid.snap(event.getSceneX() - dragOffsetX.get()) / EcdarController.getActiveCanvasZoomFactor().get();
+                final double dragDistanceY = Grid.snap(event.getSceneY() - dragOffsetY.get()) / EcdarController.getActiveCanvasZoomFactor().get();
+                double draggableNewX = getDragBounds().trimX(draggablePreviousX.get() + dragDistanceX);
+                double draggableNewY = getDragBounds().trimY(draggablePreviousY.get() + dragDistanceY);
 
-            final double newY = EcdarController.getActiveCanvasPresentation().mouseTracker.gridYProperty().subtract(getComponent().getBox().getYProperty()).subtract(getLocationAware().yProperty()).subtract(controller.topbar.getHeight() / 2).doubleValue();
-            setTranslateY(newY - 2);
+                setTranslateX(draggableNewX);
+                setTranslateY(draggableNewY);
+            });
 
-            // Tell the mouse release action that we can store an update
-            wasDragged = true;
+            wasDragged.set(true);
         });
 
-        controller.frame.setOnMouseReleased(event -> {
-            if (wasDragged) {
-                // Add to undo redo stack
-                final double currentX = getTranslateX();
-                final double currentY = getTranslateY();
-                final double storePreviousX = previousX;
-                final double storePreviousY = previousY;
+        controller.frame.addEventHandler(MouseEvent.MOUSE_RELEASED, event -> {
+            event.consume();
+            final double draggableCurrentX = getTranslateX();
+            final double draggableCurrentY = getTranslateY();
+            final double previousX = draggablePreviousX.get();
+            final double previousY = draggablePreviousY.get();
 
+
+            if(draggableCurrentX != previousX || draggableCurrentY != previousY) {
                 UndoRedoStack.pushAndPerform(
                         () -> {
-                            setTranslateX(currentX);
-                            setTranslateY(currentY);
+                            setTranslateX(draggableCurrentX);
+                            setTranslateY(draggableCurrentY);
                         },
                         () -> {
-                            setTranslateX(storePreviousX);
-                            setTranslateY(storePreviousY);
+                            setTranslateX(previousX);
+                            setTranslateY(previousY);
                         },
-                        String.format("Moved tag from (%f,%f) to (%f,%f)", currentX, currentY, storePreviousX, storePreviousY),
+                        String.format("Moved " + this.getClass() + " from (%f,%f) to (%f,%f)", draggableCurrentX, draggableCurrentY, previousX, previousY),
                         "pin-drop"
                 );
-
-                // Reset the was dragged boolean
-                wasDragged = false;
             }
 
+            // Reset the was dragged boolean
+            wasDragged.set(false);
             controller.frame.setCursor(Cursor.OPEN_HAND);
-
-            Platform.runLater(this::ensureTagIsWithinComponent);
         });
     }
 
@@ -232,7 +288,6 @@ public class MultiSyncTagPresentation extends TagPresentation {
         Platform.runLater(() -> {
             initializeTextFieldForSync(syncTextFieldPresentation);
             initializeLabelForSync(syncTextFieldPresentation);
-
             ensureTagIsWithinComponent();
         });
 
@@ -293,26 +348,8 @@ public class MultiSyncTagPresentation extends TagPresentation {
     }
 
     private void ensureTagIsWithinComponent() {
-        // Added to avoid null pointer when first sync is added
-        if (controller.syncList == null || controller.syncList.getParent() == null || controller.syncList.getParent().getParent() == null) {
-            return;
-        }
-
-        //Handle the horizontal placement of the tag
-        double syncListWidth = ((ScrollPane) controller.syncList.getParent().getParent().getParent()).getViewportBounds().getWidth();
-        if(getTranslateX() + locationAware.getValue().getX() + syncListWidth + GRID_SIZE * 2 > getComponent().getBox().getX() + getComponent().getBox().getWidth()) {
-            setTranslateX(Grid.snap(getComponent().getBox().getX() + getComponent().getBox().getWidth() - locationAware.getValue().getX() - syncListWidth - GRID_SIZE * 2));
-        } else if (getTranslateX() + locationAware.getValue().getX() < getComponent().getBox().getX()) {
-            setTranslateX(Grid.snap(getComponent().getBox().getX() - locationAware.getValue().getX()));
-        }
-
-        //Handle the vertical placement of the tag
-        double syncListHeight = ((ScrollPane) controller.syncList.getParent().getParent().getParent()).getViewportBounds().getHeight();
-        if(getTranslateY() + locationAware.getValue().getY() + syncListHeight + TAG_HEIGHT * 3 > getComponent().getBox().getY() + getComponent().getBox().getHeight()) {
-            setTranslateY(Grid.snap(getComponent().getBox().getY() + getComponent().getBox().getHeight() - locationAware.getValue().getY() - (syncListHeight + TAG_HEIGHT * 3)));
-        } else if (getTranslateY() + locationAware.getValue().getY() < getComponent().getBox().getY() + GRID_SIZE * 2) {
-            setTranslateY(Grid.snap(getComponent().getBox().getY() - locationAware.getValue().getY() + GRID_SIZE * 2));
-        }
+        setTranslateX(getDragBounds().trimX(getTranslateX()));
+        setTranslateY(getDragBounds().trimY(getTranslateY()));
     }
 
     private void placeEmptySyncBelowCurrent(SyncTextFieldPresentation currentTextField) {
