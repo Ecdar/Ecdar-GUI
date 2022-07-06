@@ -2,6 +2,7 @@ package ecdar.presentations;
 
 import ecdar.abstractions.Component;
 import ecdar.abstractions.EdgeStatus;
+import ecdar.controllers.EcdarController;
 import ecdar.controllers.SignatureArrowController;
 import ecdar.utility.colors.Color;
 import ecdar.utility.Highlightable;
@@ -33,7 +34,7 @@ public class SignatureArrow extends Group implements Highlightable {
         controller.setSyncText(edgeName);
 
         drawArrow(edgeName, edgeStatus);
-
+        unhighlight();
         initializeMouseEvents();
     }
 
@@ -111,9 +112,45 @@ public class SignatureArrow extends Group implements Highlightable {
      */
     @Override
     public void unhighlight() {
-        Color color = Color.GREY_BLUE;
-        Color.Intensity intensity = Color.Intensity.I800;
+        Color color;
+        // If sync is both input and output within component, make the arrow red
+        if (controller.getComponent().getInputStrings().contains(controller.getSyncText())
+                && controller.getComponent().getOutputStrings().contains(controller.getSyncText())) {
+            color = Color.RED;
 
+            // Color matching SignatureArrow red
+            SignatureArrow matchingSignatureArrow;
+            if (controller.getEdgeStatus().equals(EdgeStatus.INPUT)) {
+                matchingSignatureArrow = (SignatureArrow) EcdarController.getActiveCanvasPresentation().getController()
+                        .activeComponentPresentation.getController()
+                        .outputSignatureContainer.getChildren()
+                        .stream().filter(node -> node instanceof SignatureArrow && ((SignatureArrow) node).controller.getSyncText().equals(controller.getSyncText()))
+                        .findFirst().orElse(null);
+
+            } else {
+                matchingSignatureArrow = (SignatureArrow) EcdarController.getActiveCanvasPresentation().getController()
+                        .activeComponentPresentation.getController()
+                        .inputSignatureContainer.getChildren()
+                        .stream().filter(node -> node instanceof SignatureArrow && ((SignatureArrow) node).controller.getSyncText().equals(controller.getSyncText()))
+                        .findFirst().orElse(null);
+
+            }
+            if (matchingSignatureArrow != null) matchingSignatureArrow.recolorToRed();
+
+        } else {
+            color = Color.GREY_BLUE;
+        }
+
+        Color.Intensity intensity = Color.Intensity.I800;
+        this.colorArrowComponents(color, intensity);
+    }
+
+    /**
+     * Set the color of the SignatureArrow to Color.RED
+     */
+    public void recolorToRed() {
+        Color color = Color.RED;
+        Color.Intensity intensity = Color.Intensity.I800;
         this.colorArrowComponents(color, intensity);
     }
 
