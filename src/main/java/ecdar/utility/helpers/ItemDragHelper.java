@@ -1,6 +1,7 @@
 package ecdar.utility.helpers;
 
 import ecdar.controllers.EcdarController;
+import ecdar.controllers.EdgeController;
 import ecdar.presentations.ComponentOperatorPresentation;
 import ecdar.presentations.ComponentPresentation;
 import ecdar.presentations.Grid;
@@ -138,6 +139,7 @@ public class ItemDragHelper {
 
             for (int i = 0; i < numberOfSelectedItems; i++) {
                 SelectHelper.ItemSelectable item = SelectHelper.getSelectedElements().get(i);
+                if (item instanceof EdgeController) continue;
 
                 if (!item.equals(mouseSubject)) {
                     final double itemNewX = dragBounds.trimX(previousLocations.get(i).getKey() + dragDistanceX);
@@ -198,6 +200,7 @@ public class ItemDragHelper {
 
         for (int i = 0; i < numberOfSelectedItems; i++) {
             SelectHelper.ItemSelectable item = selectedItems.get(i);
+            if (item instanceof EdgeController) continue;
 
             if (!item.equals(mouseSubject)) {
                 // The x and y properties of any ComponentOperatorPresentation is bound and must therefore be set this way instead
