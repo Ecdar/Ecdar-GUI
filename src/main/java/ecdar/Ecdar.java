@@ -34,6 +34,7 @@ import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.prefs.Preferences;
 
 import java.net.URISyntaxException;
@@ -42,7 +43,7 @@ import java.security.CodeSource;
 public class Ecdar extends Application {
     public static Preferences preferences = Preferences.userRoot().node("ECDAR");
     public static BooleanProperty autoScalingEnabled = new SimpleBooleanProperty(false);
-    public static final String VERSION = "2.3.0-beta";
+    public static final String VERSION = getVersion();
     public static boolean serializationDone = false;
     public static SimpleStringProperty projectDirectory = new SimpleStringProperty();
 
@@ -386,5 +387,18 @@ public class Ecdar extends Application {
         Font.loadFont(getClass().getResourceAsStream("fonts/roboto_mono/RobotoMono-Regular.ttf"), 14);
         Font.loadFont(getClass().getResourceAsStream("fonts/roboto_mono/RobotoMono-Thin.ttf"), 14);
         Font.loadFont(getClass().getResourceAsStream("fonts/roboto_mono/RobotoMono-ThinItalic.ttf"), 14);
+    }
+
+    private static String getVersion() {
+        Properties defaultProps = new Properties();
+        try {
+            try (var in = Ecdar.class.getResourceAsStream("version")) {
+                defaultProps.load(in);
+                return (String) defaultProps.get("version");
+            }
+        } catch (NullPointerException | IOException e) {
+            e.printStackTrace();
+            return "2.3";
+        }
     }
 }
