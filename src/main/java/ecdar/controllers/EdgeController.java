@@ -90,6 +90,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                         if (nearable instanceof Edge) {
                             if (nearable.equals(getEdge())) {
                                 SelectHelper.addToSelection(EdgeController.this);
+                                edge.get().getNails().forEach(n -> SelectHelper.addToSelection(nailNailPresentationMap.get(n).getController()));
                                 break;
                             }
                         }
@@ -130,7 +131,6 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                 // Bind the first link and the arrowhead from the source location to the mouse
                 BindingHelper.bind(link, simpleArrowHead, newEdge.getSourceCircular(), new MouseCircular(newEdge.getSourceCircular()));
             } else if (newEdge.getTargetCircular() != null) {
-
                 edgeRoot.getChildren().add(simpleArrowHead);
 
                 final Circular[] previous = {newEdge.getSourceCircular()};
@@ -655,17 +655,21 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
             if (event.isShortcutDown()) {
                 if (SelectHelper.getSelectedElements().contains(this)) {
                     SelectHelper.deselect(this);
+                    edge.get().getNails().forEach(n -> SelectHelper.deselect(nailNailPresentationMap.get(n).getController()));
                 } else {
                     SelectHelper.addToSelection(this);
+                    edge.get().getNails().forEach(n -> SelectHelper.addToSelection(nailNailPresentationMap.get(n).getController()));
                 }
             } else {
                 SelectHelper.select(this);
+                edge.get().getNails().forEach(n -> SelectHelper.addToSelection(nailNailPresentationMap.get(n).getController()));
             }
         }
     }
 
     @FXML
     public void edgeDragged(final MouseEvent event) {
+        if (event.getTarget() instanceof TagPresentation) return;
         // Check if the edge is selected to ensure that the drag is not targeting a nail
         if (SelectHelper.getSelectedElements().size() == 0 || SelectHelper.getSelectedElements().get(0) == this) {
             DisplayableEdge draggedEdge = edge.get();

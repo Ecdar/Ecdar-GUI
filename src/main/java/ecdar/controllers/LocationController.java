@@ -360,6 +360,8 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
     private void initializeMouseControls() {
         final Consumer<MouseEvent> mouseClicked = (event) -> {
+            // Make sure that we are not targeting one of the tags
+            if (!(event.getTarget().equals(notCommittedShape) || event.getTarget().equals(committedShape))) return;
             event.consume();
 
             final Component component = getComponent();
