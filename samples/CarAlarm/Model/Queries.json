@@ -40,7 +40,7 @@
     "backend": "Reveaal"
   },
   {
-    "query": "specification: (Alarm ",
+    "query": "specification: (Alarm: A[] not Alarm.L7 || Alarm.x\u003c\u003d30)",
     "comment": "",
     "isPeriodic": false,
     "ignoredInputs": {},
