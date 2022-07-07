@@ -19,6 +19,8 @@
   ],
   "edges": [
     {
+      "id": "E1",
+      "group": "",
       "sourceLocation": "L3",
       "targetLocation": "L3",
       "status": "INPUT",
@@ -26,6 +28,7 @@
       "guard": "",
       "update": "",
       "sync": "button1",
+      "isLocked": false,
       "nails": [
         {
           "x": 180.0,
@@ -44,6 +47,8 @@
       ]
     },
     {
+      "id": "E1",
+      "group": "",
       "sourceLocation": "L3",
       "targetLocation": "L3",
       "status": "INPUT",
@@ -51,6 +56,7 @@
       "guard": "",
       "update": "",
       "sync": "button2",
+      "isLocked": false,
       "nails": [
         {
           "x": 260.0,
@@ -69,6 +75,8 @@
       ]
     },
     {
+      "id": "E1",
+      "group": "",
       "sourceLocation": "L3",
       "targetLocation": "L3",
       "status": "OUTPUT",
@@ -76,6 +84,7 @@
       "guard": "",
       "update": "",
       "sync": "good",
+      "isLocked": false,
       "nails": [
         {
           "x": 280.0,

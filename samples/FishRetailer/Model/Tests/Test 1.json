@@ -20,16 +20,16 @@
   "maxGenerationThreads": 10,
   "maxSutInstances": 3,
   "maxOutputWaitTime": 5,
-  "verifytgaTries": 3,
+  "backendTries": 3,
   "timeUnit": 200,
   "stepBounds": 5,
   "simulateTime": false,
-  "verdictMAX_WAIT": false,
-  "verdictMUT_NO_DELAY": false,
+  "verdictNO_RULE": false,
   "verdictOUT_OF_BOUNDS": false,
-  "verdictFAIL_PRIMARY": true,
+  "verdictPASS": false,
   "verdictFAIL_NORMAL": true,
   "verdictNON_DETERMINISM": false,
-  "verdictPASS": false,
-  "verdictNO_RULE": false
+  "verdictFAIL_PRIMARY": true,
+  "verdictMAX_WAIT": false,
+  "verdictMUT_NO_DELAY": false
 }

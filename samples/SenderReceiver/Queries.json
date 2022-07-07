@@ -1,17 +1,26 @@
 [
   {
-    "query": "E\u003c\u003e Receiver.L4",
+    "query": "reachability: Receiver.L4",
     "comment": "",
-    "isPeriodic": false
+    "isPeriodic": false,
+    "ignoredInputs": {},
+    "ignoredOutputs": {},
+    "backend": "Reveaal"
   },
   {
     "query": "specification: Sender",
     "comment": "",
-    "isPeriodic": false
+    "isPeriodic": false,
+    "ignoredInputs": {},
+    "ignoredOutputs": {},
+    "backend": "Reveaal"
   },
   {
     "query": "implementation: Sender",
     "comment": "",
-    "isPeriodic": false
+    "isPeriodic": false,
+    "ignoredInputs": {},
+    "ignoredOutputs": {},
+    "backend": "Reveaal"
   }
 ]

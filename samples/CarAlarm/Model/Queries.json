@@ -2,31 +2,49 @@
   {
     "query": "consistency: Alarm",
     "comment": "",
-    "isPeriodic": false
+    "isPeriodic": false,
+    "ignoredInputs": {},
+    "ignoredOutputs": {},
+    "backend": "Reveaal"
   },
   {
     "query": "specification: Alarm",
     "comment": "",
-    "isPeriodic": false
+    "isPeriodic": false,
+    "ignoredInputs": {},
+    "ignoredOutputs": {},
+    "backend": "Reveaal"
   },
   {
-    "query": "E\u003c\u003e Alarm.L11",
+    "query": "reachability: Alarm.L11",
     "comment": "",
-    "isPeriodic": false
+    "isPeriodic": false,
+    "ignoredInputs": {},
+    "ignoredOutputs": {},
+    "backend": "Reveaal"
   },
   {
-    "query": "E\u003c\u003e Alarm.L12",
+    "query": "reachability: Alarm.L12",
     "comment": "",
-    "isPeriodic": false
+    "isPeriodic": false,
+    "ignoredInputs": {},
+    "ignoredOutputs": {},
+    "backend": "Reveaal"
   },
   {
-    "query": "E\u003c\u003e Alarm.L9",
+    "query": "reachability: Alarm.L9",
     "comment": "",
-    "isPeriodic": false
+    "isPeriodic": false,
+    "ignoredInputs": {},
+    "ignoredOutputs": {},
+    "backend": "Reveaal"
   },
   {
-    "query": "specification: (Alarm : A[] not Alarm.L7 || Alarm.x\u003c\u003d30)",
+    "query": "specification: (Alarm ",
     "comment": "",
-    "isPeriodic": false
+    "isPeriodic": false,
+    "ignoredInputs": {},
+    "ignoredOutputs": {},
+    "backend": "Reveaal"
   }
 ]

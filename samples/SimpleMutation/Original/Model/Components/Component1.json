@@ -61,6 +61,8 @@
   ],
   "edges": [
     {
+      "id": "E0",
+      "group": "",
       "sourceLocation": "L0",
       "targetLocation": "L1",
       "status": "OUTPUT",
@@ -87,6 +89,8 @@
       ]
     },
     {
+      "id": "E0",
+      "group": "",
       "sourceLocation": "L0",
       "targetLocation": "L2",
       "status": "OUTPUT",
@@ -113,6 +117,8 @@
       ]
     },
     {
+      "id": "E0",
+      "group": "",
       "sourceLocation": "L1",
       "targetLocation": "L2",
       "status": "INPUT",
@@ -139,6 +145,8 @@
       ]
     },
     {
+      "id": "E0",
+      "group": "",
       "sourceLocation": "L2",
       "targetLocation": "L3",
       "status": "OUTPUT",
@@ -166,8 +174,8 @@
     }
   ],
   "description": "",
-  "x": 5.0,
-  "y": 5.0,
+  "x": 513.0,
+  "y": 192.0,
   "width": 450.0,
   "height": 600.0,
   "color": "2",
