@@ -42,18 +42,13 @@ public class MultiSyncTagPresentation extends TagPresentation {
 
     public MultiSyncTagPresentation(GroupedEdge edge, Runnable updateIOStatusOfSubEdges) {
         this.controller = new EcdarFXMLLoader().loadAndGetController("MultiSyncTagPresentation.fxml", this);
-
         this.edge = edge;
         edge.ioStatus.addListener((observable) -> updateIOStatusOfSubEdges.run());
 
         Platform.runLater(() -> {
             // Added to avoid NullPointer exception for location aware and component in getDragBounds method
-            Nail syncNail = edge.getNails().stream().filter(n -> n.getPropertyType().equals(DisplayableEdge.PropertyType.SYNCHRONIZATION)).findFirst().orElse(null);
-            if (syncNail != null) {
-                setLocationAware(syncNail);
-            }
+            edge.getNails().stream().filter(n -> n.getPropertyType().equals(DisplayableEdge.PropertyType.SYNCHRONIZATION)).findFirst().ifPresent(this::setLocationAware);
             setComponent(EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation.getController().getComponent());
-
 
             updateTopBorder();
             initializeMouseTransparency();
@@ -84,13 +79,8 @@ public class MultiSyncTagPresentation extends TagPresentation {
 
         edge.getEdges().addListener((ListChangeListener<Edge>) change -> {
             while (change.next()) {
-                if (change.wasRemoved()) {
-                    change.getRemoved().forEach(this::removeSyncTextField);
-                }
-
-                if (change.wasAdded()) {
-                    change.getAddedSubList().forEach(this::addSyncTextField);
-                }
+                if (change.wasRemoved()) change.getRemoved().forEach(this::removeSyncTextField);
+                if (change.wasAdded()) change.getAddedSubList().forEach(this::addSyncTextField);
             }
 
             // Handle height
@@ -202,7 +192,6 @@ public class MultiSyncTagPresentation extends TagPresentation {
                 EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation.getController().getComponent().getColorIntensity());
 
         controller.frame.setBackground(new Background(new BackgroundFill(color, new CornerRadii(0), Insets.EMPTY)));
-
         controller.frame.setCursor(Cursor.OPEN_HAND);
     }
 
@@ -217,7 +206,6 @@ public class MultiSyncTagPresentation extends TagPresentation {
             event.consume();
 
             SelectHelper.clearSelectedElements();
-
             draggablePreviousX.set(getTranslateX());
             draggablePreviousY.set(getTranslateY());
             dragOffsetX.set(event.getSceneX());
@@ -363,7 +351,6 @@ public class MultiSyncTagPresentation extends TagPresentation {
         double neededLengthForTextField = newWidth;
         for (Node child : controller.syncList.getChildren()) {
             Label currentLabel = ((SyncTextFieldPresentation) child).getController().label;
-
             if (currentLabel.getWidth() > neededLengthForTextField) {
                 neededLengthForTextField = currentLabel.getWidth();
             }
