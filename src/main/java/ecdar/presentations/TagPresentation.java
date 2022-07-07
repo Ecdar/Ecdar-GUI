@@ -141,12 +141,6 @@ public class TagPresentation extends StackPane {
             dragOffsetX.set(event.getSceneX());
             dragOffsetY.set(event.getSceneY());
 
-            // Abandon edge, if drag edge is registered instead of tag drag ToDo: Fix so this is not needed
-            Platform.runLater(() -> {
-                Robot robot = new Robot();
-                robot.keyType(KeyCode.ESCAPE);
-            });
-
             shape.setCursor(Cursor.CLOSED_HAND);
         });
 
@@ -196,7 +190,6 @@ public class TagPresentation extends StackPane {
             if (event.getClickCount() == 2) {
                 textField.setMouseTransparent(false);
                 textField.requestFocus();
-                textField.requestFocus(); // This needs to be done twice because of reasons
             }
         });
     }

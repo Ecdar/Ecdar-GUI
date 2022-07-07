@@ -669,6 +669,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
 
     @FXML
     public void edgeDragged(final MouseEvent event) {
+        if (event.getTarget() instanceof TagPresentation) return;
         // Check if the edge is selected to ensure that the drag is not targeting a nail
         if (SelectHelper.getSelectedElements().size() == 0 || SelectHelper.getSelectedElements().get(0) == this) {
             DisplayableEdge draggedEdge = edge.get();
