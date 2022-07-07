@@ -50,7 +50,6 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
                 controller.propertyTag = new TagPresentation();
             }
 
-//            controller.propertyTag = tagPresentation;
             controller.propertyTag.setTranslateX(10);
             controller.propertyTag.setTranslateY(-controller.propertyTag.getHeight());
             this.getChildren().add(controller.propertyTag);
