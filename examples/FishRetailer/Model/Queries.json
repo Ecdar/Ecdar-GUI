@@ -1,0 +1,10 @@
+[
+  {
+    "query": "consistency: Retailer",
+    "comment": "",
+    "isPeriodic": false,
+    "ignoredInputs": {},
+    "ignoredOutputs": {},
+    "backend": "Reveaal"
+  }
+]

@@ -11,7 +11,11 @@ javafx {
 }
 
 group 'ecdar'
-version '2.1'
+if (project.hasProperty('ecdarVersion')) {
+    version = project.ecdarVersion
+} else {
+    version = '2.3'
+}
 
 mainClassName = 'ECDAR'
 

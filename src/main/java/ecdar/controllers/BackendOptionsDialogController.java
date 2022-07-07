@@ -14,21 +14,19 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import org.apache.commons.lang3.Range;
+import org.apache.commons.lang3.SystemUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
+import java.util.*;
 
 public class BackendOptionsDialogController implements Initializable {
     public VBox backendInstanceList;
@@ -54,6 +52,7 @@ public class BackendOptionsDialogController implements Initializable {
     /**
      * Saves the changes made to the backend options to the preferences file and returns true
      * if no errors where found in the backend instance definitions, otherwise false.
+     *
      * @return whether the changes could be saved,
      * meaning that no errors where found in the changes made to the backend options
      */
@@ -64,6 +63,13 @@ public class BackendOptionsDialogController implements Initializable {
                 if (backendInstance instanceof BackendInstancePresentation) {
                     backendInstances.add(((BackendInstancePresentation) backendInstance).getController().updateBackendInstance());
                 }
+            }
+
+            // Close all backend connections to avoid dangling backend connections when port range is changed
+            try {
+                Ecdar.getBackendDriver().closeAllBackendConnections();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
 
             BackendHelper.updateBackendInstances(backendInstances);
@@ -119,6 +125,7 @@ public class BackendOptionsDialogController implements Initializable {
 
     /**
      * Clear the backend instance list and add the newly defined backends to it.
+     *
      * @param backends The new list of backends
      */
     private void updateBackendsInGUI(ArrayList<BackendInstance> backends) {
@@ -140,6 +147,7 @@ public class BackendOptionsDialogController implements Initializable {
 
     /**
      * Instantiate backends defined in the given JsonArray.
+     *
      * @param backends The JsonArray containing the backends
      * @return An ArrayList of the instantiated backends
      */
@@ -157,6 +165,7 @@ public class BackendOptionsDialogController implements Initializable {
     /**
      * Checks a set of paths to the packaged engines, j-Ecdar and Reveaal, and instantiates them
      * if one of the related files exists.
+     *
      * @return Backend instances of the packaged engines
      */
     private ArrayList<BackendInstance> getPackagedBackends() {
@@ -171,23 +180,31 @@ public class BackendOptionsDialogController implements Initializable {
         reveaal.setPortEnd(5040);
         reveaal.lockInstance();
 
-        List<File> potentialFilesForReveaal = List.of(
-                new File("lib/Reveaal.exe"), new File("lib/Reveaal")
-        );
+        // Load correct Reveaal executable based on OS
+        List<String> potentialFilesForReveaal = new ArrayList<>();
+        if (SystemUtils.IS_OS_WINDOWS) {
+            potentialFilesForReveaal.add("Reveaal.exe");
+        } else {
+            potentialFilesForReveaal.add("Reveaal");
+        }
         if (setBackendPathIfFileExists(reveaal, potentialFilesForReveaal)) defaultBackends.add(reveaal);
 
         // Add jECDAR engine
         var jEcdar = new BackendInstance();
-        jEcdar.setName("jECDAR");
+        jEcdar.setName("j-Ecdar");
         jEcdar.setLocal(true);
         jEcdar.setDefault(false);
         jEcdar.setPortStart(5042);
         jEcdar.setPortEnd(5050);
         jEcdar.lockInstance();
 
-        List<File> potentialFiledForJEcdar = List.of(
-                new File("lib/j-Ecdar.exe"), new File("lib/j-Ecdar.bat")
-        );
+        // Load correct j-Ecdar executable based on OS
+        List<String> potentialFiledForJEcdar = new ArrayList<>();
+        if (SystemUtils.IS_OS_WINDOWS) {
+            potentialFiledForJEcdar.add("j-Ecdar.bat");
+        } else {
+            potentialFiledForJEcdar.add("j-Ecdar");
+        }
         if (setBackendPathIfFileExists(jEcdar, potentialFiledForJEcdar)) defaultBackends.add(jEcdar);
 
         return defaultBackends;
@@ -195,17 +212,32 @@ public class BackendOptionsDialogController implements Initializable {
 
     /**
      * Sets the path to the backend instance if one of the potential files exists
+     *
      * @param engine         The backend instance of the engine to set the path for
      * @param potentialFiles List of potential files to use for the engine
+     * @return True if one of the potentialFiles where found in path, false otherwise.
+     * This value also signals whether the engine backendLocation is set
      */
-    private boolean setBackendPathIfFileExists(BackendInstance engine, List<File> potentialFiles) {
+    private boolean setBackendPathIfFileExists(BackendInstance engine, List<String> potentialFiles) {
         engine.setBackendLocation("");
 
-        for (var f : potentialFiles) {
-            if (f.exists()) {
-                engine.setBackendLocation(f.getAbsolutePath());
-                break;
+        try {
+            // Get directory containing the bin and lib folders for the executing program
+            String pathToEcdarDirectory = new File(getClass().getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().getPath();
+
+            List<File> files = List.of(Objects.requireNonNull(new File(pathToEcdarDirectory).listFiles()));
+            for (File f : files) {
+                if (potentialFiles.contains(f.getName())) {
+                    engine.setBackendLocation(f.getAbsolutePath());
+                    return true;
+                }
             }
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            Ecdar.showToast("Unable to get URI of parent directory: \"" + getClass().getProtectionDomain().getCodeSource().getLocation() + "\" due to: " + e.getMessage());
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            Ecdar.showToast("Encountered null reference when trying to get path of executing program");
         }
 
         return !engine.getBackendLocation().equals("");
@@ -213,6 +245,7 @@ public class BackendOptionsDialogController implements Initializable {
 
     /**
      * Add the new backend instance presentation to the backend options dialog
+     *
      * @param newBackendInstancePresentation The presentation of the new backend instance
      */
     private void addBackendInstancePresentationToList(BackendInstancePresentation newBackendInstancePresentation) {
@@ -235,6 +268,7 @@ public class BackendOptionsDialogController implements Initializable {
      * Given a negative value, the instance is moved up. This function uses loop-around, meaning that:
      * - If the instance is moved down while already at the bottom of the list, it is placed at the top.
      * - If the instance is moved up while already at the top of the list, it is placed at the bottom.
+     *
      * @param backendInstancePresentation The backend instance presentation to move
      * @param i                           The number of steps to move the backend instance down
      */
@@ -251,6 +285,7 @@ public class BackendOptionsDialogController implements Initializable {
 
     /**
      * Marks input fields in the backendInstanceList that contains errors and returns whether any errors were found
+     *
      * @return whether any errors were found
      */
     private boolean backendInstanceListIsErrorFree() {
