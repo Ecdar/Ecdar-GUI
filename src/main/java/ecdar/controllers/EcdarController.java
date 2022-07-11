@@ -420,16 +420,6 @@ public class EcdarController implements Initializable {
                     Debug.removeThread(thread);
                 }
 
-                try {
-                    // Make sure that the model is generated
-                    BackendHelper.buildEcdarDocument();
-                } catch (final BackendException e) {
-                    // Something went wrong with creating the document
-                    Ecdar.showToast("Could not build XML model. I got the error: " + e.getMessage());
-                    e.printStackTrace();
-                    return;
-                }
-
                 Ecdar.getProject().getQueries().forEach(query -> {
                     if (query.isPeriodic()) query.run();
                 });
