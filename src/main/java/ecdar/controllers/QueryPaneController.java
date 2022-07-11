@@ -84,17 +84,10 @@ public class QueryPaneController implements Initializable {
 
     @FXML
     private void runAllQueriesButtonClicked() {
-        try {
-            BackendHelper.buildEcdarDocument();
-        } catch (final BackendException e) {
-            Ecdar.showToast("Could not build XML model. I got the error: " + e.getMessage());
-            return;
-        }
-
         Ecdar.getProject().getQueries().forEach(query -> {
             if (query.getType() == null) return;
             query.cancel();
-            query.run(false);
+            query.run();
         });
     }
 
