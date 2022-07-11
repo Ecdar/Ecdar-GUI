@@ -210,14 +210,7 @@ public class EcdarController implements Initializable {
         initializeKeybindings();
         initializeStatusBar();
         initializeMenuBar();
-        initializeBackgroundQueriesThread();
-
-        Ecdar.shouldRunBackgroundQueries.addListener((observable, oldValue, newValue) -> {
-            if (newValue) {
-                // If we want to start reachability analysis in hte background, we must reinitialize the thread, as it will have terminated by now
-                initializeBackgroundQueriesThread();
-            }
-        });
+        startBackgroundQueriesThread(); // Will terminate immediately if background queries are turned off
 
         bottomFillerElement.heightProperty().bind(messageTabPane.maxHeightProperty());
         messageTabPane.getController().setRunnableForOpeningAndClosingMessageTabPane(this::changeInsetsOfFileAndQueryPanes);
@@ -396,7 +389,7 @@ public class EcdarController implements Initializable {
         Platform.runLater(() -> ((JFXRippler) switchEdgeStatusButton.lookup(".jfx-rippler")).setRipplerRecenter(true));
     }
 
-    private void initializeBackgroundQueriesThread() {
+    private void startBackgroundQueriesThread() {
         new Thread(() -> {
             while (Ecdar.shouldRunBackgroundQueries.get()) {
                 // Wait for the reachability (the last time we changed the model) becomes smaller than the current time
@@ -426,7 +419,7 @@ public class EcdarController implements Initializable {
                     Debug.removeThread(thread);
                 }
 
-                // Stop thread if user has toggled background queries off
+                // Stop thread if background queries have been toggled off
                 if (!Ecdar.shouldRunBackgroundQueries.get()) return;
 
                 Ecdar.getProject().getQueries().forEach(query -> {
@@ -602,6 +595,10 @@ public class EcdarController implements Initializable {
         menuBarOptionsBackgroundQueries.setOnAction(event -> {
             final BooleanProperty shouldRunBackgroundQueries = Ecdar.toggleRunBackgroundQueries();
             Ecdar.preferences.putBoolean("run_background_queries", shouldRunBackgroundQueries.get());
+            if (shouldRunBackgroundQueries.get()) {
+                // If background queries have been turned back on, start a new thread
+                startBackgroundQueriesThread();
+            }
         });
 
         Ecdar.shouldRunBackgroundQueries.setValue(Ecdar.preferences.getBoolean("run_background_queries", true));
