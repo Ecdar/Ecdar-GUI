@@ -1,5 +1,6 @@
 package ecdar.presentations;
 
+import ecdar.Ecdar;
 import ecdar.abstractions.Box;
 import ecdar.abstractions.HighLevelModelObject;
 import ecdar.controllers.EcdarController;
@@ -68,6 +69,7 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
                 model.setName(newName);
             } else {
                 controller.name.setText(model.getName());
+                Ecdar.showToast("Component names cannot contain '.'");
             }
         });
 
