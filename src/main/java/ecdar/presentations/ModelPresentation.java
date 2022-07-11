@@ -6,6 +6,7 @@ import ecdar.controllers.EcdarController;
 import ecdar.controllers.ModelController;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
+import ecdar.utility.helpers.StringValidator;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -62,8 +63,12 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
         // Set the text field to the name in the model, and bind the model to the text field
         controller.name.setText(model.getName());
         controller.name.textProperty().addListener((obs, oldName, newName) -> {
-            model.nameProperty().unbind();
-            model.setName(newName);
+            if (StringValidator.validateString(newName, StringValidator.componentNameValidation)) {
+                model.nameProperty().unbind();
+                model.setName(newName);
+            } else {
+                controller.name.setText(model.getName());
+            }
         });
 
         final Runnable updateColor = () -> {

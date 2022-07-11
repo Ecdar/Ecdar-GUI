@@ -3,6 +3,7 @@ package ecdar.abstractions;
 import ecdar.Ecdar;
 import ecdar.backend.*;
 import ecdar.controllers.EcdarController;
+import ecdar.utility.helpers.StringValidator;
 import ecdar.utility.serialize.Serializable;
 import com.google.gson.JsonObject;
 import javafx.application.Platform;
@@ -229,7 +230,7 @@ public class Query implements Serializable {
     }
 
     public void run() {
-        runQuery.run();
+        if (StringValidator.validateString(query.get(), StringValidator.queryValidation)) runQuery.run();
     }
 
     public void cancel() {
