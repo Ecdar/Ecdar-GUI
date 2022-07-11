@@ -15,11 +15,10 @@ import java.util.ResourceBundle;
 public class BackgroundThreadController implements Initializable {
 
     public VBox threadContainer;
-    private Map<Thread, BackgroundThreadEntryPresentation> threadToPresentationMap = new HashMap<>();
+    private final Map<Thread, BackgroundThreadEntryPresentation> threadToPresentationMap = new HashMap<>();
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
-
         Debug.backgroundThreads.addListener(new ListChangeListener<Thread>() {
             @Override
             public void onChanged(final Change<? extends Thread> c) {
@@ -42,9 +41,5 @@ public class BackgroundThreadController implements Initializable {
                 }
             }
         });
-
-
     }
-
-
 }

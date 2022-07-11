@@ -254,6 +254,12 @@
                             </graphic>
                         </MenuItem>
 
+                        <MenuItem fx:id="menuBarOptionsBackgroundQueries" text="Periodic query execution">
+                            <graphic>
+                                <FontIcon iconLiteral="gmi-check" fill="black" styleClass="icon-size-medium"/>
+                            </graphic>
+                        </MenuItem>
+
                         <SeparatorMenuItem/>
 
                         <MenuItem fx:id="menuBarOptionsBackendOptions" text="Backend options">
