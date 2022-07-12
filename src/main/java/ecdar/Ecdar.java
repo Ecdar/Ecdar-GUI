@@ -4,6 +4,7 @@ import ecdar.abstractions.Component;
 import ecdar.abstractions.Project;
 import ecdar.backend.BackendDriver;
 import ecdar.backend.BackendHelper;
+import ecdar.simulation.SimulationHandler;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.controllers.EcdarController;
 import ecdar.presentations.BackgroundThreadPresentation;
@@ -54,6 +55,7 @@ public class Ecdar extends Application {
     public static BooleanProperty shouldRunBackgroundQueries = new SimpleBooleanProperty(true);
     private static final BooleanProperty isSplit = new SimpleBooleanProperty(true); //Set to true to ensure correct behaviour at first toggle.
     private static final BackendDriver backendDriver = new BackendDriver();
+    private static SimulationHandler simulationHandler;
     private Stage debugStage;
 
     /**
@@ -122,6 +124,16 @@ public class Ecdar extends Application {
         return project;
     }
 
+    /**
+     * Returns the backend driver used to execute queries and handle simulation
+     * @return BackendDriver
+     */
+    public static BackendDriver getBackendDriver() {
+        return backendDriver;
+    }
+
+    public static SimulationHandler getSimulationHandler() { return simulationHandler; }
+
     public static EcdarPresentation getPresentation() {
         return presentation;
     }
@@ -183,14 +195,6 @@ public class Ecdar extends Application {
         return isSplit;
     }
 
-    /**
-     * Returns the backend driver used to execute queries and handle simulation
-     * @return BackendDriver
-     */
-    public static BackendDriver getBackendDriver() {
-        return backendDriver;
-    }
-
     public static double getDpiScale() {
         if (!autoScalingEnabled.getValue())
             return 1;
@@ -206,6 +210,7 @@ public class Ecdar extends Application {
     public void start(final Stage stage) {
         // Load or create new project
         project = new Project();
+        simulationHandler = new SimulationHandler();
 
         // Set the title for the application
         stage.setTitle("Ecdar " + VERSION);
