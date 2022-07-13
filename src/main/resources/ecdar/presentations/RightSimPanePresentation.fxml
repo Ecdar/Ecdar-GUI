@@ -17,7 +17,7 @@
                     AnchorPane.rightAnchor="0"
                     styleClass="edge-to-edge">
             <VBox fx:id="scrollPaneVbox" >
-<!--                <QueryPaneElementPresentation fx:id="queryPaneElement"/>-->
+                <!-- ToDo NIELS: Figure out whether clock bounds should go here, instead of: <QueryPaneElementPresentation fx:id="queryPaneElement"/>-->
             </VBox>
         </ScrollPane>
     </AnchorPane>

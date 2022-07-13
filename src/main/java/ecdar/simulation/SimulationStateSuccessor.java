@@ -10,6 +10,6 @@ public class SimulationStateSuccessor {
 
     public SimulationState getState() {
         // ToDo: Implement
-        return new SimulationState();
+        return new SimulationState(null);
     }
 }

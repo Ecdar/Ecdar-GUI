@@ -94,6 +94,7 @@ public class SimulatorController implements Initializable {
         //Show components from the system
         final SimulationHandler sm = Ecdar.getSimulationHandler();
         List<Component> components = new ArrayList<>();
+        components = Ecdar.getProject().getComponents();
 //        for (int i = 0; i < sm.getSystem().getNoOfProcesses(); i++) {
 //            final int finalI = i; // when using a var in lambda it has to be final
 //            final List<Component> filteredList = Ecdar.getProject().getComponents().filtered(component -> {

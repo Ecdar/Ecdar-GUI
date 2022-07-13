@@ -69,16 +69,14 @@ public class ProcessController extends ModelController implements Initializable 
         for (int i = 0; i < edges.length; i++) {
             final Edge edge = edges[i];
 
-            // Note that SimulationEdge contains a Location type from the UPPAAL libraries
-            // but we use a different Location class in our Maps
             final Location source = edge.getSourceLocation();
-            String sourceName = source.getNickname();
+            String sourceId = source.getId();
             final Location target = edge.getTargetLocation();
-            String targetName = target.getNickname();
+            String targetId = target.getId();
 
             // If target name is empty the edge is a self loop
-            if (Objects.equals(targetName, "")) {
-                targetName = sourceName;
+            if (Objects.equals(targetId, "")) {
+                targetId = sourceId;
             }
 
             boolean isSourceUniversal = false;
@@ -88,41 +86,34 @@ public class ProcessController extends ModelController implements Initializable 
             // This loop maps "Universal" to for example "U2"
             for (Map.Entry<Location, SimLocationPresentation> locEntry: locationPresentationMap.entrySet()) {
                 if(locEntry.getKey().getType() == Location.Type.UNIVERSAL) {
-                    if(sourceName.equals("Universal")) {
-                        sourceName = locEntry.getKey().getId();
+                    if(sourceId.equals("Universal")) {
+                        sourceId = locEntry.getKey().getId();
                         isSourceUniversal = true;
                     }
 
-                    if(targetName.equals("Universal")) {
-                        targetName = locEntry.getKey().getId();
+                    if(targetId.equals("Universal")) {
+                        targetId = locEntry.getKey().getId();
                     }
                 }
 
                 if(locEntry.getKey().getType() == Location.Type.INCONSISTENT) {
-                    if(sourceName.equals("Inconsistent")) {
-                        sourceName = locEntry.getKey().getId();
+                    if(sourceId.equals("Inconsistent")) {
+                        sourceId = locEntry.getKey().getId();
                     }
 
-                    if(targetName.equals("Inconsistent")) {
-                        targetName = locEntry.getKey().getId();
+                    if(targetId.equals("Inconsistent")) {
+                        targetId = locEntry.getKey().getId();
                     }
                 }
             }
 
-            // The edge name may contain ! or ?, and we need to replace those so we can compare our stored edge
-            String edgeName = edge.getId();
-//            if (edgeName.contains("?")) {
-//                edgeName = edgeName.replace("?", "");
-//            } else if (edgeName.contains("!")) {
-//                edgeName = edgeName.replace("!", "");
-//            }
-
             // Self loop on a Universal locations means that the edge name should be mapped to *
-            if (isSourceUniversal && sourceName.equals(targetName)) {
-                edgeName = "*";
+            String edgeId = edge.getId();
+            if (isSourceUniversal && sourceId.equals(targetId)) {
+                edgeId = "*";
             }
 
-            highlightEdge(edgeName, edge.getStatus(), sourceName, targetName);
+            highlightEdge(edgeId, edge.getStatus(), sourceId, targetId);
         }
     }
 
@@ -145,32 +136,32 @@ public class ProcessController extends ModelController implements Initializable 
     private void highlightEdge(final String edgeName, final EdgeStatus edgeStatus, final String sourceName, final String targetName) {
         for (Map.Entry<Edge, SimEdgePresentation> entry: edgePresentationMap.entrySet()) {
             final String keyName = entry.getKey().getSync();
-            final String keySourceName = entry.getKey().getSourceLocation().getId();
-            final String keyTargetName = entry.getKey().getTargetLocation().getId();
+            final String keySourceId = entry.getKey().getSourceLocation().getId();
+            final String keyTargetId = entry.getKey().getTargetLocation().getId();
 
             // Multiple edges may have the same name, so we also check that the source and target match this edge
             if(keyName.equals(edgeName) &&
-                    keySourceName.equals(sourceName) &&
-                    keyTargetName.equals(targetName) &&
+                    keySourceId.equals(sourceName) &&
+                    keyTargetId.equals(targetName) &&
                     entry.getKey().ioStatus.get() == edgeStatus) {
 
                 entry.getValue().getController().highlight();
-                highlightEdgeLocations(keySourceName, keyTargetName);
+                highlightEdgeLocations(keySourceId, keyTargetId);
             }
         }
     }
 
     /**
      * Helper method that finds the source/target {@link SimLocationPresentation} and highlights it
-     * @param sourceName The name of the source location
-     * @param targetName The name of the target location
+     * @param sourceId The name of the source location
+     * @param targetId The name of the target location
      */
-    private void highlightEdgeLocations(final String sourceName, final String targetName) {
+    private void highlightEdgeLocations(final String sourceId, final String targetId) {
         for (Map.Entry<Location, SimLocationPresentation> locEntry: locationPresentationMap.entrySet()) {
-            final String locName = locEntry.getKey().getId();
+            final String locationId = locEntry.getKey().getId();
 
             // Check if location is either source or target and highlight it
-            if(locName.equals(sourceName) || locName.equals(targetName)) {
+            if(locationId.equals(sourceId) || locationId.equals(targetId)) {
                 locEntry.getValue().highlight();
             }
         }
@@ -178,13 +169,11 @@ public class ProcessController extends ModelController implements Initializable 
 
     /**
      * Method that highlights all locations with the same name as the input {@link SimulationLocation}
-     * @param location The locations to highlight
+     * @param locationId The locations to highlight
      */
-    public void highlightLocation(final SimulationLocation location) {
+    public void highlightLocation(final String locationId) {
         for (Map.Entry<Location, SimLocationPresentation> locEntry: locationPresentationMap.entrySet()) {
-            final String locName = locEntry.getKey().getId();
-
-            if(locName.equals(location.getName())) {
+            if(locEntry.getKey().getId().equals(locationId)) {
                 locEntry.getValue().highlight();
             }
         }

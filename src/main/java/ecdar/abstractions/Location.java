@@ -1,5 +1,6 @@
 package ecdar.abstractions;
 
+import EcdarProtoBuf.ComponentProtos;
 import ecdar.Ecdar;
 import ecdar.code_analysis.Nearable;
 import ecdar.controllers.EcdarController;
@@ -85,6 +86,21 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     public Location(final JsonObject jsonObject) {
         deserialize(jsonObject);
         bindReachabilityAnalysis();
+    }
+
+    public Location(ComponentProtos.Location protoBufLocation) {
+        setId(protoBufLocation.getId());
+        setNickname(protoBufLocation.getNickname());
+        setInvariant(protoBufLocation.getInvariant());
+        setType(Type.valueOf(protoBufLocation.getType()));
+        setUrgency(Urgency.valueOf(protoBufLocation.getUrgency()));
+        setX(protoBufLocation.getX());
+        setY(protoBufLocation.getY());
+        setColor(Color.valueOf(protoBufLocation.getColor()));
+        setNicknameX(protoBufLocation.getNicknameX());
+        setNicknameY(protoBufLocation.getNicknameY());
+        setInvariantX(protoBufLocation.getInvariantX());
+        setInvariantY(protoBufLocation.getInvariantY());
     }
 
     /**

@@ -1,5 +1,6 @@
 package ecdar.abstractions;
 
+import EcdarProtoBuf.ComponentProtos;
 import com.google.gson.JsonPrimitive;
 import ecdar.Ecdar;
 import ecdar.controllers.EcdarController;
@@ -46,6 +47,21 @@ public class Edge extends DisplayableEdge implements Serializable {
     public Edge(final JsonObject jsonObject, final Component component) {
         deserialize(jsonObject, component);
         bindReachabilityAnalysis();
+    }
+
+    public Edge(ComponentProtos.Edge protoBufEdge) {
+        setId(protoBufEdge.getId());
+        setSourceLocation(new Location(protoBufEdge.getSourceLocation()));
+        setTargetLocation(new Location(protoBufEdge.getTargetLocation()));
+        setStatus(protoBufEdge.getStatus().equals("INPUT") ? EdgeStatus.INPUT : EdgeStatus.OUTPUT);
+        setSelect(protoBufEdge.getSelect());
+        setGuard(protoBufEdge.getGuard());
+        setUpdate(protoBufEdge.getUpdate());
+        setSync(protoBufEdge.getSync());
+
+        for (ComponentProtos.Nail protoBufNail : protoBufEdge.getNailList()) {
+            getNails().add(new Nail(protoBufNail));
+        }
     }
 
     public String getSync() {

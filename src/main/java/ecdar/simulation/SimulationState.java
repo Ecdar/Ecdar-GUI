@@ -1,11 +1,22 @@
 package ecdar.simulation;
 
+import EcdarProtoBuf.ObjectProtos;
 import ecdar.abstractions.Location;
+import javafx.util.Pair;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 public class SimulationState {
+    private final ArrayList<Pair<String, String>> locations;
+
+    public SimulationState(ObjectProtos.StateTuple protoBufState) {
+        if (protoBufState != null) locations = protoBufState.getLocationsList().stream().map(lt -> new Pair<>(lt.getComponentName(), lt.getId())).collect(Collectors.toCollection(ArrayList::new));
+        else locations = new ArrayList<>();
+        // ToDo: Handle federations
+    }
+
     public void setTime(BigDecimal value) {
         // ToDo: Implement
     }
@@ -35,8 +46,7 @@ public class SimulationState {
         };
     }
 
-    public ArrayList<Location> getLocations() {
-        // ToDo: Implement
-        return new ArrayList<>();
+    public ArrayList<Pair<String, String>> getLocations() {
+        return locations;
     }
 }

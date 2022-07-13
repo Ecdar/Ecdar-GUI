@@ -45,11 +45,11 @@ public class TracePaneElementController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         Ecdar.getSimulationHandler().getTraceLog().addListener((ListChangeListener<SimulationState>) c -> {
             while (c.next()) {
-                for(final SimulationState state: c.getAddedSubList()) {
+                for (final SimulationState state : c.getAddedSubList()) {
                     insertTraceState(state, true);
                 }
 
-                for(final SimulationState state: c.getRemoved()) {
+                for (final SimulationState state : c.getRemoved()) {
                     traceList.getChildren().remove(transitionPresentationMap.get(state));
                     transitionPresentationMap.remove(state);
                 }
@@ -67,7 +67,7 @@ public class TracePaneElementController implements Initializable {
      */
     private void initializeTraceExpand() {
         isTraceExpanded.addListener((obs, oldVal, newVal) -> {
-            if(newVal) {
+            if (newVal) {
                 showTrace();
                 expandTraceIcon.setIconLiteral("gmi-expand-less");
                 expandTraceIcon.setIconSize(24);
@@ -104,7 +104,8 @@ public class TracePaneElementController implements Initializable {
 
     /**
      * Instantiates a {@link TransitionPresentation} for a {@link SimulationState} and adds it to the view
-     * @param state The state the should be inserted into the trace log
+     *
+     * @param state         The state the should be inserted into the trace log
      * @param shouldAnimate A boolean that indicates whether the trace should fade in when added to the view
      */
     private void insertTraceState(final SimulationState state, final boolean shouldAnimate) {
@@ -135,9 +136,9 @@ public class TracePaneElementController implements Initializable {
         transitionPresentation.getController().setTitle(title);
 
         // Only insert the presentation into the view if the trace is expanded
-        if(isTraceExpanded.get()) {
+        if (isTraceExpanded.get()) {
             traceList.getChildren().add(transitionPresentation);
-            if(shouldAnimate) {
+            if (shouldAnimate) {
                 transitionPresentation.playFadeAnimation();
             }
         }
@@ -145,24 +146,27 @@ public class TracePaneElementController implements Initializable {
 
     /**
      * A helper method that returns a string representing a state in the trace log
+     *
      * @param state The SimulationState to represent
      * @return A string representing the state
      */
     private String traceString(SimulationState state) {
-        String title = "(";
+        StringBuilder title = new StringBuilder("(");
         int length = state.getLocations().size();
-        for (int i = 0; i < length ; i++) {
-            Location loc = state.getLocations().get(i);
+        for (int i = 0; i < length; i++) {
+            Location loc = Ecdar.getProject()
+                    .findComponent(state.getLocations().get(i).getKey())
+                    .findLocation(state.getLocations().get(i).getValue());
             String locationName = loc.getNickname();
-            if (i == length-1) {
-                title += locationName;
+            if (i == length - 1) {
+                title.append(locationName);
             } else {
-                title += locationName + ", ";
+                title.append(locationName).append(", ");
             }
         }
-        title += ")";
+        title.append(")");
 
-        return title;
+        return title.toString();
     }
 
     /**
@@ -170,7 +174,7 @@ public class TracePaneElementController implements Initializable {
      */
     @FXML
     private void expandTrace() {
-        if(isTraceExpanded.get()) {
+        if (isTraceExpanded.get()) {
             isTraceExpanded.set(false);
         } else {
             isTraceExpanded.set(true);

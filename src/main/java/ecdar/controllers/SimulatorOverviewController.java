@@ -15,6 +15,7 @@ import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.*;
+import javafx.util.Pair;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -84,7 +85,7 @@ public class SimulatorOverviewController implements Initializable {
      * {@link Component}<code>s</code> which are needed to the <code>processContainer</code>.
      */
     private void initializeProcessContainer() {
-        processContainer.translateXProperty().addListener((observable, oldValue, newValue)-> {
+        processContainer.translateXProperty().addListener((observable, oldValue, newValue) -> {
             processContainer.setTranslateX(0);
         });
         //Sets the space between the processes
@@ -96,7 +97,7 @@ public class SimulatorOverviewController implements Initializable {
 
         componentArrayList.addListener((ListChangeListener<Component>) c -> {
             final Map<String, ProcessPresentation> processes = new HashMap<>();
-            while (c.next()){
+            while (c.next()) {
                 if (c.wasRemoved()) {
                     clearOverview();
                 } else {
@@ -107,7 +108,15 @@ public class SimulatorOverviewController implements Initializable {
             highlightProcessState(Ecdar.getSimulationHandler().getCurrentState());
             processContainer.getChildren().addAll(processes.values());
             processPresentations.putAll(processes);
-         });
+        });
+
+        final Map<String, ProcessPresentation> processes = new HashMap<>();
+        componentArrayList.forEach(o -> processes.put(o.getName(), new ProcessPresentation(o)));
+
+        // Highlight the current state when the processes change
+        highlightProcessState(Ecdar.getSimulationHandler().getCurrentState());
+        processContainer.getChildren().addAll(processes.values());
+        processPresentations.putAll(processes);
     }
 
     /**
@@ -134,7 +143,7 @@ public class SimulatorOverviewController implements Initializable {
             });
         });
         Ecdar.getSimulationHandler().getSimulationClocks().addListener((InvalidationListener) obs -> {
-            if(processPresentations.size() == 0) return;
+            if (processPresentations.size() == 0) return;
             Ecdar.getSimulationHandler().getSimulationClocks().forEach((s, bigDecimal) -> {
                 if (!s.equals("t(0)")) {// As t(0) does not belong to any process
                     final String[] spittedString = s.split("\\.");
@@ -151,9 +160,10 @@ public class SimulatorOverviewController implements Initializable {
      * Removes {@link #processContainer} from the {@link #groupContainer}. <br />
      * In this way the {@link Component}<code>s</code> in the <code>processContainer</code> will then again be resizable,
      * as the class {@link Group} makes its children not resizeable.
+     *
      * @see Group
      */
-    void removeProcessesFromGroup(){
+    void removeProcessesFromGroup() {
         groupContainer.getChildren().removeAll(processContainer);
     }
 
@@ -165,10 +175,11 @@ public class SimulatorOverviewController implements Initializable {
      * which is needed to show the {@link ProcessPresentation}<code>s</code> in the {@link #scrollPane}.
      * If the <code>processContainer</code> is already contained in the <code>groupContainer</code>
      * the method does nothing but return.
+     *
      * @see #removeProcessesFromGroup()
      */
-    void addProcessesToGroup(){
-        if(groupContainer.getChildren().contains(processContainer)) return;
+    void addProcessesToGroup() {
+        if (groupContainer.getChildren().contains(processContainer)) return;
         groupContainer.getChildren().add(processContainer);
     }
 
@@ -177,8 +188,8 @@ public class SimulatorOverviewController implements Initializable {
      */
     private void initializeZoom() {
         processContainer.scaleXProperty().addListener((observable, oldValue, newValue) -> {
-            if(newValue.doubleValue() > MAX_ZOOM_IN) isMaxZoomInReached = true;
-            if(newValue.doubleValue() < MAX_ZOOM_OUT) isMaxZoomOutReached = true;
+            if (newValue.doubleValue() > MAX_ZOOM_IN) isMaxZoomInReached = true;
+            if (newValue.doubleValue() < MAX_ZOOM_OUT) isMaxZoomOutReached = true;
 
             handleWidthOnScale(oldValue, newValue);
         });
@@ -206,7 +217,7 @@ public class SimulatorOverviewController implements Initializable {
     private void initializeWindowResizing() {
         scrollPane.widthProperty().addListener((observable, oldValue, newValue) -> {
             final double width = (newValue.doubleValue()) * (1 + (1 - processContainer.getScaleX()));
-            if(processContainer.getScaleX() > 1) { //Zoomed in
+            if (processContainer.getScaleX() > 1) { //Zoomed in
                 processContainer.setMinWidth(width);
                 processContainer.setMaxWidth(width);
             } else if (processContainer.getScaleX() < 1) { //Zoomed out
@@ -225,6 +236,7 @@ public class SimulatorOverviewController implements Initializable {
     /**
      * Increments the {@link #processContainer} scaleX and scaleY properties
      * which creates the zoom-in feeling. Resizing of the view is handled by {@link #handleWidthOnScale(Number, Number)}
+     *
      * @see FlowPane#scaleXProperty()
      * @see FlowPane#scaleYProperty()
      */
@@ -239,11 +251,12 @@ public class SimulatorOverviewController implements Initializable {
     /**
      * Decrements the {@link #processContainer} scaleX and scaleY properties
      * which creates the zoom-in feeling. Resizing of the view is handled by {@link #handleWidthOnScale(Number, Number)}
+     *
      * @see FlowPane#scaleXProperty()
      * @see FlowPane#scaleYProperty()
      */
     void zoomOut() {
-        if(isMaxZoomOutReached) return;
+        if (isMaxZoomOutReached) return;
         isMaxZoomInReached = false;
         processContainer.setScaleX(processContainer.getScaleX() * (1 / SCALE_DELTA));
         processContainer.setScaleY(processContainer.getScaleY() * (1 / SCALE_DELTA));
@@ -251,11 +264,12 @@ public class SimulatorOverviewController implements Initializable {
 
     /**
      * Resets the scaling of the {@link #processContainer}, and hereby the zoom
+     *
      * @see FlowPane#scaleXProperty()
      * @see FlowPane#scaleYProperty()
      */
     void resetZoom() {
-        if(processContainer.getScaleX() == 1) return;
+        if (processContainer.getScaleX() == 1) return;
         resetZoom = true;
         isMaxZoomInReached = false;
         isMaxZoomOutReached = false;
@@ -265,15 +279,16 @@ public class SimulatorOverviewController implements Initializable {
 
     /**
      * Handles the scaling of the width of the {@link #processContainer}
+     *
      * @param oldValue the width of {@link #scrollPane} before the change
      * @param newValue the width of {@link #scrollPane} after the change
      */
     private void handleWidthOnScale(final Number oldValue, final Number newValue) {
-        if(resetZoom) { //Zoom reset
+        if (resetZoom) { //Zoom reset
             resetZoom = false;
             processContainer.setMinWidth(scrollPane.getWidth() - SUPER_SPECIAL_SCROLLPANE_OFFSET);
             processContainer.setMaxWidth(scrollPane.getWidth() - SUPER_SPECIAL_SCROLLPANE_OFFSET);
-        } else if(oldValue.doubleValue() > newValue.doubleValue()) { //Zoom in
+        } else if (oldValue.doubleValue() > newValue.doubleValue()) { //Zoom in
             resetZoom = false;
             processContainer.setMinWidth(Math.round(processContainer.getWidth() * SCALE_DELTA));
             processContainer.setMaxWidth(Math.round(processContainer.getWidth() * SCALE_DELTA));
@@ -293,7 +308,7 @@ public class SimulatorOverviewController implements Initializable {
 
             // If the new transition is not null, we want to highlight the locations and edges in the new value
             // otherwise we highlight the current state
-            if(newTransition != null) {
+            if (newTransition != null) {
                 highlightProcessTransition(newTransition);
             } else {
                 highlightProcessState(Ecdar.getSimulationHandler().getCurrentState());
@@ -305,7 +320,7 @@ public class SimulatorOverviewController implements Initializable {
 
             // If the new state is not null, we want to highlight the locations in the new value
             // otherwise we highlight the current state
-            if(newState != null) {
+            if (newState != null) {
                 highlightProcessState(newState);
             } else {
                 highlightProcessState(Ecdar.getSimulationHandler().getCurrentState());
@@ -317,6 +332,7 @@ public class SimulatorOverviewController implements Initializable {
      * Highlights all the processes involved in the transition.
      * Finds the processes involved in the transition (processes with edges in the transition) and highlights their edges
      * Also fades processes that are not active in the selected transition
+     *
      * @param transition The transition for which we highlight the involved processes
      */
     public void highlightProcessTransition(final Transition transition) {
@@ -340,7 +356,7 @@ public class SimulatorOverviewController implements Initializable {
      * Unhighlights all processes
      */
     public void unhighlightProcesses() {
-        for(final ProcessPresentation presentation: processPresentations.values()) {
+        for (final ProcessPresentation presentation : processPresentations.values()) {
             presentation.getController().unhighlightProcess();
             presentation.showActive();
         }
@@ -348,18 +364,19 @@ public class SimulatorOverviewController implements Initializable {
 
     /**
      * Finds the processes for the input locations in the input {@link SimulationState} and highlights the locations.
+     *
      * @param state The state with the locations to highlight
      */
     public void highlightProcessState(final SimulationState state) {
         for (int i = 0; i < state.getLocations().size(); i++) {
-            final Location loc = state.getLocations().get(i);
+            final Pair<String, String> loc = state.getLocations().get(i);
 
-            for(final ProcessPresentation presentation: processPresentations.values()) {
+            for (final ProcessPresentation presentation : processPresentations.values()) {
                 final String processName = presentation.getController().getComponent().getName();
 
-//                if(processName.equals(loc.getProcess().getName())) {
-//                    presentation.getController().highlightLocation(loc);
-//                }
+                if (processName.equals(loc.getKey())) {
+                    presentation.getController().highlightLocation(loc.getValue());
+                }
             }
         }
     }

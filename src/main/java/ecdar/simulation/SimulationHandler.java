@@ -18,9 +18,9 @@ import java.util.Map;
  */
 public class SimulationHandler {
     public static final String QUERY_PREFIX = "Query: ";
-    private ObjectProperty<SimulationState> currentConcreteState;
-    private ObjectProperty<SimulationState> initialConcreteState;
-    private ObjectProperty<BigDecimal> currentTime;
+    private ObjectProperty<SimulationState> currentConcreteState = new SimpleObjectProperty<>(new SimulationState(null));
+    private ObjectProperty<SimulationState> initialConcreteState = new SimpleObjectProperty<>(new SimulationState(null));
+    private ObjectProperty<BigDecimal> currentTime = new SimpleObjectProperty<>();
     private BigDecimal delay;
     private ArrayList<Edge> edgesSelected;
     private EcdarSystem system;
