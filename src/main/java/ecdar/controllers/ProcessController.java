@@ -65,29 +65,19 @@ public class ProcessController extends ModelController implements Initializable 
      * Highlights the edges and accompanying source/target locations in the process
      * @param edges The edges to highlight
      */
-    public void highlightEdges(final SimulationEdge[] edges) {
+    public void highlightEdges(final Edge[] edges) {
         for (int i = 0; i < edges.length; i++) {
-            final SimulationEdge edge = edges[i];
+            final Edge edge = edges[i];
 
             // Note that SimulationEdge contains a Location type from the UPPAAL libraries
             // but we use a different Location class in our Maps
-            final Location source = edge.getSource();
-            String sourceName = "";
-            final Location target = edge.getTarget();
-            String targetName = "";
-
-            // Match the Locations of the SimulationEdge with a SimulationLocation of the process,
-            // so we can get the source/target names (names are not available on a Location)
-            for (SimulationLocation sysloc : edge.getProcess().getLocations()) {
-                if (sysloc.getLocation() == source) {
-                    sourceName = sysloc.getName();
-                } else if (sysloc == target) {
-                    targetName = sysloc.getName();
-                }
-            }
+            final Location source = edge.getSourceLocation();
+            String sourceName = source.getNickname();
+            final Location target = edge.getTargetLocation();
+            String targetName = target.getNickname();
 
             // If target name is empty the edge is a self loop
-            if (targetName == "") {
+            if (Objects.equals(targetName, "")) {
                 targetName = sourceName;
             }
 
@@ -120,21 +110,19 @@ public class ProcessController extends ModelController implements Initializable 
             }
 
             // The edge name may contain ! or ?, and we need to replace those so we can compare our stored edge
-            String edgeName = edge.getName();
-            EdgeStatus edgeStatus = EdgeStatus.INPUT;
-            if (edgeName.contains("?")) {
-                edgeName = edgeName.replace("?", "");
-            } else if (edgeName.contains("!")) {
-                edgeName = edgeName.replace("!", "");
-                edgeStatus = EdgeStatus.OUTPUT;
-            }
+            String edgeName = edge.getId();
+//            if (edgeName.contains("?")) {
+//                edgeName = edgeName.replace("?", "");
+//            } else if (edgeName.contains("!")) {
+//                edgeName = edgeName.replace("!", "");
+//            }
 
             // Self loop on a Universal locations means that the edge name should be mapped to *
             if (isSourceUniversal && sourceName.equals(targetName)) {
                 edgeName = "*";
             }
 
-            highlightEdge(edgeName, edgeStatus, sourceName, targetName);
+            highlightEdge(edgeName, edge.getStatus(), sourceName, targetName);
         }
     }
 

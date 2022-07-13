@@ -2,7 +2,6 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<?import ecdar.presentations.QueryPaneElementPresentation?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="StackPane"
@@ -18,7 +17,7 @@
                     AnchorPane.rightAnchor="0"
                     styleClass="edge-to-edge">
             <VBox fx:id="scrollPaneVbox" >
-                <QueryPaneElementPresentation fx:id="queryPaneElement"/>
+<!--                <QueryPaneElementPresentation fx:id="queryPaneElement"/>-->
             </VBox>
         </ScrollPane>
     </AnchorPane>

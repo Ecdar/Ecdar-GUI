@@ -326,13 +326,11 @@ public class SimulatorOverviewController implements Initializable {
         // Processes are removed from this list, if they have an edge in the transition
         final ArrayList<ProcessPresentation> processesToHide = new ArrayList<>(processPresentations.values());
 
-        for (final Edge edge : edges) {
-            final Process process = edge.getProcess();
+        for (final ProcessPresentation processPresentation : processPresentations.values()) {
 
             // Find the processes that have edges involved in this transition
-            final ProcessPresentation presentation = processPresentations.get(process.getName());
-            presentation.getController().highlightEdges(edges);
-            processesToHide.remove(presentation);
+            processPresentation.getController().highlightEdges(edges.toArray(new Edge[0]));
+            processesToHide.remove(processPresentation);
         }
 
         processesToHide.forEach(ProcessPresentation::showInactive);

@@ -1,6 +1,5 @@
 package ecdar.controllers;
 
-import ecdar.presentations.QueryPaneElementPresentation;
 import javafx.fxml.Initializable;
 import javafx.scene.layout.*;
 
@@ -13,7 +12,7 @@ import java.util.ResourceBundle;
 public class RightSimPaneController implements Initializable {
     public StackPane root;
     public VBox scrollPaneVbox;
-    public QueryPaneElementPresentation queryPaneElement;
+//    public QueryPaneElementPresentation queryPaneElement;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
