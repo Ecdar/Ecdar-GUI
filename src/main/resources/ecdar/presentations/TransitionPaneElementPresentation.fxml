@@ -13,6 +13,9 @@
          fx:id="root" type="VBox"
          AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
     <HBox fx:id="toolbar" alignment="CENTER">
+        <padding>
+            <Insets topRightBottomLeft="10"/>
+        </padding>
         <JFXRippler fx:id="expandTransition">
             <StackPane styleClass="responsive-icon-stack-pane-sizing" onMouseClicked="#expandTransitions">
                 <FontIcon fx:id="expandTransitionIcon" iconLiteral="gmi-add" styleClass="icon-size-medium"

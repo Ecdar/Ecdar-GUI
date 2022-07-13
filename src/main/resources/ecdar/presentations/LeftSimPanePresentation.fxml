@@ -10,7 +10,6 @@
          type="StackPane"
          fx:id="root"
          fx:controller="ecdar.controllers.LeftSimPaneController">
-
     <AnchorPane>
         <ScrollPane fx:id="scrollPane"
                     fitToHeight="true" fitToWidth="true"

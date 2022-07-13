@@ -5,11 +5,15 @@
 
 <?import com.jfoenix.controls.JFXRippler?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import javafx.geometry.Insets?>
 <fx:root xmlns="http://javafx.com/javafx"
          xmlns:fx="http://javafx.com/fxml"
          type="VBox" fx:id="root" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"
          fx:controller="ecdar.controllers.TracePaneElementController">
     <HBox fx:id="toolbar" alignment="CENTER">
+        <padding>
+            <Insets topRightBottomLeft="10"/>
+        </padding>
         <JFXRippler fx:id="expandTrace">
             <StackPane styleClass="responsive-icon-stack-pane-sizing" onMouseClicked="#expandTrace">
                 <FontIcon fx:id="expandTraceIcon" iconLiteral="gmi-add" styleClass="icon-size-medium"
