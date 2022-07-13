@@ -9,7 +9,7 @@ import javafx.scene.layout.*;
 /**
  * The presentation class for the transition pane element that can be inserted into the simulator panes
  */
-public class TransitionPaneElementPresentation extends AnchorPane {
+public class TransitionPaneElementPresentation extends VBox {
     final private TransitionPaneElementController controller;
 
     public TransitionPaneElementPresentation() {

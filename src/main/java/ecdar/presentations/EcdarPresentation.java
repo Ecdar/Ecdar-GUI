@@ -29,24 +29,24 @@ import javafx.util.Duration;
 public class EcdarPresentation extends StackPane {
     private final EcdarController controller;
 
-    private final BooleanProperty filePaneOpen = new SimpleBooleanProperty(false);
+    private final BooleanProperty leftPaneOpen = new SimpleBooleanProperty(false);
     private final SimpleDoubleProperty leftPaneAnimationProperty = new SimpleDoubleProperty(0);
-    private final BooleanProperty queryPaneOpen = new SimpleBooleanProperty(false);
+    private final BooleanProperty rightPaneOpen = new SimpleBooleanProperty(false);
     private final SimpleDoubleProperty rightPaneAnimationProperty = new SimpleDoubleProperty(0);
-    private Timeline openQueryPaneAnimation;
-    private Timeline closeQueryPaneAnimation;
-    private Timeline openFilePaneAnimation;
-    private Timeline closeFilePaneAnimation;
+    private Timeline openLeftPaneAnimation;
+    private Timeline closeLeftPaneAnimation;
+    private Timeline openRightPaneAnimation;
+    private Timeline closeRightPaneAnimation;
 
     public EcdarPresentation() {
         controller = new EcdarFXMLLoader().loadAndGetController("EcdarPresentation.fxml", this);
         initializeTopBar();
         initializeQueryDetailsDialog();
-        initializeToggleQueryPaneFunctionality();
-        initializeToggleFilePaneFunctionality();
+        initializeToggleLeftPaneFunctionality();
+        initializeToggleRightPaneFunctionality();
         initializeSnackbar();
 
-        // Open the file and query panel initially
+        // Open the left and right panes initially
         Platform.runLater(() -> {
             // Bind sizing of sides and center panes to ensure correct sizing
             controller.getEditorPresentation().getController().canvasPane.minWidthProperty().bind(controller.root.widthProperty().subtract(leftPaneAnimationProperty.add(rightPaneAnimationProperty)));
@@ -66,17 +66,17 @@ public class EcdarPresentation extends StackPane {
             controller.topPane.minHeightProperty().bind(controller.menuBar.heightProperty());
             controller.topPane.maxHeightProperty().bind(controller.menuBar.heightProperty());
 
-            toggleFilePane();
-            toggleQueryPane();
+            toggleLeftPane();
+            toggleRightPane();
 
             Ecdar.getPresentation().controller.scalingProperty.addListener((observable, oldValue, newValue) -> {
                 // If the scaling has changed trigger animations for open panes to update width
                 Platform.runLater(() -> {
-                    if (filePaneOpen.get()) {
-                        openFilePaneAnimation.play();
+                    if (leftPaneOpen.get()) {
+                        openLeftPaneAnimation.play();
                     }
-                    if (queryPaneOpen.get()) {
-                        openQueryPaneAnimation.play();
+                    if (rightPaneOpen.get()) {
+                        openRightPaneAnimation.play();
                     }
                 });
 
@@ -114,84 +114,92 @@ public class EcdarPresentation extends StackPane {
         )));
     }
 
-    private void initializeToggleFilePaneFunctionality() {
-        initializeOpenFilePaneAnimation();
-        initializeCloseFilePaneAnimation();
+    private void initializeToggleLeftPaneFunctionality() {
+        initializeOpenLeftPaneAnimation();
+        initializeCloseLeftPaneAnimation();
 
         // Translate the x coordinate to create the open/close animations
-        controller.filePane.translateXProperty().bind(leftPaneAnimationProperty.subtract(controller.filePane.widthProperty()));
+        controller.projectPane.translateXProperty().bind(leftPaneAnimationProperty.subtract(controller.projectPane.widthProperty()));
+        controller.leftSimPane.translateXProperty().bind(leftPaneAnimationProperty.subtract(controller.leftSimPane.widthProperty()));
 
         // Whenever the width of the file pane is updated, update the animations
-        controller.filePane.widthProperty().addListener((observable) -> {
-            initializeOpenFilePaneAnimation();
-            initializeCloseFilePaneAnimation();
+        controller.projectPane.widthProperty().addListener((observable) -> {
+            initializeOpenLeftPaneAnimation();
+            initializeCloseLeftPaneAnimation();
+        });
+
+        // Whenever the width of the file pane is updated, update the animations
+        controller.leftPane.widthProperty().addListener((observable) -> {
+            initializeOpenLeftPaneAnimation();
+            initializeCloseLeftPaneAnimation();
         });
     }
 
-    private void initializeCloseFilePaneAnimation() {
+    private void initializeCloseLeftPaneAnimation() {
         final Interpolator interpolator = Interpolator.SPLINE(0.645, 0.045, 0.355, 1);
 
-        closeFilePaneAnimation = new Timeline();
+        closeLeftPaneAnimation = new Timeline();
 
-        final KeyValue open = new KeyValue(leftPaneAnimationProperty, controller.filePane.getWidth(), interpolator);
+        final KeyValue open = new KeyValue(leftPaneAnimationProperty, controller.projectPane.getWidth(), interpolator);
         final KeyValue closed = new KeyValue(leftPaneAnimationProperty, 0, interpolator);
 
         final KeyFrame kf1 = new KeyFrame(Duration.millis(0), open);
         final KeyFrame kf2 = new KeyFrame(Duration.millis(200), closed);
 
-        closeFilePaneAnimation.getKeyFrames().addAll(kf1, kf2);
+        closeLeftPaneAnimation.getKeyFrames().addAll(kf1, kf2);
     }
 
-    private void initializeOpenFilePaneAnimation() {
+    private void initializeOpenLeftPaneAnimation() {
         final Interpolator interpolator = Interpolator.SPLINE(0.645, 0.045, 0.355, 1);
 
-        openFilePaneAnimation = new Timeline();
+        openLeftPaneAnimation = new Timeline();
 
         final KeyValue closed = new KeyValue(leftPaneAnimationProperty, 0, interpolator);
-        final KeyValue open = new KeyValue(leftPaneAnimationProperty, controller.filePane.getWidth(), interpolator);
+        final KeyValue open = new KeyValue(leftPaneAnimationProperty, controller.projectPane.getWidth(), interpolator);
 
         final KeyFrame kf1 = new KeyFrame(Duration.millis(0), closed);
         final KeyFrame kf2 = new KeyFrame(Duration.millis(200), open);
 
-        openFilePaneAnimation.getKeyFrames().addAll(kf1, kf2);
+        openLeftPaneAnimation.getKeyFrames().addAll(kf1, kf2);
     }
 
-    private void initializeToggleQueryPaneFunctionality() {
-        initializeOpenQueryPaneAnimation();
-        initializeCloseQueryPaneAnimation();
+    private void initializeToggleRightPaneFunctionality() {
+        initializeOpenRightPaneAnimation();
+        initializeCloseRightPaneAnimation();
 
         // Translate the x coordinate to create the open/close animations
         controller.queryPane.translateXProperty().bind(rightPaneAnimationProperty.multiply(-1).add(controller.queryPane.widthProperty()));
+        controller.rightSimPane.translateXProperty().bind(rightPaneAnimationProperty.multiply(-1).add(controller.rightSimPane.widthProperty()));
 
         // Whenever the width of the query pane is updated, update the animations
         controller.queryPane.widthProperty().addListener((observable) -> {
-            initializeOpenQueryPaneAnimation();
-            initializeCloseQueryPaneAnimation();
+            initializeOpenRightPaneAnimation();
+            initializeCloseRightPaneAnimation();
         });
 
         // When new queries are added, make sure that the query pane is open
         Ecdar.getProject().getQueries().addListener((ListChangeListener<Query>) c -> {
-            if (closeQueryPaneAnimation == null)
+            if (closeRightPaneAnimation == null)
                 return; // The query pane is not yet initialized
 
             while (c.next()) {
                 c.getAddedSubList().forEach(o -> {
-                    if (!queryPaneOpen.get()) {
+                    if (!rightPaneOpen.get()) {
                         // Open the pane
-                        openQueryPaneAnimation.play();
+                        openRightPaneAnimation.play();
 
                         // Toggle the open state
-                        queryPaneOpen.set(queryPaneOpen.not().get());
+                        rightPaneOpen.set(rightPaneOpen.not().get());
                     }
                 });
             }
         });
     }
 
-    private void initializeCloseQueryPaneAnimation() {
+    private void initializeCloseRightPaneAnimation() {
         final Interpolator interpolator = Interpolator.SPLINE(0.645, 0.045, 0.355, 1);
 
-        closeQueryPaneAnimation = new Timeline();
+        closeRightPaneAnimation = new Timeline();
 
         final KeyValue open = new KeyValue(rightPaneAnimationProperty, controller.queryPane.getWidth(), interpolator);
         final KeyValue closed = new KeyValue(rightPaneAnimationProperty, 0, interpolator);
@@ -199,13 +207,13 @@ public class EcdarPresentation extends StackPane {
         final KeyFrame kf1 = new KeyFrame(Duration.millis(0), open);
         final KeyFrame kf2 = new KeyFrame(Duration.millis(200), closed);
 
-        closeQueryPaneAnimation.getKeyFrames().addAll(kf1, kf2);
+        closeRightPaneAnimation.getKeyFrames().addAll(kf1, kf2);
     }
 
-    private void initializeOpenQueryPaneAnimation() {
+    private void initializeOpenRightPaneAnimation() {
         final Interpolator interpolator = Interpolator.SPLINE(0.645, 0.045, 0.355, 1);
 
-        openQueryPaneAnimation = new Timeline();
+        openRightPaneAnimation = new Timeline();
 
         final KeyValue closed = new KeyValue(rightPaneAnimationProperty, 0, interpolator);
         final KeyValue open = new KeyValue(rightPaneAnimationProperty, controller.queryPane.getWidth(), interpolator);
@@ -213,7 +221,7 @@ public class EcdarPresentation extends StackPane {
         final KeyFrame kf1 = new KeyFrame(Duration.millis(0), closed);
         final KeyFrame kf2 = new KeyFrame(Duration.millis(200), open);
 
-        openQueryPaneAnimation.getKeyFrames().addAll(kf1, kf2);
+        openRightPaneAnimation.getKeyFrames().addAll(kf1, kf2);
     }
 
     private void initializeTopBar() {
@@ -276,30 +284,30 @@ public class EcdarPresentation extends StackPane {
         });
     }
 
-    public BooleanProperty toggleFilePane() {
-        if (filePaneOpen.get()) {
-            closeFilePaneAnimation.play();
+    public BooleanProperty toggleLeftPane() {
+        if (leftPaneOpen.get()) {
+            closeLeftPaneAnimation.play();
         } else {
-            openFilePaneAnimation.play();
+            openLeftPaneAnimation.play();
         }
 
         // Toggle the open state
-        filePaneOpen.set(filePaneOpen.not().get());
+        leftPaneOpen.set(leftPaneOpen.not().get());
 
-        return filePaneOpen;
+        return leftPaneOpen;
     }
 
-    public BooleanProperty toggleQueryPane() {
-        if (queryPaneOpen.get()) {
-            closeQueryPaneAnimation.play();
+    public BooleanProperty toggleRightPane() {
+        if (rightPaneOpen.get()) {
+            closeRightPaneAnimation.play();
         } else {
-            openQueryPaneAnimation.play();
+            openRightPaneAnimation.play();
         }
 
         // Toggle the open state
-        queryPaneOpen.set(queryPaneOpen.not().get());
+        rightPaneOpen.set(rightPaneOpen.not().get());
 
-        return queryPaneOpen;
+        return rightPaneOpen;
     }
 
     public static void fitSizeWhenAvailable(final ImageView imageView, final StackPane pane) {

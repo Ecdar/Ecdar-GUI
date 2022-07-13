@@ -12,7 +12,7 @@ import java.util.function.BiConsumer;
 /**
  * The presentation class for the trace element that can be inserted into the simulator panes
  */
-public class TracePaneElementPresentation extends AnchorPane {
+public class TracePaneElementPresentation extends VBox {
     final private TracePaneElementController controller;
 
     public TracePaneElementPresentation() {

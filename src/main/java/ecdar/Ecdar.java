@@ -148,8 +148,8 @@ public class Ecdar extends Application {
         presentation.showHelp();
     }
 
-    public static BooleanProperty toggleFilePane() {
-        return presentation.toggleFilePane();
+    public static BooleanProperty toggleLeftPane() {
+        return presentation.toggleLeftPane();
     }
 
     /**
@@ -174,7 +174,7 @@ public class Ecdar extends Application {
     }
 
     public static BooleanProperty toggleQueryPane() {
-        return presentation.toggleQueryPane();
+        return presentation.toggleRightPane();
     }
 
     /**

@@ -60,8 +60,6 @@ public class EcdarController implements Initializable {
     public StackPane leftPane;
     public StackPane rightPane;
     public Rectangle bottomFillerElement;
-    public QueryPanePresentation queryPane;
-    public ProjectPanePresentation filePane;
     public MessageTabPanePresentation messageTabPane;
     public StackPane dialogContainer;
     public JFXDialog dialog;
@@ -91,7 +89,7 @@ public class EcdarController implements Initializable {
 
     // The program top menu
     public MenuBar menuBar;
-    public MenuItem menuBarViewFilePanel;
+    public MenuItem menuBarViewProjectPanel;
     public MenuItem menuBarViewQueryPanel;
     public MenuItem menuBarViewGrid;
     public MenuItem menuBarViewAutoscaling;
@@ -162,7 +160,12 @@ public class EcdarController implements Initializable {
     private static final ObjectProperty<Mode> currentMode = new SimpleObjectProperty<>(Mode.Editor);
 
     private static final EditorPresentation editorPresentation = new EditorPresentation();
+    public final ProjectPanePresentation projectPane = new ProjectPanePresentation();
+    public final QueryPanePresentation queryPane = new QueryPanePresentation();
+
     private static final SimulatorPresentation simulatorPresentation = new SimulatorPresentation();
+    public final LeftSimPanePresentation leftSimPane = new LeftSimPanePresentation();
+    public final RightSimPanePresentation rightSimPane = new RightSimPanePresentation();
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
@@ -173,14 +176,18 @@ public class EcdarController implements Initializable {
         startBackgroundQueriesThread(); // Will terminate immediately if background queries are turned off
 
         bottomFillerElement.heightProperty().bind(messageTabPane.maxHeightProperty());
-        messageTabPane.getController().setRunnableForOpeningAndClosingMessageTabPane(this::changeInsetsOfFileAndQueryPanes);
+        messageTabPane.getController().setRunnableForOpeningAndClosingMessageTabPane(this::changeInsetsOfProjectAndQueryPanes);
 
         // Update file coloring when active model changes
-        editorPresentation.getController().getActiveCanvasPresentation().getController().activeComponentProperty().addListener(observable -> filePane.getController().updateColorsOnFilePresentations());
-        editorPresentation.getController().activeCanvasPresentationProperty().addListener(observable -> filePane.getController().updateColorsOnFilePresentations());
+        editorPresentation.getController().getActiveCanvasPresentation().getController().activeComponentProperty().addListener(observable -> projectPane.getController().updateColorsOnFilePresentations());
+        editorPresentation.getController().activeCanvasPresentationProperty().addListener(observable -> projectPane.getController().updateColorsOnFilePresentations());
 
-        borderPane.centerProperty().addListener((observable, oldValue, newValue) -> System.out.println(newValue.getClass()));
-        borderPane.setCenter(editorPresentation);
+        leftSimPane.minWidthProperty().bind(projectPane.minWidthProperty());
+        leftSimPane.maxWidthProperty().bind(projectPane.maxWidthProperty());
+        rightSimPane.minWidthProperty().bind(queryPane.minWidthProperty());
+        rightSimPane.maxWidthProperty().bind(queryPane.maxWidthProperty());
+
+        enterEditorMode();
     }
 
     public StackPane getCenter() {
@@ -304,7 +311,7 @@ public class EcdarController implements Initializable {
             dialogContainer.setMouseTransparent(false);
         });
 
-        filePane.getStyleClass().add("responsive-pane-sizing");
+        projectPane.getStyleClass().add("responsive-pane-sizing");
         queryPane.getStyleClass().add("responsive-pane-sizing");
 
         initializeKeybindings();
@@ -594,11 +601,11 @@ public class EcdarController implements Initializable {
      * Initialize the View menu.
      */
     private void initializeViewMenu() {
-        menuBarViewFilePanel.getGraphic().setOpacity(1);
-        menuBarViewFilePanel.setAccelerator(new KeyCodeCombination(KeyCode.P, KeyCodeCombination.SHORTCUT_DOWN));
-        menuBarViewFilePanel.setOnAction(event -> {
-            final BooleanProperty isOpen = Ecdar.toggleFilePane();
-            menuBarViewFilePanel.getGraphic().opacityProperty().bind(new When(isOpen).then(1).otherwise(0));
+        menuBarViewProjectPanel.getGraphic().setOpacity(1);
+        menuBarViewProjectPanel.setAccelerator(new KeyCodeCombination(KeyCode.P, KeyCodeCombination.SHORTCUT_DOWN));
+        menuBarViewProjectPanel.setOnAction(event -> {
+            final BooleanProperty isOpen = Ecdar.toggleLeftPane();
+            menuBarViewProjectPanel.getGraphic().opacityProperty().bind(new When(isOpen).then(1).otherwise(0));
         });
 
         menuBarViewQueryPanel.getGraphic().setOpacity(0);
@@ -975,6 +982,10 @@ public class EcdarController implements Initializable {
 //        simulatorPresentation.getController().willHide();
 
         borderPane.setCenter(editorPresentation);
+        leftPane.getChildren().clear();
+        leftPane.getChildren().add(projectPane);
+        rightPane.getChildren().clear();
+        rightPane.getChildren().add(queryPane);
 
         // Enable or disable the menu items that can be used when in the simulator
 //        updateMenuItems();
@@ -990,6 +1001,10 @@ public class EcdarController implements Initializable {
 //        simulatorPresentation.getController().willShow();
 
         borderPane.setCenter(simulatorPresentation);
+        leftPane.getChildren().clear();
+        leftPane.getChildren().add(leftSimPane);
+        rightPane.getChildren().clear();
+        rightPane.getChildren().add(rightSimPane);
 
         // Enable or disable the menu items that can be used when in the simulator
 //        updateMenuItems();
@@ -1157,15 +1172,15 @@ public class EcdarController implements Initializable {
     }
 
     /**
-     * This method is used to push the contents of the file and query panes when the tab pane is opened
+     * This method is used to push the contents of the project and query panes when the tab pane is opened
      */
-    private void changeInsetsOfFileAndQueryPanes() {
+    private void changeInsetsOfProjectAndQueryPanes() {
         if (messageTabPane.getController().isOpen()) {
-            filePane.showBottomInset(false);
+            projectPane.showBottomInset(false);
             queryPane.showBottomInset(false);
             CanvasPresentation.showBottomInset(false);
         } else {
-            filePane.showBottomInset(true);
+            projectPane.showBottomInset(true);
             queryPane.showBottomInset(true);
             CanvasPresentation.showBottomInset(true);
         }

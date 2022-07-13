@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import ecdar.presentations.TracePaneElementPresentation?>
@@ -12,8 +9,7 @@
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="StackPane"
          fx:id="root"
-         fx:controller="ecdar.controllers.LeftSimPaneController"
-         minWidth="300">
+         fx:controller="ecdar.controllers.LeftSimPaneController">
 
     <AnchorPane>
         <ScrollPane fx:id="scrollPane"
@@ -22,14 +18,10 @@
                     AnchorPane.bottomAnchor="0"
                     AnchorPane.leftAnchor="0"
                     AnchorPane.rightAnchor="0"
-                    styleClass="edge-to-edge" >
+                    styleClass="edge-to-edge">
             <VBox fx:id="scrollPaneVbox">
-                <VBox AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
-                    <TransitionPaneElementPresentation fx:id="transitionPanePresentation" />
-                </VBox>
-                <VBox AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
-                    <TracePaneElementPresentation fx:id="tracePanePresentation" />
-                </VBox>
+                <TransitionPaneElementPresentation fx:id="transitionPanePresentation"/>
+                <TracePaneElementPresentation fx:id="tracePanePresentation"/>
             </VBox>
         </ScrollPane>
     </AnchorPane>

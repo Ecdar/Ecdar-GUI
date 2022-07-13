@@ -14,6 +14,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import org.kordamp.ikonli.javafx.FontIcon;
 
@@ -26,11 +27,11 @@ import java.util.ResourceBundle;
  * The controller class for the trace pane element that can be inserted into a simulator pane
  */
 public class TracePaneElementController implements Initializable {
-    public AnchorPane toolbar;
+    public VBox root;
+    public HBox toolbar;
     public Label traceTitle;
     public JFXRippler expandTrace;
     public VBox traceList;
-    public VBox traceVbox;
     public FontIcon expandTraceIcon;
     public AnchorPane traceSummary;
     public Label summaryTitleLabel;
@@ -87,7 +88,7 @@ public class TracePaneElementController implements Initializable {
      */
     private void hideTrace() {
         traceList.getChildren().clear();
-        traceVbox.getChildren().add(traceSummary);
+        root.getChildren().add(traceSummary);
     }
 
     /**
@@ -98,7 +99,7 @@ public class TracePaneElementController implements Initializable {
         transitionPresentationMap.forEach((state, presentation) -> {
             insertTraceState(state, false);
         });
-        traceVbox.getChildren().remove(traceSummary);
+        root.getChildren().remove(traceSummary);
     }
 
     /**

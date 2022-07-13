@@ -22,20 +22,12 @@
 
         <!-- File pane -->
         <left>
-            <StackPane fx:id="leftPane" alignment="TOP_LEFT">
-                <ProjectPanePresentation
-                        fx:id="filePane"
-                        StackPane.alignment="TOP_LEFT"/>
-            </StackPane>
+            <StackPane fx:id="leftPane" alignment="TOP_LEFT"/>
         </left>
 
         <!-- Query pane -->
         <right>
-            <StackPane fx:id="rightPane" alignment="TOP_RIGHT">
-                <QueryPanePresentation
-                        fx:id="queryPane"
-                        StackPane.alignment="TOP_RIGHT"/>
-            </StackPane>
+            <StackPane fx:id="rightPane" alignment="TOP_RIGHT"/>
         </right>
 
         <!-- Message container -->
@@ -124,7 +116,7 @@
                     </Menu>
 
                     <Menu text="View">
-                        <MenuItem fx:id="menuBarViewFilePanel" text="Project Panel">
+                        <MenuItem fx:id="menuBarViewProjectPanel" text="Project Panel">
                             <graphic>
                                 <FontIcon iconLiteral="gmi-check" fill="black" styleClass="icon-size-medium"/>
                             </graphic>

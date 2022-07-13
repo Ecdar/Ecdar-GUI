@@ -6,61 +6,43 @@
 <?import com.jfoenix.controls.JFXRippler?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 <?import com.jfoenix.controls.JFXTextField?>
-<fx:root xmlns="http://javafx.com/javafx"
-         xmlns:fx="http://javafx.com/fxml"
+<?import javafx.geometry.Insets?>
+<fx:root xmlns:fx="http://javafx.com/fxml/1"
+         xmlns="http://javafx.com/javafx/8.0.76-ea"
          fx:controller="ecdar.controllers.TransitionPaneElementController"
-         fx:id="root"
-         type="AnchorPane">
-    <VBox fx:id="paneElementVbox" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
-        <AnchorPane fx:id="toolbar"
-                    minHeight="56" maxHeight="56">
-            <JFXRippler fx:id="expandTransition"
-                        AnchorPane.leftAnchor="8" AnchorPane.bottomAnchor="0" AnchorPane.topAnchor="0"
-                        onMouseClicked="#expandTransitions">
-                <StackPane minWidth="40" minHeight="40">
-                    <FontIcon fx:id="expandTransitionIcon" iconSize="24" fill="white"/>
-                </StackPane>
-            </JFXRippler>
+         fx:id="root" type="VBox"
+         AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+    <HBox fx:id="toolbar" alignment="CENTER">
+        <JFXRippler fx:id="expandTransition">
+            <StackPane styleClass="responsive-icon-stack-pane-sizing" onMouseClicked="#expandTransitions">
+                <FontIcon fx:id="expandTransitionIcon" iconLiteral="gmi-add" styleClass="icon-size-medium"
+                          fill="white"/>
+            </StackPane>
+        </JFXRippler>
 
-            <Label fx:id="toolbarTitle"
-                   styleClass="title"
-                   text="Transitions" AnchorPane.leftAnchor="56" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"/>
+        <Region minWidth="24" maxWidth="24"/>
 
-            <JFXRippler fx:id="refreshRippler" AnchorPane.rightAnchor="8" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
-                        onMouseClicked="#refreshTransitions">
-                <StackPane minWidth="40" minHeight="40">
-                    <FontIcon fx:id="refreshIcon" iconLiteral="gmi-refresh" iconSize="24" fill="white"/>
-                </StackPane>
-            </JFXRippler>
+        <Label fx:id="toolbarTitle" styleClass="title" text="Transitions"/>
 
-        </AnchorPane>
-        <AnchorPane fx:id="delayChooser">
-            <HBox AnchorPane.topAnchor="8"
-                  AnchorPane.bottomAnchor="8"
-                  AnchorPane.rightAnchor="8"
-                  AnchorPane.leftAnchor="8">
-                <VBox alignment="CENTER">
-                    <Label text="Delay"
-                           AnchorPane.rightAnchor="8"
-                           AnchorPane.leftAnchor="8"
-                           styleClass="subhead" />
-                </VBox>
+        <Region HBox.hgrow="ALWAYS"/>
 
-            </HBox>
-            <HBox AnchorPane.topAnchor="8"
-                  AnchorPane.bottomAnchor="8"
-                  AnchorPane.rightAnchor="0"
-                  AnchorPane.leftAnchor="0" alignment="CENTER" >
-                <JFXTextField fx:id="delayTextField"
-                              text="0.0"
-                              prefWidth="100"
-                              alignment="CENTER"
-                              styleClass="subhead"/>
-            </HBox>
-        </AnchorPane>
+        <JFXRippler fx:id="refreshRippler">
+            <StackPane styleClass="responsive-icon-stack-pane-sizing" onMouseClicked="#refreshTransitions">
+                <FontIcon iconLiteral="gmi-refresh" styleClass="icon-size-medium" fill="white"/>
+            </StackPane>
+        </JFXRippler>
+    </HBox>
+    <VBox fx:id="delayChooser">
+        <padding>
+            <Insets top="10" right="20" bottom="10" left="20"/>
+        </padding>
+        <Label text="Delay" styleClass="subhead"/>
+        <JFXTextField fx:id="delayTextField"
+                      text="0.0"
+                      styleClass="subhead"/>
+    </VBox>
 
-        <VBox fx:id="transitionList">
+    <VBox fx:id="transitionList">
         <!-- Transitions goes here -->
-        </VBox>
     </VBox>
 </fx:root>

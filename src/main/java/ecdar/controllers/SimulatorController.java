@@ -19,22 +19,16 @@ import javafx.scene.shape.Rectangle;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ResourceBundle;
 
 public class SimulatorController implements Initializable {
-
     public StackPane root;
     public SimulatorOverviewPresentation overviewPresentation;
     public StackPane toolbar;
-    public Label rightPaneFillerElement;
-    public Label leftPaneFillerElement;
-    public Rectangle bottomFillerElement;
-    public RightSimPanePresentation rightSimPane;
-    public LeftSimPanePresentation leftSimPane;
-    private Declarations systemDeclarations;
-    private boolean firstTimeInSimulator;
 
+    private boolean firstTimeInSimulator;
     private final static DoubleProperty width = new SimpleDoubleProperty(),
             height = new SimpleDoubleProperty();
     private static ObjectProperty<Transition> selectedTransition = new SimpleObjectProperty<>();
@@ -62,7 +56,7 @@ public class SimulatorController implements Initializable {
             shouldSimulationBeReset = false;
         }
 
-        if (!firstTimeInSimulator && !overviewPresentation.getController().getComponentObservableList()
+        if (!firstTimeInSimulator && !new HashSet<>(overviewPresentation.getController().getComponentObservableList())
                 .containsAll(findComponentsInCurrentSimulation())) {
             shouldSimulationBeReset = true;
         }

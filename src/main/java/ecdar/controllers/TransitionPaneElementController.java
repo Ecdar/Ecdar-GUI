@@ -15,7 +15,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import org.kordamp.ikonli.javafx.FontIcon;
 
@@ -29,15 +29,14 @@ import java.util.ResourceBundle;
  * The controller class for the transition pane element that can be inserted into the simulator panes
  */
 public class TransitionPaneElementController implements Initializable {
-    public AnchorPane root;
-    public VBox paneElementVbox;
+    public VBox root;
     public VBox transitionList;
-    public AnchorPane toolbar;
+    public HBox toolbar;
     public Label toolbarTitle;
     public JFXRippler refreshRippler;
     public JFXRippler expandTransition;
     public FontIcon expandTransitionIcon;
-    public AnchorPane delayChooser;
+    public VBox delayChooser;
     public JFXTextField delayTextField;
 
     private SimpleBooleanProperty isTransitionExpanded = new SimpleBooleanProperty(false);
@@ -48,9 +47,7 @@ public class TransitionPaneElementController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         Ecdar.getSimulationHandler().availableTransitions.addListener((ListChangeListener<Transition>) c -> {
             while (c.next()) {
-                for (Transition trans : c.getAddedSubList()) {
-                    insertTransition(trans);
-                }
+                for (Transition trans : c.getAddedSubList()) insertTransition(trans);
 
                 for (final Transition trans: c.getRemoved()) {
                     transitionList.getChildren().remove(transitionPresentationMap.get(trans));
@@ -92,15 +89,15 @@ public class TransitionPaneElementController implements Initializable {
     private void initializeTransitionExpand() {
         isTransitionExpanded.addListener((obs, oldVal, newVal) -> {
             if(newVal) {
-                if(!paneElementVbox.getChildren().contains(delayChooser)) {
+                if(!root.getChildren().contains(delayChooser)) {
                     // Add the delay chooser just below the toolbar
-                    paneElementVbox.getChildren().add(1, delayChooser);
+                    root.getChildren().add(1, delayChooser);
                 }
                 showTransitions();
                 expandTransitionIcon.setIconLiteral("gmi-expand-less");
                 expandTransitionIcon.setIconSize(24);
             } else {
-                paneElementVbox.getChildren().remove(delayChooser);
+                root.getChildren().remove(delayChooser);
                 hideTransitions();
                 expandTransitionIcon.setIconLiteral("gmi-expand-more");
                 expandTransitionIcon.setIconSize(24);
@@ -236,7 +233,6 @@ public class TransitionPaneElementController implements Initializable {
             } catch (NumberFormatException ex) {
                 // If the conversion was not possible, show the old value
                 this.delayTextField.setText(oldValue);
-                this.delay.set(new BigDecimal(oldValue));
             }
         }
 
