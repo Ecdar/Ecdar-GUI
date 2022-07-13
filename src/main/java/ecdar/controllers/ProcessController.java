@@ -4,8 +4,6 @@ import com.jfoenix.controls.JFXRippler;
 import ecdar.abstractions.*;
 import ecdar.presentations.SimEdgePresentation;
 import ecdar.presentations.SimLocationPresentation;
-import ecdar.simulation.SimulationEdge;
-import ecdar.simulation.SimulationLocation;
 import javafx.animation.Interpolator;
 import javafx.animation.Transition;
 import javafx.beans.property.ObjectProperty;
@@ -168,7 +166,7 @@ public class ProcessController extends ModelController implements Initializable 
     }
 
     /**
-     * Method that highlights all locations with the same name as the input {@link SimulationLocation}
+     * Method that highlights all locations with the input ID
      * @param locationId The locations to highlight
      */
     public void highlightLocation(final String locationId) {
