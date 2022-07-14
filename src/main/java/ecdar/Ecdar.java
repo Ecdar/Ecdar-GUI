@@ -315,6 +315,8 @@ public class Ecdar extends Application {
         });
 
         BackendHelper.addBackendInstanceListener(() -> {
+            // When the backend instances change, re-instantiate the backendDriver
+            // to prevent dangling connections and queries
             try {
                 backendDriver.closeAllBackendConnections();
             } catch (IOException e) {

@@ -20,13 +20,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class BackendDriver {
+    private final BlockingQueue<ExecutableQuery> queryQueue = new ArrayBlockingQueue<>(200);
     private final Map<BackendInstance, BlockingQueue<BackendConnection>> openBackendConnections = new HashMap<>();
     private final int deadlineForResponses = 20000;
     private final int rerunQueryDelay = 200;
     private final int numberOfRetriesPerQuery = 5;
-    BlockingQueue<ExecutableQuery> queryQueue = new ArrayBlockingQueue<>(200);
 
     public BackendDriver() {
+        // ToDo NIELS: Consider multiple consumer threads using 'for(int i = 0; i < x; i++) {}'
         QueryConsumer consumer = new QueryConsumer(queryQueue);
         Thread consumerThread = new Thread(consumer);
         consumerThread.start();
@@ -53,7 +54,7 @@ public class BackendDriver {
     /**
      * ToDo NIELS: Reimplement this with query queue when backends support this feature
      * Asynchronous method for fetching inputs and outputs for the given refinement query and adding these to the
-     * ignored inputs and outputs pane for the given query
+     * ignored inputs and outputs pane for the given query.
      *
      * @param query           the ignored input output query containing the query and related GUI elements
      * @param backendInstance the backend that should be used to execute the query
@@ -121,7 +122,7 @@ public class BackendDriver {
 
     /**
      * Executes the specified query as a gRPC request using the specified backend connection.
-     * componentsBuilder is used to update the components of the engine
+     * componentsBuilder is used to update the components of the engine.
      *
      * @param executableQuery   executable query to be executed by the backend
      * @param backendConnection connection to the backend
@@ -143,7 +144,7 @@ public class BackendDriver {
      * Executes the specified query as a gRPC request using the specified backend connection.
      * componentsBuilder is used to update the components of the engine and on completion of this transaction,
      * the query is sent and its response is consumed by responseConsumer. Any error encountered is handled by
-     * the errorConsumer
+     * the errorConsumer.
      *
      * @param query                       query to be executed by the backend
      * @param backendConnection           connection to the backend
@@ -212,7 +213,7 @@ public class BackendDriver {
 
     /**
      * Filters the list of open {@link BackendConnection}s to the specified {@link BackendInstance} and returns the
-     * first match or attempts to start a new connection if none is found
+     * first match or attempts to start a new connection if none is found.
      *
      * @param backend backend instance to get a connection to (e.g. Reveaal, j-Ecdar, custom_engine)
      * @return a BackendConnection object linked to the backend, either from the open backend connection list
@@ -326,7 +327,7 @@ public class BackendDriver {
     }
 
     private void handleQueryBackendError(Throwable t, ExecutableQuery executableQuery) {
-        // If the query has been cancelled, ignore the result
+        // If the query has been cancelled, ignore the error
         if (executableQuery.queryListener.getQuery().getQueryState() == QueryState.UNKNOWN) return;
 
         // Each error starts with a capitalized description of the error equal to the gRPC error type encountered
