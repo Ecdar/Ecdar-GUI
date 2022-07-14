@@ -14,24 +14,27 @@ import org.springframework.util.SocketUtils;
 
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public class BackendDriver {
-    private final List<BackendConnection> openBackendConnections = new CopyOnWriteArrayList<>();
+    private final Map<BackendInstance, BlockingQueue<BackendConnection>> openBackendConnections = new HashMap<>();
     private final int deadlineForResponses = 20000;
     private final int rerunQueryDelay = 200;
     private final int numberOfRetriesPerQuery = 5;
+    BlockingQueue<ExecutableQuery> queryQueue = new ArrayBlockingQueue<>(200);
 
     public BackendDriver() {
+        QueryConsumer consumer = new QueryConsumer(queryQueue);
+        Thread consumerThread = new Thread(consumer);
+        consumerThread.start();
     }
 
     /**
-     * Add the query to an execution queue with consumers for success and failure,
-     * which are executed when a response or an error is received from the backend
+     * Enqueue query for execution with consumers for success and failure, which are executed when a response or
+     * an error is received from the backend
      *
      * @param query           the query to be executed
      * @param backendInstance name of the backend to execute the query with
@@ -44,15 +47,11 @@ public class BackendDriver {
                                          Consumer<Boolean> success,
                                          Consumer<BackendException> failure,
                                          QueryListener queryListener) {
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                new ExecutableQuery(query, backendInstance, success, failure, queryListener).execute();
-            }
-        }, rerunQueryDelay);
+        queryQueue.add(new ExecutableQuery(query, backendInstance, success, failure, queryListener));
     }
 
     /**
+     * ToDo NIELS: Reimplement this with query queue when backends support this feature
      * Asynchronous method for fetching inputs and outputs for the given refinement query and adding these to the
      * ignored inputs and outputs pane for the given query
      *
@@ -104,30 +103,13 @@ public class BackendDriver {
      * @throws IOException if any of the sockets do not respond
      */
     public void closeAllBackendConnections() throws IOException {
-        for (BackendConnection s : openBackendConnections) s.close();
+        for (BlockingQueue<BackendConnection> bq : openBackendConnections.values()) {
+            for (BackendConnection bc : bq) bc.close();
+        }
     }
 
-    private void executeQuery(ExecutableQuery executableQuery) {
+    private void executeQuery(ExecutableQuery executableQuery, BackendConnection backendConnection) {
         if (executableQuery.queryListener.getQuery().getQueryState() == QueryState.UNKNOWN) return;
-
-        final BackendConnection backendConnection;
-        try {
-            backendConnection = getBackendConnection(executableQuery.backend);
-        } catch (BackendException.NoAvailableBackendConnectionException e) {
-            e.printStackTrace();
-            if (executableQuery.tries < numberOfRetriesPerQuery) {
-                new Timer().schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        executableQuery.execute();
-                    }
-                }, rerunQueryDelay);
-            } else {
-                executableQuery.failure.accept(new BackendException("Failed to execute query after five tries"));
-                executableQuery.queryListener.getQuery().setQueryState(QueryState.ERROR);
-            }
-            return;
-        }
 
         QueryProtos.ComponentsUpdateRequest.Builder componentsBuilder = QueryProtos.ComponentsUpdateRequest.newBuilder();
         for (Component c : Ecdar.getProject().getComponents()) {
@@ -177,11 +159,7 @@ public class BackendDriver {
                                     QueryProtos.IgnoredInputOutputs protoBufIgnoredInputOutputs,
                                     Consumer<QueryProtos.QueryResponse> responseConsumer,
                                     Consumer<Throwable> errorConsumer) {
-        if (!backendConnection.acquireConnection()) System.out.println("Error");
-
         StreamObserver<Empty> observer = new StreamObserver<>() {
-            private boolean error = false;
-
             @Override
             public void onNext(Empty value) {
             }
@@ -189,17 +167,11 @@ public class BackendDriver {
             @Override
             public void onError(Throwable t) {
                 errorConsumer.accept(t);
-                error = true;
+                addBackendConnection(backendConnection);
             }
 
             @Override
             public void onCompleted() {
-                // The query has been cancelled, stop execution
-                if (error) {
-                    backendConnection.releaseConnection();
-                    return;
-                }
-
                 StreamObserver<QueryProtos.QueryResponse> responseObserver = new StreamObserver<>() {
                     @Override
                     public void onNext(QueryProtos.QueryResponse value) {
@@ -209,11 +181,12 @@ public class BackendDriver {
                     @Override
                     public void onError(Throwable t) {
                         errorConsumer.accept(t);
+                        addBackendConnection(backendConnection);
                     }
 
                     @Override
                     public void onCompleted() {
-                        backendConnection.releaseConnection();
+                        addBackendConnection(backendConnection);
                     }
                 };
 
@@ -233,6 +206,10 @@ public class BackendDriver {
                 .updateComponents(componentsBuilder.build(), observer);
     }
 
+    private void addBackendConnection(BackendConnection backendConnection) {
+        this.openBackendConnections.get(backendConnection.getBackendInstance()).add(backendConnection);
+    }
+
     /**
      * Filters the list of open {@link BackendConnection}s to the specified {@link BackendInstance} and returns the
      * first match or attempts to start a new connection if none is found
@@ -244,20 +221,32 @@ public class BackendDriver {
      *                                                                and unable to start a new one
      */
     private BackendConnection getBackendConnection(BackendInstance backend) throws BackendException.NoAvailableBackendConnectionException {
-        var connection = openBackendConnections.stream()
-                .filter((con) -> con.getBackendInstance() == null || con.getBackendInstance().equals(backend))
-                .findFirst()
-                .orElseGet(() -> startNewBackendConnection(backend));
+        BackendConnection connection;
+        try {
+            if (!openBackendConnections.containsKey(backend))
+                openBackendConnections.put(backend, new ArrayBlockingQueue<>(backend.getNumberOfInstances() + 1));
 
-        if (connection == null) {
-            throw new BackendException.NoAvailableBackendConnectionException("Unable to connect to backend: " + backend.getName() + "." +
-                    "This is caused by all existing connection being busy and all ports in the specified port range being used.");
+            // If no open connection is free, attempt to start a new one
+            if (openBackendConnections.get(backend).size() < 1) {
+                tryStartNewBackendConnection(backend);
+            }
+
+            // Block until a connection becomes available
+            connection = openBackendConnections.get(backend).take();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
 
         return connection;
     }
 
-    private BackendConnection startNewBackendConnection(BackendInstance backend) {
+    /**
+     * Attempts to start a new connection to the specified backend. On success, the backend is added to the associated
+     * queue, otherwise, nothing happens.
+     *
+     * @param backend the target backend for the connection
+     */
+    private void tryStartNewBackendConnection(BackendInstance backend) {
         Process p = null;
         String hostAddress = (backend.isLocal() ? "127.0.0.1" : backend.getBackendLocation());
         long portNumber = 0;
@@ -266,7 +255,8 @@ public class BackendDriver {
             try {
                 portNumber = SocketUtils.findAvailableTcpPort(backend.getPortStart(), backend.getPortEnd());
             } catch (IllegalStateException e) {
-                Ecdar.showToast("No available port for " + backend.getName() + " with port range " + backend.getPortStart() + " - " + backend.getPortEnd());
+                // No port was available in range, we assume that connections are running on all ports
+                return;
             }
 
             do {
@@ -275,16 +265,15 @@ public class BackendDriver {
                 try {
                     p = pb.start();
                 } catch (IOException ioException) {
-                    Ecdar.showToast("Unable to start backend instance");
+                    Ecdar.showToast("Unable to start local backend instance");
                     ioException.printStackTrace();
-                    return null;
+                    return;
                 }
                 // If the process is not alive, it failed while starting up, try again
             } while (!p.isAlive());
         } else {
-            // Filter active instances of this engine and map their used ports to an int stream
-            var activeEnginePorts = openBackendConnections.stream()
-                    .filter((bi) -> bi.backendInstance.equals(backend))
+            // Filter open connections to this backend and map their used ports to an int stream
+            var activeEnginePorts = openBackendConnections.get(backend).stream()
                     .mapToInt((bi) -> Integer.parseInt(bi.getStub().getChannel().authority().split(":", 2)[1]));
 
             int currentPort = backend.getPortStart();
@@ -300,7 +289,7 @@ public class BackendDriver {
 
             if (currentPort > backend.getPortEnd()) {
                 Ecdar.showToast("Unable to connect to remote engine: " + backend.getName() + " within port range " + backend.getPortStart() + " - " + backend.getPortEnd());
-                return null;
+                return;
             }
         }
 
@@ -310,9 +299,8 @@ public class BackendDriver {
                 .build();
 
         EcdarBackendGrpc.EcdarBackendStub stub = EcdarBackendGrpc.newStub(channel);
-        BackendConnection newConnection = new BackendConnection(backend, p, stub);
-        this.openBackendConnections.add(newConnection);
-        return newConnection;
+        BackendConnection newConnection = new BackendConnection(backend, p, stub, channel);
+        addBackendConnection(newConnection);
     }
 
     private void handleQueryResponse(QueryProtos.QueryResponse value, ExecutableQuery executableQuery) {
@@ -349,34 +337,33 @@ public class BackendDriver {
                 executableQuery.queryListener.getQuery().setQueryState(QueryState.ERROR);
                 executableQuery.failure.accept(new BackendException.QueryErrorException("The query was cancelled"));
                 break;
+
             case "DEADLINE_EXCEEDED":
                 executableQuery.queryListener.getQuery().setQueryState(QueryState.ERROR);
                 executableQuery.failure.accept(new BackendException.QueryErrorException("The backend did not answer the request in time"));
-
-                new Timer().schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        executableQuery.execute();
-                    }
-                }, rerunQueryDelay);
-
+                queryQueue.add(executableQuery);
                 break;
+
             case "UNIMPLEMENTED":
                 executableQuery.queryListener.getQuery().setQueryState(QueryState.SYNTAX_ERROR);
                 executableQuery.failure.accept(new BackendException.QueryErrorException("The query type is not supported by the backend"));
                 break;
+
             case "INTERNAL":
                 executableQuery.queryListener.getQuery().setQueryState(QueryState.ERROR);
                 executableQuery.failure.accept(new BackendException.QueryErrorException("The backend was unable to execute this query:\n" + t.getMessage().split(": ", 2)[1]));
                 break;
+
             case "UNKNOWN":
                 executableQuery.queryListener.getQuery().setQueryState(QueryState.ERROR);
                 executableQuery.failure.accept(new BackendException.QueryErrorException("The backend encountered an unknown error"));
                 break;
+
             case "UNAVAILABLE":
                 executableQuery.queryListener.getQuery().setQueryState(QueryState.SYNTAX_ERROR);
                 executableQuery.failure.accept(new BackendException.QueryErrorException("The backend could not be reached"));
                 break;
+
             default:
                 try {
                     executableQuery.queryListener.getQuery().setQueryState(QueryState.ERROR);
@@ -407,22 +394,23 @@ public class BackendDriver {
         /**
          * Execute the query using the backend driver
          */
-        public void execute() {
+        void execute(BackendConnection backendConnection) {
             tries++;
-            executeQuery(this);
+            executeQuery(this, backendConnection);
         }
     }
 
     private class BackendConnection {
         private final Process process;
         private final EcdarBackendGrpc.EcdarBackendStub stub;
+        private final ManagedChannel channel;
         private final BackendInstance backendInstance;
-        private AtomicBoolean isBusy = new AtomicBoolean(false);
 
-        BackendConnection(BackendInstance backendInstance, Process process, EcdarBackendGrpc.EcdarBackendStub stub) {
+        BackendConnection(BackendInstance backendInstance, Process process, EcdarBackendGrpc.EcdarBackendStub stub, ManagedChannel channel) {
             this.process = process;
             this.stub = stub;
             this.backendInstance = backendInstance;
+            this.channel = channel;
         }
 
         /**
@@ -446,33 +434,66 @@ public class BackendDriver {
         }
 
         /**
-         * Acquires the connection, disallowing it to be used by other threads until released
-         *
-         * @return true if the connection was acquired
-         */
-        public boolean acquireConnection() {
-            return isBusy.weakCompareAndSetPlain(false, true);
-        }
-
-        /**
-         * Release the connection to allow for other threads to acquire it
-         */
-        public void releaseConnection() {
-            isBusy.set(false);
-        }
-
-        /**
          * Close the gRPC connection and end the process
          *
          * @throws IOException originally thrown by the destroy method on java.lang.Process
          */
         public void close() throws IOException {
-            // Remove the connection from the connection list
-            openBackendConnections.remove(this);
+            if (!channel.isShutdown()) {
+                try {
+                    channel.shutdown();
+                    if (!channel.awaitTermination(45, TimeUnit.SECONDS)) {
+                        channel.shutdownNow(); // Forcefully close the connection
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
 
             // If the backend-instance is remote, there will not be a process
             if (process != null) {
                 process.destroy();
+            }
+
+            openBackendConnections.get(backendInstance).remove(this);
+        }
+    }
+
+    private class QueryConsumer implements Runnable {
+        BlockingQueue<ExecutableQuery> queue;
+
+        private QueryConsumer(BlockingQueue<ExecutableQuery> queue) {
+            this.queue = queue;
+        }
+
+        @Override
+        public void run() {
+            while (true) {
+                try {
+                    ExecutableQuery executableQuery = this.queue.take();
+
+                    final BackendConnection backendConnection;
+                    try {
+                        backendConnection = getBackendConnection(executableQuery.backend);
+                        executableQuery.execute(backendConnection);
+                    } catch (BackendException.NoAvailableBackendConnectionException e) {
+                        e.printStackTrace();
+                        if (executableQuery.tries < numberOfRetriesPerQuery) {
+                            new Timer().schedule(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    queryQueue.add(executableQuery);
+                                }
+                            }, rerunQueryDelay);
+                        } else {
+                            executableQuery.failure.accept(new BackendException("Failed to execute query after five tries"));
+                            executableQuery.queryListener.getQuery().setQueryState(QueryState.ERROR);
+                        }
+                        return;
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
