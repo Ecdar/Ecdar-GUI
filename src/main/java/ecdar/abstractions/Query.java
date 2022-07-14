@@ -230,7 +230,7 @@ public class Query implements Serializable {
     }
 
     public void run() {
-        if (StringValidator.validateString(query.get(), StringValidator.queryValidation)) runQuery.run();
+        if (StringValidator.validateQuery(query.get())) runQuery.run();
     }
 
     public void cancel() {

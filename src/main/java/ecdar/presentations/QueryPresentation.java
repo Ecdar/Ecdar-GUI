@@ -80,7 +80,7 @@ public class QueryPresentation extends HBox {
             }));
 
             queryTextField.focusedProperty().addListener((observable, oldValue, newValue) -> {
-                if (!newValue && !StringValidator.validateString(queryTextField.getText(), StringValidator.queryValidation)) {
+                if (!newValue && !StringValidator.validateQuery(queryTextField.getText())) {
                     queryTextField.getStyleClass().add("input-violation");
                 } else {
                     queryTextField.getStyleClass().remove("input-violation");

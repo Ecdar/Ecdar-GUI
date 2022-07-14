@@ -64,7 +64,7 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
         // Set the text field to the name in the model, and bind the model to the text field
         controller.name.setText(model.getName());
         controller.name.textProperty().addListener((obs, oldName, newName) -> {
-            if (StringValidator.validateString(newName, StringValidator.componentNameValidation)) {
+            if (StringValidator.validateComponentName(newName)) {
                 model.nameProperty().unbind();
                 model.setName(newName);
             } else {
