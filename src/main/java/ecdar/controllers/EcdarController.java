@@ -998,7 +998,7 @@ public class EcdarController implements Initializable {
     private void enterSimulatorMode() {
 //        ToDo NIELS: Consider implementing willShow and willHide to handle general elements that should only be available for one of the modes
 //        ecdarPresentation.getController().willHide();
-//        simulatorPresentation.getController().willShow();
+        simulatorPresentation.getController().willShow();
 
         borderPane.setCenter(simulatorPresentation);
         leftPane.getChildren().clear();

@@ -18,8 +18,8 @@ import java.util.Map;
  */
 public class SimulationHandler {
     public static final String QUERY_PREFIX = "Query: ";
-    private ObjectProperty<SimulationState> currentConcreteState;
-    private ObjectProperty<SimulationState> initialConcreteState;
+    private ObjectProperty<SimulationState> currentConcreteState = new SimpleObjectProperty<>();
+    private ObjectProperty<SimulationState> initialConcreteState = new SimpleObjectProperty<>();
     private ObjectProperty<BigDecimal> currentTime = new SimpleObjectProperty<>();
     private BigDecimal delay;
     private ArrayList<Edge> edgesSelected;
@@ -73,8 +73,8 @@ public class SimulationHandler {
         this.simulationVariables.clear();
         this.simulationClocks.clear();
         this.traceLog.clear();
-        this.currentConcreteState = new SimpleObjectProperty<>(getInitialConcreteState());
-        this.initialConcreteState = new SimpleObjectProperty<>(getInitialConcreteState());
+        this.currentConcreteState.set(getInitialConcreteState());
+        this.initialConcreteState.set(getInitialConcreteState());
         this.currentTime = new SimpleObjectProperty<>(BigDecimal.ZERO);
 
         //Preparation for the simulation

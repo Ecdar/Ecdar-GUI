@@ -3,8 +3,6 @@ package ecdar.controllers;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
 import ecdar.simulation.SimulationHandler;
-import ecdar.presentations.LeftSimPanePresentation;
-import ecdar.presentations.RightSimPanePresentation;
 import ecdar.presentations.SimulatorOverviewPresentation;
 import ecdar.simulation.SimulationState;
 import ecdar.simulation.Transition;
@@ -13,9 +11,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
-import javafx.scene.shape.Rectangle;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -50,6 +46,8 @@ public class SimulatorController implements Initializable {
     public void willShow() {
         final SimulationHandler sm = Ecdar.getSimulationHandler();
         boolean shouldSimulationBeReset = true;
+
+        if (sm.getCurrentState() == null) sm.initialStep(); // ToDo NIELS: Find better solution
 
         //Have the user left a trace or is he simulating a query
         if (sm.traceLog.size() >= 2 || sm.getCurrentSimulation().contains(SimulationHandler.QUERY_PREFIX)) {

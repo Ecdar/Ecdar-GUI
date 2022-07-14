@@ -105,7 +105,7 @@ public class SimulatorOverviewController implements Initializable {
                 }
             }
             // Highlight the current state when the processes change
-            highlightProcessState(Ecdar.getSimulationHandler().getCurrentState());
+            highlightProcessState(Ecdar.getSimulationHandler().getCurrentState()); // ToDo NIELS: Throws NullPointerException inside method due to currentState
             processContainer.getChildren().addAll(processes.values());
             processPresentations.putAll(processes);
         });
@@ -113,8 +113,6 @@ public class SimulatorOverviewController implements Initializable {
         final Map<String, ProcessPresentation> processes = new HashMap<>();
         componentArrayList.forEach(o -> processes.put(o.getName(), new ProcessPresentation(o)));
 
-        // Highlight the current state when the processes change
-        highlightProcessState(Ecdar.getSimulationHandler().getCurrentState());
         processContainer.getChildren().addAll(processes.values());
         processPresentations.putAll(processes);
     }
@@ -345,7 +343,7 @@ public class SimulatorOverviewController implements Initializable {
         for (final ProcessPresentation processPresentation : processPresentations.values()) {
 
             // Find the processes that have edges involved in this transition
-            processPresentation.getController().highlightEdges(edges.toArray(new Edge[0]));
+            processPresentation.getController().highlightEdges(edges);
             processesToHide.remove(processPresentation);
         }
 

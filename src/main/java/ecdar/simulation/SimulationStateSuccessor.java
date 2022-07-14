@@ -1,5 +1,7 @@
 package ecdar.simulation;
 
+import ecdar.Ecdar;
+
 import java.util.ArrayList;
 
 public class SimulationStateSuccessor {
@@ -10,6 +12,6 @@ public class SimulationStateSuccessor {
 
     public SimulationState getState() {
         // ToDo: Implement
-        return new SimulationState(null);
+        return Ecdar.getBackendDriver().getInitialSimulationState();
     }
 }

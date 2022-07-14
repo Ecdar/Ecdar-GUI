@@ -10,7 +10,6 @@ public class SimulatorPresentation extends StackPane {
         controller = new EcdarFXMLLoader().loadAndGetController("SimulatorPresentation.fxml", this);
     }
 
-
     /**
      * The way to get the associated/linked controller of this presenter
      * @return the controller linked to this presenter

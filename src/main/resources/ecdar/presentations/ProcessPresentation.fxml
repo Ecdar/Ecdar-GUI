@@ -50,6 +50,7 @@
 
             <Rectangle opacity="0" fx:id="bottomAnchor" StackPane.alignment="BOTTOM_LEFT" disable="true"/>
             <Rectangle opacity="0" fx:id="rightAnchor" StackPane.alignment="TOP_RIGHT" disable="true"/>
+            <Rectangle opacity="0" fx:id="cornerAnchor" StackPane.alignment="BOTTOM_RIGHT"/>
         </StackPane>
     </HBox>
 </fx:root>

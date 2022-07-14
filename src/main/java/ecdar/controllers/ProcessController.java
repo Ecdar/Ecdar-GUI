@@ -63,10 +63,8 @@ public class ProcessController extends ModelController implements Initializable 
      * Highlights the edges and accompanying source/target locations in the process
      * @param edges The edges to highlight
      */
-    public void highlightEdges(final Edge[] edges) {
-        for (int i = 0; i < edges.length; i++) {
-            final Edge edge = edges[i];
-
+    public void highlightEdges(final ArrayList<Edge> edges) {
+        for (final Edge edge : edges) {
             final Location source = edge.getSourceLocation();
             String sourceId = source.getId();
             final Location target = edge.getTargetLocation();
@@ -82,24 +80,24 @@ public class ProcessController extends ModelController implements Initializable 
             // Iterate through all locations to check for Universal and Inconsistent locations
             // The name of a Universal location may be "U2" in our system, but it is mapped to "Universal" in the engine
             // This loop maps "Universal" to for example "U2"
-            for (Map.Entry<Location, SimLocationPresentation> locEntry: locationPresentationMap.entrySet()) {
-                if(locEntry.getKey().getType() == Location.Type.UNIVERSAL) {
-                    if(sourceId.equals("Universal")) {
+            for (Map.Entry<Location, SimLocationPresentation> locEntry : locationPresentationMap.entrySet()) {
+                if (locEntry.getKey().getType() == Location.Type.UNIVERSAL) {
+                    if (sourceId.equals("Universal")) {
                         sourceId = locEntry.getKey().getId();
                         isSourceUniversal = true;
                     }
 
-                    if(targetId.equals("Universal")) {
+                    if (targetId.equals("Universal")) {
                         targetId = locEntry.getKey().getId();
                     }
                 }
 
-                if(locEntry.getKey().getType() == Location.Type.INCONSISTENT) {
-                    if(sourceId.equals("Inconsistent")) {
+                if (locEntry.getKey().getType() == Location.Type.INCONSISTENT) {
+                    if (sourceId.equals("Inconsistent")) {
                         sourceId = locEntry.getKey().getId();
                     }
 
-                    if(targetId.equals("Inconsistent")) {
+                    if (targetId.equals("Inconsistent")) {
                         targetId = locEntry.getKey().getId();
                     }
                 }

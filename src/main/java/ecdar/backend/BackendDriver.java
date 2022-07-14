@@ -2,6 +2,7 @@ package ecdar.backend;
 
 import EcdarProtoBuf.ComponentProtos;
 import EcdarProtoBuf.EcdarBackendGrpc;
+import EcdarProtoBuf.ObjectProtos;
 import EcdarProtoBuf.QueryProtos;
 import com.google.protobuf.Empty;
 import ecdar.Ecdar;
@@ -11,6 +12,7 @@ import ecdar.abstractions.QueryState;
 import ecdar.simulation.SimulationState;
 import io.grpc.*;
 import io.grpc.stub.StreamObserver;
+import javafx.util.Pair;
 import org.springframework.util.SocketUtils;
 
 import java.io.*;
@@ -365,7 +367,9 @@ public class BackendDriver {
     }
 
     public SimulationState getInitialSimulationState() {
-        return new SimulationState(null);
+        SimulationState state = new SimulationState(ObjectProtos.StateTuple.newBuilder().getDefaultInstanceForType());
+        state.getLocations().add(new Pair<>(Ecdar.getProject().getComponents().get(0).getName(), Ecdar.getProject().getComponents().get(0).getLocations().get(0).getId()));
+        return state;
     }
 
     private class ExecutableQuery {
