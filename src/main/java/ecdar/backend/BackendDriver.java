@@ -8,6 +8,7 @@ import ecdar.Ecdar;
 import ecdar.abstractions.BackendInstance;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.QueryState;
+import ecdar.simulation.SimulationState;
 import io.grpc.*;
 import io.grpc.stub.StreamObserver;
 import org.springframework.util.SocketUtils;
@@ -139,11 +140,7 @@ public class BackendDriver {
     private void executeQuery(ExecutableQuery executableQuery) {
         if (executableQuery.queryListener.getQuery().getQueryState() == QueryState.UNKNOWN) return;
 
-        // Get available connection or start new
-        final BackendConnection backendConnection = openBackendConnections.stream()
-                .filter((connection) -> connection.getBackendInstance() == null || connection.getBackendInstance().equals(executableQuery.backend))
-                .findFirst()
-                .orElseGet(() -> startNewBackendConnection(executableQuery.backend));
+        final BackendConnection backendConnection = getBackendConnection(executableQuery.backend);
 
         // If the connection is null, there are no available connections,
         // and it was not possible to start a new one
@@ -222,6 +219,24 @@ public class BackendDriver {
         };
 
         backendConnection.getStub().withDeadlineAfter(deadlineForResponses, TimeUnit.MILLISECONDS).updateComponents(componentsBuilder.build(), observer);
+    }
+
+    /**
+     * Filters the list of open {@link BackendConnection}s to the specified {@link BackendInstance} and returns the
+     * first match or attempts to start a new connection if none is found.
+     * If a new connection is attempted to be started and no ports are free within the specified port range for the
+     * BackendInstance
+     *
+     * @param backend backend instance to get a connection to (e.g. Reveaal, j-Ecdar, custom_engine)
+     * @return a BackendConnection object linked to backend, either from the open backend connection list
+     * or a newly started connection. If no match is found in the list and the attempt to start a new connection failed,
+     * null is returned.
+     */
+    private BackendConnection getBackendConnection(BackendInstance backend) {
+        return openBackendConnections.stream()
+                .filter((connection) -> connection.getBackendInstance() == null || connection.getBackendInstance().equals(backend))
+                .findFirst()
+                .orElseGet(() -> startNewBackendConnection(backend));
     }
 
     private BackendConnection startNewBackendConnection(BackendInstance backend) {
@@ -347,6 +362,10 @@ public class BackendDriver {
                 }
                 break;
         }
+    }
+
+    public SimulationState getInitialSimulationState() {
+        return new SimulationState(null);
     }
 
     private class ExecutableQuery {

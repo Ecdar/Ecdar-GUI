@@ -18,8 +18,8 @@ import java.util.Map;
  */
 public class SimulationHandler {
     public static final String QUERY_PREFIX = "Query: ";
-    private ObjectProperty<SimulationState> currentConcreteState = new SimpleObjectProperty<>(new SimulationState(null));
-    private ObjectProperty<SimulationState> initialConcreteState = new SimpleObjectProperty<>(new SimulationState(null));
+    private ObjectProperty<SimulationState> currentConcreteState;
+    private ObjectProperty<SimulationState> initialConcreteState;
     private ObjectProperty<BigDecimal> currentTime = new SimpleObjectProperty<>();
     private BigDecimal delay;
     private ArrayList<Edge> edgesSelected;
@@ -349,8 +349,7 @@ public class SimulationHandler {
      * @return the initial {@link SimulationState} of this simulation
      */
     public SimulationState getInitialConcreteState() {
-        // ToDo: Implement
-        return initialConcreteState.get();
+        return Ecdar.getBackendDriver().getInitialSimulationState();
     }
 
     public ObjectProperty<SimulationState> initialConcreteStateProperty() {
