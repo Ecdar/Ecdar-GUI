@@ -9,14 +9,14 @@ public class StringValidatorTest {
     public void validQueryReturnsTrue() {
         final boolean result = StringValidator.validateQuery("(A && B)");
 
-        assert result;
+        Assertions.assertTrue(result);
     }
 
     @Test
     public void queryWithAdditionalClosingParenthesesReturnsFalse() {
         final boolean result = StringValidator.validateQuery("(A && B))");
 
-        Assertions.assertTrue(result);
+        Assertions.assertFalse(result);
     }
 
     @Test
