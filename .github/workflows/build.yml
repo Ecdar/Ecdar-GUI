@@ -30,4 +30,4 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
-      run: xvfb-run --server-args="-screen 0 1200x800x24+32" ./gradlew -Djava.awt.headless=false build
+      run: xvfb-run --server-args="-screen 0 1200x800x24+32" ./gradlew -Dglass.platform=Monocle -Dmonocle.platform=Headless -Dprism.order=sw  build

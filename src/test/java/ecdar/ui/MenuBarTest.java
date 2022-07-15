@@ -11,7 +11,7 @@ import static org.testfx.api.FxAssert.verifyThat;
 
 public class MenuBarTest extends TestFXBase {
     @Test
-    public void gridMenuItemPressedHidesGridAnd() throws TimeoutException {
+    public void gridMenuItemHidesGrid() throws TimeoutException {
         clickOn("View");
         WaitForAsyncUtils.waitFor(2, TimeUnit.SECONDS, () ->
                 lookup("#menuBarViewGrid").match(NodeQueryUtils.isVisible()).tryQuery().isPresent());
