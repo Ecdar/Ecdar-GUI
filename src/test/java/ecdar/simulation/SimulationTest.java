@@ -14,24 +14,22 @@ import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.stub.StreamObserver;
 import io.grpc.testing.GrpcCleanupRule;
-import org.junit.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.fail;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 
 public class SimulationTest extends TestFXBase {
-    @Rule
     public GrpcCleanupRule grpcCleanup = new GrpcCleanupRule();
     private final String serverName = InProcessServerBuilder.generateName();
 
     @Test
     public void testGetInitialStateHighlightsTheInitialLocation() {
         final List<Component> components = generateComponentsWithInitialLocations();
-        final SimulationHandler sh = new SimulationHandler();
 
         BindableService testService = new EcdarBackendGrpc.EcdarBackendImplBase() {
             @Override
@@ -81,9 +79,9 @@ public class SimulationTest extends TestFXBase {
 
             var result = stub.startSimulation(request).getState().getLocationsList().toArray();
 
-            Assert.assertArrayEquals(expectedResponse, result);
+            Assertions.assertArrayEquals(expectedResponse, result);
         } catch (IOException e) {
-            fail("Exception encountered: " + e.getMessage());
+            Assertions.fail("Exception encountered: " + e.getMessage());
         }
     }
 

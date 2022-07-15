@@ -3,16 +3,16 @@ package ecdar;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.testfx.api.FxToolkit;
 import org.testfx.framework.junit.ApplicationTest;
 
 import java.util.concurrent.TimeoutException;
 
 public class TestFXBase extends ApplicationTest {
-    @Before
-    public void setUpClass() throws Exception {
+    @BeforeAll
+    static void setUp() throws Exception {
         ApplicationTest.launch(Ecdar.class);
     }
 
@@ -21,7 +21,7 @@ public class TestFXBase extends ApplicationTest {
         stage.show();
     }
 
-    @After
+    @AfterAll
     public void afterEachTest() throws TimeoutException {
         FxToolkit.hideStage();
         release(new KeyCode[]{});
