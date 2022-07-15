@@ -48,21 +48,21 @@ public class Edge extends DisplayableEdge implements Serializable {
         deserialize(jsonObject, component);
         bindReachabilityAnalysis();
     }
-
-    public Edge(ComponentProtos.Edge protoBufEdge) {
-        setId(protoBufEdge.getId());
-        setSourceLocation(new Location(protoBufEdge.getSourceLocation()));
-        setTargetLocation(new Location(protoBufEdge.getTargetLocation()));
-        setStatus(protoBufEdge.getStatus().equals("INPUT") ? EdgeStatus.INPUT : EdgeStatus.OUTPUT);
-        setSelect(protoBufEdge.getSelect());
-        setGuard(protoBufEdge.getGuard());
-        setUpdate(protoBufEdge.getUpdate());
-        setSync(protoBufEdge.getSync());
-
-        for (ComponentProtos.Nail protoBufNail : protoBufEdge.getNailList()) {
-            getNails().add(new Nail(protoBufNail));
-        }
-    }
+    // ToDo NIELS: Comment in, when edges should be received through ProtoBuf
+//    public Edge(ComponentProtos.Edge protoBufEdge) {
+//        setId(protoBufEdge.getId());
+//        setSourceLocation(new Location(protoBufEdge.getSourceLocation()));
+//        setTargetLocation(new Location(protoBufEdge.getTargetLocation()));
+//        setStatus(protoBufEdge.getStatus().equals("INPUT") ? EdgeStatus.INPUT : EdgeStatus.OUTPUT);
+//        setSelect(protoBufEdge.getSelect());
+//        setGuard(protoBufEdge.getGuard());
+//        setUpdate(protoBufEdge.getUpdate());
+//        setSync(protoBufEdge.getSync());
+//
+//        for (ComponentProtos.Nail protoBufNail : protoBufEdge.getNailList()) {
+//            getNails().add(new Nail(protoBufNail));
+//        }
+//    }
 
     public String getSync() {
         return sync.get();
