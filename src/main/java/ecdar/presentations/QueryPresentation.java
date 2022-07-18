@@ -7,6 +7,7 @@ import ecdar.backend.*;
 import ecdar.controllers.QueryController;
 import ecdar.controllers.EcdarController;
 import ecdar.utility.colors.Color;
+import ecdar.utility.helpers.StringValidator;
 import javafx.application.Platform;
 import javafx.beans.binding.When;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -77,6 +78,14 @@ public class QueryPresentation extends HBox {
                     }
                 });
             }));
+
+            queryTextField.focusedProperty().addListener((observable, oldValue, newValue) -> {
+                if (!newValue && !StringValidator.validateQuery(queryTextField.getText())) {
+                    queryTextField.getStyleClass().add("input-violation");
+                } else {
+                    queryTextField.getStyleClass().remove("input-violation");
+                }
+            });
 
             commentTextField.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
         });
