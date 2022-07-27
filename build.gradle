@@ -87,7 +87,9 @@ dependencies {
 test {
     useJUnitPlatform { includeEngines 'junit-jupiter' }
 
+    // Properties needed for headless UI test execution
     systemProperty 'testfx.robot', 'glass'
+    systemProperty 'glass.platform', 'Monocle'
     systemProperty 'monocle.platform', 'Headless'
     systemProperty 'prism.order', 'sw'
     systemProperty 'testfx.setup.timeout', '2500'
