@@ -86,14 +86,6 @@ dependencies {
 test {
     useJUnitPlatform { includeEngines 'junit-jupiter' }
 
-    applicationDefaultJvmArgs = [
-            "-Dtestfx.robot=glass",
-            "-Dglass.platform=Monocle",
-            "-Dmonocle.platform=Headless",
-            "-Dprism.order=sw",
-            "-Dtestfx.setup.timeout=2500"
-    ]
-
     systemProperty 'java.awt.headless', 'true'
     systemProperty 'testfx.robot', 'glass'
     systemProperty 'testfx.headless', 'true'
