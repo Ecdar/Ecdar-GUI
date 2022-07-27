@@ -90,7 +90,8 @@ test {
             "-Dtestfx.robot=glass",
             "-Dglass.platform=Monocle",
             "-Dmonocle.platform=Headless",
-            "-Dprism.order=sw"
+            "-Dprism.order=sw",
+            "-Dtestfx.setup.timeout=2500"
     ]
 
     systemProperty 'java.awt.headless', 'true'
