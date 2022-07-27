@@ -19,6 +19,11 @@ if (project.hasProperty('ecdarVersion')) {
 
 mainClassName = 'ECDAR'
 
+applicationDefaultJvmArgs = [
+        "-Dprism.order=es2,es1,sw,j2d",
+        "-Dprism.verbose=true"
+]
+
 sourceCompatibility = JavaVersion.VERSION_11
 configurations.implementation.setCanBeResolved(true)
 
@@ -31,6 +36,10 @@ task fatJar(type: Jar) {
                 'Implementation-Version': version,
                 'Main-Class': mainClassName
     }
+    applicationDefaultJvmArgs = [
+            "-Dprism.order=es2,es1,sw,j2d",
+            "-Dprism.verbose=true"
+    ]
     baseName = project.name
     from { configurations.implementation.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar

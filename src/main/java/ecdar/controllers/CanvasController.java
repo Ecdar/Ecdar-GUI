@@ -164,7 +164,7 @@ public class CanvasController implements Initializable {
      */
     private void onActiveModelChanged(final HighLevelModelObject oldObject, final HighLevelModelObject newObject) {
         // If old object is a component or system, add to map in order to remember coordinate
-        if (oldObject != null && (oldObject instanceof Component || oldObject instanceof EcdarSystem)) {
+        if (oldObject instanceof Component || oldObject instanceof EcdarSystem) {
             ModelObjectTranslateMap.put(oldObject, new Pair<>(modelPane.getTranslateX(), modelPane.getTranslateY()));
         }
 
