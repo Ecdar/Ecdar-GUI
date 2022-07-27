@@ -4,17 +4,14 @@ import org.junit.jupiter.api.Test;
 import org.testfx.util.NodeQueryUtils;
 import org.testfx.util.WaitForAsyncUtils;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
 import static org.testfx.api.FxAssert.verifyThat;
 
 public class MenuBarTest extends TestFXBase {
     @Test
-    public void gridMenuItemHidesGrid() throws TimeoutException {
+    public void gridMenuItemHidesGrid() {
         clickOn("View");
-        WaitForAsyncUtils.waitFor(2, TimeUnit.SECONDS, () ->
-                lookup("#menuBarViewGrid").match(NodeQueryUtils.isVisible()).tryQuery().isPresent());
+        WaitForAsyncUtils.waitForFxEvents(2);
+        assert lookup("#menuBarViewGrid").match(NodeQueryUtils.isVisible()).tryQuery().isPresent();
         clickOn("#menuBarViewGrid");
 
         verifyThat(lookup("#grid"), g -> g.getOpacity() == 0);
