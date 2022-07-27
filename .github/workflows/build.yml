@@ -31,4 +31,5 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       uses: GabrielBB/xvfb-action@v1
-      run: ./gradlew -Djava.awt.headless=true -Dtestfx.robot=glass -Dtestfx.headless=true -Dprism.order=sw build
+      with:
+        run: ./gradlew -Djava.awt.headless=true -Dtestfx.robot=glass -Dtestfx.headless=true -Dprism.order=sw build
