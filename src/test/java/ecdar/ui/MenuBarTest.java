@@ -13,7 +13,7 @@ public class MenuBarTest extends TestFXBase {
     @Test
     public void gridMenuItemHidesGrid() throws TimeoutException {
         clickOn("View");
-        WaitForAsyncUtils.waitFor(2, TimeUnit.SECONDS, () ->
+        WaitForAsyncUtils.waitFor(20, TimeUnit.SECONDS, () ->
                 lookup("#menuBarViewGrid").match(NodeQueryUtils.isVisible()).tryQuery().isPresent());
         clickOn("#menuBarViewGrid");
 
