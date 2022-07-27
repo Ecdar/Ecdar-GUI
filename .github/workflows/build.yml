@@ -30,4 +30,5 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
-      run: xvfb-run --server-args="-screen 0 800x500x24+32" ./gradlew -Dtestfx.robot=glass -Dtestfx.headless=true -Dprism.order=sw -Dprism.text=t2k -Djava.awt.headless=true build
+      uses: GabrielBB/xvfb-action@v1
+      run: ./gradlew -Djava.awt.headless=true -Dtestfx.robot=glass -Dtestfx.headless=true -Dprism.order=sw build
