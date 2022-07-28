@@ -9,9 +9,10 @@ public class MenuBarTest extends TestFXBase {
     @Test
     public void gridMenuItemHidesGrid() {
         clickOn("View");
-        WaitForAsyncUtils.waitForFxEvents(3);
+        WaitForAsyncUtils.waitForFxEvents();
         clickOn("#menuBarViewGrid");
 
         verifyThat(lookup("#grid"), g -> g.getOpacity() == 0);
     }
+
 }
