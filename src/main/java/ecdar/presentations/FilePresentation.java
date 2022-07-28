@@ -157,7 +157,7 @@ public class FilePresentation extends AnchorPane {
         } else {
             controller.fileImage.setImage(new Image(Ecdar.class.getResource("description_frame.png").toExternalForm()));
         }
-        EcdarPresentation.fitSizeWhenAvailable(controller.fileImage, controller.filePane);
+        EcdarPresentation.fitSizeWhenAvailable(controller.fileImage, controller.fileImageStackPane);
     }
 
     public HighLevelModelObject getModel() {

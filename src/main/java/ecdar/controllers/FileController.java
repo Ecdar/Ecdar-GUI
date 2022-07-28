@@ -14,7 +14,7 @@ import java.util.ResourceBundle;
 public class FileController implements Initializable {
     public JFXRippler moreInformation;
     public ImageView fileImage;
-    public StackPane filePane;
+    public StackPane fileImageStackPane;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
