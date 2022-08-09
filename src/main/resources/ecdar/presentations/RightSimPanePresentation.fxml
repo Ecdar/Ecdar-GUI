@@ -17,7 +17,7 @@
                     AnchorPane.rightAnchor="0"
                     styleClass="edge-to-edge">
             <VBox fx:id="scrollPaneVbox" >
-                <!-- ToDo NIELS: Figure out whether clock bounds should go here, instead of: <QueryPaneElementPresentation fx:id="queryPaneElement"/>-->
+                <!-- ToDo NIELS: Previously contained <QueryPaneElementPresentation fx:id="queryPaneElement"/>, i.e. queries identical to the editor, should now contain the queries, but maybe in a different format -->
             </VBox>
         </ScrollPane>
     </AnchorPane>
