@@ -51,6 +51,7 @@ public class Ecdar extends Application {
     private static Project project;
     private static EcdarPresentation presentation;
     private static BooleanProperty isUICached = new SimpleBooleanProperty();
+    public static BooleanProperty shouldRunBackgroundQueries = new SimpleBooleanProperty(true);
     private static final BooleanProperty isSplit = new SimpleBooleanProperty(true); //Set to true to ensure correct behaviour at first toggle.
     private static final BackendDriver backendDriver = new BackendDriver();
     private Stage debugStage;
@@ -147,8 +148,17 @@ public class Ecdar extends Application {
      */
     public static BooleanProperty toggleUICache() {
         isUICached.set(!isUICached.get());
-
         return isUICached;
+    }
+
+    /**
+     * Toggles whether checks are run in the background.
+     * Running checks in the background increases CPU usage and power consumption.
+     * @return the property specifying whether to run checks in the background
+     */
+    public static BooleanProperty toggleRunBackgroundQueries() {
+        shouldRunBackgroundQueries.set(!shouldRunBackgroundQueries.get());
+        return shouldRunBackgroundQueries;
     }
 
     public static BooleanProperty toggleQueryPane() {

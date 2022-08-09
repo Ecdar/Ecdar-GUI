@@ -18,7 +18,7 @@
             <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
                 <StackPane  style="-fx-padding: 0em 1em 0em 1em;">
                     <Circle id="iconBackground" radius="1.25" styleClass="responsive-circle-radius"/>
-                    <StackPane fx:id="filePane" styleClass="responsive-small-image-sizing">
+                    <StackPane fx:id="fileImageStackPane" styleClass="responsive-small-image-sizing">
                         <ImageView fx:id="fileImage"/>
                     </StackPane>
                 </StackPane>
