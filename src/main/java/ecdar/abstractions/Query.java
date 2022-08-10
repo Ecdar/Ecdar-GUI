@@ -3,6 +3,7 @@ package ecdar.abstractions;
 import ecdar.Ecdar;
 import ecdar.backend.*;
 import ecdar.controllers.EcdarController;
+import ecdar.utility.helpers.StringValidator;
 import ecdar.utility.serialize.Serializable;
 import com.google.gson.JsonObject;
 import javafx.application.Platform;
@@ -30,7 +31,7 @@ public class Query implements Serializable {
     private final StringProperty errors = new SimpleStringProperty("");
     private final ObjectProperty<QueryType> type = new SimpleObjectProperty<>();
     private BackendInstance backend;
-    private Consumer<Boolean> runQuery;
+    private Runnable runQuery;
 
     public Query(final String query, final String comment, final QueryState queryState) {
         this.query.set(query);
@@ -120,21 +121,9 @@ public class Query implements Serializable {
     private Boolean forcedCancel = false;
 
     private void initializeRunQuery() {
-        runQuery = (buildEcdarDocument) -> {
+        runQuery = () -> {
             setQueryState(QueryState.RUNNING);
             forcedCancel = false;
-
-            if (buildEcdarDocument) {
-                try {
-                    BackendHelper.buildEcdarDocument();
-                } catch (final BackendException e) {
-                    Ecdar.showToast("Could not build XML document. I got the error: " + e.getMessage());
-                    setQueryState(QueryState.SYNTAX_ERROR);
-                    e.printStackTrace();
-                    return;
-                }
-            }
-
             errors.set("");
             
             if (getQuery().isEmpty()) {
@@ -240,11 +229,7 @@ public class Query implements Serializable {
     }
 
     public void run() {
-        run(true);
-    }
-
-    public void run(final boolean buildEcdarDocument) {
-        runQuery.accept(buildEcdarDocument);
+        if (StringValidator.validateQuery(query.get())) runQuery.run();
     }
 
     public void cancel() {

@@ -1,6 +1,9 @@
 package ecdar.presentations;
 
+import ecdar.controllers.EcdarController;
 import javafx.application.Platform;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.Parent;
 import javafx.scene.shape.Line;
 
@@ -12,84 +15,66 @@ public class Grid extends Parent {
     public static final double TOOL_BAR_HEIGHT = CORNER_SIZE * 0.5;
     private final ArrayList<Line> horizontalLines = new ArrayList<>();
     private final ArrayList<Line> verticalLines = new ArrayList<>();
+    private final DoubleProperty width = new SimpleDoubleProperty();
+    private final DoubleProperty height = new SimpleDoubleProperty();
 
     public Grid() {
-        setTranslateX(GRID_SIZE * 0.5);
-        setTranslateY(GRID_SIZE * 0.5);
-
-        // When the scene changes (goes from null to something) set update the grid
+        // Update grid when scene size changes
         sceneProperty().addListener((observable, oldValue, newValue) -> {
-            if(newValue != null) {
-                updateGrid(1);
+            if (newValue != null) {
                 Platform.runLater(() -> {
-                    newValue.widthProperty().addListener((observable1 -> this.updateGrid(getScaleX())));
-                    newValue.heightProperty().addListener((observable1 -> this.updateGrid(getScaleY())));
+                    newValue.widthProperty().addListener(observable1 -> updateGrid());
+                    newValue.heightProperty().addListener(observable1 -> updateGrid());
                 });
             }
         });
+
+        Platform.runLater(() -> {
+            // Update grid when scaling/zoom is changed
+            this.scaleXProperty().addListener(observable -> updateGrid());
+            setTranslateX(GRID_SIZE * 0.5);
+        });
+
+        updateGrid();
     }
 
     /**
      * Snap to the grid.
+     *
      * @param raw the raw value
      * @return the value after being snapped
      */
     public static double snap(final double raw) {
-        return Math.round(raw / GRID_SIZE) * GRID_SIZE;
-    }
-
-    /**
-     * Moved the grid in the opposite direction of the oldValue - newValue change in relation to the scale
-     * @param oldValue the start position of the translation
-     * @param newValue the end position of the translation
-     * @param scale the scale in which to move the grid
-     */
-    public void handleTranslateX(double oldValue, double newValue, double scale) {
-        //Move the grid in the opposite direction of the canvas drag, to keep its location on screen
-        this.setTranslateX(this.getTranslateX() - (newValue - oldValue) / scale);
-    }
-
-    /**
-     * Moved the grid in the opposite direction of the oldValue - newValue change in relation to the scale
-     * @param oldValue the start position of the translation
-     * @param newValue the end position of the translation
-     * @param scale the scale in which to move the grid
-     */
-    public void handleTranslateY(double oldValue, double newValue, double scale) {
-        //Move the grid in the opposite direction of the canvas drag, to keep its location on screen
-        this.setTranslateY(this.getTranslateY() - (newValue - oldValue) / scale);
+        return raw - raw % (GRID_SIZE * EcdarController.getActiveCanvasZoomFactor().get());
     }
 
     /**
      * Redraw the grid in center of the screen
-     * @param zoomLevel the scale in which to draw the grid
      */
-    public void updateGrid(double zoomLevel) {
-        // The given size of the canvas divided by the given zoomLevel (multiplied by 6 to ensure that the grid covers the full canvas)
-        double screenWidth = (int) Grid.snap(((CanvasShellPresentation) getParent().getParent()).getWidth() / zoomLevel * 6);
-        double screenHeight = (int) Grid.snap(((CanvasShellPresentation) getParent().getParent()).getHeight() / zoomLevel * 6);
-
-        if (this.getTranslateX() != Grid.snap(this.getTranslateX())) {
-            this.setTranslateX(Grid.snap(this.getTranslateX()) + GRID_SIZE * 0.5);
+    public void updateGrid() {
+        // Remove old vertical lines
+        while (!verticalLines.isEmpty()) {
+            final Line removeLine = verticalLines.get(0);
+            getChildren().remove(removeLine);
+            verticalLines.remove(removeLine);
         }
 
-        if (this.getTranslateY() != Grid.snap(this.getTranslateY())) {
-            this.setTranslateY(Grid.snap(this.getTranslateY()) + GRID_SIZE * 0.5);
+        // Remove old horizontal lines
+        while (!horizontalLines.isEmpty()) {
+            final Line removeLine = horizontalLines.get(0);
+            getChildren().remove(removeLine);
+            horizontalLines.remove(removeLine);
         }
 
         Platform.runLater(() -> {
-            // Remove old vertical lines
-            while (!verticalLines.isEmpty()) {
-                final Line removeLine = verticalLines.get(0);
-                getChildren().remove(removeLine);
-                verticalLines.remove(removeLine);
-            }
+            int scaledWidth = (int) snap(width.get() / getScaleX());
+            int scaledHeight = (int) snap(height.get() / getScaleY());
 
             // Add new vertical lines to cover the screen at the current zoom level
-            int i = (int) -screenHeight / (GRID_SIZE * 4);
-            int numberOfLine = (int) screenWidth / GRID_SIZE;
+            int i = -scaledWidth / GRID_SIZE;
+            int numberOfLine = scaledWidth / GRID_SIZE;
             while (i < numberOfLine) {
-                Line line = new Line(i * GRID_SIZE, -screenHeight, i * GRID_SIZE, screenHeight);
+                Line line = new Line(i * GRID_SIZE, -scaledHeight, i * GRID_SIZE, scaledHeight);
                 line.getStyleClass().add("grid-line");
 
                 verticalLines.add(line);
@@ -97,18 +82,11 @@ public class Grid extends Parent {
                 i++;
             }
 
-            // Remove old horizontal lines
-            while (!horizontalLines.isEmpty()) {
-                final Line removeLine = horizontalLines.get(0);
-                getChildren().remove(removeLine);
-                horizontalLines.remove(removeLine);
-            }
-
             // Add new horizontal lines to cover the screen at the current zoom level
-            i = (int) -screenHeight / (GRID_SIZE * 4);
-            numberOfLine = (int) screenHeight / GRID_SIZE;
+            i = -scaledHeight / GRID_SIZE;
+            numberOfLine = scaledHeight / GRID_SIZE;
             while (i < numberOfLine) {
-                Line line = new Line(-screenWidth, i * GRID_SIZE, screenWidth, i * GRID_SIZE);
+                Line line = new Line(-scaledWidth, i * GRID_SIZE, scaledWidth, i * GRID_SIZE);
                 line.getStyleClass().add("grid-line");
 
                 horizontalLines.add(line);
@@ -116,5 +94,10 @@ public class Grid extends Parent {
                 i++;
             }
         });
+    }
+
+    public void bindSize(DoubleProperty width, DoubleProperty height) {
+        this.width.bind(width);
+        this.height.bind(height);
     }
 }

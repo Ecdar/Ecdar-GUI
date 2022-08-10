@@ -134,96 +134,86 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
     }
 
     /**
-     * Generates a test-case.
+     * Generates a test-case. ToDo: Reimplement for new engines, kept for future reference
      *
      * @param testCase potential test-case containing the test model, the mutant, and an id
      * @param tries    number of tries with empty response from the backend before giving up
      */
     private void generateTestCase(final MutationTestCase testCase, final int tries) {
-        final Component mutant = testCase.getMutant();
-
-        // Make a project with the test model and the mutant
-        final Project project = new Project();
-        mutant.setName(MutationTestPlanController.MUTANT_NAME);
-        project.getComponents().addAll(testModel, mutant);
-        project.setGlobalDeclarations(Ecdar.getProject().getGlobalDeclarations());
-        mutant.updateIOList(); // Update io in order to get the right system declarations for the mutant
-
-        new Thread(() -> {
-            try {
-                // Store the project and the refinement query as backend XML
-                final String modelPath;
-                try {
-                    modelPath = BackendHelper.storeBackendModel(project, testCase.getId());
-                } catch (IOException | BackendException | URISyntaxException e) {
-                    throw new MutationTestingException("Error while storing backend model", e);
-                }
-
-                List<String> lines = getProcessInputLines(startProcessToFetchStrategy(modelPath));
-
-                // If refinement, no test-case to generate.
-                // ToDo (Might not be an issue after switching away from verifytga):
-                // I use endsWith rather than contains,
-                // since verifytga sometimes output some weird symbols at the start of this line.
-                if (lines.stream().anyMatch(line -> line.endsWith(" -- Property is satisfied."))) {
-                    Platform.runLater(this::onGenerationJobDone);
-                    return;
-                }
-
-                // ToDo (Might not be an issue after switching away from verifytga):
-                // Verifytga should output that the property is not satisfied
-                // If it does not, then this is an error
-                if (lines.stream().noneMatch(line -> line.endsWith(" -- Property is NOT satisfied."))) {
-                    if (lines.isEmpty()) {
-                        if (tries > 1) {
-                            final int newTries = tries - 1;
-                            Ecdar.showToast("Empty response from backend with " + testCase.getId() +
-                                    ". We will try again. " + newTries + " tr" + (newTries == 1 ? "y" : "ies") +
-                                    " left.");
-                            generateTestCase(testCase, tries - 1);
-                            return;
-                        } else {
-                            throw new MutationTestingException("Output from backend is empty. Model: " + modelPath);
-                        }
-                    }
-
-                    throw new MutationTestingException("Output from backend not understood: " + String.join("\n", lines) + "\n" +
-                            "Model: " + modelPath);
-                }
-
-                int strategyIndex = lines.indexOf("Strategy for the attacker:");
-
-                // If no such index, error
-                if (strategyIndex < 0) {
-                    throw new MutationTestingException("Output from backend not understood: " + String.join("\n", lines) + "\n" +
-                            "Model: " + modelPath);
-                }
-
-                testCase.setStrategy(new NonRefinementStrategy(lines.subList(strategyIndex + 2, lines.size())));
-
-                finishedTestCases.add(testCase);
-            } catch (MutationTestingException | IOException | BackendException e) {
-                e.printStackTrace();
-
-                // Only show error if the process is not already being stopped
-                if (getPlan().getStatus().equals(MutationTestPlan.Status.WORKING)) {
-                    getPlan().setStatus(MutationTestPlan.Status.ERROR);
-                    Platform.runLater(() -> {
-                        final String message = "Error while generating test-case " + testCase.getId() + ": " + e.getMessage();
-                        final Text text = new Text(message);
-                        text.setFill(Color.RED);
-                        getPlan().writeProgress(text);
-                        Ecdar.showToast(message);
-                    });
-                }
-
-                jobsDriver.onJobDone();
-                return;
-            }
-
-            // JavaFX elements cannot be updated in another thread, so make it run in a JavaFX thread at some point
-            Platform.runLater(this::onGenerationJobDone);
-        }).start();
+//        final Component mutant = testCase.getMutant();
+//
+//        // Make a project with the test model and the mutant
+//        final Project project = new Project();
+//        mutant.setName(MutationTestPlanController.MUTANT_NAME);
+//        project.getComponents().addAll(testModel, mutant);
+//        project.setGlobalDeclarations(Ecdar.getProject().getGlobalDeclarations());
+//        mutant.updateIOList(); // Update io in order to get the right system declarations for the mutant
+//
+//        new Thread(() -> {
+//            try {
+//                // If refinement, no test-case to generate.
+//                // ToDo (Might not be an issue after switching away from verifytga):
+//                // I use endsWith rather than contains,
+//                // since verifytga sometimes output some weird symbols at the start of this line.
+//                if (lines.stream().anyMatch(line -> line.endsWith(" -- Property is satisfied."))) {
+//                    Platform.runLater(this::onGenerationJobDone);
+//                    return;
+//                }
+//
+//                // ToDo (Might not be an issue after switching away from verifytga):
+//                // Verifytga should output that the property is not satisfied
+//                // If it does not, then this is an error
+//                if (lines.stream().noneMatch(line -> line.endsWith(" -- Property is NOT satisfied."))) {
+//                    if (lines.isEmpty()) {
+//                        if (tries > 1) {
+//                            final int newTries = tries - 1;
+//                            Ecdar.showToast("Empty response from backend with " + testCase.getId() +
+//                                    ". We will try again. " + newTries + " tr" + (newTries == 1 ? "y" : "ies") +
+//                                    " left.");
+//                            generateTestCase(testCase, tries - 1);
+//                            return;
+//                        } else {
+//                            throw new MutationTestingException("Output from backend is empty. Model: " + modelPath);
+//                        }
+//                    }
+//
+//                    throw new MutationTestingException("Output from backend not understood: " + String.join("\n", lines) + "\n" +
+//                            "Model: " + modelPath);
+//                }
+//
+//                int strategyIndex = lines.indexOf("Strategy for the attacker:");
+//
+//                // If no such index, error
+//                if (strategyIndex < 0) {
+//                    throw new MutationTestingException("Output from backend not understood: " + String.join("\n", lines) + "\n" +
+//                            "Model: " + modelPath);
+//                }
+//
+//                testCase.setStrategy(new NonRefinementStrategy(lines.subList(strategyIndex + 2, lines.size())));
+//
+//                finishedTestCases.add(testCase);
+//            } catch (MutationTestingException | IOException | BackendException e) {
+//                e.printStackTrace();
+//
+//                // Only show error if the process is not already being stopped
+//                if (getPlan().getStatus().equals(MutationTestPlan.Status.WORKING)) {
+//                    getPlan().setStatus(MutationTestPlan.Status.ERROR);
+//                    Platform.runLater(() -> {
+//                        final String message = "Error while generating test-case " + testCase.getId() + ": " + e.getMessage();
+//                        final Text text = new Text(message);
+//                        text.setFill(Color.RED);
+//                        getPlan().writeProgress(text);
+//                        Ecdar.showToast(message);
+//                    });
+//                }
+//
+//                jobsDriver.onJobDone();
+//                return;
+//            }
+//
+//            // JavaFX elements cannot be updated in another thread, so make it run in a JavaFX thread at some point
+//            Platform.runLater(this::onGenerationJobDone);
+//        }).start();
     }
 
     /**

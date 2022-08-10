@@ -4,7 +4,6 @@ import ecdar.controllers.EcdarController;
 import ecdar.model_canvas.arrow_heads.ArrowHead;
 import ecdar.model_canvas.arrow_heads.ChannelReceiverArrowHead;
 import ecdar.model_canvas.arrow_heads.ChannelSenderArrowHead;
-import ecdar.presentations.CanvasPresentation;
 import ecdar.presentations.Link;
 import ecdar.presentations.TagPresentation;
 import ecdar.utility.mouse.MouseTracker;

@@ -1,0 +1,26 @@
+[
+  {
+    "query": "reachability: Receiver.L4",
+    "comment": "",
+    "isPeriodic": false,
+    "ignoredInputs": {},
+    "ignoredOutputs": {},
+    "backend": "Reveaal"
+  },
+  {
+    "query": "specification: Sender",
+    "comment": "",
+    "isPeriodic": false,
+    "ignoredInputs": {},
+    "ignoredOutputs": {},
+    "backend": "Reveaal"
+  },
+  {
+    "query": "implementation: Sender",
+    "comment": "",
+    "isPeriodic": false,
+    "ignoredInputs": {},
+    "ignoredOutputs": {},
+    "backend": "Reveaal"
+  }
+]

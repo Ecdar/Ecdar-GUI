@@ -1,11 +1,13 @@
 package ecdar.presentations;
 
+import ecdar.Ecdar;
 import ecdar.abstractions.Box;
 import ecdar.abstractions.HighLevelModelObject;
 import ecdar.controllers.EcdarController;
 import ecdar.controllers.ModelController;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
+import ecdar.utility.helpers.StringValidator;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -40,6 +42,7 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
         initializeDimensions(box);
         initializesBottomDragAnchor(box);
         initializesRightDragAnchor(box);
+        initializesCornerDragAnchor(box);
     }
 
     /**
@@ -61,8 +64,13 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
         // Set the text field to the name in the model, and bind the model to the text field
         controller.name.setText(model.getName());
         controller.name.textProperty().addListener((obs, oldName, newName) -> {
-            model.nameProperty().unbind();
-            model.setName(newName);
+            if (StringValidator.validateComponentName(newName)) {
+                model.nameProperty().unbind();
+                model.setName(newName);
+            } else {
+                controller.name.setText(model.getName());
+                Ecdar.showToast("Component names cannot contain '.'");
+            }
         });
 
         final Runnable updateColor = () -> {
@@ -142,6 +150,9 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
 
             final double newWidth = prevWidth.get() + diff;
             final double minWidth = getDragAnchorMinWidth();
+
+            // Move the model left or right to account for new height (needed because model is centered in parent)
+            setTranslateX(getTranslateX() + (Math.max(newWidth, minWidth) - box.getWidth()) / 2);
             box.setWidth(Math.max(newWidth, minWidth));
             wasResized.set(true);
         });
@@ -199,6 +210,8 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
             final double newHeight = prevHeight.get() + diff;
             final double minHeight = getDragAnchorMinHeight();
 
+            // Move the model up or down to account for new height (needed because model is centered in parent)
+            setTranslateY(getTranslateY() + (Math.max(newHeight, minHeight) - box.getHeight()) / 2);
             box.setHeight(Math.max(newHeight, minHeight));
             wasResized.set(true);
         });
@@ -217,6 +230,71 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
                         box.setHeight(previousHeight);
                     },
                     "Component height resized",
+                    "settings-overscan"
+            );
+
+            wasResized.set(false);
+        });
+    }
+
+    private void initializesCornerDragAnchor(final Box box) {
+        final BooleanProperty wasResized = new SimpleBooleanProperty(false);
+
+        final Rectangle cornerAnchor = getModelController().cornerAnchor;
+        cornerAnchor.setCursor(Cursor.SE_RESIZE);
+
+        // Bind the place and size of bottom anchor
+        cornerAnchor.setWidth(10);
+        cornerAnchor.setHeight(10);
+
+        final DoubleProperty prevX = new SimpleDoubleProperty();
+        final DoubleProperty prevY = new SimpleDoubleProperty();
+        final DoubleProperty prevWidth = new SimpleDoubleProperty();
+        final DoubleProperty prevHeight = new SimpleDoubleProperty();
+
+        cornerAnchor.setOnMousePressed(event -> {
+            event.consume();
+
+            prevX.set(event.getScreenX());
+            prevWidth.set(box.getWidth());
+            prevY.set(event.getScreenY());
+            prevHeight.set(box.getHeight());
+        });
+
+        cornerAnchor.setOnMouseDragged(event -> {
+            double xDiff = (event.getScreenX() - prevX.get()) / EcdarController.getActiveCanvasZoomFactor().get();
+            xDiff -= xDiff % Grid.GRID_SIZE;
+
+            final double newWidth = Math.max(prevWidth.get() + xDiff, getDragAnchorMinWidth());
+            box.setWidth(newWidth);
+
+            double yDiff = (event.getScreenY() - prevY.get()) / EcdarController.getActiveCanvasZoomFactor().get();
+            yDiff -= yDiff % Grid.GRID_SIZE;
+
+            final double newHeight = Math.max(prevHeight.get() + yDiff, getDragAnchorMinHeight());
+            box.setHeight(newHeight);
+
+            wasResized.set(true);
+        });
+
+        cornerAnchor.setOnMouseReleased(event -> {
+            if (!wasResized.get()) return;
+            final double previousWidth = prevWidth.doubleValue();
+            final double currentWidth = box.getWidth();
+            final double previousHeight = prevHeight.doubleValue();
+            final double currentHeight = box.getHeight();
+
+            // If no difference do not save change
+            if (previousWidth == currentWidth && previousHeight == currentHeight) return;
+
+            UndoRedoStack.pushAndPerform(() -> { // Perform
+                        box.setWidth(currentWidth);
+                        box.setHeight(currentHeight);
+                    }, () -> { // Undo
+                        box.setWidth(previousWidth);
+                        box.setHeight(previousHeight);
+                    },
+                    "Component resized",
                     "settings-overscan"
             );
 

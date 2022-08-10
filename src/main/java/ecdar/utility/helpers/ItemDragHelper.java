@@ -1,8 +1,10 @@
 package ecdar.utility.helpers;
 
 import ecdar.controllers.EcdarController;
+import ecdar.controllers.EdgeController;
 import ecdar.presentations.ComponentOperatorPresentation;
 import ecdar.presentations.ComponentPresentation;
+import ecdar.presentations.Grid;
 import ecdar.utility.UndoRedoStack;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
@@ -83,34 +85,34 @@ public class ItemDragHelper {
         private double trim(final double v, final double min, final double max) {
             if(v < min) {
                 return min;
-            } else if(v > max) {
-                return max;
-            } else {
-                return v;
-            }
+            } else return Math.min(v, max);
         }
 
     }
 
     public static void makeDraggable(final Node mouseSubject,
                                      final Supplier<DragBounds> getDragBounds) {
-        final DoubleProperty mouseSubjectPreviousX = new SimpleDoubleProperty();
-        final DoubleProperty mouseSubjectPreviousY = new SimpleDoubleProperty();
+        makeDraggable(mouseSubject, mouseSubject, getDragBounds);
+    }
+
+    public static void makeDraggable(final Node mouseSubject, final Node draggable,
+                                     final Supplier<DragBounds> getDragBounds) {
+        final DoubleProperty draggablePreviousX = new SimpleDoubleProperty();
+        final DoubleProperty draggablePreviousY = new SimpleDoubleProperty();
+        final DoubleProperty dragOffsetX = new SimpleDoubleProperty();
+        final DoubleProperty dragOffsetY = new SimpleDoubleProperty();
         final BooleanProperty wasDragged = new SimpleBooleanProperty();
 
         final ArrayList<Pair<Double, Double>> previousLocations = new ArrayList<>();
 
-        final DoubleProperty xDiff = new SimpleDoubleProperty();
-        final DoubleProperty yDiff = new SimpleDoubleProperty();
-
         mouseSubject.addEventHandler(MouseEvent.MOUSE_PRESSED, event -> {
             if(!event.isPrimaryButtonDown()) return;
             event.consume();
-            
-            mouseSubjectPreviousX.set(mouseSubject.getLayoutX());
-            mouseSubjectPreviousY.set(mouseSubject.getLayoutY());
-            xDiff.set(event.getX());
-            yDiff.set(event.getY());
+
+            draggablePreviousX.set(draggable.getLayoutX());
+            draggablePreviousY.set(draggable.getLayoutY());
+            dragOffsetX.set(event.getSceneX());
+            dragOffsetY.set(event.getSceneY());
 
             previousLocations.clear();
 
@@ -125,48 +127,31 @@ public class ItemDragHelper {
 
             final DragBounds dragBounds = getDragBounds.get();
 
-            final double mouseSubjectNewX = EcdarController.getActiveCanvasPresentation().mouseTracker.getGridX() - ((Boxed) EcdarController.getActiveCanvasPresentation().getController().getActiveModel()).getBox().getX();
-            final double mouseSubjectNewY = EcdarController.getActiveCanvasPresentation().mouseTracker.getGridY() - ((Boxed) EcdarController.getActiveCanvasPresentation().getController().getActiveModel()).getBox().getY();
+            final double dragDistanceX = Grid.snap(event.getSceneX() - dragOffsetX.get()) / EcdarController.getActiveCanvasZoomFactor().get();
+            final double dragDistanceY = Grid.snap(event.getSceneY() - dragOffsetY.get()) / EcdarController.getActiveCanvasZoomFactor().get();
+            double draggableNewX = dragBounds.trimX(draggablePreviousX.get() + dragDistanceX);
+            double draggableNewY = dragBounds.trimY(draggablePreviousY.get() + dragDistanceY);
 
-            final double unRoundedX = dragBounds.trimX(mouseSubjectNewX - xDiff.get());
-            final double unRoundedY = dragBounds.trimY(mouseSubjectNewY - yDiff.get());
-            double mouseSubjectFinalNewX = unRoundedX - unRoundedX % GRID_SIZE;
-            double mouseSubjectFinalNewY = unRoundedY - unRoundedY % GRID_SIZE;
-
-            if (mouseSubject instanceof ComponentPresentation) {
-                mouseSubjectFinalNewX -= 0.5 * GRID_SIZE;
-                mouseSubjectFinalNewY -= 0.5 * GRID_SIZE;
-            }
-
-            mouseSubject.setLayoutX(mouseSubjectFinalNewX);
-            mouseSubject.setLayoutY(mouseSubjectFinalNewY);
+            draggable.setLayoutX(draggableNewX);
+            draggable.setLayoutY(draggableNewY);
 
             int numberOfSelectedItems = SelectHelper.getSelectedElements().size();
 
             for (int i = 0; i < numberOfSelectedItems; i++) {
                 SelectHelper.ItemSelectable item = SelectHelper.getSelectedElements().get(i);
+                if (item instanceof EdgeController) continue;
 
                 if (!item.equals(mouseSubject)) {
-                    final double itemNewX = previousLocations.get(i).getKey() + mouseSubjectFinalNewX - mouseSubjectPreviousX.doubleValue();
-                    final double itemNewY = previousLocations.get(i).getValue() + mouseSubjectFinalNewY - mouseSubjectPreviousY.doubleValue();
-
-                    final double itemUnRoundedX = dragBounds.trimX(itemNewX);
-                    final double itemUnRoundedY = dragBounds.trimY(itemNewY);
-                    double itemFinalNewX = itemUnRoundedX - itemUnRoundedX % GRID_SIZE;
-                    double itemFinalNewY = itemUnRoundedY - itemUnRoundedY % GRID_SIZE;
-
-                    if (item instanceof ComponentPresentation) {
-                        itemFinalNewX -= 0.5 * GRID_SIZE;
-                        itemFinalNewY -= 0.5 * GRID_SIZE;
-                    }
+                    final double itemNewX = dragBounds.trimX(previousLocations.get(i).getKey() + dragDistanceX);
+                    final double itemNewY = dragBounds.trimY(previousLocations.get(i).getValue() + dragDistanceY);
 
                     // The x and y properties of any ComponentOperatorPresentation is bound and must therefore be set this way instead
                     if (item instanceof ComponentOperatorPresentation) {
-                        ((ComponentOperatorPresentation) item).layoutXProperty().set(itemFinalNewX);
-                        ((ComponentOperatorPresentation) item).layoutYProperty().set(itemFinalNewY);
+                        ((ComponentOperatorPresentation) item).layoutXProperty().set(item.getDragBounds().trimX(itemNewX));
+                        ((ComponentOperatorPresentation) item).layoutYProperty().set(item.getDragBounds().trimY(itemNewY));
                     } else {
-                        item.xProperty().set(itemFinalNewX);
-                        item.yProperty().set(itemFinalNewY);
+                        item.xProperty().set(item.getDragBounds().trimX(itemNewX));
+                        item.yProperty().set(item.getDragBounds().trimY(itemNewY));
                     }
                 }
             }
@@ -175,10 +160,11 @@ public class ItemDragHelper {
         });
 
         mouseSubject.addEventHandler(MouseEvent.MOUSE_RELEASED, event -> {
-            final double mouseSubjectCurrentX = mouseSubject.getLayoutX();
-            final double mouseSubjectCurrentY = mouseSubject.getLayoutY();
-            final double mouseSubjectFinalPreviousX = mouseSubjectPreviousX.get();
-            final double mouseSubjectFinalPreviousY = mouseSubjectPreviousY.get();
+            event.consume();
+            final double draggableCurrentX = draggable.getLayoutX();
+            final double draggableCurrentY = draggable.getLayoutY();
+            final double previousX = draggablePreviousX.get();
+            final double previousY = draggablePreviousY.get();
 
             // Copying the coordinates and selected items is necessary for the undo/redo stack to function properly
             final ArrayList<SelectHelper.ItemSelectable> selectedItems = new ArrayList<>(SelectHelper.getSelectedElements());
@@ -188,15 +174,15 @@ public class ItemDragHelper {
             }
             final ArrayList<Pair<Double, Double>> savedLocations = new ArrayList<>(previousLocations);
 
-            if(mouseSubjectCurrentX != mouseSubjectFinalPreviousX || mouseSubjectCurrentY != mouseSubjectFinalPreviousY) {
+            if(draggableCurrentX != previousX || draggableCurrentY != previousY) {
                 UndoRedoStack.pushAndPerform(
                         () -> {
-                            placeSelectedItems(mouseSubject, mouseSubjectCurrentX, mouseSubjectCurrentY, currentLocations, selectedItems);
+                            placeSelectedItems(mouseSubject, draggableCurrentX, draggableCurrentY, currentLocations, selectedItems);
                         },
                         () -> {
-                            placeSelectedItems(mouseSubject, mouseSubjectFinalPreviousX, mouseSubjectFinalPreviousY, savedLocations, selectedItems);
+                            placeSelectedItems(mouseSubject, previousX, previousY, savedLocations, selectedItems);
                         },
-                        String.format("Moved " + mouseSubject.getClass() + " from (%f,%f) to (%f,%f)", mouseSubjectCurrentX, mouseSubjectCurrentY, mouseSubjectFinalPreviousX, mouseSubjectFinalPreviousY),
+                        String.format("Moved " + draggable.getClass() + " from (%f,%f) to (%f,%f)", draggableCurrentX, draggableCurrentY, previousX, previousY),
                         "pin-drop"
                 );
             }
@@ -204,7 +190,6 @@ public class ItemDragHelper {
             // Reset the was dragged boolean
             wasDragged.set(false);
         });
-
     }
 
     private static void placeSelectedItems(Node mouseSubject, double currentX, double currentY, ArrayList<Pair<Double, Double>> currentLocations, ArrayList<SelectHelper.ItemSelectable> selectedItems) {
@@ -215,15 +200,16 @@ public class ItemDragHelper {
 
         for (int i = 0; i < numberOfSelectedItems; i++) {
             SelectHelper.ItemSelectable item = selectedItems.get(i);
+            if (item instanceof EdgeController) continue;
 
             if (!item.equals(mouseSubject)) {
                 // The x and y properties of any ComponentOperatorPresentation is bound and must therefore be set this way instead
                 if (item instanceof ComponentOperatorPresentation) {
-                    ((ComponentOperatorPresentation) item).layoutXProperty().set(currentLocations.get(i).getKey());
-                    ((ComponentOperatorPresentation) item).layoutYProperty().set(currentLocations.get(i).getValue());
+                    ((ComponentOperatorPresentation) item).setLayoutX(item.getDragBounds().trimX(currentLocations.get(i).getKey()));
+                    ((ComponentOperatorPresentation) item).setLayoutY(item.getDragBounds().trimY(currentLocations.get(i).getValue()));
                 } else {
-                    item.xProperty().set(currentLocations.get(i).getKey());
-                    item.yProperty().set(currentLocations.get(i).getValue());
+                    item.xProperty().set(item.getDragBounds().trimX(currentLocations.get(i).getKey()));
+                    item.yProperty().set(item.getDragBounds().trimY(currentLocations.get(i).getValue()));
                 }
             }
         }

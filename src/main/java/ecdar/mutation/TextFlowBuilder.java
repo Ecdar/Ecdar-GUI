@@ -4,7 +4,6 @@ import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
 import ecdar.abstractions.Location;
-import ecdar.controllers.CanvasController;
 import ecdar.controllers.EcdarController;
 import ecdar.utility.helpers.SelectHelper;
 import javafx.application.Platform;
@@ -95,7 +94,7 @@ public class TextFlowBuilder {
             }
 
             SelectHelper.elementsToBeSelected = FXCollections.observableArrayList();
-            EcdarController.getActiveCanvasPresentation().getController().setActiveModel(component);
+            EcdarController.setActiveModelForActiveCanvas(component);
 
             // Use a list, since there could be multiple locations (e.i. Universal locations)
             final List<Location> locations = component.getLocations().filtered(loc -> loc.getId().equals(locationId));

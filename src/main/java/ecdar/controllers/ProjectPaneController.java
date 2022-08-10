@@ -29,6 +29,7 @@ import org.kordamp.ikonli.material.Material;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.ResourceBundle;
 
@@ -59,7 +60,8 @@ public class ProjectPaneController implements Initializable {
         final FilePresentation globalDclPresentation = new FilePresentation(Ecdar.getProject().getGlobalDeclarations());
         globalDclPresentation.setOnMousePressed(event -> {
             event.consume();
-            EcdarController.getActiveCanvasPresentation().getController().setActiveModel(Ecdar.getProject().getGlobalDeclarations());
+            EcdarController.setActiveModelForActiveCanvas(Ecdar.getProject().getGlobalDeclarations());
+            updateColorsOnFilePresentations();
         });
         filesList.getChildren().add(globalDclPresentation);
 
@@ -115,9 +117,8 @@ public class ProjectPaneController implements Initializable {
     }
 
     private void sortPresentations() {
-        final ArrayList<HighLevelModelObject> sortedComponentList = new ArrayList<>();
-        modelPresentationMap.keySet().forEach(sortedComponentList::add);
-        sortedComponentList.sort((o1, o2) -> o1.getName().compareTo(o2.getName()));
+        final ArrayList<HighLevelModelObject> sortedComponentList = new ArrayList<>(modelPresentationMap.keySet());
+        sortedComponentList.sort(Comparator.comparing(HighLevelModelObject::getName));
         sortedComponentList.forEach(component -> modelPresentationMap.get(component).toFront());
     }
 
@@ -249,7 +250,6 @@ public class ProjectPaneController implements Initializable {
             });
         }
 
-
         if (model instanceof MutationTestPlan) {
             moreInformationDropDown.addListElement("Name");
 
@@ -305,7 +305,7 @@ public class ProjectPaneController implements Initializable {
         // Open the component if the presentation is pressed
         filePresentation.setOnMousePressed(event -> {
             event.consume();
-            EcdarController.getActiveCanvasPresentation().getController().setActiveModel(model);
+            EcdarController.setActiveModelForActiveCanvas(model);
             updateColorsOnFilePresentations();
         });
 
@@ -318,11 +318,11 @@ public class ProjectPaneController implements Initializable {
             if (Ecdar.getProject().getComponents().size() > 0) {
                 // Find the first available component and show it instead of the removed one
                 final Component component = Ecdar.getProject().getComponents().get(0);
-                EcdarController.getActiveCanvasPresentation().getController().setActiveModel(component);
+                EcdarController.setActiveModelForActiveCanvas(component);
                 updateColorsOnFilePresentations();
             } else {
                 // Show no components (since there are none in the project)
-                EcdarController.getActiveCanvasPresentation().getController().setActiveModel(null);
+                EcdarController.setActiveModelForActiveCanvas(null);
             }
         }
 
@@ -365,7 +365,7 @@ public class ProjectPaneController implements Initializable {
             Ecdar.getProject().getComponents().remove(newComponent);
         }, "Created new component: " + newComponent.getName(), "add-circle");
 
-        EcdarController.getActiveCanvasPresentation().getController().setActiveModel(newComponent);
+        EcdarController.setActiveModelForActiveCanvas(newComponent);
         updateColorsOnFilePresentations();
     }
 
@@ -382,7 +382,7 @@ public class ProjectPaneController implements Initializable {
             Ecdar.getProject().getSystemsProperty().remove(newSystem);
         }, "Created new system: " + newSystem.getName(), "add-circle");
 
-        EcdarController.getActiveCanvasPresentation().getController().setActiveModel(newSystem);
+        EcdarController.setActiveModelForActiveCanvas(newSystem);
     }
 
     /**

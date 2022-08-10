@@ -1,10 +1,12 @@
 package ecdar.controllers;
 
+import ecdar.Ecdar;
 import ecdar.abstractions.Declarations;
 import ecdar.presentations.ComponentPresentation;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.Initializable;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.StyleClassedTextArea;
@@ -18,8 +20,8 @@ import java.util.ResourceBundle;
 public class DeclarationsController implements Initializable {
     public StyleClassedTextArea textArea;
     public StackPane root;
+    public BorderPane frame;
 
-    private double offSet, canvasHeight;
     private final ObjectProperty<Declarations> declarations;
 
     public DeclarationsController() {
@@ -41,23 +43,11 @@ public class DeclarationsController implements Initializable {
      */
     private void initializeWidthAndHeight() {
         // Fetch width and height of canvas and update
-        root.setMinWidth(EcdarController.getActiveCanvasPresentation().getController().getWidthProperty().doubleValue());
-        canvasHeight = EcdarController.getActiveCanvasPresentation().getController().getHeightProperty().doubleValue();
-        updateOffset(EcdarController.getActiveCanvasPresentation().getController().getInsetShouldShow().get());
-        updateHeight();
-
-        EcdarController.getActiveCanvasPresentation().getController().getWidthProperty().addListener((observable, oldValue, newValue) -> {
-            root.setMinWidth(newValue.doubleValue());
-            root.setMaxWidth(newValue.doubleValue());
-        });
-        EcdarController.getActiveCanvasPresentation().getController().getHeightProperty().addListener((observable, oldValue, newValue) -> {
-            canvasHeight = newValue.doubleValue();
-            updateHeight();
-        });
-        EcdarController.getActiveCanvasPresentation().getController().getInsetShouldShow().addListener((observable, oldValue, newValue) -> {
-            updateOffset(newValue);
-            updateHeight();
-        });
+        root.minWidthProperty().bind(Ecdar.getPresentation().getController().canvasPane.minWidthProperty());
+        root.maxWidthProperty().bind(Ecdar.getPresentation().getController().canvasPane.maxWidthProperty());
+        root.minHeightProperty().bind(Ecdar.getPresentation().getController().canvasPane.minHeightProperty());
+        root.maxHeightProperty().bind(Ecdar.getPresentation().getController().canvasPane.maxHeightProperty());
+        textArea.setTranslateY(20);
     }
 
     /**
@@ -83,28 +73,5 @@ public class DeclarationsController implements Initializable {
      */
     public void updateHighlighting() {
         textArea.setStyleSpans(0, ComponentPresentation.computeHighlighting(declarations.get().getDeclarationsText()));
-    }
-
-    /**
-     * Updates if height of the view should have an offset at the bottom.
-     * Whether the view should have an offset is based on the configuration of the error view.
-     * @param shouldHave true iff views should have an offset
-     */
-    private void updateOffset(final boolean shouldHave) {
-        if (shouldHave) {
-            offSet = 20;
-        } else {
-            offSet = 0;
-        }
-    }
-
-    /**
-     * Updates the height of the view.
-     */
-    private void updateHeight() {
-        final double value = canvasHeight - EcdarController.getActiveCanvasPresentation().getController().DECLARATION_Y_MARGIN - offSet;
-
-        root.setMinHeight(value);
-        root.setMaxHeight(value);
     }
 }

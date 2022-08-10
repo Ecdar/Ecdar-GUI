@@ -33,6 +33,8 @@ import org.apache.commons.io.FileUtils;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Objects;
+import java.util.Properties;
 import java.util.prefs.Preferences;
 
 import java.net.URISyntaxException;
@@ -41,7 +43,7 @@ import java.security.CodeSource;
 public class Ecdar extends Application {
     public static Preferences preferences = Preferences.userRoot().node("ECDAR");
     public static BooleanProperty autoScalingEnabled = new SimpleBooleanProperty(false);
-    public static final String VERSION = "2.1";
+    public static final String VERSION = getVersion();
     public static boolean serializationDone = false;
     public static SimpleStringProperty projectDirectory = new SimpleStringProperty();
 
@@ -49,6 +51,7 @@ public class Ecdar extends Application {
     private static Project project;
     private static EcdarPresentation presentation;
     private static BooleanProperty isUICached = new SimpleBooleanProperty();
+    public static BooleanProperty shouldRunBackgroundQueries = new SimpleBooleanProperty(true);
     private static final BooleanProperty isSplit = new SimpleBooleanProperty(true); //Set to true to ensure correct behaviour at first toggle.
     private static final BackendDriver backendDriver = new BackendDriver();
     private Stage debugStage;
@@ -83,8 +86,8 @@ public class Ecdar extends Application {
      * jFoenix performs illegal reflection inorder to access private methods/fields in the JavaFX code.
      * This comes with some performance benefits and is a technique used, allegedly, in many libraries.
      * The warnings are unlikely to be solved or enforced in such a way that the system breaks, see:
-     * https://github.com/sshahine/JFoenix/issues/1170
-     * The solution is taken from this answer: https://stackoverflow.com/a/46551505
+     * <a href="https://github.com/sshahine/JFoenix/issues/1170">https://github.com/sshahine/JFoenix/issues/1170</a>
+     * The solution is taken from this answer: <a href="https://stackoverflow.com/a/46551505">https://stackoverflow.com/a/46551505</a>
      * All credit for this method goes to: Rafael Winterhalter
      */
     @SuppressWarnings("unchecked")
@@ -145,8 +148,17 @@ public class Ecdar extends Application {
      */
     public static BooleanProperty toggleUICache() {
         isUICached.set(!isUICached.get());
-
         return isUICached;
+    }
+
+    /**
+     * Toggles whether checks are run in the background.
+     * Running checks in the background increases CPU usage and power consumption.
+     * @return the property specifying whether to run checks in the background
+     */
+    public static BooleanProperty toggleRunBackgroundQueries() {
+        shouldRunBackgroundQueries.set(!shouldRunBackgroundQueries.get());
+        return shouldRunBackgroundQueries;
     }
 
     public static BooleanProperty toggleQueryPane() {
@@ -236,19 +248,20 @@ public class Ecdar extends Application {
         scene.setOnKeyPressed(KeyboardTracker.handleKeyPress);
 
         // Set the icon for the application
-        stage.getIcons().addAll(
-                new Image(getClass().getResource("ic_launcher/mipmap-hdpi/ic_launcher.png").toExternalForm()),
-                new Image(getClass().getResource("ic_launcher/mipmap-mdpi/ic_launcher.png").toExternalForm()),
-                new Image(getClass().getResource("ic_launcher/mipmap-xhdpi/ic_launcher.png").toExternalForm()),
-                new Image(getClass().getResource("ic_launcher/mipmap-xxhdpi/ic_launcher.png").toExternalForm()),
-                new Image(getClass().getResource("ic_launcher/mipmap-xxxhdpi/ic_launcher.png").toExternalForm())
-        );
+        try {
+            stage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResource("ic_launcher/Ecdar_logo.png")).toExternalForm()));
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            Ecdar.showToast("The application icon could not be loaded");
+        }
 
         // We're now ready! Let the curtains fall!
         stage.show();
 
         project.reset();
-        EcdarController.getActiveCanvasPresentation().getController().setActiveModel(Ecdar.getProject().getComponents().get(0));
+
+        // Set active model
+        Platform.runLater(() -> EcdarController.setActiveModelForActiveCanvas(Ecdar.getProject().getComponents().get(0)));
 
         EcdarController.reachabilityServiceEnabled = true;
 
@@ -344,12 +357,12 @@ public class Ecdar extends Application {
             if (initialShownComponent == null) {
                 initialShownComponent = component;
             }
-            EcdarController.getActiveCanvasPresentation().getController().setActiveModel(component);
+            EcdarController.setActiveModelForActiveCanvas(component);
         }
 
         // If we found a component set that as active
         if (initialShownComponent != null) {
-            EcdarController.getActiveCanvasPresentation().getController().setActiveModel(initialShownComponent);
+            EcdarController.setActiveModelForActiveCanvas(initialShownComponent);
         }
         serializationDone = true;
     }
@@ -384,5 +397,18 @@ public class Ecdar extends Application {
         Font.loadFont(getClass().getResourceAsStream("fonts/roboto_mono/RobotoMono-Regular.ttf"), 14);
         Font.loadFont(getClass().getResourceAsStream("fonts/roboto_mono/RobotoMono-Thin.ttf"), 14);
         Font.loadFont(getClass().getResourceAsStream("fonts/roboto_mono/RobotoMono-ThinItalic.ttf"), 14);
+    }
+
+    private static String getVersion() {
+        Properties defaultProps = new Properties();
+        try {
+            try (var in = Ecdar.class.getResourceAsStream("version")) {
+                defaultProps.load(in);
+                return (String) defaultProps.get("version");
+            }
+        } catch (NullPointerException | IOException e) {
+            e.printStackTrace();
+            return "2.3";
+        }
     }
 }

@@ -192,6 +192,12 @@ public class BackendDriver {
 
             @Override
             public void onCompleted() {
+                // The query has been cancelled, stop execution
+                if (executableQuery.queryListener.getQuery().getQueryState() == QueryState.UNKNOWN) {
+                    backendConnection.setExecutableQuery(null);
+                    return;
+                }
+
                 if (!error) {
                     StreamObserver<EcdarProtoBuf.QueryProtos.QueryResponse> responseObserver = new StreamObserver<>() {
                         @Override
@@ -295,7 +301,6 @@ public class BackendDriver {
         } else if (value.hasComponent()) {
             executableQuery.queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
             executableQuery.success.accept(true);
-
             JsonObject returnedComponent = (JsonObject) JsonParser.parseString(value.getComponent().getComponent().getJson());
             addGeneratedComponent(new Component(returnedComponent));
         } else {

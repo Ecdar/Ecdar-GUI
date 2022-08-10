@@ -7,6 +7,7 @@ import ecdar.backend.*;
 import ecdar.controllers.QueryController;
 import ecdar.controllers.EcdarController;
 import ecdar.utility.colors.Color;
+import ecdar.utility.helpers.StringValidator;
 import javafx.application.Platform;
 import javafx.beans.binding.When;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -21,12 +22,13 @@ import javafx.scene.layout.*;
 import javafx.scene.text.TextAlignment;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.kordamp.ikonli.material.Material;
+
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import static javafx.scene.paint.Color.*;
 
-public class QueryPresentation extends AnchorPane {
+public class QueryPresentation extends HBox {
     private final Tooltip tooltip = new Tooltip();
     private Tooltip backendDropdownTooltip;
     private final QueryController controller;
@@ -78,6 +80,14 @@ public class QueryPresentation extends AnchorPane {
                     }
                 });
             }));
+
+            queryTextField.focusedProperty().addListener((observable, oldValue, newValue) -> {
+                if (!newValue && !StringValidator.validateQuery(queryTextField.getText())) {
+                    queryTextField.getStyleClass().add("input-violation");
+                } else {
+                    queryTextField.getStyleClass().remove("input-violation");
+                }
+            });
 
             commentTextField.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
         });
@@ -444,11 +454,6 @@ public class QueryPresentation extends AnchorPane {
             addInputOrOutput(entry.getKey(), entry.getValue(), controller.getQuery().ignoredOutputs, outputBox);
         }
     }
-
-//    private void setSwapBackendTooltipAndLabel(BackendInstance backend) {
-//        swapBackendButtonTooltip.setText("Switch to the " + (isReveaal ? "jEcdar" : "Reveaal") + " backend");
-//        currentBackendLabel.setText((isReveaal ? "Reveaal" : "jEcdar"));
-//    }
 
     private void initializeMoreInformationButtonAndQueryTypeSymbol() {
         Platform.runLater(() -> {

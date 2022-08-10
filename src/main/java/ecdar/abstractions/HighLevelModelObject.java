@@ -86,13 +86,12 @@ public abstract class HighLevelModelObject implements Serializable, DropDownMenu
      */
     void setRandomColor() {
         // Color the new component in such a way that we avoid clashing with other components if possible
-        final List<EnabledColor> availableColors = new ArrayList<>();
-        EnabledColor.enabledColors.forEach(availableColors::add);
+        final List<EnabledColor> availableColors = new ArrayList<>(EnabledColor.enabledColors);
         Ecdar.getProject().getComponents().forEach(component -> {
             availableColors.removeIf(enabledColor -> enabledColor.color.equals(component.getColor()));
         });
         if (availableColors.size() == 0) {
-            EnabledColor.enabledColors.forEach(availableColors::add);
+            availableColors.addAll(EnabledColor.enabledColors);
         }
         final int randomIndex = (new Random()).nextInt(availableColors.size());
         final EnabledColor selectedColor = availableColors.get(randomIndex);
