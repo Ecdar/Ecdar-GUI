@@ -11,6 +11,9 @@ import org.junit.jupiter.api.Assertions;
 import org.testfx.util.WaitForAsyncUtils;
 
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
 
 public class SidePaneTest extends TestFXBase {
@@ -43,7 +46,9 @@ public class SidePaneTest extends TestFXBase {
     }
 
     @Test
-    public void whenDeclarationIsPressedFilePresentationsAreNotActive() {
+    public void whenDeclarationIsPressedFilePresentationsAreNotActive() throws TimeoutException {
+        WaitForAsyncUtils.waitFor(10, TimeUnit.SECONDS, () -> lookup("Global Declarations").queryAs(Node.class).isVisible());
+
         clickOn("Global Declarations");
         WaitForAsyncUtils.waitForFxEvents();
 

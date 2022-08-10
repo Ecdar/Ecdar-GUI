@@ -96,7 +96,6 @@ test {
     systemProperty 'java.awt.headless', 'true'
     systemProperty 'testfx.headless', 'true'
     systemProperty 'prism.text', 't2k'
-    systemProperty 'headless.geometry', '800x600-32'
 }
 
 protobuf {
