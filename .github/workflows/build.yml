@@ -32,4 +32,4 @@ jobs:
     - name: Build with Gradle
       uses: GabrielBB/xvfb-action@v1
       with:
-        run: ./gradlew -Djava.awt.headless=true -Dtestfx.robot=glass -Dtestfx.headless=true -Dprism.order=sw -Dtestfx.setup.timeout=2500 -Dheadless.geometry=1920x1080-32 build
+        run: ./gradlew -Djava.awt.headless=true -Dtestfx.robot=glass -Dtestfx.headless=true -Dprism.order=sw -Dtestfx.setup.timeout=2500 build
