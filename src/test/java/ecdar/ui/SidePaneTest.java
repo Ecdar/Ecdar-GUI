@@ -8,6 +8,7 @@ import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
+import org.testfx.util.WaitForAsyncUtils;
 
 import java.util.Set;
 import java.util.function.Predicate;
@@ -16,6 +17,7 @@ public class SidePaneTest extends TestFXBase {
     @Test
     public void activeFilePresentationHasDifferentColorInProjectPane() {
         clickOn("#createComponent");
+        WaitForAsyncUtils.waitForFxEvents();
 
         var baseColorIntensity = Color.Intensity.I50;
         var baseBackgroundFill = new BackgroundFill(
@@ -43,6 +45,7 @@ public class SidePaneTest extends TestFXBase {
     @Test
     public void whenDeclarationIsPressedFilePresentationsAreNotActive() {
         clickOn("Global Declarations");
+        WaitForAsyncUtils.waitForFxEvents();
 
         var baseColorIntensity = Color.Intensity.I50;
         var baseBackgroundFill = new BackgroundFill(
