@@ -53,9 +53,9 @@ dependencies {
     implementation group: 'de.codecentric.centerdevice', name: 'javafxsvg', version: '1.3.0'
     implementation group: 'com.github.jiconfont', name: 'jiconfont-javafx', version: '1.0.0'
     implementation group: 'com.github.jiconfont', name: 'jiconfont-google_material_design_icons', version: '2.2.0.2'
-    implementation 'org.kordamp.ikonli:ikonli-core:12.3.1'
-    implementation 'org.kordamp.ikonli:ikonli-material-pack:12.3.1'
-    implementation 'org.kordamp.ikonli:ikonli-javafx:12.3.1'
+    implementation 'org.kordamp.ikonli:ikonli-core:12.2.0'
+    implementation 'org.kordamp.ikonli:ikonli-material-pack:12.2.0'
+    implementation 'org.kordamp.ikonli:ikonli-javafx:12.2.0'
     implementation 'com.google.code.gson:gson:2.8.8'
     implementation 'org.springframework:spring-core:5.3.10' // Used for evaluating expressions
     implementation 'org.springframework:spring-expression:5.3.10' // Used for evaluating expressions
