@@ -6,16 +6,16 @@ import ecdar.abstractions.Edge;
 import ecdar.abstractions.EdgeStatus;
 import ecdar.abstractions.Location;
 import ecdar.mutation.MutationTestingException;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 
 import java.util.Collection;
 
 public class ChangeGuardOpClocksOperatorTest {
 
-    @Before
-    public void setup() {
+    @BeforeAll
+    static void setup() {
         Ecdar.setUpForTest();
     }
 
@@ -33,11 +33,11 @@ public class ChangeGuardOpClocksOperatorTest {
 
         final Collection<? extends Component> mutants = new ChangeGuardOpClocksOperator().generateMutants(component);
 
-        Assert.assertEquals(1, mutants.size());
-        Assert.assertTrue(mutants.stream().anyMatch(mutant -> mutant.getDisplayableEdges().size() == 1 && mutant.getDisplayableEdges().get(0).getGuard().equals("20>x")));
+        Assertions.assertEquals(1, mutants.size());
+        Assertions.assertTrue(mutants.stream().anyMatch(mutant -> mutant.getDisplayableEdges().size() == 1 && mutant.getDisplayableEdges().get(0).getGuard().equals("20>x")));
 
         // The original guard should not be present among the mutants
-        Assert.assertTrue(mutants.stream().noneMatch(mutant -> mutant.getDisplayableEdges().stream().anyMatch(e -> e.getGuard().equals("20<=x"))));
+        Assertions.assertTrue(mutants.stream().noneMatch(mutant -> mutant.getDisplayableEdges().stream().anyMatch(e -> e.getGuard().equals("20<=x"))));
     }
 
     @Test
@@ -54,12 +54,12 @@ public class ChangeGuardOpClocksOperatorTest {
 
         final Collection<? extends Component> mutants = new ChangeGuardOpClocksOperator().generateMutants(component);
 
-        Assert.assertEquals(2, mutants.size());
-        Assert.assertTrue(mutants.stream().anyMatch(mutant -> mutant.getDisplayableEdges().size() == 1 && mutant.getDisplayableEdges().get(0).getGuard().equals("20<=x")));
-        Assert.assertTrue(mutants.stream().anyMatch(mutant -> mutant.getDisplayableEdges().size() == 1 && mutant.getDisplayableEdges().get(0).getGuard().equals("20>x")));
+        Assertions.assertEquals(2, mutants.size());
+        Assertions.assertTrue(mutants.stream().anyMatch(mutant -> mutant.getDisplayableEdges().size() == 1 && mutant.getDisplayableEdges().get(0).getGuard().equals("20<=x")));
+        Assertions.assertTrue(mutants.stream().anyMatch(mutant -> mutant.getDisplayableEdges().size() == 1 && mutant.getDisplayableEdges().get(0).getGuard().equals("20>x")));
 
         // The original guard should not be present among the mutants
-        Assert.assertTrue(mutants.stream().noneMatch(mutant -> mutant.getDisplayableEdges().stream().anyMatch(e -> e.getGuard().equals("20<x"))));
+        Assertions.assertTrue(mutants.stream().noneMatch(mutant -> mutant.getDisplayableEdges().stream().anyMatch(e -> e.getGuard().equals("20<x"))));
     }
 
     @Test
@@ -75,7 +75,7 @@ public class ChangeGuardOpClocksOperatorTest {
 
         final Collection<? extends Component> mutants = new ChangeGuardOpClocksOperator().generateMutants(component);
 
-        Assert.assertEquals(0, mutants.size());
+        Assertions.assertEquals(0, mutants.size());
     }
     @Test
     public void testComputeGuardNotEqual() throws MutationTestingException {
@@ -91,12 +91,12 @@ public class ChangeGuardOpClocksOperatorTest {
 
         final Collection<? extends Component> mutants = new ChangeGuardOpClocksOperator().generateMutants(component);
 
-        Assert.assertEquals(2, mutants.size());
-        Assert.assertTrue(mutants.stream().anyMatch(mutant -> mutant.getDisplayableEdges().size() == 1 && mutant.getDisplayableEdges().get(0).getGuard().equals("20 <= x")));
-        Assert.assertTrue(mutants.stream().anyMatch(mutant -> mutant.getDisplayableEdges().size() == 1 && mutant.getDisplayableEdges().get(0).getGuard().equals("20 > x")));
+        Assertions.assertEquals(2, mutants.size());
+        Assertions.assertTrue(mutants.stream().anyMatch(mutant -> mutant.getDisplayableEdges().size() == 1 && mutant.getDisplayableEdges().get(0).getGuard().equals("20 <= x")));
+        Assertions.assertTrue(mutants.stream().anyMatch(mutant -> mutant.getDisplayableEdges().size() == 1 && mutant.getDisplayableEdges().get(0).getGuard().equals("20 > x")));
 
         // The original guard should not be present among the mutants
-        Assert.assertTrue(mutants.stream().noneMatch(mutant -> mutant.getDisplayableEdges().stream().anyMatch(e -> e.getGuard().equals("20 != x"))));
+        Assertions.assertTrue(mutants.stream().noneMatch(mutant -> mutant.getDisplayableEdges().stream().anyMatch(e -> e.getGuard().equals("20 != x"))));
     }
 
     @Test
@@ -113,12 +113,12 @@ public class ChangeGuardOpClocksOperatorTest {
 
         final Collection<? extends Component> mutants = new ChangeGuardOpClocksOperator().generateMutants(component);
 
-        Assert.assertEquals(3, mutants.size());
-        Assert.assertTrue(mutants.stream().anyMatch(mutant -> mutant.getDisplayableEdges().size() == 1 && mutant.getDisplayableEdges().get(0).getGuard().equals("20 > x && y == 2")));
-        Assert.assertTrue(mutants.stream().anyMatch(mutant -> mutant.getDisplayableEdges().size() == 1 && mutant.getDisplayableEdges().get(0).getGuard().equals("20 <= x && y > 2")));
+        Assertions.assertEquals(3, mutants.size());
+        Assertions.assertTrue(mutants.stream().anyMatch(mutant -> mutant.getDisplayableEdges().size() == 1 && mutant.getDisplayableEdges().get(0).getGuard().equals("20 > x && y == 2")));
+        Assertions.assertTrue(mutants.stream().anyMatch(mutant -> mutant.getDisplayableEdges().size() == 1 && mutant.getDisplayableEdges().get(0).getGuard().equals("20 <= x && y > 2")));
 
         // The original guard should not be present among the mutants
-        Assert.assertTrue(mutants.stream().noneMatch(mutant -> mutant.getDisplayableEdges().stream().anyMatch(e -> e.getGuard().equals("20 <= x && y == 2"))));
+        Assertions.assertTrue(mutants.stream().noneMatch(mutant -> mutant.getDisplayableEdges().stream().anyMatch(e -> e.getGuard().equals("20 <= x && y == 2"))));
     }
 
     /**
@@ -139,7 +139,7 @@ public class ChangeGuardOpClocksOperatorTest {
 
         final Collection<? extends Component> mutants = new ChangeGuardOpClocksOperator().generateMutants(component);
 
-        Assert.assertEquals(0, mutants.size());
+        Assertions.assertEquals(0, mutants.size());
     }
 
     /**
@@ -162,7 +162,7 @@ public class ChangeGuardOpClocksOperatorTest {
 
         final Collection<? extends Component> mutants = new ChangeGuardOpClocksOperator().generateMutants(component);
 
-        Assert.assertEquals(1, mutants.size());
-        Assert.assertTrue(mutants.stream().anyMatch(mutant -> mutant.getDisplayableEdges().size() == 1 && mutant.getDisplayableEdges().get(0).getGuard().equals("20 > x && a > 0")));
+        Assertions.assertEquals(1, mutants.size());
+        Assertions.assertTrue(mutants.stream().anyMatch(mutant -> mutant.getDisplayableEdges().size() == 1 && mutant.getDisplayableEdges().get(0).getGuard().equals("20 > x && a > 0")));
     }
 }

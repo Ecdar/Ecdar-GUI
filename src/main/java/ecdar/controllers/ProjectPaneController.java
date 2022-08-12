@@ -26,6 +26,7 @@ import javafx.scene.layout.VBox;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.ResourceBundle;
 
@@ -52,6 +53,7 @@ public class ProjectPaneController implements Initializable {
         globalDclPresentation.setOnMousePressed(event -> {
             event.consume();
             EcdarController.setActiveModelForActiveCanvas(Ecdar.getProject().getGlobalDeclarations());
+            updateColorsOnFilePresentations();
         });
         filesList.getChildren().add(globalDclPresentation);
 
@@ -97,9 +99,8 @@ public class ProjectPaneController implements Initializable {
     }
 
     private void sortPresentations() {
-        final ArrayList<HighLevelModelObject> sortedComponentList = new ArrayList<>();
-        modelPresentationMap.keySet().forEach(sortedComponentList::add);
-        sortedComponentList.sort((o1, o2) -> o1.getName().compareTo(o2.getName()));
+        final ArrayList<HighLevelModelObject> sortedComponentList = new ArrayList<>(modelPresentationMap.keySet());
+        sortedComponentList.sort(Comparator.comparing(HighLevelModelObject::getName));
         sortedComponentList.forEach(component -> modelPresentationMap.get(component).toFront());
     }
 
@@ -180,8 +181,6 @@ public class ProjectPaneController implements Initializable {
                 moreInformationDropDown.hide();
             });
         }
-
-
 
         if (model instanceof MutationTestPlan) {
             moreInformationDropDown.addListElement("Name");

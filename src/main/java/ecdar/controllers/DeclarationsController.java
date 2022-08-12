@@ -6,6 +6,7 @@ import ecdar.presentations.ComponentPresentation;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.Initializable;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.StyleClassedTextArea;
@@ -19,8 +20,8 @@ import java.util.ResourceBundle;
 public class DeclarationsController implements Initializable {
     public StyleClassedTextArea textArea;
     public StackPane root;
+    public BorderPane frame;
 
-    private double offSet;
     private final ObjectProperty<Declarations> declarations;
 
     public DeclarationsController() {
@@ -46,11 +47,7 @@ public class DeclarationsController implements Initializable {
         root.maxWidthProperty().bind(Ecdar.getPresentation().getController().canvasPane.maxWidthProperty());
         root.minHeightProperty().bind(Ecdar.getPresentation().getController().canvasPane.minHeightProperty());
         root.maxHeightProperty().bind(Ecdar.getPresentation().getController().canvasPane.maxHeightProperty());
-
-        updateOffset(EcdarController.getActiveCanvasPresentation().getController().getInsetShouldShow().get());
-        EcdarController.getActiveCanvasPresentation().getController().getInsetShouldShow().addListener((observable, oldValue, newValue) -> {
-            updateOffset(newValue);
-        });
+        textArea.setTranslateY(20);
     }
 
     /**
@@ -76,18 +73,5 @@ public class DeclarationsController implements Initializable {
      */
     public void updateHighlighting() {
         textArea.setStyleSpans(0, ComponentPresentation.computeHighlighting(declarations.get().getDeclarationsText()));
-    }
-
-    /**
-     * Updates if height of the view should have an offset at the bottom.
-     * Whether the view should have an offset is based on the configuration of the error view.
-     * @param shouldHave true iff views should have an offset
-     */
-    private void updateOffset(final boolean shouldHave) {
-        if (shouldHave) {
-            offSet = 20;
-        } else {
-            offSet = 0;
-        }
     }
 }

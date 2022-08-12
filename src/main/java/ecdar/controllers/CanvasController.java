@@ -164,7 +164,7 @@ public class CanvasController implements Initializable {
      */
     private void onActiveModelChanged(final HighLevelModelObject oldObject, final HighLevelModelObject newObject) {
         // If old object is a component or system, add to map in order to remember coordinate
-        if (oldObject != null && (oldObject instanceof Component || oldObject instanceof EcdarSystem)) {
+        if ((oldObject instanceof Component || oldObject instanceof EcdarSystem)) {
             ModelObjectTranslateMap.put(oldObject, new Pair<>(modelPane.getTranslateX(), modelPane.getTranslateY()));
         }
 
@@ -200,10 +200,15 @@ public class CanvasController implements Initializable {
         }
 
         boolean shouldZoomBeActive = newObject instanceof Component || newObject instanceof EcdarSystem;
-        toolbar.setVisible(shouldZoomBeActive);
-        zoomHelper.setActive(shouldZoomBeActive);
+        setZoomAvailable(shouldZoomBeActive);
 
         root.requestFocus();
+    }
+
+    private void setZoomAvailable(boolean shouldZoomBeActive) {
+        toolbar.setVisible(shouldZoomBeActive);
+        toolbar.getParent().setMouseTransparent(!shouldZoomBeActive); // Avoid mouse being intercepted on declaration
+        zoomHelper.setActive(shouldZoomBeActive);
     }
 
     /**
