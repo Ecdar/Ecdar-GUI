@@ -292,17 +292,17 @@
 
 /* Response sizing for elements (icons with these classes will be scaled when scaling changes) */
 .icon-size-medium {
-    -fx-font-family: "Material Icons";
+    -fx-font-family: "Material Icons Regular";
     -fx-icon-size: 24;
 }
 
 .icon-size-small {
-    -fx-font-family: "Material Icons";
+    -fx-font-family: "Material Icons Regular";
     -fx-icon-size: 20;
 }
 
 .icon-size-x-small {
-    -fx-font-family: "Material Icons";
+    -fx-font-family: "Material Icons Regular";
     -fx-icon-size: 18;
 }
 
