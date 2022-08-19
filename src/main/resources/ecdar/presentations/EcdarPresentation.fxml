@@ -10,6 +10,7 @@
 <?import ecdar.presentations.*?>
 <?import ecdar.Ecdar?>
 <?import javafx.scene.text.TextFlow?>
+<?import javafx.geometry.Insets?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="StackPane"
@@ -42,7 +43,8 @@
                     <Menu text="File">
                         <MenuItem fx:id="menuBarFileCreateNewProject" text="New Project">
                             <graphic>
-                                <FontIcon iconLiteral="gmi-create-new-folder" fill="black" styleClass="icon-size-medium"/>
+                                <FontIcon iconLiteral="gmi-create-new-folder" fill="black"
+                                          styleClass="icon-size-medium"/>
                             </graphic>
                         </MenuItem>
                         <MenuItem fx:id="menuBarFileOpenProject" text="Open Project">
@@ -94,12 +96,14 @@
                     <Menu text="Edit">
                         <MenuItem fx:id="menuEditMoveLeft" text="Move All Nodes Left">
                             <graphic>
-                                <FontIcon iconLiteral="gmi-keyboard-arrow-left" fill="black" styleClass="icon-size-medium"/>
+                                <FontIcon iconLiteral="gmi-keyboard-arrow-left" fill="black"
+                                          styleClass="icon-size-medium"/>
                             </graphic>
                         </MenuItem>
                         <MenuItem fx:id="menuEditMoveUp" text="Move All Nodes Up">
                             <graphic>
-                                <FontIcon iconLiteral="gmi-keyboard-arrow-up" fill="black" styleClass="icon-size-medium"/>
+                                <FontIcon iconLiteral="gmi-keyboard-arrow-up" fill="black"
+                                          styleClass="icon-size-medium"/>
                             </graphic>
                         </MenuItem>
                         <MenuItem fx:id="menuEditMoveRight" text="Move All Nodes Right">
@@ -110,7 +114,8 @@
                         </MenuItem>
                         <MenuItem fx:id="menuEditMoveDown" text="Move All Nodes Down">
                             <graphic>
-                                <FontIcon iconLiteral="gmi-keyboard-arrow-down" fill="black" styleClass="icon-size-medium"/>
+                                <FontIcon iconLiteral="gmi-keyboard-arrow-down" fill="black"
+                                          styleClass="icon-size-medium"/>
                             </graphic>
                         </MenuItem>
                     </Menu>
@@ -180,7 +185,8 @@
 
                         <MenuItem fx:id="menuBarViewSimulator" text="Simulator">
                             <graphic>
-                                <FontIcon iconLiteral="gmi-play-circle-filled" fill="black" styleClass="icon-size-medium"/>
+                                <FontIcon iconLiteral="gmi-play-circle-filled" fill="black"
+                                          styleClass="icon-size-medium"/>
                             </graphic>
                         </MenuItem>
                     </Menu>
@@ -229,6 +235,21 @@
             </StackPane>
         </top>
     </BorderPane>
+
+    <StackPane StackPane.alignment="TOP_CENTER" styleClass="editor-simulator-toggle">
+        <padding>
+            <Insets top="-32" bottom="-32"/>
+        </padding>
+        <JFXToggleButton fx:id="switchGuiView" styleClass="large-toggle-button"/>
+        <HBox HBox.hgrow="NEVER" alignment="CENTER" disable="true">
+            <StackPane styleClass="responsive-icon-stack-pane-sizing">
+                <FontIcon iconLiteral="gmi-edit" fill="white" styleClass="icon-size-medium"/>
+            </StackPane>
+            <StackPane styleClass="responsive-icon-stack-pane-sizing">
+                <FontIcon iconLiteral="gmi-play-circle-filled" fill="white" styleClass="icon-size-medium"/>
+            </StackPane>
+        </HBox>
+    </StackPane>
 
     <!-- Message container -->
     <MessageTabPanePresentation fx:id="messageTabPane" StackPane.alignment="BOTTOM_CENTER"/>

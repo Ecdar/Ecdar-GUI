@@ -120,6 +120,7 @@ public class EcdarController implements Initializable {
     public MenuItem menuBarHelpAbout;
     public MenuItem menuBarHelpTest;
 
+    public JFXToggleButton switchGuiView;
     public Snackbar snackbar;
     public HBox statusBar;
     public Label statusLabel;
@@ -255,6 +256,8 @@ public class EcdarController implements Initializable {
         Set<Node> xSmallIcons = node.lookupAll(".icon-size-x-small");
         for (Node icon : xSmallIcons)
             icon.setStyle("-fx-icon-size: " + Math.floor(size / 13.0 * 18) + "px;");
+
+        switchGuiView.setSize(Math.floor(size / 13.0 * 24));
     }
 
     private double getNewCalculatedScale() {
@@ -646,11 +649,13 @@ public class EcdarController implements Initializable {
             }
         });
 
-        menuBarViewEditor.setAccelerator(new KeyCodeCombination(KeyCode.DIGIT1, KeyCombination.SHORTCUT_DOWN));
-        menuBarViewEditor.setOnAction(event -> editorRipplerClicked());
-
-        menuBarViewSimulator.setAccelerator(new KeyCodeCombination(KeyCode.DIGIT2, KeyCombination.SHORTCUT_DOWN));
-        menuBarViewSimulator.setOnAction(event -> simulatorRipplerClicked());
+        switchGuiView.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                currentMode.setValue(Mode.Simulator);
+            } else {
+                currentMode.setValue(Mode.Editor);
+            }
+        });
 
         currentMode.addListener((obs, oldMode, newMode) -> {
             if (newMode == Mode.Editor && oldMode != newMode) {
@@ -659,6 +664,13 @@ public class EcdarController implements Initializable {
                 enterSimulatorMode();
             }
         });
+
+        menuBarViewEditor.setAccelerator(new KeyCodeCombination(KeyCode.DIGIT1, KeyCombination.SHORTCUT_DOWN));
+        menuBarViewEditor.setOnAction(event -> switchGuiView.setSelected(false));
+
+        menuBarViewSimulator.setAccelerator(new KeyCodeCombination(KeyCode.DIGIT2, KeyCombination.SHORTCUT_DOWN));
+        menuBarViewSimulator.setOnAction(event -> switchGuiView.setSelected(true));
+
 
         // On startup, set the scaling to the values saved in preferences
         Platform.runLater(() -> {
@@ -952,24 +964,6 @@ public class EcdarController implements Initializable {
 
             CropAndExportImage(image);
         });
-    }
-
-    /**
-     * Method for click on the Editor rippler. Changes mode to the editor
-     */
-    private void editorRipplerClicked() {
-        if (currentMode.get() != Mode.Editor) {
-            currentMode.setValue(Mode.Editor);
-        }
-    }
-
-    /**
-     * Method for click on the Simulator rippler. Changes mode to the simulator
-     */
-    private void simulatorRipplerClicked() {
-        if (currentMode.get() != Mode.Simulator) {
-            currentMode.setValue(Mode.Simulator);
-        }
     }
 
     /**
