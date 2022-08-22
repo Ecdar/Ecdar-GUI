@@ -65,6 +65,11 @@ public class BackendOptionsDialogController implements Initializable {
                 }
             }
 
+            if (backendInstances.size() < 1) {
+                Ecdar.showToast("Please add an engine instance or press: \"" + resetBackendsButton.getText() + "\"");
+                return false;
+            }
+
             // Close all backend connections to avoid dangling backend connections when port range is changed
             try {
                 Ecdar.getBackendDriver().closeAllBackendConnections();
