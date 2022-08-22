@@ -6,8 +6,8 @@ import javafx.beans.value.ObservableBooleanValue;
 import javafx.scene.Node;
 import javafx.scene.control.Tooltip;
 import javafx.scene.paint.Color;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
-import jiconfont.javafx.IconNode;
+import org.kordamp.ikonli.javafx.FontIcon;
+import org.kordamp.ikonli.material.Material;
 
 import java.util.function.Predicate;
 
@@ -17,7 +17,7 @@ public abstract class Issue<T extends Node> {
     private final BooleanBinding presentProperty;
 
     // Subclasses will override this, to provided us with the correct icon to use
-    protected abstract GoogleMaterialDesignIcons getIcon();
+    protected abstract Material getIcon();
 
     public Issue(final Predicate<T> presentPredicate, final T subject, final Observable... observables) {
         presentProperty = new BooleanBinding() {
@@ -49,19 +49,19 @@ public abstract class Issue<T extends Node> {
         return presentProperty;
     }
 
-    public IconNode generateIconNode() {
-        final IconNode iconNode = new IconNode();
+    public FontIcon generateFontIconNode() {
+        final FontIcon fontIcon = new FontIcon();
 
         final Tooltip tooltip = new Tooltip(message);
-        Tooltip.install(iconNode, tooltip);
+        Tooltip.install(fontIcon, tooltip);
 
         // Set the style of the icon
-        iconNode.setFill(Color.GRAY);
-        iconNode.iconCodeProperty().set(getIcon());
+        fontIcon.setFill(Color.GRAY);
+        fontIcon.iconCodeProperty().set(getIcon());
 
         // The icon should only be visible when it is present
-        iconNode.visibleProperty().bind(presentProperty);
+        fontIcon.visibleProperty().bind(presentProperty);
 
-        return iconNode;
+        return fontIcon;
     }
 }
