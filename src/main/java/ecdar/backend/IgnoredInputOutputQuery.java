@@ -14,6 +14,7 @@ public class IgnoredInputOutputQuery {
     private final VBox ignoredInputsVBox;
     private final HashMap<String, Boolean> ignoredOutputs;
     private final VBox ignoredOutputsVBox;
+    public int tries = 0;
 
     public IgnoredInputOutputQuery(Query query, QueryPresentation queryPresentation, HashMap<String, Boolean> ignoredInputs, VBox ignoredInputsVBox, HashMap<String, Boolean> ignoredOutputs, VBox ignoredOutputsVBox) {
         this.query = query;

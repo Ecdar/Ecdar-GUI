@@ -51,13 +51,30 @@ public class QueryController implements Initializable {
             }
         }));
 
-        backendsDropdown.setValue(query.getBackend());
+        if (BackendHelper.getBackendInstances().contains(query.getBackend())) {
+            backendsDropdown.setValue(query.getBackend());
+        } else {
+            backendsDropdown.setValue(BackendHelper.getDefaultBackendInstance());
+        }
+
         backendsDropdown.valueProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 query.setBackend(newValue);
             } else {
                 backendsDropdown.setValue(BackendHelper.getDefaultBackendInstance());
             }
+        });
+
+        BackendHelper.addBackendInstanceListener(() -> {
+            Platform.runLater(() -> {
+                // The value must be set before the items (https://stackoverflow.com/a/29483445)
+                if (BackendHelper.getBackendInstances().contains(query.getBackend())) {
+                    backendsDropdown.setValue(query.getBackend());
+                } else {
+                    backendsDropdown.setValue(BackendHelper.getDefaultBackendInstance());
+                }
+                backendsDropdown.setItems(BackendHelper.getBackendInstances());
+            });
         });
     }
 
