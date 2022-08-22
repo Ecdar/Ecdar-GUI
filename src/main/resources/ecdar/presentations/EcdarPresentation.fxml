@@ -311,8 +311,8 @@
     </StackPane>
 
     <!-- Modelling help dialog -->
-    <StackPane fx:id="dialogContainer" style="-fx-background-color: #0000007F;" visible="false">
-        <JFXDialog fx:id="dialog">
+    <StackPane fx:id="modellingHelpDialogContainer" style="-fx-background-color: #0000007F;" visible="false">
+        <JFXDialog fx:id="modellingHelpDialog">
             <VBox>
                 <!-- Scale dialog -->
                 <Region minWidth="400"/>
@@ -493,5 +493,10 @@
     <!-- Backends Dialog -->
     <StackPane fx:id="backendOptionsDialogContainer" style="-fx-background-color: #0000007F;" mouseTransparent="true">
         <BackendOptionsDialogPresentation fx:id="backendOptionsDialog"/>
+    </StackPane>
+
+    <!-- Simulation initialization Dialog -->
+    <StackPane fx:id="simulationInitializationDialogContainer" style="-fx-background-color: #0000007F;" mouseTransparent="true">
+        <SimulationInitializationDialogPresentation fx:id="simulationInitializationDialog"/>
     </StackPane>
 </fx:root>

@@ -332,8 +332,8 @@ public class EcdarPresentation extends StackPane {
     }
 
     public void showHelp() {
-        controller.dialogContainer.setVisible(true);
-        controller.dialog.show(controller.dialogContainer);
+        controller.modellingHelpDialogContainer.setVisible(true);
+        controller.modellingHelpDialog.show(controller.modellingHelpDialogContainer);
     }
 
     public EcdarController getController() {

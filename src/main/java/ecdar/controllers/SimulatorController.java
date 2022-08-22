@@ -40,7 +40,7 @@ public class SimulatorController implements Initializable {
     /**
      * Prepares the simulator to be shown.<br />
      * It also prepares the processes to be shown in the {@link SimulatorOverviewPresentation} by: <br />
-     * - Building the system if it has been updated or never have been created.<br />
+     * - Building the system if it has been updated or have never been created.<br />
      * - Adding the components which are going to be used in the simulation to
      */
     public void willShow() {
@@ -60,6 +60,7 @@ public class SimulatorController implements Initializable {
         }
 
         if (shouldSimulationBeReset || firstTimeInSimulator) {
+
             resetSimulation();
             sm.resetToInitialLocation();
         }

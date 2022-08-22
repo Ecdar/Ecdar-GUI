@@ -403,4 +403,8 @@ public class SimulationHandler {
     public String getCurrentSimulation() {
         return currentSimulation;
     }
+
+    public boolean isSimulationRunning() {
+        return false; // ToDo NIELS: Handle logic for determining whether a simulation is currently running
+    }
 }

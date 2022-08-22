@@ -46,6 +46,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 public class EcdarController implements Initializable {
     // Reachability analysis
@@ -61,8 +62,8 @@ public class EcdarController implements Initializable {
     public StackPane rightPane;
     public Rectangle bottomFillerElement;
     public MessageTabPanePresentation messageTabPane;
-    public StackPane dialogContainer;
-    public JFXDialog dialog;
+    public StackPane modellingHelpDialogContainer;
+    public JFXDialog modellingHelpDialog;
     public StackPane modalBar;
     public JFXTextField queryTextField;
     public JFXTextField commentTextField;
@@ -134,6 +135,9 @@ public class EcdarController implements Initializable {
 
     public StackPane backendOptionsDialogContainer;
     public BackendOptionsDialogPresentation backendOptionsDialog;
+
+    public StackPane simulationInitializationDialogContainer;
+    public SimulationInitializationDialogPresentation simulationInitializationDialog;
 
     public final DoubleProperty scalingProperty = new SimpleDoubleProperty();
 
@@ -265,30 +269,44 @@ public class EcdarController implements Initializable {
     }
 
     private void initializeDialogs() {
-        dialog.setDialogContainer(dialogContainer);
-        dialogContainer.opacityProperty().bind(dialog.getChildren().get(0).scaleXProperty());
-        dialog.setOnDialogClosed(event -> dialogContainer.setVisible(false));
+        modellingHelpDialog.setDialogContainer(modellingHelpDialogContainer);
+        modellingHelpDialogContainer.opacityProperty().bind(modellingHelpDialog.getChildren().get(0).scaleXProperty());
+        modellingHelpDialog.setOnDialogClosed(event -> modellingHelpDialogContainer.setVisible(false));
 
         _queryDialog = queryDialog;
         _queryTextResult = queryTextResult;
         _queryTextQuery = queryTextQuery;
 
         initializeDialog(queryDialog, queryDialogContainer);
-        initializeDialog(backendOptionsDialog, backendOptionsDialogContainer);
+        initializeBackendOptionsDialog();
 
+        initializeDialog(simulationInitializationDialog, simulationInitializationDialogContainer);
+
+        simulationInitializationDialog.getController().cancelButton.setOnMouseClicked(event -> {
+            switchGuiView.setSelected(false);
+            simulationInitializationDialog.close();
+        });
+
+        simulationInitializationDialog.getController().startButton.setOnMouseClicked(event -> {
+            // ToDo NIELS: Start simulation of selected query
+            currentMode.setValue(Mode.Simulator);
+            simulationInitializationDialog.close();
+        });
+    }
+
+    private void initializeBackendOptionsDialog() {
+        initializeDialog(backendOptionsDialog, backendOptionsDialogContainer);
         backendOptionsDialog.getController().resetBackendsButton.setOnMouseClicked(event -> {
             backendOptionsDialog.getController().resetBackendsToDefault();
         });
 
         backendOptionsDialog.getController().closeButton.setOnMouseClicked(event -> {
             backendOptionsDialog.getController().cancelBackendOptionsChanges();
-            dialog.close();
             backendOptionsDialog.close();
         });
 
         backendOptionsDialog.getController().saveButton.setOnMouseClicked(event -> {
             if (backendOptionsDialog.getController().saveChangesToBackendOptions()) {
-                dialog.close();
                 backendOptionsDialog.close();
             }
         });
@@ -651,7 +669,25 @@ public class EcdarController implements Initializable {
 
         switchGuiView.selectedProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {
-                currentMode.setValue(Mode.Simulator);
+                if (Ecdar.getProject().getQueries().isEmpty()) {
+                    Ecdar.showToast("Please add a query to simulate before entering the simulator");
+                    switchGuiView.setSelected(false);
+                    return;
+                }
+
+                if (!Ecdar.getSimulationHandler().isSimulationRunning()) {
+                    ArrayList<String> queryOptions = Ecdar.getProject().getQueries().stream().map(Query::getQuery).collect(Collectors.toCollection(ArrayList::new));
+
+                    if (!simulationInitializationDialog.getController().simulationComboBox.getItems().equals(queryOptions)) {
+                        simulationInitializationDialog.getController().simulationComboBox.getItems().setAll(queryOptions);
+                    }
+
+                    simulationInitializationDialogContainer.setVisible(true);
+                    simulationInitializationDialog.show(simulationInitializationDialogContainer);
+                    simulationInitializationDialog.setMouseTransparent(false);
+                } else {
+                    currentMode.setValue(Mode.Simulator);
+                }
             } else {
                 currentMode.setValue(Mode.Editor);
             }
@@ -1214,7 +1250,7 @@ public class EcdarController implements Initializable {
 
     @FXML
     private void closeQueryDialog() {
-        dialog.close();
+        modellingHelpDialog.close();
         queryDialog.close();
     }
 
