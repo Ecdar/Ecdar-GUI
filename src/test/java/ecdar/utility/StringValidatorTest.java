@@ -27,6 +27,13 @@ public class StringValidatorTest {
     }
 
     @Test
+    public void queryWithQuoteMarkReturnsFalse() {
+        final boolean result = StringValidator.validateQuery("(A)\" something");
+
+        Assertions.assertFalse(result);
+    }
+
+    @Test
     public void validComponentNameReturnsTrue() {
         final boolean result = StringValidator.validateComponentName("Administrator");
 
