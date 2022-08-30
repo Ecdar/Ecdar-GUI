@@ -51,7 +51,7 @@ public class Ecdar extends Application {
     private static BooleanProperty isUICached = new SimpleBooleanProperty();
     public static BooleanProperty shouldRunBackgroundQueries = new SimpleBooleanProperty(true);
     private static final BooleanProperty isSplit = new SimpleBooleanProperty(true); //Set to true to ensure correct behaviour at first toggle.
-    private static final BackendDriver backendDriver = new BackendDriver();
+    private static BackendDriver backendDriver = new BackendDriver();
     private Stage debugStage;
 
     /**
@@ -309,6 +309,18 @@ public class Ecdar extends Application {
 
             Platform.exit();
             System.exit(0);
+        });
+
+        BackendHelper.addBackendInstanceListener(() -> {
+            // When the backend instances change, re-instantiate the backendDriver
+            // to prevent dangling connections and queries
+            try {
+                backendDriver.closeAllBackendConnections();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            backendDriver = new BackendDriver();
         });
     }
 
