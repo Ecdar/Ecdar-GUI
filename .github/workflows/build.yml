@@ -35,11 +35,9 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build with Gradle
-        uses: GabrielBB/xvfb-action@v1
-        with:
-          run: ./gradlew build
+        run: ./gradlew build
       - name: UI Test
+#        if: ${{ !github.event.pull_request.draft }}
         uses: GabrielBB/xvfb-action@v1
-        if: ${{ !github.event.pull_request.draft }}
         with:
-          run: ./gradlew -Djava.awt.headless=true -Dtestfx.robot=glass -Dtestfx.headless=true -Dprism.order=sw -Dtestfx.setup.timeout=2500 uiTest
+          run: ./gradlew uiTest "-Djava.awt.headless=true -Dtestfx.robot=glass -Dtestfx.headless=true -Dprism.order=sw -Dtestfx.setup.timeout=2500"

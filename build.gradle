@@ -99,9 +99,6 @@ tasks.register('uiTest', Test) {
 
     useJUnitPlatform { includeEngines 'junit-jupiter' }
 
-    // Start a new JVM for each test to avoid potential issues described here: https://github.com/TestFX/TestFX/issues/131
-    forkEvery 1
-
     // Properties needed for headless UI test execution
     systemProperty 'testfx.robot', 'glass'
     systemProperty 'glass.platform', 'Monocle'
