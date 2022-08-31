@@ -5,7 +5,6 @@ import com.google.gson.JsonArray;
 import ecdar.Debug;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
-import ecdar.backend.BackendException;
 import ecdar.backend.BackendHelper;
 import ecdar.backend.QueryListener;
 import ecdar.code_analysis.CodeAnalysis;
@@ -130,6 +129,7 @@ public class EcdarController implements Initializable {
     public MenuItem menuBarFileExportAsPng;
     public MenuItem menuBarFileExportAsPngNoBorder;
     public MenuItem menuBarOptionsCache;
+    public MenuItem menuBarOptionsBackgroundQueries;
     public MenuItem menuBarOptionsBackendOptions;
     public MenuItem menuBarHelpHelp;
     public MenuItem menuBarHelpAbout;
@@ -210,7 +210,7 @@ public class EcdarController implements Initializable {
         initializeKeybindings();
         initializeStatusBar();
         initializeMenuBar();
-        initializeReachabilityAnalysisThread();
+        startBackgroundQueriesThread(); // Will terminate immediately if background queries are turned off
 
         bottomFillerElement.heightProperty().bind(messageTabPane.maxHeightProperty());
         messageTabPane.getController().setRunnableForOpeningAndClosingMessageTabPane(this::changeInsetsOfFileAndQueryPanes);
@@ -272,7 +272,6 @@ public class EcdarController implements Initializable {
         initializeEdgeStatusHandling();
         initializeKeybindings();
         initializeStatusBar();
-        initializeReachabilityAnalysisThread();
     }
 
     /**
@@ -390,9 +389,9 @@ public class EcdarController implements Initializable {
         Platform.runLater(() -> ((JFXRippler) switchEdgeStatusButton.lookup(".jfx-rippler")).setRipplerRecenter(true));
     }
 
-    private void initializeReachabilityAnalysisThread() {
+    private void startBackgroundQueriesThread() {
         new Thread(() -> {
-            while (true) {
+            while (Ecdar.shouldRunBackgroundQueries.get()) {
                 // Wait for the reachability (the last time we changed the model) becomes smaller than the current time
                 while (reachabilityTime > System.currentTimeMillis()) {
                     try {
@@ -420,15 +419,8 @@ public class EcdarController implements Initializable {
                     Debug.removeThread(thread);
                 }
 
-                try {
-                    // Make sure that the model is generated
-                    BackendHelper.buildEcdarDocument();
-                } catch (final BackendException e) {
-                    // Something went wrong with creating the document
-                    Ecdar.showToast("Could not build XML model. I got the error: " + e.getMessage());
-                    e.printStackTrace();
-                    return;
-                }
+                // Stop thread if background queries have been toggled off
+                if (!Ecdar.shouldRunBackgroundQueries.get()) return;
 
                 Ecdar.getProject().getQueries().forEach(query -> {
                     if (query.isPeriodic()) query.run();
@@ -599,6 +591,18 @@ public class EcdarController implements Initializable {
             backendOptionsDialog.show(backendOptionsDialogContainer);
             backendOptionsDialog.setMouseTransparent(false);
         });
+
+        menuBarOptionsBackgroundQueries.setOnAction(event -> {
+            final BooleanProperty shouldRunBackgroundQueries = Ecdar.toggleRunBackgroundQueries();
+            Ecdar.preferences.putBoolean("run_background_queries", shouldRunBackgroundQueries.get());
+            if (shouldRunBackgroundQueries.get()) {
+                // If background queries have been turned back on, start a new thread
+                startBackgroundQueriesThread();
+            }
+        });
+
+        Ecdar.shouldRunBackgroundQueries.setValue(Ecdar.preferences.getBoolean("run_background_queries", true));
+        menuBarOptionsBackgroundQueries.getGraphic().opacityProperty().bind(new When(Ecdar.shouldRunBackgroundQueries).then(1).otherwise(0));
     }
 
     private void initializeEditMenu() {

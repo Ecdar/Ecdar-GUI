@@ -5,8 +5,8 @@ import ecdar.abstractions.Edge;
 import ecdar.abstractions.EdgeStatus;
 import ecdar.abstractions.Location;
 import ecdar.mutation.operators.SinkLocationOperator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 
 public class SinkLocationOperatorTest {
 
@@ -42,6 +42,6 @@ public class SinkLocationOperatorTest {
         component.addEdge(edge);
 
         // 5 edge. Expect 5 mutants
-        Assert.assertEquals(5, new SinkLocationOperator().generateTestCases(component).size());
+        Assertions.assertEquals(5, new SinkLocationOperator().generateTestCases(component).size());
     }
 }

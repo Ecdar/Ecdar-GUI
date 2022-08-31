@@ -6,14 +6,14 @@ import ecdar.abstractions.Edge;
 import ecdar.abstractions.EdgeStatus;
 import ecdar.abstractions.Location;
 import ecdar.mutation.operators.ChangeTargetOperator;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 
 public class ChangeTargetOperatorTest {
 
-    @Before
-    public void setup() {
+    @BeforeAll
+    static void setup() {
         Ecdar.setUpForTest();
     }
 
@@ -49,6 +49,6 @@ public class ChangeTargetOperatorTest {
         component.addEdge(edge);
 
         // 5 edges, 4 locations. Expect 5 * (4 - 1) = 15 mutants
-        Assert.assertEquals(15, new ChangeTargetOperator().generateTestCases(component).size());
+        Assertions.assertEquals(15, new ChangeTargetOperator().generateTestCases(component).size());
     }
 }

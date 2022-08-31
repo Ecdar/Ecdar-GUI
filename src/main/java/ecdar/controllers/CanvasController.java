@@ -200,10 +200,15 @@ public class CanvasController implements Initializable {
         }
 
         boolean shouldZoomBeActive = newObject instanceof Component || newObject instanceof EcdarSystem;
-        toolbar.setVisible(shouldZoomBeActive);
-        zoomHelper.setActive(shouldZoomBeActive);
+        setZoomAvailable(shouldZoomBeActive);
 
         root.requestFocus();
+    }
+
+    private void setZoomAvailable(boolean shouldZoomBeActive) {
+        toolbar.setVisible(shouldZoomBeActive);
+        toolbar.getParent().setMouseTransparent(!shouldZoomBeActive); // Avoid mouse being intercepted on declaration
+        zoomHelper.setActive(shouldZoomBeActive);
     }
 
     /**

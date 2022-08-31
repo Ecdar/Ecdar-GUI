@@ -34,7 +34,8 @@ class ExportHandler {
 
     /**
      * Constructs.
-     * @param plan the test plan
+     *
+     * @param plan      the test plan
      * @param testModel the test model
      */
     ExportHandler(final MutationTestPlan plan, final Component testModel) {
@@ -89,31 +90,20 @@ class ExportHandler {
         try {
             final String path;
 
-            if (getPlan().getFormat().equals("XML")) {
-                path = Ecdar.getRootDirectory() + File.separator + "mutants" + File.separator + "xml";
+            path = Ecdar.getRootDirectory() + File.separator + "mutants" + File.separator + "json";
 
-                FileUtils.forceMkdir(new File(path));
-                FileUtils.cleanDirectory(new File(path));
+            FileUtils.forceMkdir(new File(path));
+            FileUtils.cleanDirectory(new File(path));
 
-                for (final MutationTestCase aCase : cases) {
-                    storeMutantXml(aCase);
-                }
-            } else {
-                path = Ecdar.getRootDirectory() + File.separator + "mutants" + File.separator + "json";
-
-                FileUtils.forceMkdir(new File(path));
-                FileUtils.cleanDirectory(new File(path));
-
-                for (final MutationTestCase aCase : cases) {
-                    storeMutantJson(aCase);
-                }
+            for (final MutationTestCase aCase : cases) {
+                storeMutantJson(aCase);
             }
 
             final Text text = new Text("Exported to " + path);
             text.setFill(Color.GREEN);
             getProgressWriter().accept(text);
             getPlan().setStatus(MutationTestPlan.Status.IDLE);
-        } catch (final IOException | BackendException | URISyntaxException e) {
+        } catch (final IOException | URISyntaxException e) {
             e.printStackTrace();
             final String message = "Error: " + e.getMessage();
             final Text text = new Text(message);
@@ -125,28 +115,10 @@ class ExportHandler {
     }
 
     /**
-     * Stores a mutant as an XML file.
-     * @param testCase test-case containing the mutant
-     * @throws BackendException if an error occurs during generation of backend XML
-     * @throws IOException if an error occurs during storing of the file
-     * @throws URISyntaxException if an error occurs when getting the URL of the root directory
-     */
-    private static void storeMutantXml(final MutationTestCase testCase) throws BackendException, IOException, URISyntaxException {
-        final Component mutant = testCase.getMutant();
-
-        // Make a project with the mutant
-        final Project project = new Project();
-        project.getComponents().add(mutant);
-        project.setGlobalDeclarations(Ecdar.getProject().getGlobalDeclarations());
-        mutant.updateIOList(); // Update io in order to get the right system declarations for the mutant
-
-        BackendHelper.storeBackendModel(project, "mutants" + File.separator + "xml", testCase.getId());
-    }
-
-    /**
      * Stores a mutant as a JSON file.
+     *
      * @param testCase test-case containing the mutant
-     * @throws IOException if an error occurs during storing of the file
+     * @throws IOException        if an error occurs during storing of the file
      * @throws URISyntaxException if an error occurs when getting the URL of the root directory
      */
     private static void storeMutantJson(final MutationTestCase testCase) throws URISyntaxException, IOException {
@@ -159,6 +131,7 @@ class ExportHandler {
     /**
      * Handles a mutation test exception.
      * Displays a message to the user.
+     *
      * @param e the exception
      */
     private void handleException(final MutationTestingException e) {
