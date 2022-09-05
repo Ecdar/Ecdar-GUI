@@ -37,7 +37,7 @@ public class ProjectPaneController implements Initializable {
     public StackPane root;
     public HBox toolbar;
     public Label toolbarTitle;
-    public AnchorPane generatedComponentsDivider;
+    public HBox generatedComponentsDivider;
     public Label generatedComponentsDividerText;
     public ScrollPane scrollPane;
     public VBox filesList;

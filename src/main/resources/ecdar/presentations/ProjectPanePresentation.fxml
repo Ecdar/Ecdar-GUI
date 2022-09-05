@@ -56,22 +56,23 @@
                     <!-- Files goes here -->
                 </VBox>
 
-                <AnchorPane fx:id="generatedComponentsDivider">
-                    <StackPane  AnchorPane.leftAnchor="16" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0">
-                        <Label fx:id="generatedComponentsDividerText">
-                            Generated Components
-                        </Label>
-                    </StackPane>
+                <HBox fx:id="generatedComponentsDivider" alignment="CENTER">
+                    <padding>
+                        <Insets left="10"/>
+                    </padding>
 
-                    <HBox AnchorPane.rightAnchor="48" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0">
-                        <!-- CREATE SYSTEM -->
-                        <JFXRippler fx:id="generatedComponentsVisibilityButton">
-                            <StackPane minWidth="40" maxWidth="40" minHeight="40" maxHeight="40" onMouseClicked="#setGeneratedComponentsVisibilityButtonClicked">
-                                <FontIcon fx:id="generatedComponentsVisibilityButtonIcon" iconLiteral="gmi-expand-less" iconSize="24"/>
-                            </StackPane>
-                        </JFXRippler>
-                    </HBox>
-                </AnchorPane>
+                    <Label fx:id="generatedComponentsDividerText">Generated Components</Label>
+
+                    <Region HBox.hgrow="ALWAYS"/>
+
+                    <JFXRippler fx:id="generatedComponentsVisibilityButton" alignment="CENTER_RIGHT">
+                        <StackPane minWidth="40" maxWidth="40" minHeight="40" maxHeight="40"
+                                   onMouseClicked="#setGeneratedComponentsVisibilityButtonClicked">
+                            <FontIcon fx:id="generatedComponentsVisibilityButtonIcon" iconLiteral="gmi-expand-less"
+                                      iconSize="24"/>
+                        </StackPane>
+                    </JFXRippler>
+                </HBox>
 
                 <VBox fx:id="tempFilesList">
                     <!-- Temporary files goes here -->
