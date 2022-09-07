@@ -19,6 +19,7 @@ import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
+import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import org.kordamp.ikonli.javafx.FontIcon;
 
@@ -246,6 +247,14 @@ public class QueryPresentation extends HBox {
             Tooltip.install(statusIcon.getParent(), this.tooltip);
 
             controller.queryTypeSymbol.setText(controller.getQuery() != null && controller.getQuery().getType() != null ? controller.getQuery().getType().getSymbol() : "---");
+
+            statusIcon.setOnMouseClicked(event -> {
+                JFXDialog dialog = new JFXDialog();
+                dialog.setPrefWidth(600);
+                Label label = new Label(tooltip.getText());
+                dialog.setContent(label);
+                dialog.show(Ecdar.getPresentation());
+            });
         });
     }
 
