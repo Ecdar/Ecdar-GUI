@@ -11,7 +11,6 @@ import javafx.beans.property.*;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
 
 public class Query implements Serializable {
     private static final String QUERY = "query";
