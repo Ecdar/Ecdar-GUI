@@ -26,6 +26,7 @@ import org.kordamp.ikonli.material.Material;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+
 import static javafx.scene.paint.Color.*;
 
 public class QueryPresentation extends HBox {
@@ -52,12 +53,9 @@ public class QueryPresentation extends HBox {
 
     private void initializeBackendsDropdown() {
         controller.backendsDropdown.setItems(BackendHelper.getBackendInstances());
-        BackendHelper.addBackendInstanceListener(() -> controller.backendsDropdown.setItems(BackendHelper.getBackendInstances()));
-
         backendDropdownTooltip = new Tooltip();
         backendDropdownTooltip.setText("Current backend used for the query");
         JFXTooltip.install(controller.backendsDropdown, backendDropdownTooltip);
-
         controller.backendsDropdown.setValue(BackendHelper.getDefaultBackendInstance());
     }
 

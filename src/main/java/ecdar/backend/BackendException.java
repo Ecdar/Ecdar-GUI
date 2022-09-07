@@ -9,13 +9,23 @@ public class BackendException extends Exception {
         super(message, cause);
     }
 
-    public static class BadBackendQueryException extends BackendException {
-        public BadBackendQueryException(final String s) {
-            super(s);
+    public static class NoAvailableBackendConnectionException extends BackendException {
+        public NoAvailableBackendConnectionException(final String message) {
+            super(message);
         }
 
-        public BadBackendQueryException(final String s, final Exception cause) {
-            super(s, cause);
+        public NoAvailableBackendConnectionException(final String message, final Throwable cause) {
+            super(message, cause);
+        }
+    }
+
+    public static class BadBackendQueryException extends BackendException {
+        public BadBackendQueryException(final String message) {
+            super(message);
+        }
+
+        public BadBackendQueryException(final String message, final Exception cause) {
+            super(message, cause);
         }
     }
 
@@ -24,8 +34,8 @@ public class BackendException extends Exception {
             super(s);
         }
 
-        public MissingFileQueryException(final String s, final Exception cause) {
-            super(s, cause);
+        public MissingFileQueryException(final String message, final Exception cause) {
+            super(message, cause);
         }
     }
 
@@ -40,13 +50,13 @@ public class BackendException extends Exception {
         }
     }
 
-    public class QueryUncertainException extends BackendException {
+    public static class QueryUncertainException extends BackendException {
         public QueryUncertainException(final String s) {
             super(s);
         }
 
-        public QueryUncertainException(final String s, final Exception cause) {
-            super(s, cause);
+        public QueryUncertainException(final String message, final Exception cause) {
+            super(message, cause);
         }
     }
 }
