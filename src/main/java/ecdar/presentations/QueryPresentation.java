@@ -249,10 +249,10 @@ public class QueryPresentation extends HBox {
             controller.queryTypeSymbol.setText(controller.getQuery() != null && controller.getQuery().getType() != null ? controller.getQuery().getType().getSymbol() : "---");
 
             statusIcon.setOnMouseClicked(event -> {
-                JFXDialog dialog = new JFXDialog();
-                dialog.setPrefWidth(600);
+                if (controller.getQuery().getQuery().isEmpty()) return;
+                
                 Label label = new Label(tooltip.getText());
-                dialog.setContent(label);
+                JFXDialog dialog = new InformationDialogPresentation("Result from query: " + controller.getQuery().getQuery(), label);
                 dialog.show(Ecdar.getPresentation());
             });
         });
