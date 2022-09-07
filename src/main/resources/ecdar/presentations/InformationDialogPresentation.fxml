@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+
+<?import com.jfoenix.controls.JFXDialog?>
+<?import com.jfoenix.controls.JFXButton?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Text?>
+<fx:root xmlns="http://javafx.com/javafx"
+         xmlns:fx="http://javafx.com/fxml"
+         type="JFXDialog" fx:controller="ecdar.controllers.InformationDialogController"
+         prefHeight="400.0" prefWidth="600.0"
+         style="-fx-background-color: #0000007F;">
+    <VBox>
+        <!-- Will scale the dialog -->
+        <Region minWidth="400"/>
+        <!-- Content -->
+        <VBox>
+            <padding>
+                <Insets topRightBottomLeft="10"/>
+            </padding>
+            <HBox>
+                <Text fx:id="headline" styleClass="headline" HBox.hgrow="ALWAYS"/>
+            </HBox>
+            <Region prefHeight="10"/>
+            <HBox fx:id="contentContainer" alignment="CENTER" VBox.vgrow="ALWAYS">
+                <padding>
+                    <Insets topRightBottomLeft="10"/>
+                </padding>
+            </HBox>
+            <HBox>
+                <padding>
+                    <Insets topRightBottomLeft="10"/>
+                </padding>
+                <Region HBox.hgrow="ALWAYS"/>
+                <JFXButton fx:id="okButton" text="OK"/>
+            </HBox>
+        </VBox>
+    </VBox>
+</fx:root>
