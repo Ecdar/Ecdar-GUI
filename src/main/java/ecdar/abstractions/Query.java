@@ -130,7 +130,7 @@ public class Query implements Serializable {
                 this.addError("Query is empty");
                 return;
             }
-
+            
             Ecdar.getBackendDriver().addQueryToExecutionQueue(getType().getQueryName() + ": " + getQuery() + " " + getIgnoredInputOutputsOnQuery(),
                     getBackend(),
                     aBoolean -> {

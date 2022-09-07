@@ -204,6 +204,9 @@ public class Ecdar extends Application {
 
     @Override
     public void start(final Stage stage) {
+        // Print launch message the user, if terminal is being launched
+        System.out.println("Launching ECDAR...");
+
         // Load or create new project
         project = new Project();
 
