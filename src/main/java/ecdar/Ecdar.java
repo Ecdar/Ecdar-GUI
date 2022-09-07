@@ -406,8 +406,6 @@ public class Ecdar extends Application {
         Font.loadFont(getClass().getResourceAsStream("fonts/roboto_mono/RobotoMono-Regular.ttf"), 14);
         Font.loadFont(getClass().getResourceAsStream("fonts/roboto_mono/RobotoMono-Thin.ttf"), 14);
         Font.loadFont(getClass().getResourceAsStream("fonts/roboto_mono/RobotoMono-ThinItalic.ttf"), 14);
-
-        Font.loadFont(getClass().getResourceAsStream("MaterialIcons-Regular.ttf"), 14);
     }
 
     private static String getVersion() {
