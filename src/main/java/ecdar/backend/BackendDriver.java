@@ -3,13 +3,19 @@ package ecdar.backend;
 import EcdarProtoBuf.ComponentProtos;
 import EcdarProtoBuf.EcdarBackendGrpc;
 import EcdarProtoBuf.QueryProtos;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.protobuf.Empty;
 import ecdar.Ecdar;
 import ecdar.abstractions.BackendInstance;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.QueryState;
+import ecdar.controllers.EcdarController;
+import ecdar.utility.UndoRedoStack;
 import io.grpc.*;
 import io.grpc.stub.StreamObserver;
+import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import org.springframework.util.SocketUtils;
 
 import java.io.*;
@@ -320,6 +326,8 @@ public class BackendDriver {
         } else if (value.hasComponent()) {
             executableQuery.queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
             executableQuery.success.accept(true);
+            JsonObject returnedComponent = (JsonObject) JsonParser.parseString(value.getComponent().getComponent().getJson());
+            addGeneratedComponent(new Component(returnedComponent));
         } else {
             executableQuery.queryListener.getQuery().setQueryState(QueryState.ERROR);
             executableQuery.success.accept(false);
@@ -374,6 +382,46 @@ public class BackendDriver {
                 }
                 break;
         }
+    }
+
+    private void addGeneratedComponent(Component newComponent) {
+        Platform.runLater(() -> {
+            newComponent.setTemporary(true);
+
+            ObservableList<Component> listOfGeneratedComponents = Ecdar.getProject().getTempComponents();
+            Component matchedComponent = null;
+
+            for (Component currentGeneratedComponent : listOfGeneratedComponents) {
+                int comparisonOfNames = currentGeneratedComponent.getName().compareTo(newComponent.getName());
+
+                if (comparisonOfNames == 0) {
+                    matchedComponent = currentGeneratedComponent;
+                    break;
+                } else if (comparisonOfNames < 0) {
+                    break;
+                }
+            }
+
+            if (matchedComponent == null) {
+                UndoRedoStack.pushAndPerform(() -> { // Perform
+                    Ecdar.getProject().getTempComponents().add(newComponent);
+                }, () -> { // Undo
+                    Ecdar.getProject().getTempComponents().remove(newComponent);
+                }, "Created new component: " + newComponent.getName(), "add-circle");
+            } else {
+                // Remove current component with name and add the newly generated one
+                Component finalMatchedComponent = matchedComponent;
+                UndoRedoStack.pushAndPerform(() -> { // Perform
+                    Ecdar.getProject().getTempComponents().remove(finalMatchedComponent);
+                    Ecdar.getProject().getTempComponents().add(newComponent);
+                }, () -> { // Undo
+                    Ecdar.getProject().getTempComponents().remove(newComponent);
+                    Ecdar.getProject().getTempComponents().add(finalMatchedComponent);
+                }, "Created new component: " + newComponent.getName(), "add-circle");
+            }
+
+            EcdarController.getActiveCanvasPresentation().getController().setActiveModel(newComponent);
+        });
     }
 
     private class ExecutableQuery {

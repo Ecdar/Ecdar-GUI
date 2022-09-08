@@ -215,10 +215,12 @@ public class Edge extends DisplayableEdge implements Serializable {
         if (isLockedJson != null) setIsLocked(isLockedJson.getAsBoolean());
         else setIsLocked(getSync().equals("*"));
 
-        json.getAsJsonArray(NAILS).forEach(jsonElement -> {
-            final Nail newNail = new Nail((JsonObject) jsonElement);
-            addNail(newNail);
-        });
+        if(json.has(NAILS)){
+            json.getAsJsonArray(NAILS).forEach(jsonElement -> {
+                final Nail newNail = new Nail((JsonObject) jsonElement);
+                addNail(newNail);
+            });
+        }
     }
 
     private void bindReachabilityAnalysis() {

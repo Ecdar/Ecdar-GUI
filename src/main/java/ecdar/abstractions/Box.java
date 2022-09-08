@@ -84,9 +84,20 @@ public class Box {
      * @param json the JSON object
      */
     public void setProperties(final JsonObject json) {
-        setX(json.getAsJsonPrimitive(X).getAsDouble());
-        setY(json.getAsJsonPrimitive(Y).getAsDouble());
-        setWidth(json.getAsJsonPrimitive(WIDTH).getAsDouble());
-        setHeight(json.getAsJsonPrimitive(HEIGHT).getAsDouble());
+        if(json.has(X) && json.has(Y)) {
+            setX(json.getAsJsonPrimitive(X).getAsDouble());
+            setY(json.getAsJsonPrimitive(Y).getAsDouble());
+        } else {
+            setX(5);
+            setY(5);
+        }
+
+        if(json.has(WIDTH) && json.has(HEIGHT)) {
+            setWidth(json.getAsJsonPrimitive(WIDTH).getAsDouble());
+            setHeight(json.getAsJsonPrimitive(HEIGHT).getAsDouble());
+        } else {
+            setWidth(0);
+            setHeight(0);
+        }
     }
 }

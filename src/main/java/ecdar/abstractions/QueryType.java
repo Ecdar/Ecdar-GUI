@@ -1,6 +1,7 @@
 package ecdar.abstractions;
 
 public enum QueryType {
+    REACHABILITY("reachability", "E<>"),
     REFINEMENT("refinement", "<="),
     QUOTIENT("quotient", "\\"),
     SPECIFICATION("specification", "Spec"),
@@ -8,8 +9,7 @@ public enum QueryType {
     LOCAL_CONSISTENCY("consistency", "lCon"), // ToDo NIELS: Will become local-consistency
     GLOBAL_CONSISTENCY("global-consistency", "gCon"),
     BISIM_MIN("bisim", "bsim"),
-    GET_COMPONENT("get-component", "get"),
-    REACHABILITY("reachability", "E<>");
+    GET_COMPONENT("get-component", "get");
 
     private final String queryName;
     private final String symbol;

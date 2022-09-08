@@ -30,6 +30,7 @@ public class Project {
 
     private final ObservableList<Query> queries;
     private final ObservableList<Component> components;
+    private final ObservableList<Component> tempComponents;
     private final ObservableList<EcdarSystem> systems;
     private final ObservableList<MutationTestPlan> testPlans;
     private final ObjectProperty<Declarations> globalDeclarations;
@@ -37,6 +38,7 @@ public class Project {
     public Project() {
         queries = FXCollections.observableArrayList();
         components = FXCollections.observableArrayList();
+        tempComponents = FXCollections.observableArrayList();
         systems = FXCollections.observableArrayList();
         testPlans = FXCollections.observableArrayList();
         globalDeclarations = new SimpleObjectProperty<>(new Declarations("Global Declarations"));
@@ -48,6 +50,10 @@ public class Project {
 
     public ObservableList<Component> getComponents() {
         return components;
+    }
+
+    public ObservableList<Component> getTempComponents() {
+        return tempComponents;
     }
 
     public ObservableList<EcdarSystem> getSystemsProperty() {
@@ -344,6 +350,8 @@ public class Project {
         queries.clear();
 
         components.clear();
+
+        tempComponents.clear();
 
         systems.clear();
 

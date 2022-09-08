@@ -148,12 +148,12 @@ public class EcdarController implements Initializable {
 
     public StackPane backendOptionsDialogContainer;
     public BackendOptionsDialogPresentation backendOptionsDialog;
-
     public final DoubleProperty scalingProperty = new SimpleDoubleProperty();
 
     private static JFXDialog _queryDialog;
     private static Text _queryTextResult;
     private static Text _queryTextQuery;
+    private static final Text temporaryComponentWatermark = new Text("Temporary component");
 
     public static void runReachabilityAnalysis() {
         if (!reachabilityServiceEnabled) return;
@@ -165,6 +165,10 @@ public class EcdarController implements Initializable {
 
     public static EdgeStatus getGlobalEdgeStatus() {
         return globalEdgeStatus.get();
+    }
+
+    public static void setTemporaryComponentWatermarkVisibility(boolean visibility) {
+        temporaryComponentWatermark.setVisible(visibility);
     }
 
     /**
@@ -210,6 +214,7 @@ public class EcdarController implements Initializable {
         initializeKeybindings();
         initializeStatusBar();
         initializeMenuBar();
+        intitializeTemporaryComponentWatermark();
         startBackgroundQueriesThread(); // Will terminate immediately if background queries are turned off
 
         bottomFillerElement.heightProperty().bind(messageTabPane.maxHeightProperty());
@@ -272,6 +277,18 @@ public class EcdarController implements Initializable {
         initializeEdgeStatusHandling();
         initializeKeybindings();
         initializeStatusBar();
+    }
+
+    /**
+     * Initializes the watermark for temporary/generated components
+     */
+    private void intitializeTemporaryComponentWatermark() {
+        temporaryComponentWatermark.getStyleClass().add("display4");
+        temporaryComponentWatermark.setOpacity(0.1);
+        temporaryComponentWatermark.setRotate(-45);
+        temporaryComponentWatermark.setDisable(true);
+        temporaryComponentWatermark.setVisible(false);
+        root.getChildren().add(temporaryComponentWatermark);
     }
 
     /**
@@ -1055,7 +1072,6 @@ public class EcdarController implements Initializable {
         canvasPresentation = initializeNewCanvasPresentationWithActiveComponent(components, currentCompNum);
         canvasPresentation.setOpacity(0.75);
         canvasGrid.add(canvasPresentation, 1, 0);
-
         // Update the startIndex for the next canvasPresentation
         for (int i = 0; i < numComponents; i++) {
             if (canvasPresentation.getController().getActiveModel() != null && canvasPresentation.getController().getActiveModel().equals(components.get(i))) {

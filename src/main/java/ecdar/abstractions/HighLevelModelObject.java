@@ -6,10 +6,7 @@ import ecdar.utility.colors.Color;
 import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.serialize.Serializable;
 import com.google.gson.JsonObject;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +26,7 @@ public abstract class HighLevelModelObject implements Serializable, DropDownMenu
     private final StringProperty name;
     private final ObjectProperty<Color> color;
     private final ObjectProperty<Color.Intensity> colorIntensity;
+    private boolean temporary = false;
 
     public HighLevelModelObject() {
         name = new SimpleStringProperty("");
@@ -71,6 +69,14 @@ public abstract class HighLevelModelObject implements Serializable, DropDownMenu
 
     public ObjectProperty<Color.Intensity> colorIntensityProperty() {
         return colorIntensity;
+    }
+
+    public boolean isTemporary() {
+        return temporary;
+    }
+
+    public void setTemporary(final boolean newValue) {
+        this.temporary = newValue;
     }
 
     /**

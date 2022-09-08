@@ -123,7 +123,6 @@ public class Query implements Serializable {
         runQuery = () -> {
             setQueryState(QueryState.RUNNING);
             forcedCancel = false;
-
             errors.set("");
             
             if (getQuery().isEmpty()) {
@@ -131,8 +130,8 @@ public class Query implements Serializable {
                 this.addError("Query is empty");
                 return;
             }
-
-            Ecdar.getBackendDriver().addQueryToExecutionQueue(getType().getQueryName() + ": " + getQuery() + getIgnoredInputOutputsOnQuery(),
+            
+            Ecdar.getBackendDriver().addQueryToExecutionQueue(getType().getQueryName() + ": " + getQuery() + " " + getIgnoredInputOutputsOnQuery(),
                     getBackend(),
                     aBoolean -> {
                         if (aBoolean) {

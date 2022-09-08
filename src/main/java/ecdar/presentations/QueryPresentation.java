@@ -21,6 +21,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.scene.text.TextAlignment;
 import org.kordamp.ikonli.javafx.FontIcon;
+import org.kordamp.ikonli.material.Material;
 
 import java.util.Map;
 import java.util.Set;
@@ -189,15 +190,17 @@ public class QueryPresentation extends HBox {
 
             // Delegate that based on a query state updates tooltip of the query
             final Consumer<QueryState> updateToolTip = (queryState) -> {
-                Platform.runLater(() -> {
-                    if (queryState.getStatusCode() == 1) {
-                        this.tooltip.setText("This query was successful!");
-                    } else if (queryState.getStatusCode() == 3) {
-                        this.tooltip.setText("The query has not been executed yet");
+                if (queryState.getStatusCode() == 1) {
+                    if(queryState.getIconCode().equals(Material.DONE)) {
+                        this.tooltip.setText("This query was a success!");
                     } else {
-                        this.tooltip.setText(controller.getQuery().getCurrentErrors());
+                        this.tooltip.setText("The component has been created (can be accessed in the project pane)");
                     }
-                });
+                } else if (queryState.getStatusCode() == 3) {
+                    this.tooltip.setText("The query has not been executed yet");
+                } else {
+                    this.tooltip.setText(controller.getQuery().getCurrentErrors());
+                }
             };
 
             // Delegate that based on a query state updates the color of the state indicator

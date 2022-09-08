@@ -210,6 +210,7 @@ public class BackendOptionsDialogController implements Initializable {
         } else {
             potentialFiledForJEcdar.add("j-Ecdar");
         }
+
         if (setBackendPathIfFileExists(jEcdar, potentialFiledForJEcdar)) defaultBackends.add(jEcdar);
 
         return defaultBackends;
@@ -250,7 +251,10 @@ public class BackendOptionsDialogController implements Initializable {
 
     /**
      * Add the new backend instance presentation to the backend options dialog
+<<<<<<< HEAD
+=======
      *
+>>>>>>> main
      * @param newBackendInstancePresentation The presentation of the new backend instance
      */
     private void addBackendInstancePresentationToList(BackendInstancePresentation newBackendInstancePresentation) {
