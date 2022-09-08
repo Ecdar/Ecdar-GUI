@@ -26,8 +26,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
-import jiconfont.javafx.IconFontFX;
 import org.apache.commons.io.FileUtils;
 
 import java.io.*;
@@ -214,7 +212,6 @@ public class Ecdar extends Application {
         stage.setTitle("Ecdar " + VERSION);
 
         // Load the fonts required for the project
-        IconFontFX.register(GoogleMaterialDesignIcons.getIconFont());
         loadFonts();
 
         // Remove the classic decoration
