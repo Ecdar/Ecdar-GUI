@@ -443,10 +443,8 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                             }, "Deleted edge " + getEdge(), "delete");
                             dropDownMenu.hide();
                         });
-
-                        DropDownMenu.x = EcdarController.getActiveCanvasPresentation().mouseTracker.getGridX();
-                        DropDownMenu.y = EcdarController.getActiveCanvasPresentation().mouseTracker.getGridY();
-                        dropDownMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX(), event.getY());
+                        
+                        dropDownMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX() * EcdarController.getActiveCanvasZoomFactor().get(), event.getY() * EcdarController.getActiveCanvasZoomFactor().get());
 
                     } else if ((event.isShiftDown() && event.isPrimaryButtonDown()) || event.isMiddleButtonDown()) {
                         final double nailX = EcdarController.getActiveCanvasPresentation().mouseTracker.gridXProperty().subtract(getComponent().getBox().getXProperty()).doubleValue();
