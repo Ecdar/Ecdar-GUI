@@ -423,9 +423,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
 
                         dropDownMenu.addSpacerElement();
                         dropDownMenu.addClickableAndDisableableListElement("Add Nail", getEdge().getIsLockedProperty(), mouseEvent -> {
-                            final double nailX = Math.round((DropDownMenu.x - getComponent().getBox().getX()) / GRID_SIZE) * GRID_SIZE;
-                            final double nailY = Math.round((DropDownMenu.y - getComponent().getBox().getY()) / GRID_SIZE) * GRID_SIZE;
-                            final Nail newNail = new Nail(nailX, nailY);
+                            final Nail newNail = getNewNailBasedOnDropdownPosition();
 
                             UndoRedoStack.pushAndPerform(
                                     () -> getEdge().insertNailAt(newNail, links.indexOf(link)),
@@ -445,10 +443,8 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                             }, "Deleted edge " + getEdge(), "delete");
                             dropDownMenu.hide();
                         });
-
-                        DropDownMenu.x = EcdarController.getActiveCanvasPresentation().mouseTracker.getGridX();
-                        DropDownMenu.y = EcdarController.getActiveCanvasPresentation().mouseTracker.getGridY();
-                        dropDownMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX(), event.getY());
+                        
+                        dropDownMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX() * EcdarController.getActiveCanvasZoomFactor().get(), event.getY() * EcdarController.getActiveCanvasZoomFactor().get());
 
                     } else if ((event.isShiftDown() && event.isPrimaryButtonDown()) || event.isMiddleButtonDown()) {
                         final double nailX = EcdarController.getActiveCanvasPresentation().mouseTracker.gridXProperty().subtract(getComponent().getBox().getXProperty()).doubleValue();
@@ -572,7 +568,6 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
 
         // Check the elements before me, and ensure that I am placed after these
         for (int i1 = type.getI() - 1; i1 >= 0; i1--) {
-
             if (data[i1] != -1 && data[i1] >= clickedLinkedIndex) {
                 insertAt.set(data[i1] + 1);
             }
@@ -580,17 +575,13 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
 
         // Check the elements after me, and ensure that I am placed before these
         for (int i1 = type.getI() + 1; i1 < data.length; i1++) {
-
             if (data[i1] != -1 && data[i1] < clickedLinkedIndex) {
                 insertAt.set(data[i1]);
             }
         }
 
         dropDownMenu.addClickableAndDisableableListElement(rowTitle, isDisabled, event -> {
-            final double nailX = Math.round((DropDownMenu.x - getComponent().getBox().getX()) / GRID_SIZE) * GRID_SIZE;
-            final double nailY = Math.round((DropDownMenu.y - getComponent().getBox().getY()) / GRID_SIZE) * GRID_SIZE;
-
-            final Nail newNail = new Nail(nailX, nailY);
+            final Nail newNail = getNewNailBasedOnDropdownPosition();
             newNail.setPropertyType(type);
 
             UndoRedoStack.pushAndPerform(
@@ -601,6 +592,12 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
             );
             dropDownMenu.hide();
         });
+    }
+
+    private Nail getNewNailBasedOnDropdownPosition() {
+        final double nailX = Math.round(DropDownMenu.x / GRID_SIZE) * GRID_SIZE;
+        final double nailY = Math.round(DropDownMenu.y / GRID_SIZE) * GRID_SIZE;
+        return new Nail(nailX, nailY);
     }
 
     public DisplayableEdge getEdge() {
