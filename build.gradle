@@ -47,8 +47,6 @@ def protocVersion = protobufVersion
 dependencies {
     implementation fileTree(dir: 'lib', include: ['*.jar'])
 
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.8.2'
-    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.8.2'
     implementation 'com.jfoenix:jfoenix:9.0.10'
     implementation group: 'de.codecentric.centerdevice', name: 'javafxsvg', version: '1.3.0'
     implementation 'org.kordamp.ikonli:ikonli-core:12.3.1'
@@ -76,11 +74,38 @@ dependencies {
     runtimeOnly "io.grpc:grpc-netty-shaded:${grpcVersion}"
 
     testImplementation "io.grpc:grpc-testing:${grpcVersion}"
+
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.8.2'
+    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.8.2'
+    testImplementation group: 'org.testfx', name: 'testfx-junit', version: '4.0.15-alpha'
+    testImplementation group: 'org.testfx', name: 'openjfx-monocle', version: 'jdk-12.0.1+2'
 }
 
 
 test {
     useJUnitPlatform { includeEngines 'junit-jupiter' }
+
+    filter {
+        excludeTestsMatching "ecdar.ui.*"
+    }
+}
+
+tasks.register('uiTest', Test) {
+    filter {
+        includeTestsMatching "ecdar.ui.*"
+    }
+
+    useJUnitPlatform { includeEngines 'junit-jupiter' }
+
+    // Properties needed for headless UI test execution
+    systemProperty 'testfx.robot', 'glass'
+    systemProperty 'glass.platform', 'Monocle'
+    systemProperty 'monocle.platform', 'Headless'
+    systemProperty 'prism.order', 'sw'
+    systemProperty 'testfx.setup.timeout', '2500'
+    systemProperty 'java.awt.headless', 'true'
+    systemProperty 'testfx.headless', 'true'
+    systemProperty 'prism.text', 't2k'
 }
 
 protobuf {
