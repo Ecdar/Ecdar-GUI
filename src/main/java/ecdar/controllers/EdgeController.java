@@ -595,8 +595,9 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
     }
 
     private Nail getNewNailBasedOnDropdownPosition() {
-        final double nailX = Math.round(DropDownMenu.x / GRID_SIZE) * GRID_SIZE;
-        final double nailY = Math.round(DropDownMenu.y / GRID_SIZE) * GRID_SIZE;
+        final double nailX = Math.round(DropDownMenu.x / EcdarController.getActiveCanvasZoomFactor().get() / GRID_SIZE) * GRID_SIZE;
+        final double nailY = Math.round(DropDownMenu.y / EcdarController.getActiveCanvasZoomFactor().get() / GRID_SIZE) * GRID_SIZE;
+        System.out.println(EcdarController.getActiveCanvasZoomFactor().get());
         return new Nail(nailX, nailY);
     }
 
