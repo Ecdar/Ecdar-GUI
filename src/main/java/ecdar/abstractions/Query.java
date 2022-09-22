@@ -59,26 +59,27 @@ public class Query implements Serializable {
     }
 
     public String getQuery() {
-        return query.get();
+        String newQuery = "";
+        String oldQuery = this.query.get();
+        boolean hasBeenTrimmed = false;
+
+        if(oldQuery.contains("\u2264")){
+            newQuery = oldQuery.replace("\u2264","<=");
+            hasBeenTrimmed = true;
+        }
+        if(oldQuery.contains("\u2265")){
+            newQuery = oldQuery.replace("\u2265",">=");
+            hasBeenTrimmed = true;
+        }
+        if(!hasBeenTrimmed){
+            return oldQuery;
+        }
+
+        return newQuery;
     }
 
     public void setQuery(final String query) {
-        String newQuery = "";
-        boolean hasBeenTrimmed = false;
-        if(query.contains("\u2264")){
-            newQuery = query.replace("\u2264","<=");
-            hasBeenTrimmed = true;
-            this.query.setValue(newQuery);
-        }
-        if(query.contains("\u2265")){
-            newQuery = query.replace("\u2265",">=");
-            hasBeenTrimmed = true;
-            this.query.setValue(newQuery);
-        }
-        if(!hasBeenTrimmed){
-            this.query.set(query);
-        }
-
+        this.query.set(query);
     }
 
     public StringProperty queryProperty() {
