@@ -33,7 +33,7 @@
             <padding>
                 <Insets topRightBottomLeft="10"/>
             </padding>
-            <JFXTextField id="query"
+            <JFXTextField fx:id="queryText" id="query"
                           style="-fx-unfocus-color:transparent;" styleClass="subhead, responsive-text-area-sizing"
                           HBox.hgrow="ALWAYS" promptText="Query"/>
             <JFXTextField id="comment"

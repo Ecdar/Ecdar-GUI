@@ -33,11 +33,10 @@ public class Query implements Serializable {
     private Runnable runQuery;
 
     public Query(final String query, final String comment, final QueryState queryState) {
-        this.query.set(query);
+        this.setQuery(query);
         this.comment.set(comment);
         this.queryState.set(queryState);
         setBackend(BackendHelper.getDefaultBackendInstance());
-
         initializeRunQuery();
     }
 
@@ -64,7 +63,22 @@ public class Query implements Serializable {
     }
 
     public void setQuery(final String query) {
-        this.query.set(query);
+        String newQuery = "";
+        boolean hasBeenTrimmed = false;
+        if(query.contains("\u2264")){
+            newQuery = query.replace("\u2264","<=");
+            hasBeenTrimmed = true;
+            this.query.setValue(newQuery);
+        }
+        if(query.contains("\u2265")){
+            newQuery = query.replace("\u2265",">=");
+            hasBeenTrimmed = true;
+            this.query.setValue(newQuery);
+        }
+        if(!hasBeenTrimmed){
+            this.query.set(query);
+        }
+
     }
 
     public StringProperty queryProperty() {
@@ -124,7 +138,6 @@ public class Query implements Serializable {
             setQueryState(QueryState.RUNNING);
             forcedCancel = false;
             errors.set("");
-            
             if (getQuery().isEmpty()) {
                 setQueryState(QueryState.SYNTAX_ERROR);
                 this.addError("Query is empty");
