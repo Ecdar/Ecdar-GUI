@@ -2,7 +2,7 @@ package ecdar.abstractions;
 
 public enum QueryType {
     REACHABILITY("reachability", "E<>"),
-    REFINEMENT("refinement", "<="),
+    REFINEMENT("refinement", "\u2264"),
     QUOTIENT("quotient", "\\"),
     SPECIFICATION("specification", "Spec"),
     IMPLEMENTATION("implementation", "Imp"),
