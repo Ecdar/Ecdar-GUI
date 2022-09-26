@@ -13,7 +13,12 @@ public class QueryTest {
 
     @Test
     public void testGetQuery() {
+        //Test that the query string from the query textfield is decoded correctly for the backend to use it
+        final Query query = new Query("(Administration || Machine || Researcher) \u2264 Spec)", "comment", QueryState.RUNNING);
 
+        String expected = "(Administration || Machine || Researcher) <= Spec)";
+        String result = query.getQuery();
 
+        Assertions.assertEquals(expected, result);
     }
 }
