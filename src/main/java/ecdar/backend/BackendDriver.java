@@ -91,9 +91,9 @@ public class BackendDriver {
                 backendConnection,
                 componentsBuilder,
                 QueryProtos.IgnoredInputOutputs.newBuilder().getDefaultInstanceForType(),
-                (reponse) -> {
-                    if (reponse.hasQuery() && reponse.getQuery().hasIgnoredInputOutputs()) {
-                        var ignoredInputOutputs = reponse.getQuery().getIgnoredInputOutputs();
+                (response) -> {
+                    if (response.hasQuery() && response.getQuery().hasIgnoredInputOutputs()) {
+                        var ignoredInputOutputs = response.getQuery().getIgnoredInputOutputs();
                         query.addNewElementsToMap(new ArrayList<>(ignoredInputOutputs.getIgnoredInputsList()), new ArrayList<>(ignoredInputOutputs.getIgnoredOutputsList()));
                     } else {
                         // Response is unexpected, maybe just ignore
