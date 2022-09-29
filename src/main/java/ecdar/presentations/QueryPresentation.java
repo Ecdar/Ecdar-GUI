@@ -254,10 +254,25 @@ public class QueryPresentation extends HBox {
                 if (controller.getQuery().getQuery().isEmpty()) return;
                 
                 Label label = new Label(tooltip.getText());
-                JFXDialog dialog = new InformationDialogPresentation("Result from query: " + controller.getQuery().getQuery(), label);
+                //Make sure that certain symbols in the query are displayed correctly
+                String newString = changeRefinementSymbols();
+
+                JFXDialog dialog = new InformationDialogPresentation("Result from query: " + newString, label);
                 dialog.show(Ecdar.getPresentation());
             });
         });
+    }
+
+    private String changeRefinementSymbols() {
+        String queryText = controller.getQuery().getQuery();
+        String newString = "";
+        if(queryText.contains("<=")){
+            newString = queryText.replace("<=","\u2264");
+        }
+        if(queryText.contains(">=")){
+            newString = queryText.replace("<=","\u2265");
+        }
+        return newString;
     }
 
     private void setStatusIndicatorContentColor(javafx.scene.paint.Color color, FontIcon statusIcon, FontIcon queryTypeExpandIcon, QueryState queryState) {
