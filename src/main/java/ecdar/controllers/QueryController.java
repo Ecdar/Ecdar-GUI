@@ -48,15 +48,8 @@ public class QueryController implements Initializable {
 
     //Method for replacing "<=" and ">=" with its unicode character
     public void updateQueryTextFieldString(String newValue) {
-        String tmpValue = "";
-        if(newValue.contains("<=")){
-            tmpValue = newValue.replace("<=","\u2264");
-            queryText.setText(tmpValue);
-        }
-        if(newValue.contains(">=")){
-            tmpValue = newValue.replace(">=","\u2265");
-            queryText.setText(tmpValue);
-        }
+        String tmpValue = newValue.replace(">=","\u2265").replace("<=","\u2264");
+        queryText.setText(tmpValue);
     }
 
     public void setQuery(Query query) {

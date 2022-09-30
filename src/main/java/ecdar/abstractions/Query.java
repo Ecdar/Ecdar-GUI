@@ -59,23 +59,7 @@ public class Query implements Serializable {
     }
 
     public String getQuery() {
-        String newQuery = "";
-        String oldQuery = this.query.get();
-        boolean hasBeenTrimmed = false;
-
-        if(oldQuery.contains("\u2264")){
-            newQuery = oldQuery.replace("\u2264","<=");
-            hasBeenTrimmed = true;
-        }
-        if(oldQuery.contains("\u2265")){
-            newQuery = oldQuery.replace("\u2265",">=");
-            hasBeenTrimmed = true;
-        }
-        if(!hasBeenTrimmed){
-            return oldQuery;
-        }
-
-        return newQuery;
+        return this.query.get().replace("\u2264","<=").replace("\u2265",">=");
     }
 
     public void setQuery(final String query) {

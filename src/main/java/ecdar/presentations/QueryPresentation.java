@@ -264,15 +264,7 @@ public class QueryPresentation extends HBox {
     }
 
     private String changeRefinementSymbols() {
-        String queryText = controller.getQuery().getQuery();
-        String newString = "";
-        if(queryText.contains("<=")){
-            newString = queryText.replace("<=","\u2264");
-        }
-        if(queryText.contains(">=")){
-            newString = queryText.replace("<=","\u2265");
-        }
-        return newString;
+        return controller.getQuery().getQuery().replace("<=","\u2264").replace("<=","\u2265");
     }
 
     private void setStatusIndicatorContentColor(javafx.scene.paint.Color color, FontIcon statusIcon, FontIcon queryTypeExpandIcon, QueryState queryState) {
