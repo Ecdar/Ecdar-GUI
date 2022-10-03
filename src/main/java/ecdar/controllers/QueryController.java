@@ -40,16 +40,10 @@ public class QueryController implements Initializable {
         queryText.textProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                updateQueryTextFieldString(newValue);
+                String tmpValue = newValue.replace(">=","\u2265").replace("<=","\u2264");
+                queryText.setText(tmpValue);
             }
         });
-
-    }
-
-    //Method for replacing "<=" and ">=" with its unicode character
-    public void updateQueryTextFieldString(String newValue) {
-        String tmpValue = newValue.replace(">=","\u2265").replace("<=","\u2264");
-        queryText.setText(tmpValue);
     }
 
     public void setQuery(Query query) {
