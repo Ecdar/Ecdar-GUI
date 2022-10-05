@@ -258,7 +258,8 @@ public class QueryPresentation extends HBox {
                 if (controller.getQuery().getQuery().isEmpty()) return;
                 
                 Label label = new Label(tooltip.getText());
-                JFXDialog dialog = new InformationDialogPresentation("Result from query: " + controller.getQuery().getQuery(), label);
+
+                JFXDialog dialog = new InformationDialogPresentation("Result from query: " + Query.RefinementSymbolToUnicode(controller.getQuery().getQuery()), label);
                 dialog.show(Ecdar.getPresentation());
             });
         });

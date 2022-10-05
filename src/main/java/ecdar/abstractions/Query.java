@@ -33,11 +33,10 @@ public class Query implements Serializable {
     private Runnable runQuery;
 
     public Query(final String query, final String comment, final QueryState queryState) {
-        this.query.set(query);
+        this.setQuery(query);
         this.comment.set(comment);
         this.queryState.set(queryState);
         setBackend(BackendHelper.getDefaultBackendInstance());
-
         initializeRunQuery();
     }
 
@@ -45,6 +44,14 @@ public class Query implements Serializable {
         deserialize(jsonElement);
 
         initializeRunQuery();
+    }
+
+    public static String RefinementSymbolToUnicode(String stringToReplace){
+        return stringToReplace.replace(">=","\u2265").replace("<=","\u2264");
+    }
+
+    public static String UnicodeToRefinementSymbol(String stringToReplace){
+        return stringToReplace.replace("\u2264","<=").replace("\u2265",">=");
     }
 
     public QueryState getQueryState() {
@@ -60,7 +67,7 @@ public class Query implements Serializable {
     }
 
     public String getQuery() {
-        return query.get();
+        return UnicodeToRefinementSymbol(this.query.get());
     }
 
     public void setQuery(final String query) {
@@ -124,7 +131,6 @@ public class Query implements Serializable {
             setQueryState(QueryState.RUNNING);
             forcedCancel = false;
             errors.set("");
-            
             if (getQuery().isEmpty()) {
                 setQueryState(QueryState.SYNTAX_ERROR);
                 this.addError("Query is empty");
