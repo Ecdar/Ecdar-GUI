@@ -12,7 +12,7 @@
          HBox.hgrow="ALWAYS"
          alignment="CENTER"
          fx:controller="ecdar.controllers.QueryController">
-        <VBox id="stateIndicator">
+        <VBox id="stateIndicator" alignment="CENTER">
             <padding>
                 <Insets topRightBottomLeft="10"/>
             </padding>
