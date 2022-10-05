@@ -12,11 +12,11 @@
          HBox.hgrow="ALWAYS"
          alignment="CENTER"
          fx:controller="ecdar.controllers.QueryController">
-        <VBox id="stateIndicator">
+        <VBox id="stateIndicator" alignment="CENTER">
             <padding>
                 <Insets topRightBottomLeft="10"/>
             </padding>
-            <Region style="-fx-max-height: 2em; -fx-min-height: 2em"/>
+            <Region style="-fx-max-height: 2em; -fx-min-height: 2em; -fx-max-width: 4em; -fx-min-width: 4em;"/>
             <StackPane styleClass="responsive-icon-stack-pane-sizing">
                 <FontIcon id="statusIcon" iconLiteral="gmi-hourglass-full" styleClass="icon-size-medium"/>
             </StackPane>
