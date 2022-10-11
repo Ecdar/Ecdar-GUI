@@ -144,6 +144,7 @@ public class EcdarController implements Initializable {
     private static JFXDialog _queryDialog;
     private static Text _queryTextResult;
     private static Text _queryTextQuery;
+    private static final Text temporaryComponentWatermark = new Text("Temporary component");
 
     public static void runReachabilityAnalysis() {
         if (!reachabilityServiceEnabled) return;
@@ -234,6 +235,10 @@ public class EcdarController implements Initializable {
 
         // Change zoom level to fit new active model
         Platform.runLater(() -> getActiveCanvasPresentation().getController().zoomHelper.zoomToFit());
+    }
+
+    public static void setTemporaryComponentWatermarkVisibility(boolean visibility) {
+        temporaryComponentWatermark.setVisible(visibility);
     }
 
     /**
@@ -337,6 +342,18 @@ public class EcdarController implements Initializable {
 
         initializeKeybindings();
         initializeStatusBar();
+    }
+
+    /**
+     * Initializes the watermark for temporary/generated components
+     */
+    private void intitializeTemporaryComponentWatermark() {
+        temporaryComponentWatermark.getStyleClass().add("display4");
+        temporaryComponentWatermark.setOpacity(0.1);
+        temporaryComponentWatermark.setRotate(-45);
+        temporaryComponentWatermark.setDisable(true);
+        temporaryComponentWatermark.setVisible(false);
+        root.getChildren().add(temporaryComponentWatermark);
     }
 
     /**

@@ -27,8 +27,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
-import jiconfont.javafx.IconFontFX;
 import org.apache.commons.io.FileUtils;
 
 import java.io.*;
@@ -54,7 +52,7 @@ public class Ecdar extends Application {
     private static BooleanProperty isUICached = new SimpleBooleanProperty();
     public static BooleanProperty shouldRunBackgroundQueries = new SimpleBooleanProperty(true);
     private static final BooleanProperty isSplit = new SimpleBooleanProperty(true); //Set to true to ensure correct behaviour at first toggle.
-    private static final BackendDriver backendDriver = new BackendDriver();
+    private static BackendDriver backendDriver = new BackendDriver();
     private static SimulationHandler simulationHandler;
     private Stage debugStage;
 
@@ -208,6 +206,9 @@ public class Ecdar extends Application {
 
     @Override
     public void start(final Stage stage) {
+        // Print launch message the user, if terminal is being launched
+        System.out.println("Launching ECDAR...");
+
         // Load or create new project
         project = new Project();
         simulationHandler = new SimulationHandler();
@@ -216,7 +217,6 @@ public class Ecdar extends Application {
         stage.setTitle("Ecdar " + VERSION);
 
         // Load the fonts required for the project
-        IconFontFX.register(GoogleMaterialDesignIcons.getIconFont());
         loadFonts();
 
         // Remove the classic decoration
@@ -317,6 +317,18 @@ public class Ecdar extends Application {
 
             Platform.exit();
             System.exit(0);
+        });
+
+        BackendHelper.addBackendInstanceListener(() -> {
+            // When the backend instances change, re-instantiate the backendDriver
+            // to prevent dangling connections and queries
+            try {
+                backendDriver.closeAllBackendConnections();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            backendDriver = new BackendDriver();
         });
     }
 

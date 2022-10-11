@@ -6,10 +6,7 @@ import ecdar.utility.colors.Color;
 import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.serialize.Serializable;
 import com.google.gson.JsonObject;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +26,7 @@ public abstract class HighLevelModelObject implements Serializable, DropDownMenu
     private final StringProperty name;
     private final ObjectProperty<Color> color;
     private final ObjectProperty<Color.Intensity> colorIntensity;
+    private boolean temporary = false;
 
     public HighLevelModelObject() {
         name = new SimpleStringProperty("");
@@ -73,6 +71,14 @@ public abstract class HighLevelModelObject implements Serializable, DropDownMenu
         return colorIntensity;
     }
 
+    public boolean isTemporary() {
+        return temporary;
+    }
+
+    public void setTemporary(final boolean newValue) {
+        this.temporary = newValue;
+    }
+
     /**
      * Sets a random color.
      * If some colors are not currently in use, choose among those.
@@ -80,13 +86,12 @@ public abstract class HighLevelModelObject implements Serializable, DropDownMenu
      */
     void setRandomColor() {
         // Color the new component in such a way that we avoid clashing with other components if possible
-        final List<EnabledColor> availableColors = new ArrayList<>();
-        EnabledColor.enabledColors.forEach(availableColors::add);
+        final List<EnabledColor> availableColors = new ArrayList<>(EnabledColor.enabledColors);
         Ecdar.getProject().getComponents().forEach(component -> {
             availableColors.removeIf(enabledColor -> enabledColor.color.equals(component.getColor()));
         });
         if (availableColors.size() == 0) {
-            EnabledColor.enabledColors.forEach(availableColors::add);
+            availableColors.addAll(EnabledColor.enabledColors);
         }
         final int randomIndex = (new Random()).nextInt(availableColors.size());
         final EnabledColor selectedColor = availableColors.get(randomIndex);

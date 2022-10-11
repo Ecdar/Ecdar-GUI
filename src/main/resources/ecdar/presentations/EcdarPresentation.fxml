@@ -38,7 +38,7 @@
 
         <top>
             <StackPane fx:id="topPane" alignment="BOTTOM_CENTER">
-                <!-- Menu bar for "file" etc (only visible on windows) -->
+                <!-- Menu bar for "file" etc. (only visible on windows) -->
                 <MenuBar fx:id="menuBar">
                     <Menu text="File">
                         <MenuItem fx:id="menuBarFileCreateNewProject" text="New Project">

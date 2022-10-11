@@ -2,15 +2,15 @@ package ecdar.issues;
 
 import javafx.beans.Observable;
 import javafx.scene.Node;
-import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
+import org.kordamp.ikonli.material.Material;
 
 import java.util.function.Predicate;
 
 public class Warning<T extends Node> extends Issue<T> {
 
     @Override
-    protected GoogleMaterialDesignIcons getIcon() {
-        return GoogleMaterialDesignIcons.WARNING;
+    protected Material getIcon() {
+        return Material.WARNING;
     }
 
     public Warning(final Predicate<T> presentPredicate, final T subject, final Observable... observables) {

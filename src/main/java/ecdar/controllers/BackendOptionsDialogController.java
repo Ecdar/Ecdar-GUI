@@ -65,6 +65,11 @@ public class BackendOptionsDialogController implements Initializable {
                 }
             }
 
+            if (backendInstances.size() < 1) {
+                Ecdar.showToast("Please add an engine instance or press: \"" + resetBackendsButton.getText() + "\"");
+                return false;
+            }
+
             // Close all backend connections to avoid dangling backend connections when port range is changed
             try {
                 Ecdar.getBackendDriver().closeAllBackendConnections();
@@ -205,6 +210,7 @@ public class BackendOptionsDialogController implements Initializable {
         } else {
             potentialFiledForJEcdar.add("j-Ecdar");
         }
+
         if (setBackendPathIfFileExists(jEcdar, potentialFiledForJEcdar)) defaultBackends.add(jEcdar);
 
         return defaultBackends;
@@ -245,7 +251,10 @@ public class BackendOptionsDialogController implements Initializable {
 
     /**
      * Add the new backend instance presentation to the backend options dialog
+<<<<<<< HEAD
+=======
      *
+>>>>>>> main
      * @param newBackendInstancePresentation The presentation of the new backend instance
      */
     private void addBackendInstancePresentationToList(BackendInstancePresentation newBackendInstancePresentation) {

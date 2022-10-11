@@ -700,13 +700,28 @@ public class Component extends HighLevelModelObject implements Boxed {
         setDescription(json.getAsJsonPrimitive(DESCRIPTION).getAsString());
         box.setProperties(json);
 
-        final EnabledColor enabledColor = EnabledColor.fromIdentifier(json.getAsJsonPrimitive(COLOR).getAsString());
+        if (box.getWidth() == 0 && box.getHeight() == 0) {
+            box.setWidth(locations.stream().max(Comparator.comparingDouble(Location::getX)).get().getX() + Grid.GRID_SIZE * 10);
+            box.setHeight(locations.stream().max(Comparator.comparingDouble(Location::getY)).get().getY() + Grid.GRID_SIZE * 10);
+        }
+
+        final EnabledColor enabledColor = (json.has(COLOR) ? EnabledColor.fromIdentifier(json.getAsJsonPrimitive(COLOR).getAsString()) : null);
         if (enabledColor != null) {
             setColorIntensity(enabledColor.intensity);
             setColor(enabledColor.color);
+        } else {
+            setRandomColor();
+            for(Location loc : locations) {
+                loc.setColor(this.getColor());
+                loc.setColorIntensity(this.getColorIntensity());
+            }
         }
 
-        setIncludeInPeriodicCheck(json.getAsJsonPrimitive(INCLUDE_IN_PERIODIC_CHECK).getAsBoolean());
+        if(json.has(INCLUDE_IN_PERIODIC_CHECK)) {
+            setIncludeInPeriodicCheck(json.getAsJsonPrimitive(INCLUDE_IN_PERIODIC_CHECK).getAsBoolean());
+        } else {
+            setIncludeInPeriodicCheck(false);
+        }
     }
 
     /**

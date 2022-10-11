@@ -4,8 +4,8 @@ import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
 import ecdar.abstractions.EdgeStatus;
 import ecdar.abstractions.Location;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 
 public class SimpleComponentSimulationTest {
 
@@ -20,23 +20,23 @@ public class SimpleComponentSimulationTest {
 
         final SimpleComponentSimulation s = new SimpleComponentSimulation(c);
 
-        Assert.assertEquals(1, s.getClockValuations().size());
-        Assert.assertTrue(s.getClockValuations().containsKey("x"));
-        Assert.assertTrue(s.getClockValuations().containsValue(0.0));
+        Assertions.assertEquals(1, s.getClockValuations().size());
+        Assertions.assertTrue(s.getClockValuations().containsKey("x"));
+        Assertions.assertTrue(s.getClockValuations().containsValue(0.0));
 
         boolean result = s.delay(1.2);
 
-        Assert.assertEquals(true, result);
-        Assert.assertEquals(1, s.getClockValuations().size());
-        Assert.assertTrue(s.getClockValuations().containsKey("x"));
-        Assert.assertTrue(s.getClockValuations().containsValue(1.2));
+        Assertions.assertEquals(true, result);
+        Assertions.assertEquals(1, s.getClockValuations().size());
+        Assertions.assertTrue(s.getClockValuations().containsKey("x"));
+        Assertions.assertTrue(s.getClockValuations().containsValue(1.2));
 
         result = s.delay(0.3);
 
-        Assert.assertEquals(true, result);
-        Assert.assertEquals(1, s.getClockValuations().size());
-        Assert.assertTrue(s.getClockValuations().containsKey("x"));
-        Assert.assertTrue(s.getClockValuations().containsValue(1.5));
+        Assertions.assertEquals(true, result);
+        Assertions.assertEquals(1, s.getClockValuations().size());
+        Assertions.assertTrue(s.getClockValuations().containsKey("x"));
+        Assertions.assertTrue(s.getClockValuations().containsValue(1.5));
     }
 
     @Test
@@ -57,21 +57,21 @@ public class SimpleComponentSimulationTest {
 
         final SimpleComponentSimulation s = new SimpleComponentSimulation(c);
 
-        Assert.assertEquals(1, s.getClockValuations().size());
-        Assert.assertTrue(s.getClockValuations().containsKey("x"));
-        Assert.assertTrue(s.getClockValuations().containsValue(0.0));
+        Assertions.assertEquals(1, s.getClockValuations().size());
+        Assertions.assertTrue(s.getClockValuations().containsKey("x"));
+        Assertions.assertTrue(s.getClockValuations().containsValue(0.0));
 
         s.delay(1.2);
 
-        Assert.assertEquals(1, s.getClockValuations().size());
-        Assert.assertTrue(s.getClockValuations().containsKey("x"));
-        Assert.assertTrue(s.getClockValuations().containsValue(1.2));
+        Assertions.assertEquals(1, s.getClockValuations().size());
+        Assertions.assertTrue(s.getClockValuations().containsKey("x"));
+        Assertions.assertTrue(s.getClockValuations().containsValue(1.2));
 
         s.runInputAction("a");
 
-        Assert.assertEquals(1, s.getClockValuations().size());
-        Assert.assertTrue(s.getClockValuations().containsKey("x"));
-        Assert.assertTrue(s.getClockValuations().containsValue(0.0));
+        Assertions.assertEquals(1, s.getClockValuations().size());
+        Assertions.assertTrue(s.getClockValuations().containsKey("x"));
+        Assertions.assertTrue(s.getClockValuations().containsValue(0.0));
     }
 
     @Test
@@ -95,12 +95,12 @@ public class SimpleComponentSimulationTest {
 
         final SimpleComponentSimulation s = new SimpleComponentSimulation(c);
 
-        Assert.assertEquals(1, s.getClockValuations().size());
-        Assert.assertEquals("L0", s.getCurrentLocation().getId());
+        Assertions.assertEquals(1, s.getClockValuations().size());
+        Assertions.assertEquals("L0", s.getCurrentLocation().getId());
 
         s.runInputAction("a");
 
-        Assert.assertEquals(1, s.getClockValuations().size());
-        Assert.assertEquals("L1", s.getCurrentLocation().getId());
+        Assertions.assertEquals(1, s.getClockValuations().size());
+        Assertions.assertEquals("L1", s.getCurrentLocation().getId());
     }
 }

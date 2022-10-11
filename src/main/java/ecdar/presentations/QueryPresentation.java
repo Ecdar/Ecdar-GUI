@@ -7,6 +7,7 @@ import ecdar.backend.*;
 import ecdar.controllers.QueryController;
 import ecdar.controllers.EcdarController;
 import ecdar.utility.colors.Color;
+import ecdar.utility.helpers.StringValidator;
 import javafx.application.Platform;
 import javafx.beans.binding.When;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -20,9 +21,12 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.scene.text.TextAlignment;
 import org.kordamp.ikonli.javafx.FontIcon;
+import org.kordamp.ikonli.material.Material;
+
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+
 import static javafx.scene.paint.Color.*;
 
 public class QueryPresentation extends HBox {
@@ -49,12 +53,9 @@ public class QueryPresentation extends HBox {
 
     private void initializeBackendsDropdown() {
         controller.backendsDropdown.setItems(BackendHelper.getBackendInstances());
-        BackendHelper.addBackendInstanceListener(() -> controller.backendsDropdown.setItems(BackendHelper.getBackendInstances()));
-
         backendDropdownTooltip = new Tooltip();
         backendDropdownTooltip.setText("Current backend used for the query");
         JFXTooltip.install(controller.backendsDropdown, backendDropdownTooltip);
-
         controller.backendsDropdown.setValue(BackendHelper.getDefaultBackendInstance());
     }
 
@@ -77,6 +78,14 @@ public class QueryPresentation extends HBox {
                     }
                 });
             }));
+
+            queryTextField.focusedProperty().addListener((observable, oldValue, newValue) -> {
+                if (!newValue && !StringValidator.validateQuery(queryTextField.getText())) {
+                    queryTextField.getStyleClass().add("input-violation");
+                } else {
+                    queryTextField.getStyleClass().remove("input-violation");
+                }
+            });
 
             commentTextField.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
         });
@@ -181,15 +190,21 @@ public class QueryPresentation extends HBox {
 
             // Delegate that based on a query state updates tooltip of the query
             final Consumer<QueryState> updateToolTip = (queryState) -> {
-                Platform.runLater(() -> {
-                    if (queryState.getStatusCode() == 1) {
-                        this.tooltip.setText("This query was successful!");
-                    } else if (queryState.getStatusCode() == 3) {
-                        this.tooltip.setText("The query has not been executed yet");
+                if (queryState.getStatusCode() == 1) {
+                    if(queryState.getIconCode().equals(Material.DONE)) {
+                        this.tooltip.setText("This query was a success!");
                     } else {
-                        this.tooltip.setText(controller.getQuery().getCurrentErrors());
+                        this.tooltip.setText("The component has been created (can be accessed in the project pane)");
                     }
-                });
+                }
+                else if (queryState.getStatusCode() == 2){
+                    this.tooltip.setText("This query was not a success!");
+                }
+                else if (queryState.getStatusCode() == 3) {
+                    this.tooltip.setText("The query has not been executed yet");
+                } else {
+                    this.tooltip.setText(controller.getQuery().getCurrentErrors());
+                }
             };
 
             // Delegate that based on a query state updates the color of the state indicator
@@ -238,6 +253,15 @@ public class QueryPresentation extends HBox {
             Tooltip.install(statusIcon.getParent(), this.tooltip);
 
             controller.queryTypeSymbol.setText(controller.getQuery() != null && controller.getQuery().getType() != null ? controller.getQuery().getType().getSymbol() : "---");
+
+            statusIcon.setOnMouseClicked(event -> {
+                if (controller.getQuery().getQuery().isEmpty()) return;
+                
+                Label label = new Label(tooltip.getText());
+
+                JFXDialog dialog = new InformationDialogPresentation("Result from query: " + Query.RefinementSymbolToUnicode(controller.getQuery().getQuery()), label);
+                dialog.show(Ecdar.getPresentation());
+            });
         });
     }
 

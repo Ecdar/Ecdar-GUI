@@ -61,7 +61,6 @@ public class FilePresentation extends AnchorPane {
         final Color color = Color.GREY_BLUE;
         final Color.Intensity colorIntensity = Color.Intensity.I400;
 
-
         rippler.setMaskType(JFXRippler.RipplerMask.RECT);
         rippler.setRipplerFill(color.getColor(colorIntensity));
         rippler.setPosition(JFXRippler.RipplerPos.BACK);
@@ -116,6 +115,7 @@ public class FilePresentation extends AnchorPane {
             }
             setCursor(Cursor.HAND);
         });
+
         setOnMouseExited(event -> {
             if(isActive) {
                 setBackground.accept(color, colorIntensity.next(1));
@@ -157,7 +157,7 @@ public class FilePresentation extends AnchorPane {
         } else {
             controller.fileImage.setImage(new Image(Ecdar.class.getResource("description_frame.png").toExternalForm()));
         }
-        EcdarPresentation.fitSizeWhenAvailable(controller.fileImage, controller.filePane);
+        EcdarPresentation.fitSizeWhenAvailable(controller.fileImage, controller.fileImageStackPane);
     }
 
     public HighLevelModelObject getModel() {

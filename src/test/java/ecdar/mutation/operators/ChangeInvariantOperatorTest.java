@@ -3,9 +3,8 @@ package ecdar.mutation.operators;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Location;
 import ecdar.mutation.MutationTestingException;
-import ecdar.mutation.operators.ChangeInvariantOperator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 
 import java.util.List;
 
@@ -21,8 +20,8 @@ public class ChangeInvariantOperatorTest {
 
         final List<Component> mutants = new ChangeInvariantOperator().generateMutants(c);
 
-        Assert.assertEquals(1, mutants.size());
-        Assert.assertEquals("x < 2 + 1", mutants.get(0).getLocations().get(0).getInvariant());
+        Assertions.assertEquals(1, mutants.size());
+        Assertions.assertEquals("x < 2 + 1", mutants.get(0).getLocations().get(0).getInvariant());
     }
 
     @Test
@@ -35,10 +34,10 @@ public class ChangeInvariantOperatorTest {
 
         final List<Component> mutants = new ChangeInvariantOperator().generateMutants(c);
 
-        Assert.assertEquals(2, mutants.size());
+        Assertions.assertEquals(2, mutants.size());
 
-        Assert.assertEquals(1, mutants.stream().filter(m -> m.getLocations().get(0).getInvariant().equals("x < 2 + 1 && y <= 3")).count());
-        Assert.assertEquals(1, mutants.stream().filter(m -> m.getLocations().get(0).getInvariant().equals("x < 2 && y <= 3 + 1")).count());
+        Assertions.assertEquals(1, mutants.stream().filter(m -> m.getLocations().get(0).getInvariant().equals("x < 2 + 1 && y <= 3")).count());
+        Assertions.assertEquals(1, mutants.stream().filter(m -> m.getLocations().get(0).getInvariant().equals("x < 2 && y <= 3 + 1")).count());
     }
 
     @Test
@@ -55,6 +54,6 @@ public class ChangeInvariantOperatorTest {
 
         final List<Component> mutants = new ChangeInvariantOperator().generateMutants(c);
 
-        Assert.assertEquals(3, mutants.size());
+        Assertions.assertEquals(3, mutants.size());
     }
 }
