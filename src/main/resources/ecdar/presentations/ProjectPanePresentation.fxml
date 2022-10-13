@@ -56,7 +56,7 @@
                     <!-- Files goes here -->
                 </VBox>
 
-                <HBox fx:id="generatedComponentsDivider" alignment="CENTER">
+                <HBox visible="false" fx:id="generatedComponentsDivider" alignment="CENTER">
                     <padding>
                         <Insets left="10"/>
                     </padding>
@@ -68,8 +68,8 @@
                     <JFXRippler fx:id="generatedComponentsVisibilityButton" alignment="CENTER_RIGHT">
                         <StackPane minWidth="40" maxWidth="40" minHeight="40" maxHeight="40"
                                    onMouseClicked="#setGeneratedComponentsVisibilityButtonClicked">
-                            <FontIcon fx:id="generatedComponentsVisibilityButtonIcon" iconLiteral="gmi-expand-less"
-                                      iconSize="24"/>
+                            <FontIcon fx:id="generatedComponentsVisibilityButtonIcon" iconLiteral="gmi-arrow-drop-down"
+                                      iconSize="28"/>
                         </StackPane>
                     </JFXRippler>
                 </HBox>
