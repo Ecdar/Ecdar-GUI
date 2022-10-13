@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.ScrollPane?>
+<fx:root xmlns:fx="http://javafx.com/fxml/1"
+         xmlns="http://javafx.com/javafx/8.0.76-ea"
+         type="AnchorPane"
+         fx:id="root"
+         fx:controller="ecdar.controllers.SimulatorOverviewController"
+         translateY="55" style="-fx-focus-traversable: false; -fx-focus-color: lightgray">
+    <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" AnchorPane.topAnchor="0"
+                AnchorPane.bottomAnchor="55" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+    </ScrollPane>
+</fx:root>

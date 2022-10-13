@@ -2,6 +2,7 @@ package ecdar.backend;
 
 import EcdarProtoBuf.ComponentProtos;
 import EcdarProtoBuf.EcdarBackendGrpc;
+import EcdarProtoBuf.ObjectProtos;
 import EcdarProtoBuf.QueryProtos;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -10,10 +11,12 @@ import ecdar.Ecdar;
 import ecdar.abstractions.BackendInstance;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.QueryState;
-import ecdar.controllers.EcdarController;
-import ecdar.utility.UndoRedoStack;
+import ecdar.simulation.SimulationState;
 import io.grpc.*;
 import io.grpc.stub.StreamObserver;
+import javafx.util.Pair;
+import ecdar.controllers.EcdarController;
+import ecdar.utility.UndoRedoStack;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import org.springframework.util.SocketUtils;
@@ -383,6 +386,12 @@ public class BackendDriver {
                 break;
         }
     }
+
+    public SimulationState getInitialSimulationState() {
+            SimulationState state = new SimulationState(ObjectProtos.StateTuple.newBuilder().getDefaultInstanceForType());
+            state.getLocations().add(new Pair<>(Ecdar.getProject().getComponents().get(0).getName(), Ecdar.getProject().getComponents().get(0).getLocations().get(0).getId()));
+            return state;
+        }
 
     private void addGeneratedComponent(Component newComponent) {
         Platform.runLater(() -> {

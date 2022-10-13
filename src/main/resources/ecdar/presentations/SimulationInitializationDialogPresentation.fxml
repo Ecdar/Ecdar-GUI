@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+
+<?import com.jfoenix.controls.JFXDialog?>
+<?import javafx.scene.text.Text?>
+<?import com.jfoenix.controls.JFXButton?>
+<?import javafx.geometry.Insets?>
+<?import com.jfoenix.controls.JFXComboBox?>
+<fx:root xmlns="http://javafx.com/javafx"
+         xmlns:fx="http://javafx.com/fxml"
+         type="JFXDialog" fx:controller="ecdar.controllers.SimulationInitializationDialogController"
+         prefHeight="400.0" prefWidth="600.0"
+         style="-fx-background-color: #0000007F;">
+    <VBox>
+        <!-- Will scale the dialog -->
+        <Region minWidth="400" maxWidth="400"/>
+        <!-- Content -->
+        <VBox>
+            <padding>
+                <Insets topRightBottomLeft="20"/>
+            </padding>
+            <HBox>
+                <Text styleClass="headline" HBox.hgrow="ALWAYS">Simulation Initialization</Text>
+            </HBox>
+            <Region prefHeight="20"/>
+            <HBox>
+                <Region prefWidth="40"/>
+                <JFXComboBox fx:id="simulationComboBox" StackPane.alignment="CENTER" maxHeight="600" minWidth="300"
+                             maxWidth="300"/>
+                <Region prefWidth="40"/>
+            </HBox>
+            <Region prefHeight="20"/>
+            <HBox>
+                <padding>
+                    <Insets topRightBottomLeft="10"/>
+                </padding>
+                <Region HBox.hgrow="ALWAYS"/>
+                <JFXButton fx:id="cancelButton" text="Cancel"/>
+                <JFXButton fx:id="startButton" text="Start Simulation"/>
+            </HBox>
+        </VBox>
+    </VBox>
+</fx:root>

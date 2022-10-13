@@ -132,7 +132,7 @@ public class FilePresentation extends AnchorPane {
     private ArrayList<HighLevelModelObject> getActiveComponents() {
         ArrayList<HighLevelModelObject> activeComponents = new ArrayList<>();
 
-        Node canvasPaneFirstChild = Ecdar.getPresentation().getController().canvasPane.getChildren().get(0);
+        Node canvasPaneFirstChild = Ecdar.getPresentation().getController().getEditorPresentation().getController().canvasPane.getChildren().get(0);
         if(canvasPaneFirstChild instanceof GridPane) {
             for (Node child : ((GridPane) canvasPaneFirstChild).getChildren()) {
                 activeComponents.add(((CanvasPresentation) child).getController().getActiveModel());
