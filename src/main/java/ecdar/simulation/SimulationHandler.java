@@ -109,7 +109,7 @@ public class SimulationHandler {
      * elements in the {@link SimulationHandler#traceLog}. Otherwise it calls {@link SimulationHandler#initialStep}
      */
     public void resetToInitialLocation() {
-        //If the simulation has not begone
+        //If the simulation has not begun
         if (traceLog.size() == 0)
             initialStep();
         else

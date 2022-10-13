@@ -12,9 +12,8 @@ public class SimulationState {
     private final ArrayList<Pair<String, String>> locations;
 
     public SimulationState(ObjectProtos.StateTuple protoBufState) {
-        if (protoBufState != null) locations = protoBufState.getLocationsList().stream().map(lt -> new Pair<>(lt.getComponentName(), lt.getId())).collect(Collectors.toCollection(ArrayList::new));
-        else locations = new ArrayList<>();
-        // ToDo: Handle federations
+        locations = new ArrayList<>();
+        // ToDo: Initialize with correct locations from protoBuf response
     }
 
     public void setTime(BigDecimal value) {
