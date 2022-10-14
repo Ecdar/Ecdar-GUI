@@ -73,7 +73,7 @@ public class QueryPresentation extends HBox {
 
             queryTextField.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler(keyEvent -> {
                 Platform.runLater(() -> {
-                    if (keyEvent.getCode().equals(KeyCode.ENTER)) {
+                    if (keyEvent.getCode().equals(KeyCode.ENTER) && controller.getQuery().getType() != null) {
                         runQuery();
                     }
                 });
