@@ -1,6 +1,5 @@
 package ecdar.abstractions;
 
-import ecdar.presentations.Grid;
 import com.google.gson.JsonObject;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -10,8 +9,8 @@ import javafx.beans.value.ObservableValue;
  * Model of a Component Operator
  */
 public abstract class ComponentOperator implements SystemElement {
-    public final static int WIDTH = 4 * Grid.GRID_SIZE;
-    public final static int HEIGHT = 2 * Grid.GRID_SIZE;
+    public final static int WIDTH = 40;
+    public final static int HEIGHT = 20;
 
     public static final String TYPE = "type";
 

@@ -37,8 +37,6 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
-import static ecdar.presentations.Grid.GRID_SIZE;
-
 public class EdgeController implements Initializable, SelectHelper.ItemSelectable, Highlightable {
     private final ObservableList<Link> links = FXCollections.observableArrayList();
     private final ObjectProperty<DisplayableEdge> edge = new SimpleObjectProperty<>();
@@ -289,8 +287,8 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
             if (nails.size() == 0) {
                 // Check if the source and target locations are the same, if they are, add proper amount of nails
                 if (newEdge.getTargetCircular().equals(newSourceCircular)) {
-                    final Nail nail1 = new Nail(newSourceCircular.xProperty().add(4 * GRID_SIZE), newSourceCircular.yProperty().subtract(GRID_SIZE));
-                    final Nail nail2 = new Nail(newSourceCircular.xProperty().add(4 * GRID_SIZE), newSourceCircular.yProperty().add(GRID_SIZE));
+                    final Nail nail1 = new Nail(newSourceCircular.xProperty().add(40), newSourceCircular.yProperty().subtract(10));
+                    final Nail nail2 = new Nail(newSourceCircular.xProperty().add(40), newSourceCircular.yProperty().add(10));
 
                     // Add the nails to the nails collection (will draw links between them)
                     nails.addAll(nail1, nail2);
@@ -447,8 +445,8 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                         dropDownMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX() * EcdarController.getActiveCanvasZoomFactor().get(), event.getY() * EcdarController.getActiveCanvasZoomFactor().get());
 
                     } else if ((event.isShiftDown() && event.isPrimaryButtonDown()) || event.isMiddleButtonDown()) {
-                        final double nailX = EcdarController.getActiveCanvasPresentation().mouseTracker.gridXProperty().subtract(getComponent().getBox().getXProperty()).doubleValue();
-                        final double nailY = EcdarController.getActiveCanvasPresentation().mouseTracker.gridYProperty().subtract(getComponent().getBox().getYProperty()).doubleValue();
+                        final double nailX = EcdarController.getActiveCanvasPresentation().mouseTracker.xProperty().subtract(getComponent().getBox().getXProperty()).doubleValue();
+                        final double nailY = EcdarController.getActiveCanvasPresentation().mouseTracker.yProperty().subtract(getComponent().getBox().getYProperty()).doubleValue();
 
                         final Nail newNail = new Nail(nailX, nailY);
 
@@ -595,8 +593,8 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
     }
 
     private Nail getNewNailBasedOnDropdownPosition() {
-        final double nailX = Math.round(DropDownMenu.x / EcdarController.getActiveCanvasZoomFactor().get() / GRID_SIZE) * GRID_SIZE;
-        final double nailY = Math.round(DropDownMenu.y / EcdarController.getActiveCanvasZoomFactor().get() / GRID_SIZE) * GRID_SIZE;
+        final double nailX = DropDownMenu.x / EcdarController.getActiveCanvasZoomFactor().get();
+        final double nailY = DropDownMenu.y / EcdarController.getActiveCanvasZoomFactor().get();
         return new Nail(nailX, nailY);
     }
 

@@ -1,12 +1,10 @@
 package ecdar.utility.keyboard;
 
-import static ecdar.presentations.Grid.GRID_SIZE;
-
 public enum NudgeDirection {
-    UP(0, -GRID_SIZE),
-    RIGHT(GRID_SIZE, 0),
-    DOWN(0, GRID_SIZE),
-    LEFT(-GRID_SIZE, 0);
+    UP(0, -10),
+    RIGHT(10, 0),
+    DOWN(0, 10),
+    LEFT(-10, 0);
 
     private int x;
     private int y;

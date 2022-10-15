@@ -9,7 +9,6 @@ import ecdar.presentations.*;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
 import ecdar.utility.helpers.ItemDragHelper;
-import ecdar.utility.helpers.MouseCircular;
 import ecdar.utility.helpers.SelectHelper;
 import ecdar.utility.keyboard.Keybind;
 import ecdar.utility.keyboard.KeyboardTracker;
@@ -36,8 +35,6 @@ import javafx.scene.shape.Rectangle;
 import java.net.URL;
 import java.util.*;
 import java.util.function.Consumer;
-
-import static ecdar.presentations.Grid.GRID_SIZE;
 
 public class LocationController implements Initializable, SelectHelper.ItemSelectable, Nudgeable {
 
@@ -370,7 +367,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                 final DisplayableEdge unfinishedEdge = component.getUnfinishedEdge();
                 // Make self-loop pretty if needed
                 if (unfinishedEdge.getTargetLocation().equals(getLocation()) && unfinishedEdge.getNails().size() == 1) {
-                    final Nail nail = new Nail(unfinishedEdge.getNails().get(0).getX(), unfinishedEdge.getNails().get(0).getY() + 2 * GRID_SIZE);
+                    final Nail nail = new Nail(unfinishedEdge.getNails().get(0).getX(), unfinishedEdge.getNails().get(0).getY() + 20);
                     unfinishedEdge.addNail(nail);
                 }
                 unfinishedEdge.setSourceLocation(getLocation());
@@ -398,16 +395,16 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                     if (!unfinishedEdge.hasSyncNail()) {
                         // If self loop, make it pretty
                         if (getLocation().equals(unfinishedEdge.getSourceLocation())) {
-                            final Nail nail = new Nail(getX() + 4 * GRID_SIZE, getY() - GRID_SIZE);
+                            final Nail nail = new Nail(getX() + 40, getY() - 10);
                             nail.setPropertyType(Edge.PropertyType.SYNCHRONIZATION);
                             unfinishedEdge.addNail(nail);
-                            final Nail nail2 = new Nail(getX() + 4 * GRID_SIZE, getY() + GRID_SIZE);
+                            final Nail nail2 = new Nail(getX() + 40, getY() + 10);
                             unfinishedEdge.addNail(nail2);
                         } else {
                             unfinishedEdge.makeSyncNailBetweenLocations();
                         }
                     } else if (getLocation().equals(unfinishedEdge.getSourceLocation()) && unfinishedEdge.getNails().size() == 1) {
-                        final Nail nail = new Nail(unfinishedEdge.getNails().get(0).getX(), unfinishedEdge.getNails().get(0).getY() + 2 *GRID_SIZE);
+                        final Nail nail = new Nail(unfinishedEdge.getNails().get(0).getX(), unfinishedEdge.getNails().get(0).getY() + 20);
                         unfinishedEdge.addNail(nail);
                     }
 
@@ -445,10 +442,10 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                 }
             } else {
                 // Allowed x and y coordinates
-                final double minX = GRID_SIZE * 2;
-                final double maxX = getComponent().getBox().getWidth() - GRID_SIZE * 2;
-                final double minY = Grid.TOOL_BAR_HEIGHT + GRID_SIZE * 2;
-                final double maxY = getComponent().getBox().getHeight() - GRID_SIZE * 2;
+                final double minX = 20;
+                final double maxX = getComponent().getBox().getWidth() - 20;
+                final double minY = 60;
+                final double maxY = getComponent().getBox().getHeight() - 20;
 
                 if(root.getLayoutX() >= minX && root.getLayoutX() <= maxX && root.getLayoutY() >= minY && root.getLayoutY() <= maxY) {
                     // Unbind presentation root x and y coordinates (bind the view properly to enable dragging)
@@ -497,10 +494,10 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
     @Override
     public ItemDragHelper.DragBounds getDragBounds() {
-        final ObservableDoubleValue minX = new SimpleDoubleProperty(GRID_SIZE * 2);
-        final ObservableDoubleValue maxX = getComponent().getBox().getWidthProperty().subtract(GRID_SIZE * 2);
-        final ObservableDoubleValue minY = new SimpleDoubleProperty(Grid.TOOL_BAR_HEIGHT + GRID_SIZE * 2);
-        final ObservableDoubleValue maxY = getComponent().getBox().getHeightProperty().subtract(GRID_SIZE * 2);
+        final ObservableDoubleValue minX = new SimpleDoubleProperty(20);
+        final ObservableDoubleValue maxX = getComponent().getBox().getWidthProperty().subtract(20);
+        final ObservableDoubleValue minY = new SimpleDoubleProperty(40);
+        final ObservableDoubleValue maxY = getComponent().getBox().getHeightProperty().subtract(20);
         return new ItemDragHelper.DragBounds(minX, maxX, minY, maxY);
     }
 

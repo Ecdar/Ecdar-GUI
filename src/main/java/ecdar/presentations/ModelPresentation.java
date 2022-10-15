@@ -17,16 +17,14 @@ import javafx.scene.Cursor;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
 
-import static ecdar.presentations.Grid.GRID_SIZE;
-
 /**
  * Presentation for high level graphical models such as systems and components
  */
 public abstract class ModelPresentation extends HighLevelModelPresentation {
     static final Polygon TOP_LEFT_CORNER = new Polygon(
             0, 0,
-            Grid.CORNER_SIZE + 2, 0,
-            0, Grid.CORNER_SIZE + 2
+            42, 0,
+            0, 42
     );
 
     abstract ModelController getModelController();
@@ -87,7 +85,7 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
         updateColor.run();
 
         // Center the text vertically and aff a left padding of CORNER_SIZE
-        controller.name.setPadding(new Insets(2, 0, 0, Grid.CORNER_SIZE));
+        controller.name.setPadding(new Insets(2, 0, 0, 40));
         controller.name.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
     }
 
@@ -98,8 +96,8 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
     void initializeDimensions(final Box box) {
         // Ensure that the component snaps to the grid
         if (box.getX() == 0 && box.getY() == 0) {
-            box.setX(GRID_SIZE * 0.5);
-            box.setY(GRID_SIZE * 0.5);
+            box.setX(5);
+            box.setY(5);
         }
 
         // Bind the position of the abstraction to the values in the view
@@ -146,8 +144,6 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
 
         rightAnchor.setOnMouseDragged(event -> {
             double diff = event.getScreenX() - prevX.get();
-            diff -= diff % Grid.GRID_SIZE;
-
             final double newWidth = prevWidth.get() + diff;
             final double minWidth = getDragAnchorMinWidth();
 
@@ -205,8 +201,6 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
 
         bottomAnchor.setOnMouseDragged(event -> {
             double diff = event.getScreenY() - prevY.get();
-            diff -= diff % Grid.GRID_SIZE;
-
             final double newHeight = prevHeight.get() + diff;
             final double minHeight = getDragAnchorMinHeight();
 
@@ -263,14 +257,10 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
 
         cornerAnchor.setOnMouseDragged(event -> {
             double xDiff = (event.getScreenX() - prevX.get()) / EcdarController.getActiveCanvasZoomFactor().get();
-            xDiff -= xDiff % Grid.GRID_SIZE;
-
             final double newWidth = Math.max(prevWidth.get() + xDiff, getDragAnchorMinWidth());
             box.setWidth(newWidth);
 
             double yDiff = (event.getScreenY() - prevY.get()) / EcdarController.getActiveCanvasZoomFactor().get();
-            yDiff -= yDiff % Grid.GRID_SIZE;
-
             final double newHeight = Math.max(prevHeight.get() + yDiff, getDragAnchorMinHeight());
             box.setHeight(newHeight);
 

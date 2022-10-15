@@ -76,8 +76,8 @@ public class ComponentOperatorPresentation extends StackPane implements SelectHe
         instance.getBox().getHeightProperty().bind(heightProperty());
 
         // Bind x and y
-        setLayoutX(Grid.snap(instance.getBox().getX()));
-        setLayoutY(Grid.snap(instance.getBox().getY()));
+        setLayoutX(instance.getBox().getX());
+        setLayoutY(instance.getBox().getY());
         instance.getBox().getXProperty().bind(layoutXProperty());
         instance.getBox().getYProperty().bind(layoutYProperty());
     }
@@ -88,12 +88,12 @@ public class ComponentOperatorPresentation extends StackPane implements SelectHe
     private void initializeFrame() {
         final EcdarSystem system = controller.getSystem();
 
-        controller.frame.getPoints().addAll(1d * Grid.GRID_SIZE, - 1d * Grid.GRID_SIZE);
-        controller.frame.getPoints().addAll(- 1d * Grid.GRID_SIZE, - 1d * Grid.GRID_SIZE);
-        controller.frame.getPoints().addAll(- 2d * Grid.GRID_SIZE, 0d);
-        controller.frame.getPoints().addAll(- 1d * Grid.GRID_SIZE, 1d * Grid.GRID_SIZE);
-        controller.frame.getPoints().addAll(1d * Grid.GRID_SIZE, 1d * Grid.GRID_SIZE);
-        controller.frame.getPoints().addAll(2d * Grid.GRID_SIZE, 0d);
+        controller.frame.getPoints().addAll(1d * 10, - 1d * 10);
+        controller.frame.getPoints().addAll(- 1d * 10, - 1d * 10);
+        controller.frame.getPoints().addAll(- 2d * 10, 0d);
+        controller.frame.getPoints().addAll(- 1d * 10, 1d * 10);
+        controller.frame.getPoints().addAll(1d * 10, 1d * 10);
+        controller.frame.getPoints().addAll(2d * 10, 0d);
 
         final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> controller.frame.setFill(newColor.getColor(newIntensity));
 
@@ -146,13 +146,13 @@ public class ComponentOperatorPresentation extends StackPane implements SelectHe
      */
     @Override
     public ItemDragHelper.DragBounds getDragBounds() {
-        final ObservableDoubleValue minX = new SimpleDoubleProperty(Grid.GRID_SIZE);
+        final ObservableDoubleValue minX = new SimpleDoubleProperty(10);
         final ObservableDoubleValue maxX = controller.getSystem().getBox().getWidthProperty()
-                .subtract(Grid.GRID_SIZE)
+                .subtract(minX)
                 .subtract(controller.getOperator().getBox().getWidth());
-        final ObservableDoubleValue minY = new SimpleDoubleProperty(Grid.TOOL_BAR_HEIGHT + Grid.GRID_SIZE * 3);
+        final ObservableDoubleValue minY = new SimpleDoubleProperty(70);
         final ObservableDoubleValue maxY = controller.getSystem().getBox().getHeightProperty()
-                .subtract(Grid.GRID_SIZE)
+                .subtract(minY)
                 .subtract(controller.getOperator().getBox().getHeight());
         return new ItemDragHelper.DragBounds(minX, maxX, minY, maxY);
     }

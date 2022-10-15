@@ -24,12 +24,9 @@ import java.util.HashMap;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
-import static ecdar.presentations.Grid.GRID_SIZE;
-
 public class CanvasController implements Initializable {
     public StackPane root;
     public StackPane zoomablePane;
-    public Grid grid;
     public StackPane modelPane;
     public HBox toolbar;
 
@@ -38,12 +35,9 @@ public class CanvasController implements Initializable {
     public JFXRippler zoomToFit;
     public JFXRippler resetZoom;
     public final ZoomHelper zoomHelper = new ZoomHelper();
-    public final double DECLARATION_Y_MARGIN = GRID_SIZE * 5.5;
+    public final double DECLARATION_Y_MARGIN = 55;
     public ComponentPresentation activeComponentPresentation;
 
-    // This is whether to allow the user to turn on/off the grid.
-    // While this is false, the grid is always hidden, no matter the user option.
-    private final BooleanProperty allowGrid = new SimpleBooleanProperty(true);
     private final ObjectProperty<HighLevelModelObject> activeModel = new SimpleObjectProperty<>(null);
     private final HashMap<HighLevelModelObject, Pair<Double, Double>> ModelObjectTranslateMap = new HashMap<>();
     private DoubleProperty width, height;
@@ -116,35 +110,8 @@ public class CanvasController implements Initializable {
         };
 
         // Enable zoom
-        grid.scaleXProperty().bind(zoomHelper.currentZoomFactor);
-        grid.scaleYProperty().bind(zoomHelper.currentZoomFactor);
         modelPane.scaleXProperty().bind(zoomHelper.currentZoomFactor);
         modelPane.scaleYProperty().bind(zoomHelper.currentZoomFactor);
-        grid.bindSize(width, height);
-    }
-
-    /**
-     * Allows the user to turn the grid on/off.
-     * If the user has currently chosen on, then this method also shows the grid.
-     */
-    public void allowGrid() {
-        allowGrid.set(true);
-    }
-
-    /**
-     * Disallows the user to turn the grid on/off.
-     * Also hides the grid.
-     */
-    public void disallowGrid() {
-        allowGrid.set(false);
-    }
-
-    public BooleanProperty allowGridProperty() {
-        return allowGrid;
-    }
-
-    public boolean isGridAllowed() {
-        return allowGrid.get();
     }
 
     /**
@@ -168,9 +135,6 @@ public class CanvasController implements Initializable {
             ModelObjectTranslateMap.put(oldObject, new Pair<>(modelPane.getTranslateX(), modelPane.getTranslateY()));
         }
 
-        // if old object is a mutation test plan, and new object is not, allow grid to show
-        if (oldObject instanceof MutationTestPlan && !(newObject instanceof  MutationTestPlan)) allowGrid();
-
         // We should not add the new object if it is null (e.g. when clearing the view)
         if (newObject == null) return;
 
@@ -191,8 +155,6 @@ public class CanvasController implements Initializable {
             activeComponentPresentation = null;
             modelPane.getChildren().add(new SystemPresentation((EcdarSystem) newObject));
         } else if (newObject instanceof MutationTestPlan) {
-            this.disallowGrid();
-
             activeComponentPresentation = null;
             modelPane.getChildren().add(new MutationTestPlanPresentation((MutationTestPlan) newObject));
         } else {

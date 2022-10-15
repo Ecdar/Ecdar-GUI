@@ -7,7 +7,6 @@
 <?import com.jfoenix.controls.JFXRippler?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 <?import javafx.scene.layout.Region?>
-<?import ecdar.presentations.Grid?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
          type="StackPane" fx:id="root"
@@ -15,7 +14,6 @@
     <StackPane fx:id="zoomablePane"
                AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0"
                AnchorPane.rightAnchor="0.0" AnchorPane.bottomAnchor="0.0">
-        <Grid fx:id="grid"/>
         <StackPane fx:id="modelPane" style="-fx-font-size: 13px; /* Prevents scaling of text on canvas*/"/>
     </StackPane>
     <VBox maxHeight="-Infinity" style="-fx-max-width: 15em">
