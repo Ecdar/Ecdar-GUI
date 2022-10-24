@@ -505,7 +505,6 @@ public class ComponentController extends ModelController implements Initializabl
         initializeDropDownMenu.accept(getComponent());
     }
 
-    // ToDo NIELS: Location placement results in hit, no matter what
     private void initializeLocationHandling(final Component newComponent) {
         final Consumer<Location> handleAddedLocation = (loc) -> {
             // Check related to undo/redo stack

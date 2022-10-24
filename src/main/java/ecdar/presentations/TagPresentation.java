@@ -37,7 +37,7 @@ public class TagPresentation extends StackPane {
     LineTo l3;
     boolean hadInitialFocus = false;
 
-    static double TAG_HEIGHT = 1.6;
+    static double TAG_HEIGHT = 16;
 
     public TagPresentation() {
         new EcdarFXMLLoader().loadAndGetController("TagPresentation.fxml", this);
