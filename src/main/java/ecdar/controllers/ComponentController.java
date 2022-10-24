@@ -517,7 +517,7 @@ public class ComponentController extends ModelController implements Initializabl
             final LocationPresentation newLocationPresentation = new LocationPresentation(loc, newComponent);
 
             final ChangeListener<Number> locationPlacementChangedListener = (observable, oldValue, newValue) -> {
-                final double offset = newLocationPresentation.getController().circle.getRadius() * 20;
+                final double offset = newLocationPresentation.getController().circle.getRadius() * 2;
                 boolean hit = false;
                 ItemDragHelper.DragBounds componentBounds = newLocationPresentation.getController().getDragBounds();
 
@@ -685,6 +685,7 @@ public class ComponentController extends ModelController implements Initializabl
                 modelContainerLocation.getChildren().remove(newLocationPresentation);
                 locationPresentationMap.remove(newLocationPresentation.getController().locationProperty().getValue());
                 newComponent.getLocations().remove(newLocationPresentation.getController().getLocation());
+                newComponent.getDisplayableEdges().removeIf(e -> e.targetLocationProperty().get().equals(newLocationPresentation.getController().getLocation()));
                 Ecdar.showToast("Please select an empty space for the new location");
             };
 
