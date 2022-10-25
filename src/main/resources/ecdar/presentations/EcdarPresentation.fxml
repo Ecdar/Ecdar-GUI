@@ -200,11 +200,6 @@
                                 <FontIcon iconLiteral="gmi-check" fill="black" styleClass="icon-size-medium"/>
                             </graphic>
                         </MenuItem>
-                        <MenuItem fx:id="menuBarViewGrid" text="Grid">
-                            <graphic>
-                                <FontIcon iconLiteral="gmi-check" fill="black" styleClass="icon-size-medium"/>
-                            </graphic>
-                        </MenuItem>
                         <MenuItem fx:id="menuBarAutoscaling" text="Autoscaling">
                             <graphic>
                                 <FontIcon iconLiteral="gmi-check" fill="black" styleClass="icon-size-medium"/>

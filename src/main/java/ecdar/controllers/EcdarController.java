@@ -1140,8 +1140,7 @@ public class EcdarController implements Initializable {
     }
 
     /**
-     * Take a snapshot with the grid hidden.
-     * The grid is put into its original state afterwards.
+     * Take a snapshot.
      *
      * @return the snapshot
      */

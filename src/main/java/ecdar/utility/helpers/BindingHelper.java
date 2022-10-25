@@ -126,7 +126,6 @@ public class BindingHelper {
             }
         };
 
-
         subject.rotateProperty().bind(rotationBinding);
     }
 

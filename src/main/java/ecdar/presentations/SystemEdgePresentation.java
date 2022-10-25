@@ -44,11 +44,11 @@ public class SystemEdgePresentation extends Group implements SelectHelper.ItemSe
         if (edge.isFinished()) {
             bindFinishedEdge(edge);
         } else {
-            // Bind the link to the the edge source and the mouse position (snapped to the grid)
+            // Bind the link to the edge source and the mouse position
             link.startXProperty().bind(edge.getTempNode().getEdgeX());
             link.startYProperty().bind(edge.getTempNode().getEdgeY());
 
-            // Bind to mouse position (snapped to the grid)
+            // Bind to mouse position
             link.endXProperty().bind(EcdarController.getActiveCanvasPresentation().mouseTracker.xProperty().subtract(5));
             link.endYProperty().bind(EcdarController.getActiveCanvasPresentation().mouseTracker.xProperty().subtract(5));
         }
