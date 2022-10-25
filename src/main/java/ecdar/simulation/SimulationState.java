@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 public class SimulationState {
     private final ArrayList<Pair<String, String>> locations;
 
-    public SimulationState(ObjectProtos.StateTuple protoBufState) {
+    public SimulationState(ObjectProtos.State protoBufState) {
         locations = new ArrayList<>();
         // ToDo: Initialize with correct locations from protoBuf response
     }

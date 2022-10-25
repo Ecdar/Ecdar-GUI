@@ -85,19 +85,22 @@ public class BackendDriver {
             return;
         }
 
-        QueryProtos.ComponentsUpdateRequest.Builder componentsBuilder = QueryProtos.ComponentsUpdateRequest.newBuilder();
+        ComponentProtos.ComponentsInfo.Builder componentsInfoBuilder = ComponentProtos.ComponentsInfo.newBuilder();
         for (Component c : Ecdar.getProject().getComponents()) {
-            componentsBuilder.addComponents(ComponentProtos.Component.newBuilder().setJson(c.serialize().toString()).build());
+            componentsInfoBuilder.addComponents(ComponentProtos.Component.newBuilder().setJson(c.serialize().toString()).build());
         }
 
         executeGrpcRequest(query.getQuery().getQuery(),
                 backendConnection,
-                componentsBuilder,
+                componentsInfoBuilder,
                 QueryProtos.IgnoredInputOutputs.newBuilder().getDefaultInstanceForType(),
                 (response) -> {
-                    if (response.hasQuery() && response.getQuery().hasIgnoredInputOutputs()) {
-                        var ignoredInputOutputs = response.getQuery().getIgnoredInputOutputs();
-                        query.addNewElementsToMap(new ArrayList<>(ignoredInputOutputs.getIgnoredInputsList()), new ArrayList<>(ignoredInputOutputs.getIgnoredOutputsList()));
+                    // ToDo ANDREAS: Spørg niels om hvad ignored inputs og outputs er
+                    System.out.println(query.ignoredInputs);
+                    System.out.println(query.ignoredOutputs);
+                    if (response.hasQueryOk() && query.ignoredInputs != null && query.ignoredOutputs != null) {
+//                        var ignoredInputOutputs = response.getQuery().getIgnoredInputOutputs();
+                        query.addNewElementsToMap(new ArrayList<>(query.ignoredInputs.keySet()), new ArrayList<>(query.ignoredOutputs.keySet()));
                     } else {
                         // Response is unexpected, maybe just ignore
                     }
@@ -121,28 +124,31 @@ public class BackendDriver {
     private void executeQuery(ExecutableQuery executableQuery, BackendConnection backendConnection) {
         if (executableQuery.queryListener.getQuery().getQueryState() == QueryState.UNKNOWN) return;
 
-        QueryProtos.ComponentsUpdateRequest.Builder componentsBuilder = QueryProtos.ComponentsUpdateRequest.newBuilder();
+        ComponentProtos.ComponentsInfo.Builder componentsInfoBuilder = ComponentProtos.ComponentsInfo.newBuilder();
         for (Component c : Ecdar.getProject().getComponents()) {
-            componentsBuilder.addComponents(ComponentProtos.Component.newBuilder().setJson(c.serialize().toString()).build());
+            if (executableQuery.query.contains(c.getName())) {
+                componentsInfoBuilder.addComponents(ComponentProtos.Component.newBuilder().setJson(c.serialize().toString()).build());
+            }
         }
+        componentsInfoBuilder.setComponentsHash(componentsInfoBuilder.getComponentsList().hashCode());
 
-        executeGrpcRequest(executableQuery, backendConnection, componentsBuilder);
+        executeGrpcRequest(executableQuery, backendConnection, componentsInfoBuilder);
     }
 
     /**
      * Executes the specified query as a gRPC request using the specified backend connection.
-     * componentsBuilder is used to update the components of the engine.
+     * componentsInfoBuilder is used to update the components of the engine.
      *
      * @param executableQuery   executable query to be executed by the backend
      * @param backendConnection connection to the backend
-     * @param componentsBuilder components builder containing the components relevant to the query execution
+     * @param componentsInfoBuilder components builder containing the components relevant to the query execution
      */
     private void executeGrpcRequest(ExecutableQuery executableQuery,
                                     BackendConnection backendConnection,
-                                    QueryProtos.ComponentsUpdateRequest.Builder componentsBuilder) {
+                                    ComponentProtos.ComponentsInfo.Builder componentsInfoBuilder) {
         executeGrpcRequest(executableQuery.query,
                 backendConnection,
-                componentsBuilder,
+                componentsInfoBuilder,
                 null,
                 (response) -> handleQueryResponse(response, executableQuery),
                 (error) -> handleQueryBackendError(error, executableQuery)
@@ -151,13 +157,13 @@ public class BackendDriver {
 
     /**
      * Executes the specified query as a gRPC request using the specified backend connection.
-     * componentsBuilder is used to update the components of the engine and on completion of this transaction,
+     * componentsInfoBuilder is used to update the components of the engine and on completion of this transaction,
      * the query is sent and its response is consumed by responseConsumer. Any error encountered is handled by
      * the errorConsumer.
      *
      * @param query                       query to be executed by the backend
      * @param backendConnection           connection to the backend
-     * @param componentsBuilder           components builder containing the components relevant to the query execution
+     * @param componentsInfoBuilder       components builder containing the components relevant to the query execution
      * @param protoBufIgnoredInputOutputs ProtoBuf object containing the inputs and outputs that should be ignored
      *                                    (can be null)
      * @param responseConsumer            consumer for handling the received response
@@ -165,13 +171,14 @@ public class BackendDriver {
      */
     private void executeGrpcRequest(String query,
                                     BackendConnection backendConnection,
-                                    QueryProtos.ComponentsUpdateRequest.Builder componentsBuilder,
+                                    ComponentProtos.ComponentsInfo.Builder componentsInfoBuilder,
                                     QueryProtos.IgnoredInputOutputs protoBufIgnoredInputOutputs,
                                     Consumer<QueryProtos.QueryResponse> responseConsumer,
                                     Consumer<Throwable> errorConsumer) {
-        StreamObserver<Empty> observer = new StreamObserver<>() {
+        StreamObserver<QueryProtos.QueryResponse> responseObserver = new StreamObserver<>() {
             @Override
-            public void onNext(Empty value) {
+            public void onNext(QueryProtos.QueryResponse value) {
+                responseConsumer.accept(value);
             }
 
             @Override
@@ -182,38 +189,21 @@ public class BackendDriver {
 
             @Override
             public void onCompleted() {
-                StreamObserver<QueryProtos.QueryResponse> responseObserver = new StreamObserver<>() {
-                    @Override
-                    public void onNext(QueryProtos.QueryResponse value) {
-                        responseConsumer.accept(value);
-                    }
-
-                    @Override
-                    public void onError(Throwable t) {
-                        errorConsumer.accept(t);
-                        addBackendConnection(backendConnection);
-                    }
-
-                    @Override
-                    public void onCompleted() {
-                        addBackendConnection(backendConnection);
-                    }
-                };
-
-                var queryBuilder = QueryProtos.Query.newBuilder()
-                        .setId(0)
-                        .setQuery(query);
-
-                if (protoBufIgnoredInputOutputs != null)
-                    queryBuilder.setIgnoredInputOutputs(protoBufIgnoredInputOutputs);
-
-                backendConnection.getStub().withDeadlineAfter(deadlineForResponses, TimeUnit.MILLISECONDS)
-                        .sendQuery(queryBuilder.build(), responseObserver);
+                addBackendConnection(backendConnection);
             }
         };
 
+        QueryProtos.QueryRequest.Builder queryRequestBuilder = QueryProtos.QueryRequest.newBuilder()
+            .setUserId(1)
+            .setQueryId(1)
+            .setQuery(query)
+            .setComponentsInfo(componentsInfoBuilder);
+
+        if (protoBufIgnoredInputOutputs != null)
+            queryRequestBuilder.setIgnoredInputOutputs(protoBufIgnoredInputOutputs);
+
         backendConnection.getStub().withDeadlineAfter(deadlineForResponses, TimeUnit.MILLISECONDS)
-                .updateComponents(componentsBuilder.build(), observer);
+                .sendQuery(queryRequestBuilder.build(), responseObserver);
     }
 
     private void addBackendConnection(BackendConnection backendConnection) {
@@ -317,24 +307,46 @@ public class BackendDriver {
         // If the query has been cancelled, ignore the result
         if (executableQuery.queryListener.getQuery().getQueryState() == QueryState.UNKNOWN) return;
 
-        if (value.hasRefinement() && value.getRefinement().getSuccess()) {
-            executableQuery.queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
-            executableQuery.success.accept(true);
-        } else if (value.hasConsistency() && value.getConsistency().getSuccess()) {
-            executableQuery.queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
-            executableQuery.success.accept(true);
-        } else if (value.hasDeterminism() && value.getDeterminism().getSuccess()) {
-            executableQuery.queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
-            executableQuery.success.accept(true);
-        } else if (value.hasComponent()) {
-            executableQuery.queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
-            executableQuery.success.accept(true);
-            JsonObject returnedComponent = (JsonObject) JsonParser.parseString(value.getComponent().getComponent().getJson());
-            addGeneratedComponent(new Component(returnedComponent));
-        } else {
-            executableQuery.queryListener.getQuery().setQueryState(QueryState.ERROR);
-            executableQuery.success.accept(false);
+
+        switch (value.getResponseCase()) {
+            case QUERY_OK:
+                executableQuery.queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
+                executableQuery.success.accept(true);
+                if (value.getQueryOk().hasComponent()) {
+                    JsonObject returnedComponent = (JsonObject) JsonParser.parseString(value.getQueryOk().getComponent().getComponent().getJson());
+                    addGeneratedComponent(new Component(returnedComponent));
+                }
+                break;
+
+            case USER_TOKEN_ERROR:
+                executableQuery.queryListener.getQuery().setQueryState(QueryState.ERROR);
+                executableQuery.success.accept(false);
+                break;
+
+            case RESPONSE_NOT_SET:
+                executableQuery.queryListener.getQuery().setQueryState(QueryState.ERROR);
+                executableQuery.success.accept(false);
+                break;
         }
+
+//        if (value.hasRefinement() && value.getRefinement().getSuccess()) {
+//            executableQuery.queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
+//            executableQuery.success.accept(true);
+//        } else if (value.hasConsistency() && value.getConsistency().getSuccess()) {
+//            executableQuery.queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
+//            executableQuery.success.accept(true);
+//        } else if (value.hasDeterminism() && value.getDeterminism().getSuccess()) {
+//            executableQuery.queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
+//            executableQuery.success.accept(true);
+//        } else if (value.hasComponent()) {
+//            executableQuery.queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
+//            executableQuery.success.accept(true);
+//            JsonObject returnedComponent = (JsonObject) JsonParser.parseString(value.getComponent().getComponent().getJson());
+//            addGeneratedComponent(new Component(returnedComponent));
+//        } else {
+//            executableQuery.queryListener.getQuery().setQueryState(QueryState.ERROR);
+//            executableQuery.success.accept(false);
+//        }
     }
 
     private void handleQueryBackendError(Throwable t, ExecutableQuery executableQuery) {
@@ -388,7 +400,7 @@ public class BackendDriver {
     }
 
     public SimulationState getInitialSimulationState() {
-            SimulationState state = new SimulationState(ObjectProtos.StateTuple.newBuilder().getDefaultInstanceForType());
+            SimulationState state = new SimulationState(ObjectProtos.State.newBuilder().getDefaultInstanceForType());
             state.getLocations().add(new Pair<>(Ecdar.getProject().getComponents().get(0).getName(), Ecdar.getProject().getComponents().get(0).getLocations().get(0).getId()));
             return state;
         }

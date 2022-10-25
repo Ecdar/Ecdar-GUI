@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 public class Transition {
     public final ArrayList<Edge> edges = new ArrayList<>();
 
-    public Transition(ObjectProtos.Transition protoBufTransition) {
+    public Transition(ObjectProtos protoBufTransition) {
         // ToDo: Construct transition instance based on protoBuf input
     }
 }

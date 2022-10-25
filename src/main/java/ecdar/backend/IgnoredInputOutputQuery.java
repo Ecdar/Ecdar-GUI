@@ -10,9 +10,9 @@ import java.util.HashMap;
 public class IgnoredInputOutputQuery {
     private final Query query;
     private final QueryPresentation queryPresentation;
-    private final HashMap<String, Boolean> ignoredInputs;
+    public final HashMap<String, Boolean> ignoredInputs;
     private final VBox ignoredInputsVBox;
-    private final HashMap<String, Boolean> ignoredOutputs;
+    public final HashMap<String, Boolean> ignoredOutputs;
     private final VBox ignoredOutputsVBox;
     public int tries = 0;
 
