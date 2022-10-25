@@ -90,6 +90,7 @@ public class DropDownMenu extends JFXPopup {
      * @param width The width of the {@link DropDownMenu}
      */
     public DropDownMenu(final Node src, final int width)  {
+
         dropDownMenuWidth.set(width);
         list = new VBox();
         list.setStyle("-fx-background-color: white; -fx-padding: 8 0 8 0;");

@@ -15,6 +15,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
@@ -23,6 +24,7 @@ import javafx.scene.text.TextAlignment;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.kordamp.ikonli.material.Material;
 
+import javax.swing.*;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -252,7 +254,7 @@ public class QueryPresentation extends HBox {
 
             statusIcon.setOnMouseClicked(event -> {
                 if (controller.getQuery().getQuery().isEmpty()) return;
-                
+
                 Label label = new Label(tooltip.getText());
                 JFXDialog dialog = new InformationDialogPresentation("Result from query: " + controller.getQuery().getQuery(), label);
                 dialog.show(Ecdar.getPresentation());
@@ -469,16 +471,20 @@ public class QueryPresentation extends HBox {
             controller.queryTypeExpand.setRipplerFill(Color.GREY_BLUE.getColor(Color.Intensity.I500));
 
             final DropDownMenu queryTypeDropDown = new DropDownMenu(controller.queryTypeExpand);
-
             queryTypeDropDown.addListElement("Query Type");
             QueryType[] queryTypes = QueryType.values();
             for (QueryType type : queryTypes) {
                 addQueryTypeListElement(type, queryTypeDropDown);
+
             }
 
             controller.queryTypeExpand.setOnMousePressed((e) -> {
                 e.consume();
-                queryTypeDropDown.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, 16, 16);
+
+                double Y=this.getLayoutY();
+                System.out.println(Y);
+                if(Y >= 500){queryTypeDropDown.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.RIGHT, -this.getWidth()/3, -(this.getLayoutY()-this.getHeight()-300));}
+                else {queryTypeDropDown.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.RIGHT, 16, 16);}
             });
 
             controller.queryTypeSymbol.setText(controller.getQuery() != null && controller.getQuery().getType() != null ? controller.getQuery().getType().getSymbol() : "---");
