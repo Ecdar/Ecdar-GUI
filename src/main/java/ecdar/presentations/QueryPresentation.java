@@ -12,7 +12,9 @@ import javafx.application.Platform;
 import javafx.beans.binding.When;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Insets;
+import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Cursor;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -21,6 +23,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.scene.text.TextAlignment;
+import javafx.stage.Screen;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.kordamp.ikonli.material.Material;
 
@@ -481,10 +484,17 @@ public class QueryPresentation extends HBox {
             controller.queryTypeExpand.setOnMousePressed((e) -> {
                 e.consume();
 
-                double Y=this.getLayoutY();
-                System.out.println(Y);
-                if(Y >= 500){queryTypeDropDown.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.RIGHT, -this.getWidth()/3, -(this.getLayoutY()-this.getHeight()-300));}
-                else {queryTypeDropDown.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.RIGHT, 16, 16);}
+                //height of app window
+                double height = this.getScene().getHeight();
+                //height and width of object relative to the app window
+                Point2D Y = this.localToScene(this.getWidth(), this.getHeight());
+
+                //Check if the dropdown can fit the app window.
+                //340 is the height of the dropdown 27/10-2022 Cant find height before it is rendered
+                if(Y.getY()+340 >= height)
+                {queryTypeDropDown.show(JFXPopup.PopupVPosition.BOTTOM, JFXPopup.PopupHPosition.RIGHT, -55,-(Y.getY()-height)-50);}
+                else
+                {queryTypeDropDown.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.RIGHT, 16, 16);}
             });
 
             controller.queryTypeSymbol.setText(controller.getQuery() != null && controller.getQuery().getType() != null ? controller.getQuery().getType().getSymbol() : "---");
