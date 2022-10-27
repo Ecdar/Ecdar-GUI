@@ -6,7 +6,6 @@ import ecdar.Debug;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
 import ecdar.backend.BackendHelper;
-import ecdar.backend.QueryListener;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.presentations.*;
@@ -440,7 +439,7 @@ public class EcdarController implements Initializable {
                 if (!Ecdar.shouldRunBackgroundQueries.get()) return;
 
                 Ecdar.getProject().getQueries().forEach(query -> {
-                    if (query.isPeriodic()) query.run();
+                    if (query.isPeriodic()) Ecdar.getQueryExecutor().executeQuery(query);
                 });
 
                 // List of threads to start
@@ -458,37 +457,9 @@ public class EcdarController implements Initializable {
                             Query reachabilityQuery = new Query(locationReachableQuery, "", QueryState.UNKNOWN);
                             reachabilityQuery.setType(QueryType.REACHABILITY);
 
-                            Ecdar.getBackendDriver().addQueryToExecutionQueue(locationReachableQuery,
-                                    BackendHelper.getDefaultBackendInstance(),
-                                    (result -> {
-                                        if (result) {
-                                            location.setReachability(Location.Reachability.REACHABLE);
-                                        } else {
-                                            location.setReachability(Location.Reachability.UNREACHABLE);
-                                        }
-                                        Debug.removeThread(Thread.currentThread());
-                                    }),
-                                    (e) -> {
-                                        location.setReachability(Location.Reachability.UNKNOWN);
-                                        Debug.removeThread(Thread.currentThread());
-                                    },
-                                    new QueryListener(reachabilityQuery));
+                            Ecdar.getQueryExecutor().executeQuery(reachabilityQuery);
 
-                            final Thread verifyThread = new Thread(() -> Ecdar.getBackendDriver().addQueryToExecutionQueue(locationReachableQuery,
-                                    BackendHelper.getDefaultBackendInstance(),
-                                    (result -> {
-                                        if (result) {
-                                            location.setReachability(Location.Reachability.REACHABLE);
-                                        } else {
-                                            location.setReachability(Location.Reachability.UNREACHABLE);
-                                        }
-                                        Debug.removeThread(Thread.currentThread());
-                                    }),
-                                    (e) -> {
-                                        location.setReachability(Location.Reachability.UNKNOWN);
-                                        Debug.removeThread(Thread.currentThread());
-                                    },
-                                    new QueryListener(reachabilityQuery)));
+                            final Thread verifyThread = new Thread(() -> Ecdar.getQueryExecutor().executeQuery(reachabilityQuery));
 
                             verifyThread.setName(locationReachableQuery + " (" + verifyThread.getName() + ")");
                             Debug.addThread(verifyThread);

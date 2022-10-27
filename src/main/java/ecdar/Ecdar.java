@@ -4,6 +4,7 @@ import ecdar.abstractions.Component;
 import ecdar.abstractions.Project;
 import ecdar.backend.BackendDriver;
 import ecdar.backend.BackendHelper;
+import ecdar.backend.QueryExecutor;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.controllers.EcdarController;
 import ecdar.presentations.BackgroundThreadPresentation;
@@ -52,6 +53,7 @@ public class Ecdar extends Application {
     public static BooleanProperty shouldRunBackgroundQueries = new SimpleBooleanProperty(true);
     private static final BooleanProperty isSplit = new SimpleBooleanProperty(true); //Set to true to ensure correct behaviour at first toggle.
     private static BackendDriver backendDriver = new BackendDriver();
+    private static QueryExecutor queryExecutor = new QueryExecutor(backendDriver);
     private Stage debugStage;
 
     /**
@@ -187,6 +189,11 @@ public class Ecdar extends Application {
      */
     public static BackendDriver getBackendDriver() {
         return backendDriver;
+    }
+
+    public static QueryExecutor getQueryExecutor() {
+        return queryExecutor;
+
     }
 
     public static double getDpiScale() {
