@@ -4,6 +4,8 @@ import EcdarProtoBuf.ComponentProtos;
 import EcdarProtoBuf.EcdarBackendGrpc;
 import EcdarProtoBuf.ObjectProtos;
 import EcdarProtoBuf.QueryProtos;
+import EcdarProtoBuf.QueryProtos.QueryResponse.QueryOk;
+
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.protobuf.Empty;
@@ -307,19 +309,88 @@ public class BackendDriver {
         // If the query has been cancelled, ignore the result
         if (executableQuery.queryListener.getQuery().getQueryState() == QueryState.UNKNOWN) return;
 
-
         switch (value.getResponseCase()) {
             case QUERY_OK:
-                executableQuery.queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
-                executableQuery.success.accept(true);
-                if (value.getQueryOk().hasComponent()) {
-                    JsonObject returnedComponent = (JsonObject) JsonParser.parseString(value.getQueryOk().getComponent().getComponent().getJson());
-                    addGeneratedComponent(new Component(returnedComponent));
+                QueryOk queryOk = value.getQueryOk();
+                switch (queryOk.getResultCase()) {
+                    case REFINEMENT:
+                        if (queryOk.getRefinement().getSuccess()) {
+                            executableQuery.queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
+                            executableQuery.success.accept(true);
+                        } else {
+                            executableQuery.queryListener.getQuery().setQueryState(QueryState.ERROR);
+                            executableQuery.failure.accept(new BackendException.QueryErrorException(queryOk.getRefinement().getReason()));
+                            // executableQuery.success.accept(false);
+                        }
+                        break;
+
+                    case CONSISTENCY:
+                        if (queryOk.getConsistency().getSuccess()) {
+                            executableQuery.queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
+                            executableQuery.success.accept(true);
+                        } else {
+                            executableQuery.queryListener.getQuery().setQueryState(QueryState.ERROR);
+                            executableQuery.failure.accept(new BackendException.QueryErrorException(queryOk.getConsistency().getReason()));
+                            executableQuery.success.accept(false);
+                        }
+                        break;
+
+                    case DETERMINISM:
+                        if (queryOk.getDeterminism().getSuccess()) {
+                            executableQuery.queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
+                            executableQuery.success.accept(true);
+                        } else {
+                            executableQuery.queryListener.getQuery().setQueryState(QueryState.ERROR);
+                            executableQuery.failure.accept(new BackendException.QueryErrorException(queryOk.getDeterminism().getReason()));
+                            executableQuery.success.accept(false);
+                        }
+                        break;
+
+                    case IMPLEMENTATION:
+                        if (queryOk.getImplementation().getSuccess()) {
+                            executableQuery.queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
+                            executableQuery.success.accept(true);
+                        } else {
+                            executableQuery.queryListener.getQuery().setQueryState(QueryState.ERROR);
+                            executableQuery.failure.accept(new BackendException.QueryErrorException(queryOk.getImplementation().getReason()));
+                            executableQuery.success.accept(false);
+                        }
+                        break;
+
+                    case REACHABILITY:
+                        if (queryOk.getReachability().getSuccess()) {
+                            executableQuery.queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
+                            executableQuery.success.accept(true);
+                        } else {
+                            executableQuery.queryListener.getQuery().setQueryState(QueryState.ERROR);
+                            executableQuery.failure.accept(new BackendException.QueryErrorException(queryOk.getReachability().getReason()));
+                            executableQuery.success.accept(false);
+                        }
+                        break;
+
+                    case COMPONENT:
+                        executableQuery.queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
+                        executableQuery.success.accept(true);
+                        JsonObject returnedComponent = (JsonObject) JsonParser.parseString(queryOk.getComponent().getComponent().getJson());
+                        addGeneratedComponent(new Component(returnedComponent));
+                        break;
+
+                    case ERROR:
+                        executableQuery.queryListener.getQuery().setQueryState(QueryState.ERROR);
+                        executableQuery.failure.accept(new BackendException.QueryErrorException(queryOk.getError()));
+                        executableQuery.success.accept(false);
+                        break;
+
+                    case RESULT_NOT_SET:
+                        executableQuery.queryListener.getQuery().setQueryState(QueryState.ERROR);
+                        executableQuery.success.accept(false);
+                        break;
                 }
                 break;
 
             case USER_TOKEN_ERROR:
                 executableQuery.queryListener.getQuery().setQueryState(QueryState.ERROR);
+                executableQuery.failure.accept(new BackendException.QueryErrorException(value.getUserTokenError().getErrorMessage()));
                 executableQuery.success.accept(false);
                 break;
 
@@ -328,25 +399,6 @@ public class BackendDriver {
                 executableQuery.success.accept(false);
                 break;
         }
-
-//        if (value.hasRefinement() && value.getRefinement().getSuccess()) {
-//            executableQuery.queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
-//            executableQuery.success.accept(true);
-//        } else if (value.hasConsistency() && value.getConsistency().getSuccess()) {
-//            executableQuery.queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
-//            executableQuery.success.accept(true);
-//        } else if (value.hasDeterminism() && value.getDeterminism().getSuccess()) {
-//            executableQuery.queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
-//            executableQuery.success.accept(true);
-//        } else if (value.hasComponent()) {
-//            executableQuery.queryListener.getQuery().setQueryState(QueryState.SUCCESSFUL);
-//            executableQuery.success.accept(true);
-//            JsonObject returnedComponent = (JsonObject) JsonParser.parseString(value.getComponent().getComponent().getJson());
-//            addGeneratedComponent(new Component(returnedComponent));
-//        } else {
-//            executableQuery.queryListener.getQuery().setQueryState(QueryState.ERROR);
-//            executableQuery.success.accept(false);
-//        }
     }
 
     private void handleQueryBackendError(Throwable t, ExecutableQuery executableQuery) {
