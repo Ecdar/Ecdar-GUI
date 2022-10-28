@@ -313,6 +313,7 @@ public class Ecdar extends Application {
 
             try {
                 backendDriver.closeAllBackendConnections();
+                queryExecutor.closeAllBackendConnections();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -326,6 +327,7 @@ public class Ecdar extends Application {
             // to prevent dangling connections and queries
             try {
                 backendDriver.closeAllBackendConnections();
+                queryExecutor.closeAllBackendConnections();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

@@ -21,7 +21,7 @@ public class BackendDriver {
     private final BlockingQueue<GrpcRequest> requestQueue = new ArrayBlockingQueue<>(200);
     private final Map<BackendInstance, BlockingQueue<BackendConnection>> openBackendConnections = new HashMap<>(); // ToDo NIELS: Remove and close when backend is no longer needed
     private final int responseDeadline = 20000;
-    private final int rerunQueryDelay = 200;
+    private final int rerunRequestDelay = 200;
     private final int numberOfRetriesPerQuery = 5;
 
     public BackendDriver() {
@@ -36,7 +36,7 @@ public class BackendDriver {
     }
 
     /**
-     *Add a GrpcRequest to the request queue to be executed when a backend is available
+     * Add a GrpcRequest to the request queue to be executed when a backend is available
      *
      * @param request The GrpcRequest to be executed later
      */
@@ -45,7 +45,8 @@ public class BackendDriver {
     }
 
     public void addBackendConnection(BackendConnection backendConnection) {
-        this.openBackendConnections.get(backendConnection.getBackendInstance()).add(backendConnection);
+        var relatedQueue = this.openBackendConnections.get(backendConnection.getBackendInstance());
+        if (!relatedQueue.contains(backendConnection)) relatedQueue.add(backendConnection);
     }
 
     /**
@@ -152,12 +153,11 @@ public class BackendDriver {
 
             @Override
             public void onError(Throwable t) {
-                addBackendConnection(newConnection);
-                // ToDo NIELS: Handle failed component update
             }
 
             @Override
             public void onCompleted() {
+                addBackendConnection(newConnection);
             }
         };
 
@@ -194,7 +194,7 @@ public class BackendDriver {
                                 public void run() {
                                     requestQueue.add(request);
                                 }
-                            }, rerunQueryDelay);
+                            }, rerunRequestDelay);
                         } else {
                             Ecdar.showToast("Unable to find a connection to the requested engine");
                         }

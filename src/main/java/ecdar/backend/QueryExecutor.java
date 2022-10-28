@@ -14,11 +14,14 @@ import io.grpc.stub.StreamObserver;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 
 public class QueryExecutor {
     private final BackendDriver backendDriver;
+    private final ArrayList<BackendConnection> connections = new ArrayList<>();
 
     public QueryExecutor(BackendDriver backendDriver) {
         this.backendDriver = backendDriver;
@@ -41,6 +44,7 @@ public class QueryExecutor {
         query.errors().set("");
 
         GrpcRequest request = new GrpcRequest(backendConnection -> {
+            connections.add(backendConnection); // Sae reference for closing connection on exit
             StreamObserver<QueryProtos.QueryResponse> responseObserver = new StreamObserver<>() {
                 @Override
                 public void onNext(QueryProtos.QueryResponse value) {
@@ -50,17 +54,21 @@ public class QueryExecutor {
                 @Override
                 public void onError(Throwable t) {
                     handleQueryBackendError(t, query);
+                    backendDriver.addBackendConnection(backendConnection);
+                    connections.remove(backendConnection);
                 }
 
                 @Override
                 public void onCompleted() {
+                    // Release backend connection
                     backendDriver.addBackendConnection(backendConnection);
+                    connections.remove(backendConnection);
                 }
             };
 
             var queryBuilder = QueryProtos.Query.newBuilder()
                     .setId(0)
-                    .setQuery(query.getQuery());
+                    .setQuery(query.getType().getQueryName() + ": " + query.getQuery());
 
             backendConnection.getStub().withDeadlineAfter(backendDriver.getResponseDeadline(), TimeUnit.MILLISECONDS)
                     .sendQuery(queryBuilder.build(), responseObserver);
@@ -106,7 +114,7 @@ public class QueryExecutor {
         } else {
             try {
                 query.setQueryState(QueryState.ERROR);
-                query.getFailureConsumer().accept(new BackendException.QueryErrorException("The query failed and gave the following error: " + errorType));
+                query.getFailureConsumer().accept(new BackendException.QueryErrorException("The execution of this query failed with message:\n" + t.getLocalizedMessage()));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -151,5 +159,16 @@ public class QueryExecutor {
 
             EcdarController.getActiveCanvasPresentation().getController().setActiveModel(newComponent);
         });
+    }
+
+    /**
+     * Close all open backend connection and kill all locally running processes
+     *
+     * @throws IOException if any of the sockets do not respond
+     */
+    public void closeAllBackendConnections() throws IOException {
+        for (BackendConnection con : connections) {
+            con.close();
+        }
     }
 }
