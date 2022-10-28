@@ -341,6 +341,7 @@ public class BackendDriver {
         // Each error starts with a capitalized description of the error equal to the gRPC error type encountered
         String errorType = t.getMessage().split(":\\s+", 2)[0];
 
+
         switch (errorType) {
             case "CANCELLED":
                 executableQuery.queryListener.getQuery().setQueryState(QueryState.ERROR);

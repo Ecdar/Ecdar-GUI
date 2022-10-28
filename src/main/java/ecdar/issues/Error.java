@@ -15,5 +15,6 @@ public class Error<T extends Node> extends Issue<T> {
 
     public Error(final Predicate<T> presentPredicate, final T subject, final Observable... observables) {
         super(presentPredicate, subject, observables);
+
     }
 }

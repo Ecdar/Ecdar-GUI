@@ -283,6 +283,23 @@ public class TagPresentation extends StackPane {
         initializeTextAid((JFXTextField) lookup("#textField"));
     }
 
+    void initializeTextAid2(JFXTextField textField) {
+        textField.textProperty().addListener((obs, oldText, newText) -> {
+            if (newText.contains("<=")) {
+                final String updatedString = newText.replace("<=", "\u2264");
+                textField.setText(updatedString);
+            }
+            if (newText.contains(">=")) {
+                final String updatedString = newText.replace(">=", "\u2265");
+                textField.setText(updatedString);
+            }
+        });
+    }
+    public void replaceSigns() {
+        initializeTextAid2((JFXTextField) lookup("#textField"));
+    }
+
+
     public void requestTextFieldFocus() {
         final JFXTextField textField = (JFXTextField) lookup("#textField");
         Platform.runLater(textField::requestFocus);
