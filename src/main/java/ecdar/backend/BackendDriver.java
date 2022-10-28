@@ -4,6 +4,7 @@ import EcdarProtoBuf.ComponentProtos;
 import EcdarProtoBuf.EcdarBackendGrpc;
 import EcdarProtoBuf.ObjectProtos;
 import EcdarProtoBuf.QueryProtos;
+import EcdarProtoBuf.QueryProtos.SimulationStepResponse;
 import EcdarProtoBuf.QueryProtos.QueryResponse.QueryOk;
 
 import com.google.gson.JsonObject;
@@ -13,6 +14,7 @@ import ecdar.Ecdar;
 import ecdar.abstractions.BackendInstance;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.QueryState;
+import ecdar.backend.BackendException.NoAvailableBackendConnectionException;
 import ecdar.simulation.SimulationState;
 import io.grpc.*;
 import io.grpc.stub.StreamObserver;
@@ -155,6 +157,51 @@ public class BackendDriver {
                 (response) -> handleQueryResponse(response, executableQuery),
                 (error) -> handleQueryBackendError(error, executableQuery)
         );
+    }
+
+    public void executeStartSimRequest(String componentComposition, Consumer<SimulationStepResponse> responseConsumer, Consumer<Throwable> errorConsumer) {
+        BackendConnection backendConnection;
+        try {
+            backendConnection = getBackendConnection(BackendHelper.getDefaultBackendInstance());
+        } catch (NoAvailableBackendConnectionException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return;
+        }
+
+        StreamObserver<QueryProtos.SimulationStepResponse> responseObserver = new StreamObserver<>() {
+            @Override
+            public void onNext(QueryProtos.SimulationStepResponse value) {
+                System.out.println(value);
+                responseConsumer.accept(value);
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                errorConsumer.accept(t);
+                addBackendConnection(backendConnection);
+            }
+
+            @Override
+            public void onCompleted() {
+                addBackendConnection(backendConnection);
+            }
+        };
+
+        var comInfo = ComponentProtos.ComponentsInfo.newBuilder();
+        for (Component c : Ecdar.getProject().getComponents()) {
+            if (componentComposition.contains(c.getName())) {
+                comInfo.addComponents(ComponentProtos.Component.newBuilder().setJson(c.serialize().toString()).build());
+            }
+        }
+        comInfo.setComponentsHash(comInfo.getComponentsList().hashCode());
+        var simStartRequest = QueryProtos.SimulationStartRequest.newBuilder();
+        var simInfo = QueryProtos.SimulationInfo.newBuilder()
+                .setComponentComposition(componentComposition)
+                .setComponentsInfo(comInfo);
+        simStartRequest.setSimulationInfo(simInfo);
+        backendConnection.getStub().withDeadlineAfter(deadlineForResponses, TimeUnit.MILLISECONDS)
+                .startSimulation(simStartRequest.build(), responseObserver);
     }
 
     /**
@@ -496,6 +543,26 @@ public class BackendDriver {
             EcdarController.getActiveCanvasPresentation().getController().setActiveModel(newComponent);
         });
     }
+
+    // private class ExecutableStartSimRequest  {
+    //     private final String componentComposition;
+    //     private final BackendInstance backendInstance;
+    //     private final Consumer<Boolean> success;
+    //     private final Consumer<BackendException> failure;
+    //     private final StartSimListener startSimListener;
+    //     public int tries = 0;
+
+    //     public ExecutableStartSimRequest(String componentComposition, BackendInstance backendInstance,
+    //             Consumer<Boolean> success, Consumer<BackendException> failure, StartSimListener startSimListener,
+    //             int tries) {
+    //         this.componentComposition = componentComposition;
+    //         this.backendInstance = backendInstance;
+    //         this.success = success;
+    //         this.failure = failure;
+    //         this.startSimListener = startSimListener;
+    //         this.tries = tries;
+    //     }
+    // }
 
     private class ExecutableQuery {
         private final String query;

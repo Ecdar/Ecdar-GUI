@@ -12,6 +12,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Map;
 
+import EcdarProtoBuf.QueryProtos.SimulationStepResponse;
+
 /**
  * Handles state changes, updates of values / clocks, and keeps track of all the transitions that
  * have been taken throughout a simulation.
@@ -26,6 +28,7 @@ public class SimulationHandler {
     private EcdarSystem system;
     private SimulationStateSuccessor successor;
     private int numberOfSteps;
+    private SimulationStepResponse currentResponse;
 
     /**
      * A string to keep track what is currently being simulated
@@ -89,8 +92,11 @@ public class SimulationHandler {
      */
     public void initialStep() {
         initializeSimulation();
+
         final SimulationState currentState = currentConcreteState.get();
         successor = getStateSuccessor();
+
+        Ecdar.getBackendDriver().executeStartSimRequest("Administration || Machine || Researcher", (res) -> currentResponse = res, (err) -> System.out.println(err));
 
         //Save the previous states, and get the new
         currentConcreteState.set(successor.getState());
