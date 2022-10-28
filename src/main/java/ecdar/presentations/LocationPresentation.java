@@ -182,9 +182,8 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
         }
 
         controller.nicknameTag.replaceSpace();
-        controller.invariantTag.replaceSigns();
         controller.nicknameTag.replaceSigns();
-
+        controller.invariantTag.replaceSigns();
 
 
         // Set the layout from the model (if they are not both 0)

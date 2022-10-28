@@ -161,7 +161,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     }
 
     public String getInvariant() {
-        return invariant.get();
+        return invariant.get().replace("\u2264", "<=").replace("\u2665", ">=");
     }
 
     public void setInvariant(final String invariant) {
