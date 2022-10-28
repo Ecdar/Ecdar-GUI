@@ -24,6 +24,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Screen;
+import javafx.stage.StageStyle;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.kordamp.ikonli.material.Material;
 
@@ -478,23 +479,24 @@ public class QueryPresentation extends HBox {
             QueryType[] queryTypes = QueryType.values();
             for (QueryType type : queryTypes) {
                 addQueryTypeListElement(type, queryTypeDropDown);
-
             }
 
             controller.queryTypeExpand.setOnMousePressed((e) -> {
                 e.consume();
-
                 //height of app window
-                double height = this.getScene().getHeight();
-                //height and width of object relative to the app window
-                Point2D Y = this.localToScene(this.getWidth(), this.getHeight());
-
+                double windowHeight = this.getScene().getHeight();
+                //Location of dropdown relative to the app window
+                Point2D Origin = this.localToScene(this.getWidth(), this.getHeight());
+                //Generate the popups properties before displaying
+                queryTypeDropDown.show(this);
                 //Check if the dropdown can fit the app window.
-                //340 is the height of the dropdown 27/10-2022 Cant find height before it is rendered
-                if(Y.getY()+340 >= height)
-                {queryTypeDropDown.show(JFXPopup.PopupVPosition.BOTTOM, JFXPopup.PopupHPosition.RIGHT, -55,-(Y.getY()-height)-50);}
-                else
-                {queryTypeDropDown.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.RIGHT, 16, 16);}
+                if(Origin.getY()+queryTypeDropDown.getHeight() >= windowHeight){
+                    queryTypeDropDown.show(JFXPopup.PopupVPosition.BOTTOM, JFXPopup.PopupHPosition.RIGHT, -55,-(Origin.getY()-windowHeight)-50);
+                }
+                else{
+                    queryTypeDropDown.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.RIGHT, 16, 16);
+                }
+
             });
 
             controller.queryTypeSymbol.setText(controller.getQuery() != null && controller.getQuery().getType() != null ? controller.getQuery().getType().getSymbol() : "---");
