@@ -148,10 +148,10 @@ public final class BackendHelper {
         BackendHelper.backendInstancesUpdatedListeners.add(runnable);
     }
 
-    public static ComponentProtos.ComponentsInfo.Builder getComponentsInfoBuilder(Query query) {
+    public static ComponentProtos.ComponentsInfo.Builder getComponentsInfoBuilder(String query) {
         ComponentProtos.ComponentsInfo.Builder componentsInfoBuilder = ComponentProtos.ComponentsInfo.newBuilder();
         for (Component c : Ecdar.getProject().getComponents()) {
-            if (query.getQuery().contains(c.getName())) {
+            if (query.contains(c.getName())) {
                 componentsInfoBuilder.addComponents(ComponentProtos.Component.newBuilder().setJson(c.serialize().toString()).build());
             }
         }

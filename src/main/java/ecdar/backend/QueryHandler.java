@@ -47,7 +47,7 @@ public class QueryHandler {
         GrpcRequest request = new GrpcRequest(backendConnection -> {
             connections.add(backendConnection); // Save reference for closing connection on exit
 
-            var componentsInfoBuilder = BackendHelper.getComponentsInfoBuilder(query);
+            var componentsInfoBuilder = BackendHelper.getComponentsInfoBuilder(query.getQuery());
 
             StreamObserver<QueryProtos.QueryResponse> responseObserver = new StreamObserver<>() {
                 @Override
