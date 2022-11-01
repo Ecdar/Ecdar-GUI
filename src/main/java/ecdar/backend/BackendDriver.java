@@ -1,14 +1,9 @@
 package ecdar.backend;
 
-import EcdarProtoBuf.ComponentProtos;
 import EcdarProtoBuf.EcdarBackendGrpc;
-import EcdarProtoBuf.QueryProtos;
-import com.google.protobuf.Empty;
 import ecdar.Ecdar;
 import ecdar.abstractions.BackendInstance;
-import ecdar.abstractions.Component;
 import io.grpc.*;
-import io.grpc.stub.StreamObserver;
 import org.springframework.util.SocketUtils;
 
 import java.io.*;
@@ -50,17 +45,6 @@ public class BackendDriver {
     }
 
     /**
-     * Close all open backend connection and kill all locally running processes
-     *
-     * @throws IOException if any of the sockets do not respond
-     */
-    public void closeAllBackendConnections() throws IOException {
-        for (BlockingQueue<BackendConnection> bq : openBackendConnections.values()) {
-            for (BackendConnection bc : bq) bc.close();
-        }
-    }
-
-    /**
      * Filters the list of open {@link BackendConnection}s to the specified {@link BackendInstance} and returns the
      * first match or attempts to start a new connection if none is found.
      *
@@ -88,6 +72,17 @@ public class BackendDriver {
         }
 
         return connection;
+    }
+
+    /**
+     * Close all open backend connection and kill all locally running processes
+     *
+     * @throws IOException if any of the sockets do not respond
+     */
+    public void closeAllBackendConnections() throws IOException {
+        for (BlockingQueue<BackendConnection> bq : openBackendConnections.values()) {
+            for (BackendConnection bc : bq) bc.close();
+        }
     }
 
     /**
@@ -151,30 +146,33 @@ public class BackendDriver {
         EcdarBackendGrpc.EcdarBackendStub stub = EcdarBackendGrpc.newStub(channel);
         BackendConnection newConnection = new BackendConnection(backend, p, stub, channel);
         addBackendConnection(newConnection);
-
-        QueryProtos.ComponentsUpdateRequest.Builder componentsBuilder = QueryProtos.ComponentsUpdateRequest.newBuilder();
-        for (Component c : Ecdar.getProject().getComponents()) {
-            componentsBuilder.addComponents(ComponentProtos.Component.newBuilder().setJson(c.serialize().toString()).build());
-        }
-
-        StreamObserver<Empty> observer = new StreamObserver<>() {
-            @Override
-            public void onNext(Empty value) {
-            }
-
-            @Override
-            public void onError(Throwable t) {
-            }
-
-            @Override
-            public void onCompleted() {
-                addBackendConnection(newConnection);
-            }
-        };
-
-        newConnection.getStub().withDeadlineAfter(responseDeadline, TimeUnit.MILLISECONDS)
-                .updateComponents(componentsBuilder.build(), observer);
     }
+
+//    public SimulationState getInitialSimulationState() {
+//        SimulationState state = new SimulationState(ObjectProtos.State.newBuilder().getDefaultInstanceForType());
+//        state.getLocations().add(new Pair<>(Ecdar.getProject().getComponents().get(0).getName(), Ecdar.getProject().getComponents().get(0).getLocations().get(0).getId()));
+//        return state;
+//    }
+
+    // private class ExecutableStartSimRequest  {
+    //     private final String componentComposition;
+    //     private final BackendInstance backendInstance;
+    //     private final Consumer<Boolean> success;
+    //     private final Consumer<BackendException> failure;
+    //     private final StartSimListener startSimListener;
+    //     public int tries = 0;
+
+    //     public ExecutableStartSimRequest(String componentComposition, BackendInstance backendInstance,
+    //             Consumer<Boolean> success, Consumer<BackendException> failure, StartSimListener startSimListener,
+    //             int tries) {
+    //         this.componentComposition = componentComposition;
+    //         this.backendInstance = backendInstance;
+    //         this.success = success;
+    //         this.failure = failure;
+    //         this.startSimListener = startSimListener;
+    //         this.tries = tries;
+    //     }
+    // }
 
     private class GrpcRequestConsumer implements Runnable {
         @Override

@@ -1,5 +1,6 @@
 package ecdar.abstractions;
 
+import EcdarProtoBuf.ComponentProtos;
 import ecdar.Ecdar;
 import ecdar.code_analysis.Nearable;
 import ecdar.controllers.EcdarController;
@@ -86,6 +87,22 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
         deserialize(jsonObject);
         bindReachabilityAnalysis();
     }
+
+    // ToDo NIELS: Comment in, when location should be received through ProtoBuf
+//    public Location(ComponentProtos.Location protoBufLocation) {
+//        setId(protoBufLocation.getId());
+//        setNickname(protoBufLocation.getNickname());
+//        setInvariant(protoBufLocation.getInvariant());
+//        setType(Type.valueOf(protoBufLocation.getType()));
+//        setUrgency(Urgency.valueOf(protoBufLocation.getUrgency()));
+//        setX(protoBufLocation.getX());
+//        setY(protoBufLocation.getY());
+//        setColor(Color.valueOf(protoBufLocation.getColor()));
+//        setNicknameX(protoBufLocation.getNicknameX());
+//        setNicknameY(protoBufLocation.getNicknameY());
+//        setInvariantX(protoBufLocation.getInvariantX());
+//        setInvariantY(protoBufLocation.getInvariantY());
+//    }
 
     /**
      * Generates an id for this, and binds reachability analysis.

@@ -1,5 +1,6 @@
 package ecdar.backend;
 
+import EcdarProtoBuf.ComponentProtos;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
 import javafx.beans.property.SimpleListProperty;
@@ -145,5 +146,16 @@ public final class BackendHelper {
 
     public static void addBackendInstanceListener(Runnable runnable) {
         BackendHelper.backendInstancesUpdatedListeners.add(runnable);
+    }
+
+    public static ComponentProtos.ComponentsInfo.Builder getComponentsInfoBuilder(Query query) {
+        ComponentProtos.ComponentsInfo.Builder componentsInfoBuilder = ComponentProtos.ComponentsInfo.newBuilder();
+        for (Component c : Ecdar.getProject().getComponents()) {
+            if (query.getQuery().contains(c.getName())) {
+                componentsInfoBuilder.addComponents(ComponentProtos.Component.newBuilder().setJson(c.serialize().toString()).build());
+            }
+        }
+        componentsInfoBuilder.setComponentsHash(componentsInfoBuilder.getComponentsList().hashCode());
+        return componentsInfoBuilder;
     }
 }

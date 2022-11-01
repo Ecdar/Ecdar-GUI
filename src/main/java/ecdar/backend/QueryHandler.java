@@ -1,5 +1,6 @@
 package ecdar.backend;
 
+import EcdarProtoBuf.ComponentProtos;
 import EcdarProtoBuf.QueryProtos;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -19,11 +20,11 @@ import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 
-public class QueryExecutor {
+public class QueryHandler {
     private final BackendDriver backendDriver;
     private final ArrayList<BackendConnection> connections = new ArrayList<>();
 
-    public QueryExecutor(BackendDriver backendDriver) {
+    public QueryHandler(BackendDriver backendDriver) {
         this.backendDriver = backendDriver;
     }
 
@@ -44,7 +45,10 @@ public class QueryExecutor {
         query.errors().set("");
 
         GrpcRequest request = new GrpcRequest(backendConnection -> {
-            connections.add(backendConnection); // Sae reference for closing connection on exit
+            connections.add(backendConnection); // Save reference for closing connection on exit
+
+            var componentsInfoBuilder = BackendHelper.getComponentsInfoBuilder(query);
+
             StreamObserver<QueryProtos.QueryResponse> responseObserver = new StreamObserver<>() {
                 @Override
                 public void onNext(QueryProtos.QueryResponse value) {
@@ -66,9 +70,10 @@ public class QueryExecutor {
                 }
             };
 
-            var queryBuilder = QueryProtos.Query.newBuilder()
-                    .setId(0)
-                    .setQuery(query.getType().getQueryName() + ": " + query.getQuery());
+            var queryBuilder = QueryProtos.QueryRequest.newBuilder()
+                    .setQueryId(0)
+                    .setQuery(query.getType().getQueryName() + ": " + query.getQuery())
+                    .setComponentsInfo(componentsInfoBuilder);
 
             backendConnection.getStub().withDeadlineAfter(backendDriver.getResponseDeadline(), TimeUnit.MILLISECONDS)
                     .sendQuery(queryBuilder.build(), responseObserver);
@@ -92,23 +97,95 @@ public class QueryExecutor {
         // If the query has been cancelled, ignore the result
         if (query.getQueryState() == QueryState.UNKNOWN) return;
 
-        if (value.hasRefinement() && value.getRefinement().getSuccess()) {
-            query.setQueryState(QueryState.SUCCESSFUL);
-            query.getSuccessConsumer().accept(true);
-        } else if (value.hasConsistency() && value.getConsistency().getSuccess()) {
-            query.setQueryState(QueryState.SUCCESSFUL);
-            query.getSuccessConsumer().accept(true);
-        } else if (value.hasDeterminism() && value.getDeterminism().getSuccess()) {
-            query.setQueryState(QueryState.SUCCESSFUL);
-            query.getSuccessConsumer().accept(true);
-        } else if (value.hasComponent()) {
-            query.setQueryState(QueryState.SUCCESSFUL);
-            query.getSuccessConsumer().accept(true);
-            JsonObject returnedComponent = (JsonObject) JsonParser.parseString(value.getComponent().getComponent().getJson());
-            addGeneratedComponent(new Component(returnedComponent));
-        } else {
-            query.setQueryState(QueryState.ERROR);
-            query.getSuccessConsumer().accept(false);
+        switch (value.getResponseCase()) {
+            case QUERY_OK:
+                QueryProtos.QueryResponse.QueryOk queryOk = value.getQueryOk();
+                switch (queryOk.getResultCase()) {
+                    case REFINEMENT:
+                        if (queryOk.getRefinement().getSuccess()) {
+                            query.setQueryState(QueryState.SUCCESSFUL);
+                            query.getSuccessConsumer().accept(true);
+                        } else {
+                            query.setQueryState(QueryState.ERROR);
+                            query.getFailureConsumer().accept(new BackendException.QueryErrorException(queryOk.getRefinement().getReason()));
+                            // query.getSuccessConsumer().accept(false);
+                        }
+                        break;
+
+                    case CONSISTENCY:
+                        if (queryOk.getConsistency().getSuccess()) {
+                            query.setQueryState(QueryState.SUCCESSFUL);
+                            query.getSuccessConsumer().accept(true);
+                        } else {
+                            query.setQueryState(QueryState.ERROR);
+                            query.getFailureConsumer().accept(new BackendException.QueryErrorException(queryOk.getConsistency().getReason()));
+                            query.getSuccessConsumer().accept(false);
+                        }
+                        break;
+
+                    case DETERMINISM:
+                        if (queryOk.getDeterminism().getSuccess()) {
+                            query.setQueryState(QueryState.SUCCESSFUL);
+                            query.getSuccessConsumer().accept(true);
+                        } else {
+                            query.setQueryState(QueryState.ERROR);
+                            query.getFailureConsumer().accept(new BackendException.QueryErrorException(queryOk.getDeterminism().getReason()));
+                            query.getSuccessConsumer().accept(false);
+                        }
+                        break;
+
+                    case IMPLEMENTATION:
+                        if (queryOk.getImplementation().getSuccess()) {
+                            query.setQueryState(QueryState.SUCCESSFUL);
+                            query.getSuccessConsumer().accept(true);
+                        } else {
+                            query.setQueryState(QueryState.ERROR);
+                            query.getFailureConsumer().accept(new BackendException.QueryErrorException(queryOk.getImplementation().getReason()));
+                            query.getSuccessConsumer().accept(false);
+                        }
+                        break;
+
+                    case REACHABILITY:
+                        if (queryOk.getReachability().getSuccess()) {
+                            query.setQueryState(QueryState.SUCCESSFUL);
+                            query.getSuccessConsumer().accept(true);
+                        } else {
+                            query.setQueryState(QueryState.ERROR);
+                            query.getFailureConsumer().accept(new BackendException.QueryErrorException(queryOk.getReachability().getReason()));
+                            query.getSuccessConsumer().accept(false);
+                        }
+                        break;
+
+                    case COMPONENT:
+                        query.setQueryState(QueryState.SUCCESSFUL);
+                        query.getSuccessConsumer().accept(true);
+                        JsonObject returnedComponent = (JsonObject) JsonParser.parseString(queryOk.getComponent().getComponent().getJson());
+                        addGeneratedComponent(new Component(returnedComponent));
+                        break;
+
+                    case ERROR:
+                        query.setQueryState(QueryState.ERROR);
+                        query.getFailureConsumer().accept(new BackendException.QueryErrorException(queryOk.getError()));
+                        query.getSuccessConsumer().accept(false);
+                        break;
+
+                    case RESULT_NOT_SET:
+                        query.setQueryState(QueryState.ERROR);
+                        query.getSuccessConsumer().accept(false);
+                        break;
+                }
+                break;
+
+            case USER_TOKEN_ERROR:
+                query.setQueryState(QueryState.ERROR);
+                query.getFailureConsumer().accept(new BackendException.QueryErrorException(value.getUserTokenError().getErrorMessage()));
+                query.getSuccessConsumer().accept(false);
+                break;
+
+            case RESPONSE_NOT_SET:
+                query.setQueryState(QueryState.ERROR);
+                query.getSuccessConsumer().accept(false);
+                break;
         }
     }
 

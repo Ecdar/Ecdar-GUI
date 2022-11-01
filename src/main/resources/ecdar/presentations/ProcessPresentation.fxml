@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.shape.Line?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import com.jfoenix.controls.JFXRippler?>
+<fx:root xmlns:fx="http://javafx.com/fxml/1"
+         xmlns="http://javafx.com/javafx/8.0.76-ea"
+         type="StackPane"
+         fx:id="root"
+         fx:controller="ecdar.controllers.ProcessController">
+    <HBox alignment="CENTER">
+        <StackPane fx:id="componentPane">
+            <Rectangle fx:id="background" StackPane.alignment="TOP_LEFT"/>
+
+            <StackPane>
+                <Pane fx:id="modelContainerLocation" pickOnBounds="false"/>
+                <Pane fx:id="modelContainerEdge" pickOnBounds="false"/>
+            </StackPane>
+
+            <BorderPane fx:id="frame" pickOnBounds="false">
+                <top>
+                    <BorderPane fx:id="toolbar">
+                        <center>
+                            <HBox>
+                                <StackPane>
+                                    <JFXTextField fx:id="name" styleClass="sub-caption" translateY="1" editable="false"/>
+                                </StackPane>
+                            </HBox>
+                        </center>
+
+                        <right>
+                            <JFXRippler fx:id="toggleValuesButton" minWidth="25" minHeight="20">
+                                <StackPane onMouseClicked="#toggleValues">
+                                    <FontIcon fx:id="toggleValueButtonIcon" iconLiteral="gmi-code" iconSize="17" fill="white"/>
+                                </StackPane>
+                            </JFXRippler>
+                        </right>
+                    </BorderPane>
+                </top>
+                <center>
+                    <VBox fx:id="valueArea" StackPane.alignment="TOP_CENTER" styleClass="body2-mono"/>
+                </center>
+            </BorderPane>
+
+            <Line fx:id="topLeftLine"/>
+
+            <Rectangle opacity="0" fx:id="bottomAnchor" StackPane.alignment="BOTTOM_LEFT" disable="true"/>
+            <Rectangle opacity="0" fx:id="rightAnchor" StackPane.alignment="TOP_RIGHT" disable="true"/>
+            <Rectangle opacity="0" fx:id="cornerAnchor" StackPane.alignment="BOTTOM_RIGHT"/>
+        </StackPane>
+    </HBox>
+</fx:root>

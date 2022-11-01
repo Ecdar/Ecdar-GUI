@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import com.jfoenix.controls.JFXRippler?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import com.jfoenix.controls.JFXTextField?>
+<?import javafx.geometry.Insets?>
+<fx:root xmlns:fx="http://javafx.com/fxml/1"
+         xmlns="http://javafx.com/javafx/8.0.76-ea"
+         fx:controller="ecdar.controllers.TransitionPaneElementController"
+         fx:id="root" type="VBox"
+         AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+    <HBox fx:id="toolbar" alignment="CENTER">
+        <padding>
+            <Insets topRightBottomLeft="10"/>
+        </padding>
+        <JFXRippler fx:id="expandTransition">
+            <StackPane styleClass="responsive-icon-stack-pane-sizing" onMouseClicked="#expandTransitions">
+                <FontIcon fx:id="expandTransitionIcon" iconLiteral="gmi-add" styleClass="icon-size-medium"
+                          fill="white"/>
+            </StackPane>
+        </JFXRippler>
+
+        <Region minWidth="24" maxWidth="24"/>
+
+        <Label fx:id="toolbarTitle" styleClass="title" text="Transitions"/>
+
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <JFXRippler fx:id="refreshRippler">
+            <StackPane styleClass="responsive-icon-stack-pane-sizing" onMouseClicked="#refreshTransitions">
+                <FontIcon iconLiteral="gmi-refresh" styleClass="icon-size-medium" fill="white"/>
+            </StackPane>
+        </JFXRippler>
+    </HBox>
+    <VBox fx:id="delayChooser">
+        <padding>
+            <Insets top="10" right="20" bottom="10" left="20"/>
+        </padding>
+        <Label text="Delay" styleClass="subhead"/>
+        <JFXTextField fx:id="delayTextField"
+                      text="0.0"
+                      styleClass="subhead"/>
+    </VBox>
+
+    <VBox fx:id="transitionList">
+        <!-- Transitions goes here -->
+    </VBox>
+</fx:root>

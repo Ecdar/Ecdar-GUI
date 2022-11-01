@@ -2,6 +2,7 @@ package ecdar.controllers;
 
 import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXRippler;
+import com.jfoenix.controls.JFXTextField;
 import ecdar.abstractions.BackendInstance;
 import ecdar.abstractions.Query;
 import ecdar.abstractions.QueryType;
@@ -9,11 +10,13 @@ import ecdar.backend.BackendHelper;
 import ecdar.utility.colors.Color;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableValue;
+import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Tooltip;
 import javafx.scene.text.Text;
 import org.kordamp.ikonli.javafx.FontIcon;
-
+import javafx.beans.value.ChangeListener;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,10 +30,19 @@ public class QueryController implements Initializable {
     private Query query;
     private final Map<QueryType, SimpleBooleanProperty> queryTypeListElementsSelectedState = new HashMap<>();
     private final Tooltip noQueryTypeSetTooltip = new Tooltip("Please select a query type beneath the status icon");
+    @FXML
+    private JFXTextField queryText;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         initializeActionButton();
+
+        queryText.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                queryText.setText(Query.RefinementSymbolToUnicode(newValue));
+            }
+        });
     }
 
     public void setQuery(Query query) {

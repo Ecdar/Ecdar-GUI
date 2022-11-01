@@ -1,5 +1,6 @@
 package ecdar.abstractions;
 
+import EcdarProtoBuf.ComponentProtos;
 import ecdar.utility.helpers.Circular;
 import ecdar.utility.serialize.Serializable;
 import com.google.gson.Gson;
@@ -38,6 +39,13 @@ public class Nail implements Circular, Serializable {
     public Nail(final JsonObject jsonObject) {
         deserialize(jsonObject);
     }
+
+    // ToDo NIELS: Comment in, when location should be received through ProtoBuf
+//    public Nail(ComponentProtos.Nail protoBufNail) {
+//        setPropertyType(DisplayableEdge.PropertyType.valueOf(protoBufNail.getPropertyType()));
+//        setPropertyX(protoBufNail.getPropertyX());
+//        setPropertyY(protoBufNail.getPropertyY());
+//    }
 
     public double getX() {
         return x.get();

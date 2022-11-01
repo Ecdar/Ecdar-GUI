@@ -192,7 +192,11 @@ public class QueryPresentation extends HBox {
                     } else {
                         this.tooltip.setText("The component has been created (can be accessed in the project pane)");
                     }
-                } else if (queryState.getStatusCode() == 3) {
+                }
+                else if (queryState.getStatusCode() == 2){
+                    this.tooltip.setText("This query was not a success!");
+                }
+                else if (queryState.getStatusCode() == 3) {
                     this.tooltip.setText("The query has not been executed yet");
                 } else {
                     this.tooltip.setText(controller.getQuery().getCurrentErrors());
@@ -250,7 +254,8 @@ public class QueryPresentation extends HBox {
                 if (controller.getQuery().getQuery().isEmpty()) return;
                 
                 Label label = new Label(tooltip.getText());
-                JFXDialog dialog = new InformationDialogPresentation("Result from query: " + controller.getQuery().getQuery(), label);
+
+                JFXDialog dialog = new InformationDialogPresentation("Result from query: " + Query.RefinementSymbolToUnicode(controller.getQuery().getQuery()), label);
                 dialog.show(Ecdar.getPresentation());
             });
         });

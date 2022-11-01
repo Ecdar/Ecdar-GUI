@@ -4,7 +4,8 @@ import ecdar.abstractions.Component;
 import ecdar.abstractions.Project;
 import ecdar.backend.BackendDriver;
 import ecdar.backend.BackendHelper;
-import ecdar.backend.QueryExecutor;
+import ecdar.backend.QueryHandler;
+import ecdar.simulation.SimulationHandler;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.controllers.EcdarController;
 import ecdar.presentations.BackgroundThreadPresentation;
@@ -53,7 +54,8 @@ public class Ecdar extends Application {
     public static BooleanProperty shouldRunBackgroundQueries = new SimpleBooleanProperty(true);
     private static final BooleanProperty isSplit = new SimpleBooleanProperty(true); //Set to true to ensure correct behaviour at first toggle.
     private static BackendDriver backendDriver = new BackendDriver();
-    private static QueryExecutor queryExecutor = new QueryExecutor(backendDriver);
+    private static QueryHandler queryHandler = new QueryHandler(backendDriver);
+    private static SimulationHandler simulationHandler;
     private Stage debugStage;
 
     /**
@@ -122,6 +124,20 @@ public class Ecdar extends Application {
         return project;
     }
 
+    /**
+     * Returns the backend driver used to execute queries and handle simulation
+     * @return BackendDriver
+     */
+    public static BackendDriver getBackendDriver() {
+        return backendDriver;
+    }
+
+    public static QueryHandler getQueryExecutor() {
+        return queryHandler;
+    }
+
+    public static SimulationHandler getSimulationHandler() { return simulationHandler; }
+
     public static EcdarPresentation getPresentation() {
         return presentation;
     }
@@ -136,8 +152,8 @@ public class Ecdar extends Application {
         presentation.showHelp();
     }
 
-    public static BooleanProperty toggleFilePane() {
-        return presentation.toggleFilePane();
+    public static BooleanProperty toggleLeftPane() {
+        return presentation.toggleLeftPane();
     }
 
     /**
@@ -162,7 +178,7 @@ public class Ecdar extends Application {
     }
 
     public static BooleanProperty toggleQueryPane() {
-        return presentation.toggleQueryPane();
+        return presentation.toggleRightPane();
     }
 
     /**
@@ -183,19 +199,6 @@ public class Ecdar extends Application {
         return isSplit;
     }
 
-    /**
-     * Returns the backend driver used to execute queries and handle simulation
-     * @return BackendDriver
-     */
-    public static BackendDriver getBackendDriver() {
-        return backendDriver;
-    }
-
-    public static QueryExecutor getQueryExecutor() {
-        return queryExecutor;
-
-    }
-
     public static double getDpiScale() {
         if (!autoScalingEnabled.getValue())
             return 1;
@@ -214,6 +217,7 @@ public class Ecdar extends Application {
 
         // Load or create new project
         project = new Project();
+        simulationHandler = new SimulationHandler(getBackendDriver());
 
         // Set the title for the application
         stage.setTitle("Ecdar " + VERSION);
@@ -313,7 +317,8 @@ public class Ecdar extends Application {
 
             try {
                 backendDriver.closeAllBackendConnections();
-                queryExecutor.closeAllBackendConnections();
+                queryHandler.closeAllBackendConnections();
+                simulationHandler.closeAllBackendConnections();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -327,7 +332,8 @@ public class Ecdar extends Application {
             // to prevent dangling connections and queries
             try {
                 backendDriver.closeAllBackendConnections();
-                queryExecutor.closeAllBackendConnections();
+                queryHandler.closeAllBackendConnections();
+                simulationHandler.closeAllBackendConnections();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

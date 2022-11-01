@@ -58,7 +58,7 @@ public class Query implements Serializable {
     };
 
     public Query(final String query, final String comment, final QueryState queryState) {
-        this.query.set(query);
+        this.setQuery(query);
         this.comment.set(comment);
         this.queryState.set(queryState);
         setBackend(BackendHelper.getDefaultBackendInstance());
@@ -66,6 +66,14 @@ public class Query implements Serializable {
 
     public Query(final JsonObject jsonElement) {
         deserialize(jsonElement);
+    }
+
+    public static String RefinementSymbolToUnicode(String stringToReplace){
+        return stringToReplace.replace(">=","\u2265").replace("<=","\u2264");
+    }
+
+    public static String UnicodeToRefinementSymbol(String stringToReplace){
+        return stringToReplace.replace("\u2264","<=").replace("\u2265",">=");
     }
 
     public QueryState getQueryState() {
@@ -81,7 +89,7 @@ public class Query implements Serializable {
     }
 
     public String getQuery() {
-        return query.get();
+        return UnicodeToRefinementSymbol(this.query.get());
     }
 
     public void setQuery(final String query) {
