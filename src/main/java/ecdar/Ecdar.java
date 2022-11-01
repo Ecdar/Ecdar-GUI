@@ -5,7 +5,7 @@ import ecdar.abstractions.Project;
 import ecdar.backend.BackendDriver;
 import ecdar.backend.BackendHelper;
 import ecdar.backend.QueryHandler;
-import ecdar.simulation.SimulationHandler;
+import ecdar.backend.SimulationHandler;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.controllers.EcdarController;
 import ecdar.presentations.BackgroundThreadPresentation;

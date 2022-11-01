@@ -1,13 +1,11 @@
-package ecdar.simulation;
+package ecdar.backend;
 
 import EcdarProtoBuf.ComponentProtos;
 import EcdarProtoBuf.QueryProtos;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
-import ecdar.backend.BackendConnection;
-import ecdar.backend.BackendDriver;
-import ecdar.backend.BackendHelper;
-import ecdar.backend.GrpcRequest;
+import ecdar.simulation.SimulationState;
+import ecdar.simulation.SimulationStateSuccessor;
 import io.grpc.stub.StreamObserver;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -53,9 +51,9 @@ public class SimulationHandler {
      * that are available, when running the initial step.
      * That is why we need to keep track of the initial transitions.
      */
-    private final ObservableList<Transition> initialTransitions = FXCollections.observableArrayList();
+    private final ObservableList<ecdar.simulation.Transition> initialTransitions = FXCollections.observableArrayList();
     public ObservableList<SimulationState> traceLog = FXCollections.observableArrayList();
-    public ObservableList<Transition> availableTransitions = FXCollections.observableArrayList();
+    public ObservableList<ecdar.simulation.Transition> availableTransitions = FXCollections.observableArrayList();
     private final BackendDriver backendDriver;
     private final ArrayList<BackendConnection> connections = new ArrayList<>();
 
@@ -107,7 +105,7 @@ public class SimulationHandler {
         final SimulationState currentState = currentConcreteState.get();
         successor = getStateSuccessor();
 
-        GrpcRequest newRequest = new GrpcRequest(backendConnection -> {
+        GrpcRequest request = new GrpcRequest(backendConnection -> {
             StreamObserver<SimulationStepResponse> responseObserver = new StreamObserver<>() {
                 @Override
                 public void onNext(QueryProtos.SimulationStepResponse value) {
@@ -118,6 +116,7 @@ public class SimulationHandler {
                 @Override
                 public void onError(Throwable t) {
                     System.out.println(t.getMessage());
+
                     // Release backend connection
                     backendDriver.addBackendConnection(backendConnection);
                     connections.remove(backendConnection);
@@ -146,6 +145,8 @@ public class SimulationHandler {
             backendConnection.getStub().withDeadlineAfter(this.backendDriver.getResponseDeadline(), TimeUnit.MILLISECONDS)
                     .startSimulation(simStartRequest.build(), responseObserver);
         }, BackendHelper.getDefaultBackendInstance());
+
+        backendDriver.addRequestToExecutionQueue(request);
 
         //Save the previous states, and get the new
         currentConcreteState.set(successor.getState());
@@ -230,7 +231,7 @@ public class SimulationHandler {
             return;
         }
 
-        final Transition selectedTransition = availableTransitions.get(selectedTransitionIndex);
+        final ecdar.simulation.Transition selectedTransition = availableTransitions.get(selectedTransitionIndex);
         edgesSelected = new ArrayList<>();
 
         //Preparing for the step
@@ -278,7 +279,7 @@ public class SimulationHandler {
         nextStep(selectedTransition, BigDecimal.ZERO);
     }
 
-    public void nextStep(final Transition transition, final BigDecimal delay) {
+    public void nextStep(final ecdar.simulation.Transition transition, final BigDecimal delay) {
         int index = availableTransitions.indexOf(transition);
         if (index != -1) {
             nextStep(index, delay);
@@ -374,7 +375,7 @@ public class SimulationHandler {
      *
      * @return an {@link ObservableList} of all the currently available transitions in this state
      */
-    public ObservableList<Transition> getAvailableTransitions() {
+    public ObservableList<ecdar.simulation.Transition> getAvailableTransitions() {
         return availableTransitions;
     }
 
@@ -446,7 +447,7 @@ public class SimulationHandler {
      */
     public ArrayList<String> getAvailableTransitionsAsStrings() {
         final ArrayList<String> transitions = new ArrayList<>();
-        for (final Transition Transition : availableTransitions) {
+        for (final ecdar.simulation.Transition Transition : availableTransitions) {
             transitions.add(Transition.getLabel());
         }
         return transitions;

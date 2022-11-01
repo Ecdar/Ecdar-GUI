@@ -58,6 +58,8 @@ public class QueryHandler {
                 @Override
                 public void onError(Throwable t) {
                     handleQueryBackendError(t, query);
+
+                    // Release backend connection
                     backendDriver.addBackendConnection(backendConnection);
                     connections.remove(backendConnection);
                 }
@@ -70,8 +72,10 @@ public class QueryHandler {
                 }
             };
 
+            // ToDo SW5: Not working with the updated gRPC Protos
             var queryBuilder = QueryProtos.QueryRequest.newBuilder()
-                    .setQueryId(0)
+                    .setUserId(1)
+                    .setQueryId(1)
                     .setQuery(query.getType().getQueryName() + ": " + query.getQuery())
                     .setComponentsInfo(componentsInfoBuilder);
 
