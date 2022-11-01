@@ -77,6 +77,17 @@ public class QueryExecutor {
         backendDriver.addRequestToExecutionQueue(request);
     }
 
+    /**
+     * Close all open backend connection and kill all locally running processes
+     *
+     * @throws IOException if any of the sockets do not respond
+     */
+    public void closeAllBackendConnections() throws IOException {
+        for (BackendConnection con : connections) {
+            con.close();
+        }
+    }
+
     private void handleQueryResponse(QueryProtos.QueryResponse value, Query query) {
         // If the query has been cancelled, ignore the result
         if (query.getQueryState() == QueryState.UNKNOWN) return;
@@ -159,16 +170,5 @@ public class QueryExecutor {
 
             EcdarController.getActiveCanvasPresentation().getController().setActiveModel(newComponent);
         });
-    }
-
-    /**
-     * Close all open backend connection and kill all locally running processes
-     *
-     * @throws IOException if any of the sockets do not respond
-     */
-    public void closeAllBackendConnections() throws IOException {
-        for (BackendConnection con : connections) {
-            con.close();
-        }
     }
 }

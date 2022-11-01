@@ -329,7 +329,7 @@ public class ComponentController extends ModelController implements Initializabl
                 }, "Added universal location '" + newLocation + "' to component '" + component.getName() + "'", "add-circle");
             });
 
-            // Adds the add inconsistent location element to the drop down menu, this element adds an inconsistent location
+            // Adds the add inconsistent location element to the dropdown menu, this element adds an inconsistent location
             contextMenu.addClickableListElement("Add Inconsistent Location", event -> {
                 contextMenu.hide();
                 double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;

@@ -50,6 +50,17 @@ public class BackendDriver {
     }
 
     /**
+     * Close all open backend connection and kill all locally running processes
+     *
+     * @throws IOException if any of the sockets do not respond
+     */
+    public void closeAllBackendConnections() throws IOException {
+        for (BlockingQueue<BackendConnection> bq : openBackendConnections.values()) {
+            for (BackendConnection bc : bq) bc.close();
+        }
+    }
+
+    /**
      * Filters the list of open {@link BackendConnection}s to the specified {@link BackendInstance} and returns the
      * first match or attempts to start a new connection if none is found.
      *
@@ -165,17 +176,6 @@ public class BackendDriver {
                 .updateComponents(componentsBuilder.build(), observer);
     }
 
-    /**
-     * Close all open backend connection and kill all locally running processes
-     *
-     * @throws IOException if any of the sockets do not respond
-     */
-    public void closeAllBackendConnections() throws IOException {
-        for (BlockingQueue<BackendConnection> bq : openBackendConnections.values()) {
-            for (BackendConnection bc : bq) bc.close();
-        }
-    }
-
     private class GrpcRequestConsumer implements Runnable {
         @Override
         public void run() {
@@ -204,15 +204,6 @@ public class BackendDriver {
                     e.printStackTrace();
                 }
             }
-        }
-    }
-
-    enum TraceType {
-        NONE, SOME, SHORTEST, FASTEST;
-
-        @Override
-        public String toString() {
-            return "trace " + this.ordinal();
         }
     }
 }
