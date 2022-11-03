@@ -1,16 +1,23 @@
-package ecdar.simulation;
+package ecdar.backend;
 
+import EcdarProtoBuf.ComponentProtos;
+import EcdarProtoBuf.QueryProtos;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
+import ecdar.simulation.SimulationState;
+import ecdar.simulation.SimulationStateSuccessor;
+import io.grpc.stub.StreamObserver;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import EcdarProtoBuf.QueryProtos.SimulationStepResponse;
 
@@ -44,15 +51,17 @@ public class SimulationHandler {
      * that are available, when running the initial step.
      * That is why we need to keep track of the initial transitions.
      */
-    private final ObservableList<Transition> initialTransitions = FXCollections.observableArrayList();
+    private final ObservableList<ecdar.simulation.Transition> initialTransitions = FXCollections.observableArrayList();
     public ObservableList<SimulationState> traceLog = FXCollections.observableArrayList();
-    public ObservableList<Transition> availableTransitions = FXCollections.observableArrayList();
+    public ObservableList<ecdar.simulation.Transition> availableTransitions = FXCollections.observableArrayList();
+    private final BackendDriver backendDriver;
+    private final ArrayList<BackendConnection> connections = new ArrayList<>();
 
     /**
      * Empty constructor that should be used if the system or project has not be initialized yet
      */
-    public SimulationHandler() {
-
+    public SimulationHandler(BackendDriver backendDriver) {
+        this.backendDriver = backendDriver;
     }
 
     /**
@@ -96,7 +105,48 @@ public class SimulationHandler {
         final SimulationState currentState = currentConcreteState.get();
         successor = getStateSuccessor();
 
-        Ecdar.getBackendDriver().executeStartSimRequest("Administration || Machine || Researcher", (res) -> currentResponse = res, (err) -> System.out.println(err));
+        GrpcRequest request = new GrpcRequest(backendConnection -> {
+            StreamObserver<SimulationStepResponse> responseObserver = new StreamObserver<>() {
+                @Override
+                public void onNext(QueryProtos.SimulationStepResponse value) {
+                    System.out.println(value);
+                    currentResponse = value;
+                }
+
+                @Override
+                public void onError(Throwable t) {
+                    System.out.println(t.getMessage());
+
+                    // Release backend connection
+                    backendDriver.addBackendConnection(backendConnection);
+                    connections.remove(backendConnection);
+                }
+
+                @Override
+                public void onCompleted() {
+                    // Release backend connection
+                    backendDriver.addBackendConnection(backendConnection);
+                    connections.remove(backendConnection);
+                }
+            };
+
+            var comInfo = ComponentProtos.ComponentsInfo.newBuilder();
+            for (Component c : Ecdar.getProject().getComponents()) {
+                if (currentSimulation.contains(c.getName())) {
+                    comInfo.addComponents(ComponentProtos.Component.newBuilder().setJson(c.serialize().toString()).build());
+                }
+            }
+            comInfo.setComponentsHash(comInfo.getComponentsList().hashCode());
+            var simStartRequest = QueryProtos.SimulationStartRequest.newBuilder();
+            var simInfo = QueryProtos.SimulationInfo.newBuilder()
+                    .setComponentComposition(currentSimulation)
+                    .setComponentsInfo(comInfo);
+            simStartRequest.setSimulationInfo(simInfo);
+            backendConnection.getStub().withDeadlineAfter(this.backendDriver.getResponseDeadline(), TimeUnit.MILLISECONDS)
+                    .startSimulation(simStartRequest.build(), responseObserver);
+        }, BackendHelper.getDefaultBackendInstance());
+
+        backendDriver.addRequestToExecutionQueue(request);
 
         //Save the previous states, and get the new
         currentConcreteState.set(successor.getState());
@@ -112,7 +162,7 @@ public class SimulationHandler {
     /**
      * Resets the simulation to the initial location
      * where the <code>SimulationState</code> is the {@link SimulationHandler#initialConcreteState}, when there are
-     * elements in the {@link SimulationHandler#traceLog}. Otherwise it calls {@link SimulationHandler#initialStep}
+     * elements in the {@link SimulationHandler#traceLog}. Otherwise, it calls {@link SimulationHandler#initialStep}
      */
     public void resetToInitialLocation() {
         //If the simulation has not begun
@@ -181,7 +231,7 @@ public class SimulationHandler {
             return;
         }
 
-        final Transition selectedTransition = availableTransitions.get(selectedTransitionIndex);
+        final ecdar.simulation.Transition selectedTransition = availableTransitions.get(selectedTransitionIndex);
         edgesSelected = new ArrayList<>();
 
         //Preparing for the step
@@ -229,7 +279,7 @@ public class SimulationHandler {
         nextStep(selectedTransition, BigDecimal.ZERO);
     }
 
-    public void nextStep(final Transition transition, final BigDecimal delay) {
+    public void nextStep(final ecdar.simulation.Transition transition, final BigDecimal delay) {
         int index = availableTransitions.indexOf(transition);
         if (index != -1) {
             nextStep(index, delay);
@@ -325,7 +375,7 @@ public class SimulationHandler {
      *
      * @return an {@link ObservableList} of all the currently available transitions in this state
      */
-    public ObservableList<Transition> getAvailableTransitions() {
+    public ObservableList<ecdar.simulation.Transition> getAvailableTransitions() {
         return availableTransitions;
     }
 
@@ -355,7 +405,8 @@ public class SimulationHandler {
      * @return the initial {@link SimulationState} of this simulation
      */
     public SimulationState getInitialConcreteState() {
-        return Ecdar.getBackendDriver().getInitialSimulationState();
+        // ToDo: Implement
+        return null;
     }
 
     public ObjectProperty<SimulationState> initialConcreteStateProperty() {
@@ -396,7 +447,7 @@ public class SimulationHandler {
      */
     public ArrayList<String> getAvailableTransitionsAsStrings() {
         final ArrayList<String> transitions = new ArrayList<>();
-        for (final Transition Transition : availableTransitions) {
+        for (final ecdar.simulation.Transition Transition : availableTransitions) {
             transitions.add(Transition.getLabel());
         }
         return transitions;
@@ -411,6 +462,17 @@ public class SimulationHandler {
     }
 
     public boolean isSimulationRunning() {
-        return false; // ToDo NIELS: Handle logic for determining whether a simulation is currently running
+        return false; // ToDo: Implement
+    }
+
+    /**
+     * Close all open backend connection and kill all locally running processes
+     *
+     * @throws IOException if any of the sockets do not respond
+     */
+    public void closeAllBackendConnections() throws IOException {
+        for (BackendConnection con : connections) {
+            con.close();
+        }
     }
 }
