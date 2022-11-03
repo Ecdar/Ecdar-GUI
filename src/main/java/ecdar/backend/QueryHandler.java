@@ -100,6 +100,7 @@ public class QueryHandler {
     private void handleQueryResponse(QueryProtos.QueryResponse value, Query query) {
         // If the query has been cancelled, ignore the result
         if (query.getQueryState() == QueryState.UNKNOWN) return;
+        System.out.println(value);
 
         switch (value.getResponseCase()) {
             case QUERY_OK:
@@ -112,7 +113,8 @@ public class QueryHandler {
                         } else {
                             query.setQueryState(QueryState.ERROR);
                             query.getFailureConsumer().accept(new BackendException.QueryErrorException(queryOk.getRefinement().getReason()));
-                            // query.getSuccessConsumer().accept(false);
+                            query.getSuccessConsumer().accept(false);
+                            query.getStateConsumer().accept(value.getQueryOk().getConsistency().getState());
                         }
                         break;
 
@@ -124,6 +126,7 @@ public class QueryHandler {
                             query.setQueryState(QueryState.ERROR);
                             query.getFailureConsumer().accept(new BackendException.QueryErrorException(queryOk.getConsistency().getReason()));
                             query.getSuccessConsumer().accept(false);
+                            query.getStateConsumer().accept(value.getQueryOk().getConsistency().getState());
                         }
                         break;
 
@@ -135,6 +138,7 @@ public class QueryHandler {
                             query.setQueryState(QueryState.ERROR);
                             query.getFailureConsumer().accept(new BackendException.QueryErrorException(queryOk.getDeterminism().getReason()));
                             query.getSuccessConsumer().accept(false);
+                            query.getStateConsumer().accept(value.getQueryOk().getConsistency().getState());
                         }
                         break;
 
@@ -146,6 +150,7 @@ public class QueryHandler {
                             query.setQueryState(QueryState.ERROR);
                             query.getFailureConsumer().accept(new BackendException.QueryErrorException(queryOk.getImplementation().getReason()));
                             query.getSuccessConsumer().accept(false);
+                            query.getStateConsumer().accept(value.getQueryOk().getConsistency().getState());
                         }
                         break;
 
@@ -157,6 +162,7 @@ public class QueryHandler {
                             query.setQueryState(QueryState.ERROR);
                             query.getFailureConsumer().accept(new BackendException.QueryErrorException(queryOk.getReachability().getReason()));
                             query.getSuccessConsumer().accept(false);
+                            query.getStateConsumer().accept(value.getQueryOk().getConsistency().getState());
                         }
                         break;
 
