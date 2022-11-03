@@ -4,6 +4,7 @@ import EcdarProtoBuf.ComponentProtos;
 import EcdarProtoBuf.QueryProtos;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
+import ecdar.controllers.SimulationInitializationDialogController;
 import ecdar.simulation.SimulationState;
 import ecdar.simulation.SimulationStateSuccessor;
 import io.grpc.stub.StreamObserver;
@@ -27,6 +28,7 @@ import EcdarProtoBuf.QueryProtos.SimulationStepResponse;
  */
 public class SimulationHandler {
     public static final String QUERY_PREFIX = "Query: ";
+    public String composition;
     private ObjectProperty<SimulationState> currentConcreteState = new SimpleObjectProperty<>();
     private ObjectProperty<SimulationState> initialConcreteState = new SimpleObjectProperty<>();
     private ObjectProperty<BigDecimal> currentTime = new SimpleObjectProperty<>();
@@ -42,7 +44,7 @@ public class SimulationHandler {
      * For now the string is prefixed with {@link #QUERY_PREFIX} when doing a query simulation
      * and kept empty when doing system simulations
      */
-    private String currentSimulation = "";
+    public String currentSimulation = "";
 
     private final ObservableMap<String, BigDecimal> simulationVariables = FXCollections.observableHashMap();
     private final ObservableMap<String, BigDecimal> simulationClocks = FXCollections.observableHashMap();
@@ -91,7 +93,7 @@ public class SimulationHandler {
 
         //Preparation for the simulation
         this.system = getSystem();
-        this.currentConcreteState.get().setTime(currentTime.getValue());
+        //this.currentConcreteState.get().setTime(currentTime.getValue());
         this.initialTransitions.clear();
         this.successor = null;
     }
@@ -132,14 +134,12 @@ public class SimulationHandler {
 
             var comInfo = ComponentProtos.ComponentsInfo.newBuilder();
             for (Component c : Ecdar.getProject().getComponents()) {
-                if (currentSimulation.contains(c.getName())) {
-                    comInfo.addComponents(ComponentProtos.Component.newBuilder().setJson(c.serialize().toString()).build());
-                }
+                comInfo.addComponents(ComponentProtos.Component.newBuilder().setJson(c.serialize().toString()).build());
             }
             comInfo.setComponentsHash(comInfo.getComponentsList().hashCode());
             var simStartRequest = QueryProtos.SimulationStartRequest.newBuilder();
             var simInfo = QueryProtos.SimulationInfo.newBuilder()
-                    .setComponentComposition(currentSimulation)
+                    .setComponentComposition(composition)
                     .setComponentsInfo(comInfo);
             simStartRequest.setSimulationInfo(simInfo);
             backendConnection.getStub().withDeadlineAfter(this.backendDriver.getResponseDeadline(), TimeUnit.MILLISECONDS)
@@ -293,7 +293,7 @@ public class SimulationHandler {
      */
     private void updateAllValues() {
         currentTime.set(currentTime.get().add(delay));
-        successor.getState().setTime(currentTime.get());
+        //successor.getState().setTime(currentTime.get());
         setSimVarAndClocks();
     }
 
@@ -406,7 +406,7 @@ public class SimulationHandler {
      */
     public SimulationState getInitialConcreteState() {
         // ToDo: Implement
-        return null;
+        return initialConcreteState.get();
     }
 
     public ObjectProperty<SimulationState> initialConcreteStateProperty() {

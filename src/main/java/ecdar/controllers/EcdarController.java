@@ -293,6 +293,7 @@ public class EcdarController implements Initializable {
 
         simulationInitializationDialog.getController().startButton.setOnMouseClicked(event -> {
             // ToDo NIELS: Start simulation of selected query
+            Ecdar.getSimulationHandler().composition = simulationInitializationDialog.getController().simulationComboBox.getSelectionModel().getSelectedItem();
             currentMode.setValue(Mode.Simulator);
             simulationInitializationDialog.close();
         });
@@ -665,7 +666,6 @@ public class EcdarController implements Initializable {
 
                 if (!Ecdar.getSimulationHandler().isSimulationRunning()) {
                     ArrayList<String> queryOptions = Ecdar.getProject().getQueries().stream().map(Query::getQuery).collect(Collectors.toCollection(ArrayList::new));
-
                     if (!simulationInitializationDialog.getController().simulationComboBox.getItems().equals(queryOptions)) {
                         simulationInitializationDialog.getController().simulationComboBox.getItems().setAll(queryOptions);
                     }
