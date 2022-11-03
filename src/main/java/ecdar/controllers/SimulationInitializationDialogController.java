@@ -15,9 +15,11 @@ public class SimulationInitializationDialogController implements Initializable {
     public JFXButton startButton;
 
     public static List<String> ListOfComponents = new ArrayList<>();
-
+    /**
+     * Function gets list of components to simulation
+     * and saves it in the public static ListOfComponents
+     */
     public void GetListOfComponentsToSimulate(){
-        //Function gets list of components to simulation
         String componentsToSimulate = simulationComboBox.getSelectionModel().getSelectedItem();
         //filters out all components by ignoring operators.
         Pattern pattern = Pattern.compile("([\\w]*)", Pattern.CASE_INSENSITIVE);
