@@ -18,18 +18,17 @@ public class SimulationInitializationDialogController implements Initializable {
 
     public void GetListOfComponentsToSimulate(){
         //Function gets list of components to simulation
-        String componentsToSimulate =simulationComboBox.getSelectionModel().getSelectedItem();
-
-        //componentsToSimulate = componentsToSimulate.replace("([\\w]*)([^\\w])","");
-
+        String componentsToSimulate = simulationComboBox.getSelectionModel().getSelectedItem();
+        //filters out all components by ignoring operators.
         Pattern pattern = Pattern.compile("([\\w]*)", Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(componentsToSimulate);
         List<String> listOfComponents = new ArrayList<>();
+        //Adds all found components to list.
         while(matcher.find()){
-            if(matcher.group().length() != 0)
-            {listOfComponents.add(matcher.group());}
+            if(matcher.group().length() != 0) {
+                listOfComponents.add(matcher.group());
+            }
         }
-
 
         ListOfComponents = listOfComponents;
     }

@@ -97,6 +97,7 @@ public class SimulatorController implements Initializable {
         List<Component> components = new ArrayList<>();
         components = Ecdar.getProject().getComponents();
 
+        //Matches query components against with existing components and adds them to simulation
         List<Component> SelectedComponents = new ArrayList<>();
         for(Component comp:components) {
             for(String componentInQuery : queryComponents) {
@@ -104,7 +105,6 @@ public class SimulatorController implements Initializable {
                     SelectedComponents.add(comp);
                 }
             }
-
         }
         return SelectedComponents;
     }
