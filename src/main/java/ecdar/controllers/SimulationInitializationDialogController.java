@@ -5,13 +5,34 @@ import com.jfoenix.controls.JFXComboBox;
 import javafx.fxml.Initializable;
 
 import java.net.URL;
-import java.util.ResourceBundle;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SimulationInitializationDialogController implements Initializable {
     public JFXComboBox<String> simulationComboBox;
     public JFXButton cancelButton;
     public JFXButton startButton;
 
+    public static List<String> ListOfComponents = new ArrayList<>();
+
+    public void GetListOfComponentsToSimulate(){
+        //Function gets list of components to simulation
+        String componentsToSimulate =simulationComboBox.getSelectionModel().getSelectedItem();
+
+        //componentsToSimulate = componentsToSimulate.replace("([\\w]*)([^\\w])","");
+
+        Pattern pattern = Pattern.compile("([\\w]*)", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(componentsToSimulate);
+        List<String> listOfComponents = new ArrayList<>();
+        while(matcher.find()){
+            if(matcher.group().length() != 0)
+            {listOfComponents.add(matcher.group());}
+        }
+
+
+        ListOfComponents = listOfComponents;
+    }
     public void initialize(URL location, ResourceBundle resources) {
 
     }
