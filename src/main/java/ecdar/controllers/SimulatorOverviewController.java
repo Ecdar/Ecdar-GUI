@@ -366,6 +366,7 @@ public class SimulatorOverviewController implements Initializable {
      * @param state The state with the locations to highlight
      */
     public void highlightProcessState(final SimulationState state) {
+        if (state == null) return;
         for (int i = 0; i < state.getLocations().size(); i++) {
             final Pair<String, String> loc = state.getLocations().get(i);
 

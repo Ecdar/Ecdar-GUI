@@ -11,9 +11,11 @@ import java.util.stream.Collectors;
 public class SimulationState {
     private final ArrayList<Pair<String, String>> locations;
 
-    public SimulationState(ObjectProtos.StateTuple protoBufState) {
+    public SimulationState(ObjectProtos.State protoBufState) {
         locations = new ArrayList<>();
-        // ToDo: Initialize with correct locations from protoBuf response
+        for (ObjectProtos.Location location : protoBufState.getLocationTuple().getLocationsList()) {
+            locations.add(new Pair<>(location.getId(), location.getSpecificComponent().getComponentName()));
+        }
     }
 
     public void setTime(BigDecimal value) {

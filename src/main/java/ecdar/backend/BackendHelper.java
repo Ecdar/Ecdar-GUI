@@ -1,5 +1,6 @@
 package ecdar.backend;
 
+import EcdarProtoBuf.ComponentProtos;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
 import javafx.beans.property.SimpleListProperty;
@@ -44,16 +45,6 @@ public final class BackendHelper {
         );
 
         return path;
-    }
-
-    /**
-     * Check if the given backend supports ignored inputs and outputs as parameters.
-     *
-     * @param backend the name of the backend to check
-     * @return true if the backend supports ignored inputs and outputs, else false
-     */
-    public static Boolean backendSupportsInputOutputs(BackendInstance backend) {
-        return true;
     }
 
     /**
@@ -155,5 +146,16 @@ public final class BackendHelper {
 
     public static void addBackendInstanceListener(Runnable runnable) {
         BackendHelper.backendInstancesUpdatedListeners.add(runnable);
+    }
+
+    public static ComponentProtos.ComponentsInfo.Builder getComponentsInfoBuilder(String query) {
+        ComponentProtos.ComponentsInfo.Builder componentsInfoBuilder = ComponentProtos.ComponentsInfo.newBuilder();
+        for (Component c : Ecdar.getProject().getComponents()) {
+            if (query.contains(c.getName())) {
+                componentsInfoBuilder.addComponents(ComponentProtos.Component.newBuilder().setJson(c.serialize().toString()).build());
+            }
+        }
+        componentsInfoBuilder.setComponentsHash(componentsInfoBuilder.getComponentsList().hashCode());
+        return componentsInfoBuilder;
     }
 }

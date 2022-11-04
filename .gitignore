@@ -13,6 +13,10 @@ lib/*.dll
 .idea/
 /out/
 
+#VsCode
+/bin/
+.vscode/
+
 ### Gradle ###
 .gradle
 /build/

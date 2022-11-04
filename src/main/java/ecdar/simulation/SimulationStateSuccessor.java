@@ -12,6 +12,6 @@ public class SimulationStateSuccessor {
 
     public SimulationState getState() {
         // ToDo: Implement
-        return Ecdar.getBackendDriver().getInitialSimulationState();
+        return null;
     }
 }

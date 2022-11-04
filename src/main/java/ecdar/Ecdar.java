@@ -4,7 +4,8 @@ import ecdar.abstractions.Component;
 import ecdar.abstractions.Project;
 import ecdar.backend.BackendDriver;
 import ecdar.backend.BackendHelper;
-import ecdar.simulation.SimulationHandler;
+import ecdar.backend.QueryHandler;
+import ecdar.backend.SimulationHandler;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.controllers.EcdarController;
 import ecdar.presentations.BackgroundThreadPresentation;
@@ -53,6 +54,7 @@ public class Ecdar extends Application {
     public static BooleanProperty shouldRunBackgroundQueries = new SimpleBooleanProperty(true);
     private static final BooleanProperty isSplit = new SimpleBooleanProperty(true); //Set to true to ensure correct behaviour at first toggle.
     private static BackendDriver backendDriver = new BackendDriver();
+    private static QueryHandler queryHandler = new QueryHandler(backendDriver);
     private static SimulationHandler simulationHandler;
     private Stage debugStage;
 
@@ -128,6 +130,10 @@ public class Ecdar extends Application {
      */
     public static BackendDriver getBackendDriver() {
         return backendDriver;
+    }
+
+    public static QueryHandler getQueryExecutor() {
+        return queryHandler;
     }
 
     public static SimulationHandler getSimulationHandler() { return simulationHandler; }
@@ -211,7 +217,7 @@ public class Ecdar extends Application {
 
         // Load or create new project
         project = new Project();
-        simulationHandler = new SimulationHandler();
+        simulationHandler = new SimulationHandler(getBackendDriver());
 
         // Set the title for the application
         stage.setTitle("Ecdar " + VERSION);
@@ -311,6 +317,8 @@ public class Ecdar extends Application {
 
             try {
                 backendDriver.closeAllBackendConnections();
+                queryHandler.closeAllBackendConnections();
+                simulationHandler.closeAllBackendConnections();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -324,6 +332,8 @@ public class Ecdar extends Application {
             // to prevent dangling connections and queries
             try {
                 backendDriver.closeAllBackendConnections();
+                queryHandler.closeAllBackendConnections();
+                simulationHandler.closeAllBackendConnections();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
