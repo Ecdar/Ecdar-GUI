@@ -82,19 +82,11 @@ public abstract class DisplayableEdge implements Nearable {
     }
     // Husk, convert back to <=, >=
     public String getGuard() {
-        return guard.get().replace("\u2264", "<=").replace("\u2665", ">=");
+        return guard.get().replace("\u2264", "<=").replace("\u2265", ">=");
         //return guard.get();
     }
 
     public void setGuard(final String guard) {
-       /*if(guard.contains("<=")){
-            final String updatedString = guard.replace("<=", "\u2264");
-            guardProperty().setValue(updatedString);
-        }
-        if (guard.contains(">=")) {
-            final String updatedString = guard.replace(">=", "\u2265");
-            guardProperty().setValue(updatedString);
-        }*/
        this.guard.set(guard);
     }
 
