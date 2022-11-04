@@ -43,7 +43,7 @@ public class SimulationHandler {
      * For now the string is prefixed with {@link #QUERY_PREFIX} when doing a query simulation
      * and kept empty when doing system simulations
      */
-    public String currentSimulation = "";
+    private String currentSimulation = "";
 
     private final ObservableMap<String, BigDecimal> simulationVariables = FXCollections.observableHashMap();
     private final ObservableMap<String, BigDecimal> simulationClocks = FXCollections.observableHashMap();
