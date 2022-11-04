@@ -66,6 +66,7 @@ dependencies {
     //GRPC:
     implementation "io.grpc:grpc-protobuf:${grpcVersion}"
     implementation "io.grpc:grpc-stub:${grpcVersion}"
+    testImplementation 'junit:junit:4.13.1'
     compileOnly "org.apache.tomcat:annotations-api:6.0.53"
 
     // examples/advanced need this for JsonFormat
