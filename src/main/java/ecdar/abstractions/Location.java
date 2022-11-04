@@ -58,6 +58,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     private final ObjectProperty<Reachability> reachability = new SimpleObjectProperty<>();
 
     private final SimpleBooleanProperty isLocked = new SimpleBooleanProperty(false);
+    private boolean failing;
 
     public Location() {
     }
@@ -468,6 +469,19 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     public String generateNearString() {
         return "Location " + (!Strings.isNullOrEmpty(getNickname()) ? (getNickname() + " (" + getId() + ")") : getId());
     }
+
+    /**
+     * Sets whether this location failed for the last query
+     * @param bool if a query responded failure with the location, bool should be true.
+     */
+    public void setFailing(boolean bool) {
+        this.failing = bool;
+    }
+
+    public boolean getFailing() {
+        return this.failing;
+    }
+
     public enum Type {
         NORMAL, INITIAL, UNIVERSAL, INCONSISTENT
     }

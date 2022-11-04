@@ -64,8 +64,9 @@ public class Query implements Serializable {
     private final Consumer<ObjectProtos.State> stateConsumer = (state) -> {
         for (Component c : Ecdar.getProject().getComponents()) {
             if (query.getValue().equals(c.getName())) {
-                Location location = c.findLocation(state.getLocationTuple().getLocations(0).getId());
-                location.setColor(Color.RED);
+                for (ObjectProtos.Location location : state.getLocationTuple().getLocationsList()) {
+                    c.findLocation(location.getId()).setFailing(true);
+                };
             }
         }
     };
