@@ -161,7 +161,6 @@ public class Edge extends DisplayableEdge implements Serializable {
 
         result.addProperty(STATUS, ioStatus.get().toString());
         result.addProperty(SELECT, getSelect());
-        //result.addProperty(GUARD, getGuard().replace("\u2264", "<=").replace("\u2665", ">="));
         result.addProperty(GUARD, getGuard());
         result.addProperty(UPDATE, getUpdate());
         result.addProperty(SYNC, getSync());

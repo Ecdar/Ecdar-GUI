@@ -6,6 +6,7 @@ import ecdar.presentations.Grid;
 import ecdar.utility.colors.Color;
 import ecdar.utility.helpers.Circular;
 import ecdar.utility.helpers.MouseCircular;
+import ecdar.utility.helpers.StringHelper;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -80,14 +81,13 @@ public abstract class DisplayableEdge implements Nearable {
     public StringProperty selectProperty() {
         return select;
     }
-    // Husk, convert back to <=, >=
+
     public String getGuard() {
-        return guard.get().replace("\u2264", "<=").replace("\u2265", ">=");
-        //return guard.get();
+        return StringHelper.ConvertSymbolsToUnicode(guard.get());
     }
 
     public void setGuard(final String guard) {
-       this.guard.set(guard);
+        this.guard.set(guard);
     }
 
     public StringProperty guardProperty() {

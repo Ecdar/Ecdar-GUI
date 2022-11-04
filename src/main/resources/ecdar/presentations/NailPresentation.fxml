@@ -10,7 +10,7 @@
          fx:controller="ecdar.controllers.NailController"
          fx:id="root">
 
-    <Line fx:id="propertyTagLine" strokeDashOffset="2" strokeDashArray="3,3" stroke="#666" mouseTransparent="true" />
+    <Line fx:id="propertyTagLine" strokeDashOffset="2" strokeDashArray="3,3" stroke="#666" mouseTransparent="true"/>
 
     <Group fx:id="dragGroup">
         <Circle fx:id="dragCircle" radius="12.5" opacity="0"/>
