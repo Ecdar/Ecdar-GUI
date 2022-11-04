@@ -7,6 +7,7 @@ import ecdar.backend.*;
 import ecdar.controllers.QueryController;
 import ecdar.controllers.EcdarController;
 import ecdar.utility.colors.Color;
+import ecdar.utility.helpers.StringHelper;
 import ecdar.utility.helpers.StringValidator;
 import javafx.application.Platform;
 import javafx.beans.binding.When;
@@ -265,7 +266,7 @@ public class QueryPresentation extends HBox {
 
                 Label label = new Label(tooltip.getText());
 
-                JFXDialog dialog = new InformationDialogPresentation("Result from query: " + Query.RefinementSymbolToUnicode(controller.getQuery().getQuery()), label);
+                JFXDialog dialog = new InformationDialogPresentation("Result from query: " + StringHelper.ConvertSymbolsToUnicode(controller.getQuery().getQuery()), label);
                 dialog.show(Ecdar.getPresentation());
             });
         });

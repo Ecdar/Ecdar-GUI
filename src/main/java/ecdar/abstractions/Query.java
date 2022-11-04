@@ -3,6 +3,7 @@ package ecdar.abstractions;
 import ecdar.Ecdar;
 import ecdar.backend.*;
 import ecdar.controllers.EcdarController;
+import ecdar.utility.helpers.StringHelper;
 import ecdar.utility.helpers.StringValidator;
 import ecdar.utility.serialize.Serializable;
 import com.google.gson.JsonObject;
@@ -59,7 +60,7 @@ public class Query implements Serializable {
     }
 
     public String getQuery() {
-        return UnicodeToRefinementSymbol(this.query.get());
+        return StringHelper.ConvertUnicodeToSymbols(this.query.get());
     }
 
     public void setQuery(final String query) {
