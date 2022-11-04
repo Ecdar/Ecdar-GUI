@@ -51,6 +51,7 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
             }
 
             controller.propertyTag.setTranslateX(10);
+            controller.propertyTag.replaceSigns();
             controller.propertyTag.setTranslateY(-controller.propertyTag.getHeight());
             this.getChildren().add(controller.propertyTag);
 
@@ -74,7 +75,6 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
 
         radiusUpdater.accept(controller.getNail().getPropertyType());
     }
-
     private void initializePropertyTag() {
         final TagPresentation propertyTag = controller.propertyTag;
         final Line propertyTagLine = controller.propertyTagLine;
