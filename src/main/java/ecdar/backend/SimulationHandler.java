@@ -1,10 +1,10 @@
 package ecdar.backend;
 
 import EcdarProtoBuf.ComponentProtos;
+import EcdarProtoBuf.ObjectProtos;
 import EcdarProtoBuf.QueryProtos;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
-import ecdar.controllers.SimulationInitializationDialogController;
 import ecdar.simulation.SimulationState;
 import ecdar.simulation.SimulationStateSuccessor;
 import io.grpc.stub.StreamObserver;
@@ -37,7 +37,6 @@ public class SimulationHandler {
     private EcdarSystem system;
     private SimulationStateSuccessor successor;
     private int numberOfSteps;
-    private SimulationStepResponse currentResponse;
 
     /**
      * A string to keep track what is currently being simulated
@@ -90,7 +89,7 @@ public class SimulationHandler {
         this.currentConcreteState.set(getInitialConcreteState());
         this.initialConcreteState.set(getInitialConcreteState());
         this.currentTime = new SimpleObjectProperty<>(BigDecimal.ZERO);
-
+        
         //Preparation for the simulation
         this.system = getSystem();
         //this.currentConcreteState.get().setTime(currentTime.getValue());
@@ -103,22 +102,22 @@ public class SimulationHandler {
      */
     public void initialStep() {
         initializeSimulation();
-
+    
         final SimulationState currentState = currentConcreteState.get();
         successor = getStateSuccessor();
-
+        
         GrpcRequest request = new GrpcRequest(backendConnection -> {
             StreamObserver<SimulationStepResponse> responseObserver = new StreamObserver<>() {
                 @Override
                 public void onNext(QueryProtos.SimulationStepResponse value) {
                     System.out.println(value);
-                    currentResponse = value;
                 }
-
+                
                 @Override
                 public void onError(Throwable t) {
                     System.out.println(t.getMessage());
-
+                    Ecdar.showToast("Could not start simulation");
+                    
                     // Release backend connection
                     backendDriver.addBackendConnection(backendConnection);
                     connections.remove(backendConnection);
@@ -145,20 +144,21 @@ public class SimulationHandler {
             backendConnection.getStub().withDeadlineAfter(this.backendDriver.getResponseDeadline(), TimeUnit.MILLISECONDS)
                     .startSimulation(simStartRequest.build(), responseObserver);
         }, BackendHelper.getDefaultBackendInstance());
-
+        
         backendDriver.addRequestToExecutionQueue(request);
-
+        
         //Save the previous states, and get the new
         currentConcreteState.set(successor.getState());
         this.traceLog.add(currentState);
         numberOfSteps++;
-
+    
         //Updates the transitions available
         availableTransitions.addAll(FXCollections.observableArrayList(successor.getTransitions()));
         initialTransitions.addAll(availableTransitions);
         updateAllValues();
+        
     }
-
+    
     /**
      * Resets the simulation to the initial location
      * where the <code>SimulationState</code> is the {@link SimulationHandler#initialConcreteState}, when there are
