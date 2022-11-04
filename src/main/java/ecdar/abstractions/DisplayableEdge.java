@@ -83,7 +83,7 @@ public abstract class DisplayableEdge implements Nearable {
     }
 
     public String getGuard() {
-        return StringHelper.ConvertSymbolsToUnicode(guard.get());
+        return StringHelper.ConvertUnicodeToSymbols(guard.get());
     }
 
     public void setGuard(final String guard) {
