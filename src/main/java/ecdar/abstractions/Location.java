@@ -58,7 +58,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     private final ObjectProperty<Reachability> reachability = new SimpleObjectProperty<>();
 
     private final SimpleBooleanProperty isLocked = new SimpleBooleanProperty(false);
-    private boolean failing;
+    private final BooleanProperty failing = new SimpleBooleanProperty(false);
 
     public Location() {
     }
@@ -475,10 +475,14 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
      * @param bool if a query responded failure with the location, bool should be true.
      */
     public void setFailing(boolean bool) {
-        this.failing = bool;
+        this.failing.set(bool);
     }
 
     public boolean getFailing() {
+        return this.failing.get();
+    }
+
+    public BooleanProperty failingProperty() {
         return this.failing;
     }
 
