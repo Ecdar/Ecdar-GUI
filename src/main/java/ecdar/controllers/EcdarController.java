@@ -293,6 +293,7 @@ public class EcdarController implements Initializable {
         });
 
         simulationInitializationDialog.getController().startButton.setOnMouseClicked(event -> {
+
             // ToDo NIELS: Start simulation of selected query
             currentMode.setValue(Mode.Simulator);
             simulationInitializationDialog.close();

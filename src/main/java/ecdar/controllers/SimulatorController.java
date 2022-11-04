@@ -2,6 +2,7 @@ package ecdar.controllers;
 
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
+import ecdar.presentations.SimulationInitializationDialogPresentation;
 import ecdar.simulation.SimulationHandler;
 import ecdar.presentations.SimulatorOverviewPresentation;
 import ecdar.simulation.SimulationState;
@@ -55,7 +56,7 @@ public class SimulatorController implements Initializable {
         }
 
         if (!firstTimeInSimulator && !new HashSet<>(overviewPresentation.getController().getComponentObservableList())
-                .containsAll(findComponentsInCurrentSimulation())) {
+                .containsAll(findComponentsInCurrentSimulation(SimulationInitializationDialogController.ListOfComponents))) {
             shouldSimulationBeReset = true;
         }
 
@@ -75,9 +76,10 @@ public class SimulatorController implements Initializable {
     private void resetSimulation() {
         final SimulationHandler sm = Ecdar.getSimulationHandler();
         sm.initializeDefaultSystem();
+
         overviewPresentation.getController().clearOverview();
         overviewPresentation.getController().getComponentObservableList().clear();
-        overviewPresentation.getController().getComponentObservableList().addAll(findComponentsInCurrentSimulation());
+        overviewPresentation.getController().getComponentObservableList().addAll(findComponentsInCurrentSimulation(SimulationInitializationDialogController.ListOfComponents));
         firstTimeInSimulator = false;
     }
 
@@ -89,19 +91,22 @@ public class SimulatorController implements Initializable {
      *
      * @return all the components used in the current simulation
      */
-    private List<Component> findComponentsInCurrentSimulation() {
+    private List<Component> findComponentsInCurrentSimulation(List<String> queryComponents) {
         //Show components from the system
         final SimulationHandler sm = Ecdar.getSimulationHandler();
         List<Component> components = new ArrayList<>();
         components = Ecdar.getProject().getComponents();
-//        for (int i = 0; i < sm.getSystem().getNoOfProcesses(); i++) {
-//            final int finalI = i; // when using a var in lambda it has to be final
-//            final List<Component> filteredList = Ecdar.getProject().getComponents().filtered(component -> {
-//                return component.getName().contentEquals(sm.getSystem().getProcess(finalI).getName());
-//            });
-//            components.addAll(filteredList);
-//        }
-        return components;
+
+        //Matches query components against with existing components and adds them to simulation
+        List<Component> SelectedComponents = new ArrayList<>();
+        for(Component comp:components) {
+            for(String componentInQuery : queryComponents) {
+                if((comp.getName().equals(componentInQuery))) {
+                    SelectedComponents.add(comp);
+                }
+            }
+        }
+        return SelectedComponents;
     }
 
     /**
