@@ -37,7 +37,6 @@ public class StringHelperTestSymbolToUnicode {
 
     @Test
     public void testStringHelperConversionToUnicode() {
-        System.out.println(inputString + " bliver sammenlignet med " + expectedResult);
         assertEquals(expectedResult,
                 StringHelper.ConvertSymbolsToUnicode(inputString));
     }
