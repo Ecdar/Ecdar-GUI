@@ -19,11 +19,11 @@ import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 
-public class QueryExecutor {
+public class QueryHandler {
     private final BackendDriver backendDriver;
     private final ArrayList<BackendConnection> connections = new ArrayList<>();
 
-    public QueryExecutor(BackendDriver backendDriver) {
+    public QueryHandler(BackendDriver backendDriver) {
         this.backendDriver = backendDriver;
     }
 
