@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 public class BackendDriver {
     private final BlockingQueue<GrpcRequest> requestQueue = new ArrayBlockingQueue<>(200);
-    private final Map<BackendInstance, BlockingQueue<BackendConnection>> openBackendConnections = new HashMap<>(); // ToDo NIELS: Remove and close when backend is no longer needed
+    private final Map<BackendInstance, BlockingQueue<BackendConnection>> openBackendConnections = new HashMap<>();
     private final int responseDeadline = 20000;
     private final int rerunRequestDelay = 200;
     private final int numberOfRetriesPerQuery = 5;
