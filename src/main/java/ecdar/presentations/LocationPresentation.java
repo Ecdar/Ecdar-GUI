@@ -15,6 +15,7 @@ import javafx.scene.control.Label;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.shape.*;
 import javafx.util.Duration;
+import javafx.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -170,7 +171,7 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
             if(isFailing) {
                 updateColor.accept(Color.RED, colorIntensity.get());
             } else {
-                //ToDo: Paint to previous color
+                updateColor.accept(location.getColor(), colorIntensity.get());
             }
         };
 
@@ -433,7 +434,7 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
             if(isFailing) {
                 updateColor.accept(Color.RED, colorIntensity.get());
             } else {
-                //ToDo: Paint to previous color
+                updateColor.accept(location.getColor(), colorIntensity.get());
             }
         };
 

@@ -32,6 +32,9 @@ public class Query implements Serializable {
 
     private final Consumer<Boolean> successConsumer = (aBoolean) -> {
         if (aBoolean) {
+            for (Component c : Ecdar.getProject().getComponents()) {
+                c.removeFailingLocations();
+            }
             setQueryState(QueryState.SUCCESSFUL);
         } else {
             setQueryState(QueryState.ERROR);
@@ -63,10 +66,11 @@ public class Query implements Serializable {
 
     private final Consumer<ObjectProtos.State> stateConsumer = (state) -> {
         for (Component c : Ecdar.getProject().getComponents()) {
-            if (query.getValue().equals(c.getName())) {
+            c.removeFailingLocations();
+            if (query.getValue().contains(c.getName())) {
                 for (ObjectProtos.Location location : state.getLocationTuple().getLocationsList()) {
-                    c.findLocation(location.getId()).setFailing(true);
-                };
+                    c.addFailingLocation(location.getId());
+                }
             }
         }
     };
