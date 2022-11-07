@@ -496,8 +496,8 @@ public class Component extends HighLevelModelObject implements Boxed {
     public void removeFailingLocations() {
         for (Location location : failingLocations) {
             location.setFailing(false);
-            failingLocations.remove(location);
         }
+        failingLocations.removeAll();
     }
 
     public ObservableList<Location> getFailingLocations() {

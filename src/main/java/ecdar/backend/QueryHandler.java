@@ -57,6 +57,7 @@ public class QueryHandler {
 
                 @Override
                 public void onError(Throwable t) {
+                    System.out.println(t);
                     handleQueryBackendError(t, query);
 
                     // Release backend connection
