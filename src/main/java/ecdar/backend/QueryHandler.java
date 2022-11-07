@@ -57,7 +57,6 @@ public class QueryHandler {
 
                 @Override
                 public void onError(Throwable t) {
-                    System.out.println(t);
                     handleQueryBackendError(t, query);
 
                     // Release backend connection
@@ -101,7 +100,6 @@ public class QueryHandler {
     private void handleQueryResponse(QueryProtos.QueryResponse value, Query query) {
         // If the query has been cancelled, ignore the result
         if (query.getQueryState() == QueryState.UNKNOWN) return;
-        System.out.println(value);
 
         switch (value.getResponseCase()) {
             case QUERY_OK:

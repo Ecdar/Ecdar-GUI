@@ -15,7 +15,6 @@ import javafx.scene.control.Label;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.shape.*;
 import javafx.util.Duration;
-import javafx.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;

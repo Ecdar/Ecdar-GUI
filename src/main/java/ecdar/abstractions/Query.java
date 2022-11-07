@@ -1,17 +1,14 @@
 package ecdar.abstractions;
 
-import EcdarProtoBuf.ComponentProtos;
 import EcdarProtoBuf.ObjectProtos;
 import ecdar.Ecdar;
 import ecdar.backend.*;
 import ecdar.controllers.EcdarController;
-import ecdar.utility.colors.Color;
 import ecdar.utility.serialize.Serializable;
 import com.google.gson.JsonObject;
 import javafx.application.Platform;
 import javafx.beans.property.*;
 
-import java.io.FilenameFilter;
 import java.util.function.Consumer;
 
 public class Query implements Serializable {
@@ -26,7 +23,6 @@ public class Query implements Serializable {
     private final SimpleBooleanProperty isPeriodic = new SimpleBooleanProperty(false);
     private final ObjectProperty<QueryState> queryState = new SimpleObjectProperty<>(QueryState.UNKNOWN);
     private final ObjectProperty<QueryType> type = new SimpleObjectProperty<>();
-    private final StringProperty failingLocation = new SimpleStringProperty("");
     private BackendInstance backend;
 
 
@@ -100,14 +96,6 @@ public class Query implements Serializable {
 
     public void setQueryState(final QueryState queryState) {
         this.queryState.set(queryState);
-    }
-
-    public void setFailingLocation(final String location) {
-        this.failingLocation.set(location);
-    }
-
-    public String getFailingLocation() {
-        return this.failingLocation.get();
     }
 
     public ObjectProperty<QueryState> queryStateProperty() {
