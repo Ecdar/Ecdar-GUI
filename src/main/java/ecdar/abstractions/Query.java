@@ -167,6 +167,11 @@ public class Query implements Serializable {
     public Consumer<Exception> getFailureConsumer() {
         return failureConsumer;
     }
+
+    /**
+     * Getter for the state consumer.
+     * @return The <a href="#stateConsumer">State Consumer</a>
+     */
     public Consumer<ObjectProtos.State> getStateConsumer() {
         return stateConsumer;
     }

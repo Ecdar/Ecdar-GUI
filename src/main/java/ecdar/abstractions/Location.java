@@ -478,10 +478,18 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
         this.failing.set(bool);
     }
 
+    /**
+     * Whether this location is currently failing.
+     * @return Whether this location is currently failing.
+     */
     public boolean getFailing() {
         return this.failing.get();
     }
 
+    /**
+     * The observable boolean property for 'failing' of this.
+     * @return The observable boolean property for 'failing' of this.
+     */
     public BooleanProperty failingProperty() {
         return this.failing;
     }
