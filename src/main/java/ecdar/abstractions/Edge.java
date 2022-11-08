@@ -77,6 +77,19 @@ public class Edge extends DisplayableEdge implements Serializable {
         group.set(string);
     }
 
+    @Override
+    public boolean getFailing() { return this.failing.get(); }
+
+    @Override
+    public void setFailing(boolean bool) {
+        this.failing.set(bool);
+    }
+
+    @Override
+    public BooleanProperty failingProperty() {
+        return this.failing;
+    }
+
     /**
      * Creates a clone of an edge.
      * Clones objects used for verification.

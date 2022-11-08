@@ -71,6 +71,19 @@ public class Query implements Serializable {
         }
     };
 
+    private final Consumer<String> actionConsumer = (action) -> {
+        for (Component c : Ecdar.getProject().getComponents()) {
+            c.removeFailingEdges();
+            if (query.getValue().contains(c.getName())) {
+                for (Edge edge : c.getEdges()) {
+                    if(action.equals(edge.getSync()) && edge.getSourceLocation().getFailing()) {
+                        c.addFailingEdge(edge);
+                    }
+                }
+            }
+        }
+    };
+
     public Query(final String query, final String comment, final QueryState queryState) {
         this.setQuery(query);
         this.comment.set(comment);
@@ -174,6 +187,10 @@ public class Query implements Serializable {
      */
     public Consumer<ObjectProtos.State> getStateConsumer() {
         return stateConsumer;
+    }
+
+    public Consumer<String> getActionConsumer() {
+        return actionConsumer;
     }
 
     @Override

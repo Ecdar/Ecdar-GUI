@@ -126,6 +126,7 @@ public class QueryHandler {
                             query.getFailureConsumer().accept(new BackendException.QueryErrorException(queryOk.getConsistency().getReason()));
                             query.getSuccessConsumer().accept(false);
                             query.getStateConsumer().accept(value.getQueryOk().getConsistency().getState());
+                            query.getActionConsumer().accept(value.getQueryOk().getConsistency().getAction());
                         }
                         break;
 
