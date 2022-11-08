@@ -667,7 +667,7 @@ public class EcdarController implements Initializable {
             menuBarViewFilePanel.getGraphic().opacityProperty().bind(new When(isOpen).then(1).otherwise(0));
         });
 
-        menuBarViewQueryPanel.getGraphic().setOpacity(0);
+        menuBarViewQueryPanel.getGraphic().setOpacity(1);
         menuBarViewQueryPanel.setAccelerator(new KeyCodeCombination(KeyCode.G, KeyCodeCombination.SHORTCUT_DOWN));
         menuBarViewQueryPanel.setOnAction(event -> {
             final BooleanProperty isOpen = Ecdar.toggleQueryPane();
