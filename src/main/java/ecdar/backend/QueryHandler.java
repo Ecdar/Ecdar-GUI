@@ -113,7 +113,7 @@ public class QueryHandler {
                             query.setQueryState(QueryState.ERROR);
                             query.getFailureConsumer().accept(new BackendException.QueryErrorException(queryOk.getRefinement().getReason()));
                             query.getSuccessConsumer().accept(false);
-                            query.getStateConsumer().accept(value.getQueryOk().getConsistency().getState());
+                            query.getStateConsumer().accept(value.getQueryOk().getRefinement().getState());
                         }
                         break;
 
@@ -137,7 +137,7 @@ public class QueryHandler {
                             query.setQueryState(QueryState.ERROR);
                             query.getFailureConsumer().accept(new BackendException.QueryErrorException(queryOk.getDeterminism().getReason()));
                             query.getSuccessConsumer().accept(false);
-                            query.getStateConsumer().accept(value.getQueryOk().getConsistency().getState());
+                            query.getStateConsumer().accept(value.getQueryOk().getDeterminism().getState());
                         }
                         break;
 
@@ -149,7 +149,7 @@ public class QueryHandler {
                             query.setQueryState(QueryState.ERROR);
                             query.getFailureConsumer().accept(new BackendException.QueryErrorException(queryOk.getImplementation().getReason()));
                             query.getSuccessConsumer().accept(false);
-                            query.getStateConsumer().accept(value.getQueryOk().getConsistency().getState());
+                            query.getStateConsumer().accept(value.getQueryOk().getImplementation().getState());
                         }
                         break;
 
@@ -161,7 +161,7 @@ public class QueryHandler {
                             query.setQueryState(QueryState.ERROR);
                             query.getFailureConsumer().accept(new BackendException.QueryErrorException(queryOk.getReachability().getReason()));
                             query.getSuccessConsumer().accept(false);
-                            query.getStateConsumer().accept(value.getQueryOk().getConsistency().getState());
+                            query.getStateConsumer().accept(value.getQueryOk().getReachability().getState());
                         }
                         break;
 
