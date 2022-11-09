@@ -12,12 +12,11 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
-import javafx.beans.property.ObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.Group;
 import javafx.scene.control.Label;
 import javafx.scene.shape.Line;
 
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import static javafx.util.Duration.millis;
@@ -182,24 +181,6 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
         }
     }
 
-    private void initializeFailingListener() {
-        final DisplayableEdge edge = controller.getEdge();
-        final ObjectProperty<Color.Intensity> colorIntensity = edge.colorIntensityProperty();
-
-        // Delegate to style the label based on the color of the location
-        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
-            controller.color(newColor, newIntensity);
-        };
-        final Consumer<Boolean> handleFailingUpdate = (isFailing) -> {
-            if(isFailing) {
-                updateColor.accept(Color.RED, colorIntensity.get());
-            } else {
-                updateColor.accept(edge.getColor(), colorIntensity.get());
-            }
-        };
-        edge.failingProperty().addListener((obs, oldFailing, newFailing) -> handleFailingUpdate.accept(newFailing));
-    }
-
     private void initializeNailCircleColor() {
         final Runnable updateNailColor = () -> {
             final Color color = controller.getComponent().getColor();
@@ -214,27 +195,28 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
             }
         };
 
-        final Runnable updateNailColorOnFailing = () -> {
-            final Color color = controller.getComponent().getColor();
-            final Color.Intensity colorIntensity = controller.getComponent().getColorIntensity();
-            for(DisplayableEdge edge : controller.getComponent().getFailingEdges()) {
-                for (Nail nail : edge.getNails()) {
-                    if(nail.getPropertyType().equals(DisplayableEdge.PropertyType.SYNCHRONIZATION)){
-                        controller.nailCircle.setFill(Color.RED.getColor(colorIntensity));
-                        controller.nailCircle.setStroke(Color.RED.getColor(colorIntensity.next(2)));
-                    }
-                }
-            }
-        };
+
 
         // When the color of the component updates, update the nail indicator as well
         controller.getComponent().colorProperty().addListener((observable) -> updateNailColor.run());
 
         // When the color intensity of the component updates, update the nail indicator
         controller.getComponent().colorIntensityProperty().addListener((observable) -> updateNailColor.run());
-        controller.getEdge().failingProperty().addListener((observable) -> updateNailColorOnFailing.run());
         // Initialize the color of the nail
         updateNailColor.run();
+    }
+
+    /**
+     * Update color when the edge of this nails failing property is updated.
+     */
+    public void onFailingUpdate() {
+        final Runnable updateNailColorOnFailing = () -> {
+            final Color color = controller.getComponent().getColor();
+            final Color.Intensity colorIntensity = controller.getComponent().getColorIntensity();
+            controller.nailCircle.setFill(Color.RED.getColor(colorIntensity));
+            controller.nailCircle.setStroke(Color.RED.getColor(colorIntensity.next(2)));
+        };
+        updateNailColorOnFailing.run();
     }
 
     private void initializeShakeAnimation() {
