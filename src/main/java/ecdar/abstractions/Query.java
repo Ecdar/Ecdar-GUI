@@ -30,6 +30,7 @@ public class Query implements Serializable {
         if (aBoolean) {
             for (Component c : Ecdar.getProject().getComponents()) {
                 c.removeFailingLocations();
+                c.removeFailingEdges();
             }
             setQueryState(QueryState.SUCCESSFUL);
         } else {

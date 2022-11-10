@@ -100,7 +100,6 @@ public class QueryHandler {
     private void handleQueryResponse(QueryProtos.QueryResponse value, Query query) {
         // If the query has been cancelled, ignore the result
         if (query.getQueryState() == QueryState.UNKNOWN) return;
-
         switch (value.getResponseCase()) {
             case QUERY_OK:
                 QueryProtos.QueryResponse.QueryOk queryOk = value.getQueryOk();
@@ -114,6 +113,7 @@ public class QueryHandler {
                             query.getFailureConsumer().accept(new BackendException.QueryErrorException(queryOk.getRefinement().getReason()));
                             query.getSuccessConsumer().accept(false);
                             query.getStateConsumer().accept(value.getQueryOk().getRefinement().getState());
+                            query.getActionConsumer().accept(value.getQueryOk().getConsistency().getAction());
                         }
                         break;
 
@@ -139,6 +139,7 @@ public class QueryHandler {
                             query.getFailureConsumer().accept(new BackendException.QueryErrorException(queryOk.getDeterminism().getReason()));
                             query.getSuccessConsumer().accept(false);
                             query.getStateConsumer().accept(value.getQueryOk().getDeterminism().getState());
+                            query.getActionConsumer().accept(value.getQueryOk().getConsistency().getAction());
                         }
                         break;
 

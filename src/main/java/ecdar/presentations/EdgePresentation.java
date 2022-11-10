@@ -32,7 +32,7 @@ public class EdgePresentation extends Group {
     private void onFailingUpdate(DisplayableEdge edge, Boolean isFailing) {
         for (Nail nail : edge.getNails()) {
             if (nail.getPropertyType().equals(DisplayableEdge.PropertyType.SYNCHRONIZATION)) {
-                controller.getNailNailPresentationMap().get(nail).onFailingUpdate();
+                controller.getNailNailPresentationMap().get(nail).onFailingUpdate(isFailing);
             }
         }
     }

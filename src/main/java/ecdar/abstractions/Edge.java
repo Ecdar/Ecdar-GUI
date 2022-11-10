@@ -69,7 +69,7 @@ public class Edge extends DisplayableEdge implements Serializable {
         return sync.get() + (ioStatus.get().equals(EdgeStatus.INPUT) ? "?" : "!");
     }
 
-    public String getGroup(){
+    public String getGroup() {
         return group.get();
     }
 
@@ -78,7 +78,9 @@ public class Edge extends DisplayableEdge implements Serializable {
     }
 
     @Override
-    public boolean getFailing() { return this.failing.get(); }
+    public boolean getFailing() {
+        return this.failing.get();
+    }
 
     @Override
     public void setFailing(boolean bool) {

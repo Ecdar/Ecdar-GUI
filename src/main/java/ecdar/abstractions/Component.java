@@ -489,7 +489,8 @@ public class Component extends HighLevelModelObject implements Boxed {
     }
 
     /**
-     * Adds a failing Edge to the list of failing Edges.
+     * Add a failing Edge to the list of failing edges
+     * and set the edge's failing property to true.
      * @param edge the Edge that is failing.
      * @return whether adding the Edge to the list was a success
      */
@@ -499,8 +500,8 @@ public class Component extends HighLevelModelObject implements Boxed {
     }
 
     /**
-     * Sets all previous failing locations to not failing
-     * and removes all previous failing locations from list.
+     * Sets all previous failing edges to not failing
+     * and removes all previous failing edges from list.
      */
     public void removeFailingEdges() {
         for (DisplayableEdge edge : failingEdges) {

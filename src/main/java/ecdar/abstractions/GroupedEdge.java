@@ -169,13 +169,19 @@ public class GroupedEdge extends DisplayableEdge {
     }
 
     @Override
-    public void setFailing(boolean bool) { this.failing.set(bool); }
+    public void setFailing(boolean bool) {
+        this.failing.set(bool);
+    }
 
     @Override
-    public boolean getFailing() { return this.failing.get(); }
+    public boolean getFailing() {
+        return this.failing.get();
+    }
 
     @Override
-    public BooleanProperty failingProperty() { return this.failing; }
+    public BooleanProperty failingProperty() {
+        return this.failing;
+    }
 
     public List<StringProperty> getSyncProperties() {
         List<StringProperty> syncProperties = new ArrayList<>();

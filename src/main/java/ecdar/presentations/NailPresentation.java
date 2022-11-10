@@ -182,6 +182,34 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
     }
 
     private void initializeNailCircleColor() {
+
+        // When the color of the component updates, update the nail indicator as well
+        controller.getComponent().colorProperty().addListener((observable) -> updateNailColor());
+
+        // When the color intensity of the component updates, update the nail indicator
+        controller.getComponent().colorIntensityProperty().addListener((observable) -> updateNailColor());
+        // Initialize the color of the nail
+        updateNailColor();
+    }
+
+    /**
+     * Update color when the edge of this nails failing property is updated.
+     */
+    public void onFailingUpdate(boolean isFailing) {
+        final Runnable updateNailColorOnFailingUpdate = () -> {
+            final Color color = controller.getComponent().getColor();
+            final Color.Intensity colorIntensity = controller.getComponent().getColorIntensity();
+            controller.nailCircle.setFill(Color.RED.getColor(colorIntensity));
+            controller.nailCircle.setStroke(Color.RED.getColor(colorIntensity.next(2)));
+        };
+        if (isFailing) {
+            updateNailColorOnFailingUpdate.run();
+        } else {
+            updateNailColor();
+        }
+    }
+
+    private void updateNailColor() {
         final Runnable updateNailColor = () -> {
             final Color color = controller.getComponent().getColor();
             final Color.Intensity colorIntensity = controller.getComponent().getColorIntensity();
@@ -194,29 +222,7 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
                 controller.nailCircle.setStroke(Color.GREY_BLUE.getColor(Color.Intensity.I900));
             }
         };
-
-
-
-        // When the color of the component updates, update the nail indicator as well
-        controller.getComponent().colorProperty().addListener((observable) -> updateNailColor.run());
-
-        // When the color intensity of the component updates, update the nail indicator
-        controller.getComponent().colorIntensityProperty().addListener((observable) -> updateNailColor.run());
-        // Initialize the color of the nail
         updateNailColor.run();
-    }
-
-    /**
-     * Update color when the edge of this nails failing property is updated.
-     */
-    public void onFailingUpdate() {
-        final Runnable updateNailColorOnFailing = () -> {
-            final Color color = controller.getComponent().getColor();
-            final Color.Intensity colorIntensity = controller.getComponent().getColorIntensity();
-            controller.nailCircle.setFill(Color.RED.getColor(colorIntensity));
-            controller.nailCircle.setStroke(Color.RED.getColor(colorIntensity.next(2)));
-        };
-        updateNailColorOnFailing.run();
     }
 
     private void initializeShakeAnimation() {
