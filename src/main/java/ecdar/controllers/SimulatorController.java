@@ -1,5 +1,6 @@
 package ecdar.controllers;
 
+import com.google.gson.JsonObject;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
 import ecdar.backend.SimulationHandler;
@@ -7,12 +8,14 @@ import ecdar.presentations.SimulationInitializationDialogPresentation;
 import ecdar.presentations.SimulatorOverviewPresentation;
 import ecdar.simulation.SimulationState;
 import ecdar.simulation.Transition;
+import ecdar.utility.colors.Color;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.Initializable;
 import javafx.scene.layout.StackPane;
+import org.apache.commons.lang3.SerializationUtils;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -81,8 +84,16 @@ public class SimulatorController implements Initializable {
         overviewPresentation.getController().getComponentObservableList().clear();
         overviewPresentation.getController().getComponentObservableList().addAll(findComponentsInCurrentSimulation(SimulationInitializationDialogController.ListOfComponents));
         firstTimeInSimulator = false;
-    }
 
+        //Method that colors all initial states.
+        initialstatelighter(findComponentsInCurrentSimulation(SimulationInitializationDialogController.ListOfComponents));
+    }
+    private void initialstatelighter(List<Component> listofComponents){
+        for(Component comp: listofComponents){
+            comp.getInitialLocation().setColor(Color.ORANGE);
+        }
+
+    }
     /**
      * Finds the components that are used in the current simulation by looking at the component found in
      * {@link Project#getComponents()} and compare them to the processes declared in the {@link SimulationHandler#getSystem()}
@@ -102,7 +113,9 @@ public class SimulatorController implements Initializable {
         for(Component comp:components) {
             for(String componentInQuery : queryComponents) {
                 if((comp.getName().equals(componentInQuery))) {
-                    SelectedComponents.add(comp);
+                    Component temp = new Component();
+                    temp = comp.cloneForSimulation();
+                    SelectedComponents.add(temp);
                 }
             }
         }

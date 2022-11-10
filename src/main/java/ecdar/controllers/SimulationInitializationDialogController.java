@@ -22,6 +22,7 @@ public class SimulationInitializationDialogController implements Initializable {
      * and saves it in the public static ListOfComponents
      */
     public void GetListOfComponentsToSimulate(){
+        ListOfComponents.clear();
         String componentsToSimulate = simulationComboBox.getSelectionModel().getSelectedItem();
         //filters out all components by ignoring operators.
         Pattern pattern = Pattern.compile("([\\w]*)", Pattern.CASE_INSENSITIVE);
