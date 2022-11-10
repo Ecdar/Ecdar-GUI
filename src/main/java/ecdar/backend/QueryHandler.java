@@ -113,7 +113,7 @@ public class QueryHandler {
                             query.getFailureConsumer().accept(new BackendException.QueryErrorException(queryOk.getRefinement().getReason()));
                             query.getSuccessConsumer().accept(false);
                             query.getStateConsumer().accept(value.getQueryOk().getRefinement().getState());
-                            query.getActionConsumer().accept(value.getQueryOk().getConsistency().getAction());
+                            query.getActionConsumer().accept(value.getQueryOk().getRefinement().getAction());
                         }
                         break;
 
@@ -139,7 +139,7 @@ public class QueryHandler {
                             query.getFailureConsumer().accept(new BackendException.QueryErrorException(queryOk.getDeterminism().getReason()));
                             query.getSuccessConsumer().accept(false);
                             query.getStateConsumer().accept(value.getQueryOk().getDeterminism().getState());
-                            query.getActionConsumer().accept(value.getQueryOk().getConsistency().getAction());
+                            query.getActionConsumer().accept(value.getQueryOk().getDeterminism().getAction());
                         }
                         break;
 
