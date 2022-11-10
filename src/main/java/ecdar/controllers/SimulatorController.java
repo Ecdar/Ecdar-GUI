@@ -79,20 +79,29 @@ public class SimulatorController implements Initializable {
     private void resetSimulation() {
         final SimulationHandler sm = Ecdar.getSimulationHandler();
         sm.initializeDefaultSystem();
-
+        List<Component> listOfComponentsForSimulation = findComponentsInCurrentSimulation(SimulationInitializationDialogController.ListOfComponents);
         overviewPresentation.getController().clearOverview();
         overviewPresentation.getController().getComponentObservableList().clear();
-        overviewPresentation.getController().getComponentObservableList().addAll(findComponentsInCurrentSimulation(SimulationInitializationDialogController.ListOfComponents));
+        overviewPresentation.getController().getComponentObservableList().addAll(listOfComponentsForSimulation);
         firstTimeInSimulator = false;
 
         //Method that colors all initial states.
-        initialstatelighter(findComponentsInCurrentSimulation(SimulationInitializationDialogController.ListOfComponents));
+        initialstatelighter(listOfComponentsForSimulation);
     }
     private void initialstatelighter(List<Component> listofComponents){
-        for(Component comp: listofComponents){
-            comp.getInitialLocation().setColor(Color.ORANGE);
+        for(Component comp: listofComponents)
+        {
+            Location initiallocation = comp.getInitialLocation();
+            initiallocation.setColor(Color.ORANGE);
+            List<DisplayableEdge> tempedge = comp.getRelatedEdges(initiallocation);
+            for(DisplayableEdge e: tempedge)
+            {
+                if(e.getSourceLocation() == initiallocation)
+                {
+                    e.setIsHighlighted(true);
+                }
+            }
         }
-
     }
     /**
      * Finds the components that are used in the current simulation by looking at the component found in
@@ -113,8 +122,7 @@ public class SimulatorController implements Initializable {
         for(Component comp:components) {
             for(String componentInQuery : queryComponents) {
                 if((comp.getName().equals(componentInQuery))) {
-                    Component temp = new Component();
-                    temp = comp.cloneForSimulation();
+                    Component temp = new Component(comp.serialize());
                     SelectedComponents.add(temp);
                 }
             }
