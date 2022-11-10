@@ -3,6 +3,7 @@ package ecdar.abstractions;
 import ecdar.Ecdar;
 import ecdar.backend.*;
 import ecdar.controllers.EcdarController;
+import ecdar.utility.helpers.StringHelper;
 import ecdar.utility.helpers.StringValidator;
 import ecdar.utility.serialize.Serializable;
 import com.google.gson.JsonObject;
@@ -46,14 +47,6 @@ public class Query implements Serializable {
         initializeRunQuery();
     }
 
-    public static String RefinementSymbolToUnicode(String stringToReplace){
-        return stringToReplace.replace(">=","\u2265").replace("<=","\u2264");
-    }
-
-    public static String UnicodeToRefinementSymbol(String stringToReplace){
-        return stringToReplace.replace("\u2264","<=").replace("\u2265",">=");
-    }
-
     public QueryState getQueryState() {
         return queryState.get();
     }
@@ -67,7 +60,7 @@ public class Query implements Serializable {
     }
 
     public String getQuery() {
-        return UnicodeToRefinementSymbol(this.query.get());
+        return StringHelper.ConvertUnicodeToSymbols(this.query.get());
     }
 
     public void setQuery(final String query) {
