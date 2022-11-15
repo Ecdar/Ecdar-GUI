@@ -213,8 +213,13 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
         final Runnable updateNailColor = () -> {
             final Color color = controller.getComponent().getColor();
             final Color.Intensity colorIntensity = controller.getComponent().getColorIntensity();
-
-            if(!controller.getNail().getPropertyType().equals(Edge.PropertyType.NONE)) {
+            //If edge is failing and is a SYNC
+            if (controller.getEdge().getFailing() && controller.getNail().getPropertyType().equals(Edge.PropertyType.SYNCHRONIZATION)) {
+                controller.nailCircle.setFill(Color.RED.getColor(colorIntensity));
+                controller.nailCircle.setStroke(Color.RED.getColor(colorIntensity.next(2)));
+            }
+            //If edge is not NONE
+            else if (!controller.getNail().getPropertyType().equals(Edge.PropertyType.NONE)) {
                 controller.nailCircle.setFill(color.getColor(colorIntensity));
                 controller.nailCircle.setStroke(color.getColor(colorIntensity.next(2)));
             } else {
@@ -258,17 +263,7 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
 
     @Override
     public void deselect() {
-        Color color = Color.GREY_BLUE;
-        Color.Intensity intensity = Color.Intensity.I800;
-
-        // Set the color
-        if(!controller.getNail().getPropertyType().equals(Edge.PropertyType.NONE)) {
-            color = controller.getComponent().getColor();
-            intensity = controller.getComponent().getColorIntensity();
-        }
-
-        controller.nailCircle.setFill(color.getColor(intensity));
-        controller.nailCircle.setStroke(color.getColor(intensity.next(2)));
+        updateNailColor();
     }
 
     public NailController getController() {

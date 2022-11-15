@@ -162,8 +162,13 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
 
         // Delegate to style the label based on the color of the location
         final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
-            idLabel.setTextFill(newColor.getTextColor(newIntensity));
-            ds.setColor(newColor.getColor(newIntensity));
+            if (location.getFailing()) {
+                idLabel.setTextFill(Color.RED.getTextColor(newIntensity));
+                ds.setColor(Color.RED.getColor(newIntensity));
+            } else {
+                idLabel.setTextFill(newColor.getTextColor(newIntensity));
+                ds.setColor(newColor.getColor(newIntensity));
+            }
         };
 
         final Consumer<Boolean> handleFailingUpdate = (isFailing) -> {
@@ -419,21 +424,22 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
 
         // Delegate to style the label based on the color of the location
         final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
-            notCommittedShape.setFill(newColor.getColor(newIntensity));
 
             if (!location.getUrgency().equals(Location.Urgency.PROHIBITED)) {
-                notCommittedShape.setStroke(newColor.getColor(newIntensity.next(2)));
+                if (location.getFailing()) {
+                    notCommittedShape.setStroke(Color.RED.getColor(newIntensity));
+                } else {
+                    notCommittedShape.setStroke(newColor.getColor(newIntensity.next(2)));
+                }
             }
-
-            committedShape.setFill(newColor.getColor(newIntensity));
-            committedShape.setStroke(newColor.getColor(newIntensity.next(2)));
-        };
-
-        final Consumer<Boolean> handleFailingUpdate = (isFailing) -> {
-            if(isFailing) {
-                updateColor.accept(Color.RED, colorIntensity.get());
+            if (location.getFailing()) {
+                notCommittedShape.setFill(Color.RED.getColor(newIntensity));
+                committedShape.setFill(Color.RED.getColor(newIntensity));
+                committedShape.setStroke(Color.RED.getColor(newIntensity.next(2)));
             } else {
-                updateColor.accept(location.getColor(), colorIntensity.get());
+                notCommittedShape.setFill(newColor.getColor(newIntensity));
+                committedShape.setFill(newColor.getColor(newIntensity));
+                committedShape.setStroke(newColor.getColor(newIntensity.next(2)));
             }
         };
 
@@ -444,7 +450,7 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
 
         // Update the color of the circle when the color of the location is updated
         color.addListener((obs, old, newColor) -> updateColor.accept(newColor, colorIntensity.get()));
-        failing.addListener((obs, old, newFailing) -> handleFailingUpdate.accept(newFailing));
+        failing.addListener((obs, old, newFailing) -> updateColor.accept(color.get(), colorIntensity.get()));
     }
 
     private void initializeTypeGraphics() {
