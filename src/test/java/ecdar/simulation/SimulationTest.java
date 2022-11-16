@@ -32,24 +32,24 @@ public class SimulationTest extends TestFXBase {
         final List<Component> components = generateComponentsWithInitialLocations();
 
         BindableService testService = new EcdarBackendGrpc.EcdarBackendImplBase() {
-            @Override
-            public void startSimulation(QueryProtos.SimulationStartRequest request,
-                                        StreamObserver<QueryProtos.SimulationStepResponse> responseObserver) {
-                try {
-                    ObjectProtos.StateTuple state = ObjectProtos.StateTuple.newBuilder().addAllLocations(components.stream()
-                            .map(c -> ObjectProtos.StateTuple.LocationTuple.newBuilder()
-                                    .setComponentName(c.getName())
-                                    .setId(c.getInitialLocation().getId())
-                                    .build())
-                            .collect(Collectors.toList())).build();
+            // @Override
+            // public void startSimulation(QueryProtos.SimulationStartRequest request,
+            //                             StreamObserver<QueryProtos.SimulationStepResponse> responseObserver) {
+            //     try {
+            //         ObjectProtos.StateTuple state = ObjectProtos.StateTuple.newBuilder().addAllLocations(components.stream()
+            //                 .map(c -> ObjectProtos.StateTuple.LocationTuple.newBuilder()
+            //                         .setComponentName(c.getName())
+            //                         .setId(c.getInitialLocation().getId())
+            //                         .build())
+            //                 .collect(Collectors.toList())).build();
 
-                    QueryProtos.SimulationStepResponse response = QueryProtos.SimulationStepResponse.newBuilder().setState(state).build();
-                    responseObserver.onNext(response);
-                    responseObserver.onCompleted();
-                } catch (Throwable e) {
-                    responseObserver.onError(Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asException());
-                }
-            }
+            //         QueryProtos.SimulationStepResponse response = QueryProtos.SimulationStepResponse.newBuilder().setState(state).build();
+            //         responseObserver.onNext(response);
+            //         responseObserver.onCompleted();
+            //     } catch (Throwable e) {
+            //         responseObserver.onError(Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asException());
+            //     }
+            // }
 
             @Override
             public void takeSimulationStep(EcdarProtoBuf.QueryProtos.SimulationStepRequest request,
