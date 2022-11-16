@@ -8,6 +8,7 @@ import ecdar.abstractions.Query;
 import ecdar.abstractions.QueryType;
 import ecdar.backend.BackendHelper;
 import ecdar.utility.colors.Color;
+import ecdar.utility.helpers.StringHelper;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
@@ -40,7 +41,7 @@ public class QueryController implements Initializable {
         queryText.textProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                queryText.setText(Query.RefinementSymbolToUnicode(newValue));
+                queryText.setText(StringHelper.ConvertSymbolsToUnicode(newValue));
             }
         });
     }

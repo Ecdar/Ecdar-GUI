@@ -182,6 +182,9 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
         }
 
         controller.nicknameTag.replaceSpace();
+        controller.nicknameTag.replaceSigns();
+        controller.invariantTag.replaceSigns();
+
 
         // Set the layout from the model (if they are not both 0)
         final Location loc = controller.getLocation();

@@ -9,6 +9,7 @@ import ecdar.presentations.Grid;
 import ecdar.utility.colors.Color;
 import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.Circular;
+import ecdar.utility.helpers.StringHelper;
 import ecdar.utility.serialize.Serializable;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
@@ -178,7 +179,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     }
 
     public String getInvariant() {
-        return invariant.get();
+        return StringHelper.ConvertUnicodeToSymbols(invariant.get());
     }
 
     public void setInvariant(final String invariant) {
