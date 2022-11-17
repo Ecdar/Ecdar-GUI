@@ -27,7 +27,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.Assertions;
 
-public class SimulationTest extends TestFXBase {
+public class SimulationTest {
     public GrpcCleanupRule grpcCleanup = new GrpcCleanupRule();
     private final String serverName = InProcessServerBuilder.generateName();
 
