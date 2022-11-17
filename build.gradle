@@ -3,7 +3,7 @@ plugins {
     id 'application'
     id 'org.openjfx.javafxplugin' version '0.0.10'
     id 'com.google.protobuf' version '0.8.17'
-    id 'org.beryx.jlink' version '2.25.0'
+    id 'org.beryx.runtime' version '1.12.7'
 }
 
 javafx {
@@ -108,10 +108,26 @@ tasks.register('uiTest', Test) {
     systemProperty 'prism.text', 't2k'
 }
 
-jlink {
+runtime {
     options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
-    launcher {
-        name = mainClassName
+    modules = [
+            'javafx.base',
+            'java.desktop',
+            'javafx.graphics',
+            'javafx.controls',
+            'javafx.fxml',
+            'java.prefs',
+            'javafx.swing',
+            'java.xml',
+            'jdk.unsupported',
+            'java.scripting',
+            'jdk.unsupported.desktop',
+            'java.datatransfer',
+            'java.logging',
+            'java.sql',
+            'jdk.jfr']
+
+    launcher{
         jvmArgs = ['-Dlog4j.configurationFile=./log4j2.xml']
     }
 }
