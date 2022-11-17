@@ -1,4 +1,4 @@
 [submodule "src/main/proto"]
 	path = src/main/proto
-	url = ../Ecdar-ProtoBuf.git
+	url = https://github.com/Ecdar-SW5/Ecdar-ProtoBuf.git
 
