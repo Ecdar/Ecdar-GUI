@@ -90,8 +90,8 @@ public class SimulatorController implements Initializable {
      */
     private List<Component> findComponentsInCurrentSimulation(List<String> queryComponents) {
         //Show components from the system
-        final SimulationHandler sm = Ecdar.getSimulationHandler();
         List<Component> components = new ArrayList<>();
+        
         components = Ecdar.getProject().getComponents();
 
         //Matches query components against with existing components and adds them to simulation
