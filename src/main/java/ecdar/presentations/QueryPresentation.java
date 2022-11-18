@@ -196,7 +196,7 @@ public class QueryPresentation extends HBox {
                     }
                 }
                 else if (queryState.getStatusCode() == 2){
-                    this.tooltip.setText("This query was not a success!");
+                    this.tooltip.setText("This query was not a success: " + controller.getQuery().getCurrentErrors());
                 }
                 else if (queryState.getStatusCode() == 3) {
                     this.tooltip.setText("The query has not been executed yet");

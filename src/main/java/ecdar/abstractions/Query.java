@@ -1,5 +1,6 @@
 package ecdar.abstractions;
 
+import EcdarProtoBuf.ObjectProtos;
 import ecdar.Ecdar;
 import ecdar.backend.*;
 import ecdar.controllers.EcdarController;
@@ -28,6 +29,9 @@ public class Query implements Serializable {
 
     private final Consumer<Boolean> successConsumer = (aBoolean) -> {
         if (aBoolean) {
+            for (Component c : Ecdar.getProject().getComponents()) {
+                c.removeFailingLocations();
+            }
             setQueryState(QueryState.SUCCESSFUL);
         } else {
             setQueryState(QueryState.ERROR);
@@ -52,6 +56,17 @@ public class Query implements Serializable {
                     setQueryState(QueryState.UNKNOWN);
                 } else {
                     Platform.runLater(() -> EcdarController.openQueryDialog(this, cause.toString()));
+                }
+            }
+        }
+    };
+
+    private final Consumer<ObjectProtos.State> stateConsumer = (state) -> {
+        for (Component c : Ecdar.getProject().getComponents()) {
+            c.removeFailingLocations();
+            if (query.getValue().contains(c.getName())) {
+                for (ObjectProtos.Location location : state.getLocationTuple().getLocationsList()) {
+                    c.addFailingLocation(location.getId());
                 }
             }
         }
@@ -144,6 +159,14 @@ public class Query implements Serializable {
 
     public Consumer<Exception> getFailureConsumer() {
         return failureConsumer;
+    }
+
+    /**
+     * Getter for the state consumer.
+     * @return The <a href="#stateConsumer">State Consumer</a>
+     */
+    public Consumer<ObjectProtos.State> getStateConsumer() {
+        return stateConsumer;
     }
 
     @Override
