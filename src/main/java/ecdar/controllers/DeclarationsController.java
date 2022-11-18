@@ -43,11 +43,10 @@ public class DeclarationsController implements Initializable {
      */
     private void initializeWidthAndHeight() {
         // Fetch width and height of canvas and update
-        root.minWidthProperty().bind(Ecdar.getPresentation().getController().canvasPane.minWidthProperty());
-        root.maxWidthProperty().bind(Ecdar.getPresentation().getController().canvasPane.maxWidthProperty());
-        root.minHeightProperty().bind(Ecdar.getPresentation().getController().canvasPane.minHeightProperty());
-        root.maxHeightProperty().bind(Ecdar.getPresentation().getController().canvasPane.maxHeightProperty());
-        textArea.setTranslateY(20);
+        root.minWidthProperty().bind(Ecdar.getPresentation().getController().getEditorPresentation().getController().canvasPane.minWidthProperty());
+        root.maxWidthProperty().bind(Ecdar.getPresentation().getController().getEditorPresentation().getController().canvasPane.maxWidthProperty());
+        root.minHeightProperty().bind(Ecdar.getPresentation().getController().getEditorPresentation().getController().canvasPane.minHeightProperty());
+        root.maxHeightProperty().bind(Ecdar.getPresentation().getController().getEditorPresentation().getController().canvasPane.maxHeightProperty());
     }
 
     /**

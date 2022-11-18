@@ -3,16 +3,9 @@ package ecdar.controllers;
 import ecdar.Ecdar;
 import ecdar.abstractions.Query;
 import ecdar.abstractions.QueryState;
-import ecdar.backend.*;
-import ecdar.presentations.Grid;
 import ecdar.presentations.QueryPresentation;
 import com.jfoenix.controls.JFXRippler;
-import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -21,9 +14,6 @@ import javafx.scene.Cursor;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Paint;
-import javafx.scene.shape.Rectangle;
-
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -87,7 +77,7 @@ public class QueryPaneController implements Initializable {
         Ecdar.getProject().getQueries().forEach(query -> {
             if (query.getType() == null) return;
             query.cancel();
-            query.run();
+            Ecdar.getQueryExecutor().executeQuery(query);
         });
     }
 

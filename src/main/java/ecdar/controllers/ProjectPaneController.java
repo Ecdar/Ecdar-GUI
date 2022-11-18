@@ -12,6 +12,7 @@ import ecdar.utility.UndoRedoStack;
 import com.jfoenix.controls.JFXPopup;
 import com.jfoenix.controls.JFXRippler;
 import com.jfoenix.controls.JFXTextArea;
+import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -20,7 +21,6 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -343,7 +343,7 @@ public class ProjectPaneController implements Initializable {
     public void updateColorsOnFilePresentations() {
         for (Node child : filesList.getChildren()) {
             if (child instanceof FilePresentation) {
-                ((FilePresentation) child).updateColors();
+                Platform.runLater(() -> ((FilePresentation) child).updateColors());
             }
         }
 

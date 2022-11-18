@@ -3,7 +3,6 @@ package ecdar.utility.helpers;
 import ecdar.controllers.EcdarController;
 import ecdar.controllers.EdgeController;
 import ecdar.presentations.ComponentOperatorPresentation;
-import ecdar.presentations.ComponentPresentation;
 import ecdar.presentations.Grid;
 import ecdar.utility.UndoRedoStack;
 import javafx.beans.property.BooleanProperty;
@@ -18,8 +17,6 @@ import javafx.util.Pair;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
-
-import static ecdar.presentations.Grid.GRID_SIZE;
 
 public class ItemDragHelper {
 

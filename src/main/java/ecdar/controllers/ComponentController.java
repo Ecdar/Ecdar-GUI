@@ -13,7 +13,6 @@ import com.jfoenix.controls.JFXRippler;
 import javafx.animation.Interpolator;
 import javafx.animation.Transition;
 import javafx.application.Platform;
-import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -329,7 +328,7 @@ public class ComponentController extends ModelController implements Initializabl
                 }, "Added universal location '" + newLocation + "' to component '" + component.getName() + "'", "add-circle");
             });
 
-            // Adds the add inconsistent location element to the drop down menu, this element adds an inconsistent location
+            // Adds the add inconsistent location element to the dropdown menu, this element adds an inconsistent location
             contextMenu.addClickableListElement("Add Inconsistent Location", event -> {
                 contextMenu.hide();
                 double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
@@ -359,7 +358,7 @@ public class ComponentController extends ModelController implements Initializabl
                 final Query query = new Query(deadlockQuery, deadlockComment, QueryState.UNKNOWN);
                 query.setType(QueryType.REACHABILITY);
                 Ecdar.getProject().getQueries().add(query);
-                query.run();
+                Ecdar.getQueryExecutor().executeQuery(query);
                 contextMenu.hide();
             });
 

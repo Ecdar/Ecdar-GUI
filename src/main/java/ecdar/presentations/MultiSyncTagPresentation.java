@@ -4,7 +4,6 @@ import com.jfoenix.controls.JFXTextField;
 import ecdar.abstractions.DisplayableEdge;
 import ecdar.abstractions.Edge;
 import ecdar.abstractions.GroupedEdge;
-import ecdar.abstractions.Nail;
 import ecdar.controllers.EcdarController;
 import ecdar.controllers.MultiSyncTagController;
 import ecdar.utility.UndoRedoStack;

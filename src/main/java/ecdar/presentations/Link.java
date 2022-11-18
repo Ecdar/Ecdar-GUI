@@ -1,9 +1,8 @@
 package ecdar.presentations;
 
 import ecdar.Debug;
-import ecdar.abstractions.EdgeStatus;
-import ecdar.utility.colors.Color;
 import ecdar.utility.Highlightable;
+import ecdar.utility.colors.Color;
 import ecdar.utility.helpers.SelectHelper;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;

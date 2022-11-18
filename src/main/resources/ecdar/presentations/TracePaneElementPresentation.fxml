@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import com.jfoenix.controls.JFXRippler?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import javafx.geometry.Insets?>
+<fx:root xmlns="http://javafx.com/javafx"
+         xmlns:fx="http://javafx.com/fxml"
+         type="VBox" fx:id="root" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"
+         fx:controller="ecdar.controllers.TracePaneElementController">
+    <HBox fx:id="toolbar" alignment="CENTER">
+        <padding>
+            <Insets topRightBottomLeft="10"/>
+        </padding>
+        <JFXRippler fx:id="expandTrace">
+            <StackPane styleClass="responsive-icon-stack-pane-sizing" onMouseClicked="#expandTrace">
+                <FontIcon fx:id="expandTraceIcon" iconLiteral="gmi-add" styleClass="icon-size-medium"
+                          fill="white"/>
+            </StackPane>
+        </JFXRippler>
+
+        <Region minWidth="24" maxWidth="24"/>
+
+        <Label fx:id="traceTitle" styleClass="title" text="Trace"/>
+
+        <Region HBox.hgrow="ALWAYS"/>
+    </HBox>
+
+    <VBox fx:id="traceList">
+        <!-- Trace goes here -->
+    </VBox>
+
+    <AnchorPane fx:id="traceSummary" minHeight="56" maxHeight="56" onMouseClicked="#expandTrace">
+        <VBox AnchorPane.leftAnchor="8"
+              AnchorPane.topAnchor="0"
+              AnchorPane.bottomAnchor="0"
+              AnchorPane.rightAnchor="8"
+              alignment="CENTER_LEFT">
+            <Label fx:id="summaryTitleLabel"
+                   text="0 steps in trace"
+                   styleClass="subhead"/>
+            <Label fx:id="summarySubtitleLabel"
+                   text="Expand to show trace..."
+                   styleClass="caption"/>
+        </VBox>
+    </AnchorPane>
+</fx:root>
