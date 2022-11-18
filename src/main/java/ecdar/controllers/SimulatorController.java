@@ -3,7 +3,6 @@ package ecdar.controllers;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
 import ecdar.backend.SimulationHandler;
-import ecdar.presentations.SimulationInitializationDialogPresentation;
 import ecdar.presentations.SimulatorOverviewPresentation;
 import ecdar.simulation.SimulationState;
 import ecdar.simulation.Transition;

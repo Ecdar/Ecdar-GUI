@@ -1,6 +1,5 @@
 package ecdar.abstractions;
 
-import EcdarProtoBuf.ComponentProtos;
 import ecdar.Ecdar;
 import ecdar.code_analysis.Nearable;
 import ecdar.controllers.EcdarController;

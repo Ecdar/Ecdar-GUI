@@ -2,8 +2,6 @@ package ecdar.controllers;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
-import ecdar.Ecdar;
-import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 
 import java.net.URL;

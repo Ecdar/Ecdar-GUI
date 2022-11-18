@@ -1,7 +1,6 @@
 package ecdar.backend;
 
 import EcdarProtoBuf.ComponentProtos;
-import EcdarProtoBuf.ObjectProtos;
 import EcdarProtoBuf.QueryProtos;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;

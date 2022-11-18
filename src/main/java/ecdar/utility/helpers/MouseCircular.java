@@ -1,12 +1,9 @@
 package ecdar.utility.helpers;
 
 import ecdar.controllers.EcdarController;
-import ecdar.presentations.Grid;
 import ecdar.utility.mouse.MouseTracker;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-
-import static ecdar.presentations.Grid.GRID_SIZE;
 
 public class MouseCircular implements Circular {
     private final DoubleProperty x = new SimpleDoubleProperty(0d);

@@ -6,7 +6,6 @@ import EcdarProtoBuf.QueryProtos;
 import EcdarProtoBuf.ObjectProtos.DecisionPoint;
 import EcdarProtoBuf.ObjectProtos.LocationTuple;
 import EcdarProtoBuf.ObjectProtos.SpecificComponent;
-import ecdar.TestFXBase;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Location;
 import io.grpc.BindableService;
@@ -23,8 +22,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.Assertions;
 
 public class SimulationTest {

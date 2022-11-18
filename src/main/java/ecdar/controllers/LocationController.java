@@ -9,7 +9,6 @@ import ecdar.presentations.*;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
 import ecdar.utility.helpers.ItemDragHelper;
-import ecdar.utility.helpers.MouseCircular;
 import ecdar.utility.helpers.SelectHelper;
 import ecdar.utility.keyboard.Keybind;
 import ecdar.utility.keyboard.KeyboardTracker;
