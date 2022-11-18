@@ -49,7 +49,7 @@ public class SimulatorController implements Initializable {
 
         if (sm.getCurrentState() == null) sm.initialStep(); // ToDo NIELS: Find better solution
 
-        //Have the user left a trace or is he simulating a query
+        //Have the user left a trace
         if (sm.traceLog.size() >= 2) {
             shouldSimulationBeReset = false;
         }
