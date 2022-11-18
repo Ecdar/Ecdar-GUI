@@ -27,6 +27,7 @@ import EcdarProtoBuf.QueryProtos.SimulationStepResponse;
  */
 public class SimulationHandler {
     public static final String QUERY_PREFIX = "Query: ";
+    private String composition;
     private ObjectProperty<SimulationState> currentConcreteState = new SimpleObjectProperty<>();
     private ObjectProperty<SimulationState> initialConcreteState = new SimpleObjectProperty<>();
     private ObjectProperty<BigDecimal> currentTime = new SimpleObjectProperty<>();
@@ -35,14 +36,6 @@ public class SimulationHandler {
     private EcdarSystem system;
     private SimulationStateSuccessor successor;
     private int numberOfSteps;
-    private SimulationStepResponse currentResponse;
-
-    /**
-     * A string to keep track what is currently being simulated
-     * For now the string is prefixed with {@link #QUERY_PREFIX} when doing a query simulation
-     * and kept empty when doing system simulations
-     */
-    private String currentSimulation = "";
 
     private final ObservableMap<String, BigDecimal> simulationVariables = FXCollections.observableHashMap();
     private final ObservableMap<String, BigDecimal> simulationClocks = FXCollections.observableHashMap();
@@ -67,9 +60,6 @@ public class SimulationHandler {
     /**
      * Initializes the default system (non-query system)
      */
-    public void initializeDefaultSystem() {
-        currentSimulation = "";
-    }
 
     /**
      * Initializes the values and properties in the {@link SimulationHandler}.
@@ -88,10 +78,10 @@ public class SimulationHandler {
         this.currentConcreteState.set(getInitialConcreteState());
         this.initialConcreteState.set(getInitialConcreteState());
         this.currentTime = new SimpleObjectProperty<>(BigDecimal.ZERO);
-
+        
         //Preparation for the simulation
         this.system = getSystem();
-        this.currentConcreteState.get().setTime(currentTime.getValue());
+        //this.currentConcreteState.get().setTime(currentTime.getValue());
         this.initialTransitions.clear();
         this.successor = null;
     }
@@ -101,22 +91,22 @@ public class SimulationHandler {
      */
     public void initialStep() {
         initializeSimulation();
-
+    
         final SimulationState currentState = currentConcreteState.get();
         successor = getStateSuccessor();
-
+        
         GrpcRequest request = new GrpcRequest(backendConnection -> {
             StreamObserver<SimulationStepResponse> responseObserver = new StreamObserver<>() {
                 @Override
                 public void onNext(QueryProtos.SimulationStepResponse value) {
                     System.out.println(value);
-                    currentResponse = value;
                 }
-
+                
                 @Override
                 public void onError(Throwable t) {
                     System.out.println(t.getMessage());
-
+                    Ecdar.showToast("Could not start simulation");
+                    
                     // Release backend connection
                     backendDriver.addBackendConnection(backendConnection);
                     connections.remove(backendConnection);
@@ -132,33 +122,32 @@ public class SimulationHandler {
 
             var comInfo = ComponentProtos.ComponentsInfo.newBuilder();
             for (Component c : Ecdar.getProject().getComponents()) {
-                if (currentSimulation.contains(c.getName())) {
-                    comInfo.addComponents(ComponentProtos.Component.newBuilder().setJson(c.serialize().toString()).build());
-                }
+                comInfo.addComponents(ComponentProtos.Component.newBuilder().setJson(c.serialize().toString()).build());
             }
             comInfo.setComponentsHash(comInfo.getComponentsList().hashCode());
             var simStartRequest = QueryProtos.SimulationStartRequest.newBuilder();
             var simInfo = QueryProtos.SimulationInfo.newBuilder()
-                    .setComponentComposition(currentSimulation)
+                    .setComponentComposition(composition)
                     .setComponentsInfo(comInfo);
             simStartRequest.setSimulationInfo(simInfo);
             backendConnection.getStub().withDeadlineAfter(this.backendDriver.getResponseDeadline(), TimeUnit.MILLISECONDS)
                     .startSimulation(simStartRequest.build(), responseObserver);
         }, BackendHelper.getDefaultBackendInstance());
-
+        
         backendDriver.addRequestToExecutionQueue(request);
-
+        
         //Save the previous states, and get the new
         currentConcreteState.set(successor.getState());
         this.traceLog.add(currentState);
         numberOfSteps++;
-
+    
         //Updates the transitions available
         availableTransitions.addAll(FXCollections.observableArrayList(successor.getTransitions()));
         initialTransitions.addAll(availableTransitions);
         updateAllValues();
+        
     }
-
+    
     /**
      * Resets the simulation to the initial location
      * where the <code>SimulationState</code> is the {@link SimulationHandler#initialConcreteState}, when there are
@@ -293,7 +282,7 @@ public class SimulationHandler {
      */
     private void updateAllValues() {
         currentTime.set(currentTime.get().add(delay));
-        successor.getState().setTime(currentTime.get());
+        //successor.getState().setTime(currentTime.get());
         setSimVarAndClocks();
     }
 
@@ -406,7 +395,7 @@ public class SimulationHandler {
      */
     public SimulationState getInitialConcreteState() {
         // ToDo: Implement
-        return null;
+        return initialConcreteState.get();
     }
 
     public ObjectProperty<SimulationState> initialConcreteStateProperty() {
@@ -457,9 +446,9 @@ public class SimulationHandler {
         return system;
     }
 
-    public String getCurrentSimulation() {
-        return currentSimulation;
-    }
+    public String getComposition() { return composition;}
+
+    public void setComposition(String composition) {this.composition = composition;}
 
     public boolean isSimulationRunning() {
         return false; // ToDo: Implement

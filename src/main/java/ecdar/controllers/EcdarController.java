@@ -292,7 +292,9 @@ public class EcdarController implements Initializable {
         });
 
         simulationInitializationDialog.getController().startButton.setOnMouseClicked(event -> {
+
             // ToDo NIELS: Start simulation of selected query
+            Ecdar.getSimulationHandler().setComposition(simulationInitializationDialog.getController().simulationComboBox.getSelectionModel().getSelectedItem());
             currentMode.setValue(Mode.Simulator);
             simulationInitializationDialog.close();
         });
@@ -617,7 +619,7 @@ public class EcdarController implements Initializable {
             menuBarViewProjectPanel.getGraphic().opacityProperty().bind(new When(isOpen).then(1).otherwise(0));
         });
 
-        menuBarViewQueryPanel.getGraphic().setOpacity(0);
+        menuBarViewQueryPanel.getGraphic().setOpacity(1);
         menuBarViewQueryPanel.setAccelerator(new KeyCodeCombination(KeyCode.G, KeyCodeCombination.SHORTCUT_DOWN));
         menuBarViewQueryPanel.setOnAction(event -> {
             final BooleanProperty isOpen = Ecdar.toggleQueryPane();
@@ -665,7 +667,6 @@ public class EcdarController implements Initializable {
 
                 if (!Ecdar.getSimulationHandler().isSimulationRunning()) {
                     ArrayList<String> queryOptions = Ecdar.getProject().getQueries().stream().map(Query::getQuery).collect(Collectors.toCollection(ArrayList::new));
-
                     if (!simulationInitializationDialog.getController().simulationComboBox.getItems().equals(queryOptions)) {
                         simulationInitializationDialog.getController().simulationComboBox.getItems().setAll(queryOptions);
                     }

@@ -9,13 +9,13 @@ public class EnabledColor {
     public static final ArrayList<EnabledColor> enabledColors = new ArrayList<EnabledColor>() {{
         add(new EnabledColor(Color.GREY_BLUE, Color.Intensity.I700, KeyCode.DIGIT0));
         add(new EnabledColor(Color.DEEP_ORANGE, Color.Intensity.I700, KeyCode.DIGIT1));
-        add(new EnabledColor(Color.RED, Color.Intensity.I500, KeyCode.DIGIT2));
-        add(new EnabledColor(Color.PINK, Color.Intensity.I500, KeyCode.DIGIT3));
-        add(new EnabledColor(Color.PURPLE, Color.Intensity.I500, KeyCode.DIGIT4));
-        add(new EnabledColor(Color.INDIGO, Color.Intensity.I500, KeyCode.DIGIT5));
-        add(new EnabledColor(Color.BLUE, Color.Intensity.I600, KeyCode.DIGIT6));
-        add(new EnabledColor(Color.CYAN, Color.Intensity.I700, KeyCode.DIGIT7));
-        add(new EnabledColor(Color.GREEN, Color.Intensity.I600, KeyCode.DIGIT8));
+        add(new EnabledColor(Color.PINK, Color.Intensity.I500, KeyCode.DIGIT2));
+        add(new EnabledColor(Color.PURPLE, Color.Intensity.I500, KeyCode.DIGIT3));
+        add(new EnabledColor(Color.INDIGO, Color.Intensity.I500, KeyCode.DIGIT4));
+        add(new EnabledColor(Color.BLUE, Color.Intensity.I600, KeyCode.DIGIT5));
+        add(new EnabledColor(Color.CYAN, Color.Intensity.I700, KeyCode.DIGIT6));
+        add(new EnabledColor(Color.GREEN, Color.Intensity.I600, KeyCode.DIGIT7));
+        add(new EnabledColor(Color.LIME, Color.Intensity.I500, KeyCode.DIGIT8));
         add(new EnabledColor(Color.BROWN, Color.Intensity.I500, KeyCode.DIGIT9));
     }};
 

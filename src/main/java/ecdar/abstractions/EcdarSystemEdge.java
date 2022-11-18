@@ -2,7 +2,6 @@ package ecdar.abstractions;
 
 import ecdar.Ecdar;
 import ecdar.controllers.SystemRootController;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;

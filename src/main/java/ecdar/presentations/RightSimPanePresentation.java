@@ -2,7 +2,6 @@ package ecdar.presentations;
 
 import ecdar.controllers.RightSimPaneController;
 import ecdar.utility.colors.Color;
-import ecdar.utility.helpers.DropShadowHelper;
 import javafx.geometry.Insets;
 import javafx.scene.layout.*;
 

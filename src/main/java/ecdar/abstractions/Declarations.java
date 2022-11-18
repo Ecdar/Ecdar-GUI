@@ -1,15 +1,12 @@
 package ecdar.abstractions;
 
 import ecdar.utility.colors.Color;
-import ecdar.utility.colors.EnabledColor;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.apache.commons.lang3.tuple.Triple;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
