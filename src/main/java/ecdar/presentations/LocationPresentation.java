@@ -171,22 +171,6 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
             }
         };
 
-        final Consumer<Boolean> handleFailingUpdate = (isFailing) -> {
-            if(isFailing) {
-                updateColor.accept(Color.RED, colorIntensity.get());
-            } else {
-                updateColor.accept(location.getColor(), colorIntensity.get());
-            }
-        };
-
-        final Consumer<Boolean> handleFailingUpdate = (isFailing) -> {
-            if(isFailing) {
-                updateColor.accept(Color.RED, colorIntensity.get());
-            } else {
-                updateColor.accept(location.getColor(), colorIntensity.get());
-            }
-        };
-
         updateColorDelegates.add(updateColor);
 
         // Set the initial color
@@ -194,7 +178,7 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
 
         // Update the color of the circle when the color of the location is updated
         color.addListener((obs, old, newColor) -> updateColor.accept(newColor, colorIntensity.get()));
-        failing.addListener((obs, old, newFailing) -> handleFailingUpdate.accept(newFailing));
+        failing.addListener((obs, old, newFailing) -> updateColor.accept(color.get(), colorIntensity.get()          ));
     }
 
     private void initializeTags() {
