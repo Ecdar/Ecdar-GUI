@@ -1,6 +1,5 @@
 package ecdar.abstractions;
 
-import EcdarProtoBuf.ComponentProtos;
 import com.google.gson.JsonPrimitive;
 import ecdar.Ecdar;
 import ecdar.controllers.EcdarController;

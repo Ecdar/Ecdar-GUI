@@ -1,12 +1,8 @@
 package ecdar.presentations;
 
-import ecdar.Ecdar;
-import ecdar.controllers.EcdarController;
 import ecdar.utility.colors.Color;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableBooleanValue;
-import javafx.css.CssMetaData;
-import javafx.css.Styleable;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -14,15 +10,13 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import org.kordamp.ikonli.javafx.FontIcon;
 
-
-import java.util.List;
 import java.util.function.Consumer;
 
 import static javafx.scene.paint.Color.TRANSPARENT;
 import static javafx.scene.paint.Color.WHITE;
 
-/**
- * Represents an element of the dropdown menu, excluding spacer and the colour palette element.
+
+/* Represents an element of the dropdown menu, excluding spacer and the colour palette element.
  */
 public class MenuElement {
     public static final javafx.scene.paint.Color DISABLED_COLOR = Color.GREY_BLUE.getColor(Color.Intensity.I300);
@@ -110,7 +104,7 @@ public class MenuElement {
      */
     private void createRippler(final Consumer<MouseEvent> mouseEventConsumer){
         rippler = new ReleaseRippler(clickListenerFix);
-        rippler.setRipplerFill(javafx.scene.paint.Color.TRANSPARENT);
+        rippler.setRipplerFill(TRANSPARENT);
 
         rippler.setOnMouseEntered(event -> {
             if (isDisabled.get()) return;

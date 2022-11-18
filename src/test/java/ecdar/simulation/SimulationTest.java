@@ -3,12 +3,13 @@ package ecdar.simulation;
 import EcdarProtoBuf.EcdarBackendGrpc;
 import EcdarProtoBuf.ObjectProtos;
 import EcdarProtoBuf.QueryProtos;
-import ecdar.TestFXBase;
+import EcdarProtoBuf.ObjectProtos.DecisionPoint;
+import EcdarProtoBuf.ObjectProtos.LocationTuple;
+import EcdarProtoBuf.ObjectProtos.SpecificComponent;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Location;
 import io.grpc.BindableService;
 import io.grpc.ManagedChannel;
-import io.grpc.Server;
 import io.grpc.Status;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
@@ -23,7 +24,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
 
-public class SimulationTest extends TestFXBase {
+public class SimulationTest {
     public GrpcCleanupRule grpcCleanup = new GrpcCleanupRule();
     private final String serverName = InProcessServerBuilder.generateName();
 
@@ -36,14 +37,20 @@ public class SimulationTest extends TestFXBase {
             public void startSimulation(QueryProtos.SimulationStartRequest request,
                                         StreamObserver<QueryProtos.SimulationStepResponse> responseObserver) {
                 try {
-                    ObjectProtos.StateTuple state = ObjectProtos.StateTuple.newBuilder().addAllLocations(components.stream()
-                            .map(c -> ObjectProtos.StateTuple.LocationTuple.newBuilder()
-                                    .setComponentName(c.getName())
-                                    .setId(c.getInitialLocation().getId())
-                                    .build())
-                            .collect(Collectors.toList())).build();
-
-                    QueryProtos.SimulationStepResponse response = QueryProtos.SimulationStepResponse.newBuilder().setState(state).build();
+                    ObjectProtos.LocationTuple locations = LocationTuple.newBuilder().addAllLocations(components.stream()
+                            .map(c -> ObjectProtos.Location.newBuilder()
+                            .setSpecificComponent(SpecificComponent.newBuilder()
+                                    .setComponentName(c.getName()))
+                            .setId(c.getInitialLocation().getId())
+                            .build())
+                            .collect(Collectors.toList()))
+                        .build();
+                    
+                    ObjectProtos.State state = ObjectProtos.State.newBuilder().setLocationTuple(locations).build();
+                    DecisionPoint decisionPoint = DecisionPoint.newBuilder().setSource(state).build();
+                    QueryProtos.SimulationStepResponse response = QueryProtos.SimulationStepResponse.newBuilder()
+                            .setNewDecisionPoint(decisionPoint)
+                            .build();
                     responseObserver.onNext(response);
                     responseObserver.onCompleted();
                 } catch (Throwable e) {
@@ -57,27 +64,27 @@ public class SimulationTest extends TestFXBase {
             }
         };
 
-        final Server server;
         final ManagedChannel channel;
         final EcdarBackendGrpc.EcdarBackendBlockingStub stub;
         try {
-            server = grpcCleanup.register(InProcessServerBuilder
+            grpcCleanup.register(InProcessServerBuilder
                     .forName(serverName).directExecutor().addService(testService).build().start());
             channel = grpcCleanup.register(InProcessChannelBuilder
                     .forName(serverName).directExecutor().build());
             stub = EcdarBackendGrpc.newBlockingStub(channel);
-            QueryProtos.SimulationStartRequest request = QueryProtos.SimulationStartRequest.newBuilder().setSystem("(A || B)").build();
 
-            var expectedResponse = new ObjectProtos.StateTuple.LocationTuple[components.size()];
+            QueryProtos.SimulationStartRequest request = QueryProtos.SimulationStartRequest.newBuilder().build();
+
+            var expectedResponse = new ObjectProtos.Location[components.size()];
 
             for (int i = 0; i < components.size(); i++) {
                 Component comp = components.get(i);
-                expectedResponse[i] = ObjectProtos.StateTuple.LocationTuple.newBuilder()
-                        .setComponentName(comp.getName())
+                expectedResponse[i] = ObjectProtos.Location.newBuilder()
+                        .setSpecificComponent(SpecificComponent.newBuilder().setComponentName(comp.getName()))
                         .setId(comp.getInitialLocation().getId()).build();
             }
 
-            var result = stub.startSimulation(request).getState().getLocationsList().toArray();
+            var result = stub.startSimulation(request).getNewDecisionPoint().getSource().getLocationTuple().getLocationsList().toArray();
 
             Assertions.assertArrayEquals(expectedResponse, result);
         } catch (IOException e) {

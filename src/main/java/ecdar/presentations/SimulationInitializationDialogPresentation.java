@@ -1,7 +1,6 @@
 package ecdar.presentations;
 
 import com.jfoenix.controls.JFXDialog;
-import ecdar.controllers.BackendOptionsDialogController;
 import ecdar.controllers.SimulationInitializationDialogController;
 
 public class SimulationInitializationDialogPresentation extends JFXDialog {
@@ -14,4 +13,5 @@ public class SimulationInitializationDialogPresentation extends JFXDialog {
     public SimulationInitializationDialogController getController() {
         return controller;
     }
+
 }

@@ -5,6 +5,7 @@ import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.testfx.api.FxRobot;
 import org.testfx.api.FxToolkit;
 import org.testfx.framework.junit.ApplicationTest;
 
@@ -22,9 +23,10 @@ public class TestFXBase extends ApplicationTest {
     }
 
     @AfterAll
-    public void afterEachTest() throws TimeoutException {
+    public static void afterEachTest() throws TimeoutException {
         FxToolkit.hideStage();
-        release(new KeyCode[]{});
-        release(new MouseButton[]{});
+        FxRobot robot = new FxRobot();
+        robot.release(new KeyCode[]{});
+        robot.release(new MouseButton[]{});
     }
 }

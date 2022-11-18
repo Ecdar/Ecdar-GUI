@@ -1,6 +1,5 @@
 package ecdar.backend;
 
-import EcdarProtoBuf.ComponentProtos;
 import EcdarProtoBuf.QueryProtos;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;

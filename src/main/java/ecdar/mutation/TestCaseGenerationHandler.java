@@ -2,12 +2,10 @@ package ecdar.mutation;
 
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
-import ecdar.abstractions.Project;
 import ecdar.backend.BackendException;
 import ecdar.backend.BackendHelper;
 import ecdar.mutation.models.MutationTestCase;
 import ecdar.mutation.models.MutationTestPlan;
-import ecdar.mutation.models.NonRefinementStrategy;
 import javafx.application.Platform;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
