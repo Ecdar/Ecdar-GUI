@@ -179,6 +179,14 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
             }
         };
 
+        final Consumer<Boolean> handleFailingUpdate = (isFailing) -> {
+            if(isFailing) {
+                updateColor.accept(Color.RED, colorIntensity.get());
+            } else {
+                updateColor.accept(location.getColor(), colorIntensity.get());
+            }
+        };
+
         updateColorDelegates.add(updateColor);
 
         // Set the initial color
@@ -443,6 +451,14 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
                 notCommittedShape.setFill(newColor.getColor(newIntensity));
                 committedShape.setFill(newColor.getColor(newIntensity));
                 committedShape.setStroke(newColor.getColor(newIntensity.next(2)));
+            }
+        };
+
+        final Consumer<Boolean> handleFailingUpdate = (isFailing) -> {
+            if(isFailing) {
+                updateColor.accept(Color.RED, colorIntensity.get());
+            } else {
+                updateColor.accept(location.getColor(), colorIntensity.get());
             }
         };
 

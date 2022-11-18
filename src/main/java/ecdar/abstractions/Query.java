@@ -186,7 +186,7 @@ public class Query implements Serializable {
     public Consumer<String> getActionConsumer() {
         return actionConsumer;
     }
-
+    
     @Override
     public JsonObject serialize() {
         final JsonObject result = new JsonObject();

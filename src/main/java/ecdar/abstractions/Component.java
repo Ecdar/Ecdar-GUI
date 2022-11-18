@@ -547,6 +547,12 @@ public class Component extends HighLevelModelObject implements Boxed {
     public ObservableList<DisplayableEdge> getFailingEdges() {
         return failingEdges;
     }
+     * Observable list of all failing locations.
+     * @return Observable list of all failing locations.
+     */
+    public ObservableList<Location> getFailingLocations() {
+        return failingLocations;
+    }
 
     /**
      * Returns all DisplayableEdges of the component (returning a list potentially containing GroupEdges and Edges)
