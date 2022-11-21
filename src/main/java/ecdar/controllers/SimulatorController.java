@@ -85,6 +85,7 @@ public class SimulatorController implements Initializable {
         //Method that colors all initial states.
         initialstatelighter(listOfComponentsForSimulation);
     }
+    
     private void initialstatelighter(List<Component> listofComponents){
         for(Component comp: listofComponents)
         {
