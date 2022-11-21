@@ -9,9 +9,7 @@ import ecdar.utility.helpers.BindingHelper;
 import ecdar.utility.helpers.SelectHelper;
 import javafx.animation.*;
 import javafx.beans.binding.DoubleBinding;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.*;
 import javafx.scene.Group;
 import javafx.scene.control.Label;
 import javafx.scene.effect.DropShadow;
@@ -46,6 +44,7 @@ public class SimLocationPresentation extends Group implements Highlightable {
     private final List<BiConsumer<Color, Color.Intensity>> updateColorDelegates = new ArrayList<>();
     private final DoubleProperty animation = new SimpleDoubleProperty(0);
     private final DoubleBinding reverseAnimation = new SimpleDoubleProperty(1).subtract(animation);
+    private BooleanProperty isPlaced = new SimpleBooleanProperty(true);
 
     /**
      * Constructs a Simulator Location ready to be placed on the view
@@ -272,6 +271,13 @@ public class SimLocationPresentation extends Group implements Highlightable {
         color.addListener((obs, old, newColor) -> updateColor.accept(newColor, colorIntensity.get()));
     }
 
+    public Boolean isPlaced(){
+        return isPlaced.get();
+    }
+
+    public void setPlaced(boolean placed){
+        isPlaced.set(placed);
+    }
     private void initializeTypeGraphics() {
         final Location location = controller.getLocation();
 
