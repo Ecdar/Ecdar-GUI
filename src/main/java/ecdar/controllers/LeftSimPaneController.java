@@ -2,7 +2,6 @@ package ecdar.controllers;
 
 import ecdar.presentations.TracePaneElementPresentation;
 import ecdar.presentations.TransitionPaneElementPresentation;
-import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.StackPane;

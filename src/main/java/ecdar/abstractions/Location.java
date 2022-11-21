@@ -1,6 +1,5 @@
 package ecdar.abstractions;
 
-import EcdarProtoBuf.ComponentProtos;
 import ecdar.Ecdar;
 import ecdar.code_analysis.Nearable;
 import ecdar.controllers.EcdarController;
@@ -9,6 +8,7 @@ import ecdar.presentations.Grid;
 import ecdar.utility.colors.Color;
 import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.Circular;
+import ecdar.utility.helpers.StringHelper;
 import ecdar.utility.serialize.Serializable;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
@@ -58,6 +58,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     private final ObjectProperty<Reachability> reachability = new SimpleObjectProperty<>();
 
     private final SimpleBooleanProperty isLocked = new SimpleBooleanProperty(false);
+    private final BooleanProperty failing = new SimpleBooleanProperty(false);
 
     public Location() {
     }
@@ -178,7 +179,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     }
 
     public String getInvariant() {
-        return invariant.get();
+        return StringHelper.ConvertUnicodeToSymbols(invariant.get());
     }
 
     public void setInvariant(final String invariant) {
@@ -468,6 +469,31 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     public String generateNearString() {
         return "Location " + (!Strings.isNullOrEmpty(getNickname()) ? (getNickname() + " (" + getId() + ")") : getId());
     }
+
+    /**
+     * Sets whether this location failed for the last query
+     * @param bool if a query responded failure with the location, bool should be true.
+     */
+    public void setFailing(boolean bool) {
+        this.failing.set(bool);
+    }
+
+    /**
+     * Whether this location is currently failing.
+     * @return Whether this location is currently failing.
+     */
+    public boolean getFailing() {
+        return this.failing.get();
+    }
+
+    /**
+     * The observable boolean property for 'failing' of this.
+     * @return The observable boolean property for 'failing' of this.
+     */
+    public BooleanProperty failingProperty() {
+        return this.failing;
+    }
+
     public enum Type {
         NORMAL, INITIAL, UNIVERSAL, INCONSISTENT
     }

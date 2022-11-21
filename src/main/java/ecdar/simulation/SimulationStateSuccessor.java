@@ -1,7 +1,5 @@
 package ecdar.simulation;
 
-import ecdar.Ecdar;
-
 import java.util.ArrayList;
 
 public class SimulationStateSuccessor {

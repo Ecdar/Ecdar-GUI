@@ -6,6 +6,7 @@ import ecdar.presentations.Grid;
 import ecdar.utility.colors.Color;
 import ecdar.utility.helpers.Circular;
 import ecdar.utility.helpers.MouseCircular;
+import ecdar.utility.helpers.StringHelper;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -38,6 +39,8 @@ public abstract class DisplayableEdge implements Nearable {
     private final BooleanProperty isLocked = new SimpleBooleanProperty(false);
 
     private final BooleanProperty isHighlighted = new SimpleBooleanProperty(false);
+
+    protected final BooleanProperty failing = new SimpleBooleanProperty(false);
 
     public Location getSourceLocation() {
         return sourceLocation.get();
@@ -82,7 +85,7 @@ public abstract class DisplayableEdge implements Nearable {
     }
 
     public String getGuard() {
-        return guard.get();
+        return StringHelper.ConvertUnicodeToSymbols(guard.get());
     }
 
     public void setGuard(final String guard) {
@@ -302,4 +305,22 @@ public abstract class DisplayableEdge implements Nearable {
     public abstract List<String> getProperty(final PropertyType propertyType);
 
     public abstract void setProperty(final PropertyType propertyType, final List<String> newProperty);
+
+    /**
+     * Sets the 'failing' property
+     * @param bool true if the edge is failing.
+     */
+    public abstract void setFailing(final boolean bool);
+
+    /**
+     * Getter for the 'failing' boolean
+     * @return Whether edge is failing in last query response.
+     */
+    public abstract boolean getFailing();
+
+    /**
+     * The observable boolean property for 'failing' of this.
+     * @return The observable boolean property for 'failing' of this.
+     */
+    public abstract BooleanProperty failingProperty();
 }

@@ -1,12 +1,7 @@
 package ecdar.abstractions;
 
 import EcdarProtoBuf.ObjectProtos;
-import ecdar.Ecdar;
-
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class Transition {
     public final ArrayList<Edge> edges = new ArrayList<>();

@@ -12,6 +12,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.Group;
 import javafx.scene.control.Label;
 import javafx.scene.shape.Line;
@@ -51,6 +52,7 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
             }
 
             controller.propertyTag.setTranslateX(10);
+            controller.propertyTag.replaceSigns();
             controller.propertyTag.setTranslateY(-controller.propertyTag.getHeight());
             this.getChildren().add(controller.propertyTag);
 
@@ -74,7 +76,6 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
 
         radiusUpdater.accept(controller.getNail().getPropertyType());
     }
-
     private void initializePropertyTag() {
         final TagPresentation propertyTag = controller.propertyTag;
         final Line propertyTagLine = controller.propertyTagLine;
@@ -181,11 +182,44 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
     }
 
     private void initializeNailCircleColor() {
+
+        // When the color of the component updates, update the nail indicator as well
+        controller.getComponent().colorProperty().addListener((observable) -> updateNailColor());
+
+        // When the color intensity of the component updates, update the nail indicator
+        controller.getComponent().colorIntensityProperty().addListener((observable) -> updateNailColor());
+        // Initialize the color of the nail
+        updateNailColor();
+    }
+
+    /**
+     * Update color when the edge of this nails failing property is updated.
+     */
+    public void onFailingUpdate(boolean isFailing) {
+        final Runnable updateNailColorOnFailingUpdate = () -> {
+            final Color color = controller.getComponent().getColor();
+            final Color.Intensity colorIntensity = controller.getComponent().getColorIntensity();
+            controller.nailCircle.setFill(Color.RED.getColor(colorIntensity));
+            controller.nailCircle.setStroke(Color.RED.getColor(colorIntensity.next(2)));
+        };
+        if (isFailing) {
+            updateNailColorOnFailingUpdate.run();
+        } else {
+            updateNailColor();
+        }
+    }
+
+    private void updateNailColor() {
         final Runnable updateNailColor = () -> {
             final Color color = controller.getComponent().getColor();
             final Color.Intensity colorIntensity = controller.getComponent().getColorIntensity();
-
-            if(!controller.getNail().getPropertyType().equals(Edge.PropertyType.NONE)) {
+            //If edge is failing and is a SYNC
+            if (controller.getEdge().getFailing() && controller.getNail().getPropertyType().equals(Edge.PropertyType.SYNCHRONIZATION)) {
+                controller.nailCircle.setFill(Color.RED.getColor(colorIntensity));
+                controller.nailCircle.setStroke(Color.RED.getColor(colorIntensity.next(2)));
+            }
+            //If edge is not NONE
+            else if (!controller.getNail().getPropertyType().equals(Edge.PropertyType.NONE)) {
                 controller.nailCircle.setFill(color.getColor(colorIntensity));
                 controller.nailCircle.setStroke(color.getColor(colorIntensity.next(2)));
             } else {
@@ -193,14 +227,6 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
                 controller.nailCircle.setStroke(Color.GREY_BLUE.getColor(Color.Intensity.I900));
             }
         };
-
-        // When the color of the component updates, update the nail indicator as well
-        controller.getComponent().colorProperty().addListener((observable) -> updateNailColor.run());
-
-        // When the color intensity of the component updates, update the nail indicator
-        controller.getComponent().colorIntensityProperty().addListener((observable) -> updateNailColor.run());
-
-        // Initialize the color of the nail
         updateNailColor.run();
     }
 
@@ -237,17 +263,7 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
 
     @Override
     public void deselect() {
-        Color color = Color.GREY_BLUE;
-        Color.Intensity intensity = Color.Intensity.I800;
-
-        // Set the color
-        if(!controller.getNail().getPropertyType().equals(Edge.PropertyType.NONE)) {
-            color = controller.getComponent().getColor();
-            intensity = controller.getComponent().getColorIntensity();
-        }
-
-        controller.nailCircle.setFill(color.getColor(intensity));
-        controller.nailCircle.setStroke(color.getColor(intensity.next(2)));
+        updateNailColor();
     }
 
     public NailController getController() {

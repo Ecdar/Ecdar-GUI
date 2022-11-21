@@ -21,7 +21,6 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -83,6 +82,8 @@ public class ProjectPaneController implements Initializable {
             while (c.next()) {
                 c.getAddedSubList().forEach(this::handleAddedModel);
                 c.getRemoved().forEach(this::handleRemovedModel);
+
+                generatedComponentsDivider.setVisible(!tempFilesList.getChildren().isEmpty());
 
                 // Sort the children alphabetically
                 sortPresentations();
@@ -391,12 +392,12 @@ public class ProjectPaneController implements Initializable {
      */
     @FXML
     private void setGeneratedComponentsVisibilityButtonClicked() {
-        if (generatedComponentsVisibilityButtonIcon.getIconCode() == Material.EXPAND_MORE) {
-            generatedComponentsVisibilityButtonIcon.setIconCode(Material.EXPAND_LESS);
+        if (generatedComponentsVisibilityButtonIcon.getIconCode() == Material.ARROW_LEFT) {
+            generatedComponentsVisibilityButtonIcon.setIconCode(Material.ARROW_DROP_DOWN);
             this.tempFilesList.setVisible(true);
             this.tempFilesList.setManaged(true);
         } else {
-            generatedComponentsVisibilityButtonIcon.setIconCode(Material.EXPAND_MORE);
+            generatedComponentsVisibilityButtonIcon.setIconCode(Material.ARROW_LEFT);
             this.tempFilesList.setVisible(false);
             this.tempFilesList.setManaged(false);
         }

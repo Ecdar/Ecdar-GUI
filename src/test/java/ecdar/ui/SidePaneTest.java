@@ -11,8 +11,6 @@ import org.junit.jupiter.api.Assertions;
 import org.testfx.util.WaitForAsyncUtils;
 
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
 

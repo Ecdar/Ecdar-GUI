@@ -153,7 +153,7 @@ public class EditorController implements Initializable {
      * Handles the change of color on selected objects
      *
      * @param enabledColor  The new color for the selected objects
-     * @param previousColor The color old color of the selected objects
+     * @param previousColor The old color of the selected objects
      */
     public void changeColorOnSelectedElements(final EnabledColor enabledColor,
                                               final List<Pair<SelectHelper.ItemSelectable, EnabledColor>> previousColor) {

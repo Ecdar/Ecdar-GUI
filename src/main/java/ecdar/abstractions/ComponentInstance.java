@@ -2,7 +2,6 @@ package ecdar.abstractions;
 
 import ecdar.Ecdar;
 import ecdar.presentations.Grid;
-import ecdar.utility.colors.Color;
 import com.google.gson.JsonObject;
 import javafx.beans.property.*;
 import javafx.beans.value.ObservableValue;

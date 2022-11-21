@@ -1,6 +1,5 @@
 package ecdar.abstractions;
 
-import EcdarProtoBuf.ComponentProtos;
 import ecdar.utility.helpers.Circular;
 import ecdar.utility.serialize.Serializable;
 import com.google.gson.Gson;

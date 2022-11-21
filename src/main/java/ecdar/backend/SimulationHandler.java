@@ -1,7 +1,6 @@
 package ecdar.backend;
 
 import EcdarProtoBuf.ComponentProtos;
-import EcdarProtoBuf.ObjectProtos;
 import EcdarProtoBuf.QueryProtos;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
@@ -28,7 +27,7 @@ import EcdarProtoBuf.QueryProtos.SimulationStepResponse;
  */
 public class SimulationHandler {
     public static final String QUERY_PREFIX = "Query: ";
-    public String composition;
+    private String composition;
     private ObjectProperty<SimulationState> currentConcreteState = new SimpleObjectProperty<>();
     private ObjectProperty<SimulationState> initialConcreteState = new SimpleObjectProperty<>();
     private ObjectProperty<BigDecimal> currentTime = new SimpleObjectProperty<>();
@@ -37,13 +36,6 @@ public class SimulationHandler {
     private EcdarSystem system;
     private SimulationStateSuccessor successor;
     private int numberOfSteps;
-
-    /**
-     * A string to keep track what is currently being simulated
-     * For now the string is prefixed with {@link #QUERY_PREFIX} when doing a query simulation
-     * and kept empty when doing system simulations
-     */
-    private String currentSimulation = "";
 
     private final ObservableMap<String, BigDecimal> simulationVariables = FXCollections.observableHashMap();
     private final ObservableMap<String, BigDecimal> simulationClocks = FXCollections.observableHashMap();
@@ -68,9 +60,6 @@ public class SimulationHandler {
     /**
      * Initializes the default system (non-query system)
      */
-    public void initializeDefaultSystem() {
-        currentSimulation = "";
-    }
 
     /**
      * Initializes the values and properties in the {@link SimulationHandler}.
@@ -457,9 +446,9 @@ public class SimulationHandler {
         return system;
     }
 
-    public String getCurrentSimulation() {
-        return currentSimulation;
-    }
+    public String getComposition() { return composition;}
+
+    public void setComposition(String composition) {this.composition = composition;}
 
     public boolean isSimulationRunning() {
         return false; // ToDo: Implement

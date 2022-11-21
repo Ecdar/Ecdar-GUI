@@ -38,7 +38,9 @@ public class Component extends HighLevelModelObject implements Boxed {
 
     // Verification properties
     private final ObservableList<Location> locations = FXCollections.observableArrayList();
+    private final ObservableList<Location> failingLocations = FXCollections.observableArrayList();
     private final ObservableList<DisplayableEdge> edges = FXCollections.observableArrayList();
+    private final ObservableList<DisplayableEdge> failingEdges = FXCollections.observableArrayList();
     private final ObservableList<String> inputStrings = FXCollections.observableArrayList();
     private final ObservableList<String> outputStrings = FXCollections.observableArrayList();
     private final StringProperty description = new SimpleStringProperty("");
@@ -487,6 +489,67 @@ public class Component extends HighLevelModelObject implements Boxed {
     public boolean removeLocation(final Location location) {
         return locations.remove(location);
     }
+
+    /**
+     * Add a failing Edge to the list of failing edges
+     * and set the edge's failing property to true.
+     * @param edge the Edge that is failing.
+     * @return whether adding the Edge to the list was a success
+     */
+    public boolean addFailingEdge(final Edge edge) {
+        edge.setFailing(true);
+        return failingEdges.add(edge);
+    }
+
+    /**
+     * Sets all previous failing edges to not failing
+     * and removes all previous failing edges from list.
+     */
+    public void removeFailingEdges() {
+        for (DisplayableEdge edge : failingEdges) {
+            edge.setFailing(false);
+        }
+        failingEdges.removeAll();
+    }
+
+    /**
+     * Observable list of all failing locations.
+     * @return Observable list of all failing locations.
+     */
+    public ObservableList<Location> getFailingLocations() {
+        return failingLocations;
+    }
+
+    /**
+     * Adds a failing location to the list of failing locations.
+     * @param locationId the id of the location that is failing.
+     * @return whether adding the location to the list was a success
+     */
+    public boolean addFailingLocation(final String locationId) {
+        Location failingLocation = findLocation(locationId);
+        failingLocation.setFailing(true);
+        return failingLocations.add(failingLocation);
+    }
+
+    /**
+     * Sets all previous failing locations to not failing
+     * and removes all previous failing locations from list.
+     */
+    public void removeFailingLocations() {
+        for (Location location : failingLocations) {
+            location.setFailing(false);
+        }
+        failingLocations.removeAll();
+    }
+
+    /**
+     * Observable list of all failing edges.
+     * @return Observable list of all failing edges.
+     */
+    public ObservableList<DisplayableEdge> getFailingEdges() {
+        return failingEdges;
+    }
+
 
     /**
      * Returns all DisplayableEdges of the component (returning a list potentially containing GroupEdges and Edges)

@@ -8,6 +8,7 @@ import ecdar.utility.helpers.ItemDragHelper;
 import ecdar.utility.helpers.LocationAware;
 import com.jfoenix.controls.JFXTextField;
 import ecdar.utility.helpers.SelectHelper;
+import ecdar.utility.helpers.StringHelper;
 import javafx.application.Platform;
 import javafx.beans.binding.When;
 import javafx.beans.property.*;
@@ -16,10 +17,8 @@ import javafx.beans.value.ObservableDoubleValue;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.control.Label;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
-import javafx.scene.robot.Robot;
 import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
@@ -283,6 +282,14 @@ public class TagPresentation extends StackPane {
         initializeTextAid((JFXTextField) lookup("#textField"));
     }
 
+    public void replaceSigns() {
+        var textField = (JFXTextField) lookup("#textField");
+        textField.textProperty().addListener((obs, oldText, newText) -> {
+            textField.setText(StringHelper.ConvertSymbolsToUnicode(newText));
+        });
+    }
+
+    
     public void requestTextFieldFocus() {
         final JFXTextField textField = (JFXTextField) lookup("#textField");
         Platform.runLater(textField::requestFocus);

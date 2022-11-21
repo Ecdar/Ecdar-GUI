@@ -1,6 +1,5 @@
 package ecdar.abstractions;
 
-import EcdarProtoBuf.ComponentProtos;
 import com.google.gson.JsonPrimitive;
 import ecdar.Ecdar;
 import ecdar.controllers.EcdarController;
@@ -69,12 +68,27 @@ public class Edge extends DisplayableEdge implements Serializable {
         return sync.get() + (ioStatus.get().equals(EdgeStatus.INPUT) ? "?" : "!");
     }
 
-    public String getGroup(){
+    public String getGroup() {
         return group.get();
     }
 
     public void setGroup(final String string){
         group.set(string);
+    }
+
+    @Override
+    public boolean getFailing() {
+        return this.failing.get();
+    }
+
+    @Override
+    public void setFailing(boolean bool) {
+        this.failing.set(bool);
+    }
+
+    @Override
+    public BooleanProperty failingProperty() {
+        return this.failing;
     }
 
     /**

@@ -1,14 +1,16 @@
 package ecdar.abstractions;
 
+import EcdarProtoBuf.ObjectProtos;
 import ecdar.Ecdar;
 import ecdar.backend.*;
 import ecdar.controllers.EcdarController;
-import ecdar.utility.helpers.StringValidator;
+import ecdar.utility.helpers.StringHelper;
 import ecdar.utility.serialize.Serializable;
 import com.google.gson.JsonObject;
 import javafx.application.Platform;
 import javafx.beans.property.*;
 
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class Query implements Serializable {
@@ -28,6 +30,10 @@ public class Query implements Serializable {
 
     private final Consumer<Boolean> successConsumer = (aBoolean) -> {
         if (aBoolean) {
+            for (Component c : Ecdar.getProject().getComponents()) {
+                c.removeFailingLocations();
+                c.removeFailingEdges();
+            }
             setQueryState(QueryState.SUCCESSFUL);
         } else {
             setQueryState(QueryState.ERROR);
@@ -57,6 +63,29 @@ public class Query implements Serializable {
         }
     };
 
+    private final BiConsumer<ObjectProtos.State, String> stateActionConsumer = (state, action) -> {
+        for (Component c : Ecdar.getProject().getComponents()) {
+            c.removeFailingLocations();
+            c.removeFailingEdges();
+        }
+        for (ObjectProtos.Location location : state.getLocationTuple().getLocationsList()) {
+            Component c = Ecdar.getProject().findComponent(location.getSpecificComponent().getComponentName());
+            if (c == null) {
+                throw new NullPointerException("Could not find the specific component: " + location.getSpecificComponent().getComponentName());
+            }
+            Location l = c.findLocation(location.getId());
+            if (l == null) {
+                throw new NullPointerException("Could not find location: " + location.getId());
+            }
+            c.addFailingLocation(l.getId());
+            for (Edge edge : c.getEdges()) {
+                if(action.equals(edge.getSync()) && edge.getSourceLocation() == l) {
+                    c.addFailingEdge(edge);
+                }
+            }
+        }
+    };
+
     public Query(final String query, final String comment, final QueryState queryState) {
         this.setQuery(query);
         this.comment.set(comment);
@@ -66,14 +95,6 @@ public class Query implements Serializable {
 
     public Query(final JsonObject jsonElement) {
         deserialize(jsonElement);
-    }
-
-    public static String RefinementSymbolToUnicode(String stringToReplace){
-        return stringToReplace.replace(">=","\u2265").replace("<=","\u2264");
-    }
-
-    public static String UnicodeToRefinementSymbol(String stringToReplace){
-        return stringToReplace.replace("\u2264","<=").replace("\u2265",">=");
     }
 
     public QueryState getQueryState() {
@@ -89,7 +110,7 @@ public class Query implements Serializable {
     }
 
     public String getQuery() {
-        return UnicodeToRefinementSymbol(this.query.get());
+        return StringHelper.ConvertUnicodeToSymbols(this.query.get());
     }
 
     public void setQuery(final String query) {
@@ -154,6 +175,15 @@ public class Query implements Serializable {
         return failureConsumer;
     }
 
+    /**
+     * Getter for the state action consumer.
+     * @return The <a href="#stateConsumer">State Consumer</a>
+     */
+    public BiConsumer<ObjectProtos.State, String> getStateActionConsumer() {
+        return stateActionConsumer;
+    }
+
+    
     @Override
     public JsonObject serialize() {
         final JsonObject result = new JsonObject();

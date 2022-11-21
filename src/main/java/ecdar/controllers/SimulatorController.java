@@ -4,7 +4,6 @@ import com.google.gson.JsonObject;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
 import ecdar.backend.SimulationHandler;
-import ecdar.presentations.SimulationInitializationDialogPresentation;
 import ecdar.presentations.SimulatorOverviewPresentation;
 import ecdar.simulation.SimulationState;
 import ecdar.simulation.Transition;
@@ -53,8 +52,8 @@ public class SimulatorController implements Initializable {
 
         if (sm.getCurrentState() == null) sm.initialStep(); // ToDo NIELS: Find better solution
 
-        //Have the user left a trace or is he simulating a query
-        if (sm.traceLog.size() >= 2 || sm.getCurrentSimulation().contains(SimulationHandler.QUERY_PREFIX)) {
+        //Have the user left a trace
+        if (sm.traceLog.size() >= 2) {
             shouldSimulationBeReset = false;
         }
 
@@ -104,17 +103,15 @@ public class SimulatorController implements Initializable {
         }
     }
     /**
-     * Finds the components that are used in the current simulation by looking at the component found in
-     * {@link Project#getComponents()} and compare them to the processes declared in the {@link SimulationHandler#getSystem()}
-     * <p>
-     * TODO This does currently not work if the same component is used multiple times.
+     * Finds the components that are used in the current simulation by looking at the components found in
+     * Ecdar.getProject.getComponents() and compares them to the components found in the queryComponents list
      *
      * @return all the components used in the current simulation
      */
     private List<Component> findComponentsInCurrentSimulation(List<String> queryComponents) {
         //Show components from the system
-        final SimulationHandler sm = Ecdar.getSimulationHandler();
         List<Component> components = new ArrayList<>();
+        
         components = Ecdar.getProject().getComponents();
 
         //Matches query components against with existing components and adds them to simulation
