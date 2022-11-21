@@ -99,7 +99,6 @@ public class Component extends HighLevelModelObject implements Boxed {
         bindReachabilityAnalysis();
     }
 
-
     /**
      * Creates a clone of another component.
      * Copies objects used for verification (e.g. locations, edges and the declarations).
@@ -119,7 +118,6 @@ public class Component extends HighLevelModelObject implements Boxed {
 
         return clone;
     }
-
 
     /**
      * Adds objects used for verifications to this component.
