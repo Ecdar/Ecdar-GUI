@@ -76,8 +76,6 @@ public class SimulatorController implements Initializable {
      * {@link SimulatorOverviewController#processContainer} and adding the processes of the new simulation.
      */
     private void resetSimulation() {
-        final SimulationHandler sm = Ecdar.getSimulationHandler();
-        sm.initializeDefaultSystem();
         List<Component> listOfComponentsForSimulation = findComponentsInCurrentSimulation(SimulationInitializationDialogController.ListOfComponents);
         overviewPresentation.getController().clearOverview();
         overviewPresentation.getController().getComponentObservableList().clear();
@@ -93,13 +91,13 @@ public class SimulatorController implements Initializable {
             Location initiallocation = comp.getInitialLocation();
             initiallocation.setColor(Color.ORANGE);
             List<DisplayableEdge> tempedge = comp.getRelatedEdges(initiallocation);
-            for(DisplayableEdge e: tempedge)
+            /* for(DisplayableEdge e: tempedge)
             {
                 if(e.getSourceLocation() == initiallocation)
                 {
                     e.setIsHighlighted(true);
                 }
-            }
+            }*/
         }
     }
     /**
