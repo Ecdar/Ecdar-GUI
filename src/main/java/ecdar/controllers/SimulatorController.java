@@ -1,6 +1,5 @@
 package ecdar.controllers;
 
-import com.google.gson.JsonObject;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
 import ecdar.backend.SimulationHandler;
@@ -14,7 +13,6 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.Initializable;
 import javafx.scene.layout.StackPane;
-import org.apache.commons.lang3.SerializationUtils;
 
 import java.net.URL;
 import java.util.ArrayList;
