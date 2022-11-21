@@ -97,9 +97,9 @@ public class QueryHandler {
     }
 
     private void handleQueryResponse(QueryProtos.QueryResponse value, Query query) {
+        System.out.println(value);
         // If the query has been cancelled, ignore the result
         if (query.getQueryState() == QueryState.UNKNOWN) return;
-
         switch (value.getResponseCase()) {
             case QUERY_OK:
                 QueryProtos.QueryResponse.QueryOk queryOk = value.getQueryOk();
@@ -112,7 +112,8 @@ public class QueryHandler {
                             query.setQueryState(QueryState.ERROR);
                             query.getFailureConsumer().accept(new BackendException.QueryErrorException(queryOk.getRefinement().getReason()));
                             query.getSuccessConsumer().accept(false);
-                            query.getStateConsumer().accept(value.getQueryOk().getRefinement().getState());
+                            query.getStateActionConsumer().accept(value.getQueryOk().getRefinement().getState(),
+                                    value.getQueryOk().getRefinement().getAction());
                         }
                         break;
 
@@ -124,7 +125,9 @@ public class QueryHandler {
                             query.setQueryState(QueryState.ERROR);
                             query.getFailureConsumer().accept(new BackendException.QueryErrorException(queryOk.getConsistency().getReason()));
                             query.getSuccessConsumer().accept(false);
-                            query.getStateConsumer().accept(value.getQueryOk().getConsistency().getState());
+                            query.getStateActionConsumer().accept(value.getQueryOk().getConsistency().getState(),
+                                    value.getQueryOk().getConsistency().getAction());
+
                         }
                         break;
 
@@ -136,7 +139,9 @@ public class QueryHandler {
                             query.setQueryState(QueryState.ERROR);
                             query.getFailureConsumer().accept(new BackendException.QueryErrorException(queryOk.getDeterminism().getReason()));
                             query.getSuccessConsumer().accept(false);
-                            query.getStateConsumer().accept(value.getQueryOk().getDeterminism().getState());
+                            query.getStateActionConsumer().accept(value.getQueryOk().getDeterminism().getState(),
+                                    value.getQueryOk().getDeterminism().getAction());
+
                         }
                         break;
 
@@ -148,7 +153,9 @@ public class QueryHandler {
                             query.setQueryState(QueryState.ERROR);
                             query.getFailureConsumer().accept(new BackendException.QueryErrorException(queryOk.getImplementation().getReason()));
                             query.getSuccessConsumer().accept(false);
-                            query.getStateConsumer().accept(value.getQueryOk().getImplementation().getState());
+                            //ToDo: These errors are not implemented in the Reveaal backend.
+                            query.getStateActionConsumer().accept(value.getQueryOk().getImplementation().getState(),
+                                    "");
                         }
                         break;
 
@@ -160,7 +167,9 @@ public class QueryHandler {
                             query.setQueryState(QueryState.ERROR);
                             query.getFailureConsumer().accept(new BackendException.QueryErrorException(queryOk.getReachability().getReason()));
                             query.getSuccessConsumer().accept(false);
-                            query.getStateConsumer().accept(value.getQueryOk().getReachability().getState());
+                            //ToDo: These errors are not implemented in the Reveaal backend.
+                            query.getStateActionConsumer().accept(value.getQueryOk().getReachability().getState(),
+                                    "");
                         }
                         break;
 

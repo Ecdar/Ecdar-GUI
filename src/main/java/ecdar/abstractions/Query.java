@@ -10,6 +10,7 @@ import com.google.gson.JsonObject;
 import javafx.application.Platform;
 import javafx.beans.property.*;
 
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class Query implements Serializable {
@@ -31,6 +32,7 @@ public class Query implements Serializable {
         if (aBoolean) {
             for (Component c : Ecdar.getProject().getComponents()) {
                 c.removeFailingLocations();
+                c.removeFailingEdges();
             }
             setQueryState(QueryState.SUCCESSFUL);
         } else {
@@ -61,12 +63,24 @@ public class Query implements Serializable {
         }
     };
 
-    private final Consumer<ObjectProtos.State> stateConsumer = (state) -> {
+    private final BiConsumer<ObjectProtos.State, String> stateActionConsumer = (state, action) -> {
         for (Component c : Ecdar.getProject().getComponents()) {
             c.removeFailingLocations();
-            if (query.getValue().contains(c.getName())) {
-                for (ObjectProtos.Location location : state.getLocationTuple().getLocationsList()) {
-                    c.addFailingLocation(location.getId());
+            c.removeFailingEdges();
+        }
+        for (ObjectProtos.Location location : state.getLocationTuple().getLocationsList()) {
+            Component c = Ecdar.getProject().findComponent(location.getSpecificComponent().getComponentName());
+            if (c == null) {
+                throw new NullPointerException("Could not find the specific component: " + location.getSpecificComponent().getComponentName());
+            }
+            Location l = c.findLocation(location.getId());
+            if (l == null) {
+                throw new NullPointerException("Could not find location: " + location.getId());
+            }
+            c.addFailingLocation(l.getId());
+            for (Edge edge : c.getEdges()) {
+                if(action.equals(edge.getSync()) && edge.getSourceLocation() == l) {
+                    c.addFailingEdge(edge);
                 }
             }
         }
@@ -162,13 +176,14 @@ public class Query implements Serializable {
     }
 
     /**
-     * Getter for the state consumer.
+     * Getter for the state action consumer.
      * @return The <a href="#stateConsumer">State Consumer</a>
      */
-    public Consumer<ObjectProtos.State> getStateConsumer() {
-        return stateConsumer;
+    public BiConsumer<ObjectProtos.State, String> getStateActionConsumer() {
+        return stateActionConsumer;
     }
 
+    
     @Override
     public JsonObject serialize() {
         final JsonObject result = new JsonObject();
