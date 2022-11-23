@@ -19,6 +19,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static ecdar.controllers.SimulationInitializationDialogController.ListOfComponents;
+
 public final class BackendHelper {
     final static String TEMP_DIRECTORY = "temporary";
     private static BackendInstance defaultBackend = null;
@@ -67,12 +69,42 @@ public final class BackendHelper {
     /**
      * Generates a reachability query based on the given location and component
      *
-     * @param location  The location which should be checked for reachability
-     * @param component The component where the location belong to / are placed
+     * @param endLocation  The location which should be checked for reachability
      * @return A reachability query string
      */
-    public static String getLocationReachableQuery(final Location location, final Component component) {
-        return component.getName() + "." + location.getId();
+    public static String getLocationReachableQuery(final Location endLocation, final Component component) {
+        var stringBuilder = new StringBuilder();
+
+        for (var componentName:ListOfComponents) {
+            stringBuilder.append(componentName);
+            stringBuilder.append(" || ");
+        }
+        stringBuilder.delete(stringBuilder.length()-3, stringBuilder.length());
+
+        // append start location here TODO
+
+
+        // append end state
+        var indexOfSelectedComponent = ListOfComponents.indexOf(component.getName());
+        stringBuilder.append("-> [");
+        // add underscore to indicate, that we don't care about the end locations in the other components
+        var numberOfComponents = ListOfComponents.size();
+        for (int i = 0; i < numberOfComponents; i++){
+            if (i == indexOfSelectedComponent){
+                stringBuilder.append(endLocation.getId() + ", ");
+            }
+            else{
+                stringBuilder.append("_, ");
+            }
+        }
+        stringBuilder.delete(stringBuilder.length()-2, stringBuilder.length());
+        stringBuilder.append("](");
+
+        // append clock here TODO
+        stringBuilder.append(")");
+
+        //  return example: m1 || M2 -> [L1, L4](y<3); [L2, L7](y<2)
+        return stringBuilder.toString();
     }
 
     /**

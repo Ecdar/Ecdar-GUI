@@ -1,6 +1,7 @@
 package ecdar.controllers;
 
 import com.jfoenix.controls.JFXPopup;
+import ecdar.Ecdar;
 import ecdar.abstractions.*;
 import ecdar.backend.BackendHelper;
 import ecdar.presentations.DropDownMenu;
@@ -77,7 +78,6 @@ public class SimLocationController implements Initializable {
         dropDownMenu = new DropDownMenu(root);
 
         dropDownMenu.addClickableListElement("Is " + getLocation().getId() + " reachable?", event -> {
-            dropDownMenu.hide();
             // Generate the query from the backend
             final String reachabilityQuery = BackendHelper.getLocationReachableQuery(getLocation(), getComponent());
 
@@ -87,6 +87,10 @@ public class SimLocationController implements Initializable {
             // Add new query for this location
             final Query query = new Query(reachabilityQuery, reachabilityComment, QueryState.UNKNOWN);
             query.setType(QueryType.REACHABILITY);
+
+            // execute query
+            Ecdar.getQueryExecutor().executeQuery(query);
+
             dropDownMenu.hide();
         });
     }
