@@ -7,7 +7,9 @@ import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Query;
 import ecdar.abstractions.QueryState;
+import ecdar.controllers.ComponentController;
 import ecdar.controllers.EcdarController;
+import ecdar.controllers.SignatureArrowController;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.helpers.StringValidator;
 import io.grpc.stub.StreamObserver;
@@ -31,12 +33,14 @@ public class QueryHandler {
      * Executes the specified query
      * @param query             query to be executed
      */
+
     public void executeQuery(Query query) throws NoSuchElementException {
         if (query.getQueryState().equals(QueryState.RUNNING) || !StringValidator.validateQuery(query.getQuery())) return;
 
         if (query.getQuery().isEmpty()) {
             query.setQueryState(QueryState.SYNTAX_ERROR);
             query.addError("Query is empty");
+
             return;
         }
 
@@ -97,7 +101,7 @@ public class QueryHandler {
     }
 
     private void handleQueryResponse(QueryProtos.QueryResponse value, Query query) {
-        System.out.println(value);
+
         // If the query has been cancelled, ignore the result
         if (query.getQueryState() == QueryState.UNKNOWN) return;
         switch (value.getResponseCase()) {
@@ -118,6 +122,7 @@ public class QueryHandler {
                         break;
 
                     case CONSISTENCY:
+
                         if (queryOk.getConsistency().getSuccess()) {
                             query.setQueryState(QueryState.SUCCESSFUL);
                             query.getSuccessConsumer().accept(true);
@@ -127,6 +132,8 @@ public class QueryHandler {
                             query.getSuccessConsumer().accept(false);
                             query.getStateActionConsumer().accept(value.getQueryOk().getConsistency().getState(),
                                     value.getQueryOk().getConsistency().getAction());
+
+
 
                         }
                         break;
@@ -174,6 +181,7 @@ public class QueryHandler {
                         break;
 
                     case COMPONENT:
+                        System.out.println("dizNuts");
                         query.setQueryState(QueryState.SUCCESSFUL);
                         query.getSuccessConsumer().accept(true);
                         JsonObject returnedComponent = (JsonObject) JsonParser.parseString(queryOk.getComponent().getComponent().getJson());

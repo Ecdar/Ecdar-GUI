@@ -13,8 +13,10 @@ import ecdar.utility.helpers.Boxed;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import ecdar.utility.helpers.MouseCircular;
+import javafx.beans.InvalidationListener;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -45,7 +47,7 @@ public class Component extends HighLevelModelObject implements Boxed {
     private final ObservableList<String> outputStrings = FXCollections.observableArrayList();
     private final StringProperty description = new SimpleStringProperty("");
     private final StringProperty declarationsText = new SimpleStringProperty("");;
-
+    private  BooleanProperty isFailing = new SimpleBooleanProperty(false);
     // Background check
     private final BooleanProperty includeInPeriodicCheck = new SimpleBooleanProperty(true);
 
@@ -56,11 +58,22 @@ public class Component extends HighLevelModelObject implements Boxed {
 
     public Location previousLocationForDraggedEdge;
 
+    public boolean getIsFailing(){
+        return isFailing.get();
+    }
+
+    public void setFailingComponent(boolean status){
+        this.isFailing.set(status);
+    }
+
+    public BooleanProperty getIsFailingProperty() {
+        return isFailing;
+    }
+
     /**
      * Constructs an empty component
      */
     public Component() {
-
     }
 
     /**

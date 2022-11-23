@@ -137,6 +137,22 @@ public class ComponentController extends ModelController implements Initializabl
      * @param newComponent The component that should be presented with its signature
      */
     private void initializeSignatureListeners(final Component newComponent) {
+        newComponent.getIsFailingProperty().addListener((observable, oldValue, newValue) -> {
+            for (Node n : inputSignatureContainer.getChildren()){
+                if (n instanceof SignatureArrow){
+                    ((SignatureArrow) n).recolorToRed();
+                }
+
+            }
+            for (Node n : outputSignatureContainer.getChildren()){
+                if (n instanceof SignatureArrow){
+                    ((SignatureArrow) n).recolorToRed();
+                }
+
+            }
+
+        });
+
         newComponent.getOutputStrings().addListener((ListChangeListener<String>) c -> {
             // By clearing the container we don't have to fiddle with which elements are removed and added
             outputSignatureContainer.getChildren().clear();
@@ -160,11 +176,13 @@ public class ComponentController extends ModelController implements Initializabl
      */
     private void insertSignatureArrow(final String channel, final EdgeStatus status) {
         SignatureArrow newArrow = new SignatureArrow(channel, status, component.get());
+
         if (status == EdgeStatus.INPUT) {
             inputSignatureContainer.getChildren().add(newArrow);
         } else {
             outputSignatureContainer.getChildren().add(newArrow);
         }
+
     }
     
     /***
