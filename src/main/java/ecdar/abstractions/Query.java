@@ -70,8 +70,8 @@ public class Query implements Serializable {
         }
         for (ObjectProtos.Location location : state.getLocationTuple().getLocationsList()) {
             Component c = Ecdar.getProject().findComponent(location.getSpecificComponent().getComponentName());
-            c.setIsFailingOutput(true);
-            c.setIsFailingInput(true);
+            c.setIsFailing(true);
+
             if (c == null) {
                 throw new NullPointerException("Could not find the specific component: " + location.getSpecificComponent().getComponentName());
             }

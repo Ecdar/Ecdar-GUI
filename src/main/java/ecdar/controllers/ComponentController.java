@@ -139,6 +139,7 @@ public class ComponentController extends ModelController implements Initializabl
     private void initializeSignatureListeners(final Component newComponent) {
         newComponent.getIsFailingProperty().addListener((observable, oldValue, newValue) -> {
             if(newComponent.getIsFailing()) {
+                System.out.println("HYN");
                 for (Node n : inputSignatureContainer.getChildren()) {
                     if (n instanceof SignatureArrow) {
                         for (String label : component.get().getInputStrings()) { // TODO Bwad bwad labuls gwo here <- UwU shall be complate faliure label that shall be punshid
@@ -158,7 +159,7 @@ public class ComponentController extends ModelController implements Initializabl
                         }
                     }
                 }
-                newComponent.setIsFailing(false);
+               //newComponent.setIsFailing(false);
             }
         });
         newComponent.getOutputStrings().addListener((ListChangeListener<String>) c -> {

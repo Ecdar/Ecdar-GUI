@@ -31,7 +31,6 @@ public class SignatureArrowController {
     public void initialize(final URL location, final ResourceBundle resources) {
 
     }
-
     /***
      * Finds matching edges and highlights them
      */

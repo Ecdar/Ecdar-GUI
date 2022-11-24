@@ -51,7 +51,12 @@ public class SignatureArrow extends Group implements Highlightable {
         });
         controller.arrowBox.onMouseExitedProperty().set(event -> {
             controller.mouseExited();
-            this.unhighlight();
+            if (controller.getComponent().getIsFailing()){
+                this.recolorToRed();
+            }else {
+                this.unhighlight();
+            }
+
         });
     }
 
