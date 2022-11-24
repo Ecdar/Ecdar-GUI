@@ -75,35 +75,72 @@ public final class BackendHelper {
     public static String getLocationReachableQuery(final Location endLocation, final Component component) {
         var stringBuilder = new StringBuilder();
 
-        for (var componentName:ListOfComponents) {
-            stringBuilder.append(componentName);
-            stringBuilder.append(" || ");
-        }
-        stringBuilder.delete(stringBuilder.length()-3, stringBuilder.length());
+        // append simulation query (currently only supports parallel composition)
+        stringBuilder.append(getSimulationQueryString());
 
         // append start location here TODO
 
-
         // append end state
-        var indexOfSelectedComponent = ListOfComponents.indexOf(component.getName());
-        stringBuilder.append("-> [");
-        // add underscore to indicate, that we don't care about the end locations in the other components
-        var numberOfComponents = ListOfComponents.size();
-        for (int i = 0; i < numberOfComponents; i++){
-            if (i == indexOfSelectedComponent){
-                stringBuilder.append(endLocation.getId() + ", ");
-            }
-            else{
-                stringBuilder.append("_, ");
-            }
-        }
-        stringBuilder.delete(stringBuilder.length()-2, stringBuilder.length());
-        stringBuilder.append("](");
+        stringBuilder.append(getEndStateString(component.getName(), endLocation.getId()));
 
+        // append clocks
+        stringBuilder.append("(");
         // append clock here TODO
         stringBuilder.append(")");
 
-        //  return example: m1 || M2 -> [L1, L4](y<3); [L2, L7](y<2)
+        //  return example: m1||M2->[L1,L4](y<3);[L2, L7](y<2)
+        return stringBuilder.toString();
+    }
+
+    private static String getSimulationQueryString() {
+        var stringBuilder = new StringBuilder();
+
+        var appendComponentWithSeparator = false;
+        for (var componentName:ListOfComponents) {
+            if (appendComponentWithSeparator){
+                stringBuilder.append("||" + componentName);
+            }
+            else {
+                stringBuilder.append(componentName);
+            }
+            if (!appendComponentWithSeparator) {
+                appendComponentWithSeparator = true;
+            }
+        }
+        return stringBuilder.toString();
+    }
+
+    private static String getEndStateString(String componentName, String endLocationId) {
+        var stringBuilder = new StringBuilder();
+
+        var indexOfSelectedComponent = ListOfComponents.indexOf(componentName);
+        stringBuilder.append(" -> [");
+        // add underscore to indicate, that we don't care about the end locations in the other components
+        var numberOfComponents = ListOfComponents.size();
+        var appendLocationWithSeparator = false;
+        for (int i = 0; i < numberOfComponents; i++){
+            if (i == indexOfSelectedComponent){
+                if (appendLocationWithSeparator){
+                    stringBuilder.append("," + endLocationId);
+                }
+                else{
+                    stringBuilder.append(endLocationId);
+                }
+            }
+            else{
+                if (appendLocationWithSeparator){
+                    stringBuilder.append(",_");
+                }
+                else{
+                    stringBuilder.append("_");
+                }
+            }
+            if (!appendLocationWithSeparator) {
+                appendLocationWithSeparator = true;
+            }
+        }
+        stringBuilder.append("]");
+
         return stringBuilder.toString();
     }
 
