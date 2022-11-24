@@ -47,8 +47,8 @@ public class Component extends HighLevelModelObject implements Boxed {
     private final ObservableList<String> outputStrings = FXCollections.observableArrayList();
     private final StringProperty description = new SimpleStringProperty("");
     private final StringProperty declarationsText = new SimpleStringProperty("");;
-    private BooleanProperty isFailingInput = new SimpleBooleanProperty(false);
-    private BooleanProperty isFailingOutput = new SimpleBooleanProperty(false);
+    private BooleanProperty isFailing = new SimpleBooleanProperty(false);
+
     // Background check
     private final BooleanProperty includeInPeriodicCheck = new SimpleBooleanProperty(true);
 
@@ -58,14 +58,10 @@ public class Component extends HighLevelModelObject implements Boxed {
     private final BooleanProperty firsTimeShown = new SimpleBooleanProperty(false);
 
     public Location previousLocationForDraggedEdge;
-    public boolean getIsFailingInput(){return isFailingInput.get();}
-    public BooleanProperty getIsFailingInputProperty(){return isFailingInput;}
-    public void setIsFailingInput(boolean isFailingInput){this.isFailingInput.set(isFailingInput);}
-    public boolean getIsFailingOutput(){return isFailingOutput.get();}
-    public BooleanProperty getIsFailingOutputProperty(){return isFailingOutput;}
-    public void setIsFailingOutput(boolean isFailingOutput) {
-        this.isFailingOutput.set(isFailingOutput);
-    }
+    public boolean getIsFailing(){return isFailing.get();}
+    public BooleanProperty getIsFailingProperty(){return isFailing;}
+    public void setIsFailing(boolean isFailingInput){this.isFailing.set(isFailingInput);}
+
 
     /**
      * Constructs an empty component

@@ -19,6 +19,9 @@ public class SignatureArrow extends Group implements Highlightable {
 
     private SignatureArrowController controller;
 
+    public String getSignatureArrowLabel(){
+        return controller.signatureArrowLabel.getText();
+    }
     /***
      * Create a new signature arrow with a label for an edge, and different look depending on whether it's
      * an input or output arrow

@@ -137,37 +137,30 @@ public class ComponentController extends ModelController implements Initializabl
      * @param newComponent The component that should be presented with its signature
      */
     private void initializeSignatureListeners(final Component newComponent) {
-        newComponent.getIsFailingInputProperty().addListener((observable, oldValue, newValue) -> {
-            for (Node n : inputSignatureContainer.getChildren()){
-                if (n instanceof SignatureArrow){
-                    ((SignatureArrow) n).recolorToRed();
+        newComponent.getIsFailingProperty().addListener((observable, oldValue, newValue) -> {
+            if(newComponent.getIsFailing()) {
+                for (Node n : inputSignatureContainer.getChildren()) {
+                    if (n instanceof SignatureArrow) {
+                        for (String label : component.get().getInputStrings()) { // TODO Bwad bwad labuls gwo here <- UwU shall be complate faliure label that shall be punshid
+                            if (Objects.equals(((SignatureArrow) n).getSignatureArrowLabel(), label)) {
+                                ((SignatureArrow) n).recolorToRed();
+                            }
+                        }
+                    }
+
                 }
-
-            }
-            for (Node n : outputSignatureContainer.getChildren()){
-                if (n instanceof SignatureArrow){
-                    ((SignatureArrow) n).recolorToRed();
+                for (Node n : outputSignatureContainer.getChildren()) {
+                    if (n instanceof SignatureArrow) {
+                        for (String label : component.get().getInputStrings()) { // TODO insert list of failing signature arrows
+                            if (Objects.equals(((SignatureArrow) n).getSignatureArrowLabel(), label)) {
+                                ((SignatureArrow) n).recolorToRed();
+                            }
+                        }
+                    }
                 }
-
+                newComponent.setIsFailing(false);
             }
-
         });
-        newComponent.getIsFailingOutputProperty().addListener((observable, oldValue, newValue) -> {
-            for (Node n : inputSignatureContainer.getChildren()){
-                if (n instanceof SignatureArrow){
-                    ((SignatureArrow) n).recolorToRed();
-                }
-
-            }
-            for (Node n : outputSignatureContainer.getChildren()){
-                if (n instanceof SignatureArrow){
-                    ((SignatureArrow) n).recolorToRed();
-                }
-
-            }
-
-        });
-
         newComponent.getOutputStrings().addListener((ListChangeListener<String>) c -> {
             // By clearing the container we don't have to fiddle with which elements are removed and added
             outputSignatureContainer.getChildren().clear();

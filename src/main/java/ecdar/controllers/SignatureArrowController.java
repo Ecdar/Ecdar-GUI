@@ -22,7 +22,6 @@ public class SignatureArrowController {
     private final ObjectProperty<Component> component = new SimpleObjectProperty<>();
     private final ObjectProperty<EdgeStatus> edgeStatus = new SimpleObjectProperty<>();
     private final StringProperty syncText = new SimpleStringProperty();
-
     public Label signatureArrowLabel;
     public Path signatureArrowPath;
     public Path signatureArrowHeadPath;
