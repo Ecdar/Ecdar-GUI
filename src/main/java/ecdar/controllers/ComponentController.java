@@ -137,7 +137,22 @@ public class ComponentController extends ModelController implements Initializabl
      * @param newComponent The component that should be presented with its signature
      */
     private void initializeSignatureListeners(final Component newComponent) {
-        newComponent.getIsFailingProperty().addListener((observable, oldValue, newValue) -> {
+        newComponent.getIsFailingInputProperty().addListener((observable, oldValue, newValue) -> {
+            for (Node n : inputSignatureContainer.getChildren()){
+                if (n instanceof SignatureArrow){
+                    ((SignatureArrow) n).recolorToRed();
+                }
+
+            }
+            for (Node n : outputSignatureContainer.getChildren()){
+                if (n instanceof SignatureArrow){
+                    ((SignatureArrow) n).recolorToRed();
+                }
+
+            }
+
+        });
+        newComponent.getIsFailingOutputProperty().addListener((observable, oldValue, newValue) -> {
             for (Node n : inputSignatureContainer.getChildren()){
                 if (n instanceof SignatureArrow){
                     ((SignatureArrow) n).recolorToRed();
