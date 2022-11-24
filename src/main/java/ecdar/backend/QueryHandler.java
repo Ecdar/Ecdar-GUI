@@ -162,9 +162,11 @@ public class QueryHandler {
                     case REACHABILITY:
                         if (queryOk.getReachability().getSuccess()) {
                             query.setQueryState(QueryState.SUCCESSFUL);
+                            Ecdar.showToast("Reachability check was successful.");
                             query.getSuccessConsumer().accept(true);
                         } else {
                             query.setQueryState(QueryState.ERROR);
+                            Ecdar.showToast("Reachability check was unsuccessful!");
                             query.getFailureConsumer().accept(new BackendException.QueryErrorException(queryOk.getReachability().getReason()));
                             query.getSuccessConsumer().accept(false);
                             //ToDo: These errors are not implemented in the Reveaal backend.
