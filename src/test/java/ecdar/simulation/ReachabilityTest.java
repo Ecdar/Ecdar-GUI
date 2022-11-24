@@ -52,8 +52,8 @@ public class ReachabilityTest {
         SimulationInitializationDialogController.ListOfComponents.add("C3");
 
         var result = BackendHelper.getLocationReachableQuery(location, component);
-        var indexOfComponent = result.indexOf('[') + 1;
-        var output = result.charAt(indexOfComponent);
+        var indexOfLocation = result.indexOf('[') + 1;
+        var output = result.charAt(indexOfLocation);
         assertEquals(output, location.getId().charAt(0));
     }
 
@@ -70,8 +70,8 @@ public class ReachabilityTest {
         SimulationInitializationDialogController.ListOfComponents.add("C3");
 
         var result = BackendHelper.getLocationReachableQuery(location, component);
-        var indexOfComponent = result.indexOf(',') + 1;
-        var output = result.charAt(indexOfComponent);
+        var indexOfLocation = result.indexOf(',') + 1;
+        var output = result.charAt(indexOfLocation);
         assertEquals(output, location.getId().charAt(0));
     }
 
@@ -88,8 +88,8 @@ public class ReachabilityTest {
         SimulationInitializationDialogController.ListOfComponents.add("C1");
 
         var query = BackendHelper.getLocationReachableQuery(location, component);
-        var indexOfComponent = query.indexOf(']') - 2;
-        var output = query.charAt(indexOfComponent);
+        var indexOfLocation = query.indexOf(']') - 2;
+        var output = query.charAt(indexOfLocation);
         assertEquals(output, location.getId().charAt(0));
     }
 
