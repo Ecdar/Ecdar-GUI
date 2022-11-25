@@ -163,10 +163,10 @@ public class QueryHandler {
                     case REACHABILITY:
                         if (queryOk.getReachability().getSuccess()) {
                             query.setQueryState(QueryState.SUCCESSFUL);
-                            if(value.toString().contains("true")){
+                            if(value.getQueryOk().getReachability().getSuccess()){
                                 Ecdar.showToast("Reachability check was successful and the location can be reached.");
                             }
-                            else if(value.toString().contains("false")){
+                            else if(!value.getQueryOk().getReachability().getSuccess()){
                                 Ecdar.showToast("Reachability check was successful but the location cannot be reached.");
                             }
                             query.getSuccessConsumer().accept(true);
