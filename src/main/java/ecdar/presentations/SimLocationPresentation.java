@@ -271,10 +271,16 @@ public class SimLocationPresentation extends Group implements Highlightable {
         color.addListener((obs, old, newColor) -> updateColor.accept(newColor, colorIntensity.get()));
     }
 
+    /**
+     * Returns true if the mouse hovers over a location
+     * */
     public Boolean isPlaced(){
         return isPlaced.get();
     }
 
+    /**
+     * Set placed to true or false
+     * */
     public void setPlaced(boolean placed){
         isPlaced.set(placed);
     }
