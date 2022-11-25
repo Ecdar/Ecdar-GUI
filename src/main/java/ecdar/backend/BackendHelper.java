@@ -113,13 +113,12 @@ public final class BackendHelper {
     private static String getEndStateString(String componentName, String endLocationId) {
         var stringBuilder = new StringBuilder();
 
-        var indexOfSelectedComponent = ListOfComponents.indexOf(componentName);
         stringBuilder.append(" -> [");
-        // add underscore to indicate, that we don't care about the end locations in the other components
-        var numberOfComponents = ListOfComponents.size();
         var appendLocationWithSeparator = false;
-        for (int i = 0; i < numberOfComponents; i++){
-            if (i == indexOfSelectedComponent){
+
+        for (var component:ListOfComponents)
+        {
+            if (component.equals(componentName)){
                 if (appendLocationWithSeparator){
                     stringBuilder.append("," + endLocationId);
                 }
@@ -127,7 +126,7 @@ public final class BackendHelper {
                     stringBuilder.append(endLocationId);
                 }
             }
-            else{
+            else{ // add underscore to indicate, that we don't care about the end locations in the other components
                 if (appendLocationWithSeparator){
                     stringBuilder.append(",_");
                 }
