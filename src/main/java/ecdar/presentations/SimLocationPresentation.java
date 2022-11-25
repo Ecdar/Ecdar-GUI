@@ -278,6 +278,7 @@ public class SimLocationPresentation extends Group implements Highlightable {
     public void setPlaced(boolean placed){
         isPlaced.set(placed);
     }
+
     private void initializeTypeGraphics() {
         final Location location = controller.getLocation();
 

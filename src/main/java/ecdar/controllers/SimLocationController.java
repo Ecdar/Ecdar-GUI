@@ -74,6 +74,11 @@ public class SimLocationController implements Initializable {
             root.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseClicked::accept);
         });
     }
+
+    /**
+     * Creates the dropdown when right clicking a location.
+     * When reachability is chosen a request will be send to the backend to see if the location can be reached
+     */
     public void initializeDropDownMenu(){
         dropDownMenu = new DropDownMenu(root);
 
