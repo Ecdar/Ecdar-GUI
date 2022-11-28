@@ -126,9 +126,33 @@ runtime {
             'java.logging',
             'java.sql',
             'jdk.jfr']
-
-    launcher{
+    launcher {
         jvmArgs = ['-Dlog4j.configurationFile=./log4j2.xml']
+    }
+//    imageDir = file("$buildDir/ecdar-$version")
+
+    targetPlatform("linux_64", {
+        jdkHome = jdkDownload("https://cdn.azul.com/zulu/bin/zulu11.60.19-ca-fx-jdk11.0.17-linux_x64.tar.gz") {
+            archiveExtension = "tar.gz"
+        }
+    })
+
+    targetPlatform("win_64", {
+        jdkHome = jdkDownload("https://cdn.azul.com/zulu/bin/zulu11.60.19-ca-fx-jdk11.0.17-win_x64.zip") {
+            archiveExtension = "zip"
+        }
+    })
+
+    targetPlatform("macOS_x86") {
+        jdkHome = jdkDownload("https://cdn.azul.com/zulu/bin/zulu11.60.19-ca-fx-jdk11.0.17-macosx_x64.tar.gz") {
+            archiveExtension = "tar.gz"
+        }
+    }
+
+    targetPlatform("macOS_arm") {
+        jdkHome = jdkDownload("https://cdn.azul.com/zulu/bin/zulu11.60.19-ca-fx-jdk11.0.17-macosx_aarch64.tar.gz") {
+            archiveExtension = "tar.gz"
+        }
     }
 }
 
