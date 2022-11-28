@@ -19,6 +19,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static ecdar.controllers.SimulationInitializationDialogController.ListOfComponents;
+
 public final class BackendHelper {
     final static String TEMP_DIRECTORY = "temporary";
     private static BackendInstance defaultBackend = null;
@@ -67,12 +69,78 @@ public final class BackendHelper {
     /**
      * Generates a reachability query based on the given location and component
      *
-     * @param location  The location which should be checked for reachability
-     * @param component The component where the location belong to / are placed
+     * @param endLocation  The location which should be checked for reachability
      * @return A reachability query string
      */
-    public static String getLocationReachableQuery(final Location location, final Component component) {
-        return component.getName() + "." + location.getId();
+    public static String getLocationReachableQuery(final Location endLocation, final Component component) {
+        var stringBuilder = new StringBuilder();
+
+        // append simulation query (currently only supports parallel composition)
+        stringBuilder.append(getSimulationQueryString());
+
+        // append start location here TODO
+
+        // append end state
+        stringBuilder.append(getEndStateString(component.getName(), endLocation.getId()));
+
+        // append clocks
+        stringBuilder.append("(");
+        // append clock here TODO
+        stringBuilder.append(")");
+
+        //  return example: m1||M2->[L1,L4](y<3);[L2, L7](y<2)
+        return stringBuilder.toString();
+    }
+
+    private static String getSimulationQueryString() {
+        var stringBuilder = new StringBuilder();
+
+        var appendComponentWithSeparator = false;
+        for (var componentName:ListOfComponents) {
+            if (appendComponentWithSeparator){
+                stringBuilder.append("||" + componentName);
+            }
+            else {
+                stringBuilder.append(componentName);
+            }
+            if (!appendComponentWithSeparator) {
+                appendComponentWithSeparator = true;
+            }
+        }
+        return stringBuilder.toString();
+    }
+
+    private static String getEndStateString(String componentName, String endLocationId) {
+        var stringBuilder = new StringBuilder();
+
+        stringBuilder.append(" -> [");
+        var appendLocationWithSeparator = false;
+
+        for (var component:ListOfComponents)
+        {
+            if (component.equals(componentName)){
+                if (appendLocationWithSeparator){
+                    stringBuilder.append("," + endLocationId);
+                }
+                else{
+                    stringBuilder.append(endLocationId);
+                }
+            }
+            else{ // add underscore to indicate, that we don't care about the end locations in the other components
+                if (appendLocationWithSeparator){
+                    stringBuilder.append(",_");
+                }
+                else{
+                    stringBuilder.append("_");
+                }
+            }
+            if (!appendLocationWithSeparator) {
+                appendLocationWithSeparator = true;
+            }
+        }
+        stringBuilder.append("]");
+
+        return stringBuilder.toString();
     }
 
     /**

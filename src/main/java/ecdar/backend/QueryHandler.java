@@ -7,6 +7,7 @@ import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Query;
 import ecdar.abstractions.QueryState;
+import ecdar.abstractions.QueryType;
 import ecdar.controllers.EcdarController;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.helpers.StringValidator;
@@ -162,9 +163,16 @@ public class QueryHandler {
                     case REACHABILITY:
                         if (queryOk.getReachability().getSuccess()) {
                             query.setQueryState(QueryState.SUCCESSFUL);
+                            if(value.getQueryOk().getReachability().getSuccess()){
+                                Ecdar.showToast("Reachability check was successful and the location can be reached.");
+                            }
+                            else if(!value.getQueryOk().getReachability().getSuccess()){
+                                Ecdar.showToast("Reachability check was successful but the location cannot be reached.");
+                            }
                             query.getSuccessConsumer().accept(true);
                         } else {
                             query.setQueryState(QueryState.ERROR);
+                            Ecdar.showToast("Reachability check was unsuccessful!");
                             query.getFailureConsumer().accept(new BackendException.QueryErrorException(queryOk.getReachability().getReason()));
                             query.getSuccessConsumer().accept(false);
                             //ToDo: These errors are not implemented in the Reveaal backend.
@@ -209,6 +217,11 @@ public class QueryHandler {
     private void handleQueryBackendError(Throwable t, Query query) {
         // If the query has been cancelled, ignore the error
         if (query.getQueryState() == QueryState.UNKNOWN) return;
+
+        // due to lack of information from backend if the reachability check shows that a location can NOT be reached, this is the most accurate information we can provide
+        if(query.getType() == QueryType.REACHABILITY){
+            Ecdar.showToast("The reachability query failed. This might be due to the fact that the location is not reachable.");
+        }
 
         // Each error starts with a capitalized description of the error equal to the gRPC error type encountered
         String errorType = t.getMessage().split(":\\s+", 2)[0];
