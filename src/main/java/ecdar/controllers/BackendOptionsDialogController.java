@@ -204,7 +204,7 @@ public class BackendOptionsDialogController implements Initializable {
         jEcdar.setPortStart(5042);
         jEcdar.setPortEnd(5050);
         jEcdar.lockInstance();
-        reveaal.setIsThreadSafe(false);
+        jEcdar.setIsThreadSafe(false);
 
         // Load correct j-Ecdar executable based on OS
         List<String> potentialFiledForJEcdar = new ArrayList<>();
