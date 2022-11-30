@@ -18,6 +18,7 @@ import javafx.collections.ObservableList;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 
@@ -31,11 +32,13 @@ public class QueryHandler {
 
     /**
      * Executes the specified query
-     * @param query             query to be executed
+     *
+     * @param query query to be executed
      */
 
     public void executeQuery(Query query) throws NoSuchElementException {
-        if (query.getQueryState().equals(QueryState.RUNNING) || !StringValidator.validateQuery(query.getQuery())) return;
+        if (query.getQueryState().equals(QueryState.RUNNING) || !StringValidator.validateQuery(query.getQuery()))
+            return;
 
         if (query.getQuery().isEmpty()) {
             query.setQueryState(QueryState.SYNTAX_ERROR);
@@ -101,117 +104,98 @@ public class QueryHandler {
     }
 
     private void handleQueryResponse(QueryProtos.QueryResponse value, Query query) {
-
         // If the query has been cancelled, ignore the result
         if (query.getQueryState() == QueryState.UNKNOWN) return;
-        switch (value.getResponseCase()) {
-            case QUERY_OK:
-                QueryProtos.QueryResponse.QueryOk queryOk = value.getQueryOk();
-                switch (queryOk.getResultCase()) {
-                    case REFINEMENT:
-                        if (queryOk.getRefinement().getSuccess()) {
-                            query.setQueryState(QueryState.SUCCESSFUL);
-                            query.getSuccessConsumer().accept(true);
-                        } else {
-                            query.setQueryState(QueryState.ERROR);
-                            query.getFailureConsumer().accept(new BackendException.QueryErrorException(queryOk.getRefinement().getReason()));
-                            query.getSuccessConsumer().accept(false);
-                            query.getStateActionConsumer().accept(value.getQueryOk().getRefinement().getState(),
-                                    value.getQueryOk().getRefinement().getAction());
-                        }
-                        break;
-
-                    case CONSISTENCY:
-
-                        if (queryOk.getConsistency().getSuccess()) {
-                            query.setQueryState(QueryState.SUCCESSFUL);
-                            query.getSuccessConsumer().accept(true);
-                        } else {
-                            query.setQueryState(QueryState.ERROR);
-                            query.getFailureConsumer().accept(new BackendException.QueryErrorException(queryOk.getConsistency().getReason()));
-                            query.getSuccessConsumer().accept(false);
-                            query.getStateActionConsumer().accept(value.getQueryOk().getConsistency().getState(),
-                                    value.getQueryOk().getConsistency().getAction());
-
-
-
-                        }
-                        break;
-
-                    case DETERMINISM:
-                        if (queryOk.getDeterminism().getSuccess()) {
-                            query.setQueryState(QueryState.SUCCESSFUL);
-                            query.getSuccessConsumer().accept(true);
-                        } else {
-                            query.setQueryState(QueryState.ERROR);
-                            query.getFailureConsumer().accept(new BackendException.QueryErrorException(queryOk.getDeterminism().getReason()));
-                            query.getSuccessConsumer().accept(false);
-                            query.getStateActionConsumer().accept(value.getQueryOk().getDeterminism().getState(),
-                                    value.getQueryOk().getDeterminism().getAction());
-
-                        }
-                        break;
-
-                    case IMPLEMENTATION:
-                        if (queryOk.getImplementation().getSuccess()) {
-                            query.setQueryState(QueryState.SUCCESSFUL);
-                            query.getSuccessConsumer().accept(true);
-                        } else {
-                            query.setQueryState(QueryState.ERROR);
-                            query.getFailureConsumer().accept(new BackendException.QueryErrorException(queryOk.getImplementation().getReason()));
-                            query.getSuccessConsumer().accept(false);
-                            //ToDo: These errors are not implemented in the Reveaal backend.
-                            query.getStateActionConsumer().accept(value.getQueryOk().getImplementation().getState(),
-                                    "");
-                        }
-                        break;
-
-                    case REACHABILITY:
-                        if (queryOk.getReachability().getSuccess()) {
-                            query.setQueryState(QueryState.SUCCESSFUL);
-                            query.getSuccessConsumer().accept(true);
-                        } else {
-                            query.setQueryState(QueryState.ERROR);
-                            query.getFailureConsumer().accept(new BackendException.QueryErrorException(queryOk.getReachability().getReason()));
-                            query.getSuccessConsumer().accept(false);
-                            //ToDo: These errors are not implemented in the Reveaal backend.
-                            query.getStateActionConsumer().accept(value.getQueryOk().getReachability().getState(),
-                                    "");
-                        }
-                        break;
-
-                    case COMPONENT:
-                        System.out.println("dizNuts");
-                        query.setQueryState(QueryState.SUCCESSFUL);
-                        query.getSuccessConsumer().accept(true);
-                        JsonObject returnedComponent = (JsonObject) JsonParser.parseString(queryOk.getComponent().getComponent().getJson());
-                        addGeneratedComponent(new Component(returnedComponent));
-                        break;
-
-                    case ERROR:
-                        query.setQueryState(QueryState.ERROR);
-                        query.getFailureConsumer().accept(new BackendException.QueryErrorException(queryOk.getError()));
-                        query.getSuccessConsumer().accept(false);
-                        break;
-
-                    case RESULT_NOT_SET:
-                        query.setQueryState(QueryState.ERROR);
-                        query.getSuccessConsumer().accept(false);
-                        break;
+        switch (value.getResultCase()) {
+            case REFINEMENT:
+                if (value.getRefinement().getSuccess()) {
+                    query.setQueryState(QueryState.SUCCESSFUL);
+                    query.getSuccessConsumer().accept(true);
+                } else {
+                    query.setQueryState(QueryState.ERROR);
+                    query.getFailureConsumer().accept(new BackendException.QueryErrorException(value.getRefinement().getReason()));
+                    query.getSuccessConsumer().accept(false);
+                    query.getStateActionConsumer().accept(value.getRefinement().getState(),
+                            value.getRefinement().getActionList());
                 }
                 break;
 
-            case USER_TOKEN_ERROR:
+            case CONSISTENCY:
+                if (value.getConsistency().getSuccess()) {
+                    query.setQueryState(QueryState.SUCCESSFUL);
+                    query.getSuccessConsumer().accept(true);
+                } else {
+                    query.setQueryState(QueryState.ERROR);
+                    query.getFailureConsumer().accept(new BackendException.QueryErrorException(value.getConsistency().getReason()));
+                    query.getSuccessConsumer().accept(false);
+                    query.getStateActionConsumer().accept(value.getConsistency().getState(),
+                            value.getConsistency().getActionList());
+
+
+                }
+                break;
+
+            case DETERMINISM:
+                if (value.getDeterminism().getSuccess()) {
+                    query.setQueryState(QueryState.SUCCESSFUL);
+                    query.getSuccessConsumer().accept(true);
+                } else {
+                    query.setQueryState(QueryState.ERROR);
+                    query.getFailureConsumer().accept(new BackendException.QueryErrorException(value.getDeterminism().getReason()));
+                    query.getSuccessConsumer().accept(false);
+                    query.getStateActionConsumer().accept(value.getDeterminism().getState(),
+                            value.getDeterminism().getActionList());
+
+                }
+                break;
+
+            case IMPLEMENTATION:
+                if (value.getImplementation().getSuccess()) {
+                    query.setQueryState(QueryState.SUCCESSFUL);
+                    query.getSuccessConsumer().accept(true);
+                } else {
+                    query.setQueryState(QueryState.ERROR);
+                    query.getFailureConsumer().accept(new BackendException.QueryErrorException(value.getImplementation().getReason()));
+                    query.getSuccessConsumer().accept(false);
+                    //ToDo: These errors are not implemented in the Reveaal backend.
+                    query.getStateActionConsumer().accept(value.getImplementation().getState(),
+                            new ArrayList<>());
+                }
+                break;
+
+            case REACHABILITY:
+                if (value.getReachability().getSuccess()) {
+                    query.setQueryState(QueryState.SUCCESSFUL);
+                    query.getSuccessConsumer().accept(true);
+                } else {
+                    query.setQueryState(QueryState.ERROR);
+                    query.getFailureConsumer().accept(new BackendException.QueryErrorException(value.getReachability().getReason()));
+                    query.getSuccessConsumer().accept(false);
+                    //ToDo: These errors are not implemented in the Reveaal backend.
+                    query.getStateActionConsumer().accept(value.getReachability().getState(),
+                            new ArrayList<>());
+                }
+                break;
+
+            case COMPONENT:
+                query.setQueryState(QueryState.SUCCESSFUL);
+                query.getSuccessConsumer().accept(true);
+                JsonObject returnedComponent = (JsonObject) JsonParser.parseString(value.getComponent().getComponent().getJson());
+                addGeneratedComponent(new Component(returnedComponent));
+                break;
+
+            case ERROR:
                 query.setQueryState(QueryState.ERROR);
-                query.getFailureConsumer().accept(new BackendException.QueryErrorException(value.getUserTokenError().getErrorMessage()));
+                query.getFailureConsumer().accept(new BackendException.QueryErrorException(value.getError()));
                 query.getSuccessConsumer().accept(false);
                 break;
 
-            case RESPONSE_NOT_SET:
+            case RESULT_NOT_SET:
                 query.setQueryState(QueryState.ERROR);
                 query.getSuccessConsumer().accept(false);
                 break;
         }
+
     }
 
     private void handleQueryBackendError(Throwable t, Query query) {

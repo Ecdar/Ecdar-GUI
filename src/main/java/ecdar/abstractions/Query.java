@@ -10,6 +10,7 @@ import com.google.gson.JsonObject;
 import javafx.application.Platform;
 import javafx.beans.property.*;
 
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -63,7 +64,7 @@ public class Query implements Serializable {
         }
     };
     //TODO add set alle compontens isfailing til fales
-    private final BiConsumer<ObjectProtos.State, String> stateActionConsumer = (state, action) -> {
+    private final BiConsumer<ObjectProtos.State, List<String>> stateActionConsumer = (state, action) -> {
         for (Component c : Ecdar.getProject().getComponents()) {
             c.removeFailingLocations();
             c.removeFailingEdges();
@@ -182,7 +183,7 @@ public class Query implements Serializable {
      * Getter for the state action consumer.
      * @return The <a href="#stateConsumer">State Consumer</a>
      */
-    public BiConsumer<ObjectProtos.State, String> getStateActionConsumer() {
+    public BiConsumer<ObjectProtos.State, List<String>> getStateActionConsumer() {
         return stateActionConsumer;
     }
 
