@@ -72,8 +72,8 @@ public class SimulatorOverviewController implements Initializable {
 
         initializeWindowResizing();
         initializeZoom();
-        initializeHighlighting();
         initializeSimulationVariables();
+        initializeHighlighting();
         // Add the processes and group to the view
         addProcessesToGroup();
         scrollPane.setContent(groupContainer);
@@ -105,7 +105,7 @@ public class SimulatorOverviewController implements Initializable {
                 }
             }
             // Highlight the current state when the processes change
-            highlightProcessState(Ecdar.getSimulationHandler().getCurrentState()); // ToDo NIELS: Throws NullPointerException inside method due to currentState
+            highlightProcessState(Ecdar.getSimulationHandler().currentState.get()); // ToDo NIELS: Throws NullPointerException inside method due to currentState
             processContainer.getChildren().addAll(processes.values());
             processPresentations.putAll(processes);
         });
@@ -297,32 +297,21 @@ public class SimulatorOverviewController implements Initializable {
         }
     }
 
-    /**
+        /**
      * Initializer method to setup listeners that handle highlighting when selected/current state/transition changes
      */
     private void initializeHighlighting() {
-        SimulatorController.getSelectedTransitionProperty().addListener((observable, oldTransition, newTransition) -> {
+        Ecdar.getSimulationHandler().selectedEdge.addListener((observable, oldEdge, newEdge) -> {
             unhighlightProcesses();
-
-            // If the new transition is not null, we want to highlight the locations and edges in the new value
-            // otherwise we highlight the current state
-            if (newTransition != null) {
-                highlightProcessTransition(newTransition);
-            } else {
-                highlightProcessState(Ecdar.getSimulationHandler().getCurrentState());
-            }
         });
 
-        SimulatorController.getSelectedStateProperty().addListener((observable, oldState, newState) -> {
-            unhighlightProcesses();
-
-            // If the new state is not null, we want to highlight the locations in the new value
-            // otherwise we highlight the current state
-            if (newState != null) {
-                highlightProcessState(newState);
-            } else {
-                highlightProcessState(Ecdar.getSimulationHandler().getCurrentState());
+        Ecdar.getSimulationHandler().currentState.addListener((observable, oldState, newState) -> {
+            if (newState == null) {
+                return;
             }
+            unhighlightProcesses();
+            highlightProcessState(newState);
+            highlightAvailableEdges(newState);
         });
     }
 
@@ -350,6 +339,7 @@ public class SimulatorOverviewController implements Initializable {
         processesToHide.forEach(ProcessPresentation::showInactive);
     }
 
+
     /**
      * Unhighlights all processes
      */
@@ -370,17 +360,34 @@ public class SimulatorOverviewController implements Initializable {
         for (int i = 0; i < state.getLocations().size(); i++) {
             final Pair<String, String> loc = state.getLocations().get(i);
 
-            for (final ProcessPresentation presentation : processPresentations.values()) {
-                final String processName = presentation.getController().getComponent().getName();
-
-                if (processName.equals(loc.getKey())) {
-                    presentation.getController().highlightLocation(loc.getValue());
-                }
-            }
+            processPresentations.values().stream()
+                    .filter(p -> p.getController().getComponent().getName().equals(loc.getKey()))
+                    .forEach(p -> p.getController().highlightLocation(loc.getValue()));
         }
     }
 
     public ObservableList<Component> getComponentObservableList() {
         return componentArrayList;
     }
+
+    public void highlightAvailableEdges(SimulationState state) {
+        // unhighlight all edges
+        for (Pair<String,String> edge : state.getEdges()) {
+            processPresentations.values().stream()
+                    .forEach(p -> p.getController().getComponent().getEdges().stream()
+                            .forEach(e -> e.setIsHighlighted(false)));
+        }
+
+        // highlight available edges in the given state
+        for (Pair<String,String> edge : state.getEdges()) {
+            processPresentations.values().stream()
+                    .forEach(p -> p.getController().getComponent().getEdges().stream()
+                        .forEach(e -> {
+                            if (e.getId().equals(edge.getValue())) {
+                                e.setIsHighlighted(true);
+                            }
+                        }));
+        }
+    }
+
 }

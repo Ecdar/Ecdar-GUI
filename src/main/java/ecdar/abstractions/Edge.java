@@ -207,10 +207,17 @@ public class Edge extends DisplayableEdge implements Serializable {
         }
 
         ioStatus = new SimpleObjectProperty<>(EdgeStatus.valueOf(json.getAsJsonPrimitive(STATUS).getAsString()));
-
         final JsonPrimitive IDJson = json.getAsJsonPrimitive(ID);
-        if (IDJson != null) setId(IDJson.getAsString());
-        else setId();
+        /* The new type of edge ids is a UUID, which has a length of 36 characters.
+         * The if statement checks if the id is a UUID and if not, it creates a new UUID.
+         * This is necessary because the old type of edge ids were not unique and has to be replaced in old projects.
+         * It should be possible to simplify this in the future when all projects are updated.
+        */
+        int UUIDLength = 36;
+        if (IDJson != null && IDJson.getAsString().length() == UUIDLength)
+            setId(IDJson.getAsString());
+        else
+            setId();
 
         final JsonPrimitive groupJson = json.getAsJsonPrimitive(GROUP);
 

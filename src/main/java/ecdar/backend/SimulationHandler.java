@@ -1,17 +1,20 @@
 package ecdar.backend;
 
 import EcdarProtoBuf.ComponentProtos;
+import EcdarProtoBuf.ObjectProtos;
 import EcdarProtoBuf.QueryProtos;
+import EcdarProtoBuf.ObjectProtos.Decision;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
 import ecdar.simulation.SimulationState;
-import ecdar.simulation.SimulationStateSuccessor;
 import io.grpc.stub.StreamObserver;
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
+import javafx.util.Pair;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -19,6 +22,8 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import EcdarProtoBuf.QueryProtos.SimulationInfo;
+import EcdarProtoBuf.QueryProtos.SimulationStepRequest;
 import EcdarProtoBuf.QueryProtos.SimulationStepResponse;
 
 /**
@@ -28,25 +33,15 @@ import EcdarProtoBuf.QueryProtos.SimulationStepResponse;
 public class SimulationHandler {
     public static final String QUERY_PREFIX = "Query: ";
     private String composition;
-    private ObjectProperty<SimulationState> currentConcreteState = new SimpleObjectProperty<>();
-    private ObjectProperty<SimulationState> initialConcreteState = new SimpleObjectProperty<>();
-    private ObjectProperty<BigDecimal> currentTime = new SimpleObjectProperty<>();
-    private BigDecimal delay;
-    private ArrayList<Edge> edgesSelected;
+    public ObjectProperty<SimulationState> currentState = new SimpleObjectProperty<>();
+    public ObjectProperty<SimulationState> initialState = new SimpleObjectProperty<>();
+    public ObjectProperty<Edge> selectedEdge = new SimpleObjectProperty<>();
     private EcdarSystem system;
-    private SimulationStateSuccessor successor;
     private int numberOfSteps;
 
     private final ObservableMap<String, BigDecimal> simulationVariables = FXCollections.observableHashMap();
     private final ObservableMap<String, BigDecimal> simulationClocks = FXCollections.observableHashMap();
-    /**
-     * For some reason the successor.getTransitions() only sometimes returns some of the transitions
-     * that are available, when running the initial step.
-     * That is why we need to keep track of the initial transitions.
-     */
-    private final ObservableList<ecdar.simulation.Transition> initialTransitions = FXCollections.observableArrayList();
     public ObservableList<SimulationState> traceLog = FXCollections.observableArrayList();
-    public ObservableList<ecdar.simulation.Transition> availableTransitions = FXCollections.observableArrayList();
     private final BackendDriver backendDriver;
     private final ArrayList<BackendConnection> connections = new ArrayList<>();
 
@@ -57,9 +52,6 @@ public class SimulationHandler {
         this.backendDriver = backendDriver;
     }
 
-    /**
-     * Initializes the default system (non-query system)
-     */
 
     /**
      * Initializes the values and properties in the {@link SimulationHandler}.
@@ -68,44 +60,34 @@ public class SimulationHandler {
      */
     private void initializeSimulation() {
         // Initialization
-        this.delay = new BigDecimal(0);
-        this.edgesSelected = new ArrayList<>();
         this.numberOfSteps = 0;
-        this.availableTransitions.clear();
         this.simulationVariables.clear();
         this.simulationClocks.clear();
+        this.currentState.set(null);
+        this.selectedEdge.set(null);
         this.traceLog.clear();
-        this.currentConcreteState.set(getInitialConcreteState());
-        this.initialConcreteState.set(getInitialConcreteState());
-        this.currentTime = new SimpleObjectProperty<>(BigDecimal.ZERO);
         
-        //Preparation for the simulation
         this.system = getSystem();
-        //this.currentConcreteState.get().setTime(currentTime.getValue());
-        this.initialTransitions.clear();
-        this.successor = null;
     }
+
 
     /**
      * Reloads the whole simulation sets the initial transitions, states, etc
      */
     public void initialStep() {
         initializeSimulation();
-    
-        final SimulationState currentState = currentConcreteState.get();
-        successor = getStateSuccessor();
-        
+
         GrpcRequest request = new GrpcRequest(backendConnection -> {
             StreamObserver<SimulationStepResponse> responseObserver = new StreamObserver<>() {
                 @Override
                 public void onNext(QueryProtos.SimulationStepResponse value) {
-                    System.out.println(value);
+                    currentState.set(new SimulationState(value.getNewDecisionPoint()));
+                    Platform.runLater(() -> traceLog.add(currentState.get()));
                 }
                 
                 @Override
                 public void onError(Throwable t) {
-                    System.out.println(t.getMessage());
-                    Ecdar.showToast("Could not start simulation");
+                    Ecdar.showToast("Could not start simulation:\n" + t.getMessage());
                     
                     // Release backend connection
                     backendDriver.addBackendConnection(backendConnection);
@@ -137,152 +119,108 @@ public class SimulationHandler {
         backendDriver.addRequestToExecutionQueue(request);
         
         //Save the previous states, and get the new
-        currentConcreteState.set(successor.getState());
-        this.traceLog.add(currentState);
+        this.traceLog.add(currentState.get());
         numberOfSteps++;
     
         //Updates the transitions available
-        availableTransitions.addAll(FXCollections.observableArrayList(successor.getTransitions()));
-        initialTransitions.addAll(availableTransitions);
         updateAllValues();
         
     }
     
     /**
      * Resets the simulation to the initial location
-     * where the <code>SimulationState</code> is the {@link SimulationHandler#initialConcreteState}, when there are
-     * elements in the {@link SimulationHandler#traceLog}. Otherwise, it calls {@link SimulationHandler#initialStep}
      */
     public void resetToInitialLocation() {
-        //If the simulation has not begun
-        if (traceLog.size() == 0)
-            initialStep();
-        else
-            selectTransitionFromLog(initialConcreteState.get());
-    }
-
-    /**
-     * Resets the simulation to the state after executing the given transition. <br />
-     * This method also resets the state, variables, and clocks to the values they had after the given transition.
-     * This also updates {@link SimulationHandler#availableTransitions} such that
-     * it displays the available transitions after taking the given transition.
-     *
-     * @param transition the transition which the simulation should go back to
-     */
-    public void selectTransitionFromLog(final SimulationState transition) {
-        final int indexInTrace = traceLog.indexOf(transition);
-        final SimulationState selectedState;
-        if (indexInTrace == -1) {
-            System.out.println("Cannot find transition: " + transition);
-            Ecdar.showToast("Cannot find transition: " + transition);
-            return;
-        } else if (indexInTrace == numberOfSteps - 1) {
-            return; //you have selected the current system
-        } else {
-            selectedState = traceLog.get(indexInTrace);
-        }
-        final int sizeOfTraceLog = traceLog.size();
-        final int maxRetries = 3;
-        int numberOfRetries = 0;
-        edgesSelected = new ArrayList<>();
-        //In case that we fail we have to save the time we had before
-        final BigDecimal tempTime = currentTime.get();
-
-        currentTime.setValue(new BigDecimal(selectedState.getTime().doubleValue()));
-        successor.getState().setTime(currentTime.getValue());
-
-        while (numberOfRetries < maxRetries) {
-            successor = getStateSuccessor();
-            break;
-        }
-        currentConcreteState.set(selectedState);
-        setSimVarAndClocks();
-        traceLog.remove(indexInTrace + 1, sizeOfTraceLog);
-        availableTransitions.clear();
-
-        // If the user selected the initial/first state in the trace log, we do not trust the engine,
-        // as it only gives us a subset of the available transitions, in some cases.
-        if (indexInTrace == 0) availableTransitions.addAll(initialTransitions);
-        else availableTransitions.addAll(successor.getTransitions());
-
-        numberOfSteps = indexInTrace + 1;
+        initialStep();
     }
 
     /**
      * Take a step in the simulation.
-     *
-     * @param selectedTransitionIndex the index of the availableTransition that you want to take.
-     * @param delay              the time which should pass after the transition.
      */
-    public void nextStep(final int selectedTransitionIndex, final BigDecimal delay) {
-        if (selectedTransitionIndex > availableTransitions.size()) {
-            Ecdar.showToast("The selected transition index: " + selectedTransitionIndex + " is bigger than it should: " + availableTransitions);
-            return;
-        }
+    public void nextStep() {
+        GrpcRequest request = new GrpcRequest(backendConnection -> {
+            StreamObserver<SimulationStepResponse> responseObserver = new StreamObserver<>() {
+                @Override
+                public void onNext(QueryProtos.SimulationStepResponse value) {
+                    currentState.set(new SimulationState(value.getNewDecisionPoint()));
+                    Platform.runLater(() -> traceLog.add(currentState.get()));
+                }
+                
+                @Override
+                public void onError(Throwable t) {
+                    Ecdar.showToast("Could not take next step in simulation\nError: " + t.getMessage());
+                    
+                    // Release backend connection
+                    backendDriver.addBackendConnection(backendConnection);
+                    connections.remove(backendConnection);
+                }
+                
+                @Override
+                public void onCompleted() {
+                    // Release backend connection
+                    backendDriver.addBackendConnection(backendConnection);
+                    connections.remove(backendConnection);
+                }
+            };
+            
+            var comInfo = ComponentProtos.ComponentsInfo.newBuilder();
+            for (Component c : Ecdar.getProject().getComponents()) {
+                comInfo.addComponents(ComponentProtos.Component.newBuilder().setJson(c.serialize().toString()).build());
+            }
+            comInfo.setComponentsHash(comInfo.getComponentsList().hashCode());
+            var simStepRequest = SimulationStepRequest.newBuilder();
+            var simInfo = SimulationInfo.newBuilder()
+                    .setComponentComposition(composition)
+                    .setComponentsInfo(comInfo);
+            simStepRequest.setSimulationInfo(simInfo);
+            var source = currentState.get().getState();
+            var specComp = ObjectProtos.SpecificComponent.newBuilder().setComponentName(getComponentName(selectedEdge.get())).setComponentIndex(getComponentIndex(selectedEdge.get()));
+            var edge = EcdarProtoBuf.ObjectProtos.Edge.newBuilder().setId(selectedEdge.get().getId()).setSpecificComponent(specComp);
+            var decision = Decision.newBuilder().setEdge(edge).setSource(source);
+            simStepRequest.setChosenDecision(decision);
 
-        final ecdar.simulation.Transition selectedTransition = availableTransitions.get(selectedTransitionIndex);
-        edgesSelected = new ArrayList<>();
-
-        //Preparing for the step
-        for (int i = 0; i < selectedTransition.getEdges().size(); i++) {
-            edgesSelected.set(i, selectedTransition.getEdges().get(i));
-        }
-
-        final int maxRetries = 3;
-        int numberOfRetries = 0;
-
-        // getConcreteSuccessor may throw a "ProtocolException: Word expected" but in some cases calling the same
-        // method again does not throw this exception, and actually gives us the expected result.
-        // This loop calls the method a number of times (maxRetries)
-        while (numberOfRetries < maxRetries) {
-            successor = getStateSuccessor();
-            // Break from the loop if the method call was a success
-            break;
-        }
-
-        //Save the previous states, and get the new
-        currentConcreteState.set(successor.getState());
-        this.traceLog.add(currentConcreteState.get());
-
+            backendConnection.getStub().withDeadlineAfter(this.backendDriver.getResponseDeadline(), TimeUnit.MILLISECONDS)
+                    .takeSimulationStep(simStepRequest.build(), responseObserver);
+        }, BackendHelper.getDefaultBackendInstance());
+        
+        backendDriver.addRequestToExecutionQueue(request);
+        
+        
         // increments the number of steps taken during this simulation
         numberOfSteps++;
-
-        //Updates the transitions available
-        availableTransitions.clear();
-        availableTransitions.setAll(successor.getTransitions());
-        this.delay = delay;
+        
+        
         updateAllValues();
     }
 
-    private SimulationStateSuccessor getStateSuccessor() {
-        // ToDo: Implement
-        return new SimulationStateSuccessor();
-    }
-
-    /**
-     * An overload of {@link SimulationHandler#nextStep(int, BigDecimal)} where the delay is 0.
-     *
-     * @param selectedTransition the index of the availableTransition that you want to take.
-     */
-    public void nextStep(final int selectedTransition) {
-        nextStep(selectedTransition, BigDecimal.ZERO);
-    }
-
-    public void nextStep(final ecdar.simulation.Transition transition, final BigDecimal delay) {
-        int index = availableTransitions.indexOf(transition);
-        if (index != -1) {
-            nextStep(index, delay);
+    private String getComponentName(Edge edge) {
+        var components = Ecdar.getProject().getComponents();
+        for (var component : components) {
+            for (var e : component.getEdges()) {
+                if (e.getId().equals(edge.getId())) {
+                    return component.getName();
+                }
+            }
         }
+        throw new RuntimeException("Could not find component name for edge with id " + edge.getId());
     }
 
+    private int getComponentIndex (Edge edge) {
+        for (int i = 0; i < Ecdar.getProject().getComponents().size(); i++) {
+            if (Ecdar.getProject().getComponents().get(i).getEdges().stream().anyMatch(p -> p.getId() == edge.getId())) {
+                return i;
+            }
+        };
+        throw new IllegalArgumentException("Edge does not belong to any component");
+    }
+    
+    
     /**
      * Updates all values and clocks that are used doing the current simulation.
      * It also stores the variables in the {@link SimulationHandler#simulationVariables}
      * and the clocks in {@link SimulationHandler#simulationClocks}.
      */
     private void updateAllValues() {
-        currentTime.set(currentTime.get().add(delay));
-        //successor.getState().setTime(currentTime.get());
         setSimVarAndClocks();
     }
 
@@ -310,36 +248,7 @@ public class SimulationHandler {
 //        }
     }
 
-    /**
-     * Getter for the current concrete state
-     *
-     * @return the current {@link SimulationState}
-     */
-    public SimulationState getCurrentState() {
-        return currentConcreteState.get();
-    }
 
-    /**
-     * The way to get the time in the current state of a simulation
-     *
-     * @return the time in the current state
-     */
-    public BigDecimal getCurrentTime() {
-        return currentTime.get();
-    }
-
-    public ObjectProperty<BigDecimal> currentTimeProperty() {
-        return currentTime;
-    }
-
-    /**
-     * The way to get the delay of the latest step in the simulation
-     *
-     * @return the delay of the latest step in the in the simulation
-     */
-    public BigDecimal getDelay() {
-        return delay;
-    }
 
     /**
      * The number of total steps taken in the current simulation
@@ -361,11 +270,12 @@ public class SimulationHandler {
 
     /**
      * All the available transitions in this state
+     * @return 
      *
      * @return an {@link ObservableList} of all the currently available transitions in this state
      */
-    public ObservableList<ecdar.simulation.Transition> getAvailableTransitions() {
-        return availableTransitions;
+    public ArrayList<Pair<String, String>> getAvailableTransitions() {
+        return currentState.get().getEdges();
     }
 
     /**
@@ -393,54 +303,15 @@ public class SimulationHandler {
      *
      * @return the initial {@link SimulationState} of this simulation
      */
-    public SimulationState getInitialConcreteState() {
+    public SimulationState getInitialState() {
         // ToDo: Implement
-        return initialConcreteState.get();
+        return initialState.get();
     }
 
-    public ObjectProperty<SimulationState> initialConcreteStateProperty() {
-        return initialConcreteState;
+    public ObjectProperty<SimulationState> initialStateProperty() {
+        return initialState;
     }
 
-    /**
-     * Prints all available transitions to {@link System#out}.
-     * This is very useful for debugging.
-     * If a string representation is needed please use {@link SimulationHandler#getAvailableTransitionsAsStrings()}
-     * instead.
-     */
-    public void printAvailableTransitions() {
-        System.out.println("---------------------------------");
-
-        System.out.println(numberOfSteps + " Successor state " + currentConcreteState.toString() + " Entry time " + currentTime);
-        System.out.print("Available transitions: ");
-        availableTransitions.forEach(
-                Transition -> System.out.println(Transition.getLabel() + " "));
-
-        if (!availableTransitions.isEmpty()) {
-            for (int i = 0; i < availableTransitions.get(0).getEdges().size(); i++) {
-                // ToDo: Implement
-//                System.out.println("Edges: " +
-//                        availableTransitions.get(0).getEdges().get(i).getEdge().getSource().getPropertyValue("name") +
-//                        "." + availableTransitions.get(0).getEdges().get(i).getName() + " --> " +
-//                        availableTransitions.get(0).getEdges().get(i).getEdge().getTarget().getPropertyValue("name"));
-            }
-        }
-
-        System.out.println("---------------------------------");
-    }
-
-    /**
-     * To get all available transitions as strings
-     *
-     * @return an ArrayList<String> of all the enabled transitions
-     */
-    public ArrayList<String> getAvailableTransitionsAsStrings() {
-        final ArrayList<String> transitions = new ArrayList<>();
-        for (final ecdar.simulation.Transition Transition : availableTransitions) {
-            transitions.add(Transition.getLabel());
-        }
-        return transitions;
-    }
 
     public EcdarSystem getSystem() {
         return system;
@@ -463,5 +334,16 @@ public class SimulationHandler {
         for (BackendConnection con : connections) {
             con.close();
         }
+    }
+
+
+    /**
+     * Sets the current state of the simulation to the given state from the trace log
+     */
+    public void selectStateFromLog(SimulationState state) {
+        while (traceLog.get(traceLog.size() - 1) != state) {
+            traceLog.remove(traceLog.size() - 1);
+        }
+        currentState.set(state);
     }
 }
