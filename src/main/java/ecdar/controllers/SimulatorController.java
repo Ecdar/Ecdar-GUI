@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class SimulatorController implements Initializable {
+    private static String simulationQuery;
     public StackPane root;
     public SimulatorOverviewPresentation overviewPresentation;
     public StackPane toolbar;
@@ -83,7 +84,7 @@ public class SimulatorController implements Initializable {
         //Method that colors all initial states.
         initialstatelighter(listOfComponentsForSimulation);
     }
-    
+
     private void initialstatelighter(List<Component> listofComponents){
         for(Component comp: listofComponents)
         {
@@ -108,7 +109,7 @@ public class SimulatorController implements Initializable {
     private List<Component> findComponentsInCurrentSimulation(List<String> queryComponents) {
         //Show components from the system
         List<Component> components = new ArrayList<>();
-        
+
         components = Ecdar.getProject().getComponents();
 
         //Matches query components against with existing components and adds them to simulation
@@ -165,5 +166,12 @@ public class SimulatorController implements Initializable {
 
     public static void setSelectedState(SimulationState selectedState) {
         SimulatorController.selectedState.set(selectedState);
+    }
+    public static void setSimulationQuery(String query) {
+        simulationQuery = query;
+    }
+
+    public static String getSimulationQuery(){
+        return simulationQuery;
     }
 }

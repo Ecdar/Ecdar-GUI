@@ -84,7 +84,7 @@ public class SimLocationController implements Initializable {
 
         dropDownMenu.addClickableListElement("Is " + getLocation().getId() + " reachable?", event -> {
             // Generate the query from the backend
-            final String reachabilityQuery = BackendHelper.getLocationReachableQuery(getLocation(), getComponent());
+            final String reachabilityQuery = BackendHelper.getLocationReachableQuery(getLocation(), getComponent(), SimulatorController.getSimulationQuery());
 
             // Add proper comment
             final String reachabilityComment = "Is " + getLocation().getMostDescriptiveIdentifier() + " reachable?";

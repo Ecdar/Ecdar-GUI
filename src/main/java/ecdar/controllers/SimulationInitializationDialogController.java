@@ -19,12 +19,15 @@ public class SimulationInitializationDialogController implements Initializable {
      * Function gets list of components to simulation
      * and saves it in the public static ListOfComponents
      */
-    public void SetListOfComponentsToSimulate(){
+    public void setSimulationData(){
+        // set simulation query
+        SimulatorController.setSimulationQuery(simulationComboBox.getSelectionModel().getSelectedItem());
+
+        // set list of components involved in simulation
         ListOfComponents.clear();
-        String componentsToSimulate = simulationComboBox.getSelectionModel().getSelectedItem();
-        //filters out all components by ignoring operators.
+        // pattern filters out all components by ignoring operators.
         Pattern pattern = Pattern.compile("([\\w]*)", Pattern.CASE_INSENSITIVE);
-        Matcher matcher = pattern.matcher(componentsToSimulate);
+        Matcher matcher = pattern.matcher(SimulatorController.getSimulationQuery());
         List<String> listOfComponentsToSimulate = new ArrayList<>();
         //Adds all found components to list.
         while(matcher.find()){
@@ -32,9 +35,9 @@ public class SimulationInitializationDialogController implements Initializable {
                 listOfComponentsToSimulate.add(matcher.group());
             }
         }
-
         ListOfComponents = listOfComponentsToSimulate;
     }
+
     public void initialize(URL location, ResourceBundle resources) {
 
     }

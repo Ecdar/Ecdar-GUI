@@ -23,7 +23,7 @@ public class ReachabilityTest {
 
     @Test
     void reachabilityQuerySyntaxTestSuccess() {
-        var regex = "([a-zA-Z]\\w*)([|][|][a-zA-Z]\\w*)*\\s+\\->\\s+\\[(\\w*)(,(\\w)*)*\\]\\([a-zA-Z0-9_<>=]*\\)(;\\[(\\w*)(,(\\w)*)\\]\\([a-zA-Z0-9_<>=]*\\))*";
+        var regex = "query\\s+\\->\\s+\\[(\\w*)(,(\\w)*)*\\]\\([a-zA-Z0-9_<>=]*\\)(;\\[(\\w*)(,(\\w)*)\\]\\([a-zA-Z0-9_<>=]*\\))*";
 
         var location = new Location();
         location.setId("L1");
@@ -35,7 +35,7 @@ public class ReachabilityTest {
         SimulationInitializationDialogController.ListOfComponents.add("C2");
         SimulationInitializationDialogController.ListOfComponents.add("C3");
 
-        var result = BackendHelper.getLocationReachableQuery(location, component);
+        var result = BackendHelper.getLocationReachableQuery(location, component, "query");
         assertTrue(result.matches(regex));
     }
 
@@ -51,7 +51,7 @@ public class ReachabilityTest {
         SimulationInitializationDialogController.ListOfComponents.add("C2");
         SimulationInitializationDialogController.ListOfComponents.add("C3");
 
-        var result = BackendHelper.getLocationReachableQuery(location, component);
+        var result = BackendHelper.getLocationReachableQuery(location, component, "query");
         var indexOfLocation = result.indexOf('[') + 1;
         var output = result.charAt(indexOfLocation);
         assertEquals(output, location.getId().charAt(0));
@@ -69,7 +69,7 @@ public class ReachabilityTest {
         SimulationInitializationDialogController.ListOfComponents.add("C1");
         SimulationInitializationDialogController.ListOfComponents.add("C3");
 
-        var result = BackendHelper.getLocationReachableQuery(location, component);
+        var result = BackendHelper.getLocationReachableQuery(location, component, "query");
         var indexOfLocation = result.indexOf(',') + 1;
         var output = result.charAt(indexOfLocation);
         assertEquals(output, location.getId().charAt(0));
@@ -87,7 +87,7 @@ public class ReachabilityTest {
         SimulationInitializationDialogController.ListOfComponents.add("C3");
         SimulationInitializationDialogController.ListOfComponents.add("C1");
 
-        var query = BackendHelper.getLocationReachableQuery(location, component);
+        var query = BackendHelper.getLocationReachableQuery(location, component, "query");
         var indexOfLocation = query.indexOf(']') - 2;
         var output = query.charAt(indexOfLocation);
         assertEquals(output, location.getId().charAt(0));
@@ -106,7 +106,7 @@ public class ReachabilityTest {
         SimulationInitializationDialogController.ListOfComponents.add("C3");
         SimulationInitializationDialogController.ListOfComponents.add("C4");
 
-        var query = BackendHelper.getLocationReachableQuery(location, component);
+        var query = BackendHelper.getLocationReachableQuery(location, component, "query");
         int underscoreCount = 0;
         for (int i = 0; i < query.length(); i++) {
             if (query.charAt(i) == '_') {

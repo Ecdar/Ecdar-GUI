@@ -72,11 +72,11 @@ public final class BackendHelper {
      * @param endLocation  The location which should be checked for reachability
      * @return A reachability query string
      */
-    public static String getLocationReachableQuery(final Location endLocation, final Component component) {
+    public static String getLocationReachableQuery(final Location endLocation, final Component component, final String query) {
         var stringBuilder = new StringBuilder();
 
-        // append simulation query (currently only supports parallel composition)
-        stringBuilder.append(getSimulationQueryString());
+        // append simulation query
+        stringBuilder.append(query);
 
         // append start location here TODO
 
@@ -89,24 +89,6 @@ public final class BackendHelper {
         stringBuilder.append(")");
 
         //  return example: m1||M2->[L1,L4](y<3);[L2, L7](y<2)
-        return stringBuilder.toString();
-    }
-
-    private static String getSimulationQueryString() {
-        var stringBuilder = new StringBuilder();
-
-        var appendComponentWithSeparator = false;
-        for (var componentName:ListOfComponents) {
-            if (appendComponentWithSeparator){
-                stringBuilder.append("||" + componentName);
-            }
-            else {
-                stringBuilder.append(componentName);
-            }
-            if (!appendComponentWithSeparator) {
-                appendComponentWithSeparator = true;
-            }
-        }
         return stringBuilder.toString();
     }
 
