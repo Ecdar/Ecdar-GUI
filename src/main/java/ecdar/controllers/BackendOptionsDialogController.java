@@ -182,7 +182,7 @@ public class BackendOptionsDialogController implements Initializable {
         reveaal.setName("Reveaal");
         reveaal.setLocal(true);
         reveaal.setDefault(true);
-        reveaal.setPortStart(5032);
+        reveaal.setPortStart(5040);
         reveaal.setPortEnd(5040);
         reveaal.lockInstance();
         reveaal.setIsThreadSafe(true);

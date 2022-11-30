@@ -94,8 +94,10 @@
                     <Region prefHeight="5"/>
                 </VBox>
             </StackPane>
-            <JFXRadioButton fx:id="defaultBackendRadioButton" styleClass="subhead">Default</JFXRadioButton>
-            <JFXRadioButton fx:id="threadSafeBackendRadioButton" styleClass="subhead">Thread Safe</JFXRadioButton>
+            <HBox spacing="20">
+                <JFXRadioButton fx:id="defaultBackendRadioButton" styleClass="subhead">Default</JFXRadioButton>
+                <JFXRadioButton fx:id="threadSafeBackendRadioButton" styleClass="subhead">Thread Safe</JFXRadioButton>
+            </HBox>
         </VBox>
     </HBox>
 </fx:root>
