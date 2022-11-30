@@ -62,7 +62,7 @@ public class Query implements Serializable {
             }
         }
     };
-
+    //TODO add set alle compontens isfailing til fales
     private final BiConsumer<ObjectProtos.State, String> stateActionConsumer = (state, action) -> {
         for (Component c : Ecdar.getProject().getComponents()) {
             c.removeFailingLocations();

@@ -153,7 +153,6 @@ public class SignatureArrow extends Group implements Highlightable {
         this.colorArrowComponents(color, intensity);
     }
 
-    public int eatMyAsssssssss;
 
     /**
      * Set the color of the SignatureArrow to Color.RED
