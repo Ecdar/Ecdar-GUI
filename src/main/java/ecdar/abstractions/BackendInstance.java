@@ -57,8 +57,8 @@ public class BackendInstance implements Serializable {
         return isThreadSafe;
     }
 
-    public void setIsThreadSafe(boolean aThreadSafe) {
-        isThreadSafe = aThreadSafe;
+    public void setIsThreadSafe(boolean threadSafe) {
+        isThreadSafe = threadSafe;
     }
 
     public String getBackendLocation() {
