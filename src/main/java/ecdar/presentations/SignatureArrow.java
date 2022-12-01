@@ -163,6 +163,11 @@ public class SignatureArrow extends Group implements Highlightable {
         this.colorArrowComponents(color, intensity);
     }
 
+    public void recolorToGray(){
+        Color color = Color.GREY;
+        Color.Intensity intensity = Color.Intensity.I800;
+        this.colorArrowComponents(color, intensity);
+    }
     /***
      * Colors the components of the arrow
      * @param color The Color to color the components

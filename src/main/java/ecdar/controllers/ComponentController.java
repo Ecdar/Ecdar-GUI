@@ -6,6 +6,7 @@ import ecdar.backend.BackendHelper;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.presentations.*;
 import ecdar.utility.UndoRedoStack;
+import ecdar.utility.colors.Color;
 import ecdar.utility.helpers.*;
 import ecdar.utility.mouse.MouseTracker;
 import com.jfoenix.controls.JFXPopup;
@@ -131,14 +132,18 @@ public class ComponentController extends ModelController implements Initializabl
         newComponent.getInputStrings().forEach((channel) -> insertSignatureArrow(channel, EdgeStatus.INPUT));
     }
 
+
+
     /***
      * Initialize the listeners, that listen for changes in the input and output edges of the presented component.
      * The view is updated whenever an insert (deletions are also a type of insert) is reported
      * @param newComponent The component that should be presented with its signature
      */
+
+
     private void initializeSignatureListeners(final Component newComponent) {
         newComponent.getIsFailingProperty().addListener((observable, oldValue, newValue) -> {
-            if(newComponent.getIsFailing()) {
+            if (newComponent.getIsFailing()) {
                 for (Node n : inputSignatureContainer.getChildren()) {
                     if (n instanceof SignatureArrow) {
                         for (String label : component.get().getInputStrings()) { // TODO Bwad bwad labuls gwo here <- UwU shall be complate faliure label that shall be punshid
@@ -150,14 +155,32 @@ public class ComponentController extends ModelController implements Initializabl
                 }
                 for (Node n : outputSignatureContainer.getChildren()) {
                     if (n instanceof SignatureArrow) {
-                        for (String label : component.get().getInputStrings()) { // TODO insert list of failing signature arrows
+                        for (String label : component.get().getOutputStrings()) { // TODO insert list of failing signature arrows
                             if (Objects.equals(((SignatureArrow) n).getSignatureArrowLabel(), label)) {
                                 ((SignatureArrow) n).recolorToRed();
                             }
                         }
                     }
                 }
-               //newComponent.setIsFailing(false);
+            }else {
+                for (Node n : inputSignatureContainer.getChildren()) {
+                    if (n instanceof SignatureArrow) {
+                        for (String label : component.get().getInputStrings()) { // TODO Bwad bwad labuls gwo here <- UwU shall be complate faliure label that shall be punshid
+                            if (Objects.equals(((SignatureArrow) n).getSignatureArrowLabel(), label)) {
+                                ((SignatureArrow) n).recolorToGray();
+                            }
+                        }
+                    }
+                }
+                for (Node n : outputSignatureContainer.getChildren()) {
+                    if (n instanceof SignatureArrow) {
+                        for (String label : component.get().getOutputStrings()) { // TODO insert list of failing signature arrows
+                            if (Objects.equals(((SignatureArrow) n).getSignatureArrowLabel(), label)) {
+                                ((SignatureArrow) n).recolorToGray();
+                            }
+                        }
+                    }
+                }
             }
         });
         newComponent.getOutputStrings().addListener((ListChangeListener<String>) c -> {
@@ -191,7 +214,7 @@ public class ComponentController extends ModelController implements Initializabl
         }
 
     }
-    
+
     /***
      * Updates the component's height to match the input/output signature containers
      * if the component is smaller than either of them
@@ -825,6 +848,7 @@ public class ComponentController extends ModelController implements Initializabl
 
         final Transition rippleEffect = new Transition() {
             private final double maxRadius = Math.sqrt(Math.pow(getComponent().getBox().getWidth(), 2) + Math.pow(getComponent().getBox().getHeight(), 2));
+
             {
                 setCycleDuration(Duration.millis(500));
             }

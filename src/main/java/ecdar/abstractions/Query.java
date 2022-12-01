@@ -34,6 +34,7 @@ public class Query implements Serializable {
             for (Component c : Ecdar.getProject().getComponents()) {
                 c.removeFailingLocations();
                 c.removeFailingEdges();
+                c.setIsFailing(false);
             }
             setQueryState(QueryState.SUCCESSFUL);
         } else {
@@ -65,13 +66,17 @@ public class Query implements Serializable {
     };
     //TODO add set alle compontens isfailing til fales
     private final BiConsumer<ObjectProtos.State, List<String>> stateActionConsumer = (state, action) -> {
+
         for (Component c : Ecdar.getProject().getComponents()) {
             c.removeFailingLocations();
             c.removeFailingEdges();
+            if(state.getLocationTuple().getLocationsList().isEmpty()){
+                c.setIsFailing(true);
+            }
         }
+
         for (ObjectProtos.Location location : state.getLocationTuple().getLocationsList()) {
             Component c = Ecdar.getProject().findComponent(location.getSpecificComponent().getComponentName());
-            c.setIsFailing(true);
 
             if (c == null) {
                 throw new NullPointerException("Could not find the specific component: " + location.getSpecificComponent().getComponentName());
@@ -79,7 +84,8 @@ public class Query implements Serializable {
 
             Location l = c.findLocation(location.getId());
             if (l == null) {
-                throw new NullPointerException("Could not find location: " + location.getId());
+                c.setIsFailing(true);
+                //throw new NullPointerException("Could not find location: " + location.getId());
             }
             c.addFailingLocation(l.getId());
             for (Edge edge : c.getEdges()) {
