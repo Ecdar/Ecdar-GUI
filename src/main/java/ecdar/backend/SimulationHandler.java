@@ -19,6 +19,7 @@ import javafx.util.Pair;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -45,6 +46,8 @@ public class SimulationHandler {
     private final BackendDriver backendDriver;
     private final ArrayList<BackendConnection> connections = new ArrayList<>();
 
+    private List<String> ComponentsInSimulation = new ArrayList<>();
+
     /**
      * Empty constructor that should be used if the system or project has not be initialized yet
      */
@@ -52,6 +55,9 @@ public class SimulationHandler {
         this.backendDriver = backendDriver;
     }
 
+    public void clearComponentsInSimulation() {
+        ComponentsInSimulation.clear();
+    }
 
     /**
      * Initializes the values and properties in the {@link SimulationHandler}.
@@ -345,5 +351,13 @@ public class SimulationHandler {
             traceLog.remove(traceLog.size() - 1);
         }
         currentState.set(state);
+    }
+
+    public void setComponentsInSimulation(List<String> value) {
+        ComponentsInSimulation = value;
+    }
+
+    public List<String> getComponentsInSimulation() {
+        return ComponentsInSimulation;
     }
 }

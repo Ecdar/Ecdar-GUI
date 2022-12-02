@@ -2,6 +2,8 @@ package ecdar.controllers;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
+import ecdar.Ecdar;
+import ecdar.backend.SimulationHandler;
 import javafx.fxml.Initializable;
 
 import java.net.URL;
@@ -14,7 +16,8 @@ public class SimulationInitializationDialogController implements Initializable {
     public JFXButton cancelButton;
     public JFXButton startButton;
 
-    public static List<String> ListOfComponents = new ArrayList<>();
+    private SimulationHandler simulationHandler;
+
     /**
      * Function gets list of components to simulation
      * and saves it in the public static ListOfComponents
@@ -24,7 +27,7 @@ public class SimulationInitializationDialogController implements Initializable {
         SimulatorController.setSimulationQuery(simulationComboBox.getSelectionModel().getSelectedItem());
 
         // set list of components involved in simulation
-        ListOfComponents.clear();
+        simulationHandler.clearComponentsInSimulation();
         // pattern filters out all components by ignoring operators.
         Pattern pattern = Pattern.compile("([\\w]*)", Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(SimulatorController.getSimulationQuery());
@@ -35,10 +38,10 @@ public class SimulationInitializationDialogController implements Initializable {
                 listOfComponentsToSimulate.add(matcher.group());
             }
         }
-        ListOfComponents = listOfComponentsToSimulate;
+        simulationHandler.setComponentsInSimulation(listOfComponentsToSimulate);
     }
 
     public void initialize(URL location, ResourceBundle resources) {
-
+        simulationHandler = Ecdar.getSimulationHandler();
     }
 }
