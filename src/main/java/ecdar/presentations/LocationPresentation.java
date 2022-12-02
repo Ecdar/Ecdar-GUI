@@ -206,10 +206,15 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
         }
 
         // Bind the model to the layout
-        loc.nicknameXProperty().bindBidirectional(controller.nicknameTag.translateXProperty());
-        loc.nicknameYProperty().bindBidirectional(controller.nicknameTag.translateYProperty());
-        loc.invariantXProperty().bindBidirectional(controller.invariantTag.translateXProperty());
-        loc.invariantYProperty().bindBidirectional(controller.invariantTag.translateYProperty());
+        // Check is needed because the property cannot be bound twice
+        // which happens when switching from the simulator to the editor
+        if (!loc.nicknameXProperty().isBound() && !loc.nicknameYProperty().isBound() &&
+                !loc.invariantXProperty().isBound() && !loc.invariantYProperty().isBound()) {
+            loc.nicknameXProperty().bindBidirectional(controller.nicknameTag.translateXProperty());
+            loc.nicknameYProperty().bindBidirectional(controller.nicknameTag.translateYProperty());
+            loc.invariantXProperty().bindBidirectional(controller.invariantTag.translateXProperty());
+            loc.invariantYProperty().bindBidirectional(controller.invariantTag.translateYProperty());
+        }
 
         final Consumer<Location> updateTags = location -> {
             // Update the color

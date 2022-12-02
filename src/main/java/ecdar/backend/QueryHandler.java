@@ -8,6 +8,7 @@ import ecdar.abstractions.Component;
 import ecdar.abstractions.Query;
 import ecdar.abstractions.QueryState;
 import ecdar.controllers.ComponentController;
+import ecdar.abstractions.QueryType;
 import ecdar.controllers.EcdarController;
 import ecdar.controllers.SignatureArrowController;
 import ecdar.utility.UndoRedoStack;
@@ -201,6 +202,11 @@ public class QueryHandler {
     private void handleQueryBackendError(Throwable t, Query query) {
         // If the query has been cancelled, ignore the error
         if (query.getQueryState() == QueryState.UNKNOWN) return;
+
+        // due to lack of information from backend if the reachability check shows that a location can NOT be reached, this is the most accurate information we can provide
+        if(query.getType() == QueryType.REACHABILITY){
+            Ecdar.showToast("The reachability query failed. This might be due to the fact that the location is not reachable.");
+        }
 
         // Each error starts with a capitalized description of the error equal to the gRPC error type encountered
         String errorType = t.getMessage().split(":\\s+", 2)[0];

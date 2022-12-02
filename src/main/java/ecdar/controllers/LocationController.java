@@ -193,24 +193,6 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
         dropDownMenu.addSpacerElement();
 
-        dropDownMenu.addClickableListElement("Is " + getLocation().getId() + " reachable?", event -> {
-            dropDownMenu.hide();
-            // Generate the query from the backend
-            final String reachabilityQuery = BackendHelper.getLocationReachableQuery(getLocation(), getComponent());
-
-            // Add proper comment
-            final String reachabilityComment = "Is " + getLocation().getMostDescriptiveIdentifier() + " reachable?";
-
-            // Add new query for this location
-            final Query query = new Query(reachabilityQuery, reachabilityComment, QueryState.UNKNOWN);
-            query.setType(QueryType.REACHABILITY);
-            Ecdar.getProject().getQueries().add(query);
-            Ecdar.getQueryExecutor().executeQuery(query);
-            dropDownMenu.hide();
-        });
-
-        dropDownMenu.addSpacerElement();
-
         dropDownMenu.addColorPicker(getLocation(), (color, intensity) -> {
             getLocation().setColorIntensity(intensity);
             getLocation().setColor(color);

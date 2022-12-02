@@ -60,7 +60,6 @@ public class EcdarController implements Initializable {
     public StackPane leftPane;
     public StackPane rightPane;
     public Rectangle bottomFillerElement;
-    public MessageTabPanePresentation messageTabPane;
     public StackPane modellingHelpDialogContainer;
     public JFXDialog modellingHelpDialog;
     public StackPane modalBar;
@@ -179,9 +178,6 @@ public class EcdarController implements Initializable {
         initializeStatusBar();
         initializeMenuBar();
         startBackgroundQueriesThread(); // Will terminate immediately if background queries are turned off
-
-        bottomFillerElement.heightProperty().bind(messageTabPane.maxHeightProperty());
-        messageTabPane.getController().setRunnableForOpeningAndClosingMessageTabPane(this::changeInsetsOfProjectAndQueryPanes);
 
         // Update file coloring when active model changes
         editorPresentation.getController().getActiveCanvasPresentation().getController().activeComponentProperty().addListener(observable -> projectPane.getController().updateColorsOnFilePresentations());
@@ -455,7 +451,7 @@ public class EcdarController implements Initializable {
                         component.getLocations().forEach(location -> location.setReachability(Location.Reachability.EXCLUDED));
                     } else {
                         component.getLocations().forEach(location -> {
-                            final String locationReachableQuery = BackendHelper.getLocationReachableQuery(location, component);
+                            final String locationReachableQuery = BackendHelper.getLocationReachableQuery(location, component, SimulatorController.getSimulationQuery());
 
                             Query reachabilityQuery = new Query(locationReachableQuery, "", QueryState.UNKNOWN);
                             reachabilityQuery.setType(QueryType.REACHABILITY);
@@ -726,7 +722,6 @@ public class EcdarController implements Initializable {
 
         scaleIcons(root, newCalculatedScale);
         editorPresentation.getController().scaleEdgeStatusToggle(newCalculatedScale);
-        messageTabPane.getController().updateScale(newScale);
 
         // Update listeners of UI scale
         scalingProperty.set(newScale);
@@ -1005,6 +1000,7 @@ public class EcdarController implements Initializable {
         leftPane.getChildren().add(projectPane);
         rightPane.getChildren().clear();
         rightPane.getChildren().add(queryPane);
+        scaling.selectToggle(scaleM); // temporary fix for scaling issue
 
         // Enable or disable the menu items that can be used when in the simulator
 //        updateMenuItems();
@@ -1190,20 +1186,6 @@ public class EcdarController implements Initializable {
         throw new IllegalArgumentException("Image is all white");
     }
 
-    /**
-     * This method is used to push the contents of the project and query panes when the tab pane is opened
-     */
-    private void changeInsetsOfProjectAndQueryPanes() {
-        if (messageTabPane.getController().isOpen()) {
-            projectPane.showBottomInset(false);
-            queryPane.showBottomInset(false);
-            CanvasPresentation.showBottomInset(false);
-        } else {
-            projectPane.showBottomInset(true);
-            queryPane.showBottomInset(true);
-            CanvasPresentation.showBottomInset(true);
-        }
-    }
 
     private void nudgeSelected(final NudgeDirection direction) {
         final List<SelectHelper.ItemSelectable> selectedElements = SelectHelper.getSelectedElements();

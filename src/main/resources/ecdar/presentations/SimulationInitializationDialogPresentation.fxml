@@ -36,7 +36,7 @@
                 </padding>
                 <Region HBox.hgrow="ALWAYS"/>
                 <JFXButton fx:id="cancelButton" text="Cancel"/>
-                <JFXButton fx:id="startButton" onMousePressed="#SetListOfComponentsToSimulate" text="Start Simulation"/>
+                <JFXButton fx:id="startButton" onMousePressed="#setSimulationData" text="Start Simulation"/>
             </HBox>
         </VBox>
     </VBox>

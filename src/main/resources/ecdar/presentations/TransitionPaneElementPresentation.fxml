@@ -30,7 +30,7 @@
         <Region HBox.hgrow="ALWAYS"/>
 
         <JFXRippler fx:id="refreshRippler">
-            <StackPane styleClass="responsive-icon-stack-pane-sizing" onMouseClicked="#refreshTransitions">
+            <StackPane styleClass="responsive-icon-stack-pane-sizing" onMouseClicked="#restartSimulation">
                 <FontIcon iconLiteral="gmi-refresh" styleClass="icon-size-medium" fill="white"/>
             </StackPane>
         </JFXRippler>

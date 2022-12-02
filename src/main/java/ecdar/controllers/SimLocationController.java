@@ -1,7 +1,10 @@
 package ecdar.controllers;
 
-import ecdar.abstractions.Component;
-import ecdar.abstractions.Location;
+import com.jfoenix.controls.JFXPopup;
+import ecdar.Ecdar;
+import ecdar.abstractions.*;
+import ecdar.backend.BackendHelper;
+import ecdar.presentations.DropDownMenu;
 import ecdar.presentations.SimLocationPresentation;
 import ecdar.presentations.SimTagPresentation;
 import ecdar.utility.colors.Color;
@@ -14,6 +17,9 @@ import javafx.scene.control.Label;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Path;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
+import java.util.function.Consumer;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -36,6 +42,7 @@ public class SimLocationController implements Initializable {
     public Label idLabel;
     public Line nameTagLine;
     public Line invariantTagLine;
+    private DropDownMenu dropDownMenu;
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
@@ -49,8 +56,49 @@ public class SimLocationController implements Initializable {
 
         // Scale x and y 1:1 (based on the x-scale)
         scaleContent.scaleYProperty().bind(scaleContent.scaleXProperty());
+        initializeMouseControls();
     }
 
+    private void initializeMouseControls() {
+        final Consumer<MouseEvent> mouseClicked = (event) -> {
+            if (root.isPlaced()) {
+                if (event.getButton().equals(MouseButton.SECONDARY)) {
+                    initializeDropDownMenu();
+                    dropDownMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, 0, 0);
+                }
+            }
+
+        };
+        locationProperty().addListener((obs, oldLocation, newLocation) -> {
+            if(newLocation == null) return;
+            root.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseClicked::accept);
+        });
+    }
+
+    /**
+     * Creates the dropdown when right clicking a location.
+     * When reachability is chosen a request will be send to the backend to see if the location can be reached
+     */
+    public void initializeDropDownMenu(){
+        dropDownMenu = new DropDownMenu(root);
+
+        dropDownMenu.addClickableListElement("Is " + getLocation().getId() + " reachable?", event -> {
+            // Generate the query from the backend
+            final String reachabilityQuery = BackendHelper.getLocationReachableQuery(getLocation(), getComponent(), SimulatorController.getSimulationQuery());
+
+            // Add proper comment
+            final String reachabilityComment = "Is " + getLocation().getMostDescriptiveIdentifier() + " reachable?";
+
+            // Add new query for this location
+            final Query query = new Query(reachabilityQuery, reachabilityComment, QueryState.UNKNOWN);
+            query.setType(QueryType.REACHABILITY);
+
+            // execute query
+            Ecdar.getQueryExecutor().executeQuery(query);
+
+            dropDownMenu.hide();
+        });
+    }
     public Location getLocation() {
         return location.get();
     }
