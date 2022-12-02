@@ -75,7 +75,6 @@ public class QueryHandler {
                 }
             };
 
-            // ToDo SW5: Not working with the updated gRPC Protos
             var queryBuilder = QueryProtos.QueryRequest.newBuilder()
                     .setUserId(1)
                     .setQueryId(UUID.randomUUID().hashCode())
