@@ -150,21 +150,24 @@ public class TracePaneElementController implements Initializable {
      * @return A string representing the state
      */
     private String traceString(SimulationState state) {
-        StringBuilder title = new StringBuilder("(");
+        StringBuilder title = new StringBuilder();
         int length = state.getLocations().size();
+
         for (int i = 0; i < length; i++) {
-            Location loc = Ecdar.getProject()
-                    .findComponent(state.getLocations().get(i).getKey())
-                    .findLocation(state.getLocations().get(i).getValue());
+            Location loc = Ecdar.getProject().findComponent(state.getLocations().get(i).getKey()).findLocation(state.getLocations().get(i).getValue());
             String locationName = loc.getId();
+            //Component name
+            title.append(Ecdar.getProject().findComponent(state.getLocations().get(i).getKey()).getName());
+            //Clock names
+            title.append("|Clocks: " + state.getState().getFederation().getDisjunction().getConjunctions(0).getConstraints(i).getX().getClockName());
+            //Location names
+            title.append("|Location: ");
             if (i == length - 1) {
                 title.append(locationName);
             } else {
-                title.append(locationName).append(", ");
+                title.append(locationName).append(",\n");
             }
         }
-        title.append(")");
-
         return title.toString();
     }
 
