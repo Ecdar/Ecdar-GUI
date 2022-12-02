@@ -45,6 +45,7 @@ public class Component extends HighLevelModelObject implements Boxed {
     private final ObservableList<DisplayableEdge> failingEdges = FXCollections.observableArrayList();
     private final ObservableList<String> inputStrings = FXCollections.observableArrayList();
     private final ObservableList<String> outputStrings = FXCollections.observableArrayList();
+    private List<String> failingIOStrings = new ArrayList<String>();
     private final StringProperty description = new SimpleStringProperty("");
     private final StringProperty declarationsText = new SimpleStringProperty("");;
     private BooleanProperty isFailing = new SimpleBooleanProperty(false);
@@ -61,8 +62,10 @@ public class Component extends HighLevelModelObject implements Boxed {
     public boolean getIsFailing(){return isFailing.get();}
     public BooleanProperty getIsFailingProperty(){return isFailing;}
     public void setIsFailing(boolean isFailingInput){this.isFailing.set(isFailingInput);}
-
-
+    public List<String> getFailingIOStrings(){return failingIOStrings;}
+    public void setFailingIOStrings(List<String> failingIOStrings){
+        this.failingIOStrings.clear();
+        this.failingIOStrings.addAll(failingIOStrings);}
     /**
      * Constructs an empty component
      */

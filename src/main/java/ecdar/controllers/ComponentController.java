@@ -133,7 +133,6 @@ public class ComponentController extends ModelController implements Initializabl
     }
 
 
-
     /***
      * Initialize the listeners, that listen for changes in the input and output edges of the presented component.
      * The view is updated whenever an insert (deletions are also a type of insert) is reported
@@ -146,7 +145,7 @@ public class ComponentController extends ModelController implements Initializabl
             if (newComponent.getIsFailing()) {
                 for (Node n : inputSignatureContainer.getChildren()) {
                     if (n instanceof SignatureArrow) {
-                        for (String label : component.get().getInputStrings()) { // TODO Bwad bwad labuls gwo here <- UwU shall be complate faliure label that shall be punshid
+                        for (String label : component.get().getFailingIOStrings()) {
                             if (Objects.equals(((SignatureArrow) n).getSignatureArrowLabel(), label)) {
                                 ((SignatureArrow) n).recolorToRed();
                             }
@@ -155,30 +154,22 @@ public class ComponentController extends ModelController implements Initializabl
                 }
                 for (Node n : outputSignatureContainer.getChildren()) {
                     if (n instanceof SignatureArrow) {
-                        for (String label : component.get().getOutputStrings()) { // TODO insert list of failing signature arrows
+                        for (String label : component.get().getFailingIOStrings()) {
                             if (Objects.equals(((SignatureArrow) n).getSignatureArrowLabel(), label)) {
                                 ((SignatureArrow) n).recolorToRed();
                             }
                         }
                     }
                 }
-            }else {
+            } else {
                 for (Node n : inputSignatureContainer.getChildren()) {
                     if (n instanceof SignatureArrow) {
-                        for (String label : component.get().getInputStrings()) { // TODO Bwad bwad labuls gwo here <- UwU shall be complate faliure label that shall be punshid
-                            if (Objects.equals(((SignatureArrow) n).getSignatureArrowLabel(), label)) {
-                                ((SignatureArrow) n).recolorToGray();
-                            }
-                        }
+                        ((SignatureArrow) n).recolorToGray();
                     }
                 }
                 for (Node n : outputSignatureContainer.getChildren()) {
                     if (n instanceof SignatureArrow) {
-                        for (String label : component.get().getOutputStrings()) { // TODO insert list of failing signature arrows
-                            if (Objects.equals(((SignatureArrow) n).getSignatureArrowLabel(), label)) {
-                                ((SignatureArrow) n).recolorToGray();
-                            }
-                        }
+                        ((SignatureArrow) n).recolorToGray();
                     }
                 }
             }

@@ -9,6 +9,7 @@ import ecdar.utility.serialize.Serializable;
 import com.google.gson.JsonObject;
 import javafx.application.Platform;
 import javafx.beans.property.*;
+import javafx.collections.ObservableList;
 
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -64,13 +65,15 @@ public class Query implements Serializable {
             }
         }
     };
-    //TODO add set alle compontens isfailing til fales
+    //TODO add set alle compontens isfailing til fails
     private final BiConsumer<ObjectProtos.State, List<String>> stateActionConsumer = (state, action) -> {
 
         for (Component c : Ecdar.getProject().getComponents()) {
             c.removeFailingLocations();
             c.removeFailingEdges();
             if(state.getLocationTuple().getLocationsList().isEmpty()){
+                c.setFailingIOStrings(action);
+
                 c.setIsFailing(true);
             }
         }
