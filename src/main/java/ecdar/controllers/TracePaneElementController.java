@@ -150,7 +150,6 @@ public class TracePaneElementController implements Initializable {
      * @return A string representing the state
      */
     private String traceString(SimulationState state) {
-        System.out.println(state.getState().getFederation().getDisjunction().getConjunctionsList().size());
         StringBuilder title = new StringBuilder("(");
         int length = state.getLocations().size();
         for (int i = 0; i < length; i++) {
