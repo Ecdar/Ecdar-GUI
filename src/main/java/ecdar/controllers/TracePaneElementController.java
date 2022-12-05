@@ -150,6 +150,7 @@ public class TracePaneElementController implements Initializable {
      * @return A string representing the state
      */
     private String traceString(SimulationState state) {
+        System.out.println(state.getState().getFederation().getDisjunction().getConjunctionsList().size());
         StringBuilder title = new StringBuilder("(");
         int length = state.getLocations().size();
         for (int i = 0; i < length; i++) {
@@ -173,23 +174,6 @@ public class TracePaneElementController implements Initializable {
             var strict = constraint.getStrict();
             clocks.append(x).append(" - ").append(y).append(strict ? " < " : " <= ").append(c).append("\n");
         }
-        // for (int i = 0; i < length; i++) {
-        //     Location loc = Ecdar.getProject().findComponent(state.getLocations().get(i).getKey()).findLocation(state.getLocations().get(i).getValue());
-        //     int clock = Ecdar.getSimulationHandler().currentState.getValue().getState().getFederation().getDisjunction().getConjunctions(0).getConstraints(i).getC();
-        //     String locationName = loc.getId();
-        //     //Component name
-        //     title.append(Ecdar.getProject().findComponent(state.getLocations().get(i).getKey()).getName());
-        //     //Clock names
-        //     title.append("|Clocks: " + state.getState().getFederation().getDisjunction().getConjunctions(0).getConstraints(i).getX().getClockName());
-        //     title.append(": "+ clock);
-        //     //Location names
-        //     title.append("|Location: ");
-        //     if (i == length - 1) {
-        //         title.append(locationName);
-        //     } else {
-        //         title.append(locationName).append(",\n");
-        //     }
-        // }
         return title.toString() + clocks.toString();
     }
 
