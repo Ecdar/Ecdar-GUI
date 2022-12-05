@@ -9,7 +9,7 @@
          fx:controller="ecdar.controllers.TransitionController"
          type="AnchorPane">
     <JFXRippler fx:id="rippler" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
-        <AnchorPane minHeight="48" maxHeight="300">
+        <AnchorPane minHeight="48">
             <Label alignment="CENTER_LEFT" fx:id="titleLabel" styleClass="body1"
                     AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="8" AnchorPane.rightAnchor="8"/>
         </AnchorPane>
