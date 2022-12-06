@@ -28,6 +28,7 @@ public class SimulationTest {
     public GrpcCleanupRule grpcCleanup = new GrpcCleanupRule();
     private final String serverName = InProcessServerBuilder.generateName();
 /*
+// TODO fix this test
     @Test
     public void testGetInitialStateHighlightsTheInitialLocation() {
         final List<Component> components = generateComponentsWithInitialLocations();
