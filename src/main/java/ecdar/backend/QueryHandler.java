@@ -81,7 +81,7 @@ public class QueryHandler {
             var queryBuilder = QueryProtos.QueryRequest.newBuilder()
                     .setUserId(1)
                     .setQueryId(UUID.randomUUID().hashCode())
-                    .setSettings(Settings.newBuilder().setDisableClockReduction(false))
+                    .setSettings(Settings.newBuilder().setDisableClockReduction(true))
                     .setQuery(query.getType().getQueryName() + ": " + query.getQuery())
                     .setComponentsInfo(componentsInfoBuilder);
 
