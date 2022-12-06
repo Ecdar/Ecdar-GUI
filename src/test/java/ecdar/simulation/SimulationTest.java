@@ -49,7 +49,7 @@ public class SimulationTest {
                     ObjectProtos.State state = ObjectProtos.State.newBuilder().setLocationTuple(locations).build();
                     DecisionPoint decisionPoint = DecisionPoint.newBuilder().setSource(state).build();
                     QueryProtos.SimulationStepResponse response = QueryProtos.SimulationStepResponse.newBuilder()
-                            .setNewDecisionPoint(decisionPoint)
+                            .addNewDecisionPoints(decisionPoint)
                             .build();
                     responseObserver.onNext(response);
                     responseObserver.onCompleted();
@@ -84,7 +84,7 @@ public class SimulationTest {
                         .setId(comp.getInitialLocation().getId()).build();
             }
 
-            var result = stub.startSimulation(request).getNewDecisionPoint().getSource().getLocationTuple().getLocationsList().toArray();
+            var result = stub.startSimulation(request).getNewDecisionPoints(0).getSource().getLocationTuple().getLocationsList().toArray();
 
             Assertions.assertArrayEquals(expectedResponse, result);
         } catch (IOException e) {

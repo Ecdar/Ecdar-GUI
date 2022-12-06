@@ -81,7 +81,8 @@ public class SimulationHandler {
             StreamObserver<SimulationStepResponse> responseObserver = new StreamObserver<>() {
                 @Override
                 public void onNext(QueryProtos.SimulationStepResponse value) {
-                    currentState.set(new SimulationState(value.getNewDecisionPoint()));
+                    // TODO this is temp solution to compile but should be fixed to handle ambiguity
+                    currentState.set(new SimulationState(value.getNewDecisionPoints(0)));
                     Platform.runLater(() -> traceLog.add(currentState.get()));
                 }
                 
@@ -142,7 +143,8 @@ public class SimulationHandler {
             StreamObserver<SimulationStepResponse> responseObserver = new StreamObserver<>() {
                 @Override
                 public void onNext(QueryProtos.SimulationStepResponse value) {
-                    currentState.set(new SimulationState(value.getNewDecisionPoint()));
+                    // TODO this is temp solution to compile but should be fixed to handle ambiguity
+                    currentState.set(new SimulationState(value.getNewDecisionPoints(0)));
                     Platform.runLater(() -> traceLog.add(currentState.get()));
                 }
                 
