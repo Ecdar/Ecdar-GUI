@@ -105,7 +105,6 @@ public class QueryHandler {
 
     private void handleQueryResponse(QueryProtos.QueryResponse value, Query query) {
         // If the query has been cancelled, ignore the result
-        System.out.println(value);
         if (query.getQueryState() == QueryState.UNKNOWN) return;
         switch (value.getResultCase()) {
             case REFINEMENT:
