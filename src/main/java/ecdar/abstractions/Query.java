@@ -65,15 +65,14 @@ public class Query implements Serializable {
             }
         }
     };
-    //TODO add set alle compontens isfailing til fails
+
     private final BiConsumer<ObjectProtos.State, List<String>> stateActionConsumer = (state, action) -> {
 
         for (Component c : Ecdar.getProject().getComponents()) {
             c.removeFailingLocations();
             c.removeFailingEdges();
-            if(state.getLocationTuple().getLocationsList().isEmpty()){
+            if(state.getLocationTuple().getLocationsList().isEmpty() && query.getValue().contains(c.getName())){
                 c.setFailingIOStrings(action);
-
                 c.setIsFailing(true);
             }
         }
