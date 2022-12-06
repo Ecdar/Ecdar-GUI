@@ -1,6 +1,8 @@
 package ecdar.backend;
 
 import EcdarProtoBuf.QueryProtos;
+import EcdarProtoBuf.QueryProtos.QueryRequest.Settings;
+
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import ecdar.Ecdar;
@@ -21,6 +23,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class QueryHandler {
@@ -33,18 +36,14 @@ public class QueryHandler {
 
     /**
      * Executes the specified query
-     *
-     * @param query query to be executed
+     * @param query             query to be executed
      */
-
     public void executeQuery(Query query) throws NoSuchElementException {
-        if (query.getQueryState().equals(QueryState.RUNNING) || !StringValidator.validateQuery(query.getQuery()))
-            return;
+        if (query.getQueryState().equals(QueryState.RUNNING) || !StringValidator.validateQuery(query.getQuery())) return;
 
         if (query.getQuery().isEmpty()) {
             query.setQueryState(QueryState.SYNTAX_ERROR);
             query.addError("Query is empty");
-
             return;
         }
 
@@ -79,10 +78,10 @@ public class QueryHandler {
                 }
             };
 
-            // ToDo SW5: Not working with the updated gRPC Protos
             var queryBuilder = QueryProtos.QueryRequest.newBuilder()
                     .setUserId(1)
-                    .setQueryId(1)
+                    .setQueryId(UUID.randomUUID().hashCode())
+                    .setSettings(Settings.newBuilder().setAll(true))
                     .setQuery(query.getType().getQueryName() + ": " + query.getQuery())
                     .setComponentsInfo(componentsInfoBuilder);
 
@@ -164,26 +163,33 @@ public class QueryHandler {
                 }
                 break;
 
-            case REACHABILITY:
-                if (value.getReachability().getSuccess()) {
+                case REACHABILITY:
+                    if (value.getReachability().getSuccess()) {
+                        query.setQueryState(QueryState.SUCCESSFUL);
+                        if(value.getReachability().getSuccess()){
+                            Ecdar.showToast("Reachability check was successful and the location can be reached.");
+                        }
+                        else if(!value.getReachability().getSuccess()){
+                            Ecdar.showToast("Reachability check was successful but the location cannot be reached.");
+                        }
+                        query.getSuccessConsumer().accept(true);
+                    } else {
+                        query.setQueryState(QueryState.ERROR);
+                        Ecdar.showToast("Reachability check was unsuccessful!");
+                        query.getFailureConsumer().accept(new BackendException.QueryErrorException(value.getReachability().getReason()));
+                        query.getSuccessConsumer().accept(false);
+                        //ToDo: These errors are not implemented in the Reveaal backend.
+                        query.getStateActionConsumer().accept(value.getReachability().getState(),
+                                new ArrayList<>());
+                    }
+                    break;
+
+                case COMPONENT:
                     query.setQueryState(QueryState.SUCCESSFUL);
                     query.getSuccessConsumer().accept(true);
-                } else {
-                    query.setQueryState(QueryState.ERROR);
-                    query.getFailureConsumer().accept(new BackendException.QueryErrorException(value.getReachability().getReason()));
-                    query.getSuccessConsumer().accept(false);
-                    //ToDo: These errors are not implemented in the Reveaal backend.
-                    query.getStateActionConsumer().accept(value.getReachability().getState(),
-                            new ArrayList<>());
-                }
-                break;
-
-            case COMPONENT:
-                query.setQueryState(QueryState.SUCCESSFUL);
-                query.getSuccessConsumer().accept(true);
-                JsonObject returnedComponent = (JsonObject) JsonParser.parseString(value.getComponent().getComponent().getJson());
-                addGeneratedComponent(new Component(returnedComponent));
-                break;
+                    JsonObject returnedComponent = (JsonObject) JsonParser.parseString(value.getComponent().getComponent().getJson());
+                    addGeneratedComponent(new Component(returnedComponent));
+                    break;
 
             case ERROR:
                 query.setQueryState(QueryState.ERROR);
