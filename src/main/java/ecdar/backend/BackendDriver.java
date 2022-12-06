@@ -65,12 +65,16 @@ public class BackendDriver {
                 tryStartNewBackendConnection(backend);
             }
 
-            // Block until a connection becomes available
-            connection = openBackendConnections.get(backend).take();
+            if (backend.isThreadSafe()){
+                connection = openBackendConnections.get(backend).peek();
+            }
+            else{
+                // Block until a connection becomes available
+                connection = openBackendConnections.get(backend).take();
+            }
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-
         return connection;
     }
 
@@ -105,6 +109,8 @@ public class BackendDriver {
             }
 
             do {
+                //ToDo: Refactor ProcessBuilder to accept cache-size(-cs) and thread-number(-tn) to better configure the Reveaal engine.
+                // Default values are acceptable for now.
                 ProcessBuilder pb = new ProcessBuilder(backend.getBackendLocation(), "-p", hostAddress + ":" + portNumber);
 
                 try {

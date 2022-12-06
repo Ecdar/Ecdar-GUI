@@ -12,10 +12,12 @@ public class BackendInstance implements Serializable {
     private static final String PORT_RANGE_START = "portRangeStart";
     private static final String PORT_RANGE_END = "portRangeEnd";
     private static final String LOCKED = "locked";
+    private static final String IS_THREAD_SAFE = "isThreadSafe";
 
     private String name;
     private boolean isLocal;
     private boolean isDefault;
+    private boolean isThreadSafe;
     private String backendLocation;
     private int portStart;
     private int portEnd;
@@ -49,6 +51,14 @@ public class BackendInstance implements Serializable {
 
     public void setDefault(boolean aDefault) {
         isDefault = aDefault;
+    }
+
+    public boolean isThreadSafe() {
+        return isThreadSafe;
+    }
+
+    public void setIsThreadSafe(boolean threadSafe) {
+        isThreadSafe = threadSafe;
     }
 
     public String getBackendLocation() {
@@ -93,6 +103,7 @@ public class BackendInstance implements Serializable {
         result.addProperty(NAME, getName());
         result.addProperty(IS_LOCAL, isLocal());
         result.addProperty(IS_DEFAULT, isDefault());
+        result.addProperty(IS_THREAD_SAFE, isThreadSafe());
         result.addProperty(LOCATION, getBackendLocation());
         result.addProperty(PORT_RANGE_START, getPortStart());
         result.addProperty(PORT_RANGE_END, getPortEnd());
@@ -106,6 +117,7 @@ public class BackendInstance implements Serializable {
         setName(json.getAsJsonPrimitive(NAME).getAsString());
         setLocal(json.getAsJsonPrimitive(IS_LOCAL).getAsBoolean());
         setDefault(json.getAsJsonPrimitive(IS_DEFAULT).getAsBoolean());
+        setIsThreadSafe(json.getAsJsonPrimitive(IS_THREAD_SAFE).getAsBoolean());
         setBackendLocation(json.getAsJsonPrimitive(LOCATION).getAsString());
         setPortStart(json.getAsJsonPrimitive(PORT_RANGE_START).getAsInt());
         setPortEnd(json.getAsJsonPrimitive(PORT_RANGE_END).getAsInt());

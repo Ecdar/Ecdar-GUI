@@ -182,9 +182,10 @@ public class BackendOptionsDialogController implements Initializable {
         reveaal.setName("Reveaal");
         reveaal.setLocal(true);
         reveaal.setDefault(true);
-        reveaal.setPortStart(5032);
+        reveaal.setPortStart(5040);
         reveaal.setPortEnd(5040);
         reveaal.lockInstance();
+        reveaal.setIsThreadSafe(true);
 
         // Load correct Reveaal executable based on OS
         List<String> potentialFilesForReveaal = new ArrayList<>();
@@ -203,6 +204,7 @@ public class BackendOptionsDialogController implements Initializable {
         jEcdar.setPortStart(5042);
         jEcdar.setPortEnd(5050);
         jEcdar.lockInstance();
+        jEcdar.setIsThreadSafe(false);
 
         // Load correct j-Ecdar executable based on OS
         List<String> potentialFiledForJEcdar = new ArrayList<>();
@@ -252,10 +254,6 @@ public class BackendOptionsDialogController implements Initializable {
 
     /**
      * Add the new backend instance presentation to the backend options dialog
-<<<<<<< HEAD
-=======
-     *
->>>>>>> main
      * @param newBackendInstancePresentation The presentation of the new backend instance
      */
     private void addBackendInstancePresentationToList(BackendInstancePresentation newBackendInstancePresentation) {
