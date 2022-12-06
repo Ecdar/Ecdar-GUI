@@ -12,6 +12,7 @@ import javafx.beans.property.*;
 import javafx.collections.ObservableList;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -66,15 +67,11 @@ public class Query implements Serializable {
         }
     };
 
-    private final BiConsumer<ObjectProtos.State, List<String>> stateActionConsumer = (state, action) -> {
+    private final BiConsumer<ObjectProtos.State, List<String>> stateActionConsumer = (state, actions) -> {
 
         for (Component c : Ecdar.getProject().getComponents()) {
             c.removeFailingLocations();
             c.removeFailingEdges();
-            if(state.getLocationTuple().getLocationsList().isEmpty() && query.getValue().contains(c.getName())){
-                c.setFailingIOStrings(action);
-                c.setIsFailing(true);
-            }
         }
 
         for (ObjectProtos.Location location : state.getLocationTuple().getLocationsList()) {
@@ -84,15 +81,22 @@ public class Query implements Serializable {
                 throw new NullPointerException("Could not find the specific component: " + location.getSpecificComponent().getComponentName());
             }
 
-            Location l = c.findLocation(location.getId());
-            if (l == null) {
-                c.setIsFailing(true);
-                //throw new NullPointerException("Could not find location: " + location.getId());
-            }
-            c.addFailingLocation(l.getId());
-            for (Edge edge : c.getEdges()) {
-                if(action.equals(edge.getSync()) && edge.getSourceLocation() == l) {
-                    c.addFailingEdge(edge);
+            if (location.getId().isEmpty()) {
+                if(c.getName().equals(location.getSpecificComponent().getComponentName())){
+                    c.setFailingIOStrings(actions);
+                    c.setIsFailing(true);
+                }
+            } else {
+                Location l = c.findLocation(location.getId());
+                if (l == null) {
+                    throw new NullPointerException("Could not find location: " + location.getId());
+                }
+                
+                c.addFailingLocation(l.getId());
+                for (Edge edge : c.getEdges()) {
+                    if (actions.get(0).equals(edge.getSync()) && edge.getSourceLocation() == l) {
+                        c.addFailingEdge(edge);
+                    }
                 }
             }
         }
@@ -145,7 +149,9 @@ public class Query implements Serializable {
         return comment;
     }
 
-    public StringProperty errors() { return errors; }
+    public StringProperty errors() {
+        return errors;
+    }
 
     public boolean isPeriodic() {
         return isPeriodic.get();
@@ -189,13 +195,14 @@ public class Query implements Serializable {
 
     /**
      * Getter for the state action consumer.
+     *
      * @return The <a href="#stateConsumer">State Consumer</a>
      */
     public BiConsumer<ObjectProtos.State, List<String>> getStateActionConsumer() {
         return stateActionConsumer;
     }
 
-    
+
     @Override
     public JsonObject serialize() {
         final JsonObject result = new JsonObject();
@@ -212,7 +219,7 @@ public class Query implements Serializable {
     public void deserialize(final JsonObject json) {
         String query = json.getAsJsonPrimitive(QUERY).getAsString();
 
-        if(query.contains(":")) {
+        if (query.contains(":")) {
             String[] queryFieldFromJSON = json.getAsJsonPrimitive(QUERY).getAsString().split(": ");
             setType(QueryType.fromString(queryFieldFromJSON[0]));
             setQuery(queryFieldFromJSON[1]);
@@ -226,7 +233,7 @@ public class Query implements Serializable {
             setIsPeriodic(json.getAsJsonPrimitive(IS_PERIODIC).getAsBoolean());
         }
 
-        if(json.has(BACKEND)) {
+        if (json.has(BACKEND)) {
             setBackend(BackendHelper.getBackendInstanceByName(json.getAsJsonPrimitive(BACKEND).getAsString()));
         } else {
             setBackend(BackendHelper.getDefaultBackendInstance());
