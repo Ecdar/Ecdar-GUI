@@ -96,7 +96,7 @@
             </StackPane>
             <HBox spacing="20">
                 <JFXRadioButton fx:id="defaultBackendRadioButton" styleClass="subhead">Default</JFXRadioButton>
-                <JFXRadioButton fx:id="threadSafeBackendRadioButton" styleClass="subhead">Thread Safe</JFXRadioButton>
+                <JFXCheckBox fx:id="threadSafeBackendCheckBox" styleClass="subhead">Thread Safe</JFXCheckBox>
             </HBox>
         </VBox>
     </HBox>
