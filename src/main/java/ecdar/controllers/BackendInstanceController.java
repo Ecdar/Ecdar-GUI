@@ -52,7 +52,7 @@ public class BackendInstanceController implements Initializable {
     public JFXTextField portRangeStart;
     public JFXTextField portRangeEnd;
     public RadioButton defaultBackendRadioButton;
-    public RadioButton threadSafeBackendRadioButton;
+    public JFXCheckBox threadSafeBackendCheckBox;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -63,7 +63,7 @@ public class BackendInstanceController implements Initializable {
             setHGrow();
 
             colorIconAsDisabledBasedOnProperty(removeBackendIcon, defaultBackendRadioButton.selectedProperty());
-            colorIconAsDisabledBasedOnProperty(removeBackendIcon, threadSafeBackendRadioButton.selectedProperty());
+            colorIconAsDisabledBasedOnProperty(removeBackendIcon, threadSafeBackendCheckBox.selectedProperty());
             colorIconAsDisabledBasedOnProperty(pickPathToBackendIcon, backendInstance.getLockedProperty());
         });
     }
@@ -95,7 +95,7 @@ public class BackendInstanceController implements Initializable {
         this.backendName.setText(instance.getName());
         this.isLocal.setSelected(instance.isLocal());
         this.defaultBackendRadioButton.setSelected(instance.isDefault());
-        this.threadSafeBackendRadioButton.setSelected(instance.isThreadSafe());
+        this.threadSafeBackendCheckBox.setSelected(instance.isThreadSafe());
 
         // Check if the path or the address should be used
         if (isLocal.isSelected()) {
@@ -116,7 +116,7 @@ public class BackendInstanceController implements Initializable {
         backendInstance.setName(backendName.getText());
         backendInstance.setLocal(isLocal.isSelected());
         backendInstance.setDefault(defaultBackendRadioButton.isSelected());
-        backendInstance.setIsThreadSafe(threadSafeBackendRadioButton.isSelected());
+        backendInstance.setIsThreadSafe(threadSafeBackendCheckBox.isSelected());
         backendInstance.setBackendLocation(isLocal.isSelected() ? pathToBackend.getText() : address.getText());
         backendInstance.setPortStart(Integer.parseInt(portRangeStart.getText()));
         backendInstance.setPortEnd(Integer.parseInt(portRangeEnd.getText()));
