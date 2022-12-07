@@ -9,8 +9,10 @@ import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Query;
 import ecdar.abstractions.QueryState;
+import ecdar.controllers.ComponentController;
 import ecdar.abstractions.QueryType;
 import ecdar.controllers.EcdarController;
+import ecdar.controllers.SignatureArrowController;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.helpers.StringValidator;
 import io.grpc.stub.StreamObserver;
@@ -19,6 +21,7 @@ import javafx.collections.ObservableList;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -78,7 +81,7 @@ public class QueryHandler {
             var queryBuilder = QueryProtos.QueryRequest.newBuilder()
                     .setUserId(1)
                     .setQueryId(UUID.randomUUID().hashCode())
-                    .setSettings(Settings.newBuilder().setAll(true))
+                    .setSettings(Settings.newBuilder().setDisableClockReduction(true))
                     .setQuery(query.getType().getQueryName() + ": " + query.getQuery())
                     .setComponentsInfo(componentsInfoBuilder);
 
@@ -101,64 +104,64 @@ public class QueryHandler {
     }
 
     private void handleQueryResponse(QueryProtos.QueryResponse value, Query query) {
-        System.out.println(value);
         // If the query has been cancelled, ignore the result
         if (query.getQueryState() == QueryState.UNKNOWN) return;
-            switch (value.getResultCase()) {
-                case REFINEMENT:
-                    if (value.getRefinement().getSuccess()) {
-                        query.setQueryState(QueryState.SUCCESSFUL);
-                        query.getSuccessConsumer().accept(true);
-                    } else {
-                        query.setQueryState(QueryState.ERROR);
-                        query.getFailureConsumer().accept(new BackendException.QueryErrorException(value.getRefinement().getReason()));
-                        query.getSuccessConsumer().accept(false);
-                        query.getStateActionConsumer().accept(value.getRefinement().getState(),
-                        value.getRefinement().getAction());
-                    }
-                    break;
+        switch (value.getResultCase()) {
+            case REFINEMENT:
+                if (value.getRefinement().getSuccess()) {
+                    query.setQueryState(QueryState.SUCCESSFUL);
+                    query.getSuccessConsumer().accept(true);
+                } else {
+                    query.setQueryState(QueryState.ERROR);
+                    query.getFailureConsumer().accept(new BackendException.QueryErrorException(value.getRefinement().getReason()));
+                    query.getSuccessConsumer().accept(false);
+                    query.getStateActionConsumer().accept(value.getRefinement().getState(),
+                            value.getRefinement().getActionList());
+                }
+                break;
 
-                case CONSISTENCY:
-                    if (value.getConsistency().getSuccess()) {
-                        query.setQueryState(QueryState.SUCCESSFUL);
-                        query.getSuccessConsumer().accept(true);
-                    } else {
-                        query.setQueryState(QueryState.ERROR);
-                        query.getFailureConsumer().accept(new BackendException.QueryErrorException(value.getConsistency().getReason()));
-                        query.getSuccessConsumer().accept(false);
-                        query.getStateActionConsumer().accept(value.getConsistency().getState(),
-                                value.getConsistency().getAction());
+            case CONSISTENCY:
+                if (value.getConsistency().getSuccess()) {
+                    query.setQueryState(QueryState.SUCCESSFUL);
+                    query.getSuccessConsumer().accept(true);
+                } else {
+                    query.setQueryState(QueryState.ERROR);
+                    query.getFailureConsumer().accept(new BackendException.QueryErrorException(value.getConsistency().getReason()));
+                    query.getSuccessConsumer().accept(false);
+                    query.getStateActionConsumer().accept(value.getConsistency().getState(),
+                            value.getConsistency().getActionList());
 
-                    }
-                    break;
 
-                case DETERMINISM:
-                    if (value.getDeterminism().getSuccess()) {
-                        query.setQueryState(QueryState.SUCCESSFUL);
-                        query.getSuccessConsumer().accept(true);
-                    } else {
-                        query.setQueryState(QueryState.ERROR);
-                        query.getFailureConsumer().accept(new BackendException.QueryErrorException(value.getDeterminism().getReason()));
-                        query.getSuccessConsumer().accept(false);
-                        query.getStateActionConsumer().accept(value.getDeterminism().getState(),
-                                value.getDeterminism().getAction());
+                }
+                break;
 
-                    }
-                    break;
+            case DETERMINISM:
+                if (value.getDeterminism().getSuccess()) {
+                    query.setQueryState(QueryState.SUCCESSFUL);
+                    query.getSuccessConsumer().accept(true);
+                } else {
+                    query.setQueryState(QueryState.ERROR);
+                    query.getFailureConsumer().accept(new BackendException.QueryErrorException(value.getDeterminism().getReason()));
+                    query.getSuccessConsumer().accept(false);
+                    query.getStateActionConsumer().accept(value.getDeterminism().getState(),
+                            value.getDeterminism().getActionList());
 
-                case IMPLEMENTATION:
-                    if (value.getImplementation().getSuccess()) {
-                        query.setQueryState(QueryState.SUCCESSFUL);
-                        query.getSuccessConsumer().accept(true);
-                    } else {
-                        query.setQueryState(QueryState.ERROR);
-                        query.getFailureConsumer().accept(new BackendException.QueryErrorException(value.getImplementation().getReason()));
-                        query.getSuccessConsumer().accept(false);
-                        //ToDo: These errors are not implemented in the Reveaal backend.
-                        query.getStateActionConsumer().accept(value.getImplementation().getState(),
-                                "");
-                    }
-                    break;
+                }
+                break;
+
+            case IMPLEMENTATION:
+                if (value.getImplementation().getSuccess()) {
+                    query.setQueryState(QueryState.SUCCESSFUL);
+                    query.getSuccessConsumer().accept(true);
+                } else {
+                    query.setQueryState(QueryState.ERROR);
+                    query.getFailureConsumer().accept(new BackendException.QueryErrorException(value.getImplementation().getReason()));
+                    query.getSuccessConsumer().accept(false);
+                    //ToDo: These errors are not implemented in the Reveaal backend.
+                    query.getStateActionConsumer().accept(value.getImplementation().getState(),
+                            new ArrayList<>());
+                }
+                break;
 
                 case REACHABILITY:
                     if (value.getReachability().getSuccess()) {
@@ -177,7 +180,7 @@ public class QueryHandler {
                         query.getSuccessConsumer().accept(false);
                         //ToDo: These errors are not implemented in the Reveaal backend.
                         query.getStateActionConsumer().accept(value.getReachability().getState(),
-                                "");
+                                new ArrayList<>());
                     }
                     break;
 
@@ -188,17 +191,18 @@ public class QueryHandler {
                     addGeneratedComponent(new Component(returnedComponent));
                     break;
 
-                case ERROR:
-                    query.setQueryState(QueryState.ERROR);
-                    query.getFailureConsumer().accept(new BackendException.QueryErrorException(value.getError()));
-                    query.getSuccessConsumer().accept(false);
-                    break;
+            case ERROR:
+                query.setQueryState(QueryState.ERROR);
+                query.getFailureConsumer().accept(new BackendException.QueryErrorException(value.getError()));
+                query.getSuccessConsumer().accept(false);
+                break;
 
-                case RESULT_NOT_SET:
-                    query.setQueryState(QueryState.ERROR);
-                    query.getSuccessConsumer().accept(false);
-                    break;
-            }
+            case RESULT_NOT_SET:
+                query.setQueryState(QueryState.ERROR);
+                query.getSuccessConsumer().accept(false);
+                break;
+        }
+
     }
 
     private void handleQueryBackendError(Throwable t, Query query) {

@@ -6,6 +6,7 @@ import ecdar.backend.BackendHelper;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.presentations.*;
 import ecdar.utility.UndoRedoStack;
+import ecdar.utility.colors.Color;
 import ecdar.utility.helpers.*;
 import ecdar.utility.mouse.MouseTracker;
 import com.jfoenix.controls.JFXPopup;
@@ -131,12 +132,48 @@ public class ComponentController extends ModelController implements Initializabl
         newComponent.getInputStrings().forEach((channel) -> insertSignatureArrow(channel, EdgeStatus.INPUT));
     }
 
+
     /***
      * Initialize the listeners, that listen for changes in the input and output edges of the presented component.
      * The view is updated whenever an insert (deletions are also a type of insert) is reported
      * @param newComponent The component that should be presented with its signature
      */
+
+
     private void initializeSignatureListeners(final Component newComponent) {
+        newComponent.getIsFailingProperty().addListener((observable, oldValue, newValue) -> {
+            if (newComponent.getIsFailing()) {
+                for (Node n : inputSignatureContainer.getChildren()) {
+                    if (n instanceof SignatureArrow) {
+                        for (String label : component.get().getFailingIOStrings()) {
+                            if (Objects.equals(((SignatureArrow) n).getSignatureArrowLabel(), label)) {
+                                ((SignatureArrow) n).recolorToRed();
+                            }
+                        }
+                    }
+                }
+                for (Node n : outputSignatureContainer.getChildren()) {
+                    if (n instanceof SignatureArrow) {
+                        for (String label : component.get().getFailingIOStrings()) {
+                            if (Objects.equals(((SignatureArrow) n).getSignatureArrowLabel(), label)) {
+                                ((SignatureArrow) n).recolorToRed();
+                            }
+                        }
+                    }
+                }
+            } else {
+                for (Node n : inputSignatureContainer.getChildren()) {
+                    if (n instanceof SignatureArrow) {
+                        ((SignatureArrow) n).recolorToGray();
+                    }
+                }
+                for (Node n : outputSignatureContainer.getChildren()) {
+                    if (n instanceof SignatureArrow) {
+                        ((SignatureArrow) n).recolorToGray();
+                    }
+                }
+            }
+        });
         newComponent.getOutputStrings().addListener((ListChangeListener<String>) c -> {
             // By clearing the container we don't have to fiddle with which elements are removed and added
             outputSignatureContainer.getChildren().clear();
@@ -160,13 +197,15 @@ public class ComponentController extends ModelController implements Initializabl
      */
     private void insertSignatureArrow(final String channel, final EdgeStatus status) {
         SignatureArrow newArrow = new SignatureArrow(channel, status, component.get());
+
         if (status == EdgeStatus.INPUT) {
             inputSignatureContainer.getChildren().add(newArrow);
         } else {
             outputSignatureContainer.getChildren().add(newArrow);
         }
+
     }
-    
+
     /***
      * Updates the component's height to match the input/output signature containers
      * if the component is smaller than either of them
@@ -800,6 +839,7 @@ public class ComponentController extends ModelController implements Initializabl
 
         final Transition rippleEffect = new Transition() {
             private final double maxRadius = Math.sqrt(Math.pow(getComponent().getBox().getWidth(), 2) + Math.pow(getComponent().getBox().getHeight(), 2));
+
             {
                 setCycleDuration(Duration.millis(500));
             }

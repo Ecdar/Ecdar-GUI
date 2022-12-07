@@ -9,7 +9,10 @@ import ecdar.utility.serialize.Serializable;
 import com.google.gson.JsonObject;
 import javafx.application.Platform;
 import javafx.beans.property.*;
+import javafx.collections.ObservableList;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -33,6 +36,7 @@ public class Query implements Serializable {
             for (Component c : Ecdar.getProject().getComponents()) {
                 c.removeFailingLocations();
                 c.removeFailingEdges();
+                c.setIsFailing(false);
             }
             setQueryState(QueryState.SUCCESSFUL);
         } else {
@@ -63,24 +67,36 @@ public class Query implements Serializable {
         }
     };
 
-    private final BiConsumer<ObjectProtos.State, String> stateActionConsumer = (state, action) -> {
+    private final BiConsumer<ObjectProtos.State, List<String>> stateActionConsumer = (state, actions) -> {
+
         for (Component c : Ecdar.getProject().getComponents()) {
             c.removeFailingLocations();
             c.removeFailingEdges();
         }
+
         for (ObjectProtos.Location location : state.getLocationTuple().getLocationsList()) {
             Component c = Ecdar.getProject().findComponent(location.getSpecificComponent().getComponentName());
+
             if (c == null) {
                 throw new NullPointerException("Could not find the specific component: " + location.getSpecificComponent().getComponentName());
             }
-            Location l = c.findLocation(location.getId());
-            if (l == null) {
-                throw new NullPointerException("Could not find location: " + location.getId());
-            }
-            c.addFailingLocation(l.getId());
-            for (Edge edge : c.getEdges()) {
-                if(action.equals(edge.getSync()) && edge.getSourceLocation() == l) {
-                    c.addFailingEdge(edge);
+
+            if (location.getId().isEmpty()) {
+                if(c.getName().equals(location.getSpecificComponent().getComponentName())){
+                    c.setFailingIOStrings(actions);
+                    c.setIsFailing(true);
+                }
+            } else {
+                Location l = c.findLocation(location.getId());
+                if (l == null) {
+                    throw new NullPointerException("Could not find location: " + location.getId());
+                }
+                
+                c.addFailingLocation(l.getId());
+                for (Edge edge : c.getEdges()) {
+                    if (actions.get(0).equals(edge.getSync()) && edge.getSourceLocation() == l) {
+                        c.addFailingEdge(edge);
+                    }
                 }
             }
         }
@@ -133,7 +149,9 @@ public class Query implements Serializable {
         return comment;
     }
 
-    public StringProperty errors() { return errors; }
+    public StringProperty errors() {
+        return errors;
+    }
 
     public boolean isPeriodic() {
         return isPeriodic.get();
@@ -177,13 +195,14 @@ public class Query implements Serializable {
 
     /**
      * Getter for the state action consumer.
+     *
      * @return The <a href="#stateConsumer">State Consumer</a>
      */
-    public BiConsumer<ObjectProtos.State, String> getStateActionConsumer() {
+    public BiConsumer<ObjectProtos.State, List<String>> getStateActionConsumer() {
         return stateActionConsumer;
     }
 
-    
+
     @Override
     public JsonObject serialize() {
         final JsonObject result = new JsonObject();
@@ -200,7 +219,7 @@ public class Query implements Serializable {
     public void deserialize(final JsonObject json) {
         String query = json.getAsJsonPrimitive(QUERY).getAsString();
 
-        if(query.contains(":")) {
+        if (query.contains(":")) {
             String[] queryFieldFromJSON = json.getAsJsonPrimitive(QUERY).getAsString().split(": ");
             setType(QueryType.fromString(queryFieldFromJSON[0]));
             setQuery(queryFieldFromJSON[1]);
@@ -214,7 +233,7 @@ public class Query implements Serializable {
             setIsPeriodic(json.getAsJsonPrimitive(IS_PERIODIC).getAsBoolean());
         }
 
-        if(json.has(BACKEND)) {
+        if (json.has(BACKEND)) {
             setBackend(BackendHelper.getBackendInstanceByName(json.getAsJsonPrimitive(BACKEND).getAsString()));
         } else {
             setBackend(BackendHelper.getDefaultBackendInstance());

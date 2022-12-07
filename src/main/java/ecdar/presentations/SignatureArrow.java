@@ -12,12 +12,19 @@ import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 
+import java.util.Objects;
+
 /***
  * Creates input and output arrows, that can for example be used on the side of components to show its signature
  */
 public class SignatureArrow extends Group implements Highlightable {
 
     private SignatureArrowController controller;
+
+    public String getSignatureArrowLabel() {
+        return controller.signatureArrowLabel.getText();
+    }
+
 
     /***
      * Create a new signature arrow with a label for an edge, and different look depending on whether it's
@@ -48,7 +55,7 @@ public class SignatureArrow extends Group implements Highlightable {
         });
         controller.arrowBox.onMouseExitedProperty().set(event -> {
             controller.mouseExited();
-            this.unhighlight();
+                this.unhighlight();
         });
     }
 
@@ -75,14 +82,14 @@ public class SignatureArrow extends Group implements Highlightable {
         // Draw the arrow head separately, so it is for example possible to have a dashed line and solid head
         final Path arrowHead = controller.signatureArrowHeadPath;
         final MoveTo moveHead = new MoveTo(xValue + 50, yValue);
-        final LineTo lineHead1 = new LineTo(xValue + 35 , yValue-5); // Upper line in the arrow head
-        final LineTo lineHead2 = new LineTo(xValue + 35 , yValue+5); // Lower line in the arrow head
+        final LineTo lineHead1 = new LineTo(xValue + 35, yValue - 5); // Upper line in the arrow head
+        final LineTo lineHead2 = new LineTo(xValue + 35, yValue + 5); // Lower line in the arrow head
 
         arrowHead.getElements().addAll(moveHead, lineHead1, moveHead, lineHead2);
         arrowHead.setStrokeWidth(1.0);
 
         final double radius = 2.0; // Radius for the circle
-        if(edgeStatus == EdgeStatus.OUTPUT){
+        if (edgeStatus == EdgeStatus.OUTPUT) {
             arrowLine.getStyleClass().add("dashed");
             controller.arrowBox.setAlignment(Pos.CENTER_LEFT);
             controller.signatureArrowCircle.setCenterX(xValue - radius); // Place the circle partly on the line
@@ -143,7 +150,14 @@ public class SignatureArrow extends Group implements Highlightable {
 
         Color.Intensity intensity = Color.Intensity.I800;
         this.colorArrowComponents(color, intensity);
+
+        for(String s : controller.getComponent().getFailingIOStrings()){
+            if(Objects.equals(getSignatureArrowLabel(), s) && controller.getComponent().getIsFailing()){
+                this.recolorToRed();
+            }
+        }
     }
+
 
     /**
      * Set the color of the SignatureArrow to Color.RED
@@ -154,6 +168,11 @@ public class SignatureArrow extends Group implements Highlightable {
         this.colorArrowComponents(color, intensity);
     }
 
+    public void recolorToGray() {
+        Color color = Color.GREY;
+        Color.Intensity intensity = Color.Intensity.I800;
+        this.colorArrowComponents(color, intensity);
+    }
     /***
      * Colors the components of the arrow
      * @param color The Color to color the components
