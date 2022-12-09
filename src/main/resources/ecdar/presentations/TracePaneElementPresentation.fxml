@@ -46,4 +46,7 @@
                    styleClass="caption"/>
         </VBox>
     </AnchorPane>
+    <padding>
+        <Insets bottom="25"/>
+    </padding>
 </fx:root>

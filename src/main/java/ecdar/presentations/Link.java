@@ -156,4 +156,9 @@ public class Link extends Group implements SelectHelper.Selectable, Highlightabl
     public void unhighlight() {
         shownLine.setStroke(Color.GREY.getColor(Color.Intensity.I900));
     }
+
+    @Override
+    public void highlightPurple() {
+        shownLine.setStroke(Color.DEEP_PURPLE.getColor(Color.Intensity.I900));
+    }
 }

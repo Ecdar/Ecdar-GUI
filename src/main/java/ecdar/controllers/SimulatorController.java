@@ -5,7 +5,6 @@ import ecdar.abstractions.*;
 import ecdar.backend.SimulationHandler;
 import ecdar.presentations.SimulatorOverviewPresentation;
 import ecdar.simulation.SimulationState;
-import ecdar.utility.colors.Color;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -19,8 +18,8 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class SimulatorController implements Initializable {
-    private static String simulationQuery;
     public StackPane root;
+    private SimulationHandler simulationHandler;
     public SimulatorOverviewPresentation overviewPresentation;
     public StackPane toolbar;
 
@@ -34,6 +33,7 @@ public class SimulatorController implements Initializable {
         root.widthProperty().addListener((observable, oldValue, newValue) -> width.setValue(newValue));
         root.heightProperty().addListener((observable, oldValue, newValue) -> height.setValue(newValue));
         firstTimeInSimulator = true;
+        simulationHandler = Ecdar.getSimulationHandler();
     }
 
     /**
@@ -43,33 +43,32 @@ public class SimulatorController implements Initializable {
      * - Adding the components which are going to be used in the simulation to
      */
     public void willShow() {
-        final SimulationHandler sm = Ecdar.getSimulationHandler();
         boolean shouldSimulationBeReset = true;
 
 
 
         // If the user left a trace, continue from that trace
-        if (sm.traceLog.size() >= 2) {
+        if (simulationHandler.traceLog.size() >= 2) {
             shouldSimulationBeReset = false;
         }
 
         // If the composition is not the same as previous simulation, reset the simulation
         if (!(overviewPresentation.getController().getComponentObservableList().hashCode() ==
-                findComponentsInCurrentSimulation(SimulationInitializationDialogController.ListOfComponents).hashCode())) {
+                findComponentsInCurrentSimulation(simulationHandler.getComponentsInSimulation()).hashCode())) {
             shouldSimulationBeReset = true;
         }
         
-        if (shouldSimulationBeReset || firstTimeInSimulator || sm.currentState.get() == null) {
+        if (shouldSimulationBeReset || firstTimeInSimulator || simulationHandler.currentState.get() == null) {
             resetSimulation();
-            sm.initialStep();
+            simulationHandler.initialStep();
         }
 
         overviewPresentation.getController().addProcessesToGroup();
 
         // If the simulation continues, highligt the current state and available edges
-        if (sm.currentState.get() != null && !shouldSimulationBeReset) {
-            overviewPresentation.getController().highlightProcessState(sm.currentState.get());
-            overviewPresentation.getController().highlightAvailableEdges(sm.currentState.get());
+        if (simulationHandler.currentState.get() != null && !shouldSimulationBeReset) {
+            overviewPresentation.getController().highlightProcessState(simulationHandler.currentState.get());
+            overviewPresentation.getController().highlightAvailableEdges(simulationHandler.currentState.get());
         }
 
     }
@@ -79,7 +78,7 @@ public class SimulatorController implements Initializable {
      * {@link SimulatorOverviewController#processContainer} and adding the processes of the new simulation.
      */
     private void resetSimulation() {
-        List<Component> listOfComponentsForSimulation = findComponentsInCurrentSimulation(SimulationInitializationDialogController.ListOfComponents);
+        List<Component> listOfComponentsForSimulation = findComponentsInCurrentSimulation(simulationHandler.getComponentsInSimulation());
         overviewPresentation.getController().clearOverview();
         overviewPresentation.getController().getComponentObservableList().clear();
         overviewPresentation.getController().getComponentObservableList().addAll(listOfComponentsForSimulation);
@@ -106,6 +105,7 @@ public class SimulatorController implements Initializable {
                 }
             }
         }
+        simulationHandler.setSimulationComponents((ArrayList<Component>) SelectedComponents);
         return SelectedComponents;
     }
 
@@ -115,7 +115,7 @@ public class SimulatorController implements Initializable {
     public void resetCurrentSimulation() {
         overviewPresentation.getController().removeProcessesFromGroup();
         resetSimulation();
-        Ecdar.getSimulationHandler().resetToInitialLocation();
+        simulationHandler.resetToInitialLocation();
         overviewPresentation.getController().addProcessesToGroup();
     }
 
@@ -133,12 +133,5 @@ public class SimulatorController implements Initializable {
 
     public static void setSelectedState(SimulationState selectedState) {
         SimulatorController.selectedState.set(selectedState);
-    }
-    public static void setSimulationQuery(String query) {
-        simulationQuery = query;
-    }
-
-    public static String getSimulationQuery(){
-        return simulationQuery;
     }
 }

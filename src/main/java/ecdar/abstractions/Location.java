@@ -65,7 +65,6 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
 
     public Location(final String id) {
         setId(id);
-        bindReachabilityAnalysis();
     }
 
     public Location(final Component component, final Type type, final double x, final double y){
@@ -86,7 +85,6 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
 
     public Location(final JsonObject jsonObject) {
         deserialize(jsonObject);
-        bindReachabilityAnalysis();
     }
 
     // ToDo NIELS: Comment in, when location should be received through ProtoBuf
@@ -110,7 +108,6 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
      */
     public void initialize() {
         setId();
-        bindReachabilityAnalysis();
     }
 
     /**
@@ -208,7 +205,6 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
 
     public void setUrgency(final Urgency urgency) {
         // If there is no EcdarPresentation, we are running tests and EcdarController calls will fail
-        if (Ecdar.getPresentation() != null) EcdarController.runReachabilityAnalysis();
         this.urgency.set(urgency);
     }
 
@@ -324,7 +320,6 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
 
     public void setInvariantY(final double invariantY) {
         // If there is no EcdarPresentation, we are running tests and EcdarController calls will fail
-        if (Ecdar.getPresentation() != null) EcdarController.runReachabilityAnalysis();
         this.invariantY.set(invariantY);
     }
 
@@ -504,11 +499,6 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
 
     public enum Reachability {
         REACHABLE, UNREACHABLE, UNKNOWN, EXCLUDED
-    }
-
-    private void bindReachabilityAnalysis() {
-        invariantProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
-        urgencyProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
     }
 
     public boolean isUniversalOrInconsistent() {

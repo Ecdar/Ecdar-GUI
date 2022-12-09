@@ -3,13 +3,17 @@ package ecdar.simulation;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Location;
+import ecdar.backend.BackendDriver;
 import ecdar.backend.BackendHelper;
+import ecdar.backend.SimulationHandler;
 import ecdar.controllers.SimulationInitializationDialogController;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,12 +34,19 @@ public class ReachabilityTest {
         var component = new Component();
         component.setName("C1");
 
-        SimulationInitializationDialogController.ListOfComponents.clear();
-        SimulationInitializationDialogController.ListOfComponents.add("C1");
-        SimulationInitializationDialogController.ListOfComponents.add("C2");
-        SimulationInitializationDialogController.ListOfComponents.add("C3");
+        SimulationHandler simulationHandler = new SimulationHandler(new BackendDriver());
+
+        List<String> components = new ArrayList<>();
+        components.add("C1");
+        components.add("C2");
+        components.add("C3");
+
+        simulationHandler.setComponentsInSimulation(components);
+
+        Ecdar.setSimulationHandler(simulationHandler);
 
         var result = BackendHelper.getLocationReachableQuery(location, component, "query");
+
         assertTrue(result.matches(regex));
     }
 
@@ -46,51 +57,107 @@ public class ReachabilityTest {
         var component = new Component();
         component.setName("C1");
 
-        SimulationInitializationDialogController.ListOfComponents.clear();
-        SimulationInitializationDialogController.ListOfComponents.add("C1");
-        SimulationInitializationDialogController.ListOfComponents.add("C2");
-        SimulationInitializationDialogController.ListOfComponents.add("C3");
+        SimulationHandler simulationHandler = new SimulationHandler(new BackendDriver());
+
+        List<String> components = new ArrayList<>();
+        components.add("C1");
+        components.add("C2");
+        components.add("C3");
+
+        simulationHandler.setComponentsInSimulation(components);
+
+        Ecdar.setSimulationHandler(simulationHandler);
 
         var result = BackendHelper.getLocationReachableQuery(location, component, "query");
-        var indexOfLocation = result.indexOf('[') + 1;
-        var output = result.charAt(indexOfLocation);
-        assertEquals(output, location.getId().charAt(0));
+
+        int indexOfOpeningBracket = result.indexOf('[');
+        int indexOfComma = 0;
+
+        for (int i = 0; i < result.length(); i++) {
+            if (result.charAt(i) == ',') {
+               indexOfComma = i;
+               break;
+            }
+        }
+
+        var output = result.substring(indexOfOpeningBracket + 1, indexOfComma);
+        assertEquals(output, location.getId());
     }
 
     @Test
     void reachabilityQueryLocationPosition2TestSuccess() {
         var location = new Location();
-        location.setId("L1");
+        location.setId("L123");
         var component = new Component();
-        component.setName("C1");
+        component.setName("C2");
 
-        SimulationInitializationDialogController.ListOfComponents.clear();
-        SimulationInitializationDialogController.ListOfComponents.add("C2");
-        SimulationInitializationDialogController.ListOfComponents.add("C1");
-        SimulationInitializationDialogController.ListOfComponents.add("C3");
+        SimulationHandler simulationHandler = new SimulationHandler(new BackendDriver());
+
+        List<String> components = new ArrayList<>();
+        components.add("C1");
+        components.add("C2");
+        components.add("C3");
+
+        simulationHandler.setComponentsInSimulation(components);
+
+        Ecdar.setSimulationHandler(simulationHandler);
 
         var result = BackendHelper.getLocationReachableQuery(location, component, "query");
-        var indexOfLocation = result.indexOf(',') + 1;
-        var output = result.charAt(indexOfLocation);
-        assertEquals(output, location.getId().charAt(0));
+
+        int indexOfFirstComma = 0;
+        int indexofSecondComma = 0;
+        boolean commaSeen = false;
+
+        for (int i = 0; i < result.length(); i++) {
+            if (result.charAt(i) == ',') {
+                if(commaSeen){
+                    indexofSecondComma = i;
+                }
+                else {
+                    indexOfFirstComma = i;
+                    commaSeen = true;
+                }
+            }
+        }
+
+        var output = result.substring(indexOfFirstComma + 1,indexofSecondComma);
+        assertEquals(output, location.getId());
     }
 
     @Test
     void reachabilityQueryLocationPosition3TestSuccess() {
         var location = new Location();
-        location.setId("L1");
+        location.setId("L12345");
         var component = new Component();
-        component.setName("C1");
+        component.setName("C3");
 
-        SimulationInitializationDialogController.ListOfComponents.clear();
-        SimulationInitializationDialogController.ListOfComponents.add("C2");
-        SimulationInitializationDialogController.ListOfComponents.add("C3");
-        SimulationInitializationDialogController.ListOfComponents.add("C1");
+        SimulationHandler simulationHandler = new SimulationHandler(new BackendDriver());
+
+        List<String> components = new ArrayList<>();
+        components.add("C1");
+        components.add("C2");
+        components.add("C3");
+
+        simulationHandler.setComponentsInSimulation(components);
+
+        Ecdar.setSimulationHandler(simulationHandler);
 
         var query = BackendHelper.getLocationReachableQuery(location, component, "query");
-        var indexOfLocation = query.indexOf(']') - 2;
-        var output = query.charAt(indexOfLocation);
-        assertEquals(output, location.getId().charAt(0));
+
+        int indexOfLastComma = 0;
+
+        for (int i = query.length()-1; i > 0; i--) {
+            if (query.charAt(i) == ',') {
+               indexOfLastComma = i;
+               break;
+            }
+        }
+
+        int indexOfClosingBracket = query.indexOf(']');
+
+        var output = query.substring(indexOfLastComma + 1,indexOfClosingBracket);
+
+        assertEquals(output, location.getId());
     }
 
     @Test
@@ -100,20 +167,28 @@ public class ReachabilityTest {
         var component = new Component();
         component.setName("C1");
 
-        SimulationInitializationDialogController.ListOfComponents.clear();
-        SimulationInitializationDialogController.ListOfComponents.add("C2");
-        SimulationInitializationDialogController.ListOfComponents.add("C1");
-        SimulationInitializationDialogController.ListOfComponents.add("C3");
-        SimulationInitializationDialogController.ListOfComponents.add("C4");
+        SimulationHandler simulationHandler = new SimulationHandler(new BackendDriver());
+
+        List<String> components = new ArrayList<>();
+        components.add("C1");
+        components.add("C2");
+        components.add("C3");
+        components.add("C4");
+
+        simulationHandler.setComponentsInSimulation(components);
+
+        Ecdar.setSimulationHandler(simulationHandler);
 
         var query = BackendHelper.getLocationReachableQuery(location, component, "query");
-        int underscoreCount = 0;
+        int commaCount = 0;
         for (int i = 0; i < query.length(); i++) {
-            if (query.charAt(i) == '_') {
-                underscoreCount++;
+            if (query.charAt(i) == ',') {
+                commaCount++;
             }
         }
 
-        assertEquals(SimulationInitializationDialogController.ListOfComponents.size(), underscoreCount + 1);
+        int expected = commaCount + 1;
+
+        assertEquals(expected, Ecdar.getSimulationHandler().getComponentsInSimulation().size());
     }
 }

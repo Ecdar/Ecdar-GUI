@@ -138,6 +138,10 @@ public class Ecdar extends Application {
 
     public static SimulationHandler getSimulationHandler() { return simulationHandler; }
 
+    public static void setSimulationHandler(SimulationHandler simHandler) {
+        simulationHandler = simHandler;
+    }
+
     public static EcdarPresentation getPresentation() {
         return presentation;
     }
@@ -273,8 +277,6 @@ public class Ecdar extends Application {
 
         // Set active model
         Platform.runLater(() -> EcdarController.setActiveModelForActiveCanvas(Ecdar.getProject().getComponents().get(0)));
-
-        EcdarController.reachabilityServiceEnabled = true;
 
         // Register a key-bind for showing debug-information
         KeyboardTracker.registerKeybind("DEBUG", new Keybind(new KeyCodeCombination(KeyCode.F12), () -> {

@@ -40,12 +40,10 @@ public class Edge extends DisplayableEdge implements Serializable {
             setId();
         }
 
-        bindReachabilityAnalysis();
     }
 
     public Edge(final JsonObject jsonObject, final Component component) {
         deserialize(jsonObject, component);
-        bindReachabilityAnalysis();
     }
 
     public String getSync() {
@@ -243,15 +241,6 @@ public class Edge extends DisplayableEdge implements Serializable {
                 addNail(newNail);
             });
         }
-    }
-
-    private void bindReachabilityAnalysis() {
-        // If there is no EcdarPresentation, we are running tests and EcdarController calls will fail
-        if (Ecdar.getPresentation() == null) return;
-        selectProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
-        guardProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
-        syncProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
-        updateProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
     }
 
     /**

@@ -19,6 +19,7 @@ import javafx.util.Pair;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -38,12 +39,15 @@ public class SimulationHandler {
     public ObjectProperty<Edge> selectedEdge = new SimpleObjectProperty<>();
     private EcdarSystem system;
     private int numberOfSteps;
-
+    private String simulationQuery;
+    private ArrayList<Component> simulationComponents = new ArrayList<>();
     private final ObservableMap<String, BigDecimal> simulationVariables = FXCollections.observableHashMap();
     private final ObservableMap<String, BigDecimal> simulationClocks = FXCollections.observableHashMap();
     public ObservableList<SimulationState> traceLog = FXCollections.observableArrayList();
     private final BackendDriver backendDriver;
     private final ArrayList<BackendConnection> connections = new ArrayList<>();
+
+    private List<String> ComponentsInSimulation = new ArrayList<>();
 
     /**
      * Empty constructor that should be used if the system or project has not be initialized yet
@@ -52,6 +56,9 @@ public class SimulationHandler {
         this.backendDriver = backendDriver;
     }
 
+    public void clearComponentsInSimulation() {
+        ComponentsInSimulation.clear();
+    }
 
     /**
      * Initializes the values and properties in the {@link SimulationHandler}.
@@ -66,7 +73,6 @@ public class SimulationHandler {
         this.currentState.set(null);
         this.selectedEdge.set(null);
         this.traceLog.clear();
-        
         this.system = getSystem();
     }
 
@@ -119,8 +125,6 @@ public class SimulationHandler {
         
         backendDriver.addRequestToExecutionQueue(request);
         
-        //Save the previous states, and get the new
-        this.traceLog.add(currentState.get());
         numberOfSteps++;
     
         //Updates the transitions available
@@ -139,6 +143,9 @@ public class SimulationHandler {
      * Take a step in the simulation.
      */
     public void nextStep() {
+        // removes invalid states from the log when stepping forward after previewing a previous state
+        removeStatesFromLog(currentState.get()); 
+        
         GrpcRequest request = new GrpcRequest(backendConnection -> {
             StreamObserver<SimulationStepResponse> responseObserver = new StreamObserver<>() {
                 @Override
@@ -227,7 +234,7 @@ public class SimulationHandler {
     }
 
     /**
-     * Sets the value of simulation variables and clocks, based on {@link SimulationHandler#currentConcreteState}
+     * Sets the value of simulation variables and clocks, based on currentConcreteState
      */
     private void setSimVarAndClocks() {
         // The variables and clocks are all found in the getVariables array
@@ -277,7 +284,7 @@ public class SimulationHandler {
      * @return an {@link ObservableList} of all the currently available transitions in this state
      */
     public ArrayList<Pair<String, String>> getAvailableTransitions() {
-        return currentState.get().getEdges();
+        return currentState.get().getEnabledEdges();
     }
 
     /**
@@ -298,6 +305,10 @@ public class SimulationHandler {
      */
     public ObservableMap<String, BigDecimal> getSimulationClocks() {
         return simulationClocks;
+    }
+
+    public SimulationState getCurrentState() {
+        return currentState.get();
     }
 
     /**
@@ -338,14 +349,64 @@ public class SimulationHandler {
         }
     }
 
-
     /**
-     * Sets the current state of the simulation to the given state from the trace log
+     * Removes all states from the trace log after the given state
      */
-    public void selectStateFromLog(SimulationState state) {
+    private void removeStatesFromLog(SimulationState state) {
         while (traceLog.get(traceLog.size() - 1) != state) {
             traceLog.remove(traceLog.size() - 1);
         }
-        currentState.set(state);
+    }
+
+    public void setComponentsInSimulation(List<String> value) {
+        ComponentsInSimulation = value;
+    }
+
+    public List<String> getComponentsInSimulation() {
+        return ComponentsInSimulation;
+    }
+
+    public void setSimulationQuery(String query) {
+        simulationQuery = query;
+    }
+
+    public String getSimulationQuery(){
+        return simulationQuery;
+    }
+
+    /**
+     * Set list of components used in the simulation
+     */
+    public void setSimulationComponents(ArrayList<Component> components){
+        simulationComponents = components;
+    }
+
+    /**
+     * Get list of components used in the simulation
+     */
+    public ArrayList<Component> getSimulationComponents(){
+        return simulationComponents;
+    }
+
+    /**
+     * Highlights the edges from the reachability response
+     */
+    public void highlightReachabilityEdges(ArrayList<String> ids){
+        //unhighlight all edges
+        for(var comp : simulationComponents){
+            for(var edge : comp.getEdges()){
+                edge.setIsHighlightedForReachability(false);
+            }
+        }
+        //highlight the edges from the reachability response
+        for(var comp : simulationComponents){
+            for(var edge : comp.getEdges()){
+                for(var id : ids){
+                    if(edge.getId().equals(id)){
+                        edge.setIsHighlightedForReachability(true);
+                    }
+                }
+            }
+        }
     }
 }

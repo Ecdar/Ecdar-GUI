@@ -238,6 +238,16 @@ public class SimNailPresentation extends Group implements Highlightable {
         controller.nailCircle.setStroke(color.getColor(intensity.next(2)));
     }
 
+    @Override
+    public void highlightPurple() {
+        final Color color1 = Color.DEEP_PURPLE;
+        final Color.Intensity intensity = Color.Intensity.I500;
+
+        // Set the color
+        controller.nailCircle.setFill(color1.getColor(intensity));
+        controller.nailCircle.setStroke(color1.getColor(intensity.next(2)));
+    }
+
     /**
      * Removes the highlight from the nail
      */

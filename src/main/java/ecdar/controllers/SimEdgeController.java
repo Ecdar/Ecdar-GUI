@@ -74,9 +74,27 @@ public class SimEdgeController implements Initializable, Highlightable {
                     this.unhighlight();
                 }
             });
+
+            // When an edge updates highlight property,
+            // we want to update the view to reflect current highlight property
+            edge.get().isHighlightedForReachabilityProperty().addListener(v -> {
+                if(edge.get().getIsHighlightedForReachability()) {
+                    this.highlightSpecialColor();
+                } else {
+                    this.unhighlight();
+                }
+            });
         });
 
         ensureNailsInFront();
+    }
+
+    public void highlightSpecialColor() {
+        edgeRoot.getChildren().forEach(node -> {
+            if(node instanceof Highlightable) {
+                ((Highlightable) node).highlightPurple();
+            }
+        });
     }
 
     private void ensureNailsInFront() {

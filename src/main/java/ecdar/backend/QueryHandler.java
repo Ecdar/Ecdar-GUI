@@ -130,8 +130,6 @@ public class QueryHandler {
                     query.getSuccessConsumer().accept(false);
                     query.getStateActionConsumer().accept(value.getConsistency().getState(),
                             value.getConsistency().getActionList());
-
-
                 }
                 break;
 
@@ -148,7 +146,7 @@ public class QueryHandler {
 
                 }
                 break;
-
+            
             case IMPLEMENTATION:
                 if (value.getImplementation().getSuccess()) {
                     query.setQueryState(QueryState.SUCCESSFUL);
@@ -163,44 +161,54 @@ public class QueryHandler {
                 }
                 break;
 
-                case REACHABILITY:
-                    if (value.getReachability().getSuccess()) {
-                        query.setQueryState(QueryState.SUCCESSFUL);
-                        if(value.getReachability().getSuccess()){
-                            Ecdar.showToast("Reachability check was successful and the location can be reached.");
-                        }
-                        else if(!value.getReachability().getSuccess()){
-                            Ecdar.showToast("Reachability check was successful but the location cannot be reached.");
-                        }
-                        query.getSuccessConsumer().accept(true);
-                    } else {
-                        query.setQueryState(QueryState.ERROR);
-                        Ecdar.showToast("Reachability check was unsuccessful!");
-                        query.getFailureConsumer().accept(new BackendException.QueryErrorException(value.getReachability().getReason()));
-                        query.getSuccessConsumer().accept(false);
-                        //ToDo: These errors are not implemented in the Reveaal backend.
-                        query.getStateActionConsumer().accept(value.getReachability().getState(),
-                                new ArrayList<>());
-                    }
-                    break;
+          case REACHABILITY:
+              if (value.getReachability().getSuccess()) {
+                  query.setQueryState(QueryState.SUCCESSFUL);
+                  Ecdar.showToast("Reachability check was successful and the location can be reached.");
 
-                case COMPONENT:
-                    query.setQueryState(QueryState.SUCCESSFUL);
-                    query.getSuccessConsumer().accept(true);
-                    JsonObject returnedComponent = (JsonObject) JsonParser.parseString(value.getComponent().getComponent().getJson());
-                    addGeneratedComponent(new Component(returnedComponent));
-                    break;
+                  //create list of edge id's
+                  ArrayList<String> edgeIds = new ArrayList<>();
+                  for(var pathsList : value.getReachability().getComponentPathsList()){
+                      for(var id : pathsList.getEdgeIdsList().toArray()) {
+                          edgeIds.add(id.toString());
+                      }
+                  }
+                  //highlight the edges
+                  Ecdar.getSimulationHandler().highlightReachabilityEdges(edgeIds);
+                  query.getSuccessConsumer().accept(true);
+              }
+              else if(!value.getReachability().getSuccess()){
+                  Ecdar.showToast("Reachability check was successful but the location cannot be reached.");
+                  query.getSuccessConsumer().accept(true);
+              } else {
+                  query.setQueryState(QueryState.ERROR);
+                  Ecdar.showToast("Error from backend: Reachability check was unsuccessful!");
+                  query.getFailureConsumer().accept(new BackendException.QueryErrorException(value.getReachability().getReason()));
+                  query.getSuccessConsumer().accept(false);
+                  //ToDo: These errors are not implemented in the Reveaal backend.
+                  query.getStateActionConsumer().accept(value.getReachability().getState(),
+                          new ArrayList<>());
+              }
+              break;
 
-            case ERROR:
-                query.setQueryState(QueryState.ERROR);
-                query.getFailureConsumer().accept(new BackendException.QueryErrorException(value.getError()));
-                query.getSuccessConsumer().accept(false);
-                break;
+          case COMPONENT:
+              query.setQueryState(QueryState.SUCCESSFUL);
+              query.getSuccessConsumer().accept(true);
+              JsonObject returnedComponent = (JsonObject) JsonParser.parseString(value.getComponent().getComponent().getJson());
+              addGeneratedComponent(new Component(returnedComponent));
+              break;
 
-            case RESULT_NOT_SET:
-                query.setQueryState(QueryState.ERROR);
-                query.getSuccessConsumer().accept(false);
-                break;
+          case ERROR:
+              query.setQueryState(QueryState.ERROR);
+              Ecdar.showToast(value.getError());
+              query.getFailureConsumer().accept(new BackendException.QueryErrorException(value.getError()));
+              query.getSuccessConsumer().accept(false);
+              break;
+
+          case RESULT_NOT_SET:
+              query.setQueryState(QueryState.ERROR);
+              query.getSuccessConsumer().accept(false);
+              break;
         }
 
     }
@@ -211,7 +219,7 @@ public class QueryHandler {
 
         // due to lack of information from backend if the reachability check shows that a location can NOT be reached, this is the most accurate information we can provide
         if(query.getType() == QueryType.REACHABILITY){
-            Ecdar.showToast("The reachability query failed. This might be due to the fact that the location is not reachable.");
+            Ecdar.showToast("Timeout (no response from backend): The reachability query failed. This might be due to the fact that the location is not reachable.");
         }
 
         // Each error starts with a capitalized description of the error equal to the gRPC error type encountered

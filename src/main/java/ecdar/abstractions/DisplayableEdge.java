@@ -9,6 +9,7 @@ import ecdar.utility.helpers.StringHelper;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.fxml.FXMLLoader;
 
 import java.util.List;
 import java.util.UUID;
@@ -41,6 +42,7 @@ public abstract class DisplayableEdge implements Nearable {
     private final BooleanProperty isHighlighted = new SimpleBooleanProperty(false);
 
     protected final BooleanProperty failing = new SimpleBooleanProperty(false);
+    private final BooleanProperty isHighlightedForReachability = new SimpleBooleanProperty(false);
 
     public Location getSourceLocation() {
         return sourceLocation.get();
@@ -135,8 +137,11 @@ public abstract class DisplayableEdge implements Nearable {
     public void setIsHighlighted(final boolean highlight){ this.isHighlighted.set(highlight);}
 
     public boolean getIsHighlighted(){ return this.isHighlighted.get(); }
+    public boolean getIsHighlightedForReachability(){ return this.isHighlightedForReachability.get(); }
 
     public BooleanProperty isHighlightedProperty() { return this.isHighlighted; }
+    public BooleanProperty isHighlightedForReachabilityProperty() { return this.isHighlightedForReachability; }
+
 
     public ObservableList<Nail> getNails() {
         return nails;
@@ -247,6 +252,8 @@ public abstract class DisplayableEdge implements Nearable {
             ioStatus.set(EdgeStatus.INPUT);
         }
     }
+
+    public void setIsHighlightedForReachability(final boolean highlightedForReachability){ this.isHighlightedForReachability.set(highlightedForReachability);}
 
     public enum PropertyType {
         NONE(-1),

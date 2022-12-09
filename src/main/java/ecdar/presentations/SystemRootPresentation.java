@@ -140,4 +140,9 @@ public class SystemRootPresentation extends StackPane implements Highlightable {
     public void unhighlight() {
         dyeFromSystemColor();
     }
+
+    @Override
+    public void highlightPurple() {
+        dye(Color.DEEP_PURPLE, SelectHelper.SELECT_COLOR_INTENSITY_NORMAL);
+    }
 }

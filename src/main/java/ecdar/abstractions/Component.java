@@ -96,7 +96,6 @@ public class Component extends HighLevelModelObject implements Boxed {
 
         locations.add(initialLocation);
         initializeIOListeners();
-        bindReachabilityAnalysis();
     }
 
     public Component(final JsonObject json) {
@@ -105,7 +104,6 @@ public class Component extends HighLevelModelObject implements Boxed {
         deserialize(json);
         initializeIOListeners();
         updateIOList();
-        bindReachabilityAnalysis();
     }
 
     /**
@@ -833,16 +831,6 @@ public class Component extends HighLevelModelObject implements Boxed {
                 location.setColor(previousLocationColors.get(location).getKey());
             });
         }, String.format("Changed the color of %s to %s", this, color.name()), "color-lens");
-    }
-
-    private void bindReachabilityAnalysis() {
-        // If there is no EcdarPresentation, we are running tests and EcdarController calls will fail
-        if (Ecdar.getPresentation() == null) return;
-
-        locations.addListener((ListChangeListener<? super Location>) c -> EcdarController.runReachabilityAnalysis());
-        edges.addListener((ListChangeListener<? super DisplayableEdge>) c -> EcdarController.runReachabilityAnalysis());
-        declarationsTextProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
-        includeInPeriodicCheckProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
     }
 
     public String getDescription() {

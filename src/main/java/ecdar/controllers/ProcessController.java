@@ -2,6 +2,7 @@ package ecdar.controllers;
 
 import com.jfoenix.controls.JFXRippler;
 import ecdar.abstractions.*;
+import ecdar.presentations.ComponentPresentation;
 import ecdar.presentations.SimEdgePresentation;
 import ecdar.presentations.SimLocationPresentation;
 import javafx.animation.Interpolator;
@@ -16,6 +17,9 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Circle;
 import javafx.util.Duration;
+
+import org.fxmisc.richtext.LineNumberFactory;
+import org.fxmisc.richtext.StyleClassedTextArea;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.math.BigDecimal;
@@ -31,6 +35,7 @@ public class ProcessController extends ModelController implements Initializable 
     public Pane modelContainerLocation;
     public JFXRippler toggleValuesButton;
     public VBox valueArea;
+    public StyleClassedTextArea declarationTextArea;
     public FontIcon toggleValueButtonIcon;
     private ObjectProperty<Component> component;
 
@@ -46,6 +51,8 @@ public class ProcessController extends ModelController implements Initializable 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
         component = new SimpleObjectProperty<>(new Component(true));
+        // add line numbers to the declaration text area
+        declarationTextArea.setParagraphGraphicFactory(LineNumberFactory.get(declarationTextArea));
         initializeValues();
     }
 
@@ -196,6 +203,10 @@ public class ProcessController extends ModelController implements Initializable 
             modelContainerEdge.getChildren().add(ep);
             edgePresentationMap.put(edge, ep);
         });
+
+        declarationTextArea.appendText(component.getDeclarationsText());
+        declarationTextArea.setStyleSpans(0, ComponentPresentation.computeHighlighting(getComponent().getDeclarationsText()));
+        declarationTextArea.getStyleClass().add("component-declaration");
     }
 
     public void toggleValues(final MouseEvent mouseEvent) {

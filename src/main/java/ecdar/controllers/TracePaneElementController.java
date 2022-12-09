@@ -13,9 +13,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.net.URL;
@@ -40,10 +38,13 @@ public class TracePaneElementController implements Initializable {
     private SimpleBooleanProperty isTraceExpanded = new SimpleBooleanProperty(false);
     private Map<SimulationState, TransitionPresentation> transitionPresentationMap = new LinkedHashMap<>();
     private SimpleIntegerProperty numberOfSteps = new SimpleIntegerProperty(0);
+    private SimulationHandler simulationHandler;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        Ecdar.getSimulationHandler().getTraceLog().addListener((ListChangeListener<SimulationState>) c -> {
+        simulationHandler = Ecdar.getSimulationHandler();
+
+        simulationHandler.getTraceLog().addListener((ListChangeListener<SimulationState>) c -> {
             while (c.next()) {
                 for (final SimulationState state : c.getAddedSubList()) {
                     if (state != null) insertTraceState(state, true);
@@ -102,6 +103,16 @@ public class TracePaneElementController implements Initializable {
         root.getChildren().remove(traceSummary);
     }
 
+    private void previewStep(final SimulationState state) {
+        traceList.getChildren().forEach(trace -> trace.setOpacity(1));
+        int i = traceList.getChildren().size() - 1;
+        while (traceList.getChildren().get(i) != transitionPresentationMap.get(state)) {
+            traceList.getChildren().get(i).setOpacity(0.4);
+            i--;
+        }
+        simulationHandler.currentState.set(state);
+    }
+
     /**
      * Instantiates a {@link TransitionPresentation} for a {@link SimulationState} and adds it to the view
      *
@@ -114,9 +125,8 @@ public class TracePaneElementController implements Initializable {
 
         transitionPresentation.setOnMouseReleased(event -> {
             event.consume();
-            final SimulationHandler simHandler = Ecdar.getSimulationHandler();
-            if (simHandler == null) return;
-            Ecdar.getSimulationHandler().selectStateFromLog(state);
+            if (simulationHandler == null) return;
+            previewStep(state);
         });
 
         EventHandler mouseEntered = transitionPresentation.getOnMouseEntered();
@@ -159,13 +169,21 @@ public class TracePaneElementController implements Initializable {
             String locationName = loc.getId();
             if (i == length - 1) {
                 title.append(locationName);
-            } else {
+            } else  {
                 title.append(locationName).append(", ");
             }
         }
-        title.append(")");
+        title.append(")\n");
 
-        return title.toString();
+        StringBuilder clocks = new StringBuilder();
+        for (var constraint : state.getState().getFederation().getDisjunction().getConjunctions(0).getConstraintsList()) {
+            var x = constraint.getX().getClockName();
+            var y = constraint.getY().getClockName();
+            var c = constraint.getC();
+            var strict = constraint.getStrict();
+            clocks.append(x).append(" - ").append(y).append(strict ? " < " : " <= ").append(c).append("\n");
+        }
+        return title.toString() + clocks.toString();
     }
 
     /**

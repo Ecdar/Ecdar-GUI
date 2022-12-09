@@ -2,6 +2,7 @@ package ecdar.controllers;
 
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
+import ecdar.backend.SimulationHandler;
 import ecdar.presentations.ProcessPresentation;
 import ecdar.simulation.SimulationState;
 import ecdar.simulation.Transition;
@@ -62,9 +63,12 @@ public class SimulatorOverviewController implements Initializable {
     private boolean resetZoom = false;
     private boolean isMaxZoomInReached = false;
     private boolean isMaxZoomOutReached = false;
+    private SimulationHandler simulationHandler;
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
+        simulationHandler = Ecdar.getSimulationHandler();
+
         groupContainer = new Group();
         processContainer = new FlowPane();
         //In case that the processContainer gets moved around we have to keep in into place.
@@ -105,7 +109,7 @@ public class SimulatorOverviewController implements Initializable {
                 }
             }
             // Highlight the current state when the processes change
-            highlightProcessState(Ecdar.getSimulationHandler().currentState.get()); // ToDo NIELS: Throws NullPointerException inside method due to currentState
+            highlightProcessState(simulationHandler.currentState.get()); // ToDo NIELS: Throws NullPointerException inside method due to currentState
             processContainer.getChildren().addAll(processes.values());
             processPresentations.putAll(processes);
         });
@@ -129,8 +133,8 @@ public class SimulatorOverviewController implements Initializable {
      * Setup listeners for displaying clock and variable values on the {@link ProcessPresentation}
      */
     private void initializeSimulationVariables() {
-        Ecdar.getSimulationHandler().getSimulationVariables().addListener((InvalidationListener) obs -> {
-            Ecdar.getSimulationHandler().getSimulationVariables().forEach((s, bigDecimal) -> {
+        simulationHandler.getSimulationVariables().addListener((InvalidationListener) obs -> {
+            simulationHandler.getSimulationVariables().forEach((s, bigDecimal) -> {
                 if (!s.equals("t(0)")) {// As t(0) does not belong to any process
                     final String[] spittedString = s.split("\\.");
                     // If the process containing the var is not there we just skip it
@@ -140,9 +144,9 @@ public class SimulatorOverviewController implements Initializable {
                 }
             });
         });
-        Ecdar.getSimulationHandler().getSimulationClocks().addListener((InvalidationListener) obs -> {
+        simulationHandler.getSimulationClocks().addListener((InvalidationListener) obs -> {
             if (processPresentations.size() == 0) return;
-            Ecdar.getSimulationHandler().getSimulationClocks().forEach((s, bigDecimal) -> {
+            simulationHandler.getSimulationClocks().forEach((s, bigDecimal) -> {
                 if (!s.equals("t(0)")) {// As t(0) does not belong to any process
                     final String[] spittedString = s.split("\\.");
                     // If the process containing the clock is not there we just skip it
@@ -301,11 +305,11 @@ public class SimulatorOverviewController implements Initializable {
      * Initializer method to setup listeners that handle highlighting when selected/current state/transition changes
      */
     private void initializeHighlighting() {
-        Ecdar.getSimulationHandler().selectedEdge.addListener((observable, oldEdge, newEdge) -> {
+        simulationHandler.selectedEdge.addListener((observable, oldEdge, newEdge) -> {
             unhighlightProcesses();
         });
 
-        Ecdar.getSimulationHandler().currentState.addListener((observable, oldState, newState) -> {
+        simulationHandler.currentState.addListener((observable, oldState, newState) -> {
             if (newState == null) {
                 return;
             }
@@ -357,8 +361,8 @@ public class SimulatorOverviewController implements Initializable {
      */
     public void highlightProcessState(final SimulationState state) {
         if (state == null) return;
-        for (int i = 0; i < state.getLocations().size(); i++) {
-            final Pair<String, String> loc = state.getLocations().get(i);
+
+        for(var loc : state.getLocations()){
 
             processPresentations.values().stream()
                     .filter(p -> p.getController().getComponent().getName().equals(loc.getKey()))
@@ -372,14 +376,14 @@ public class SimulatorOverviewController implements Initializable {
 
     public void highlightAvailableEdges(SimulationState state) {
         // unhighlight all edges
-        for (Pair<String,String> edge : state.getEdges()) {
+        for (Pair<String,String> edge : state.getEnabledEdges()) {
             processPresentations.values().stream()
                     .forEach(p -> p.getController().getComponent().getEdges().stream()
                             .forEach(e -> e.setIsHighlighted(false)));
         }
 
         // highlight available edges in the given state
-        for (Pair<String,String> edge : state.getEdges()) {
+        for (Pair<String,String> edge : state.getEnabledEdges()) {
             processPresentations.values().stream()
                     .forEach(p -> p.getController().getComponent().getEdges().stream()
                         .forEach(e -> {
@@ -389,5 +393,4 @@ public class SimulatorOverviewController implements Initializable {
                         }));
         }
     }
-
 }

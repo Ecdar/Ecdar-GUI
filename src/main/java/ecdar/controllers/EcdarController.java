@@ -6,6 +6,7 @@ import ecdar.Debug;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
 import ecdar.backend.BackendHelper;
+import ecdar.backend.SimulationHandler;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.presentations.*;
@@ -48,11 +49,7 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public class EcdarController implements Initializable {
-    // Reachability analysis
-    public static boolean reachabilityServiceEnabled = false;
-    private static long reachabilityTime = Long.MAX_VALUE;
-    private static ExecutorService reachabilityService;
-
+    private SimulationHandler simulationHandler;
     // View stuff
     public StackPane root;
     public BorderPane borderPane;
@@ -144,16 +141,10 @@ public class EcdarController implements Initializable {
     private static Text _queryTextQuery;
     private static final Text temporaryComponentWatermark = new Text("Temporary component");
 
-    public static void runReachabilityAnalysis() {
-        if (!reachabilityServiceEnabled) return;
-
-        reachabilityTime = System.currentTimeMillis() + 500;
-    }
-
     /**
      * Enumeration to keep track of which mode the application is in
      */
-    private enum Mode {
+    public enum Mode {
         Editor, Simulator
     }
 
@@ -161,7 +152,7 @@ public class EcdarController implements Initializable {
      * currentMode is a property that keeps track of which mode the application is in.
      * The initial mode is Mode.Editor
      */
-    private static final ObjectProperty<Mode> currentMode = new SimpleObjectProperty<>(Mode.Editor);
+    public static final ObjectProperty<Mode> currentMode = new SimpleObjectProperty<>(Mode.Editor);
 
     private static final EditorPresentation editorPresentation = new EditorPresentation();
     public final ProjectPanePresentation projectPane = new ProjectPanePresentation();
@@ -177,7 +168,6 @@ public class EcdarController implements Initializable {
         initializeKeybindings();
         initializeStatusBar();
         initializeMenuBar();
-        startBackgroundQueriesThread(); // Will terminate immediately if background queries are turned off
 
         // Update file coloring when active model changes
         editorPresentation.getController().getActiveCanvasPresentation().getController().activeComponentProperty().addListener(observable -> projectPane.getController().updateColorsOnFilePresentations());
@@ -189,6 +179,8 @@ public class EcdarController implements Initializable {
         rightSimPane.maxWidthProperty().bind(queryPane.maxWidthProperty());
 
         enterEditorMode();
+
+        simulationHandler = Ecdar.getSimulationHandler();
     }
 
     public StackPane getCenter() {
@@ -290,7 +282,7 @@ public class EcdarController implements Initializable {
         simulationInitializationDialog.getController().startButton.setOnMouseClicked(event -> {
 
             // ToDo NIELS: Start simulation of selected query
-            Ecdar.getSimulationHandler().setComposition(simulationInitializationDialog.getController().simulationComboBox.getSelectionModel().getSelectedItem());
+            simulationHandler.setComposition(simulationInitializationDialog.getController().simulationComboBox.getSelectionModel().getSelectedItem());
             currentMode.setValue(Mode.Simulator);
             simulationInitializationDialog.close();
         });
@@ -404,74 +396,6 @@ public class EcdarController implements Initializable {
         KeyboardTracker.registerKeybind(KeyboardTracker.NUDGE_D, new Keybind(new KeyCodeCombination(KeyCode.D), () -> nudgeSelected(NudgeDirection.RIGHT)));
     }
 
-    private void startBackgroundQueriesThread() {
-        new Thread(() -> {
-            while (Ecdar.shouldRunBackgroundQueries.get()) {
-                // Wait for the reachability (the last time we changed the model) becomes smaller than the current time
-                while (reachabilityTime > System.currentTimeMillis()) {
-                    try {
-                        Thread.sleep(2000);
-                        Debug.backgroundThreads.removeIf(thread -> !thread.isAlive());
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                // We are now performing the analysis. Do not do another analysis before another change is introduced
-                reachabilityTime = Long.MAX_VALUE;
-
-                // Cancel any ongoing analysis
-                if (reachabilityService != null) {
-                    reachabilityService.shutdownNow();
-                }
-
-                // Start new analysis
-                reachabilityService = Executors.newFixedThreadPool(10);
-
-                while (Debug.backgroundThreads.size() > 0) {
-                    final Thread thread = Debug.backgroundThreads.get(0);
-                    thread.interrupt();
-                    Debug.removeThread(thread);
-                }
-
-                // Stop thread if background queries have been toggled off
-                if (!Ecdar.shouldRunBackgroundQueries.get()) return;
-
-                Ecdar.getProject().getQueries().forEach(query -> {
-                    if (query.isPeriodic()) Ecdar.getQueryExecutor().executeQuery(query);
-                });
-
-                // List of threads to start
-                List<Thread> threads = new ArrayList<>();
-
-                // Submit all background reachability queries
-                Ecdar.getProject().getComponents().forEach(component -> {
-                    // Check if we should consider this component
-                    if (!component.isIncludeInPeriodicCheck()) {
-                        component.getLocations().forEach(location -> location.setReachability(Location.Reachability.EXCLUDED));
-                    } else {
-                        component.getLocations().forEach(location -> {
-                            final String locationReachableQuery = BackendHelper.getLocationReachableQuery(location, component, SimulatorController.getSimulationQuery());
-
-                            Query reachabilityQuery = new Query(locationReachableQuery, "", QueryState.UNKNOWN);
-                            reachabilityQuery.setType(QueryType.REACHABILITY);
-
-                            Ecdar.getQueryExecutor().executeQuery(reachabilityQuery);
-
-                            final Thread verifyThread = new Thread(() -> Ecdar.getQueryExecutor().executeQuery(reachabilityQuery));
-
-                            verifyThread.setName(locationReachableQuery + " (" + verifyThread.getName() + ")");
-                            Debug.addThread(verifyThread);
-                            threads.add(verifyThread);
-                        });
-                    }
-                });
-
-                threads.forEach((verifyThread) -> reachabilityService.submit(verifyThread::start));
-            }
-        }).start();
-    }
-
     private void initializeStatusBar() {
         statusBar.setBackground(new Background(new BackgroundFill(
                 Color.GREY_BLUE.getColor(Color.Intensity.I800),
@@ -560,10 +484,6 @@ public class EcdarController implements Initializable {
         menuBarOptionsBackgroundQueries.setOnAction(event -> {
             final BooleanProperty shouldRunBackgroundQueries = Ecdar.toggleRunBackgroundQueries();
             Ecdar.preferences.putBoolean("run_background_queries", shouldRunBackgroundQueries.get());
-            if (shouldRunBackgroundQueries.get()) {
-                // If background queries have been turned back on, start a new thread
-                startBackgroundQueriesThread();
-            }
         });
 
         Ecdar.shouldRunBackgroundQueries.setValue(Ecdar.preferences.getBoolean("run_background_queries", true));
@@ -661,7 +581,7 @@ public class EcdarController implements Initializable {
                     return;
                 }
 
-                if (!Ecdar.getSimulationHandler().isSimulationRunning()) {
+                if (!simulationHandler.isSimulationRunning()) {
                     ArrayList<String> queryOptions = Ecdar.getProject().getQueries().stream().map(Query::getQuery).collect(Collectors.toCollection(ArrayList::new));
                     if (!simulationInitializationDialog.getController().simulationComboBox.getItems().equals(queryOptions)) {
                         simulationInitializationDialog.getController().simulationComboBox.getItems().setAll(queryOptions);
@@ -705,7 +625,6 @@ public class EcdarController implements Initializable {
                     break;
                 }
             }
-            scaling.selectToggle(scaleM); // Necessary to avoid project pane appearing off-screen
             scaling.selectToggle((RadioMenuItem) matchingToggle);
         });
 
@@ -1000,7 +919,6 @@ public class EcdarController implements Initializable {
         leftPane.getChildren().add(projectPane);
         rightPane.getChildren().clear();
         rightPane.getChildren().add(queryPane);
-        scaling.selectToggle(scaleM); // temporary fix for scaling issue
 
         // Enable or disable the menu items that can be used when in the simulator
 //        updateMenuItems();
