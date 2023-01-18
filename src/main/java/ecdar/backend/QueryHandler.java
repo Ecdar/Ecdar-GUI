@@ -44,7 +44,7 @@ public class QueryHandler {
         query.errors().set("");
 
         GrpcRequest request = new GrpcRequest(backendConnection -> {
-            connections.add(backendConnection); // Sae reference for closing connection on exit
+            connections.add(backendConnection); // Save reference for closing connection on exit
             StreamObserver<QueryProtos.QueryResponse> responseObserver = new StreamObserver<>() {
                 @Override
                 public void onNext(QueryProtos.QueryResponse value) {
@@ -79,10 +79,8 @@ public class QueryHandler {
 
     /**
      * Close all open backend connection and kill all locally running processes
-     *
-     * @throws IOException if any of the sockets do not respond
      */
-    public void closeAllBackendConnections() throws IOException {
+    public void closeAllBackendConnections() {
         for (BackendConnection con : connections) {
             con.close();
         }
@@ -125,7 +123,7 @@ public class QueryHandler {
         } else {
             try {
                 query.setQueryState(QueryState.ERROR);
-                query.getFailureConsumer().accept(new BackendException.QueryErrorException("The execution of this query failed with message:\n" + t.getLocalizedMessage()));
+                query.getFailureConsumer().accept(new BackendException.QueryErrorException("The execution of this query failed with message:" + System.lineSeparator() + t.getLocalizedMessage()));
             } catch (Exception e) {
                 e.printStackTrace();
             }
