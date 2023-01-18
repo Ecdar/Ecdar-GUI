@@ -126,7 +126,7 @@ public class SystemRootPresentation extends StackPane implements Highlightable {
         final ObservableDoubleValue minX = new SimpleDoubleProperty(2d * 10);
         final ObservableDoubleValue maxX = controller.getSystem().getBox().getWidthProperty()
                 .subtract(8d * 10);
-        final ObservableDoubleValue y = new SimpleDoubleProperty(40);
+        final ObservableDoubleValue y = new SimpleDoubleProperty(20);
 
         return new ItemDragHelper.DragBounds(minX, maxX, y, y);
     }

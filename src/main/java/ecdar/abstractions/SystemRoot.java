@@ -37,7 +37,7 @@ public class SystemRoot implements SystemElement {
 
     @Override
     public ObservableValue<? extends Number> getEdgeY() {
-        return new SimpleDoubleProperty(60 - 4d);
+        return new SimpleDoubleProperty(40 - 4d);
     }
 
     @Override

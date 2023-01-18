@@ -444,7 +444,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                 // Allowed x and y coordinates
                 final double minX = 20;
                 final double maxX = getComponent().getBox().getWidth() - 20;
-                final double minY = 60;
+                final double minY = 40;
                 final double maxY = getComponent().getBox().getHeight() - 20;
 
                 if(root.getLayoutX() >= minX && root.getLayoutX() <= maxX && root.getLayoutY() >= minY && root.getLayoutY() <= maxY) {

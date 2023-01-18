@@ -262,7 +262,7 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
     public ItemDragHelper.DragBounds getDragBounds() {
         final ObservableDoubleValue minX = new SimpleDoubleProperty(10);
         final ObservableDoubleValue maxX = getComponent().getBox().getWidthProperty().subtract(10);
-        final ObservableDoubleValue minY = new SimpleDoubleProperty(50);
+        final ObservableDoubleValue minY = new SimpleDoubleProperty(30);
         final ObservableDoubleValue maxY = getComponent().getBox().getHeightProperty().subtract(10);
 
         return new ItemDragHelper.DragBounds(minX, maxX, minY, maxY);
