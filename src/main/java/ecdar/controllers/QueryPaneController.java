@@ -87,7 +87,7 @@ public class QueryPaneController implements Initializable {
         Ecdar.getProject().getQueries().forEach(query -> {
             if (query.getType() == null) return;
             query.cancel();
-            query.run();
+            Ecdar.getQueryExecutor().executeQuery(query);
         });
     }
 

@@ -47,16 +47,6 @@ public final class BackendHelper {
     }
 
     /**
-     * Check if the given backend supports ignored inputs and outputs as parameters.
-     *
-     * @param backend the name of the backend to check
-     * @return true if the backend supports ignored inputs and outputs, else false
-     */
-    public static Boolean backendSupportsInputOutputs(BackendInstance backend) {
-        return true;
-    }
-
-    /**
      * Gets the directory path for storing temporary files.
      *
      * @return the path
