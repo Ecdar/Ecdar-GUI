@@ -43,9 +43,9 @@ public class SystemRootPresentation extends StackPane implements Highlightable {
         setLayoutY(40);
 
         controller.shape.getPoints().addAll(0d, 0d);
-        controller.shape.getPoints().addAll(2d * 10, 15.);
-        controller.shape.getPoints().addAll(4d * 10, 15.);
-        controller.shape.getPoints().addAll(6d * 10, 0d);
+        controller.shape.getPoints().addAll(20d, 15.);
+        controller.shape.getPoints().addAll(40d, 15.);
+        controller.shape.getPoints().addAll(60d, 0d);
     }
 
     /**
@@ -123,9 +123,9 @@ public class SystemRootPresentation extends StackPane implements Highlightable {
      * @return the drag bounds
      */
     private ItemDragHelper.DragBounds getDragBounds() {
-        final ObservableDoubleValue minX = new SimpleDoubleProperty(2d * 10);
+        final ObservableDoubleValue minX = new SimpleDoubleProperty(20d);
         final ObservableDoubleValue maxX = controller.getSystem().getBox().getWidthProperty()
-                .subtract(8d * 10);
+                .subtract(80d);
         final ObservableDoubleValue y = new SimpleDoubleProperty(20);
 
         return new ItemDragHelper.DragBounds(minX, maxX, y, y);

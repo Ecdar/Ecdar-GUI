@@ -1,5 +1,6 @@
 package ecdar.presentations;
 
+import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
 import ecdar.abstractions.Location;
@@ -97,7 +98,7 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
             // Set the icon color and rippler color of the toggleDeclarationButton
             controller.toggleDeclarationButton.setRipplerFill(newColor.getTextColor(newIntensity));
 
-            controller.toolbar.setPrefHeight(20);
+            controller.toolbar.setPrefHeight(Ecdar.CANVAS_PADDING * 2);
             controller.toggleDeclarationButton.setBackground(Background.EMPTY);
         };
 
@@ -128,10 +129,10 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
             controller.background.setOpacity(0.5);
 
             // Bind the missing lines that we cropped away
-            controller.topLeftLine.setStartX(40);
+            controller.topLeftLine.setStartX(Ecdar.CANVAS_PADDING * 4);
             controller.topLeftLine.setStartY(0);
             controller.topLeftLine.setEndX(0);
-            controller.topLeftLine.setEndY(40);
+            controller.topLeftLine.setEndY(Ecdar.CANVAS_PADDING * 4);
             controller.topLeftLine.setStroke(newColor.getColor(newIntensity.next(2)));
             controller.topLeftLine.setStrokeWidth(1.25);
             StackPane.setAlignment(controller.topLeftLine, Pos.TOP_LEFT);
@@ -227,15 +228,15 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
     @Override
     double getDragAnchorMinWidth() {
         final Component component = controller.getComponent();
-        double minWidth = 100;
+        double minWidth = Ecdar.CANVAS_PADDING * 10;
 
         for (final Location location : component.getLocations()) {
-            minWidth = Math.max(minWidth, location.getX() + 20);
+            minWidth = Math.max(minWidth, location.getX() + Ecdar.CANVAS_PADDING * 2);
         }
 
         for (final Edge edge : component.getEdges()) {
             for (final Nail nail : edge.getNails()) {
-                minWidth = Math.max(minWidth, nail.getX() + 10);
+                minWidth = Math.max(minWidth, nail.getX() + Ecdar.CANVAS_PADDING);
             }
         }
 

@@ -1,5 +1,6 @@
 package ecdar.controllers;
 
+import ecdar.Ecdar;
 import ecdar.abstractions.*;
 import ecdar.code_analysis.Nearable;
 import ecdar.model_canvas.arrow_heads.SimpleArrowHead;
@@ -287,8 +288,8 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
             if (nails.size() == 0) {
                 // Check if the source and target locations are the same, if they are, add proper amount of nails
                 if (newEdge.getTargetCircular().equals(newSourceCircular)) {
-                    final Nail nail1 = new Nail(newSourceCircular.xProperty().add(40), newSourceCircular.yProperty().subtract(10));
-                    final Nail nail2 = new Nail(newSourceCircular.xProperty().add(40), newSourceCircular.yProperty().add(10));
+                    final Nail nail1 = new Nail(newSourceCircular.xProperty().add(Ecdar.CANVAS_PADDING * 4), newSourceCircular.yProperty().subtract(Ecdar.CANVAS_PADDING));
+                    final Nail nail2 = new Nail(newSourceCircular.xProperty().add(Ecdar.CANVAS_PADDING * 4), newSourceCircular.yProperty().add(Ecdar.CANVAS_PADDING));
 
                     // Add the nails to the nails collection (will draw links between them)
                     nails.addAll(nail1, nail2);

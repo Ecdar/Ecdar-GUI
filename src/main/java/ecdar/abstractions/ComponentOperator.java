@@ -1,6 +1,7 @@
 package ecdar.abstractions;
 
 import com.google.gson.JsonObject;
+import ecdar.Ecdar;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
@@ -9,8 +10,8 @@ import javafx.beans.value.ObservableValue;
  * Model of a Component Operator
  */
 public abstract class ComponentOperator implements SystemElement {
-    public final static int WIDTH = 40;
-    public final static int HEIGHT = 20;
+    public final static int WIDTH = Ecdar.CANVAS_PADDING * 4;
+    public final static int HEIGHT = Ecdar.CANVAS_PADDING * 2;
 
     public static final String TYPE = "type";
 

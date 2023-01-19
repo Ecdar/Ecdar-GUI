@@ -701,8 +701,8 @@ public class Component extends HighLevelModelObject implements Boxed {
         box.setProperties(json);
 
         if (box.getWidth() == 0 && box.getHeight() == 0) {
-            box.setWidth(locations.stream().max(Comparator.comparingDouble(Location::getX)).get().getX() + 100);
-            box.setHeight(locations.stream().max(Comparator.comparingDouble(Location::getY)).get().getY() + 100);
+            box.setWidth(locations.stream().max(Comparator.comparingDouble(Location::getX)).get().getX() + Ecdar.CANVAS_PADDING * 10);
+            box.setHeight(locations.stream().max(Comparator.comparingDouble(Location::getY)).get().getY() + Ecdar.CANVAS_PADDING * 10);
         }
 
         final EnabledColor enabledColor = (json.has(COLOR) ? EnabledColor.fromIdentifier(json.getAsJsonPrimitive(COLOR).getAsString()) : null);
@@ -968,16 +968,16 @@ public class Component extends HighLevelModelObject implements Boxed {
      * Moves all nodes down.
      */
     public void moveAllNodesDown() {
-        getLocations().forEach(loc -> loc.setX(loc.getX() + NudgeDirection.DOWN.getYOffset()));
-        getDisplayableEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setX(nail.getX() + NudgeDirection.DOWN.getYOffset())));
+        getLocations().forEach(loc -> loc.setY(loc.getY() + NudgeDirection.DOWN.getYOffset()));
+        getDisplayableEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setY(nail.getY() + NudgeDirection.DOWN.getYOffset())));
     }
 
     /**
      * Moves all nodes up.
      */
     public void moveAllNodesUp() {
-        getLocations().forEach(loc -> loc.setX(loc.getX() + NudgeDirection.UP.getYOffset()));
-        getDisplayableEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setX(nail.getX() + NudgeDirection.UP.getYOffset())));
+        getLocations().forEach(loc -> loc.setY(loc.getY() + NudgeDirection.UP.getYOffset()));
+        getDisplayableEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setY(nail.getY() + NudgeDirection.UP.getYOffset())));
     }
 
     public List<DisplayableEdge> getInputEdges() {

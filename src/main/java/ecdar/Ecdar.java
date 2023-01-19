@@ -42,6 +42,7 @@ public class Ecdar extends Application {
     public static Preferences preferences = Preferences.userRoot().node("ECDAR");
     public static BooleanProperty autoScalingEnabled = new SimpleBooleanProperty(false);
     public static final String VERSION = getVersion();
+    public static final int CANVAS_PADDING = 10;
     public static boolean serializationDone = false;
     public static SimpleStringProperty projectDirectory = new SimpleStringProperty();
 

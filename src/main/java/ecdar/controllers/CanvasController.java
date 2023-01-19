@@ -1,6 +1,7 @@
 package ecdar.controllers;
 
 import com.jfoenix.controls.JFXRippler;
+import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Declarations;
 import ecdar.abstractions.HighLevelModelObject;
@@ -35,7 +36,7 @@ public class CanvasController implements Initializable {
     public JFXRippler zoomToFit;
     public JFXRippler resetZoom;
     public final ZoomHelper zoomHelper = new ZoomHelper();
-    public final double DECLARATION_Y_MARGIN = 55;
+    public final double DECLARATION_Y_MARGIN = Ecdar.CANVAS_PADDING * 5.5;
     public ComponentPresentation activeComponentPresentation;
 
     private final ObjectProperty<HighLevelModelObject> activeModel = new SimpleObjectProperty<>(null);

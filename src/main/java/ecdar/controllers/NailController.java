@@ -260,10 +260,10 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
 
     @Override
     public ItemDragHelper.DragBounds getDragBounds() {
-        final ObservableDoubleValue minX = new SimpleDoubleProperty(10);
-        final ObservableDoubleValue maxX = getComponent().getBox().getWidthProperty().subtract(10);
-        final ObservableDoubleValue minY = new SimpleDoubleProperty(30);
-        final ObservableDoubleValue maxY = getComponent().getBox().getHeightProperty().subtract(10);
+        final ObservableDoubleValue minX = new SimpleDoubleProperty(Ecdar.CANVAS_PADDING);
+        final ObservableDoubleValue maxX = getComponent().getBox().getWidthProperty().subtract(Ecdar.CANVAS_PADDING);
+        final ObservableDoubleValue minY = new SimpleDoubleProperty(Ecdar.CANVAS_PADDING * 3);
+        final ObservableDoubleValue maxY = getComponent().getBox().getHeightProperty().subtract(Ecdar.CANVAS_PADDING);
 
         return new ItemDragHelper.DragBounds(minX, maxX, minY, maxY);
     }

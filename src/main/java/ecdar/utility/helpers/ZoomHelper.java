@@ -1,5 +1,6 @@
 package ecdar.utility.helpers;
 
+import ecdar.Ecdar;
 import ecdar.controllers.EcdarController;
 import ecdar.presentations.CanvasPresentation;
 import ecdar.presentations.ModelPresentation;
@@ -120,7 +121,7 @@ public class ZoomHelper {
 
     private void centerComponent() {
         EcdarController.getActiveCanvasPresentation().getController().modelPane.setTranslateX(0);
-        EcdarController.getActiveCanvasPresentation().getController().modelPane.setTranslateY(-20); // 0 is slightly below center, this looks better
+        EcdarController.getActiveCanvasPresentation().getController().modelPane.setTranslateY(-Ecdar.CANVAS_PADDING * 2); // 0 is slightly below center, this looks better
 
         // Center the model within the modelPane to account for resized model
         model.setTranslateX(0);

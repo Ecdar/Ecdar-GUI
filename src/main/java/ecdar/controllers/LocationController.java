@@ -367,7 +367,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                 final DisplayableEdge unfinishedEdge = component.getUnfinishedEdge();
                 // Make self-loop pretty if needed
                 if (unfinishedEdge.getTargetLocation().equals(getLocation()) && unfinishedEdge.getNails().size() == 1) {
-                    final Nail nail = new Nail(unfinishedEdge.getNails().get(0).getX(), unfinishedEdge.getNails().get(0).getY() + 20);
+                    final Nail nail = new Nail(unfinishedEdge.getNails().get(0).getX(), unfinishedEdge.getNails().get(0).getY() + Ecdar.CANVAS_PADDING * 2);
                     unfinishedEdge.addNail(nail);
                 }
                 unfinishedEdge.setSourceLocation(getLocation());
@@ -395,16 +395,16 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                     if (!unfinishedEdge.hasSyncNail()) {
                         // If self loop, make it pretty
                         if (getLocation().equals(unfinishedEdge.getSourceLocation())) {
-                            final Nail nail = new Nail(getX() + 40, getY() - 10);
+                            final Nail nail = new Nail(getX() + Ecdar.CANVAS_PADDING * 4, getY() - Ecdar.CANVAS_PADDING);
                             nail.setPropertyType(Edge.PropertyType.SYNCHRONIZATION);
                             unfinishedEdge.addNail(nail);
-                            final Nail nail2 = new Nail(getX() + 40, getY() + 10);
+                            final Nail nail2 = new Nail(getX() + Ecdar.CANVAS_PADDING * 4, getY() + Ecdar.CANVAS_PADDING);
                             unfinishedEdge.addNail(nail2);
                         } else {
                             unfinishedEdge.makeSyncNailBetweenLocations();
                         }
                     } else if (getLocation().equals(unfinishedEdge.getSourceLocation()) && unfinishedEdge.getNails().size() == 1) {
-                        final Nail nail = new Nail(unfinishedEdge.getNails().get(0).getX(), unfinishedEdge.getNails().get(0).getY() + 20);
+                        final Nail nail = new Nail(unfinishedEdge.getNails().get(0).getX(), unfinishedEdge.getNails().get(0).getY() + Ecdar.CANVAS_PADDING * 2);
                         unfinishedEdge.addNail(nail);
                     }
 
@@ -442,10 +442,10 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                 }
             } else {
                 // Allowed x and y coordinates
-                final double minX = 20;
-                final double maxX = getComponent().getBox().getWidth() - 20;
-                final double minY = 40;
-                final double maxY = getComponent().getBox().getHeight() - 20;
+                final double minX = Ecdar.CANVAS_PADDING * 2;
+                final double maxX = getComponent().getBox().getWidth() - Ecdar.CANVAS_PADDING * 2;
+                final double minY = Ecdar.CANVAS_PADDING * 4;
+                final double maxY = getComponent().getBox().getHeight() - Ecdar.CANVAS_PADDING * 2;
 
                 if(root.getLayoutX() >= minX && root.getLayoutX() <= maxX && root.getLayoutY() >= minY && root.getLayoutY() <= maxY) {
                     // Unbind presentation root x and y coordinates (bind the view properly to enable dragging)
@@ -494,10 +494,10 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
     @Override
     public ItemDragHelper.DragBounds getDragBounds() {
-        final ObservableDoubleValue minX = new SimpleDoubleProperty(20);
-        final ObservableDoubleValue maxX = getComponent().getBox().getWidthProperty().subtract(20);
-        final ObservableDoubleValue minY = new SimpleDoubleProperty(40);
-        final ObservableDoubleValue maxY = getComponent().getBox().getHeightProperty().subtract(20);
+        final ObservableDoubleValue minX = new SimpleDoubleProperty(Ecdar.CANVAS_PADDING * 2);
+        final ObservableDoubleValue maxX = getComponent().getBox().getWidthProperty().subtract(Ecdar.CANVAS_PADDING * 2);
+        final ObservableDoubleValue minY = new SimpleDoubleProperty(Ecdar.CANVAS_PADDING * 4);
+        final ObservableDoubleValue maxY = getComponent().getBox().getHeightProperty().subtract(Ecdar.CANVAS_PADDING * 2);
         return new ItemDragHelper.DragBounds(minX, maxX, minY, maxY);
     }
 

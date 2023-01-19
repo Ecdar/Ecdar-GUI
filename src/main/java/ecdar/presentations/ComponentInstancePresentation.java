@@ -1,5 +1,6 @@
 package ecdar.presentations;
 
+import ecdar.Ecdar;
 import ecdar.abstractions.*;
 import ecdar.controllers.ComponentInstanceController;
 import ecdar.controllers.EcdarController;
@@ -122,7 +123,7 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
         instance.getComponent().colorProperty().addListener(observable -> updateColor.run());
 
         // Center the text vertically and aff a left padding of CORNER_SIZE
-        controller.identifier.setPadding(new Insets(2, 0, 0, 40));
+        controller.identifier.setPadding(new Insets(2, 0, 0, Ecdar.CANVAS_PADDING * 4));
         controller.identifier.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
 
         controller.originalComponentLabel.setPadding(new Insets(0, 5, 0, 15));
@@ -165,7 +166,7 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
                     Insets.EMPTY
             )));
 
-            controller.toolbar.setPrefHeight(20);
+            controller.toolbar.setPrefHeight(Ecdar.CANVAS_PADDING * 2);
         };
 
         // Update color now, whenever color of component changes, and when someone uses the color delegates
@@ -217,8 +218,8 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
         // Generate first corner (to subtract)
         final Polygon corner1 = new Polygon(
                 0, 0,
-                42, 0,
-                0, 42
+                Ecdar.CANVAS_PADDING * 4 + 2, 0,
+                0, Ecdar.CANVAS_PADDING * 4 + 2
         );
 
         final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
@@ -228,10 +229,10 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
             controller.background.setClip(Path.union(mask[0], mask[0]));
 
             // Bind the missing lines that we cropped away
-            controller.line1.setStartX(40);
+            controller.line1.setStartX(Ecdar.CANVAS_PADDING * 4);
             controller.line1.setStartY(0);
             controller.line1.setEndX(0);
-            controller.line1.setEndY(40);
+            controller.line1.setEndY(Ecdar.CANVAS_PADDING * 4);
             controller.line1.setStroke(newColor.getColor(newIntensity.next(2)));
             controller.line1.setStrokeWidth(1.25);
             StackPane.setAlignment(controller.line1, Pos.TOP_LEFT);
@@ -350,13 +351,13 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
      */
     @Override
     public ItemDragHelper.DragBounds getDragBounds() {
-        final ObservableDoubleValue minX = new SimpleDoubleProperty(10);
+        final ObservableDoubleValue minX = new SimpleDoubleProperty(Ecdar.CANVAS_PADDING);
         final ObservableDoubleValue maxX = controller.getSystem().getBox().getWidthProperty()
-                .subtract(minX)
+                .subtract(Ecdar.CANVAS_PADDING)
                 .subtract(controller.getInstance().getBox().getWidth());
-        final ObservableDoubleValue minY = new SimpleDoubleProperty(50);
+        final ObservableDoubleValue minY = new SimpleDoubleProperty(Ecdar.CANVAS_PADDING * 5);
         final ObservableDoubleValue maxY = controller.getSystem().getBox().getHeightProperty()
-                .subtract(minY)
+                .subtract(Ecdar.CANVAS_PADDING * 5)
                 .subtract(controller.getInstance().getBox().getHeight());
         return new ItemDragHelper.DragBounds(minX, maxX, minY, maxY);
     }

@@ -1,5 +1,6 @@
 package ecdar.presentations;
 
+import ecdar.Ecdar;
 import ecdar.abstractions.*;
 import ecdar.controllers.ModelController;
 import ecdar.controllers.SystemController;
@@ -56,7 +57,7 @@ public class SystemPresentation extends ModelPresentation {
                     Insets.EMPTY
             )));
 
-            controller.toolbar.setPrefHeight(20);
+            controller.toolbar.setPrefHeight(Ecdar.CANVAS_PADDING * 2);
         };
 
         system.colorProperty().addListener(observable -> updateColor.accept(system.getColor(), system.getColorIntensity()));
@@ -77,8 +78,8 @@ public class SystemPresentation extends ModelPresentation {
         // Generate top right corner (to subtract)
         final Polygon topRightCorner = new Polygon(
                 system.getBox().getWidth(), 0,
-                system.getBox().getWidth() - 38, 0,
-                system.getBox().getWidth(), 42
+                system.getBox().getWidth() - Ecdar.CANVAS_PADDING * 3 + 8, 0,
+                system.getBox().getWidth(), Ecdar.CANVAS_PADDING * 4 + 2
         );
 
         final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
@@ -153,14 +154,14 @@ public class SystemPresentation extends ModelPresentation {
     @Override
     double getDragAnchorMinWidth() {
         final EcdarSystem system = controller.getSystem();
-        double minWidth = system.getSystemRoot().getX() + SystemRoot.WIDTH + 20;
+        double minWidth = system.getSystemRoot().getX() + SystemRoot.WIDTH + Ecdar.CANVAS_PADDING * 2;
 
         for (final ComponentInstance instance : system.getComponentInstances()) {
-            minWidth = Math.max(minWidth, instance.getBox().getX() + instance.getBox().getWidth() + 10);
+            minWidth = Math.max(minWidth, instance.getBox().getX() + instance.getBox().getWidth() + Ecdar.CANVAS_PADDING);
         }
 
         for (final ComponentOperator operator : system.getComponentOperators()) {
-            minWidth = Math.max(minWidth, operator.getBox().getX() + operator.getBox().getWidth() + 10);
+            minWidth = Math.max(minWidth, operator.getBox().getX() + operator.getBox().getWidth() + Ecdar.CANVAS_PADDING);
         }
 
         return minWidth;
@@ -174,14 +175,14 @@ public class SystemPresentation extends ModelPresentation {
     @Override
     double getDragAnchorMinHeight() {
         final EcdarSystem system = controller.getSystem();
-        double minHeight = 100;
+        double minHeight = Ecdar.CANVAS_PADDING * 2;
 
         for (final ComponentInstance instance : system.getComponentInstances()) {
-            minHeight = Math.max(minHeight, instance.getBox().getY() + instance.getBox().getHeight() + 10);
+            minHeight = Math.max(minHeight, instance.getBox().getY() + instance.getBox().getHeight() + Ecdar.CANVAS_PADDING);
         }
 
         for (final ComponentOperator operator : system.getComponentOperators()) {
-            minHeight = Math.max(minHeight, operator.getBox().getY() + operator.getBox().getHeight() + 10);
+            minHeight = Math.max(minHeight, operator.getBox().getY() + operator.getBox().getHeight() + Ecdar.CANVAS_PADDING);
         }
 
         return minHeight;

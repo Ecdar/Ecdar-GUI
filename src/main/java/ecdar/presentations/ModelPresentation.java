@@ -23,8 +23,8 @@ import javafx.scene.shape.Rectangle;
 public abstract class ModelPresentation extends HighLevelModelPresentation {
     static final Polygon TOP_LEFT_CORNER = new Polygon(
             0, 0,
-            42, 0,
-            0, 42
+            Ecdar.CANVAS_PADDING * 4 + 2, 0,
+            0, Ecdar.CANVAS_PADDING * 4 + 2
     );
 
     abstract ModelController getModelController();
