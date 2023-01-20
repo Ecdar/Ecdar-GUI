@@ -1,12 +1,5 @@
 #Engines
-lib/Reveaal.exe
-lib/Reveaal
-lib/libJDBM.so
-lib/libJDBM.dylib
-lib/JDBM.dll
-lib/j-Ecdar
-lib/j-Ecdar.bat
-lib/*.dll
+lib/
 
 
 #IntelliJ

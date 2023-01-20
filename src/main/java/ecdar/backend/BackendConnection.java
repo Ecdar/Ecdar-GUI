@@ -42,10 +42,8 @@ public class BackendConnection {
 
     /**
      * Close the gRPC connection and end the process
-     *
-     * @throws IOException originally thrown by the destroy method on java.lang.Process
      */
-    public void close() throws IOException {
+    public void close() {
         if (!channel.isShutdown()) {
             try {
                 channel.shutdown();

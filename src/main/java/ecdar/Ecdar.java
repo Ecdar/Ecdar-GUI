@@ -124,24 +124,6 @@ public class Ecdar extends Application {
         return project;
     }
 
-    /**
-     * Returns the backend driver used to execute queries and handle simulation
-     * @return BackendDriver
-     */
-    public static BackendDriver getBackendDriver() {
-        return backendDriver;
-    }
-
-    public static QueryHandler getQueryExecutor() {
-        return queryHandler;
-    }
-
-    public static SimulationHandler getSimulationHandler() { return simulationHandler; }
-
-    public static void setSimulationHandler(SimulationHandler simHandler) {
-        simulationHandler = simHandler;
-    }
-
     public static EcdarPresentation getPresentation() {
         return presentation;
     }
@@ -202,6 +184,25 @@ public class Ecdar extends Application {
 
         return isSplit;
     }
+
+    /**
+     * Returns the backend driver used to execute queries and handle simulation
+     * @return BackendDriver
+     */
+    public static BackendDriver getBackendDriver() {
+        return backendDriver;
+    }
+
+    public static QueryHandler getQueryExecutor() {
+        return queryHandler;
+    }
+
+    public static SimulationHandler getSimulationHandler() { return simulationHandler; }
+
+    public static void setSimulationHandler(SimulationHandler simHandler) {
+        simulationHandler = simHandler;
+    }
+
 
     public static double getDpiScale() {
         if (!autoScalingEnabled.getValue())

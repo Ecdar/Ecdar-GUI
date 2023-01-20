@@ -2,26 +2,21 @@ package ecdar.backend;
 
 import EcdarProtoBuf.QueryProtos;
 import EcdarProtoBuf.QueryProtos.QueryRequest.Settings;
-
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Query;
 import ecdar.abstractions.QueryState;
-import ecdar.controllers.ComponentController;
 import ecdar.abstractions.QueryType;
 import ecdar.controllers.EcdarController;
-import ecdar.controllers.SignatureArrowController;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.helpers.StringValidator;
 import io.grpc.stub.StreamObserver;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -94,10 +89,8 @@ public class QueryHandler {
 
     /**
      * Close all open backend connection and kill all locally running processes
-     *
-     * @throws IOException if any of the sockets do not respond
      */
-    public void closeAllBackendConnections() throws IOException {
+    public void closeAllBackendConnections() {
         for (BackendConnection con : connections) {
             con.close();
         }
@@ -210,7 +203,6 @@ public class QueryHandler {
               query.getSuccessConsumer().accept(false);
               break;
         }
-
     }
 
     private void handleQueryBackendError(Throwable t, Query query) {
@@ -231,7 +223,7 @@ public class QueryHandler {
         } else {
             try {
                 query.setQueryState(QueryState.ERROR);
-                query.getFailureConsumer().accept(new BackendException.QueryErrorException("The execution of this query failed with message:\n" + t.getLocalizedMessage()));
+                query.getFailureConsumer().accept(new BackendException.QueryErrorException("The execution of this query failed with message:" + System.lineSeparator() + t.getLocalizedMessage()));
             } catch (Exception e) {
                 e.printStackTrace();
             }
