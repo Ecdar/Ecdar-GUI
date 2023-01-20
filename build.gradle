@@ -58,7 +58,7 @@ dependencies {
     implementation 'org.springframework:spring-expression:5.3.10' // Used for evaluating expressions
     implementation 'com.bpodgursky:jbool_expressions:1.23'
     // Used for converting boolean expressions to disjunctive normal form
-    implementation group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.10.6'
+    implementation 'org.fxmisc.richtext:richtextfx:0.10.6'
     implementation 'com.google.guava:guava:31.0.1-jre'
     implementation 'org.apache.commons:commons-lang3:3.12.0'
 
@@ -75,10 +75,12 @@ dependencies {
 
     testImplementation "io.grpc:grpc-testing:${grpcVersion}"
 
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.8.2'
-    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.8.2'
-    testImplementation group: 'org.testfx', name: 'testfx-junit', version: '4.0.15-alpha'
-    testImplementation group: 'org.testfx', name: 'openjfx-monocle', version: 'jdk-12.0.1+2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
+    testImplementation 'org.testfx:testfx-junit:4.0.15-alpha'
+    testImplementation 'org.testfx:openjfx-monocle:jdk-12.0.1+2'
+    testImplementation 'org.mockito:mockito-core:3.12.4'
+    testImplementation 'org.mockito:mockito-junit-jupiter:4.8.0'
 }
 
 

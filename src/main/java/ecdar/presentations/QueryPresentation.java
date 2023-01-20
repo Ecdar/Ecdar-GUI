@@ -12,14 +12,11 @@ import javafx.application.Platform;
 import javafx.beans.binding.When;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.control.Label;
-import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
-import javafx.scene.text.TextAlignment;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.kordamp.ikonli.material.Material;
 
@@ -43,7 +40,6 @@ public class QueryPresentation extends HBox {
         initializeActionButton();
         initializeDetailsButton();
         initializeTextFields();
-        initializeInputOutputPaneAndAddIgnoredInputOutputs();
         initializeMoreInformationButtonAndQueryTypeSymbol();
         initializeBackendsDropdown();
 
@@ -270,197 +266,6 @@ public class QueryPresentation extends HBox {
         }
     }
 
-    private void initializeInputOutputPaneAndAddIgnoredInputOutputs() {
-        Platform.runLater(() -> {
-            final TitledPane inputOutputPane = (TitledPane) lookup("#inputOutputPane");
-            inputOutputPane.setAnimated(true);
-            final Runnable changeTitledPaneVisibility = () -> updateTitlePaneVisibility(inputOutputPane);
-
-            // Run the consumer to ensure that the input/output pane is displayed for existing refinement queries
-            changeTitledPaneVisibility.run();
-
-            // Bind the expand icon to the expand property of the pane
-            inputOutputPane.expandedProperty().addListener((observable, oldValue, newValue) -> {
-                FontIcon expandIcon = (FontIcon) inputOutputPane.lookup("#inputOutputPaneExpandIcon");
-                if (!newValue) {
-                    expandIcon.setIconLiteral("gmi-keyboard-arrow-down");
-                } else {
-                    expandIcon.setIconLiteral("gmi-keyboard-arrow-up");
-                }
-            });
-
-            // Make sure the input/output pane state is updated whenever the query text field loses focus
-            final JFXTextField queryTextField = (JFXTextField) lookup("#query");
-            queryTextField.focusedProperty().addListener((observable, oldValue, newValue) -> {
-                if (!newValue) {
-                    changeTitledPaneVisibility.run();
-                }
-            });
-
-            // Change visibility of input/output Pane when backend is changed for the query ToDo NIELS
-            // lookup("#swapBackendButton").setOnMousePressed(event -> changeTitledPaneVisibility.accept(controller.getQuery().getQuery()));
-            Platform.runLater(() -> addIgnoredInputOutputsFromQuery(inputOutputPane));
-        });
-    }
-
-    private void initiateResetInputOutputButton(TitledPane inputOutputPane) {
-        Platform.runLater(() -> {
-            final JFXRippler resetInputOutputPaneButton = (JFXRippler) inputOutputPane.lookup("#inputOutputPaneUpdateButton");
-
-            initializeResetInputOutputPaneButton(inputOutputPane, resetInputOutputPaneButton);
-
-            // Get the inputs and outputs automatically, when executing a refinement query
-            controller.actionButton.setOnMousePressed(event -> {
-                // Update the ignored inputs and outputs without clearing the lists
-                updateInputOutputs(inputOutputPane, false);
-            });
-
-            // Install tooltip on the reset button
-            final Tooltip buttonTooltip = new Tooltip("Refresh inputs and outputs (resets selections)");
-            buttonTooltip.setWrapText(true);
-            Tooltip.install(resetInputOutputPaneButton, buttonTooltip);
-        });
-    }
-
-    private void initializeResetInputOutputPaneButton(TitledPane inputOutputPane,
-                                                      JFXRippler resetInputOutputPaneButton) {
-        Platform.runLater(() -> {
-            final FontIcon resetInputOutputPaneButtonIcon = (FontIcon) lookup("#inputOutputPaneUpdateButtonIcon");
-            final JFXSpinner progressIndicator = (JFXSpinner) lookup("#inputOutputProgressIndicator");
-
-            progressIndicator.setVisible(false);
-
-            // Set the initial state of the reset button
-            resetInputOutputPaneButton.setCursor(Cursor.HAND);
-            resetInputOutputPaneButton.setRipplerFill(Color.GREY.getColor(Color.Intensity.I500));
-            resetInputOutputPaneButton.setMaskType(JFXRippler.RipplerMask.CIRCLE);
-            resetInputOutputPaneButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I900));
-
-            resetInputOutputPaneButton.setOnMousePressed(event -> {
-                // Disable the button on click
-                progressIndicator.setVisible(true);
-                resetInputOutputPaneButton.setDisable(true);
-                resetInputOutputPaneButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I700));
-
-                updateInputOutputs(inputOutputPane, true);
-
-                // Enable the button after inputs and outputs have been updated
-                progressIndicator.setVisible(false);
-                resetInputOutputPaneButton.setDisable(false);
-                resetInputOutputPaneButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I900));
-            });
-        });
-    }
-
-    private void updateTitlePaneVisibility(TitledPane inputOutputPane) {
-        // Check if the query is a refinement and that the engine is set to Reveaal
-        if (controller.getQuery().getQuery().startsWith("refinement") && BackendHelper.backendSupportsInputOutputs(controller.getQuery().getBackend())) {
-            initiateResetInputOutputButton(inputOutputPane);
-
-            // Make the input/output pane visible
-            inputOutputPaneVisibility(true);
-        } else {
-            inputOutputPaneVisibility(false);
-        }
-    }
-
-    private void updateInputOutputs(TitledPane inputOutputPane, Boolean shouldResetSelections) {
-        final VBox inputBox = (VBox) inputOutputPane.lookup("#inputBox");
-        final VBox outputBox = (VBox) inputOutputPane.lookup("#outputBox");
-
-        IgnoredInputOutputQuery query = new IgnoredInputOutputQuery(this.controller.getQuery(), this, controller.getQuery().ignoredInputs, inputBox, controller.getQuery().ignoredOutputs, outputBox);
-
-        if (shouldResetSelections) {
-            // Reset selections for ignored inputs and outputs
-            clearIgnoredInputsAndOutputs(inputBox, outputBox);
-        }
-
-        Ecdar.getBackendDriver().getInputOutputs(query, controller.getQuery().getBackend());
-    }
-
-    private void clearIgnoredInputsAndOutputs(VBox inputBox, VBox outputBox) {
-        controller.getQuery().ignoredInputs.clear();
-        controller.getQuery().ignoredOutputs.clear();
-
-        Platform.runLater(() -> {
-            inputBox.getChildren().clear();
-            outputBox.getChildren().clear();
-        });
-    }
-
-    public void addInputOrOutput(String name, Boolean state, Map<String, Boolean> associatedMap, VBox associatedBox) {
-        HBox sliderBox = new HBox();
-        sliderBox.setAlignment(Pos.CENTER_LEFT);
-
-        Label label = new Label(name);
-        label.setWrapText(true);
-
-        // Initialize the toggle slider
-        JFXToggleButton slider = new JFXToggleButton();
-        slider.setStyle("-jfx-toggle-color:#dddddd; -jfx-untoggle-color:#dddddd; -jfx-toggle-line-color:#" + Color.YELLOW.getColor(Color.Intensity.I700).toString().substring(2, 8) + ";-jfx-untoggle-line-color:#" + Color.GREY.getColor(Color.Intensity.I400).toString().substring(2, 8) + "; -fx-padding: 0 0 0 0;");
-        slider.setSelected(state);
-
-        // Add label beneath toggle slider to display state
-        Label stateLabel = new Label();
-        stateLabel.setText(state ? "Ignored" : "Included");
-        stateLabel.setTextAlignment(TextAlignment.CENTER);
-
-        // Enforce changes of the slider
-        slider.setOnMouseClicked((event) -> {
-            associatedMap.replace(name, slider.isSelected());
-            stateLabel.setText(slider.isSelected() ? "Ignored" : "Included");
-        });
-
-        // Add toggle slider and state label to VBox and set its width
-        VBox sliderAndStateLabel = new VBox();
-        sliderAndStateLabel.setMinWidth(64);
-        sliderAndStateLabel.setMaxWidth(64);
-        sliderAndStateLabel.setSpacing(-7.5);
-        sliderAndStateLabel.getChildren().addAll(slider, stateLabel);
-
-        // Horizontal space to ensure that the toggle slider and input/output label is not intertwined
-        Region horizontalSpace = new Region();
-        horizontalSpace.setMinWidth(16);
-        horizontalSpace.setMaxWidth(16);
-
-        sliderBox.getChildren().addAll(sliderAndStateLabel, horizontalSpace, label);
-
-        Platform.runLater(() -> {
-            // Add checkbox to the scene
-            associatedBox.getChildren().add(sliderBox);
-        });
-    }
-
-    private void inputOutputPaneVisibility(Boolean visibility) {
-        Platform.runLater(() -> {
-            final TitledPane inputOutputPane = (TitledPane) lookup("#inputOutputPane");
-
-            // Hide/show the inputOutputPane and remove/add the space it would occupy respectively
-            inputOutputPane.setVisible(visibility);
-            inputOutputPane.setManaged(visibility);
-
-            // Set expand property only on visibility false to avoid auto expand
-            if (!visibility) {
-                inputOutputPane.setExpanded(false);
-            }
-        });
-    }
-
-    private void addIgnoredInputOutputsFromQuery(TitledPane inputOutputPane) {
-        final VBox inputBox = (VBox) inputOutputPane.lookup("#inputBox");
-        final VBox outputBox = (VBox) inputOutputPane.lookup("#outputBox");
-
-        // Add inputs as toggles in the GUI
-        for (Map.Entry<String, Boolean> entry : controller.getQuery().ignoredInputs.entrySet()) {
-            addInputOrOutput(entry.getKey(), entry.getValue(), controller.getQuery().ignoredInputs, inputBox);
-        }
-
-        // Add outputs as toggles in the GUI
-        for (Map.Entry<String, Boolean> entry : controller.getQuery().ignoredOutputs.entrySet()) {
-            addInputOrOutput(entry.getKey(), entry.getValue(), controller.getQuery().ignoredOutputs, outputBox);
-        }
-    }
-
     private void initializeMoreInformationButtonAndQueryTypeSymbol() {
         Platform.runLater(() -> {
             controller.queryTypeExpand.setVisible(true);
@@ -508,6 +313,6 @@ public class QueryPresentation extends HBox {
     }
 
     private void runQuery() {
-        controller.getQuery().run();
+        Ecdar.getQueryExecutor().executeQuery(this.controller.getQuery());
     }
 }
