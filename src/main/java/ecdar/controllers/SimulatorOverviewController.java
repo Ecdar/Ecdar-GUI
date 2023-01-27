@@ -50,9 +50,9 @@ public class SimulatorOverviewController implements Initializable {
     private static final double MAX_ZOOM_OUT = 0.5;
 
     /**
-     * Offset such that the view does not overlap with the scroll bar on the right hand sig.
+     * Offset such that the view does not overlap with the scroll bar on the right-hand side.
      */
-    private static final int SUPER_SPECIAL_SCROLLPANE_OFFSET = 20;
+    private static final int SCROLLPANE_OFFSET = 20;
 
     private final ObservableList<Component> componentArrayList = FXCollections.observableArrayList();
     private final ObservableMap<String, ProcessPresentation> processPresentations = FXCollections.observableHashMap();
@@ -109,7 +109,7 @@ public class SimulatorOverviewController implements Initializable {
                 }
             }
             // Highlight the current state when the processes change
-            highlightProcessState(simulationHandler.currentState.get()); // ToDo NIELS: Throws NullPointerException inside method due to currentState
+            highlightProcessState(simulationHandler.currentState.get());
             processContainer.getChildren().addAll(processes.values());
             processPresentations.putAll(processes);
         });
@@ -195,21 +195,6 @@ public class SimulatorOverviewController implements Initializable {
 
             handleWidthOnScale(oldValue, newValue);
         });
-
-        // to support pinch zooming
-        //TODO this should be fixed at as it does not work as it should
-        /*
-        processContainer.setOnZoom(event -> {
-            //Tries to zoom in/out but max is reached
-            if(event.getZoomFactor() >= 1 && isMaxZoomInReached) return;
-            if(event.getZoomFactor() < 1 && isMaxZoomOutReached) return;
-
-            isMaxZoomInReached = false;
-            isMaxZoomOutReached = false;
-
-            processContainer.setScaleX(processContainer.getScaleX() * event.getZoomFactor());
-            processContainer.setScaleY(processContainer.getScaleY() * event.getZoomFactor());
-        });*/
     }
 
     /**
@@ -226,57 +211,13 @@ public class SimulatorOverviewController implements Initializable {
                 processContainer.setMinWidth(width);
                 processContainer.setMaxWidth(width);
                 final double deltaWidth = newValue.doubleValue() - groupContainer.layoutBoundsProperty().get().getWidth();
-                processContainer.setMinWidth(processContainer.getWidth() + (deltaWidth - SUPER_SPECIAL_SCROLLPANE_OFFSET) * (1 + (1 - processContainer.getScaleX())));
-                processContainer.setMaxWidth(processContainer.getWidth() + (deltaWidth - SUPER_SPECIAL_SCROLLPANE_OFFSET) * (1 + (1 - processContainer.getScaleX())));
+                processContainer.setMinWidth(processContainer.getWidth() + (deltaWidth - SCROLLPANE_OFFSET) * (1 + (1 - processContainer.getScaleX())));
+                processContainer.setMaxWidth(processContainer.getWidth() + (deltaWidth - SCROLLPANE_OFFSET) * (1 + (1 - processContainer.getScaleX())));
             } else { // Reset
-                processContainer.setMinWidth(newValue.doubleValue() - SUPER_SPECIAL_SCROLLPANE_OFFSET);
-                processContainer.setMaxWidth(newValue.doubleValue() - SUPER_SPECIAL_SCROLLPANE_OFFSET);
+                processContainer.setMinWidth(newValue.doubleValue() - SCROLLPANE_OFFSET);
+                processContainer.setMaxWidth(newValue.doubleValue() - SCROLLPANE_OFFSET);
             }
         });
-    }
-
-    /**
-     * Increments the {@link #processContainer} scaleX and scaleY properties
-     * which creates the zoom-in feeling. Resizing of the view is handled by {@link #handleWidthOnScale(Number, Number)}
-     *
-     * @see FlowPane#scaleXProperty()
-     * @see FlowPane#scaleYProperty()
-     */
-    void zoomIn() {
-        if (isMaxZoomInReached) return;
-        isMaxZoomOutReached = false;
-        processContainer.setScaleX(processContainer.getScaleX() * SCALE_DELTA);
-        processContainer.setScaleY(processContainer.getScaleY() * SCALE_DELTA);
-    }
-
-
-    /**
-     * Decrements the {@link #processContainer} scaleX and scaleY properties
-     * which creates the zoom-in feeling. Resizing of the view is handled by {@link #handleWidthOnScale(Number, Number)}
-     *
-     * @see FlowPane#scaleXProperty()
-     * @see FlowPane#scaleYProperty()
-     */
-    void zoomOut() {
-        if (isMaxZoomOutReached) return;
-        isMaxZoomInReached = false;
-        processContainer.setScaleX(processContainer.getScaleX() * (1 / SCALE_DELTA));
-        processContainer.setScaleY(processContainer.getScaleY() * (1 / SCALE_DELTA));
-    }
-
-    /**
-     * Resets the scaling of the {@link #processContainer}, and hereby the zoom
-     *
-     * @see FlowPane#scaleXProperty()
-     * @see FlowPane#scaleYProperty()
-     */
-    void resetZoom() {
-        if (processContainer.getScaleX() == 1) return;
-        resetZoom = true;
-        isMaxZoomInReached = false;
-        isMaxZoomOutReached = false;
-        processContainer.setScaleX(1);
-        processContainer.setScaleY(1);
     }
 
     /**
@@ -288,8 +229,8 @@ public class SimulatorOverviewController implements Initializable {
     private void handleWidthOnScale(final Number oldValue, final Number newValue) {
         if (resetZoom) { //Zoom reset
             resetZoom = false;
-            processContainer.setMinWidth(scrollPane.getWidth() - SUPER_SPECIAL_SCROLLPANE_OFFSET);
-            processContainer.setMaxWidth(scrollPane.getWidth() - SUPER_SPECIAL_SCROLLPANE_OFFSET);
+            processContainer.setMinWidth(scrollPane.getWidth() - SCROLLPANE_OFFSET);
+            processContainer.setMaxWidth(scrollPane.getWidth() - SCROLLPANE_OFFSET);
         } else if (oldValue.doubleValue() > newValue.doubleValue()) { //Zoom in
             resetZoom = false;
             processContainer.setMinWidth(Math.round(processContainer.getWidth() * SCALE_DELTA));
@@ -301,7 +242,7 @@ public class SimulatorOverviewController implements Initializable {
         }
     }
 
-        /**
+    /**
      * Initializer method to setup listeners that handle highlighting when selected/current state/transition changes
      */
     private void initializeHighlighting() {
@@ -332,9 +273,7 @@ public class SimulatorOverviewController implements Initializable {
         // List of all processes to show as inactive if they are not involved in a transition
         // Processes are removed from this list, if they have an edge in the transition
         final ArrayList<ProcessPresentation> processesToHide = new ArrayList<>(processPresentations.values());
-
         for (final ProcessPresentation processPresentation : processPresentations.values()) {
-
             // Find the processes that have edges involved in this transition
             processPresentation.getController().highlightEdges(edges);
             processesToHide.remove(processPresentation);
@@ -342,7 +281,6 @@ public class SimulatorOverviewController implements Initializable {
 
         processesToHide.forEach(ProcessPresentation::showInactive);
     }
-
 
     /**
      * Unhighlights all processes
@@ -361,9 +299,8 @@ public class SimulatorOverviewController implements Initializable {
      */
     public void highlightProcessState(final SimulationState state) {
         if (state == null) return;
-
-        for(var loc : state.getLocations()){
-
+        
+        for (var loc : state.getLocations()) {
             processPresentations.values().stream()
                     .filter(p -> p.getController().getComponent().getName().equals(loc.getKey()))
                     .forEach(p -> p.getController().highlightLocation(loc.getValue()));
@@ -376,21 +313,21 @@ public class SimulatorOverviewController implements Initializable {
 
     public void highlightAvailableEdges(SimulationState state) {
         // unhighlight all edges
-        for (Pair<String,String> edge : state.getEnabledEdges()) {
+        for (Pair<String, String> edge : state.getEnabledEdges()) {
             processPresentations.values().stream()
                     .forEach(p -> p.getController().getComponent().getEdges().stream()
                             .forEach(e -> e.setIsHighlighted(false)));
         }
 
         // highlight available edges in the given state
-        for (Pair<String,String> edge : state.getEnabledEdges()) {
+        for (Pair<String, String> edge : state.getEnabledEdges()) {
             processPresentations.values().stream()
                     .forEach(p -> p.getController().getComponent().getEdges().stream()
-                        .forEach(e -> {
-                            if (e.getId().equals(edge.getValue())) {
-                                e.setIsHighlighted(true);
-                            }
-                        }));
+                            .forEach(e -> {
+                                if (e.getId().equals(edge.getValue())) {
+                                    e.setIsHighlighted(true);
+                                }
+                            }));
         }
     }
 }

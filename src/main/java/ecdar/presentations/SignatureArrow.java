@@ -55,7 +55,7 @@ public class SignatureArrow extends Group implements Highlightable {
         });
         controller.arrowBox.onMouseExitedProperty().set(event -> {
             controller.mouseExited();
-                this.unhighlight();
+            this.unhighlight();
         });
     }
 
@@ -151,13 +151,12 @@ public class SignatureArrow extends Group implements Highlightable {
         Color.Intensity intensity = Color.Intensity.I800;
         this.colorArrowComponents(color, intensity);
 
-        for(String s : controller.getComponent().getFailingIOStrings()){
-            if(Objects.equals(getSignatureArrowLabel(), s) && controller.getComponent().getIsFailing()){
+        for (String s : controller.getComponent().getFailingIOStrings()) {
+            if (Objects.equals(getSignatureArrowLabel(), s) && controller.getComponent().getIsFailing()) {
                 this.recolorToRed();
             }
         }
     }
-
 
     /**
      * Set the color of the SignatureArrow to Color.RED
@@ -173,7 +172,8 @@ public class SignatureArrow extends Group implements Highlightable {
         Color.Intensity intensity = Color.Intensity.I800;
         this.colorArrowComponents(color, intensity);
     }
-    /***
+
+    /**
      * Colors the components of the arrow
      * @param color The Color to color the components
      * @param intensity The Intensity of the color

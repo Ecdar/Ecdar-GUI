@@ -187,7 +187,6 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
     }
 
     private void initializeNailCircleColor() {
-
         // When the color of the component updates, update the nail indicator as well
         controller.getComponent().colorProperty().addListener((observable) -> updateNailColor());
 

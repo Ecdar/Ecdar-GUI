@@ -289,7 +289,6 @@ public class TagPresentation extends StackPane {
         });
     }
 
-    
     public void requestTextFieldFocus() {
         final JFXTextField textField = (JFXTextField) lookup("#textField");
         Platform.runLater(textField::requestFocus);

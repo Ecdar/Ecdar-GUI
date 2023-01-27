@@ -182,8 +182,11 @@ public class BackendOptionsDialogController implements Initializable {
         reveaal.setName("Reveaal");
         reveaal.setLocal(true);
         reveaal.setDefault(true);
+
+        // The engine is thread-safe, a range just adds options for finding an open port
+        // Only one process will be started
         reveaal.setPortStart(5040);
-        reveaal.setPortEnd(5040);
+        reveaal.setPortEnd(5042);
         reveaal.lockInstance();
         reveaal.setIsThreadSafe(true);
 

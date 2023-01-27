@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import EcdarProtoBuf.QueryProtos.SimulationInfo;
@@ -76,7 +77,6 @@ public class SimulationHandler {
         this.system = getSystem();
     }
 
-
     /**
      * Reloads the whole simulation sets the initial transitions, states, etc
      */
@@ -113,6 +113,7 @@ public class SimulationHandler {
             for (Component c : Ecdar.getProject().getComponents()) {
                 comInfo.addComponents(ComponentProtos.Component.newBuilder().setJson(c.serialize().toString()).build());
             }
+
             comInfo.setComponentsHash(comInfo.getComponentsList().hashCode());
             var simStartRequest = QueryProtos.SimulationStartRequest.newBuilder();
             var simInfo = QueryProtos.SimulationInfo.newBuilder()
@@ -126,10 +127,6 @@ public class SimulationHandler {
         backendDriver.addRequestToExecutionQueue(request);
         
         numberOfSteps++;
-    
-        //Updates the transitions available
-        updateAllValues();
-        
     }
     
     /**
@@ -193,13 +190,9 @@ public class SimulationHandler {
         }, BackendHelper.getDefaultBackendInstance());
         
         backendDriver.addRequestToExecutionQueue(request);
-        
-        
+
         // increments the number of steps taken during this simulation
         numberOfSteps++;
-        
-        
-        updateAllValues();
     }
 
     private String getComponentName(Edge edge) {
@@ -211,53 +204,19 @@ public class SimulationHandler {
                 }
             }
         }
+
         throw new RuntimeException("Could not find component name for edge with id " + edge.getId());
     }
 
     private int getComponentIndex (Edge edge) {
         for (int i = 0; i < Ecdar.getProject().getComponents().size(); i++) {
-            if (Ecdar.getProject().getComponents().get(i).getEdges().stream().anyMatch(p -> p.getId() == edge.getId())) {
+            if (Ecdar.getProject().getComponents().get(i).getEdges().stream().anyMatch(p -> Objects.equals(p.getId(), edge.getId()))) {
                 return i;
             }
-        };
+        }
+
         throw new IllegalArgumentException("Edge does not belong to any component");
     }
-    
-    
-    /**
-     * Updates all values and clocks that are used doing the current simulation.
-     * It also stores the variables in the {@link SimulationHandler#simulationVariables}
-     * and the clocks in {@link SimulationHandler#simulationClocks}.
-     */
-    private void updateAllValues() {
-        setSimVarAndClocks();
-    }
-
-    /**
-     * Sets the value of simulation variables and clocks, based on currentConcreteState
-     */
-    private void setSimVarAndClocks() {
-        // The variables and clocks are all found in the getVariables array
-        // the array is always of the following order: variables, clocks.
-        // The noOfVars variable thus also functions as an offset for the clocks in the getVariables array
-//        final int noOfClocks = engine.getSystem().getNoOfClocks();
-//        final int noOfVars = engine.getSystem().getNoOfVariables();
-
-//        for (int i = 0; i < noOfVars; i++){
-//            simulationVariables.put(engine.getSystem().getVariableName(i),
-//                    currentConcreteState.get().getVariables()[i].getValue(BigDecimal.ZERO));
-//        }
-
-        // As the clocks values starts after the variables values in currentConcreteState.get().getVariables()
-        // Then i needs to start where the variables ends.
-        // j is needed to map the correct name with the value
-//        for (int i = noOfVars, j = 0; i < noOfClocks + noOfVars ; i++, j++) {
-//            simulationClocks.put(engine.getSystem().getClockName(j),
-//                    currentConcreteState.get().getVariables()[i].getValue(BigDecimal.ZERO));
-//        }
-    }
-
-
 
     /**
      * The number of total steps taken in the current simulation

@@ -39,13 +39,6 @@ public class Nail implements Circular, Serializable {
         deserialize(jsonObject);
     }
 
-    // ToDo NIELS: Comment in, when location should be received through ProtoBuf
-//    public Nail(ComponentProtos.Nail protoBufNail) {
-//        setPropertyType(DisplayableEdge.PropertyType.valueOf(protoBufNail.getPropertyType()));
-//        setPropertyX(protoBufNail.getPropertyX());
-//        setPropertyY(protoBufNail.getPropertyY());
-//    }
-
     public double getX() {
         return x.get();
     }

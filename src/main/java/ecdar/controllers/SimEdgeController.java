@@ -68,7 +68,7 @@ public class SimEdgeController implements Initializable, Highlightable {
             // When an edge updates highlight property,
             // we want to update the view to reflect current highlight property
             edge.get().isHighlightedProperty().addListener(v -> {
-                if(edge.get().getIsHighlighted()) {
+                if (edge.get().getIsHighlighted()) {
                     this.highlight();
                 } else {
                     this.unhighlight();
@@ -78,7 +78,7 @@ public class SimEdgeController implements Initializable, Highlightable {
             // When an edge updates highlight property,
             // we want to update the view to reflect current highlight property
             edge.get().isHighlightedForReachabilityProperty().addListener(v -> {
-                if(edge.get().getIsHighlightedForReachability()) {
+                if (edge.get().getIsHighlightedForReachability()) {
                     this.highlightSpecialColor();
                 } else {
                     this.unhighlight();
@@ -91,7 +91,7 @@ public class SimEdgeController implements Initializable, Highlightable {
 
     public void highlightSpecialColor() {
         edgeRoot.getChildren().forEach(node -> {
-            if(node instanceof Highlightable) {
+            if (node instanceof Highlightable) {
                 ((Highlightable) node).highlightPurple();
             }
         });
@@ -129,7 +129,6 @@ public class SimEdgeController implements Initializable, Highlightable {
                 BindingHelper.bind(link, simpleArrowHead, newEdge.getSourceCircular(),
                         newComponent.getBox().getXProperty(), newComponent.getBox().getYProperty());
             } else if (newEdge.getTargetCircular() != null) {
-
                 edgeRoot.getChildren().add(simpleArrowHead);
 
                 final Circular[] previous = {newEdge.getSourceCircular()};
@@ -158,7 +157,6 @@ public class SimEdgeController implements Initializable, Highlightable {
 
             // Changes are made to the nails list
             newEdge.getNails().addListener(getNailsChangeListener(newEdge, newComponent));
-
         };
     }
 
@@ -205,7 +203,6 @@ public class SimEdgeController implements Initializable, Highlightable {
                         if (isHoveringEdge.get()) {
                             enlargeNail.accept(newNail);
                         }
-
                     } else {
                         // The previous last link must end in the new nail
                         final Link lastLink = links.get(links.size() - 1);
@@ -372,7 +369,8 @@ public class SimEdgeController implements Initializable, Highlightable {
 
     /**
      * Colors the edge model
-     * @param color the new color of the edge
+     *
+     * @param color     the new color of the edge
      * @param intensity the intensity of the edge
      */
     public void color(final Color color, final Color.Intensity intensity) {
@@ -403,7 +401,7 @@ public class SimEdgeController implements Initializable, Highlightable {
         // Clear the currently selected elements, so we don't have multiple things highlighted/selected
         SelectHelper.clearSelectedElements();
         edgeRoot.getChildren().forEach(node -> {
-            if(node instanceof Highlightable) {
+            if (node instanceof Highlightable) {
                 ((Highlightable) node).highlight();
             }
         });
@@ -415,7 +413,7 @@ public class SimEdgeController implements Initializable, Highlightable {
     @Override
     public void unhighlight() {
         edgeRoot.getChildren().forEach(node -> {
-            if(node instanceof Highlightable) {
+            if (node instanceof Highlightable) {
                 ((Highlightable) node).unhighlight();
             }
         });

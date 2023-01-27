@@ -108,8 +108,6 @@ public class BackendDriver {
             }
 
             do {
-                //ToDo: Refactor ProcessBuilder to accept cache-size(-cs) and thread-number(-tn) to better configure the Reveaal engine.
-                // Default values are acceptable for now.
                 ProcessBuilder pb = new ProcessBuilder(backend.getBackendLocation(), "-p", hostAddress + ":" + portNumber);
 
                 try {
@@ -152,32 +150,6 @@ public class BackendDriver {
         BackendConnection newConnection = new BackendConnection(backend, p, stub, channel);
         addBackendConnection(newConnection);
     }
-
-//    public SimulationState getInitialSimulationState() {
-//        SimulationState state = new SimulationState(ObjectProtos.State.newBuilder().getDefaultInstanceForType());
-//        state.getLocations().add(new Pair<>(Ecdar.getProject().getComponents().get(0).getName(), Ecdar.getProject().getComponents().get(0).getLocations().get(0).getId()));
-//        return state;
-//    }
-
-    // private class ExecutableStartSimRequest  {
-    //     private final String componentComposition;
-    //     private final BackendInstance backendInstance;
-    //     private final Consumer<Boolean> success;
-    //     private final Consumer<BackendException> failure;
-    //     private final StartSimListener startSimListener;
-    //     public int tries = 0;
-
-    //     public ExecutableStartSimRequest(String componentComposition, BackendInstance backendInstance,
-    //             Consumer<Boolean> success, Consumer<BackendException> failure, StartSimListener startSimListener,
-    //             int tries) {
-    //         this.componentComposition = componentComposition;
-    //         this.backendInstance = backendInstance;
-    //         this.success = success;
-    //         this.failure = failure;
-    //         this.startSimListener = startSimListener;
-    //         this.tries = tries;
-    //     }
-    // }
 
     private class GrpcRequestConsumer implements Runnable {
         @Override
