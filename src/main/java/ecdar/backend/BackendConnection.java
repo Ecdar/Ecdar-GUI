@@ -1,10 +1,8 @@
 package ecdar.backend;
 
 import EcdarProtoBuf.EcdarBackendGrpc;
-import ecdar.abstractions.BackendInstance;
 import io.grpc.ManagedChannel;
 
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 public class BackendConnection {

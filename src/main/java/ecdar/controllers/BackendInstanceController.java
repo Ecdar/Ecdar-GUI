@@ -3,7 +3,7 @@ package ecdar.controllers;
 import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXRippler;
 import com.jfoenix.controls.JFXTextField;
-import ecdar.abstractions.BackendInstance;
+import ecdar.backend.BackendInstance;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.fxml.FXML;

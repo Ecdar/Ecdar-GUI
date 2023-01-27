@@ -1,4 +1,4 @@
-package ecdar.abstractions;
+package ecdar.backend;
 
 import com.google.gson.JsonObject;
 import ecdar.utility.serialize.Serializable;
@@ -117,7 +117,13 @@ public class BackendInstance implements Serializable {
         setName(json.getAsJsonPrimitive(NAME).getAsString());
         setLocal(json.getAsJsonPrimitive(IS_LOCAL).getAsBoolean());
         setDefault(json.getAsJsonPrimitive(IS_DEFAULT).getAsBoolean());
-        setIsThreadSafe(json.getAsJsonPrimitive(IS_THREAD_SAFE).getAsBoolean());
+
+        try { // ToDo NIELS: Decide to either do this or simply reload defaults
+            setIsThreadSafe(json.getAsJsonPrimitive(IS_THREAD_SAFE).getAsBoolean());
+        } catch (NullPointerException e) {
+            setIsThreadSafe(false);
+        }
+
         setBackendLocation(json.getAsJsonPrimitive(LOCATION).getAsString());
         setPortStart(json.getAsJsonPrimitive(PORT_RANGE_START).getAsInt());
         setPortEnd(json.getAsJsonPrimitive(PORT_RANGE_END).getAsInt());

@@ -2,7 +2,6 @@ package ecdar.backend;
 
 import EcdarProtoBuf.EcdarBackendGrpc;
 import ecdar.Ecdar;
-import ecdar.abstractions.BackendInstance;
 import io.grpc.*;
 import org.springframework.util.SocketUtils;
 

@@ -164,7 +164,7 @@ public class CanvasController implements Initializable {
      */
     private void onActiveModelChanged(final HighLevelModelObject oldObject, final HighLevelModelObject newObject) {
         // If old object is a component or system, add to map in order to remember coordinate
-        if ((oldObject instanceof Component || oldObject instanceof EcdarSystem)) {
+        if (oldObject instanceof Component || oldObject instanceof EcdarSystem) {
             ModelObjectTranslateMap.put(oldObject, new Pair<>(modelPane.getTranslateX(), modelPane.getTranslateY()));
         }
 
@@ -180,10 +180,6 @@ public class CanvasController implements Initializable {
         if (newObject instanceof Component) {
             activeComponentPresentation = new ComponentPresentation((Component) newObject);
             modelPane.getChildren().add(activeComponentPresentation);
-
-            // To avoid NullPointerException on initial model
-            if (oldObject != null) zoomHelper.resetZoom();
-
         } else if (newObject instanceof Declarations) {
             activeComponentPresentation = null;
             modelPane.getChildren().add(new DeclarationPresentation((Declarations) newObject));

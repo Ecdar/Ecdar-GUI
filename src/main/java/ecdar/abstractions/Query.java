@@ -9,10 +9,8 @@ import ecdar.utility.serialize.Serializable;
 import com.google.gson.JsonObject;
 import javafx.application.Platform;
 import javafx.beans.property.*;
-import javafx.collections.ObservableList;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 

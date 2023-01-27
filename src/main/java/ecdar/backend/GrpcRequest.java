@@ -1,7 +1,5 @@
 package ecdar.backend;
 
-import ecdar.abstractions.BackendInstance;
-
 import java.util.function.Consumer;
 
 public class GrpcRequest {

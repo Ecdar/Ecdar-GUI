@@ -3,7 +3,7 @@ package ecdar.controllers;
 import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXRippler;
 import com.jfoenix.controls.JFXTextField;
-import ecdar.abstractions.BackendInstance;
+import ecdar.backend.BackendInstance;
 import ecdar.abstractions.Query;
 import ecdar.abstractions.QueryType;
 import ecdar.backend.BackendHelper;

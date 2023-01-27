@@ -6,6 +6,7 @@ import ecdar.Debug;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
 import ecdar.backend.BackendHelper;
+import ecdar.backend.BackendInstance;
 import ecdar.backend.SimulationHandler;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.mutation.models.MutationTestPlan;
@@ -44,8 +45,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public class EcdarController implements Initializable {

@@ -5,7 +5,7 @@ import com.google.gson.JsonParser;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXRippler;
 import ecdar.Ecdar;
-import ecdar.abstractions.BackendInstance;
+import ecdar.backend.BackendInstance;
 import ecdar.backend.BackendHelper;
 import ecdar.presentations.BackendInstancePresentation;
 import javafx.fxml.Initializable;
