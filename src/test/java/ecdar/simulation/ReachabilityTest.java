@@ -6,17 +6,14 @@ import ecdar.abstractions.Location;
 import ecdar.backend.BackendDriver;
 import ecdar.backend.BackendHelper;
 import ecdar.backend.SimulationHandler;
-import ecdar.controllers.SimulationInitializationDialogController;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ReachabilityTest {
 
