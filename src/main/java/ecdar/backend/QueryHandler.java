@@ -266,7 +266,7 @@ public class QueryHandler {
                 }, "Created new component: " + newComponent.getName(), "add-circle");
             }
 
-            EcdarController.getActiveCanvasPresentation().getController().setActiveModel(newComponent);
+            EcdarController.setActiveModelForActiveCanvas(newComponent);
         });
     }
 }

@@ -43,14 +43,8 @@ public class SimulatorController implements Initializable {
      * - Adding the components which are going to be used in the simulation to
      */
     public void willShow() {
-        boolean shouldSimulationBeReset = true;
-
-
-
         // If the user left a trace, continue from that trace
-        if (simulationHandler.traceLog.size() >= 2) {
-            shouldSimulationBeReset = false;
-        }
+        boolean shouldSimulationBeReset = simulationHandler.traceLog.size() < 2;
 
         // If the composition is not the same as previous simulation, reset the simulation
         if (!(overviewPresentation.getController().getComponentObservableList().hashCode() ==

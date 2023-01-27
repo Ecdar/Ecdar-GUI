@@ -74,7 +74,7 @@ public class EditorController implements Initializable {
     }
 
     public void setActiveModelForActiveCanvas(HighLevelModelObject newActiveModel) {
-        EcdarController.getActiveCanvasPresentation().getController().setActiveModel(newActiveModel);
+        EcdarController.setActiveModelForActiveCanvas(newActiveModel);
 
         // Change zoom level to fit new active model
         Platform.runLater(() -> EcdarController.getActiveCanvasPresentation().getController().zoomHelper.zoomToFit());

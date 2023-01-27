@@ -205,12 +205,12 @@ public class ProjectPaneController implements Initializable {
                             Ecdar.getProject().getTempComponents().remove(model);
                             model.setTemporary(false);
                             Ecdar.getProject().getComponents().add((Component) model);
-                            EcdarController.getActiveCanvasPresentation().getController().setActiveModel(model);
+                            EcdarController.setActiveModelForActiveCanvas(model);
                         }, () -> { // Undo
                             Ecdar.getProject().getComponents().remove(model);
                             model.setTemporary(true);
                             Ecdar.getProject().getTempComponents().add((Component) model);
-                            EcdarController.getActiveCanvasPresentation().getController().setActiveModel(model);
+                            EcdarController.setActiveModelForActiveCanvas(model);
                         }, "Add component " + model.getName(), "add");
                         moreInformationDropDown.hide();
                     } else {
@@ -222,7 +222,7 @@ public class ProjectPaneController implements Initializable {
                                     Ecdar.getProject().getTempComponents().remove(model);
                                     model.setTemporary(false);
                                     Ecdar.getProject().getComponents().add((Component) model);
-                                    EcdarController.getActiveCanvasPresentation().getController().setActiveModel(model);
+                                    EcdarController.setActiveModelForActiveCanvas(model);
                                     model.setName(newName);
                                 }, () -> { // Undo
                                     Ecdar.getProject().getComponents().remove(model);
@@ -363,11 +363,11 @@ public class ProjectPaneController implements Initializable {
 
         UndoRedoStack.pushAndPerform(() -> { // Perform
             Ecdar.getProject().getComponents().add(newComponent);
+            EcdarController.setActiveModelForActiveCanvas(newComponent);
         }, () -> { // Undo
             Ecdar.getProject().getComponents().remove(newComponent);
         }, "Created new component: " + newComponent.getName(), "add-circle");
 
-        EcdarController.setActiveModelForActiveCanvas(newComponent);
         updateColorsOnFilePresentations();
     }
 
@@ -380,11 +380,10 @@ public class ProjectPaneController implements Initializable {
 
         UndoRedoStack.pushAndPerform(() -> { // Perform
             Ecdar.getProject().getSystemsProperty().add(newSystem);
+            EcdarController.setActiveModelForActiveCanvas(newSystem);
         }, () -> { // Undo
             Ecdar.getProject().getSystemsProperty().remove(newSystem);
         }, "Created new system: " + newSystem.getName(), "add-circle");
-
-        EcdarController.setActiveModelForActiveCanvas(newSystem);
     }
 
     /**

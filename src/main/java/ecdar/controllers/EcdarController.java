@@ -218,9 +218,6 @@ public class EcdarController implements Initializable {
 
     public static void setActiveModelForActiveCanvas(HighLevelModelObject newActiveModel) {
         getActiveCanvasPresentation().getController().setActiveModel(newActiveModel);
-
-        // Change zoom level to fit new active model
-        Platform.runLater(() -> getActiveCanvasPresentation().getController().zoomHelper.zoomToFit());
     }
 
     public static void setTemporaryComponentWatermarkVisibility(boolean visibility) {
@@ -359,11 +356,10 @@ public class EcdarController implements Initializable {
             final Component newComponent = new Component(true);
             UndoRedoStack.pushAndPerform(() -> { // Perform
                 Ecdar.getProject().getComponents().add(newComponent);
+                setActiveModelForActiveCanvas(newComponent);
             }, () -> { // Undo
                 Ecdar.getProject().getComponents().remove(newComponent);
             }, "Created new component: " + newComponent.getName(), "add-circle");
-
-            getActiveCanvasPresentation().getController().setActiveModel(newComponent);
         });
         KeyboardTracker.registerKeybind(KeyboardTracker.CREATE_COMPONENT, binding);
 
@@ -830,7 +826,7 @@ public class EcdarController implements Initializable {
 
             UndoRedoStack.pushAndPerform(() -> { // Perform
                 Ecdar.getProject().getTestPlans().add(newPlan);
-                getActiveCanvasPresentation().getController().setActiveModel(newPlan);
+                setActiveModelForActiveCanvas(newPlan);
             }, () -> { // Undo
                 Ecdar.getProject().getTestPlans().remove(newPlan);
             }, "Created new mutation test plan", "");
@@ -848,7 +844,7 @@ public class EcdarController implements Initializable {
         Ecdar.projectDirectory.set(null);
 
         Ecdar.getProject().reset();
-        getActiveCanvasPresentation().getController().setActiveModel(Ecdar.getProject().getComponents().get(0));
+        setActiveModelForActiveCanvas(Ecdar.getProject().getComponents().get(0));
 
         UndoRedoStack.clear();
 
@@ -909,18 +905,11 @@ public class EcdarController implements Initializable {
      * Only enter if the mode is not already Editor
      */
     private void enterEditorMode() {
-//        ToDo NIELS: Consider implementing willShow and willHide to handle general elements that should only be available for one of the modes
-//        editorPresentation.getController().willShow();
-//        simulatorPresentation.getController().willHide();
-
         borderPane.setCenter(editorPresentation);
         leftPane.getChildren().clear();
         leftPane.getChildren().add(projectPane);
         rightPane.getChildren().clear();
         rightPane.getChildren().add(queryPane);
-
-        // Enable or disable the menu items that can be used when in the simulator
-//        updateMenuItems();
     }
 
     /**
@@ -928,8 +917,6 @@ public class EcdarController implements Initializable {
      * Only enter if the mode is not already Simulator
      */
     private void enterSimulatorMode() {
-//        ToDo NIELS: Consider implementing willShow and willHide to handle general elements that should only be available for one of the modes
-//        ecdarPresentation.getController().willHide();
         simulatorPresentation.getController().willShow();
 
         borderPane.setCenter(simulatorPresentation);
@@ -937,9 +924,6 @@ public class EcdarController implements Initializable {
         leftPane.getChildren().add(leftSimPane);
         rightPane.getChildren().clear();
         rightPane.getChildren().add(rightSimPane);
-
-        // Enable or disable the menu items that can be used when in the simulator
-//        updateMenuItems();
     }
 
     /**
