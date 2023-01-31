@@ -82,7 +82,7 @@ public abstract class HighLevelModelObject implements Serializable, DropDownMenu
     /**
      * Sets a random color.
      * If some colors are not currently in use, choose among those.
-     * Otherwise choose a between all available colors.
+     * Otherwise, choose a between all available colors.
      */
     void setRandomColor() {
         // Color the new component in such a way that we avoid clashing with other components if possible

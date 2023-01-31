@@ -40,7 +40,6 @@ import java.util.function.Consumer;
 import static ecdar.presentations.Grid.GRID_SIZE;
 
 public class LocationController implements Initializable, SelectHelper.ItemSelectable, Nudgeable {
-
     private static final Map<Location, Boolean> invalidNameError = new HashMap<>();
 
     private final ObjectProperty<Location> location = new SimpleObjectProperty<>();
@@ -67,7 +66,6 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
     public Line prohibitedLocStrikeThrough;
 
     private DropDownMenu dropDownMenu;
-    private boolean dropDownMenuInitialized = false;
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
@@ -87,18 +85,15 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
     }
 
     private void initializeSelectListener() {
-        SelectHelper.elementsToBeSelected.addListener(new ListChangeListener<Nearable>() {
-            @Override
-            public void onChanged(final Change<? extends Nearable> c) {
-                while (c.next()) {
-                    if (c.getAddedSize() == 0) return;
+        SelectHelper.elementsToBeSelected.addListener((ListChangeListener<Nearable>) c -> {
+            while (c.next()) {
+                if (c.getAddedSize() == 0) return;
 
-                    for (final Nearable nearable : SelectHelper.elementsToBeSelected) {
-                        if (nearable instanceof Location) {
-                            if (nearable.equals(getLocation())) {
-                                SelectHelper.addToSelection(LocationController.this);
-                                break;
-                            }
+                for (final Nearable nearable : SelectHelper.elementsToBeSelected) {
+                    if (nearable instanceof Location) {
+                        if (nearable.equals(getLocation())) {
+                            SelectHelper.addToSelection(LocationController.this);
+                            break;
                         }
                     }
                 }
@@ -111,15 +106,15 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
         dropDownMenu.addClickableAndDisableableListElement("Draw Edge", getLocation().getIsLocked(),
                 (event) -> {
-                        final Edge newEdge = new Edge(getLocation(), EcdarController.getGlobalEdgeStatus());
+                    final Edge newEdge = new Edge(getLocation(), EcdarController.getGlobalEdgeStatus());
 
-                        KeyboardTracker.registerKeybind(KeyboardTracker.ABANDON_EDGE, new Keybind(new KeyCodeCombination(KeyCode.ESCAPE), () -> {
-                            getComponent().removeEdge(newEdge);
-                        }));
-                        getComponent().addEdge(newEdge);
-                        dropDownMenu.hide();
-                    }
-                );
+                    KeyboardTracker.registerKeybind(KeyboardTracker.ABANDON_EDGE, new Keybind(new KeyCodeCombination(KeyCode.ESCAPE), () -> {
+                        getComponent().removeEdge(newEdge);
+                    }));
+                    getComponent().addEdge(newEdge);
+                    dropDownMenu.hide();
+                }
+        );
 
         dropDownMenu.addClickableAndDisableableListElement("Add Nickname",
                 getLocation().nicknameProperty().isNotEmpty().or(nicknameTag.textFieldFocusProperty()),
@@ -283,17 +278,11 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
     public void setLocation(final Location location) {
         this.location.set(location);
-
-        if (ComponentController.isPlacingLocation()) {
-            root.layoutXProperty().bindBidirectional(location.xProperty());
-            root.layoutYProperty().bindBidirectional(location.yProperty());
-        } else {
-            root.setLayoutX(location.getX());
-            root.setLayoutY(location.getY());
-            location.xProperty().bindBidirectional(root.layoutXProperty());
-            location.yProperty().bindBidirectional(root.layoutYProperty());
-            root.setPlaced(true);
-        }
+        root.setLayoutX(location.getX());
+        root.setLayoutY(location.getY());
+        location.xProperty().bindBidirectional(root.layoutXProperty());
+        location.yProperty().bindBidirectional(root.layoutYProperty());
+        root.setPlaced(true);
     }
 
     public ObjectProperty<Location> locationProperty() {
@@ -324,7 +313,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
     @FXML
     private void mouseEntered() {
-        if(!this.root.isInteractable()) return;
+        if (!this.root.isInteractable()) return;
         circle.setCursor(Cursor.HAND);
         this.root.animateHoverEntered();
 
@@ -351,7 +340,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
     @FXML
     private void mouseExited() {
         final LocationPresentation locationPresentation = this.root;
-        if(!locationPresentation.isInteractable()) return;
+        if (!locationPresentation.isInteractable()) return;
 
         circle.setCursor(Cursor.DEFAULT);
         locationPresentation.animateHoverExited();
@@ -407,7 +396,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                             unfinishedEdge.makeSyncNailBetweenLocations();
                         }
                     } else if (getLocation().equals(unfinishedEdge.getSourceLocation()) && unfinishedEdge.getNails().size() == 1) {
-                        final Nail nail = new Nail(unfinishedEdge.getNails().get(0).getX(), unfinishedEdge.getNails().get(0).getY() + 2 *GRID_SIZE);
+                        final Nail nail = new Nail(unfinishedEdge.getNails().get(0).getX(), unfinishedEdge.getNails().get(0).getY() + 2 * GRID_SIZE);
                         unfinishedEdge.addNail(nail);
                     }
 
@@ -430,7 +419,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                     }
                     // Otherwise, select the location
                     else {
-                        if(root.isInteractable()) {
+                        if (root.isInteractable()) {
                             if (event.isShortcutDown()) {
                                 if (SelectHelper.getSelectedElements().contains(this)) {
                                     SelectHelper.deselect(this);
@@ -450,7 +439,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
                 final double minY = Grid.TOOL_BAR_HEIGHT + GRID_SIZE * 2;
                 final double maxY = getComponent().getBox().getHeight() - GRID_SIZE * 2;
 
-                if(root.getLayoutX() >= minX && root.getLayoutX() <= maxX && root.getLayoutY() >= minY && root.getLayoutY() <= maxY) {
+                if (root.getLayoutX() >= minX && root.getLayoutX() <= maxX && root.getLayoutY() >= minY && root.getLayoutY() <= maxY) {
                     // Unbind presentation root x and y coordinates (bind the view properly to enable dragging)
                     root.layoutXProperty().unbind();
                     root.layoutYProperty().unbind();
@@ -461,7 +450,6 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
                     // Notify that the location was placed
                     root.setPlaced(true);
-                    ComponentController.setPlacingLocation(null);
                     KeyboardTracker.unregisterKeybind(KeyboardTracker.ABANDON_LOCATION);
                 } else {
                     root.shake();
@@ -470,7 +458,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
         };
 
         locationProperty().addListener((obs, oldLocation, newLocation) -> {
-            if(newLocation == null) return;
+            if (newLocation == null) return;
             root.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseClicked::accept);
             ItemDragHelper.makeDraggable(root, this::getDragBounds);
         });
@@ -527,14 +515,16 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
         return oldX != newX || oldY != newY;
     }
 
-    /**'
+    /**
+     * '
      * Method which has the logical expression for the shortcut of adding a new edge,
      * checks whether the location is locked and the correct buttons are held down
+     *
      * @param event the mouse event
      * @return the result of the boolean expression, false if the location is locked or the incorrect buttons are held down,
      * true if the correct buttons are down
      */
-    private boolean canCreateEdgeShortcut(MouseEvent event){
+    private boolean canCreateEdgeShortcut(MouseEvent event) {
         return (!getLocation().getIsLocked().get() &&
                 ((event.isShiftDown() && event.getButton().equals(MouseButton.PRIMARY)) || event.getButton().equals(MouseButton.MIDDLE)));
     }

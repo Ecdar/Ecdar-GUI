@@ -6,47 +6,55 @@ import ecdar.backend.BackendHelper;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.presentations.*;
 import ecdar.utility.UndoRedoStack;
+import ecdar.utility.colors.Color;
 import ecdar.utility.helpers.*;
-import ecdar.utility.mouse.MouseTracker;
 import com.jfoenix.controls.JFXPopup;
 import com.jfoenix.controls.JFXRippler;
 import javafx.animation.Interpolator;
 import javafx.animation.Transition;
 import javafx.application.Platform;
-import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Cursor;
 import javafx.scene.layout.*;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Path;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.Shape;
 import javafx.util.Duration;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.StyleClassedTextArea;
 
 import java.net.URL;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static ecdar.presentations.Grid.GRID_SIZE;
+import static ecdar.presentations.ModelPresentation.TOP_LEFT_CORNER;
 
 public class ComponentController extends ModelController implements Initializable {
+    private final List<BiConsumer<Color, Color.Intensity>> updateColorDelegates = new ArrayList<>();
     private static final Map<Component, ListChangeListener<Location>> locationListChangeListenerMap = new HashMap<>();
     private static final Map<Component, Boolean> errorsAndWarningsInitialized = new HashMap<>();
-    private static Location placingLocation = null;
     private final ObjectProperty<Component> component = new SimpleObjectProperty<>(null);
     private final Map<DisplayableEdge, EdgePresentation> edgePresentationMap = new HashMap<>();
     private final Map<Location, LocationPresentation> locationPresentationMap = new HashMap<>();
 
+    // View elements
     public StyleClassedTextArea declarationTextArea;
     public JFXRippler toggleDeclarationButton;
     public Label x;
@@ -58,23 +66,29 @@ public class ComponentController extends ModelController implements Initializabl
     public VBox outputSignatureContainer;
     public VBox inputSignatureContainer;
 
-    private MouseTracker mouseTracker;
     private DropDownMenu contextMenu;
     private DropDownMenu finishEdgeContextMenu;
-
-    public static boolean isPlacingLocation() {
-        return placingLocation != null;
-    }
-
-    public static void setPlacingLocation(final Location placingLocation) {
-        ComponentController.placingLocation = placingLocation;
-    }
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
         declarationTextArea.setParagraphGraphicFactory(LineNumberFactory.get(declarationTextArea));
 
         component.addListener((obs, oldComponent, newComponent) -> {
+            super.initialize(newComponent.getBox());
+
+            // Initialize methods that is sensitive to width and height
+            final Runnable onUpdateSize = () -> {
+                initializeToolbar();
+                initializeFrame();
+                initializeBackground();
+            };
+
+            onUpdateSize.run();
+
+            // Re-run initialisation on update of width and height property
+            newComponent.getBox().getWidthProperty().addListener(observable -> onUpdateSize.run());
+            newComponent.getBox().getHeightProperty().addListener(observable -> onUpdateSize.run());
+
             inputSignatureContainer.heightProperty().addListener((change) -> updateMaxHeight());
             outputSignatureContainer.heightProperty().addListener((change) -> updateMaxHeight());
 
@@ -106,21 +120,17 @@ public class ComponentController extends ModelController implements Initializabl
             initializeDeclarations();
             initializeSignature(newComponent);
             initializeSignatureListeners(newComponent);
-        });
 
-
-        // The root view have been inflated, initialize the mouse tracker on it
-        mouseTracker = new MouseTracker(root);
-        initializeContextMenu();
-
-        component.addListener((obs, old, component) -> {
-            if (component == null) return;
-
-            if (!errorsAndWarningsInitialized.containsKey(component) || !errorsAndWarningsInitialized.get(component)) {
+            if (!errorsAndWarningsInitialized.containsKey(newComponent) || !errorsAndWarningsInitialized.get(newComponent)) {
                 initializeNoIncomingEdgesWarning();
-                errorsAndWarningsInitialized.put(component, true);
+                errorsAndWarningsInitialized.put(newComponent, true);
             }
         });
+
+        initializeContextMenu();
+
+        declarationTextArea.textProperty().addListener((obs, oldText, newText) ->
+                declarationTextArea.setStyleSpans(0, UPPAALSyntaxHighlighter.computeHighlighting(newText)));
     }
 
     /***
@@ -152,47 +162,6 @@ public class ComponentController extends ModelController implements Initializabl
                 c.getAddedSubList().forEach((channel) -> insertSignatureArrow(channel, EdgeStatus.INPUT));
             }
         });
-    }
-
-    /***
-     * Inserts a new {@link ecdar.presentations.SignatureArrow} in the containers for either input or output signature
-     * @param channel A String with the channel name that should be shown with the arrow
-     * @param status An EdgeStatus for the type of arrow to insert
-     */
-    private void insertSignatureArrow(final String channel, final EdgeStatus status) {
-        SignatureArrow newArrow = new SignatureArrow(channel, status, component.get());
-        if (status == EdgeStatus.INPUT) {
-            inputSignatureContainer.getChildren().add(newArrow);
-        } else {
-            outputSignatureContainer.getChildren().add(newArrow);
-        }
-    }
-    
-    /***
-     * Updates the component's height to match the input/output signature containers
-     * if the component is smaller than either of them
-     */
-    private void updateMaxHeight() {
-        // If input/outputsignature container is taller than the current component height
-        // we update the component's height to be as tall as the container
-        double maxHeight = findMaxHeight();
-        if (maxHeight > component.get().getBox().getHeight()) {
-            component.get().getBox().getHeightProperty().set(maxHeight);
-        }
-    }
-
-    /***
-     * Finds the max height of the input/output signature container and the component
-     * @return a double of the largest height
-     */
-    private double findMaxHeight() {
-        double inputHeight = inputSignatureContainer.getHeight();
-        double outputHeight = outputSignatureContainer.getHeight();
-        double componentHeight = component.get().getBox().getHeight();
-
-        double maxSignatureHeight = Math.max(outputHeight, inputHeight);
-
-        return Math.max(maxSignatureHeight, componentHeight);
     }
 
     private void initializeNoIncomingEdgesWarning() {
@@ -284,11 +253,11 @@ public class ComponentController extends ModelController implements Initializabl
                 final Location newLocation = new Location();
                 newLocation.initialize();
 
-                double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
+                double x = DropDownMenu.x - getComponent().getBox().getX();
                 x = Grid.snap(x);
                 newLocation.setX(x);
 
-                double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
+                double y = DropDownMenu.y - getComponent().getBox().getY();
                 y = Grid.snap(y);
                 newLocation.setY(y);
 
@@ -529,10 +498,10 @@ public class ComponentController extends ModelController implements Initializabl
                 ItemDragHelper.DragBounds componentBounds = newLocationPresentation.getController().getDragBounds();
 
                 //Define the x and y coordinates for the initial and final locations
-                final double initialLocationX = component.get().getBox().getX() + newLocationPresentation.getController().circle.getRadius() * 2,
-                        initialLocationY = component.get().getBox().getY() + newLocationPresentation.getController().circle.getRadius() * 2,
-                        finalLocationX = component.get().getBox().getX() + component.get().getBox().getWidth() - newLocationPresentation.getController().circle.getRadius() * 2,
-                        finalLocationY = component.get().getBox().getY() + component.get().getBox().getHeight() - newLocationPresentation.getController().circle.getRadius() * 2;
+                final double initialLocationX = getComponent().getBox().getX() + newLocationPresentation.getController().circle.getRadius() * 2,
+                        initialLocationY = getComponent().getBox().getY() + newLocationPresentation.getController().circle.getRadius() * 2,
+                        finalLocationX = getComponent().getBox().getX() + getComponent().getBox().getWidth() - newLocationPresentation.getController().circle.getRadius() * 2,
+                        finalLocationY = getComponent().getBox().getY() + getComponent().getBox().getHeight() - newLocationPresentation.getController().circle.getRadius() * 2;
 
                 double latestHitRight = 0,
                         latestHitDown = 0,
@@ -582,7 +551,7 @@ public class ComponentController extends ModelController implements Initializabl
                 hit = false;
 
                 //Find an unoccupied space for the location
-                for (int i = 1; i < component.get().getBox().getWidth() / offset; i++) {
+                for (int i = 1; i < getComponent().getBox().getWidth() / offset; i++) {
 
                     //Check to see, if the location can be placed to the right of the existing locations
                     if (componentBounds.trimX(latestHitRight + offset) == latestHitRight + offset) {
@@ -779,7 +748,7 @@ public class ComponentController extends ModelController implements Initializabl
 
     private void initializeDeclarations() {
         // Initially style the declarations
-        declarationTextArea.setStyleSpans(0, ComponentPresentation.computeHighlighting(getComponent().getDeclarationsText()));
+        declarationTextArea.setStyleSpans(0, UPPAALSyntaxHighlighter.computeHighlighting(getComponent().getDeclarationsText()));
         declarationTextArea.getStyleClass().add("component-declaration");
 
         final Circle circle = new Circle(0);
@@ -791,9 +760,147 @@ public class ComponentController extends ModelController implements Initializabl
         clip.set(circle);
     }
 
-    public void toggleDeclaration(final MouseEvent mouseEvent) {
+    private void initializeToolbar() {
+        final Component component = getComponent();
+
+        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
+            // Set the background of the toolbar
+            toolbar.setBackground(new Background(new BackgroundFill(
+                    newColor.getColor(newIntensity),
+                    CornerRadii.EMPTY,
+                    Insets.EMPTY
+            )));
+
+            // Set the icon color and rippler color of the toggleDeclarationButton
+            toggleDeclarationButton.setRipplerFill(newColor.getTextColor(newIntensity));
+
+            toolbar.setPrefHeight(Grid.TOOL_BAR_HEIGHT);
+            toggleDeclarationButton.setBackground(Background.EMPTY);
+        };
+
+        updateColorDelegates.add(updateColor);
+
+        getComponent().colorProperty().addListener(observable -> updateColor.accept(component.getColor(), component.getColorIntensity()));
+
+        updateColor.accept(component.getColor(), component.getColorIntensity());
+
+        // Set a hover effect for the controller.toggleDeclarationButton
+        toggleDeclarationButton.setOnMouseEntered(event -> toggleDeclarationButton.setCursor(Cursor.HAND));
+        toggleDeclarationButton.setOnMouseExited(event -> toggleDeclarationButton.setCursor(Cursor.DEFAULT));
+        toggleDeclarationButton.setOnMousePressed(this::toggleDeclaration);
+
+    }
+
+    private void initializeFrame() {
+        final Component component = getComponent();
+
+        final Shape[] mask = new Shape[1];
+        final Rectangle rectangle = new Rectangle(component.getBox().getWidth(), component.getBox().getHeight());
+
+        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
+            // Mask the parent of the frame (will also mask the background)
+            mask[0] = Path.subtract(rectangle, TOP_LEFT_CORNER);
+            frame.setClip(mask[0]);
+            background.setClip(Path.union(mask[0], mask[0]));
+            background.setOpacity(0.5);
+
+            // Bind the missing lines that we cropped away
+            topLeftLine.setStartX(Grid.CORNER_SIZE);
+            topLeftLine.setStartY(0);
+            topLeftLine.setEndX(0);
+            topLeftLine.setEndY(Grid.CORNER_SIZE);
+            topLeftLine.setStroke(newColor.getColor(newIntensity.next(2)));
+            topLeftLine.setStrokeWidth(1.25);
+            StackPane.setAlignment(topLeftLine, Pos.TOP_LEFT);
+
+            // Set the stroke color to two shades darker
+            frame.setBorder(new Border(new BorderStroke(
+                    newColor.getColor(newIntensity.next(2)),
+                    BorderStrokeStyle.SOLID,
+                    CornerRadii.EMPTY,
+                    new BorderWidths(1),
+                    Insets.EMPTY
+            )));
+        };
+
+        updateColorDelegates.add(updateColor);
+
+        component.colorProperty().addListener(observable -> {
+            updateColor.accept(component.getColor(), component.getColorIntensity());
+        });
+
+        updateColor.accept(component.getColor(), component.getColorIntensity());
+    }
+
+    private void initializeBackground() {
+        final Component component = getComponent();
+
+        // Bind the background width and height to the values in the model
+        background.widthProperty().bindBidirectional(component.getBox().getWidthProperty());
+        background.heightProperty().bindBidirectional(component.getBox().getHeightProperty());
+
+        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
+            // Set the background color to the lightest possible version of the color
+            background.setFill(newColor.getColor(newIntensity.next(-10).next(2)));
+        };
+
+        updateColorDelegates.add(updateColor);
+
+        component.colorProperty().addListener(observable -> {
+            updateColor.accept(component.getColor(), component.getColorIntensity());
+        });
+
+        updateColor.accept(component.getColor(), component.getColorIntensity());
+    }
+
+    /***
+     * Inserts a new {@link ecdar.presentations.SignatureArrow} in the containers for either input or output signature
+     * @param channel A String with the channel name that should be shown with the arrow
+     * @param status An EdgeStatus for the type of arrow to insert
+     */
+    private void insertSignatureArrow(final String channel, final EdgeStatus status) {
+        SignatureArrow newArrow = new SignatureArrow(channel, status, getComponent());
+        if (status == EdgeStatus.INPUT) {
+            inputSignatureContainer.getChildren().add(newArrow);
+        } else {
+            outputSignatureContainer.getChildren().add(newArrow);
+        }
+    }
+
+    /***
+     * Updates the component's height to match the input/output signature containers
+     * if the component is smaller than either of them
+     */
+    private void updateMaxHeight() {
+        // If input/outputsignature container is taller than the current component height
+        // we update the component's height to be as tall as the container
+        double maxHeight = findMaxHeight();
+        if (maxHeight > getComponent().getBox().getHeight()) {
+            getComponent().getBox().getHeightProperty().set(maxHeight);
+        }
+    }
+
+    /***
+     * Finds the max height of the input/output signature container and the component
+     * @return a double of the largest height
+     */
+    private double findMaxHeight() {
+        double inputHeight = inputSignatureContainer.getHeight();
+        double outputHeight = outputSignatureContainer.getHeight();
+        double componentHeight = getComponent().getBox().getHeight();
+
+        double maxSignatureHeight = Math.max(outputHeight, inputHeight);
+
+        return Math.max(maxSignatureHeight, componentHeight);
+    }
+
+    /***
+     * Toggle the declaration of the component with a ripple effect originating from the MouseEvent
+     * @param mouseEvent to use for the origin of the ripple effect
+     */
+    private void toggleDeclaration(final MouseEvent mouseEvent) {
         final Circle circle = new Circle(0);
-        circle.setCenterX(component.get().getBox().getWidth() - (toggleDeclarationButton.getWidth() - mouseEvent.getX()));
+        circle.setCenterX(getComponent().getBox().getWidth() - (toggleDeclarationButton.getWidth() - mouseEvent.getX()));
         circle.setCenterY(-1 * mouseEvent.getY());
 
         final ObjectProperty<Node> clip = new SimpleObjectProperty<>(circle);
@@ -801,6 +908,7 @@ public class ComponentController extends ModelController implements Initializabl
 
         final Transition rippleEffect = new Transition() {
             private final double maxRadius = Math.sqrt(Math.pow(getComponent().getBox().getWidth(), 2) + Math.pow(getComponent().getBox().getHeight(), 2));
+
             {
                 setCycleDuration(Duration.millis(500));
             }
@@ -822,6 +930,20 @@ public class ComponentController extends ModelController implements Initializabl
         getComponent().declarationOpenProperty().set(!getComponent().isDeclarationOpen());
     }
 
+    /***
+     * Mark the component as selected in the view
+     */
+    public void componentSelected() {
+        updateColorDelegates.forEach(colorConsumer -> colorConsumer.accept(SelectHelper.SELECT_COLOR, SelectHelper.SELECT_COLOR_INTENSITY_NORMAL));
+    }
+
+    /***
+     * Mark the component as not selected in the view
+     */
+    public void componentUnselected() {
+        updateColorDelegates.forEach(colorConsumer -> colorConsumer.accept(getComponent().getColor(), getComponent().getColorIntensity()));
+    }
+
     public Component getComponent() {
         return component.get();
     }
@@ -834,6 +956,10 @@ public class ComponentController extends ModelController implements Initializabl
         return component;
     }
 
+    /***
+     * Handle the component being pressed based on the mouse button pressed and hotkeys
+     * @param event to use for handling the action
+     */
     @FXML
     private void modelContainerPressed(final MouseEvent event) {
         EcdarController.getActiveCanvasPresentation().getController().leaveTextAreas();
@@ -921,12 +1047,52 @@ public class ComponentController extends ModelController implements Initializabl
         contextMenu.hide();
     }
 
-    public MouseTracker getMouseTracker() {
-        return mouseTracker;
-    }
-
     @Override
     public HighLevelModelObject getModel() {
         return getComponent();
+    }
+
+    @Override
+    double getDragAnchorMinWidth() {
+        double minWidth = 10 * GRID_SIZE;
+
+        for (final Location location : getComponent().getLocations()) {
+            minWidth = Math.max(minWidth, location.getX() + GRID_SIZE * 2);
+        }
+
+        for (final Edge edge : getComponent().getEdges()) {
+            for (final Nail nail : edge.getNails()) {
+                minWidth = Math.max(minWidth, nail.getX() + GRID_SIZE);
+            }
+        }
+
+        return minWidth;
+    }
+
+    /**
+     * Gets the minimum possible height when dragging the anchor.
+     * The height is based on the y coordinate of locations, nails and the signature arrows
+     *
+     * @return the minimum possible height.
+     */
+    @Override
+    double getDragAnchorMinHeight() {
+        double minHeight = 10 * GRID_SIZE;
+
+        for (final Location location : getComponent().getLocations()) {
+            minHeight = Math.max(minHeight, location.getY() + GRID_SIZE * 2);
+        }
+
+        for (final Edge edge : getComponent().getEdges()) {
+            for (final Nail nail : edge.getNails()) {
+                minHeight = Math.max(minHeight, nail.getY() + GRID_SIZE);
+            }
+        }
+
+        //Component should not get smaller than the height of the input/output signature containers
+        minHeight = Math.max(inputSignatureContainer.getHeight(), minHeight);
+        minHeight = Math.max(outputSignatureContainer.getHeight(), minHeight);
+
+        return minHeight;
     }
 }

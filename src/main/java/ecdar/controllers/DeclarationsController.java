@@ -2,7 +2,7 @@ package ecdar.controllers;
 
 import ecdar.Ecdar;
 import ecdar.abstractions.Declarations;
-import ecdar.presentations.ComponentPresentation;
+import ecdar.utility.helpers.UPPAALSyntaxHighlighter;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.Initializable;
@@ -72,6 +72,6 @@ public class DeclarationsController implements Initializable {
      * Updates highlighting of the text in the text area.
      */
     public void updateHighlighting() {
-        textArea.setStyleSpans(0, ComponentPresentation.computeHighlighting(declarations.get().getDeclarationsText()));
+        textArea.setStyleSpans(0, UPPAALSyntaxHighlighter.computeHighlighting(declarations.get().getDeclarationsText()));
     }
 }

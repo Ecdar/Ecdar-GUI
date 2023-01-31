@@ -4,6 +4,7 @@ import ecdar.Ecdar;
 import ecdar.abstractions.*;
 import ecdar.presentations.*;
 import ecdar.utility.UndoRedoStack;
+import ecdar.utility.colors.Color;
 import ecdar.utility.helpers.SelectHelper;
 import com.jfoenix.controls.JFXPopup;
 import javafx.beans.property.ObjectProperty;
@@ -11,15 +12,20 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Pane;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Line;
+import javafx.scene.layout.*;
+import javafx.scene.shape.*;
 
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.function.BiConsumer;
+
+import static ecdar.presentations.Grid.GRID_SIZE;
+import static ecdar.presentations.ModelPresentation.TOP_LEFT_CORNER;
 
 /**
  * Controller for a system.
@@ -61,10 +67,118 @@ public class SystemController extends ModelController implements Initializable {
             initializeOperatorHandling(newValue);
             initializeEdgeHandling(newValue);
         });
+
+        super.initialize(getSystem().getBox());
+        initializeDimensions(getSystem().getBox());
+
+        // Initialize methods that is sensitive to width and height
+        final Runnable onUpdateSize = () -> {
+            initializeToolbar();
+            initializeFrame();
+            initializeBackground();
+        };
+
+        onUpdateSize.run();
+
+        // Re-run initialisation on update of width and height property
+        getSystem().getBox().getWidthProperty().addListener(observable -> onUpdateSize.run());
+        getSystem().getBox().getHeightProperty().addListener(observable -> onUpdateSize.run());
     }
 
     private void initializeSystemRoot(final EcdarSystem system) {
         systemRootContainer.getChildren().add(new SystemRootPresentation(system));
+    }
+
+    /**
+     * Initializes the toolbar.
+     */
+    private void initializeToolbar() {
+        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
+            // Set the background of the toolbar
+            toolbar.setBackground(new Background(new BackgroundFill(
+                    newColor.getColor(newIntensity),
+                    CornerRadii.EMPTY,
+                    Insets.EMPTY
+            )));
+
+            toolbar.setPrefHeight(Grid.TOOL_BAR_HEIGHT);
+        };
+
+        getSystem().colorProperty().addListener(observable -> updateColor.accept(getSystem().getColor(), getSystem().getColorIntensity()));
+
+        updateColor.accept(getSystem().getColor(), getSystem().getColorIntensity());
+    }
+
+    /**
+     * Initializes the frame and handling of it.
+     * The frame is a rectangle minus two cutouts.
+     */
+    private void initializeFrame() {
+        final Shape[] mask = new Shape[1];
+        final Rectangle rectangle = new Rectangle(getSystem().getBox().getWidth(), getSystem().getBox().getHeight());
+
+        // Generate top right corner (to subtract)
+        final Polygon topRightCorner = new Polygon(
+                getSystem().getBox().getWidth(), 0,
+                getSystem().getBox().getWidth() - Grid.CORNER_SIZE - 2, 0,
+                getSystem().getBox().getWidth(), Grid.CORNER_SIZE + 2
+        );
+
+        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
+            // Mask the parent of the frame (will also mask the background)
+            mask[0] = Path.subtract(rectangle, TOP_LEFT_CORNER);
+            mask[0] = Path.subtract(mask[0], topRightCorner);
+            frame.setClip(mask[0]);
+            background.setClip(Path.union(mask[0], mask[0]));
+            background.setOpacity(0.5);
+
+            // Bind the missing lines that we cropped away
+            topLeftLine.setStartX(Grid.CORNER_SIZE);
+            topLeftLine.setStartY(0);
+            topLeftLine.setEndX(0);
+            topLeftLine.setEndY(Grid.CORNER_SIZE);
+            topLeftLine.setStroke(newColor.getColor(newIntensity.next(2)));
+            topLeftLine.setStrokeWidth(1.25);
+            StackPane.setAlignment(topLeftLine, Pos.TOP_LEFT);
+
+            topRightLine.setStartX(0);
+            topRightLine.setStartY(0);
+            topRightLine.setEndX(Grid.CORNER_SIZE);
+            topRightLine.setEndY(Grid.CORNER_SIZE);
+            topRightLine.setStroke(newColor.getColor(newIntensity.next(2)));
+            topRightLine.setStrokeWidth(1.25);
+            StackPane.setAlignment(topRightLine, Pos.TOP_RIGHT);
+
+            // Set the stroke color to two shades darker
+            frame.setBorder(new Border(new BorderStroke(
+                    newColor.getColor(newIntensity.next(2)),
+                    BorderStrokeStyle.SOLID,
+                    CornerRadii.EMPTY,
+                    new BorderWidths(1),
+                    Insets.EMPTY
+            )));
+        };
+
+        // Update now, and update on color change
+        updateColor.accept(getSystem().getColor(), getSystem().getColorIntensity());
+        getSystem().colorProperty().addListener(observable -> updateColor.accept(getSystem().getColor(), getSystem().getColorIntensity()));
+    }
+
+    /**
+     * Initializes the background
+     */
+    private void initializeBackground() {
+        // Bind the background width and height to the values in the model
+        background.widthProperty().bindBidirectional(getSystem().getBox().getWidthProperty());
+        background.heightProperty().bindBidirectional(getSystem().getBox().getHeightProperty());
+
+        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
+            // Set the background color to the lightest possible version of the color
+            background.setFill(newColor.getColor(newIntensity.next(-10).next(2)));
+        };
+
+        getSystem().colorProperty().addListener(observable -> updateColor.accept(getSystem().getColor(), getSystem().getColorIntensity()));
+        updateColor.accept(getSystem().getColor(), getSystem().getColorIntensity());
     }
 
     /**
@@ -308,5 +422,45 @@ public class SystemController extends ModelController implements Initializable {
     void showBorderAndBackground() {
         super.showBorderAndBackground();
         topRightLine.setVisible(true);
+    }
+
+    /**
+     * Gets the minimum allowed width when dragging the anchor.
+     * It is determined by the position and size of the system nodes.
+     * @return the minimum allowed width
+     */
+    @Override
+    double getDragAnchorMinWidth() {
+        double minWidth = getSystem().getSystemRoot().getX() + SystemRoot.WIDTH + 2 * Grid.GRID_SIZE;
+
+        for (final ComponentInstance instance : getSystem().getComponentInstances()) {
+            minWidth = Math.max(minWidth, instance.getBox().getX() + instance.getBox().getWidth() + Grid.GRID_SIZE);
+        }
+
+        for (final ComponentOperator operator : getSystem().getComponentOperators()) {
+            minWidth = Math.max(minWidth, operator.getBox().getX() + operator.getBox().getWidth() + Grid.GRID_SIZE);
+        }
+
+        return minWidth;
+    }
+
+    /**
+     * Gets the minimum allowed height when dragging the anchor.
+     * It is determined by the position and size of the system nodes.
+     * @return the minimum allowed height
+     */
+    @Override
+    double getDragAnchorMinHeight() {
+        double minHeight = 10 * GRID_SIZE;
+
+        for (final ComponentInstance instance : getSystem().getComponentInstances()) {
+            minHeight = Math.max(minHeight, instance.getBox().getY() + instance.getBox().getHeight() + Grid.GRID_SIZE);
+        }
+
+        for (final ComponentOperator operator : getSystem().getComponentOperators()) {
+            minHeight = Math.max(minHeight, operator.getBox().getY() + operator.getBox().getHeight() + Grid.GRID_SIZE);
+        }
+
+        return minHeight;
     }
 }

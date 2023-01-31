@@ -5,7 +5,7 @@ import com.jfoenix.skins.ValidationPane;
 import ecdar.controllers.CanvasController;
 import ecdar.controllers.EcdarController;
 import ecdar.utility.colors.Color;
-import ecdar.utility.helpers.MouseTrackable;
+import ecdar.utility.helpers.LocationAware;
 import ecdar.utility.helpers.SelectHelper;
 import ecdar.utility.mouse.MouseTracker;
 import javafx.application.Platform;
@@ -23,7 +23,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
 
-public class CanvasPresentation extends StackPane implements MouseTrackable {
+public class CanvasPresentation extends StackPane implements LocationAware {
     public MouseTracker mouseTracker;
 
     private final DoubleProperty x = new SimpleDoubleProperty(0);
@@ -161,14 +161,6 @@ public class CanvasPresentation extends StackPane implements MouseTrackable {
         controller.grid.setOpacity(0);
     }
 
-    /**
-     * Updates if views should show an inset behind the error view.
-     * @param shouldShow true iff views should show an inset
-     */
-    public static void showBottomInset(final Boolean shouldShow) {
-        EcdarController.getActiveCanvasPresentation().getController().updateOffset(shouldShow);
-    }
-
     @Override
     public DoubleProperty xProperty() {
         return x;
@@ -189,15 +181,14 @@ public class CanvasPresentation extends StackPane implements MouseTrackable {
         return yProperty().get();
     }
 
-    @Override
-    public MouseTracker getMouseTracker() {
-        return mouseTracker;
-    }
-
     public CanvasController getController() {
         return controller;
     }
 
+    /***
+     * Start drawing selection rectangle for area selection
+     * @param event used for the origin of the selection rectangle
+     */
     private void startDragSelect(final MouseEvent event) {
         if(event.isPrimaryButtonDown()) {
             SelectHelper.clearSelectedElements();
@@ -240,6 +231,12 @@ public class CanvasPresentation extends StackPane implements MouseTrackable {
         }
     }
 
+    /***
+     * Initialize the rectangle to use for selection
+     * @param mouseDownX X-coordinate for the initial mouse press
+     * @param mouseDownY Y-coordinate for the initial mouse press
+     * @return the initialized rectangle
+     */
     private Rectangle initializeRectangleForSelectionBox(double mouseDownX, double mouseDownY) {
         Rectangle selectionRectangle = new Rectangle();
         selectionRectangle.setStroke(SelectHelper.SELECT_COLOR.getColor(SelectHelper.SELECT_COLOR_INTENSITY_BORDER));
@@ -256,6 +253,11 @@ public class CanvasPresentation extends StackPane implements MouseTrackable {
         return selectionRectangle;
     }
 
+    /***
+     * Traverse the node graph recursively to update the set of nodes that should be selected
+     * @param currentNode the current 'root' node to traverse
+     * @param selectionRectangle the rectangle representing the selection area
+     */
     private void updateSelection(Parent currentNode, Rectangle selectionRectangle) {
         // None of these nodes contain ItemSelectable nodes, so avoiding traversing these sub-trees improves performance
         if (currentNode instanceof VBox || currentNode instanceof ValidationPane || currentNode instanceof JFXRippler || currentNode instanceof BorderPane) {
@@ -285,7 +287,7 @@ public class CanvasPresentation extends StackPane implements MouseTrackable {
         });
     }
 
-    /**
+    /***
      * Returns whether the item is within the selection box.
      * @param item the node to potentially be selected.
      * @param itemSelectable the ItemSelectable object related to the item (in order to get width and height for the checks).
@@ -302,5 +304,13 @@ public class CanvasPresentation extends StackPane implements MouseTrackable {
                 itemCoordinates.getMinX() + itemSelectable.getSelectableWidth() * getScaleX() / 2 < selectionBoxCoordinates.getMinX() + selectionRectangle.getWidth() * getScaleX() &&
                 selectionBoxCoordinates.getMinY() < itemCoordinates.getMinY() + itemSelectable.getSelectableHeight() * getScaleY() / 2 &&
                 itemCoordinates.getMinY() + itemSelectable.getSelectableHeight() * getScaleY() / 2 < selectionBoxCoordinates.getMinY() + selectionRectangle.getHeight() * getScaleY();
+    }
+
+    /**
+     * Updates if views should show an inset behind the error view.
+     * @param shouldShow true iff views should show an inset
+     */
+    public static void showBottomInset(final Boolean shouldShow) {
+        EcdarController.getActiveCanvasPresentation().getController().updateOffset(shouldShow);
     }
 }
