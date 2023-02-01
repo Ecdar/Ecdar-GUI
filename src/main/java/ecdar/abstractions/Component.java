@@ -3,7 +3,6 @@ package ecdar.abstractions;
 import com.bpodgursky.jbool_expressions.*;
 import com.bpodgursky.jbool_expressions.rules.RuleSet;
 import ecdar.Ecdar;
-import ecdar.controllers.EcdarController;
 import ecdar.presentations.Grid;
 import ecdar.utility.ExpressionHelper;
 import ecdar.utility.UndoRedoStack;
@@ -42,7 +41,7 @@ public class Component extends HighLevelModelObject implements Boxed {
     private final ObservableList<String> inputStrings = FXCollections.observableArrayList();
     private final ObservableList<String> outputStrings = FXCollections.observableArrayList();
     private final StringProperty description = new SimpleStringProperty("");
-    private final StringProperty declarationsText = new SimpleStringProperty("");;
+    private final StringProperty declarationsText = new SimpleStringProperty("");
 
     // Background check
     private final BooleanProperty includeInPeriodicCheck = new SimpleBooleanProperty(true);
@@ -85,7 +84,6 @@ public class Component extends HighLevelModelObject implements Boxed {
 
         locations.add(initialLocation);
         initializeIOListeners();
-        bindReachabilityAnalysis();
     }
 
     public Component(final JsonObject json) {
@@ -94,7 +92,6 @@ public class Component extends HighLevelModelObject implements Boxed {
         deserialize(json);
         initializeIOListeners();
         updateIOList();
-        bindReachabilityAnalysis();
     }
 
     /**
@@ -763,16 +760,6 @@ public class Component extends HighLevelModelObject implements Boxed {
         }, String.format("Changed the color of %s to %s", this, color.name()), "color-lens");
     }
 
-    private void bindReachabilityAnalysis() {
-        // If there is no EcdarPresentation, we are running tests and EcdarController calls will fail
-        if (Ecdar.getPresentation() == null) return;
-
-        locations.addListener((ListChangeListener<? super Location>) c -> EcdarController.runReachabilityAnalysis());
-        edges.addListener((ListChangeListener<? super DisplayableEdge>) c -> EcdarController.runReachabilityAnalysis());
-        declarationsTextProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
-        includeInPeriodicCheckProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
-    }
-
     public String getDescription() {
         return description.get();
     }
@@ -796,7 +783,7 @@ public class Component extends HighLevelModelObject implements Boxed {
     /**
      * Generate and sets a unique id for this system
      */
-    private void setComponentName() {
+    private void setComponentName() {// ToDo NIELS: Move this out of component
         for(int counter = 1; ; counter++) {
             if(!Ecdar.getProject().getComponentNames().contains(COMPONENT + counter)){
                 setName((COMPONENT + counter));
@@ -810,7 +797,7 @@ public class Component extends HighLevelModelObject implements Boxed {
      * if one has already been generated, return that instead
      * @return generated universal/inconsistent id
      */
-    String generateUniIncId(){
+    String generateUniIncId(){// ToDo NIELS: Move this out of component
         final String id = getUniIncId();
         if(id != null){
             return id;
@@ -917,7 +904,7 @@ public class Component extends HighLevelModelObject implements Boxed {
      * Also gets the lower and upper bounds for these variables.
      * @return Triples containing (left) name of the variable, (middle) lower bound, (right) upper bound
      */
-    public List<Triple<String, Integer, Integer>> getLocalVariablesWithBounds() {
+    public List<Triple<String, Integer, Integer>> getLocalVariablesWithBounds() {// ToDo NIELS: Move this out of component
         final List<Triple<String, Integer, Integer>> typedefs = Ecdar.getProject().getGlobalDeclarations().getTypedefs();
 
         final List<Triple<String, Integer, Integer>> locals = new ArrayList<>();

@@ -11,7 +11,7 @@ import java.util.function.Consumer;
 import static ecdar.presentations.Grid.GRID_SIZE;
 
 public class LocationPlacer {
-    public static LocationPresentation ensureCorrectPlacementOfLocation(Component component, Collection<LocationPresentation> existingLocations, Location originalLocation, Consumer<LocationPresentation> failedToFindPlacement) {
+    public static LocationPresentation ensureCorrectPlacementOfLocation(Component component, Collection<LocationPresentation> existingLocationPresentations, Location originalLocation, Consumer<LocationPresentation> failedToFindPlacement) {
         // Create a new presentation, and register it on the map
         final LocationPresentation newLocationPresentation = new LocationPresentation(originalLocation, component);
 
@@ -45,7 +45,7 @@ public class LocationPlacer {
 
             //Check to see if the location is placed on top of another location
             else {
-                for (LocationPresentation entry : existingLocations) {
+                for (LocationPresentation entry : existingLocationPresentations) {
                     if (entry != newLocationPresentation && Math.abs(entry.getLayoutX() - (newLocationPresentation.getLayoutX())) < offset && Math.abs(entry.getLayoutY() - (newLocationPresentation.getLayoutY())) < offset) {
                         hit = true;
                         latestHitRight = entry.getLayoutX();
@@ -74,7 +74,7 @@ public class LocationPlacer {
                         hit = true;
                         latestHitRight = finalLocationX;
                     } else {
-                        for (LocationPresentation entry : existingLocations) {
+                        for (LocationPresentation entry : existingLocationPresentations) {
                             if (entry != newLocationPresentation && Math.abs(entry.getLayoutX() - (latestHitRight + offset)) < offset && Math.abs(entry.getLayoutY() - (newLocationPresentation.getLayoutY())) < offset) {
                                 hit = true;
                                 latestHitRight = entry.getLayoutX();
@@ -98,7 +98,7 @@ public class LocationPlacer {
                         hit = true;
                         latestHitDown = finalLocationY;
                     } else {
-                        for (LocationPresentation entry : existingLocations) {
+                        for (LocationPresentation entry : existingLocationPresentations) {
                             if (entry != newLocationPresentation && Math.abs(entry.getLayoutX() - (newLocationPresentation.getLayoutX())) < offset && Math.abs(entry.getLayoutY() - (latestHitDown + offset)) < offset) {
                                 hit = true;
                                 latestHitDown = entry.getLayoutY();
@@ -121,7 +121,7 @@ public class LocationPlacer {
                         hit = true;
                         latestHitLeft = initialLocationX;
                     } else {
-                        for (LocationPresentation entry : existingLocations) {
+                        for (LocationPresentation entry : existingLocationPresentations) {
                             if (entry != newLocationPresentation && Math.abs(entry.getLayoutX() - (latestHitLeft - offset)) < offset && Math.abs(entry.getLayoutY() - (newLocationPresentation.getLayoutY())) < offset) {
                                 hit = true;
                                 latestHitLeft = entry.getLayoutX();
@@ -144,7 +144,7 @@ public class LocationPlacer {
                         hit = true;
                         latestHitUp = initialLocationY;
                     } else {
-                        for (LocationPresentation entry : existingLocations) {
+                        for (LocationPresentation entry : existingLocationPresentations) {
                             if (entry != newLocationPresentation && Math.abs(entry.getLayoutX() - (newLocationPresentation.getLayoutX())) < offset && Math.abs(entry.getLayoutY() - (latestHitUp - offset)) < offset) {
                                 hit = true;
                                 latestHitUp = entry.getLayoutY();
