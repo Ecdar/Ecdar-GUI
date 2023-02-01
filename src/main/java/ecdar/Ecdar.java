@@ -1,6 +1,8 @@
 package ecdar;
 
 import ecdar.abstractions.Component;
+import ecdar.abstractions.DisplayableEdge;
+import ecdar.abstractions.Location;
 import ecdar.abstractions.Project;
 import ecdar.backend.BackendDriver;
 import ecdar.backend.BackendHelper;
@@ -355,25 +357,21 @@ public class Ecdar extends Application {
         final File directory = new File(projectDirectory.get());
         FileUtils.forceMkdir(directory);
 
-        CodeAnalysis.getErrors().addListener(new ListChangeListener<CodeAnalysis.Message>() {
-            @Override
-            public void onChanged(Change<? extends CodeAnalysis.Message> c) {
-                CodeAnalysis.getErrors().forEach(message -> {
-                    System.out.println(message.getMessage());
-                });
-            }
-        });
+        CodeAnalysis.getErrors().addListener((ListChangeListener<CodeAnalysis.Message>) c -> CodeAnalysis.getErrors().forEach(message -> {
+            System.out.println(message.getMessage());
+        }));
+
         CodeAnalysis.clearErrorsAndWarnings();
         CodeAnalysis.disable();
         getProject().clean();
 
         // Deserialize the project
-        Ecdar.getProject().deserialize(directory);
+        getProject().deserialize(directory);
         CodeAnalysis.enable();
 
         // Generate all component presentations by making them the active component in the view one by one
         Component initialShownComponent = null;
-        for (final Component component : Ecdar.getProject().getComponents()) {
+        for (final Component component : getProject().getComponents()) {
             // The first component should be shown
             if (initialShownComponent == null) {
                 initialShownComponent = component;
@@ -386,6 +384,14 @@ public class Ecdar extends Application {
             EcdarController.setActiveModelForActiveCanvas(initialShownComponent);
         }
         serializationDone = true;
+
+        // Update reachability check timer when components change
+        getProject().getComponents().addListener((ListChangeListener<Component>) c -> c.getAddedSubList().forEach(component -> {
+            component.getLocations().addListener((ListChangeListener<? super Location>) loc -> EcdarController.runReachabilityAnalysis());
+            component.getDisplayableEdges().addListener((ListChangeListener<? super DisplayableEdge>) de -> EcdarController.runReachabilityAnalysis());
+            component.declarationsTextProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
+            component.includeInPeriodicCheckProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
+        }));
     }
 
     private void loadFonts() {

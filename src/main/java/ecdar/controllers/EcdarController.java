@@ -216,14 +216,6 @@ public class EcdarController implements Initializable {
         intitializeTemporaryComponentWatermark();
         startBackgroundQueriesThread(); // Will terminate immediately if background queries are turned off
 
-        // Update reachability check logic based on component changes
-        Ecdar.getProject().getComponents().addListener((ListChangeListener<Component>) c -> c.getAddedSubList().forEach(component -> {
-            component.getLocations().addListener((ListChangeListener<? super Location>) loc -> EcdarController.runReachabilityAnalysis());
-            component.getDisplayableEdges().addListener((ListChangeListener<? super DisplayableEdge>) de -> EcdarController.runReachabilityAnalysis());
-            component.declarationsTextProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
-            component.includeInPeriodicCheckProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
-        }));
-
         bottomFillerElement.heightProperty().bind(messageTabPane.maxHeightProperty());
         messageTabPane.getController().setRunnableForOpeningAndClosingMessageTabPane(this::changeInsetsOfFileAndQueryPanes);
     }
