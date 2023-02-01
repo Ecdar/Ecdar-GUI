@@ -337,7 +337,7 @@ public class Project {
      */
     public void reset() {
         clean();
-        components.add(new Component(true));
+        components.add(new Component(true, getUniqueComponentName()));
     }
 
     /**
@@ -417,7 +417,7 @@ public class Project {
      * Gets the name of all components in the project and inserts it into a set
      * @return the set of all component names
      */
-    HashSet<String> getComponentNames(){
+    public HashSet<String> getComponentNames(){
         final HashSet<String> names = new HashSet<>();
 
         for(final Component component : getComponents()){
@@ -425,6 +425,15 @@ public class Project {
         }
 
         return names;
+    }
+
+    public String getUniqueComponentName() {
+        for(int counter = 1; ; counter++) {
+            final String name = "Component" + counter;
+            if(getComponentNames().contains("Component" + counter)){
+                return name;
+            }
+        }
     }
 
     /**

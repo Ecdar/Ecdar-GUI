@@ -302,7 +302,7 @@ public class EcdarController implements Initializable {
         //Press ctrl+N or cmd+N to create a new component. The canvas changes to this new component
         KeyCodeCombination combination = new KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN);
         Keybind binding = new Keybind(combination, (event) -> {
-            final Component newComponent = new Component(true);
+            final Component newComponent = new Component(true, Ecdar.getProject().getUniqueComponentName());
             UndoRedoStack.pushAndPerform(() -> { // Perform
                 Ecdar.getProject().getComponents().add(newComponent);
             }, () -> { // Undo

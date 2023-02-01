@@ -19,7 +19,6 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.util.Pair;
-import org.apache.commons.lang3.tuple.Triple;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -64,8 +63,8 @@ public class Component extends HighLevelModelObject implements Boxed {
      * Creates a component with a specific name and a boolean value that chooses whether the colour for this component is chosen at random
      * @param doRandomColor boolean that is true if the component should choose a colour at random and false if not
      */
-    public Component(final boolean doRandomColor) {
-        setComponentName();
+    public Component(final boolean doRandomColor, final String name) {
+        setName(name);
 
         if(doRandomColor) {
             setRandomColor();
@@ -781,18 +780,6 @@ public class Component extends HighLevelModelObject implements Boxed {
     }
 
     /**
-     * Generate and sets a unique id for this system
-     */
-    private void setComponentName() {// ToDo NIELS: Move this out of component
-        for(int counter = 1; ; counter++) {
-            if(!Ecdar.getProject().getComponentNames().contains(COMPONENT + counter)){
-                setName((COMPONENT + counter));
-                return;
-            }
-        }
-    }
-
-    /**
      * Generates an id to be used by universal and inconsistent locations in this component,
      * if one has already been generated, return that instead
      * @return generated universal/inconsistent id
@@ -894,30 +881,6 @@ public class Component extends HighLevelModelObject implements Boxed {
             if ((!matcher.find()) || matcher.group(1).equals("clock")) return;
 
             locals.add(matcher.group(2));
-        });
-
-        return locals;
-    }
-
-    /**
-     * Gets the local variables defined in the declarations text.
-     * Also gets the lower and upper bounds for these variables.
-     * @return Triples containing (left) name of the variable, (middle) lower bound, (right) upper bound
-     */
-    public List<Triple<String, Integer, Integer>> getLocalVariablesWithBounds() {// ToDo NIELS: Move this out of component
-        final List<Triple<String, Integer, Integer>> typedefs = Ecdar.getProject().getGlobalDeclarations().getTypedefs();
-
-        final List<Triple<String, Integer, Integer>> locals = new ArrayList<>();
-
-        Arrays.stream(getDeclarationsText().split(";")).forEach(statement -> {
-            final Matcher matcher = Pattern.compile("^\\s*(\\w+)\\s+(\\w+)(\\W|$)").matcher(statement);
-            if (!matcher.find()) return;
-
-            final Optional<Triple<String, Integer, Integer>> typedef = typedefs.stream()
-                    .filter(def -> def.getLeft().equals(matcher.group(1))).findAny();
-            if (!typedef.isPresent()) return;
-
-            locals.add(Triple.of(matcher.group(2), typedef.get().getMiddle(), typedef.get().getRight()));
         });
 
         return locals;
