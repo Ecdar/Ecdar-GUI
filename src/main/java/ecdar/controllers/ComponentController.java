@@ -15,7 +15,6 @@ import javafx.animation.Transition;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -45,6 +44,7 @@ import java.util.regex.Pattern;
 
 import static ecdar.presentations.Grid.GRID_SIZE;
 import static ecdar.presentations.ModelPresentation.TOP_LEFT_CORNER;
+import static ecdar.utility.helpers.LocationPlacer.ensureCorrectPlacementOfLocation;
 
 public class ComponentController extends ModelController implements Initializable {
     private final List<BiConsumer<Color, Color.Intensity>> updateColorDelegates = new ArrayList<>();
@@ -76,29 +76,24 @@ public class ComponentController extends ModelController implements Initializabl
         component.addListener((obs, oldComponent, newComponent) -> {
             super.initialize(newComponent.getBox());
 
-            // Initialize methods that is sensitive to width and height
-            final Runnable onUpdateSize = () -> {
-                initializeToolbar();
-                initializeFrame();
-                initializeBackground();
-            };
-
-            onUpdateSize.run();
+            initializeFrame();
+            initializeToolbar();
+            initializeBackground();
 
             // Re-run initialisation on update of width and height property
-            newComponent.getBox().getWidthProperty().addListener(observable -> onUpdateSize.run());
-            newComponent.getBox().getHeightProperty().addListener(observable -> onUpdateSize.run());
+            newComponent.getBox().getWidthProperty().addListener(observable -> initializeFrame());
+            newComponent.getBox().getHeightProperty().addListener(observable -> initializeFrame());
 
             inputSignatureContainer.heightProperty().addListener((change) -> updateMaxHeight());
             outputSignatureContainer.heightProperty().addListener((change) -> updateMaxHeight());
 
-            // Bind the declarations of the abstraction the the view
+            // Bind the declarations of the abstraction the view
             declarationTextArea.replaceText(0, declarationTextArea.getLength(), newComponent.getDeclarationsText());
             declarationTextArea.textProperty().addListener((observable, oldDeclaration, newDeclaration) -> newComponent.setDeclarationsText(newDeclaration));
 
             // Find the clocks in the decls
             newComponent.declarationsTextProperty().addListener((observable, oldValue, newValue) -> {
-                final List<String> clocks = new ArrayList<String>();
+                final List<String> clocks = new ArrayList<>();
 
                 final String strippedDecls = newValue.replaceAll("[\\r\\n]+", "");
 
@@ -106,7 +101,7 @@ public class ComponentController extends ModelController implements Initializabl
                 Matcher matcher = pattern.matcher(strippedDecls);
 
                 while (matcher.find()) {
-                    final String clockStrings[] = matcher.group("CLOCKS").split(",");
+                    final String[] clockStrings = matcher.group("CLOCKS").split(",");
                     for (String clockString : clockStrings) {
                         clocks.add(clockString.replaceAll("\\s", ""));
                     }
@@ -131,6 +126,92 @@ public class ComponentController extends ModelController implements Initializabl
 
         declarationTextArea.textProperty().addListener((obs, oldText, newText) ->
                 declarationTextArea.setStyleSpans(0, UPPAALSyntaxHighlighter.computeHighlighting(newText)));
+    }
+
+    private void initializeToolbar() {
+        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
+            // Set the background of the toolbar
+            toolbar.setBackground(new Background(new BackgroundFill(
+                    newColor.getColor(newIntensity),
+                    CornerRadii.EMPTY,
+                    Insets.EMPTY
+            )));
+
+            // Set the icon color and rippler color of the toggleDeclarationButton
+            toggleDeclarationButton.setRipplerFill(newColor.getTextColor(newIntensity));
+
+            toolbar.setPrefHeight(Grid.TOOL_BAR_HEIGHT);
+            toggleDeclarationButton.setBackground(Background.EMPTY);
+        };
+
+        updateColorDelegates.add(updateColor);
+
+        getComponent().colorProperty().addListener(observable -> updateColor.accept(getComponent().getColor(), getComponent().getColorIntensity()));
+
+        updateColor.accept(getComponent().getColor(), getComponent().getColorIntensity());
+
+        // Set a hover effect for the controller.toggleDeclarationButton
+        toggleDeclarationButton.setOnMouseEntered(event -> toggleDeclarationButton.setCursor(Cursor.HAND));
+        toggleDeclarationButton.setOnMouseExited(event -> toggleDeclarationButton.setCursor(Cursor.DEFAULT));
+        toggleDeclarationButton.setOnMousePressed(this::toggleDeclaration);
+    }
+
+    private void initializeFrame() {
+        final Shape[] mask = new Shape[1];
+        final Rectangle rectangle = new Rectangle(getComponent().getBox().getWidth(), getComponent().getBox().getHeight());
+
+        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
+            // Mask the parent of the frame (will also mask the background)
+            mask[0] = Path.subtract(rectangle, TOP_LEFT_CORNER);
+            frame.setClip(mask[0]);
+            background.setClip(Path.union(mask[0], mask[0]));
+            background.setOpacity(0.5);
+
+            // Bind the missing lines that we cropped away
+            topLeftLine.setStartX(Grid.CORNER_SIZE);
+            topLeftLine.setStartY(0);
+            topLeftLine.setEndX(0);
+            topLeftLine.setEndY(Grid.CORNER_SIZE);
+            topLeftLine.setStroke(newColor.getColor(newIntensity.next(2)));
+            topLeftLine.setStrokeWidth(1.25);
+            StackPane.setAlignment(topLeftLine, Pos.TOP_LEFT);
+
+            // Set the stroke color to two shades darker
+            frame.setBorder(new Border(new BorderStroke(
+                    newColor.getColor(newIntensity.next(2)),
+                    BorderStrokeStyle.SOLID,
+                    CornerRadii.EMPTY,
+                    new BorderWidths(1),
+                    Insets.EMPTY
+            )));
+        };
+
+        updateColorDelegates.add(updateColor);
+
+        getComponent().colorProperty().addListener(observable -> {
+            updateColor.accept(getComponent().getColor(), getComponent().getColorIntensity());
+        });
+
+        updateColor.accept(getComponent().getColor(), getComponent().getColorIntensity());
+    }
+
+    private void initializeBackground() {
+        // Bind the background width and height to the values in the model
+        background.widthProperty().bindBidirectional(getComponent().getBox().getWidthProperty());
+        background.heightProperty().bindBidirectional(getComponent().getBox().getHeightProperty());
+
+        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
+            // Set the background color to the lightest possible version of the color
+            background.setFill(newColor.getColor(newIntensity.next(-10).next(2)));
+        };
+
+        updateColorDelegates.add(updateColor);
+
+        getComponent().colorProperty().addListener(observable -> {
+            updateColor.accept(getComponent().getColor(), getComponent().getColorIntensity());
+        });
+
+        updateColor.accept(getComponent().getColor(), getComponent().getColorIntensity());
     }
 
     /***
@@ -216,25 +297,24 @@ public class ComponentController extends ModelController implements Initializabl
             }
         };
 
-        final Component component = getComponent();
-        checkLocations.accept(component);
+        checkLocations.accept(getComponent());
 
         // Check location whenever we get new edges
-        component.getDisplayableEdges().addListener(new ListChangeListener<DisplayableEdge>() {
+        getComponent().getDisplayableEdges().addListener(new ListChangeListener<DisplayableEdge>() {
             @Override
             public void onChanged(final Change<? extends DisplayableEdge> c) {
                 while (c.next()) {
-                    checkLocations.accept(component);
+                    checkLocations.accept(getComponent());
                 }
             }
         });
 
         // Check location whenever we get new locations
-        component.getLocations().addListener(new ListChangeListener<Location>() {
+        getComponent().getLocations().addListener(new ListChangeListener<Location>() {
             @Override
             public void onChanged(final Change<? extends Location> c) {
                 while (c.next()) {
-                    checkLocations.accept(component);
+                    checkLocations.accept(getComponent());
                 }
             }
         });
@@ -483,207 +563,30 @@ public class ComponentController extends ModelController implements Initializabl
     }
 
     private void initializeLocationHandling(final Component newComponent) {
-        final Consumer<Location> handleAddedLocation = (loc) -> {
-            // Check related to undo/redo stack
-            if (locationPresentationMap.containsKey(loc)) {
-                return;
-            }
-
-            // Create a new presentation, and register it on the map
-            final LocationPresentation newLocationPresentation = new LocationPresentation(loc, newComponent);
-
-            final ChangeListener<Number> locationPlacementChangedListener = (observable, oldValue, newValue) -> {
-                final double offset = newLocationPresentation.getController().circle.getRadius() * 2 + GRID_SIZE;
-                boolean hit = false;
-                ItemDragHelper.DragBounds componentBounds = newLocationPresentation.getController().getDragBounds();
-
-                //Define the x and y coordinates for the initial and final locations
-                final double initialLocationX = getComponent().getBox().getX() + newLocationPresentation.getController().circle.getRadius() * 2,
-                        initialLocationY = getComponent().getBox().getY() + newLocationPresentation.getController().circle.getRadius() * 2,
-                        finalLocationX = getComponent().getBox().getX() + getComponent().getBox().getWidth() - newLocationPresentation.getController().circle.getRadius() * 2,
-                        finalLocationY = getComponent().getBox().getY() + getComponent().getBox().getHeight() - newLocationPresentation.getController().circle.getRadius() * 2;
-
-                double latestHitRight = 0,
-                        latestHitDown = 0,
-                        latestHitLeft = 0,
-                        latestHitUp = 0;
-
-                //Check to see if the location is placed on top of the initial location
-                if (Math.abs(initialLocationX - (newLocationPresentation.getLayoutX())) < offset &&
-                        Math.abs(initialLocationY - (newLocationPresentation.getLayoutY())) < offset) {
-                    hit = true;
-                    latestHitRight = initialLocationX;
-                    latestHitDown = initialLocationY;
-                    latestHitLeft = initialLocationX;
-                    latestHitUp = initialLocationY;
-                }
-
-                //Check to see if the location is placed on top of the final location
-                else if (Math.abs(finalLocationX - (newLocationPresentation.getLayoutX())) < offset &&
-                        Math.abs(finalLocationY - (newLocationPresentation.getLayoutY())) < offset) {
-                    hit = true;
-                    latestHitRight = finalLocationX;
-                    latestHitDown = finalLocationY;
-                    latestHitLeft = finalLocationX;
-                    latestHitUp = finalLocationY;
-                }
-
-                //Check to see if the location is placed on top of another location
-                else {
-                    for (Map.Entry<Location, LocationPresentation> entry : locationPresentationMap.entrySet()) {
-                        if (entry.getValue() != newLocationPresentation &&
-                                Math.abs(entry.getValue().getLayoutX() - (newLocationPresentation.getLayoutX())) < offset &&
-                                Math.abs(entry.getValue().getLayoutY() - (newLocationPresentation.getLayoutY())) < offset) {
-                            hit = true;
-                            latestHitRight = entry.getValue().getLayoutX();
-                            latestHitDown = entry.getValue().getLayoutY();
-                            latestHitLeft = entry.getValue().getLayoutX();
-                            latestHitUp = entry.getValue().getLayoutY();
-                            break;
-                        }
-                    }
-                }
-
-                //If the location is not placed on top of any other locations, do not do anything
-                if (!hit) {
-                    return;
-                }
-                hit = false;
-
-                //Find an unoccupied space for the location
-                for (int i = 1; i < getComponent().getBox().getWidth() / offset; i++) {
-
-                    //Check to see, if the location can be placed to the right of the existing locations
-                    if (componentBounds.trimX(latestHitRight + offset) == latestHitRight + offset) {
-
-                        //Check if the location would be placed on the final location
-                        if (Math.abs(finalLocationX - (latestHitRight + offset)) < offset &&
-                                Math.abs(finalLocationY - (newLocationPresentation.getLayoutY())) < offset) {
-                            hit = true;
-                            latestHitRight = finalLocationX;
-                        } else {
-                            for (Map.Entry<Location, LocationPresentation> entry : locationPresentationMap.entrySet()) {
-                                if (entry.getValue() != newLocationPresentation &&
-                                        Math.abs(entry.getValue().getLayoutX() - (latestHitRight + offset)) < offset &&
-                                        Math.abs(entry.getValue().getLayoutY() - (newLocationPresentation.getLayoutY())) < offset) {
-                                    hit = true;
-                                    latestHitRight = entry.getValue().getLayoutX();
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (!hit) {
-                            newLocationPresentation.setLayoutX(latestHitRight + offset);
-                            return;
-                        }
-                    }
-                    hit = false;
-
-                    //Check to see, if the location can be placed below the existing locations
-                    if (componentBounds.trimY(latestHitDown + offset) == latestHitDown + offset) {
-
-                        //Check if the location would be placed on the final location
-                        if (Math.abs(finalLocationX - (newLocationPresentation.getLayoutX())) < offset &&
-                                Math.abs(finalLocationY - (latestHitDown + offset)) < offset) {
-                            hit = true;
-                            latestHitDown = finalLocationY;
-                        } else {
-                            for (Map.Entry<Location, LocationPresentation> entry : locationPresentationMap.entrySet()) {
-                                if (entry.getValue() != newLocationPresentation &&
-                                        Math.abs(entry.getValue().getLayoutX() - (newLocationPresentation.getLayoutX())) < offset &&
-                                        Math.abs(entry.getValue().getLayoutY() - (latestHitDown + offset)) < offset) {
-                                    hit = true;
-                                    latestHitDown = entry.getValue().getLayoutY();
-                                    break;
-                                }
-                            }
-                        }
-                        if (!hit) {
-                            newLocationPresentation.setLayoutY(latestHitDown + offset);
-                            return;
-                        }
-                    }
-                    hit = false;
-
-                    //Check to see, if the location can be placed to the left of the existing locations
-                    if (componentBounds.trimX(latestHitLeft - offset) == latestHitLeft - offset) {
-
-                        //Check if the location would be placed on the initial location
-                        if (Math.abs(initialLocationX - (latestHitLeft - offset)) < offset &&
-                                Math.abs(initialLocationY - (newLocationPresentation.getLayoutY())) < offset) {
-                            hit = true;
-                            latestHitLeft = initialLocationX;
-                        } else {
-                            for (Map.Entry<Location, LocationPresentation> entry : locationPresentationMap.entrySet()) {
-                                if (entry.getValue() != newLocationPresentation &&
-                                        Math.abs(entry.getValue().getLayoutX() - (latestHitLeft - offset)) < offset &&
-                                        Math.abs(entry.getValue().getLayoutY() - (newLocationPresentation.getLayoutY())) < offset) {
-                                    hit = true;
-                                    latestHitLeft = entry.getValue().getLayoutX();
-                                    break;
-                                }
-                            }
-                        }
-                        if (!hit) {
-                            newLocationPresentation.setLayoutX(latestHitLeft - offset);
-                            return;
-                        }
-                    }
-                    hit = false;
-
-                    //Check to see, if the location can be placed above the existing locations
-                    if (componentBounds.trimY(latestHitUp - offset) == latestHitUp - offset) {
-
-                        //Check if the location would be placed on the initial location
-                        if (Math.abs(initialLocationX - (newLocationPresentation.getLayoutX())) < offset &&
-                                Math.abs(initialLocationY - (latestHitUp - offset)) < offset) {
-                            hit = true;
-                            latestHitUp = initialLocationY;
-                        } else {
-                            for (Map.Entry<Location, LocationPresentation> entry : locationPresentationMap.entrySet()) {
-                                if (entry.getValue() != newLocationPresentation &&
-                                        Math.abs(entry.getValue().getLayoutX() - (newLocationPresentation.getLayoutX())) < offset &&
-                                        Math.abs(entry.getValue().getLayoutY() - (latestHitUp - offset)) < offset) {
-                                    hit = true;
-                                    latestHitUp = entry.getValue().getLayoutY();
-                                    break;
-                                }
-                            }
-                        }
-                        if (!hit) {
-                            newLocationPresentation.setLayoutY(latestHitUp - offset);
-                            return;
-                        }
-                    }
-                    hit = false;
-                }
-                modelContainerLocation.getChildren().remove(newLocationPresentation);
-                locationPresentationMap.remove(newLocationPresentation.getController().locationProperty().getValue());
-                newComponent.getLocations().remove(newLocationPresentation.getController().getLocation());
-                Ecdar.showToast("Please select an empty space for the new location");
-            };
-
-            newLocationPresentation.layoutXProperty().addListener(locationPlacementChangedListener);
-            newLocationPresentation.layoutYProperty().addListener(locationPlacementChangedListener);
-
-            locationPresentationMap.put(loc, newLocationPresentation);
-
-            // Add it to the view
-            modelContainerLocation.getChildren().add(newLocationPresentation);
-
-            // Bind the newly created location to the mouse and tell the ui that it is not placed yet
-            if (loc.getX() == 0) {
-                newLocationPresentation.setPlaced(false);
-                BindingHelper.bind(loc, newComponent.getBox().getXProperty(), newComponent.getBox().getYProperty());
-            }
+        final Consumer<LocationPresentation> removeLocationPresentation = locationPresentation -> {
+            modelContainerLocation.getChildren().remove(locationPresentation);
+            locationPresentationMap.remove(locationPresentation.getController().locationProperty().getValue());
+            getComponent().getLocations().remove(locationPresentation.getController().locationProperty().getValue());
+            Ecdar.showToast("Please select an empty space for the new location");
         };
 
         final ListChangeListener<Location> locationListChangeListener = c -> {
             if (c.next()) {
                 // Locations are added to the component
                 c.getAddedSubList().forEach((loc) -> {
-                    handleAddedLocation.accept(loc);
+                    // Check related to undo/redo stack
+                    if (!locationPresentationMap.containsKey(loc)) {
+                        LocationPresentation newLocationPresentation = ensureCorrectPlacementOfLocation(newComponent, locationPresentationMap.values(), loc, removeLocationPresentation);
+
+                        locationPresentationMap.put(loc, newLocationPresentation);
+                        modelContainerLocation.getChildren().add(newLocationPresentation);
+
+                        // Bind the newly created location to the mouse and tell the ui that it is not placed yet
+                        if (loc.getX() == 0) {
+                            newLocationPresentation.setPlaced(false);
+                            BindingHelper.bind(loc, getComponent().getBox().getXProperty(), getComponent().getBox().getYProperty());
+                        }
+                    }
 
                     LocationPresentation locationPresentation = locationPresentationMap.get(loc);
 
@@ -703,13 +606,24 @@ public class ComponentController extends ModelController implements Initializabl
                 });
             }
         };
+
         newComponent.getLocations().addListener(locationListChangeListener);
 
         if (!locationListChangeListenerMap.containsKey(newComponent)) {
             locationListChangeListenerMap.put(newComponent, locationListChangeListener);
         }
 
-        newComponent.getLocations().forEach(handleAddedLocation);
+        newComponent.getLocations().forEach(loc -> {
+            LocationPresentation locationPresentation = ensureCorrectPlacementOfLocation(newComponent, locationPresentationMap.values(), loc, removeLocationPresentation);
+            locationPresentationMap.put(loc, locationPresentation);
+            modelContainerLocation.getChildren().add(locationPresentation);
+
+            // Bind the newly created location to the mouse and tell the ui that it is not placed yet
+            if (loc.getX() == 0) {
+                locationPresentation.setPlaced(false);
+                BindingHelper.bind(loc, getComponent().getBox().getXProperty(), getComponent().getBox().getYProperty());
+            }
+        });
     }
 
     private void initializeEdgeHandling(final Component newComponent) {
@@ -758,99 +672,6 @@ public class ComponentController extends ModelController implements Initializabl
         final ObjectProperty<Node> clip = new SimpleObjectProperty<>(circle);
         declarationTextArea.clipProperty().bind(clip);
         clip.set(circle);
-    }
-
-    private void initializeToolbar() {
-        final Component component = getComponent();
-
-        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
-            // Set the background of the toolbar
-            toolbar.setBackground(new Background(new BackgroundFill(
-                    newColor.getColor(newIntensity),
-                    CornerRadii.EMPTY,
-                    Insets.EMPTY
-            )));
-
-            // Set the icon color and rippler color of the toggleDeclarationButton
-            toggleDeclarationButton.setRipplerFill(newColor.getTextColor(newIntensity));
-
-            toolbar.setPrefHeight(Grid.TOOL_BAR_HEIGHT);
-            toggleDeclarationButton.setBackground(Background.EMPTY);
-        };
-
-        updateColorDelegates.add(updateColor);
-
-        getComponent().colorProperty().addListener(observable -> updateColor.accept(component.getColor(), component.getColorIntensity()));
-
-        updateColor.accept(component.getColor(), component.getColorIntensity());
-
-        // Set a hover effect for the controller.toggleDeclarationButton
-        toggleDeclarationButton.setOnMouseEntered(event -> toggleDeclarationButton.setCursor(Cursor.HAND));
-        toggleDeclarationButton.setOnMouseExited(event -> toggleDeclarationButton.setCursor(Cursor.DEFAULT));
-        toggleDeclarationButton.setOnMousePressed(this::toggleDeclaration);
-
-    }
-
-    private void initializeFrame() {
-        final Component component = getComponent();
-
-        final Shape[] mask = new Shape[1];
-        final Rectangle rectangle = new Rectangle(component.getBox().getWidth(), component.getBox().getHeight());
-
-        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
-            // Mask the parent of the frame (will also mask the background)
-            mask[0] = Path.subtract(rectangle, TOP_LEFT_CORNER);
-            frame.setClip(mask[0]);
-            background.setClip(Path.union(mask[0], mask[0]));
-            background.setOpacity(0.5);
-
-            // Bind the missing lines that we cropped away
-            topLeftLine.setStartX(Grid.CORNER_SIZE);
-            topLeftLine.setStartY(0);
-            topLeftLine.setEndX(0);
-            topLeftLine.setEndY(Grid.CORNER_SIZE);
-            topLeftLine.setStroke(newColor.getColor(newIntensity.next(2)));
-            topLeftLine.setStrokeWidth(1.25);
-            StackPane.setAlignment(topLeftLine, Pos.TOP_LEFT);
-
-            // Set the stroke color to two shades darker
-            frame.setBorder(new Border(new BorderStroke(
-                    newColor.getColor(newIntensity.next(2)),
-                    BorderStrokeStyle.SOLID,
-                    CornerRadii.EMPTY,
-                    new BorderWidths(1),
-                    Insets.EMPTY
-            )));
-        };
-
-        updateColorDelegates.add(updateColor);
-
-        component.colorProperty().addListener(observable -> {
-            updateColor.accept(component.getColor(), component.getColorIntensity());
-        });
-
-        updateColor.accept(component.getColor(), component.getColorIntensity());
-    }
-
-    private void initializeBackground() {
-        final Component component = getComponent();
-
-        // Bind the background width and height to the values in the model
-        background.widthProperty().bindBidirectional(component.getBox().getWidthProperty());
-        background.heightProperty().bindBidirectional(component.getBox().getHeightProperty());
-
-        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
-            // Set the background color to the lightest possible version of the color
-            background.setFill(newColor.getColor(newIntensity.next(-10).next(2)));
-        };
-
-        updateColorDelegates.add(updateColor);
-
-        component.colorProperty().addListener(observable -> {
-            updateColor.accept(component.getColor(), component.getColorIntensity());
-        });
-
-        updateColor.accept(component.getColor(), component.getColorIntensity());
     }
 
     /***
