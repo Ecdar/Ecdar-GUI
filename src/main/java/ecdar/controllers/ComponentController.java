@@ -110,11 +110,11 @@ public class ComponentController extends ModelController implements Initializabl
                 //TODO this logs the clocks System.out.println(clocks);
             });
 
-            initializeEdgeHandling(newComponent);
-            initializeLocationHandling(newComponent);
+            initializeEdgeHandling();
+            initializeLocationHandling();
             initializeDeclarations();
-            initializeSignature(newComponent);
-            initializeSignatureListeners(newComponent);
+            initializeSignature();
+            initializeSignatureListeners();
 
             if (!errorsAndWarningsInitialized.containsKey(newComponent) || !errorsAndWarningsInitialized.get(newComponent)) {
                 initializeNoIncomingEdgesWarning();
@@ -216,20 +216,18 @@ public class ComponentController extends ModelController implements Initializabl
 
     /***
      * Inserts the initial edges of the component to the input/output signature
-     * @param newComponent The component that should be presented with its signature
      */
-    private void initializeSignature(final Component newComponent) {
-        newComponent.getOutputStrings().forEach((channel) -> insertSignatureArrow(channel, EdgeStatus.OUTPUT));
-        newComponent.getInputStrings().forEach((channel) -> insertSignatureArrow(channel, EdgeStatus.INPUT));
+    private void initializeSignature() {
+        getComponent().getOutputStrings().forEach((channel) -> insertSignatureArrow(channel, EdgeStatus.OUTPUT));
+        getComponent().getInputStrings().forEach((channel) -> insertSignatureArrow(channel, EdgeStatus.INPUT));
     }
 
     /***
      * Initialize the listeners, that listen for changes in the input and output edges of the presented component.
      * The view is updated whenever an insert (deletions are also a type of insert) is reported
-     * @param newComponent The component that should be presented with its signature
      */
-    private void initializeSignatureListeners(final Component newComponent) {
-        newComponent.getOutputStrings().addListener((ListChangeListener<String>) c -> {
+    private void initializeSignatureListeners() {
+        getComponent().getOutputStrings().addListener((ListChangeListener<String>) c -> {
             // By clearing the container we don't have to fiddle with which elements are removed and added
             outputSignatureContainer.getChildren().clear();
             while (c.next()) {
@@ -237,7 +235,7 @@ public class ComponentController extends ModelController implements Initializabl
             }
         });
 
-        newComponent.getInputStrings().addListener((ListChangeListener<String>) c -> {
+        getComponent().getInputStrings().addListener((ListChangeListener<String>) c -> {
             inputSignatureContainer.getChildren().clear();
             while (c.next()) {
                 c.getAddedSubList().forEach((channel) -> insertSignatureArrow(channel, EdgeStatus.INPUT));
@@ -562,7 +560,7 @@ public class ComponentController extends ModelController implements Initializabl
         initializeDropDownMenu.accept(getComponent());
     }
 
-    private void initializeLocationHandling(final Component newComponent) {
+    private void initializeLocationHandling() {
         final Consumer<LocationPresentation> removeLocationPresentation = locationPresentation -> {
             modelContainerLocation.getChildren().remove(locationPresentation);
             locationPresentationMap.remove(locationPresentation.getController().locationProperty().getValue());
@@ -576,21 +574,12 @@ public class ComponentController extends ModelController implements Initializabl
                 c.getAddedSubList().forEach((loc) -> {
                     // Check related to undo/redo stack
                     if (!locationPresentationMap.containsKey(loc)) {
-                        LocationPresentation newLocationPresentation = ensureCorrectPlacementOfLocation(newComponent, locationPresentationMap.values(), loc, removeLocationPresentation);
-
-                        locationPresentationMap.put(loc, newLocationPresentation);
-                        modelContainerLocation.getChildren().add(newLocationPresentation);
-
-                        // Bind the newly created location to the mouse and tell the ui that it is not placed yet
-                        if (loc.getX() == 0) {
-                            newLocationPresentation.setPlaced(false);
-                            BindingHelper.bind(loc, getComponent().getBox().getXProperty(), getComponent().getBox().getYProperty());
-                        }
+                        addLocation(removeLocationPresentation, loc);
                     }
 
                     LocationPresentation locationPresentation = locationPresentationMap.get(loc);
 
-                    //Ensure that the component is inside the bounds of the component
+                    //Ensure that the location is inside the bounds of the component
                     locationPresentation.setLayoutX(locationPresentation.getController().getDragBounds().trimX(locationPresentation.getLayoutX()));
                     locationPresentation.setLayoutY(locationPresentation.getController().getDragBounds().trimY(locationPresentation.getLayoutY()));
 
@@ -607,28 +596,37 @@ public class ComponentController extends ModelController implements Initializabl
             }
         };
 
-        newComponent.getLocations().addListener(locationListChangeListener);
+        getComponent().getLocations().addListener(locationListChangeListener);
 
-        if (!locationListChangeListenerMap.containsKey(newComponent)) {
-            locationListChangeListenerMap.put(newComponent, locationListChangeListener);
+        if (!locationListChangeListenerMap.containsKey(getComponent())) {
+            locationListChangeListenerMap.put(getComponent(), locationListChangeListener);
         }
 
-        newComponent.getLocations().forEach(loc -> {
-            LocationPresentation locationPresentation = ensureCorrectPlacementOfLocation(newComponent, locationPresentationMap.values(), loc, removeLocationPresentation);
-            locationPresentationMap.put(loc, locationPresentation);
-            modelContainerLocation.getChildren().add(locationPresentation);
-
-            // Bind the newly created location to the mouse and tell the ui that it is not placed yet
-            if (loc.getX() == 0) {
-                locationPresentation.setPlaced(false);
-                BindingHelper.bind(loc, getComponent().getBox().getXProperty(), getComponent().getBox().getYProperty());
-            }
+        getComponent().getLocations().forEach(loc -> {
+            addLocation(removeLocationPresentation, loc);
         });
     }
 
-    private void initializeEdgeHandling(final Component newComponent) {
+    /***
+     * Handles the addition of a new location
+     * @param removeLocationPresentation A consumer used to remove the location in case it is impossible to place it in the component
+     * @param loc The location to add to the component
+     */
+    private void addLocation(Consumer<LocationPresentation> removeLocationPresentation, Location loc) {
+        LocationPresentation locationPresentation = ensureCorrectPlacementOfLocation(getComponent(), locationPresentationMap.values(), loc, removeLocationPresentation);
+        locationPresentationMap.put(loc, locationPresentation);
+        modelContainerLocation.getChildren().add(locationPresentation);
+
+        // Bind the newly created location to the mouse and tell the ui that it is not placed yet
+        if (loc.getX() == 0) {
+            locationPresentation.setPlaced(false);
+            BindingHelper.bind(loc, getComponent().getBox().getXProperty(), getComponent().getBox().getYProperty());
+        }
+    }
+
+    private void initializeEdgeHandling() {
         final Consumer<DisplayableEdge> handleAddedEdge = edge -> {
-            final EdgePresentation edgePresentation = new EdgePresentation(edge, newComponent);
+            final EdgePresentation edgePresentation = new EdgePresentation(edge, getComponent());
             edgePresentationMap.put(edge, edgePresentation);
             modelContainerEdge.getChildren().add(edgePresentation);
 
@@ -641,23 +639,21 @@ public class ComponentController extends ModelController implements Initializabl
         };
 
         // React on addition of edges to the component
-        newComponent.getDisplayableEdges().addListener(new ListChangeListener<DisplayableEdge>() {
-            @Override
-            public void onChanged(final Change<? extends DisplayableEdge> c) {
-                if (c.next()) {
-                    // Edges are added to the component
-                    c.getAddedSubList().forEach(handleAddedEdge);
+        getComponent().getDisplayableEdges().addListener((ListChangeListener<DisplayableEdge>) c -> {
+            if (c.next()) {
+                // Edges are added to the component
+                c.getAddedSubList().forEach(handleAddedEdge);
 
-                    // Edges are removed from the component
-                    c.getRemoved().forEach(edge -> {
-                        final EdgePresentation edgePresentation = edgePresentationMap.get(edge);
-                        modelContainerEdge.getChildren().remove(edgePresentation);
-                        edgePresentationMap.remove(edge);
-                    });
-                }
+                // Edges are removed from the component
+                c.getRemoved().forEach(edge -> {
+                    final EdgePresentation edgePresentation = edgePresentationMap.get(edge);
+                    modelContainerEdge.getChildren().remove(edgePresentation);
+                    edgePresentationMap.remove(edge);
+                });
             }
         });
-        newComponent.getDisplayableEdges().forEach(handleAddedEdge);
+
+        getComponent().getDisplayableEdges().forEach(handleAddedEdge);
     }
 
     private void initializeDeclarations() {
@@ -695,7 +691,7 @@ public class ComponentController extends ModelController implements Initializabl
     private void updateMaxHeight() {
         // If input/outputsignature container is taller than the current component height
         // we update the component's height to be as tall as the container
-        double maxHeight = findMaxHeight();
+        double maxHeight = getMaxHeight();
         if (maxHeight > getComponent().getBox().getHeight()) {
             getComponent().getBox().getHeightProperty().set(maxHeight);
         }
@@ -705,7 +701,7 @@ public class ComponentController extends ModelController implements Initializabl
      * Finds the max height of the input/output signature container and the component
      * @return a double of the largest height
      */
-    private double findMaxHeight() {
+    private double getMaxHeight() {
         double inputHeight = inputSignatureContainer.getHeight();
         double outputHeight = outputSignatureContainer.getHeight();
         double componentHeight = getComponent().getBox().getHeight();
@@ -778,7 +774,7 @@ public class ComponentController extends ModelController implements Initializabl
     }
 
     /***
-     * Handle the component being pressed based on the mouse button pressed and hotkeys
+     * Handle the component being pressed based on the mouse button and hotkeys
      * @param event to use for handling the action
      */
     @FXML
@@ -873,6 +869,12 @@ public class ComponentController extends ModelController implements Initializabl
         return getComponent();
     }
 
+    /**
+     * Gets the minimum possible height when dragging the anchor.
+     * The height is based on the y coordinate of locations, nails and the signature arrows
+     *
+     * @return the minimum possible height.
+     */
     @Override
     double getDragAnchorMinWidth() {
         double minWidth = 10 * GRID_SIZE;
