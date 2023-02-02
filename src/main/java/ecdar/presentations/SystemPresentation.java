@@ -57,7 +57,7 @@ public class SystemPresentation extends ModelPresentation {
                     Insets.EMPTY
             )));
 
-            controller.toolbar.setPrefHeight(Ecdar.CANVAS_PADDING * 2);
+            controller.toolbar.setPrefHeight(TOOLBAR_HEIGHT);
         };
 
         system.colorProperty().addListener(observable -> updateColor.accept(system.getColor(), system.getColorIntensity()));
@@ -78,8 +78,8 @@ public class SystemPresentation extends ModelPresentation {
         // Generate top right corner (to subtract)
         final Polygon topRightCorner = new Polygon(
                 system.getBox().getWidth(), 0,
-                system.getBox().getWidth() - Ecdar.CANVAS_PADDING * 3 + 8, 0,
-                system.getBox().getWidth(), Ecdar.CANVAS_PADDING * 4 + 2
+                system.getBox().getWidth() - (CORNER_SIZE + 2), 0,
+                system.getBox().getWidth(), CORNER_SIZE + 2
         );
 
         final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
@@ -91,18 +91,18 @@ public class SystemPresentation extends ModelPresentation {
             controller.background.setOpacity(0.5);
 
             // Bind the missing lines that we cropped away
-            controller.topLeftLine.setStartX(40);
+            controller.topLeftLine.setStartX(CORNER_SIZE);
             controller.topLeftLine.setStartY(0);
             controller.topLeftLine.setEndX(0);
-            controller.topLeftLine.setEndY(40);
+            controller.topLeftLine.setEndY(CORNER_SIZE);
             controller.topLeftLine.setStroke(newColor.getColor(newIntensity.next(2)));
             controller.topLeftLine.setStrokeWidth(1.25);
             StackPane.setAlignment(controller.topLeftLine, Pos.TOP_LEFT);
 
             controller.topRightLine.setStartX(0);
             controller.topRightLine.setStartY(0);
-            controller.topRightLine.setEndX(40);
-            controller.topRightLine.setEndY(40);
+            controller.topRightLine.setEndX(CORNER_SIZE);
+            controller.topRightLine.setEndY(CORNER_SIZE);
             controller.topRightLine.setStroke(newColor.getColor(newIntensity.next(2)));
             controller.topRightLine.setStrokeWidth(1.25);
             StackPane.setAlignment(controller.topRightLine, Pos.TOP_RIGHT);

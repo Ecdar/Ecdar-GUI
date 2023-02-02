@@ -113,7 +113,7 @@ public class SystemEdgePresentation extends Group implements SelectHelper.ItemSe
     }
 
     /**
-     * Returns null, as this cannot change color.
+     * Returns null, as this edge is not draggable.
      * @return null
      */
     @Override

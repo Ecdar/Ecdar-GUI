@@ -351,13 +351,11 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
      */
     @Override
     public ItemDragHelper.DragBounds getDragBounds() {
-        final ObservableDoubleValue minX = new SimpleDoubleProperty(Ecdar.CANVAS_PADDING);
+        final ObservableDoubleValue minX = new SimpleDoubleProperty(0);
         final ObservableDoubleValue maxX = controller.getSystem().getBox().getWidthProperty()
-                .subtract(Ecdar.CANVAS_PADDING)
                 .subtract(controller.getInstance().getBox().getWidth());
-        final ObservableDoubleValue minY = new SimpleDoubleProperty(Ecdar.CANVAS_PADDING * 5);
+        final ObservableDoubleValue minY = new SimpleDoubleProperty(0);
         final ObservableDoubleValue maxY = controller.getSystem().getBox().getHeightProperty()
-                .subtract(Ecdar.CANVAS_PADDING * 5)
                 .subtract(controller.getInstance().getBox().getHeight());
         return new ItemDragHelper.DragBounds(minX, maxX, minY, maxY);
     }

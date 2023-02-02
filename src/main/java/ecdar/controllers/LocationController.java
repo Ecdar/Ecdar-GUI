@@ -494,10 +494,11 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
     @Override
     public ItemDragHelper.DragBounds getDragBounds() {
-        final ObservableDoubleValue minX = new SimpleDoubleProperty(Ecdar.CANVAS_PADDING * 2);
-        final ObservableDoubleValue maxX = getComponent().getBox().getWidthProperty().subtract(Ecdar.CANVAS_PADDING * 2);
-        final ObservableDoubleValue minY = new SimpleDoubleProperty(Ecdar.CANVAS_PADDING * 4);
-        final ObservableDoubleValue maxY = getComponent().getBox().getHeightProperty().subtract(Ecdar.CANVAS_PADDING * 2);
+        final int PADDING = 5;
+        final ObservableDoubleValue minX = new SimpleDoubleProperty(location.get().getRadius() + PADDING);
+        final ObservableDoubleValue maxX = getComponent().getBox().getWidthProperty().subtract(location.get().getRadius() + PADDING);
+        final ObservableDoubleValue minY = new SimpleDoubleProperty(location.get().getRadius() + PADDING);
+        final ObservableDoubleValue maxY = getComponent().getBox().getHeightProperty().subtract(location.get().getRadius() + PADDING);
         return new ItemDragHelper.DragBounds(minX, maxX, minY, maxY);
     }
 

@@ -21,10 +21,13 @@ import javafx.scene.shape.Rectangle;
  * Presentation for high level graphical models such as systems and components
  */
 public abstract class ModelPresentation extends HighLevelModelPresentation {
+    public static final int CORNER_SIZE = 40;
+    public static final int TOOLBAR_HEIGHT = CORNER_SIZE / 2;
+
     static final Polygon TOP_LEFT_CORNER = new Polygon(
             0, 0,
-            Ecdar.CANVAS_PADDING * 4 + 2, 0,
-            0, Ecdar.CANVAS_PADDING * 4 + 2
+            CORNER_SIZE + 2, 0,
+            0, CORNER_SIZE + 2
     );
 
     abstract ModelController getModelController();
@@ -84,8 +87,8 @@ public abstract class ModelPresentation extends HighLevelModelPresentation {
         model.colorProperty().addListener(observable -> updateColor.run());
         updateColor.run();
 
-        // Center the text vertically and aff a left padding of CORNER_SIZE
-        controller.name.setPadding(new Insets(2, 0, 0, 40));
+        // Center the text vertically and add a left padding
+        controller.name.setPadding(new Insets(2, 0, 0, CORNER_SIZE));
         controller.name.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
     }
 

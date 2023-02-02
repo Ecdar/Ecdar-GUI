@@ -40,7 +40,7 @@ public class SystemRootPresentation extends StackPane implements Highlightable {
         setLayoutX(root.getX());
         root.getXProperty().bind(layoutXProperty());
 
-        setLayoutY(40);
+        setLayoutY(ModelPresentation.TOOLBAR_HEIGHT);
 
         controller.shape.getPoints().addAll(0d, 0d);
         controller.shape.getPoints().addAll(20d, 15.);
