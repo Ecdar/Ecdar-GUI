@@ -107,7 +107,6 @@ public class EcdarController implements Initializable {
     public MenuBar menuBar;
     public MenuItem menuBarViewFilePanel;
     public MenuItem menuBarViewQueryPanel;
-    public MenuItem menuBarViewGrid;
     public MenuItem menuBarAutoscaling;
     public Menu menuViewMenuScaling;
     public ToggleGroup scaling;
@@ -302,7 +301,7 @@ public class EcdarController implements Initializable {
         //Press ctrl+N or cmd+N to create a new component. The canvas changes to this new component
         KeyCodeCombination combination = new KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN);
         Keybind binding = new Keybind(combination, (event) -> {
-            final Component newComponent = new Component(true, Ecdar.getProject().getUniqueComponentName());
+            final Component newComponent = new Component(true, Ecdar.getProject().getUniqueComponentName()); // ToDo NIELS: Move to ProjectController
             UndoRedoStack.pushAndPerform(() -> { // Perform
                 Ecdar.getProject().getComponents().add(newComponent);
             }, () -> { // Undo
@@ -643,13 +642,6 @@ public class EcdarController implements Initializable {
         menuBarViewQueryPanel.setOnAction(event -> {
             final BooleanProperty isOpen = Ecdar.toggleQueryPane();
             menuBarViewQueryPanel.getGraphic().opacityProperty().bind(new When(isOpen).then(1).otherwise(0));
-        });
-
-        menuBarViewGrid.getGraphic().setOpacity(1);
-        menuBarViewGrid.setAccelerator(new KeyCodeCombination(KeyCode.K, KeyCodeCombination.SHORTCUT_DOWN));
-        menuBarViewGrid.setOnAction(event -> {
-            final BooleanProperty isOn = Ecdar.toggleGrid();
-            menuBarViewGrid.getGraphic().opacityProperty().bind(new When(isOn).then(1).otherwise(0));
         });
 
         menuBarAutoscaling.getGraphic().setOpacity(Ecdar.autoScalingEnabled.getValue() ? 1 : 0);
@@ -1119,17 +1111,13 @@ public class EcdarController implements Initializable {
     }
 
     /**
-     * Take a snapshot with the grid hidden.
-     * The grid is put into its original state afterwards.
+     * Take a snapshot.
      *
      * @return the snapshot
      */
     private WritableImage takeSnapshot(CanvasPresentation canvas) {
         final WritableImage image;
-
-        canvas.getController().disallowGrid();
         image = scaleAndTakeSnapshot(canvas);
-        canvas.getController().allowGrid();
 
         return image;
     }
@@ -1286,11 +1274,11 @@ public class EcdarController implements Initializable {
         if (messageTabPane.getController().isOpen()) {
             filePane.showBottomInset(false);
             queryPane.showBottomInset(false);
-            CanvasPresentation.showBottomInset(false);
+            getActiveCanvasPresentation().getController().updateOffset(false);
         } else {
             filePane.showBottomInset(true);
             queryPane.showBottomInset(true);
-            CanvasPresentation.showBottomInset(true);
+            getActiveCanvasPresentation().getController().updateOffset(true);
         }
     }
 

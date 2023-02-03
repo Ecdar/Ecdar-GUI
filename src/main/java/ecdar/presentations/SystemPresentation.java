@@ -13,5 +13,4 @@ public class SystemPresentation extends ModelPresentation {
         controller = new EcdarFXMLLoader().loadAndGetController("SystemPresentation.fxml", this);
         controller.setSystem(system);
     }
-
 }

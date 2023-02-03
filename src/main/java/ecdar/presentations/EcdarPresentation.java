@@ -107,9 +107,6 @@ public class EcdarPresentation extends StackPane {
                         openQueryPaneAnimation.play();
                     }
                 });
-
-                // Make sure that the grid covers the canvas even when the side panes are shrunk
-                EcdarController.getActiveCanvasPresentation().getController().grid.updateGrid();
             });
         });
 
@@ -489,15 +486,6 @@ public class EcdarPresentation extends StackPane {
                 imageView.setFitWidth(pane.getWidth()));
         pane.heightProperty().addListener((observable, oldValue, newValue) ->
                 imageView.setFitHeight(pane.getHeight()));
-    }
-
-    /**
-     * Calls {@link CanvasPresentation#toggleGridUi()}.
-     *
-     * @return A Boolean Property that is true if the grid has been turned on and false if it is off
-     */
-    public BooleanProperty toggleGrid() {
-        return EcdarController.getActiveCanvasPresentation().toggleGridUi();
     }
 
     public void showSnackbarMessage(final String message) {

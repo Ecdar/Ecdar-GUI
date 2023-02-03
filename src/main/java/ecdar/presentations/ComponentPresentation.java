@@ -1,5 +1,4 @@
 package ecdar.presentations;
-
 import ecdar.abstractions.Component;
 import ecdar.controllers.ComponentController;
 import ecdar.utility.helpers.LocationAware;

@@ -4,7 +4,6 @@ import ecdar.Ecdar;
 import ecdar.abstractions.Box;
 import ecdar.abstractions.HighLevelModelObject;
 import com.jfoenix.controls.JFXTextField;
-import ecdar.presentations.Grid;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
 import ecdar.utility.helpers.StringValidator;
@@ -19,7 +18,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 
-import static ecdar.presentations.Grid.GRID_SIZE;
+import static ecdar.presentations.ModelPresentation.CORNER_SIZE;
 
 /**
  * Controller for a high level model, such as a component or a system.
@@ -111,7 +110,7 @@ public abstract class ModelController {
         updateColor.run();
 
         // Center the text vertically and aff a left padding of CORNER_SIZE
-        name.setPadding(new Insets(2, 0, 0, Grid.CORNER_SIZE));
+        name.setPadding(new Insets(2, 0, 0, CORNER_SIZE));
         name.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
     }
 
@@ -122,8 +121,8 @@ public abstract class ModelController {
     void initializeDimensions(final Box box) {
         // Ensure that the component snaps to the grid
         if (box.getX() == 0 && box.getY() == 0) {
-            box.setX(GRID_SIZE * 0.5);
-            box.setY(GRID_SIZE * 0.5);
+            box.setX(Ecdar.CANVAS_PADDING * 0.5);
+            box.setY(Ecdar.CANVAS_PADDING * 0.5);
         }
 
         // Bind the position of the abstraction to the values in the view
@@ -166,7 +165,7 @@ public abstract class ModelController {
 
         rightAnchor.setOnMouseDragged(event -> {
             double diff = event.getScreenX() - prevX.get();
-            diff -= diff % Grid.GRID_SIZE;
+            diff -= diff % Ecdar.CANVAS_PADDING;
 
             final double newWidth = prevWidth.get() + diff;
             final double minWidth = getDragAnchorMinWidth();
@@ -222,8 +221,6 @@ public abstract class ModelController {
 
         bottomAnchor.setOnMouseDragged(event -> {
             double diff = event.getScreenY() - prevY.get();
-            diff -= diff % Grid.GRID_SIZE;
-
             final double newHeight = prevHeight.get() + diff;
             final double minHeight = getDragAnchorMinHeight();
 
@@ -277,15 +274,11 @@ public abstract class ModelController {
         });
 
         cornerAnchor.setOnMouseDragged(event -> {
-            double xDiff = (event.getScreenX() - prevX.get()) / EcdarController.getActiveCanvasZoomFactor().get();
-            xDiff -= xDiff % Grid.GRID_SIZE;
-
+            double xDiff = (event.getScreenX() - prevX.get()) / EcdarController.getActiveCanvasZoomFactor().get(); // ToDo NIELS: Fix dependency
             final double newWidth = Math.max(prevWidth.get() + xDiff, getDragAnchorMinWidth());
             box.setWidth(newWidth);
 
             double yDiff = (event.getScreenY() - prevY.get()) / EcdarController.getActiveCanvasZoomFactor().get();
-            yDiff -= yDiff % Grid.GRID_SIZE;
-
             final double newHeight = Math.max(prevHeight.get() + yDiff, getDragAnchorMinHeight());
             box.setHeight(newHeight);
 

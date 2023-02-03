@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class NailController implements Initializable, SelectHelper.ItemSelectable, Nudgeable {
-
     public static boolean nailBeingDragged = false;
 
     private final ObjectProperty<Component> component = new SimpleObjectProperty<>();
@@ -261,10 +260,11 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
 
     @Override
     public ItemDragHelper.DragBounds getDragBounds() {
-        final ObservableDoubleValue minX = new SimpleDoubleProperty(Grid.GRID_SIZE);
-        final ObservableDoubleValue maxX = getComponent().getBox().getWidthProperty().subtract(Grid.GRID_SIZE);
-        final ObservableDoubleValue minY = new SimpleDoubleProperty(Grid.TOOL_BAR_HEIGHT + Grid.GRID_SIZE);
-        final ObservableDoubleValue maxY = getComponent().getBox().getHeightProperty().subtract(Grid.GRID_SIZE);
+        final int PADDING = 5;
+        final ObservableDoubleValue minX = new SimpleDoubleProperty(PADDING);
+        final ObservableDoubleValue maxX = getComponent().getBox().getWidthProperty().subtract(PADDING);
+        final ObservableDoubleValue minY = new SimpleDoubleProperty(PADDING);
+        final ObservableDoubleValue maxY = getComponent().getBox().getHeightProperty().subtract(PADDING);
 
         return new ItemDragHelper.DragBounds(minX, maxX, minY, maxY);
     }

@@ -1,12 +1,9 @@
 package ecdar.utility.helpers;
 
 import ecdar.controllers.EcdarController;
-import ecdar.presentations.Grid;
 import ecdar.utility.mouse.MouseTracker;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-
-import static ecdar.presentations.Grid.GRID_SIZE;
 
 public class MouseCircular implements Circular {
     private final DoubleProperty x = new SimpleDoubleProperty(0d);
@@ -25,8 +22,8 @@ public class MouseCircular implements Circular {
         originalY.set(initLocation.getY());
         x.set(initLocation.getX());
         y.set(initLocation.getY());
-        originalMouseX.set(mouseTracker.getGridX());
-        originalMouseY.set(mouseTracker.getGridY());
+        originalMouseX.set(mouseTracker.xProperty().get());
+        originalMouseY.set(mouseTracker.yProperty().get());
 
         mouseTracker.registerOnMouseMovedEventHandler(event -> updatePosition());
         mouseTracker.registerOnMouseDraggedEventHandler(event -> updatePosition());
@@ -41,8 +38,8 @@ public class MouseCircular implements Circular {
     }
 
     private void updatePosition() {
-        final double dragDistanceX = mouseTracker.getGridX() - originalMouseX.get();
-        final double dragDistanceY = mouseTracker.getGridY() - originalMouseY.get();
+        final double dragDistanceX = mouseTracker.xProperty().get() - originalMouseX.get();
+        final double dragDistanceY = mouseTracker.yProperty().get() - originalMouseY.get();
 
         x.set(originalX.get() + dragDistanceX / EcdarController.getActiveCanvasZoomFactor().get());
         y.set(originalY.get() + dragDistanceY / EcdarController.getActiveCanvasZoomFactor().get());

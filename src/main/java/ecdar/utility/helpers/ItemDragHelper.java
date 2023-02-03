@@ -3,8 +3,6 @@ package ecdar.utility.helpers;
 import ecdar.controllers.EcdarController;
 import ecdar.controllers.EdgeController;
 import ecdar.presentations.ComponentOperatorPresentation;
-import ecdar.presentations.ComponentPresentation;
-import ecdar.presentations.Grid;
 import ecdar.utility.UndoRedoStack;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
@@ -18,8 +16,6 @@ import javafx.util.Pair;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
-
-import static ecdar.presentations.Grid.GRID_SIZE;
 
 public class ItemDragHelper {
 
@@ -127,8 +123,8 @@ public class ItemDragHelper {
 
             final DragBounds dragBounds = getDragBounds.get();
 
-            final double dragDistanceX = Grid.snap(event.getSceneX() - dragOffsetX.get()) / EcdarController.getActiveCanvasZoomFactor().get();
-            final double dragDistanceY = Grid.snap(event.getSceneY() - dragOffsetY.get()) / EcdarController.getActiveCanvasZoomFactor().get();
+            final double dragDistanceX = (event.getSceneX() - dragOffsetX.get()) / EcdarController.getActiveCanvasZoomFactor().get();
+            final double dragDistanceY = (event.getSceneY() - dragOffsetY.get()) / EcdarController.getActiveCanvasZoomFactor().get();
             double draggableNewX = dragBounds.trimX(draggablePreviousX.get() + dragDistanceX);
             double draggableNewY = dragBounds.trimY(draggablePreviousY.get() + dragDistanceY);
 

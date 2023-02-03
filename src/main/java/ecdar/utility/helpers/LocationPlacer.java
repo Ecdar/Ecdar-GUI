@@ -1,5 +1,6 @@
 package ecdar.utility.helpers;
 
+import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Location;
 import ecdar.presentations.LocationPresentation;
@@ -8,15 +9,13 @@ import javafx.beans.value.ChangeListener;
 import java.util.Collection;
 import java.util.function.Consumer;
 
-import static ecdar.presentations.Grid.GRID_SIZE;
-
 public class LocationPlacer {
     public static LocationPresentation ensureCorrectPlacementOfLocation(Component component, Collection<LocationPresentation> existingLocationPresentations, Location originalLocation, Consumer<LocationPresentation> failedToFindPlacement) {
         // Create a new presentation, and register it on the map
         final LocationPresentation newLocationPresentation = new LocationPresentation(originalLocation, component);
 
         final ChangeListener<Number> locationPlacementChangedListener = (observable, oldValue, newValue) -> {
-            final double offset = newLocationPresentation.getController().circle.getRadius() * 2 + GRID_SIZE;
+            final double offset = newLocationPresentation.getController().circle.getRadius() * 2 + Ecdar.CANVAS_PADDING;
             boolean hit = false;
             ItemDragHelper.DragBounds componentBounds = newLocationPresentation.getController().getDragBounds();
 

@@ -1,6 +1,6 @@
 package ecdar.abstractions;
 
-import ecdar.presentations.Grid;
+import ecdar.Ecdar;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ObservableValue;
@@ -13,7 +13,7 @@ import javafx.beans.value.ObservableValue;
  * Its hidden id is 0.
  */
 public class SystemRoot implements SystemElement {
-    public static final int WIDTH = 6 * Grid.GRID_SIZE;
+    public static final int WIDTH = Ecdar.CANVAS_PADDING * 6;
 
     private static final int HIDDEN_ID = 0;
 
@@ -33,12 +33,12 @@ public class SystemRoot implements SystemElement {
 
     @Override
     public ObservableValue<? extends Number> getEdgeX() {
-        return getXProperty().add(3 * Grid.GRID_SIZE);
+        return getXProperty().add(Ecdar.CANVAS_PADDING * 3);
     }
 
     @Override
     public ObservableValue<? extends Number> getEdgeY() {
-        return new SimpleDoubleProperty(Grid.TOOL_BAR_HEIGHT + 2 * Grid.GRID_SIZE - 4d);
+        return new SimpleDoubleProperty(Ecdar.CANVAS_PADDING * 4 - 4d);
     }
 
     @Override
