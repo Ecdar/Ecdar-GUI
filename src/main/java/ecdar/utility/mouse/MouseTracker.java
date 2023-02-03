@@ -1,7 +1,5 @@
 package ecdar.utility.mouse;
 
-import ecdar.presentations.Grid;
-import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.event.EventHandler;
@@ -21,27 +19,6 @@ public class MouseTracker {
     private final ArrayList<EventHandler<MouseEvent>> onMousePressedEventHandlers = new ArrayList<>();
     private final ArrayList<EventHandler<MouseEvent>> onMouseReleasedEventHandlers = new ArrayList<>();
     private boolean isActive = true;
-
-    private final DoubleBinding gridX = new DoubleBinding() {
-        {
-            super.bind(xProperty());
-        }
-
-        @Override
-        protected double computeValue() {
-            return Grid.snap(xProperty().get());
-        }
-    };
-    private final DoubleBinding gridY = new DoubleBinding() {
-        {
-            super.bind(yProperty());
-        }
-
-        @Override
-        protected double computeValue() {
-            return Grid.snap(yProperty().get());
-        }
-    };
 
     private final EventHandler<MouseEvent> onMouseMovedEventHandler = event -> {
         if (!isActive) return;
@@ -237,21 +214,5 @@ public class MouseTracker {
      */
     public void enable() {
         isActive = true;
-    }
-
-    public double getGridX() {
-        return gridX.get();
-    }
-
-    public DoubleBinding gridXProperty() {
-        return gridX;
-    }
-
-    public double getGridY() {
-        return gridY.get();
-    }
-
-    public DoubleBinding gridYProperty() {
-        return gridY;
     }
 }

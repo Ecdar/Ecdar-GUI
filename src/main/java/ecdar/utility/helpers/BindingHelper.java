@@ -25,8 +25,8 @@ public class BindingHelper {
     }
 
     public static void bind(final Circular subject, final ObservableDoubleValue x, final ObservableDoubleValue y) {
-        subject.xProperty().bind(EcdarController.getActiveCanvasPresentation().mouseTracker.gridXProperty().subtract(x));
-        subject.yProperty().bind(EcdarController.getActiveCanvasPresentation().mouseTracker.gridYProperty().subtract(y));
+        subject.xProperty().bind(EcdarController.getActiveCanvasPresentation().mouseTracker.xProperty().subtract(x));
+        subject.yProperty().bind(EcdarController.getActiveCanvasPresentation().mouseTracker.yProperty().subtract(y));
     }
 
     public static void bind(final Link lineSubject, final ArrowHead arrowHeadSubject, final Circular source, final Circular target) {
@@ -126,7 +126,6 @@ public class BindingHelper {
             }
         };
 
-
         subject.rotateProperty().bind(rotationBinding);
     }
 
@@ -221,8 +220,8 @@ public class BindingHelper {
         }
 
         private static LineBinding getCircularBindings(final Circular source, final MouseTracker target, final ObservableDoubleValue x, final ObservableDoubleValue y) {
-            final ObservableDoubleValue mouseX = target.gridXProperty().subtract(x);
-            final ObservableDoubleValue mouseY = target.gridYProperty().subtract(y);
+            final ObservableDoubleValue mouseX = target.xProperty().subtract(x);
+            final ObservableDoubleValue mouseY = target.yProperty().subtract(y);
 
             final Point point = new Point(mouseX, mouseY);
 

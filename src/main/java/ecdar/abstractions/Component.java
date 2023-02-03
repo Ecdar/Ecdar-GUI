@@ -4,7 +4,6 @@ import com.bpodgursky.jbool_expressions.*;
 import com.bpodgursky.jbool_expressions.rules.RuleSet;
 import ecdar.Ecdar;
 import ecdar.controllers.EcdarController;
-import ecdar.presentations.Grid;
 import ecdar.utility.ExpressionHelper;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
@@ -13,6 +12,7 @@ import ecdar.utility.helpers.Boxed;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import ecdar.utility.helpers.MouseCircular;
+import ecdar.utility.keyboard.NudgeDirection;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -701,8 +701,8 @@ public class Component extends HighLevelModelObject implements Boxed {
         box.setProperties(json);
 
         if (box.getWidth() == 0 && box.getHeight() == 0) {
-            box.setWidth(locations.stream().max(Comparator.comparingDouble(Location::getX)).get().getX() + Grid.GRID_SIZE * 10);
-            box.setHeight(locations.stream().max(Comparator.comparingDouble(Location::getY)).get().getY() + Grid.GRID_SIZE * 10);
+            box.setWidth(locations.stream().max(Comparator.comparingDouble(Location::getX)).get().getX() + Ecdar.CANVAS_PADDING * 10);
+            box.setHeight(locations.stream().max(Comparator.comparingDouble(Location::getY)).get().getY() + Ecdar.CANVAS_PADDING * 10);
         }
 
         final EnabledColor enabledColor = (json.has(COLOR) ? EnabledColor.fromIdentifier(json.getAsJsonPrimitive(COLOR).getAsString()) : null);
@@ -949,35 +949,35 @@ public class Component extends HighLevelModelObject implements Boxed {
     }
 
     /**
-     * Moves all nodes one grid size left.
+     * Moves all nodes left.
      */
     public void moveAllNodesLeft() {
-        getLocations().forEach(loc -> loc.setX(loc.getX() - Grid.GRID_SIZE));
-        getDisplayableEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setX(nail.getX() - Grid.GRID_SIZE)));
+        getLocations().forEach(loc -> loc.setX(loc.getX() + NudgeDirection.LEFT.getXOffset()));
+        getDisplayableEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setX(nail.getX() + NudgeDirection.LEFT.getXOffset())));
     }
 
     /**
-     * Moves all nodes one grid size right.
+     * Moves all nodes right.
      */
     public void moveAllNodesRight() {
-        getLocations().forEach(loc -> loc.setX(loc.getX() + Grid.GRID_SIZE));
-        getDisplayableEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setX(nail.getX() + Grid.GRID_SIZE)));
+        getLocations().forEach(loc -> loc.setX(loc.getX() + NudgeDirection.RIGHT.getXOffset()));
+        getDisplayableEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setX(nail.getX() + NudgeDirection.RIGHT.getXOffset())));
     }
 
     /**
-     * Moves all nodes one grid size down.
+     * Moves all nodes down.
      */
     public void moveAllNodesDown() {
-        getLocations().forEach(loc -> loc.setY(loc.getY() + Grid.GRID_SIZE));
-        getDisplayableEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setY(nail.getY() + Grid.GRID_SIZE)));
+        getLocations().forEach(loc -> loc.setY(loc.getY() + NudgeDirection.DOWN.getYOffset()));
+        getDisplayableEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setY(nail.getY() + NudgeDirection.DOWN.getYOffset())));
     }
 
     /**
-     * Moves all nodes one grid size up.
+     * Moves all nodes up.
      */
     public void moveAllNodesUp() {
-        getLocations().forEach(loc -> loc.setY(loc.getY() - Grid.GRID_SIZE));
-        getDisplayableEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setY(nail.getY() - Grid.GRID_SIZE)));
+        getLocations().forEach(loc -> loc.setY(loc.getY() + NudgeDirection.UP.getYOffset()));
+        getDisplayableEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setY(nail.getY() + NudgeDirection.UP.getYOffset())));
     }
 
     public List<DisplayableEdge> getInputEdges() {
