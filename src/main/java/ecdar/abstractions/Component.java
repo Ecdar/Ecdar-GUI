@@ -1,5 +1,6 @@
 package ecdar.abstractions;
 
+import ecdar.Ecdar;
 import ecdar.utility.ExpressionHelper;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
@@ -24,11 +25,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static ecdar.abstractions.Project.LOCATION;
+
 /**
  * A component that models an I/O automata.
  */
 public class Component extends HighLevelModelObject implements Boxed {
-    private static final String COMPONENT = "Component";
     private static final String LOCATIONS = "locations";
     private static final String EDGES = "edges";
     private static final String INCLUDE_IN_PERIODIC_CHECK = "includeInPeriodicCheck";
@@ -71,7 +73,7 @@ public class Component extends HighLevelModelObject implements Boxed {
 
         // Make initial location
         final Location initialLocation = new Location();
-        initialLocation.initialize();
+        initialLocation.initialize(LOCATION + 1);
         initialLocation.setType(Location.Type.INITIAL);
         initialLocation.setColorIntensity(getColorIntensity());
         initialLocation.setColor(getColor());
@@ -241,7 +243,7 @@ public class Component extends HighLevelModelObject implements Boxed {
      */
     public void applyDemonicCompletion() {
         // Make a universal location
-        final Location uniLocation = new Location(this, Location.Type.UNIVERSAL, 0, 0);
+        final Location uniLocation = new Location(this, Location.Type.UNIVERSAL, generateUniIncId(), 0, 0);
         addLocation(uniLocation);
 
         final Edge inputEdge = uniLocation.addLeftEdge("*", EdgeStatus.INPUT);
@@ -788,12 +790,11 @@ public class Component extends HighLevelModelObject implements Boxed {
         if(id != null){
             return id;
         } else {
-            return "hstrieant" + new Random().nextInt();
-//            for(int counter = 0; ;counter++){
-//                if(!Ecdar.getProject().getUniIncIds().contains(String.valueOf(counter))){
-//                    return String.valueOf(counter);
-//                }
-//            }
+            for(int counter = 0; ;counter++){
+                if(!Ecdar.getProject().getUniIncIds().contains(String.valueOf(counter))){
+                    return String.valueOf(counter);
+                }
+            }
         }
     }
 

@@ -30,7 +30,6 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     private static final String INVARIANT_Y = "invariantY";
     private static final String UNI = "U";
     private static final String INC = "I";
-    public static final String LOCATION = "L";
     static final int ID_LETTER_LENGTH = 1;
 
     // Verification properties
@@ -65,17 +64,17 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
         bindReachabilityAnalysis();
     }
 
-    public Location(final Component component, final Type type, final double x, final double y){
+    public Location(final Component component, final Type type, final String id, final double x, final double y){
         setX(x);
         setY(y);
         setType(type);
         if(type == Type.UNIVERSAL){
             setIsLocked(true);
-            setId(UNI + component.generateUniIncId());
+            setId(UNI + id);
         } else if (type == Type.INCONSISTENT) {
             setIsLocked(true);
             setUrgency(Location.Urgency.URGENT);
-            setId(INC + component.generateUniIncId());
+            setId(INC + id);
         }
         setColorIntensity(component.getColorIntensity());
         setColor(component.getColor());
@@ -89,8 +88,8 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     /**
      * Generates an id for this, and binds reachability analysis.
      */
-    public void initialize() {
-        setId();
+    public void initialize(String id) {
+        setId(id);
         bindReachabilityAnalysis();
     }
 
@@ -133,18 +132,6 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
 
     public String getId() {
         return id.get();
-    }
-
-    /**
-     * Generate and sets a unique id for this location
-     */
-    private void setId() {
-        for(int counter = 0; ; counter++) {
-            if(!Ecdar.getProject().getLocationIds().contains(String.valueOf(counter))){
-                id.set(LOCATION + counter);
-                return;
-            }
-        }
     }
 
     /**

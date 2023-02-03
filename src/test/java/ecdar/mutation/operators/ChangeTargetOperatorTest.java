@@ -19,7 +19,7 @@ public class ChangeTargetOperatorTest {
 
     @Test
     public void testNumberOfMutants() {
-        final Component component = new Component(false);
+        final Component component = new Component(false, "test_comp");
         Ecdar.getProject().getComponents().add(component);
 
         // 3 locations in addition to the already created initial location

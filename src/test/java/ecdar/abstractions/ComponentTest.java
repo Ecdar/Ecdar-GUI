@@ -7,7 +7,11 @@ import org.junit.jupiter.api.Assertions;
 
 import java.util.List;
 
+import static ecdar.abstractions.Project.LOCATION;
+
 public class ComponentTest {
+
+    private int counter = 0;
 
     @BeforeAll
     static void setup() {
@@ -16,7 +20,7 @@ public class ComponentTest {
 
     @Test
     public void testCloneSameId() {
-        final Component original = new Component(false);
+        final Component original = new Component(false, "test_comp");
 
         final Location loc1 = new Location();
         original.addLocation(loc1);
@@ -30,16 +34,16 @@ public class ComponentTest {
 
     @Test
     public void testCloneChangeTargetOfOriginal() {
-        final Component original = new Component(false);
+        final Component original = new Component(false, "test_comp");
         Ecdar.getProject().getComponents().add(original);
 
         final Location loc1 = new Location();
-        loc1.initialize();
+        loc1.initialize(getUniqueLocationId());
         original.addLocation(loc1);
         final String id1 = loc1.getId();
 
         final Location loc2 = new Location();
-        loc2.initialize();
+        loc2.initialize(getUniqueLocationId());
         original.addLocation(loc2);
         final String id2 = loc2.getId();
 
@@ -65,16 +69,16 @@ public class ComponentTest {
 
     @Test
     public void testCloneChangeTargetOfClone() {
-        final Component original = new Component(false);
+        final Component original = new Component(false, "test_comp");
         Ecdar.getProject().getComponents().add(original);
 
         final Location loc1 = new Location();
-        loc1.initialize();
+        loc1.initialize(getUniqueLocationId());
         original.addLocation(loc1);
         final String id1 = loc1.getId();
 
         final Location loc2 = new Location();
-        loc2.initialize();
+        loc2.initialize(getUniqueLocationId());
         original.addLocation(loc2);
         final String id2 = loc2.getId();
 
@@ -105,17 +109,17 @@ public class ComponentTest {
 
         // Has no outgoing edges
         final Location l1 = new Location();
-        l1.initialize();
+        l1.initialize(getUniqueLocationId());
         c.addLocation(l1);
 
         // Has outgoing a input edge without guard
         final Location l2 = new Location();
-        l2.initialize();
+        l2.initialize(getUniqueLocationId());
         c.addLocation(l2);
 
         // Has outgoing b input edge with guard x <= 3
         final Location l3 = new Location();
-        l3.initialize();
+        l3.initialize(getUniqueLocationId());
         c.addLocation(l3);
 
         final Edge e1 = new Edge(l2, EdgeStatus.INPUT);
@@ -193,7 +197,7 @@ public class ComponentTest {
         final Component c = new Component();
 
         final Location l1 = new Location();
-        l1.initialize();
+        l1.initialize(getUniqueLocationId());
         c.addLocation(l1);
 
         final Edge e1 = new Edge(l1, EdgeStatus.INPUT);
@@ -232,7 +236,7 @@ public class ComponentTest {
         final Component c = new Component();
 
         final Location l1 = new Location();
-        l1.initialize();
+        l1.initialize(getUniqueLocationId());
         c.addLocation(l1);
 
         final Edge e1 = new Edge(l1, EdgeStatus.INPUT);
@@ -270,7 +274,7 @@ public class ComponentTest {
         final Component c = new Component();
 
         final Location l1 = new Location();
-        l1.initialize();
+        l1.initialize(getUniqueLocationId());
         c.addLocation(l1);
 
         final Edge e1 = new Edge(l1, EdgeStatus.INPUT);
@@ -386,5 +390,10 @@ public class ComponentTest {
 
         Assertions.assertEquals(1, vars.size());
         Assertions.assertEquals("sound", vars.get(0));
+    }
+
+    private String getUniqueLocationId() {
+        counter++;
+        return LOCATION + counter;
     }
 }

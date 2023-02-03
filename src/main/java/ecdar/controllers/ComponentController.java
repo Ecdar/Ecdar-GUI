@@ -41,7 +41,9 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
+import static ecdar.abstractions.Project.LOCATION;
 import static ecdar.presentations.ModelPresentation.*;
 import static ecdar.utility.helpers.LocationPlacer.ensureCorrectPlacementOfLocation;
 
@@ -328,7 +330,7 @@ public class ComponentController extends ModelController implements Initializabl
             contextMenu.addClickableListElement("Add Location", event -> {
                 contextMenu.hide();
                 final Location newLocation = new Location();
-                newLocation.initialize();
+                newLocation.initialize(getUniqueLocationId());
 
                 double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
                 newLocation.setX(x);
@@ -347,13 +349,13 @@ public class ComponentController extends ModelController implements Initializabl
                 }, "Added location '" + newLocation + "' to component '" + component.getName() + "'", "add-circle");
             });
 
-            // Adds the add universal location element to the drop down menu, this element adds an universal location and its required edges
+            // Adds the add universal location element to the drop-down menu, this element adds an universal location and its required edges
             contextMenu.addClickableListElement("Add Universal Location", event -> {
                 contextMenu.hide();
                 double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
                 double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
 
-                final Location newLocation = new Location(component, Location.Type.UNIVERSAL, x, y);
+                final Location newLocation = new Location(component, Location.Type.UNIVERSAL, getUniqueLocationId(), x, y);
 
                 final Edge inputEdge = newLocation.addLeftEdge("*", EdgeStatus.INPUT);
                 inputEdge.setIsLocked(true);
@@ -379,7 +381,7 @@ public class ComponentController extends ModelController implements Initializabl
                 double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
                 double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
 
-                final Location newLocation = new Location(component, Location.Type.INCONSISTENT, x, y);
+                final Location newLocation = new Location(component, Location.Type.INCONSISTENT, getUniqueLocationId(), x, y);
 
                 // Add a new location
                 UndoRedoStack.pushAndPerform(() -> { // Perform
@@ -425,6 +427,15 @@ public class ComponentController extends ModelController implements Initializabl
         initializeDropDownMenu.accept(getComponent());
     }
 
+    private String getUniqueLocationId() {
+        final var currentIds = getComponent().getLocations().stream().map(Location::getId).collect(Collectors.toSet());
+        for (int counter = 1; ; counter++) {
+            if (currentIds.contains(LOCATION + counter)) {
+                return LOCATION + counter;
+            }
+        }
+    }
+
     private void initializeFinishEdgeContextMenu(final DisplayableEdge unfinishedEdge) {
         final Consumer<Component> initializeDropDownMenu = (component) -> {
             if (component == null) {
@@ -445,7 +456,7 @@ public class ComponentController extends ModelController implements Initializabl
             finishEdgeContextMenu.addClickableListElement("Location", event -> {
                 finishEdgeContextMenu.hide();
                 final Location location = new Location();
-                location.initialize();
+                location.initialize(getUniqueLocationId());
 
                 location.setColorIntensity(getComponent().getColorIntensity());
                 location.setColor(getComponent().getColor());
@@ -479,7 +490,7 @@ public class ComponentController extends ModelController implements Initializabl
                 double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
                 double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
 
-                final Location newLocation = new Location(component, Location.Type.UNIVERSAL, x, y);
+                final Location newLocation = new Location(component, Location.Type.UNIVERSAL, getUniqueLocationId(), x, y);
 
                 final Edge inputEdge = newLocation.addLeftEdge("*", EdgeStatus.INPUT);
                 inputEdge.setIsLocked(true);
@@ -521,7 +532,7 @@ public class ComponentController extends ModelController implements Initializabl
                 double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
                 double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
 
-                final Location newLocation = new Location(component, Location.Type.INCONSISTENT, x, y);
+                final Location newLocation = new Location(component, Location.Type.INCONSISTENT, getUniqueLocationId(), x, y);
 
                 if (component.isAnyEdgeWithoutSource()) {
                     unfinishedEdge.setSourceLocation(newLocation);
@@ -778,7 +789,7 @@ public class ComponentController extends ModelController implements Initializabl
 
         if ((event.isShiftDown() && event.isPrimaryButtonDown()) || event.isMiddleButtonDown()) {
             final Location location = new Location();
-            location.initialize();
+            location.initialize(getUniqueLocationId());
 
             location.setX(event.getX());
             location.setY(event.getY());

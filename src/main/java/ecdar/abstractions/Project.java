@@ -21,12 +21,14 @@ import java.util.*;
  * A project of models.
  */
 public class Project {
+    public static final String LOCATION = "L";
     private final static String GLOBAL_DCL_FILENAME = "GlobalDeclarations";
     private final static String QUERIES_FILENAME = "Queries";
     private final static String JSON_FILENAME_EXTENSION = ".json";
     private static final String FOLDER_NAME_COMPONENTS = "Components";
     private static final String FOLDER_NAME_SYSTEMS = "Systems";
     private static final String FOLDER_NAME_TESTS = "Tests";
+    private static final String COMPONENT = "Component";
 
     private final ObservableList<Query> queries;
     private final ObservableList<Component> components;
@@ -275,7 +277,7 @@ public class Project {
 
         final List<Map.Entry<String, JsonObject>> list = new LinkedList<>(nameJsonMap.entrySet());
 
-        list.sort(Comparator.comparing(Map.Entry::getKey));
+        list.sort(Map.Entry.comparingByKey());
 
         final List<JsonObject> orderedJsonSystems = new ArrayList<>();
 
@@ -315,7 +317,7 @@ public class Project {
 
         final List<Map.Entry<String, JsonObject>> list = new LinkedList<>(nameJsonMap.entrySet());
 
-        list.sort(Comparator.comparing(Map.Entry::getKey));
+        list.sort(Map.Entry.comparingByKey());
 
         final List<JsonObject> orderedJsonSystems = new ArrayList<>();
 
@@ -417,7 +419,7 @@ public class Project {
      * Gets the name of all components in the project and inserts it into a set
      * @return the set of all component names
      */
-    public HashSet<String> getComponentNames(){
+    private HashSet<String> getComponentNames(){
         final HashSet<String> names = new HashSet<>();
 
         for(final Component component : getComponents()){
@@ -429,8 +431,8 @@ public class Project {
 
     public String getUniqueComponentName() {
         for(int counter = 1; ; counter++) {
-            final String name = "Component" + counter;
-            if(!getComponentNames().contains("Component" + counter)){
+            final String name = COMPONENT + counter;
+            if(!getComponentNames().contains(COMPONENT + counter)){
                 return name;
             }
         }
