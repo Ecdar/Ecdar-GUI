@@ -37,8 +37,6 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static ecdar.presentations.Grid.GRID_SIZE;
-
 public class ComponentController extends ModelController implements Initializable {
     private static final Map<Component, ListChangeListener<Location>> locationListChangeListenerMap = new HashMap<>();
     private static final Map<Component, Boolean> errorsAndWarningsInitialized = new HashMap<>();
@@ -323,11 +321,9 @@ public class ComponentController extends ModelController implements Initializabl
                 newLocation.initialize();
 
                 double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
-                x = Grid.snap(x);
                 newLocation.setX(x);
 
                 double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
-                y = Grid.snap(y);
                 newLocation.setY(y);
 
                 newLocation.setColorIntensity(component.getColorIntensity());
@@ -427,10 +423,7 @@ public class ComponentController extends ModelController implements Initializabl
 
             final Consumer<LocationAware> setCoordinates = (locationAware) -> {
                 double x = DropDownMenu.x;
-                x = Math.round(x / GRID_SIZE) * GRID_SIZE;
-
                 double y = DropDownMenu.y;
-                y = Math.round(y / GRID_SIZE) * GRID_SIZE;
 
                 locationAware.xProperty().set(x);
                 locationAware.yProperty().set(y);
@@ -562,7 +555,7 @@ public class ComponentController extends ModelController implements Initializabl
             final LocationPresentation newLocationPresentation = new LocationPresentation(loc, newComponent);
 
             final ChangeListener<Number> locationPlacementChangedListener = (observable, oldValue, newValue) -> {
-                final double offset = newLocationPresentation.getController().circle.getRadius() * 2 + GRID_SIZE;
+                final double offset = newLocationPresentation.getController().circle.getRadius() * 2;
                 boolean hit = false;
                 ItemDragHelper.DragBounds componentBounds = newLocationPresentation.getController().getDragBounds();
 
@@ -730,6 +723,7 @@ public class ComponentController extends ModelController implements Initializabl
                 modelContainerLocation.getChildren().remove(newLocationPresentation);
                 locationPresentationMap.remove(newLocationPresentation.getController().locationProperty().getValue());
                 newComponent.getLocations().remove(newLocationPresentation.getController().getLocation());
+                newComponent.getDisplayableEdges().removeIf(e -> e.targetLocationProperty().get().equals(newLocationPresentation.getController().getLocation()));
                 Ecdar.showToast("Please select an empty space for the new location");
             };
 
@@ -882,8 +876,8 @@ public class ComponentController extends ModelController implements Initializabl
             final Location location = new Location();
             location.initialize();
 
-            location.setX(Grid.snap(event.getX()));
-            location.setY(Grid.snap(event.getY()));
+            location.setX(event.getX());
+            location.setY(event.getY());
 
             location.setColorIntensity(getComponent().getColorIntensity());
             location.setColor(getComponent().getColor());
@@ -932,12 +926,8 @@ public class ComponentController extends ModelController implements Initializabl
         } else if (event.isPrimaryButtonDown()) {
             // We are drawing an edge
             if (unfinishedEdge != null) {
-                // Get coordinates of new nail on grid
-                final double x = Grid.snap(event.getX());
-                final double y = Grid.snap(event.getY());
-
                 // Create the abstraction for the new nail and add it to the unfinished edge
-                final Nail newNail = new Nail(x, y);
+                final Nail newNail = new Nail(event.getX(), event.getY());
 
                 // Make sync nail if edge has none
                 if (!unfinishedEdge.hasSyncNail()) {

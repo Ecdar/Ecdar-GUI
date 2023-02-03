@@ -40,12 +40,12 @@ public class SystemRootPresentation extends StackPane implements Highlightable {
         setLayoutX(root.getX());
         root.getXProperty().bind(layoutXProperty());
 
-        setLayoutY(Grid.TOOL_BAR_HEIGHT);
+        setLayoutY(ModelPresentation.TOOLBAR_HEIGHT);
 
         controller.shape.getPoints().addAll(0d, 0d);
-        controller.shape.getPoints().addAll(2d * Grid.GRID_SIZE, 1.5 * Grid.GRID_SIZE);
-        controller.shape.getPoints().addAll(4d * Grid.GRID_SIZE, 1.5 * Grid.GRID_SIZE);
-        controller.shape.getPoints().addAll(6d * Grid.GRID_SIZE, 0d);
+        controller.shape.getPoints().addAll(20d, 15.);
+        controller.shape.getPoints().addAll(40d, 15.);
+        controller.shape.getPoints().addAll(60d, 0d);
     }
 
     /**
@@ -123,10 +123,10 @@ public class SystemRootPresentation extends StackPane implements Highlightable {
      * @return the drag bounds
      */
     private ItemDragHelper.DragBounds getDragBounds() {
-        final ObservableDoubleValue minX = new SimpleDoubleProperty(2d * Grid.GRID_SIZE);
+        final ObservableDoubleValue minX = new SimpleDoubleProperty(20d);
         final ObservableDoubleValue maxX = controller.getSystem().getBox().getWidthProperty()
-                .subtract(8d * Grid.GRID_SIZE);
-        final ObservableDoubleValue y = new SimpleDoubleProperty(Grid.TOOL_BAR_HEIGHT);
+                .subtract(80d);
+        final ObservableDoubleValue y = new SimpleDoubleProperty(20);
 
         return new ItemDragHelper.DragBounds(minX, maxX, y, y);
     }

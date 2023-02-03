@@ -30,7 +30,6 @@ public class CanvasPresentation extends StackPane implements MouseTrackable {
     private final DoubleProperty y = new SimpleDoubleProperty(0);
 
     private final CanvasController controller;
-    private final BooleanProperty gridToggle = new SimpleBooleanProperty(false);
 
     public CanvasPresentation() {
         mouseTracker = new MouseTracker(this);
@@ -40,13 +39,7 @@ public class CanvasPresentation extends StackPane implements MouseTrackable {
         getController().root.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> EcdarController.setActiveCanvasPresentation(this));
 
         initializeModelDrag();
-        initializeGrid();
         initializeToolbar();
-
-        controller.allowGridProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue && gridToggle.get()) showGrid();
-            else hideGrid();
-        });
 
         Platform.runLater(this::initializeZoomHelper);
         getStyleClass().add("canvas-presentation");
@@ -79,8 +72,8 @@ public class CanvasPresentation extends StackPane implements MouseTrackable {
             if (!presWasAllowed.get() || !isBeingDragged.get()) return;
             event.consume();
 
-            final double dragDistanceX = Grid.snap(event.getSceneX() - dragXOffset[0]);
-            final double dragDistanceY = Grid.snap(event.getSceneY() - dragYOffset[0]);
+            final double dragDistanceX = event.getSceneX() - dragXOffset[0];
+            final double dragDistanceY = event.getSceneY() - dragYOffset[0];
             final double newX = previousXTranslation[0] + dragDistanceX;
             final double newY = previousYTranslation[0] + dragDistanceY;
 
@@ -95,14 +88,6 @@ public class CanvasPresentation extends StackPane implements MouseTrackable {
             previousXTranslation[0] = controller.modelPane.getTranslateX();
             previousYTranslation[0] = controller.modelPane.getTranslateY();
             isBeingDragged.setValue(false);
-        });
-    }
-
-    private void initializeGrid() {
-        gridToggle.setValue(true);
-        controller.allowGridProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue && gridToggle.get()) showGrid();
-            else hideGrid();
         });
     }
 
@@ -133,32 +118,7 @@ public class CanvasPresentation extends StackPane implements MouseTrackable {
     }
 
     private void initializeZoomHelper() {
-        controller.zoomHelper.setGrid(controller.grid);
         controller.zoomHelper.setCanvas(this);
-    }
-
-    /**
-     * Toggles the user option for whether or not to show the grid on components and system views.
-     * @return a Boolean property that is true if the grid has been turned on and false if the grid has been turned off
-     */
-    public BooleanProperty toggleGridUi() {
-        if (gridToggle.get()) {
-            if (controller.isGridAllowed()) hideGrid();
-
-            gridToggle.setValue(false);
-        } else {
-            showGrid();
-            gridToggle.setValue(true);
-        }
-        return gridToggle;
-    }
-
-    private void showGrid() {
-        controller.grid.setOpacity(1);
-    }
-
-    private void hideGrid() {
-        controller.grid.setOpacity(0);
     }
 
     /**

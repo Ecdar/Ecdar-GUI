@@ -1,7 +1,6 @@
 package ecdar.abstractions;
 
 import ecdar.Ecdar;
-import ecdar.presentations.Grid;
 import com.google.gson.JsonObject;
 import javafx.beans.property.*;
 import javafx.beans.value.ObservableValue;
@@ -10,8 +9,8 @@ import javafx.beans.value.ObservableValue;
  * Instance of a component.
  */
 public class ComponentInstance implements SystemElement {
-    public final static int WIDTH = Grid.GRID_SIZE * 22;
-    public final static int HEIGHT = Grid.GRID_SIZE * 12;
+    public final static int WIDTH = 220;
+    public final static int HEIGHT = 120;
     private static final String HIDDEN_ID = "id";
     private static final String X = "x";
     private static final String Y = "y";

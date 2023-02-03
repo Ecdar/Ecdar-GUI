@@ -1,5 +1,6 @@
 package ecdar.presentations;
 
+import ecdar.Ecdar;
 import ecdar.abstractions.*;
 import ecdar.controllers.ModelController;
 import ecdar.controllers.SystemController;
@@ -13,8 +14,6 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 
 import java.util.function.BiConsumer;
-
-import static ecdar.presentations.Grid.GRID_SIZE;
 
 /**
  * Presentation for a system.
@@ -39,7 +38,7 @@ public class SystemPresentation extends ModelPresentation {
 
         onUpdateSize.run();
 
-        // Re run initialisation on update of width and height property
+        // Re-run initialisation on update of width and height property
         system.getBox().getWidthProperty().addListener(observable -> onUpdateSize.run());
         system.getBox().getHeightProperty().addListener(observable -> onUpdateSize.run());
     }
@@ -58,7 +57,7 @@ public class SystemPresentation extends ModelPresentation {
                     Insets.EMPTY
             )));
 
-            controller.toolbar.setPrefHeight(Grid.TOOL_BAR_HEIGHT);
+            controller.toolbar.setPrefHeight(TOOLBAR_HEIGHT);
         };
 
         system.colorProperty().addListener(observable -> updateColor.accept(system.getColor(), system.getColorIntensity()));
@@ -79,8 +78,8 @@ public class SystemPresentation extends ModelPresentation {
         // Generate top right corner (to subtract)
         final Polygon topRightCorner = new Polygon(
                 system.getBox().getWidth(), 0,
-                system.getBox().getWidth() - Grid.CORNER_SIZE - 2, 0,
-                system.getBox().getWidth(), Grid.CORNER_SIZE + 2
+                system.getBox().getWidth() - (CORNER_SIZE + 2), 0,
+                system.getBox().getWidth(), CORNER_SIZE + 2
         );
 
         final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
@@ -92,18 +91,18 @@ public class SystemPresentation extends ModelPresentation {
             controller.background.setOpacity(0.5);
 
             // Bind the missing lines that we cropped away
-            controller.topLeftLine.setStartX(Grid.CORNER_SIZE);
+            controller.topLeftLine.setStartX(CORNER_SIZE);
             controller.topLeftLine.setStartY(0);
             controller.topLeftLine.setEndX(0);
-            controller.topLeftLine.setEndY(Grid.CORNER_SIZE);
+            controller.topLeftLine.setEndY(CORNER_SIZE);
             controller.topLeftLine.setStroke(newColor.getColor(newIntensity.next(2)));
             controller.topLeftLine.setStrokeWidth(1.25);
             StackPane.setAlignment(controller.topLeftLine, Pos.TOP_LEFT);
 
             controller.topRightLine.setStartX(0);
             controller.topRightLine.setStartY(0);
-            controller.topRightLine.setEndX(Grid.CORNER_SIZE);
-            controller.topRightLine.setEndY(Grid.CORNER_SIZE);
+            controller.topRightLine.setEndX(CORNER_SIZE);
+            controller.topRightLine.setEndY(CORNER_SIZE);
             controller.topRightLine.setStroke(newColor.getColor(newIntensity.next(2)));
             controller.topRightLine.setStrokeWidth(1.25);
             StackPane.setAlignment(controller.topRightLine, Pos.TOP_RIGHT);
@@ -155,14 +154,14 @@ public class SystemPresentation extends ModelPresentation {
     @Override
     double getDragAnchorMinWidth() {
         final EcdarSystem system = controller.getSystem();
-        double minWidth = system.getSystemRoot().getX() + SystemRoot.WIDTH + 2 * Grid.GRID_SIZE;
+        double minWidth = system.getSystemRoot().getX() + SystemRoot.WIDTH + Ecdar.CANVAS_PADDING * 2;
 
         for (final ComponentInstance instance : system.getComponentInstances()) {
-            minWidth = Math.max(minWidth, instance.getBox().getX() + instance.getBox().getWidth() + Grid.GRID_SIZE);
+            minWidth = Math.max(minWidth, instance.getBox().getX() + instance.getBox().getWidth() + Ecdar.CANVAS_PADDING);
         }
 
         for (final ComponentOperator operator : system.getComponentOperators()) {
-            minWidth = Math.max(minWidth, operator.getBox().getX() + operator.getBox().getWidth() + Grid.GRID_SIZE);
+            minWidth = Math.max(minWidth, operator.getBox().getX() + operator.getBox().getWidth() + Ecdar.CANVAS_PADDING);
         }
 
         return minWidth;
@@ -176,14 +175,14 @@ public class SystemPresentation extends ModelPresentation {
     @Override
     double getDragAnchorMinHeight() {
         final EcdarSystem system = controller.getSystem();
-        double minHeight = 10 * GRID_SIZE;
+        double minHeight = Ecdar.CANVAS_PADDING * 2;
 
         for (final ComponentInstance instance : system.getComponentInstances()) {
-            minHeight = Math.max(minHeight, instance.getBox().getY() + instance.getBox().getHeight() + Grid.GRID_SIZE);
+            minHeight = Math.max(minHeight, instance.getBox().getY() + instance.getBox().getHeight() + Ecdar.CANVAS_PADDING);
         }
 
         for (final ComponentOperator operator : system.getComponentOperators()) {
-            minHeight = Math.max(minHeight, operator.getBox().getY() + operator.getBox().getHeight() + Grid.GRID_SIZE);
+            minHeight = Math.max(minHeight, operator.getBox().getY() + operator.getBox().getHeight() + Ecdar.CANVAS_PADDING);
         }
 
         return minHeight;

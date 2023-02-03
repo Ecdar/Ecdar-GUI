@@ -25,7 +25,6 @@ import javafx.scene.shape.Path;
 
 import java.util.function.BiConsumer;
 
-import static ecdar.presentations.Grid.GRID_SIZE;
 import static javafx.scene.paint.Color.TRANSPARENT;
 
 public class TagPresentation extends StackPane {
@@ -39,7 +38,7 @@ public class TagPresentation extends StackPane {
     LineTo l3;
     boolean hadInitialFocus = false;
 
-    static double TAG_HEIGHT = 1.6 * GRID_SIZE;
+    static double TAG_HEIGHT = 16;
 
     public TagPresentation() {
         new EcdarFXMLLoader().loadAndGetController("TagPresentation.fxml", this);
@@ -146,8 +145,8 @@ public class TagPresentation extends StackPane {
         shape.addEventHandler(MouseEvent.MOUSE_DRAGGED, event -> {
             event.consume();
 
-            final double dragDistanceX = Grid.snap(event.getSceneX() - dragOffsetX.get()) / EcdarController.getActiveCanvasZoomFactor().get();
-            final double dragDistanceY = Grid.snap(event.getSceneY() - dragOffsetY.get()) / EcdarController.getActiveCanvasZoomFactor().get();
+            final double dragDistanceX = (event.getSceneX() - dragOffsetX.get()) / EcdarController.getActiveCanvasZoomFactor().get();
+            final double dragDistanceY = (event.getSceneY() - dragOffsetY.get()) / EcdarController.getActiveCanvasZoomFactor().get();
             double draggableNewX = getDragBounds().trimX(draggablePreviousX.get() + dragDistanceX);
             double draggableNewY = getDragBounds().trimY(draggablePreviousY.get() + dragDistanceY);
 
@@ -335,12 +334,12 @@ public class TagPresentation extends StackPane {
     public ItemDragHelper.DragBounds getDragBounds() {
         final JFXTextField textField = (JFXTextField) lookup("#textField");
 
-        final ObservableDoubleValue minX = locationAware.get().xProperty().multiply(-1).add(GRID_SIZE);
+        final ObservableDoubleValue minX = locationAware.get().xProperty().multiply(-1).add(TAG_HEIGHT);
         final ObservableDoubleValue maxX = getComponent().getBox().getWidthProperty()
-                .subtract(locationAware.get().xProperty().add(textField.widthProperty()).add(GRID_SIZE));
-        final ObservableDoubleValue minY = locationAware.get().yProperty().multiply(-1).add(GRID_SIZE * 2);
+                .subtract(locationAware.get().xProperty().add(textField.widthProperty()).add(TAG_HEIGHT));
+        final ObservableDoubleValue minY = locationAware.get().yProperty().multiply(-1).add(TAG_HEIGHT * 2);
         final ObservableDoubleValue maxY = getComponent().getBox().getHeightProperty()
-                .subtract(locationAware.get().yProperty().add(textField.heightProperty()).add(GRID_SIZE));
+                .subtract(locationAware.get().yProperty().add(textField.heightProperty()).add(TAG_HEIGHT));
 
         return new ItemDragHelper.DragBounds(minX, maxX, minY, maxY);
     }

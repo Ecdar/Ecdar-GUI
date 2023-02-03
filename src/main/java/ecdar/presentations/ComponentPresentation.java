@@ -1,5 +1,6 @@
 package ecdar.presentations;
 
+import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
 import ecdar.abstractions.Location;
@@ -26,8 +27,6 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static ecdar.presentations.Grid.GRID_SIZE;
 
 public class ComponentPresentation extends ModelPresentation implements MouseTrackable, SelectHelper.Selectable {
     private static final String uppaalKeywords = "clock|chan|urgent|broadcast";
@@ -99,7 +98,7 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
             // Set the icon color and rippler color of the toggleDeclarationButton
             controller.toggleDeclarationButton.setRipplerFill(newColor.getTextColor(newIntensity));
 
-            controller.toolbar.setPrefHeight(Grid.TOOL_BAR_HEIGHT);
+            controller.toolbar.setPrefHeight(Ecdar.CANVAS_PADDING * 2);
             controller.toggleDeclarationButton.setBackground(Background.EMPTY);
         };
 
@@ -130,10 +129,10 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
             controller.background.setOpacity(0.5);
 
             // Bind the missing lines that we cropped away
-            controller.topLeftLine.setStartX(Grid.CORNER_SIZE);
+            controller.topLeftLine.setStartX(Ecdar.CANVAS_PADDING * 4);
             controller.topLeftLine.setStartY(0);
             controller.topLeftLine.setEndX(0);
-            controller.topLeftLine.setEndY(Grid.CORNER_SIZE);
+            controller.topLeftLine.setEndY(Ecdar.CANVAS_PADDING * 4);
             controller.topLeftLine.setStroke(newColor.getColor(newIntensity.next(2)));
             controller.topLeftLine.setStrokeWidth(1.25);
             StackPane.setAlignment(controller.topLeftLine, Pos.TOP_LEFT);
@@ -229,15 +228,15 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
     @Override
     double getDragAnchorMinWidth() {
         final Component component = controller.getComponent();
-        double minWidth = 10 * GRID_SIZE;
+        double minWidth = Ecdar.CANVAS_PADDING * 10;
 
         for (final Location location : component.getLocations()) {
-            minWidth = Math.max(minWidth, location.getX() + GRID_SIZE * 2);
+            minWidth = Math.max(minWidth, location.getX() + Ecdar.CANVAS_PADDING * 2);
         }
 
         for (final Edge edge : component.getEdges()) {
             for (final Nail nail : edge.getNails()) {
-                minWidth = Math.max(minWidth, nail.getX() + GRID_SIZE);
+                minWidth = Math.max(minWidth, nail.getX() + Ecdar.CANVAS_PADDING);
             }
         }
 
@@ -252,15 +251,15 @@ public class ComponentPresentation extends ModelPresentation implements MouseTra
     @Override
     double getDragAnchorMinHeight() {
         final Component component = controller.getComponent();
-        double minHeight = 10 * GRID_SIZE;
+        double minHeight = 100;
 
         for (final Location location : component.getLocations()) {
-            minHeight = Math.max(minHeight, location.getY() + GRID_SIZE * 2);
+            minHeight = Math.max(minHeight, location.getY() + 20);
         }
 
         for (final Edge edge : component.getEdges()) {
             for (final Nail nail : edge.getNails()) {
-                minHeight = Math.max(minHeight, nail.getY() + GRID_SIZE);
+                minHeight = Math.max(minHeight, nail.getY() + 10);
             }
         }
 

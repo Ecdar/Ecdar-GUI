@@ -86,7 +86,6 @@ public class EcdarController implements Initializable {
     public MenuBar menuBar;
     public MenuItem menuBarViewProjectPanel;
     public MenuItem menuBarViewQueryPanel;
-    public MenuItem menuBarViewGrid;
     public MenuItem menuBarViewAutoscaling;
     public Menu menuViewMenuScaling;
     public ToggleGroup scaling;
@@ -537,13 +536,6 @@ public class EcdarController implements Initializable {
             menuBarViewQueryPanel.getGraphic().opacityProperty().bind(new When(isOpen).then(1).otherwise(0));
         });
 
-        menuBarViewGrid.getGraphic().setOpacity(1);
-        menuBarViewGrid.setAccelerator(new KeyCodeCombination(KeyCode.K, KeyCodeCombination.SHORTCUT_DOWN));
-        menuBarViewGrid.setOnAction(event -> {
-            final BooleanProperty isOn = Ecdar.toggleGrid();
-            menuBarViewGrid.getGraphic().opacityProperty().bind(new When(isOn).then(1).otherwise(0));
-        });
-
         menuBarViewAutoscaling.getGraphic().setOpacity(Ecdar.autoScalingEnabled.getValue() ? 1 : 0);
         menuBarViewAutoscaling.setOnAction(event -> {
             Ecdar.autoScalingEnabled.setValue(!Ecdar.autoScalingEnabled.getValue());
@@ -927,17 +919,13 @@ public class EcdarController implements Initializable {
     }
 
     /**
-     * Take a snapshot with the grid hidden.
-     * The grid is put into its original state afterwards.
+     * Take a snapshot.
      *
      * @return the snapshot
      */
     private WritableImage takeSnapshot(CanvasPresentation canvas) {
         final WritableImage image;
-
-        canvas.getController().disallowGrid();
         image = scaleAndTakeSnapshot(canvas);
-        canvas.getController().allowGrid();
 
         return image;
     }

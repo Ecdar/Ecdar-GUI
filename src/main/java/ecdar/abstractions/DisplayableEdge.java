@@ -1,7 +1,6 @@
 package ecdar.abstractions;
 
 import ecdar.code_analysis.Nearable;
-import ecdar.presentations.Grid;
 import ecdar.utility.colors.Color;
 import ecdar.utility.helpers.Circular;
 import ecdar.utility.helpers.MouseCircular;
@@ -179,8 +178,8 @@ public abstract class DisplayableEdge implements Nearable {
      * Makes a synchronization nail between the source and target locations.
      */
     public void makeSyncNailBetweenLocations() {
-        final double x = Grid.snap((getSourceLocation().getX() + getTargetLocation().getX()) / 2.0);
-        final double y = Grid.snap((getSourceLocation().getY() + getTargetLocation().getY()) / 2.0);
+        final double x = (getSourceLocation().getX() + getTargetLocation().getX()) / 2.0;
+        final double y = (getSourceLocation().getY() + getTargetLocation().getY()) / 2.;
 
         final Nail nail = new Nail(x, y);
         nail.setPropertyType(Edge.PropertyType.SYNCHRONIZATION);

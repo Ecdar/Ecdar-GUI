@@ -4,7 +4,6 @@ import ecdar.Ecdar;
 import ecdar.code_analysis.Nearable;
 import ecdar.controllers.EcdarController;
 import ecdar.presentations.DropDownMenu;
-import ecdar.presentations.Grid;
 import ecdar.utility.colors.Color;
 import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.Circular;
@@ -68,8 +67,8 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     }
 
     public Location(final Component component, final Type type, final double x, final double y){
-        setX(Grid.snap(x));
-        setY(Grid.snap(y));
+        setX(x);
+        setY(y);
         setType(type);
         if(type == Type.UNIVERSAL){
             setIsLocked(true);

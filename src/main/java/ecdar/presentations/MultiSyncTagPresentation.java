@@ -1,6 +1,7 @@
 package ecdar.presentations;
 
 import com.jfoenix.controls.JFXTextField;
+import ecdar.Ecdar;
 import ecdar.abstractions.DisplayableEdge;
 import ecdar.abstractions.Edge;
 import ecdar.abstractions.GroupedEdge;
@@ -29,8 +30,6 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 
 import java.util.List;
-
-import static ecdar.presentations.Grid.GRID_SIZE;
 
 public class MultiSyncTagPresentation extends TagPresentation {
     private final MultiSyncTagController controller;
@@ -85,7 +84,7 @@ public class MultiSyncTagPresentation extends TagPresentation {
             // Handle height
             if (getHeight() > TAG_HEIGHT * 10) {
                 double newHeight = TAG_HEIGHT * 10;
-                final double resHeight = GRID_SIZE * 2 - (newHeight % (GRID_SIZE * 2));
+                final double resHeight = newHeight;
                 newHeight += resHeight;
 
                 l2.setY(newHeight);
@@ -139,16 +138,16 @@ public class MultiSyncTagPresentation extends TagPresentation {
 
         // Added to avoid null pointer when first sync is added
         if (controller.syncList == null || controller.syncList.getParent() == null || controller.syncList.getParent().getParent() == null) {
-            syncListWidth = textField.getWidth() + GRID_SIZE * 2;
-            syncListHeight = textField.getHeight() + GRID_SIZE;
+            syncListWidth = textField.getWidth() + Ecdar.CANVAS_PADDING * 2;
+            syncListHeight = textField.getHeight() + Ecdar.CANVAS_PADDING;
         } else {
             syncListWidth = ((ScrollPane) controller.syncList.getParent().getParent().getParent()).getViewportBounds().getWidth();
             syncListHeight = ((ScrollPane) controller.syncList.getParent().getParent().getParent()).getViewportBounds().getHeight();
         }
 
-        final ObservableDoubleValue minX = locationAware.get().xProperty().multiply(-1).add(GRID_SIZE);
+        final ObservableDoubleValue minX = locationAware.get().xProperty().multiply(-1).add(Ecdar.CANVAS_PADDING);
         final ObservableDoubleValue maxX = getComponent().getBox().getWidthProperty()
-                .subtract(locationAware.get().xProperty().add(syncListWidth + GRID_SIZE));
+                .subtract(locationAware.get().xProperty().add(syncListWidth + Ecdar.CANVAS_PADDING));
 
         final ObservableDoubleValue minY = locationAware.get().yProperty().multiply(-1).add(textField.heightProperty().multiply(2));
         final ObservableDoubleValue maxY = getComponent().getBox().getHeightProperty()
@@ -217,8 +216,8 @@ public class MultiSyncTagPresentation extends TagPresentation {
             event.consume();
 
             Platform.runLater(() -> {
-                final double dragDistanceX = Grid.snap(event.getSceneX() - dragOffsetX.get()) / EcdarController.getActiveCanvasZoomFactor().get();
-                final double dragDistanceY = Grid.snap(event.getSceneY() - dragOffsetY.get()) / EcdarController.getActiveCanvasZoomFactor().get();
+                final double dragDistanceX = (event.getSceneX() - dragOffsetX.get()) / EcdarController.getActiveCanvasZoomFactor().get();
+                final double dragDistanceY = (event.getSceneY() - dragOffsetY.get()) / EcdarController.getActiveCanvasZoomFactor().get();
                 double draggableNewX = getDragBounds().trimX(draggablePreviousX.get() + dragDistanceX);
                 double draggableNewY = getDragBounds().trimY(draggablePreviousY.get() + dragDistanceY);
 
