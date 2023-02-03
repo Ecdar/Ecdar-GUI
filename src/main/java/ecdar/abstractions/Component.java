@@ -1,17 +1,16 @@
 package ecdar.abstractions;
 
-import com.bpodgursky.jbool_expressions.*;
-import com.bpodgursky.jbool_expressions.rules.RuleSet;
-import ecdar.Ecdar;
-import ecdar.presentations.Grid;
 import ecdar.utility.ExpressionHelper;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
 import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.Boxed;
+import ecdar.utility.helpers.MouseCircular;
+import ecdar.utility.keyboard.NudgeDirection;
+import com.bpodgursky.jbool_expressions.*;
+import com.bpodgursky.jbool_expressions.rules.RuleSet;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import ecdar.utility.helpers.MouseCircular;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -95,9 +94,9 @@ public class Component extends HighLevelModelObject implements Boxed {
 
     /**
      * Creates a clone of another component.
-     * Copies objects used for verification (e.g. locations, edges and the declarations).
+     * Copy objects used for verification (e.g. locations, edges and the declarations).
      * Does not copy UI elements (sizes and positions).
-     * It locations are cloned from the original component. Their ids are the same.
+     * Its locations are cloned from the original component. Their ids are the same.
      * Does not initialize io listeners, but copies the input and output strings.
      * Reachability analysis binding is not initialized.
      * @return the clone
@@ -697,8 +696,8 @@ public class Component extends HighLevelModelObject implements Boxed {
         box.setProperties(json);
 
         if (box.getWidth() == 0 && box.getHeight() == 0) {
-            box.setWidth(locations.stream().max(Comparator.comparingDouble(Location::getX)).get().getX() + Grid.GRID_SIZE * 10);
-            box.setHeight(locations.stream().max(Comparator.comparingDouble(Location::getY)).get().getY() + Grid.GRID_SIZE * 10);
+            box.setWidth(locations.stream().max(Comparator.comparingDouble(Location::getX)).get().getX() + 10 * 10);
+            box.setHeight(locations.stream().max(Comparator.comparingDouble(Location::getY)).get().getY() + 10 * 10);
         }
 
         final EnabledColor enabledColor = (json.has(COLOR) ? EnabledColor.fromIdentifier(json.getAsJsonPrimitive(COLOR).getAsString()) : null);
@@ -789,11 +788,12 @@ public class Component extends HighLevelModelObject implements Boxed {
         if(id != null){
             return id;
         } else {
-            for(int counter = 0; ;counter++){
-                if(!Ecdar.getProject().getUniIncIds().contains(String.valueOf(counter))){
-                    return String.valueOf(counter);
-                }
-            }
+            return "hstrieant" + new Random().nextInt();
+//            for(int counter = 0; ;counter++){
+//                if(!Ecdar.getProject().getUniIncIds().contains(String.valueOf(counter))){
+//                    return String.valueOf(counter);
+//                }
+//            }
         }
     }
 
@@ -899,35 +899,35 @@ public class Component extends HighLevelModelObject implements Boxed {
     }
 
     /**
-     * Moves all nodes one grid size left.
+     * Moves all nodes left.
      */
     public void moveAllNodesLeft() {
-        getLocations().forEach(loc -> loc.setX(loc.getX() - Grid.GRID_SIZE));
-        getDisplayableEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setX(nail.getX() - Grid.GRID_SIZE)));
+        getLocations().forEach(loc -> loc.setX(loc.getX() + NudgeDirection.LEFT.getXOffset()));
+        getDisplayableEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setX(nail.getX() + NudgeDirection.LEFT.getXOffset())));
     }
 
     /**
-     * Moves all nodes one grid size right.
+     * Moves all nodes right.
      */
     public void moveAllNodesRight() {
-        getLocations().forEach(loc -> loc.setX(loc.getX() + Grid.GRID_SIZE));
-        getDisplayableEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setX(nail.getX() + Grid.GRID_SIZE)));
+        getLocations().forEach(loc -> loc.setX(loc.getX() + NudgeDirection.RIGHT.getXOffset()));
+        getDisplayableEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setX(nail.getX() + NudgeDirection.RIGHT.getXOffset())));
     }
 
     /**
-     * Moves all nodes one grid size down.
+     * Moves all nodes down.
      */
     public void moveAllNodesDown() {
-        getLocations().forEach(loc -> loc.setY(loc.getY() + Grid.GRID_SIZE));
-        getDisplayableEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setY(nail.getY() + Grid.GRID_SIZE)));
+        getLocations().forEach(loc -> loc.setY(loc.getY() + NudgeDirection.DOWN.getYOffset()));
+        getDisplayableEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setY(nail.getY() + NudgeDirection.DOWN.getYOffset())));
     }
 
     /**
-     * Moves all nodes one grid size up.
+     * Moves all nodes up.
      */
     public void moveAllNodesUp() {
-        getLocations().forEach(loc -> loc.setY(loc.getY() - Grid.GRID_SIZE));
-        getDisplayableEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setY(nail.getY() - Grid.GRID_SIZE)));
+        getLocations().forEach(loc -> loc.setY(loc.getY() + NudgeDirection.UP.getYOffset()));
+        getDisplayableEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setY(nail.getY() + NudgeDirection.UP.getYOffset())));
     }
 
     public List<DisplayableEdge> getInputEdges() {

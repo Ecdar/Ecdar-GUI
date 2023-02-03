@@ -30,7 +30,6 @@ public class CanvasPresentation extends StackPane implements LocationAware {
     private final DoubleProperty y = new SimpleDoubleProperty(0);
 
     private final CanvasController controller;
-    private final BooleanProperty gridToggle = new SimpleBooleanProperty(false);
 
     public CanvasPresentation() {
         mouseTracker = new MouseTracker(this);
@@ -40,13 +39,7 @@ public class CanvasPresentation extends StackPane implements LocationAware {
         getController().root.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> EcdarController.setActiveCanvasPresentation(this));
 
         initializeModelDrag();
-        initializeGrid();
         initializeToolbar();
-
-        controller.allowGridProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue && gridToggle.get()) showGrid();
-            else hideGrid();
-        });
 
         Platform.runLater(this::initializeZoomHelper);
         getStyleClass().add("canvas-presentation");
@@ -79,8 +72,8 @@ public class CanvasPresentation extends StackPane implements LocationAware {
             if (!presWasAllowed.get() || !isBeingDragged.get()) return;
             event.consume();
 
-            final double dragDistanceX = Grid.snap(event.getSceneX() - dragXOffset[0]);
-            final double dragDistanceY = Grid.snap(event.getSceneY() - dragYOffset[0]);
+            final double dragDistanceX = event.getSceneX() - dragXOffset[0];
+            final double dragDistanceY = event.getSceneY() - dragYOffset[0];
             final double newX = previousXTranslation[0] + dragDistanceX;
             final double newY = previousYTranslation[0] + dragDistanceY;
 
@@ -95,14 +88,6 @@ public class CanvasPresentation extends StackPane implements LocationAware {
             previousXTranslation[0] = controller.modelPane.getTranslateX();
             previousYTranslation[0] = controller.modelPane.getTranslateY();
             isBeingDragged.setValue(false);
-        });
-    }
-
-    private void initializeGrid() {
-        gridToggle.setValue(true);
-        controller.allowGridProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue && gridToggle.get()) showGrid();
-            else hideGrid();
         });
     }
 
@@ -133,32 +118,7 @@ public class CanvasPresentation extends StackPane implements LocationAware {
     }
 
     private void initializeZoomHelper() {
-        controller.zoomHelper.setGrid(controller.grid);
         controller.zoomHelper.setCanvas(this);
-    }
-
-    /**
-     * Toggles the user option for whether or not to show the grid on components and system views.
-     * @return a Boolean property that is true if the grid has been turned on and false if the grid has been turned off
-     */
-    public BooleanProperty toggleGridUi() {
-        if (gridToggle.get()) {
-            if (controller.isGridAllowed()) hideGrid();
-
-            gridToggle.setValue(false);
-        } else {
-            showGrid();
-            gridToggle.setValue(true);
-        }
-        return gridToggle;
-    }
-
-    private void showGrid() {
-        controller.grid.setOpacity(1);
-    }
-
-    private void hideGrid() {
-        controller.grid.setOpacity(0);
     }
 
     @Override
@@ -304,13 +264,5 @@ public class CanvasPresentation extends StackPane implements LocationAware {
                 itemCoordinates.getMinX() + itemSelectable.getSelectableWidth() * getScaleX() / 2 < selectionBoxCoordinates.getMinX() + selectionRectangle.getWidth() * getScaleX() &&
                 selectionBoxCoordinates.getMinY() < itemCoordinates.getMinY() + itemSelectable.getSelectableHeight() * getScaleY() / 2 &&
                 itemCoordinates.getMinY() + itemSelectable.getSelectableHeight() * getScaleY() / 2 < selectionBoxCoordinates.getMinY() + selectionRectangle.getHeight() * getScaleY();
-    }
-
-    /**
-     * Updates if views should show an inset behind the error view.
-     * @param shouldShow true iff views should show an inset
-     */
-    public static void showBottomInset(final Boolean shouldShow) {
-        EcdarController.getActiveCanvasPresentation().getController().updateOffset(shouldShow);
     }
 }

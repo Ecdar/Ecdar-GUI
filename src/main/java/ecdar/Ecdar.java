@@ -45,6 +45,7 @@ public class Ecdar extends Application {
     public static Preferences preferences = Preferences.userRoot().node("ECDAR");
     public static BooleanProperty autoScalingEnabled = new SimpleBooleanProperty(false);
     public static final String VERSION = getVersion();
+    public static final int CANVAS_PADDING = 10;
     public static boolean serializationDone = false;
     public static SimpleStringProperty projectDirectory = new SimpleStringProperty();
 
@@ -165,14 +166,6 @@ public class Ecdar extends Application {
 
     public static BooleanProperty toggleQueryPane() {
         return presentation.toggleQueryPane();
-    }
-
-    /**
-     * Calls {@link EcdarPresentation#toggleGrid()}.
-     * @return A Boolean Property that is true if the grid has been turned on and false if it is off
-     */
-    public static BooleanProperty toggleGrid() {
-        return presentation.toggleGrid();
     }
 
     /**

@@ -357,7 +357,7 @@ public class ProjectPaneController implements Initializable {
      */
     @FXML
     private void createComponentClicked() {
-        final Component newComponent = new Component(true);
+        final Component newComponent = new Component(true, Ecdar.getProject().getUniqueComponentName());
 
         UndoRedoStack.pushAndPerform(() -> { // Perform
             Ecdar.getProject().getComponents().add(newComponent);

@@ -1,6 +1,5 @@
 package ecdar.model_canvas.arrow_heads;
 
-import ecdar.presentations.Grid;
 import ecdar.utility.colors.Color;
 import ecdar.utility.Highlightable;
 import ecdar.utility.helpers.SelectHelper;
@@ -8,8 +7,8 @@ import javafx.scene.shape.Line;
 
 public class SimpleArrowHead extends ArrowHead implements SelectHelper.Selectable, Highlightable {
 
-    private static final double TRIANGLE_LENGTH = Grid.GRID_SIZE * 1.5;
-    private static final double TRIANGLE_WIDTH = Grid.GRID_SIZE;
+    private static final double TRIANGLE_LENGTH = 15;
+    private static final double TRIANGLE_WIDTH = 10;
 
     private Line leftArrow;
     private Line rightArrow;

@@ -430,7 +430,7 @@ public class Project {
     public String getUniqueComponentName() {
         for(int counter = 1; ; counter++) {
             final String name = "Component" + counter;
-            if(getComponentNames().contains("Component" + counter)){
+            if(!getComponentNames().contains("Component" + counter)){
                 return name;
             }
         }

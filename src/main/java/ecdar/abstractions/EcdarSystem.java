@@ -1,7 +1,6 @@
 package ecdar.abstractions;
 
 import ecdar.Ecdar;
-import ecdar.presentations.Grid;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
 import ecdar.utility.colors.EnabledColor;
@@ -46,7 +45,7 @@ public class EcdarSystem extends EcdarModel implements Boxed {
         getBox().setWidth(600d);
 
         // Create system root in the middle, horizontally
-        systemRoot.setX(Grid.snap((getBox().getWidth() - SystemRoot.WIDTH) / 2));
+        systemRoot.setX((getBox().getWidth() - SystemRoot.WIDTH) / 2);
     }
 
     EcdarSystem(final JsonObject json) {

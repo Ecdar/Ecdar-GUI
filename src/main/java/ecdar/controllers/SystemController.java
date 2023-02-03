@@ -24,8 +24,8 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.function.BiConsumer;
 
-import static ecdar.presentations.Grid.GRID_SIZE;
-import static ecdar.presentations.ModelPresentation.TOP_LEFT_CORNER;
+import static ecdar.Ecdar.CANVAS_PADDING;
+import static ecdar.presentations.ModelPresentation.*;
 
 /**
  * Controller for a system.
@@ -101,7 +101,7 @@ public class SystemController extends ModelController implements Initializable {
                     Insets.EMPTY
             )));
 
-            toolbar.setPrefHeight(Grid.TOOL_BAR_HEIGHT);
+            toolbar.setPrefHeight(TOOLBAR_HEIGHT);
         };
 
         getSystem().colorProperty().addListener(observable -> updateColor.accept(getSystem().getColor(), getSystem().getColorIntensity()));
@@ -120,8 +120,8 @@ public class SystemController extends ModelController implements Initializable {
         // Generate top right corner (to subtract)
         final Polygon topRightCorner = new Polygon(
                 getSystem().getBox().getWidth(), 0,
-                getSystem().getBox().getWidth() - Grid.CORNER_SIZE - 2, 0,
-                getSystem().getBox().getWidth(), Grid.CORNER_SIZE + 2
+                getSystem().getBox().getWidth() - (CORNER_SIZE + 2), 0,
+                getSystem().getBox().getWidth(), CORNER_SIZE + 2
         );
 
         final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
@@ -133,18 +133,18 @@ public class SystemController extends ModelController implements Initializable {
             background.setOpacity(0.5);
 
             // Bind the missing lines that we cropped away
-            topLeftLine.setStartX(Grid.CORNER_SIZE);
+            topLeftLine.setStartX(CORNER_SIZE);
             topLeftLine.setStartY(0);
             topLeftLine.setEndX(0);
-            topLeftLine.setEndY(Grid.CORNER_SIZE);
+            topLeftLine.setEndY(CORNER_SIZE);
             topLeftLine.setStroke(newColor.getColor(newIntensity.next(2)));
             topLeftLine.setStrokeWidth(1.25);
             StackPane.setAlignment(topLeftLine, Pos.TOP_LEFT);
 
             topRightLine.setStartX(0);
             topRightLine.setStartY(0);
-            topRightLine.setEndX(Grid.CORNER_SIZE);
-            topRightLine.setEndY(Grid.CORNER_SIZE);
+            topRightLine.setEndX(CORNER_SIZE);
+            topRightLine.setEndY(CORNER_SIZE);
             topRightLine.setStroke(newColor.getColor(newIntensity.next(2)));
             topRightLine.setStrokeWidth(1.25);
             StackPane.setAlignment(topRightLine, Pos.TOP_RIGHT);
@@ -431,14 +431,14 @@ public class SystemController extends ModelController implements Initializable {
      */
     @Override
     double getDragAnchorMinWidth() {
-        double minWidth = getSystem().getSystemRoot().getX() + SystemRoot.WIDTH + 2 * Grid.GRID_SIZE;
+        double minWidth = getSystem().getSystemRoot().getX() + SystemRoot.WIDTH + 2 * CANVAS_PADDING;
 
         for (final ComponentInstance instance : getSystem().getComponentInstances()) {
-            minWidth = Math.max(minWidth, instance.getBox().getX() + instance.getBox().getWidth() + Grid.GRID_SIZE);
+            minWidth = Math.max(minWidth, instance.getBox().getX() + instance.getBox().getWidth() + CANVAS_PADDING);
         }
 
         for (final ComponentOperator operator : getSystem().getComponentOperators()) {
-            minWidth = Math.max(minWidth, operator.getBox().getX() + operator.getBox().getWidth() + Grid.GRID_SIZE);
+            minWidth = Math.max(minWidth, operator.getBox().getX() + operator.getBox().getWidth() + CANVAS_PADDING);
         }
 
         return minWidth;
@@ -451,14 +451,14 @@ public class SystemController extends ModelController implements Initializable {
      */
     @Override
     double getDragAnchorMinHeight() {
-        double minHeight = 10 * GRID_SIZE;
+        double minHeight = 10 * CANVAS_PADDING;
 
         for (final ComponentInstance instance : getSystem().getComponentInstances()) {
-            minHeight = Math.max(minHeight, instance.getBox().getY() + instance.getBox().getHeight() + Grid.GRID_SIZE);
+            minHeight = Math.max(minHeight, instance.getBox().getY() + instance.getBox().getHeight() + CANVAS_PADDING);
         }
 
         for (final ComponentOperator operator : getSystem().getComponentOperators()) {
-            minHeight = Math.max(minHeight, operator.getBox().getY() + operator.getBox().getHeight() + Grid.GRID_SIZE);
+            minHeight = Math.max(minHeight, operator.getBox().getY() + operator.getBox().getHeight() + CANVAS_PADDING);
         }
 
         return minHeight;

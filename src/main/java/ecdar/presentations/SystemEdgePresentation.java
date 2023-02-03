@@ -1,5 +1,6 @@
 package ecdar.presentations;
 
+import ecdar.Ecdar;
 import ecdar.abstractions.EcdarSystemEdge;
 import ecdar.abstractions.EcdarSystem;
 import ecdar.controllers.EcdarController;
@@ -44,13 +45,13 @@ public class SystemEdgePresentation extends Group implements SelectHelper.ItemSe
         if (edge.isFinished()) {
             bindFinishedEdge(edge);
         } else {
-            // Bind the link to the the edge source and the mouse position (snapped to the grid)
+            // Bind the link to the edge source and the mouse position
             link.startXProperty().bind(edge.getTempNode().getEdgeX());
             link.startYProperty().bind(edge.getTempNode().getEdgeY());
 
-            // Bind to mouse position (snapped to the grid)
-            link.endXProperty().bind(EcdarController.getActiveCanvasPresentation().mouseTracker.gridXProperty().subtract(Grid.GRID_SIZE / 2));
-            link.endYProperty().bind(EcdarController.getActiveCanvasPresentation().mouseTracker.gridYProperty().subtract(Grid.GRID_SIZE / 2));
+            // Bind to mouse position
+            link.endXProperty().bind(EcdarController.getActiveCanvasPresentation().mouseTracker.xProperty().subtract(Ecdar.CANVAS_PADDING / 2));
+            link.endYProperty().bind(EcdarController.getActiveCanvasPresentation().mouseTracker.xProperty().subtract(Ecdar.CANVAS_PADDING / 2));
         }
 
         // If edge source and target changes, bind
@@ -112,7 +113,7 @@ public class SystemEdgePresentation extends Group implements SelectHelper.ItemSe
     }
 
     /**
-     * Returns null, as this cannot change color.
+     * Returns null, as this edge is not draggable.
      * @return null
      */
     @Override

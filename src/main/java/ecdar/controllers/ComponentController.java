@@ -42,8 +42,7 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static ecdar.presentations.Grid.GRID_SIZE;
-import static ecdar.presentations.ModelPresentation.TOP_LEFT_CORNER;
+import static ecdar.presentations.ModelPresentation.*;
 import static ecdar.utility.helpers.LocationPlacer.ensureCorrectPlacementOfLocation;
 
 public class ComponentController extends ModelController implements Initializable {
@@ -140,7 +139,7 @@ public class ComponentController extends ModelController implements Initializabl
             // Set the icon color and rippler color of the toggleDeclarationButton
             toggleDeclarationButton.setRipplerFill(newColor.getTextColor(newIntensity));
 
-            toolbar.setPrefHeight(Grid.TOOL_BAR_HEIGHT);
+            toolbar.setPrefHeight(TOOLBAR_HEIGHT);
             toggleDeclarationButton.setBackground(Background.EMPTY);
         };
 
@@ -168,10 +167,10 @@ public class ComponentController extends ModelController implements Initializabl
             background.setOpacity(0.5);
 
             // Bind the missing lines that we cropped away
-            topLeftLine.setStartX(Grid.CORNER_SIZE);
+            topLeftLine.setStartX(CORNER_SIZE);
             topLeftLine.setStartY(0);
             topLeftLine.setEndX(0);
-            topLeftLine.setEndY(Grid.CORNER_SIZE);
+            topLeftLine.setEndY(CORNER_SIZE);
             topLeftLine.setStroke(newColor.getColor(newIntensity.next(2)));
             topLeftLine.setStrokeWidth(1.25);
             StackPane.setAlignment(topLeftLine, Pos.TOP_LEFT);
@@ -331,12 +330,10 @@ public class ComponentController extends ModelController implements Initializabl
                 final Location newLocation = new Location();
                 newLocation.initialize();
 
-                double x = DropDownMenu.x - getComponent().getBox().getX();
-                x = Grid.snap(x);
+                double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
                 newLocation.setX(x);
 
-                double y = DropDownMenu.y - getComponent().getBox().getY();
-                y = Grid.snap(y);
+                double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
                 newLocation.setY(y);
 
                 newLocation.setColorIntensity(component.getColorIntensity());
@@ -436,10 +433,7 @@ public class ComponentController extends ModelController implements Initializabl
 
             final Consumer<LocationAware> setCoordinates = (locationAware) -> {
                 double x = DropDownMenu.x;
-                x = Math.round(x / GRID_SIZE) * GRID_SIZE;
-
                 double y = DropDownMenu.y;
-                y = Math.round(y / GRID_SIZE) * GRID_SIZE;
 
                 locationAware.xProperty().set(x);
                 locationAware.yProperty().set(y);
@@ -786,8 +780,8 @@ public class ComponentController extends ModelController implements Initializabl
             final Location location = new Location();
             location.initialize();
 
-            location.setX(Grid.snap(event.getX()));
-            location.setY(Grid.snap(event.getY()));
+            location.setX(event.getX());
+            location.setY(event.getY());
 
             location.setColorIntensity(getComponent().getColorIntensity());
             location.setColor(getComponent().getColor());
@@ -836,12 +830,8 @@ public class ComponentController extends ModelController implements Initializabl
         } else if (event.isPrimaryButtonDown()) {
             // We are drawing an edge
             if (unfinishedEdge != null) {
-                // Get coordinates of new nail on grid
-                final double x = Grid.snap(event.getX());
-                final double y = Grid.snap(event.getY());
-
                 // Create the abstraction for the new nail and add it to the unfinished edge
-                final Nail newNail = new Nail(x, y);
+                final Nail newNail = new Nail(event.getX(), event.getY());
 
                 // Make sync nail if edge has none
                 if (!unfinishedEdge.hasSyncNail()) {
@@ -877,15 +867,15 @@ public class ComponentController extends ModelController implements Initializabl
      */
     @Override
     double getDragAnchorMinWidth() {
-        double minWidth = 10 * GRID_SIZE;
+        double minWidth = 10 * Ecdar.CANVAS_PADDING;
 
         for (final Location location : getComponent().getLocations()) {
-            minWidth = Math.max(minWidth, location.getX() + GRID_SIZE * 2);
+            minWidth = Math.max(minWidth, location.getX() + Ecdar.CANVAS_PADDING * 2);
         }
 
         for (final Edge edge : getComponent().getEdges()) {
             for (final Nail nail : edge.getNails()) {
-                minWidth = Math.max(minWidth, nail.getX() + GRID_SIZE);
+                minWidth = Math.max(minWidth, nail.getX() + Ecdar.CANVAS_PADDING);
             }
         }
 
@@ -900,15 +890,15 @@ public class ComponentController extends ModelController implements Initializabl
      */
     @Override
     double getDragAnchorMinHeight() {
-        double minHeight = 10 * GRID_SIZE;
+        double minHeight = 10 * Ecdar.CANVAS_PADDING;
 
         for (final Location location : getComponent().getLocations()) {
-            minHeight = Math.max(minHeight, location.getY() + GRID_SIZE * 2);
+            minHeight = Math.max(minHeight, location.getY() + Ecdar.CANVAS_PADDING * 2);
         }
 
         for (final Edge edge : getComponent().getEdges()) {
             for (final Nail nail : edge.getNails()) {
-                minHeight = Math.max(minHeight, nail.getY() + GRID_SIZE);
+                minHeight = Math.max(minHeight, nail.getY() + Ecdar.CANVAS_PADDING);
             }
         }
 
