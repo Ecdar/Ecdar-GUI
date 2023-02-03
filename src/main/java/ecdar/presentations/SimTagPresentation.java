@@ -1,5 +1,6 @@
 package ecdar.presentations;
 
+import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.utility.colors.Color;
 import ecdar.utility.helpers.LocationAware;
@@ -14,8 +15,6 @@ import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 
 import java.util.function.BiConsumer;
-
-import static ecdar.presentations.Grid.GRID_SIZE;
 
 /**
  * The presentation for the tag shown on a {@link SimEdgePresentation} in the {@link SimulatorOverviewPresentation}<br />
@@ -33,7 +32,7 @@ public class SimTagPresentation extends StackPane {
     private LineTo l2;
     private LineTo l3;
 
-    private static double TAG_HEIGHT = 1.6 * GRID_SIZE;
+    private final static double TAG_HEIGHT = 16; // ToDo NIELS: This should be changed to follow the same value as TagPresentation
 
     /**
      * Constructs the {@link SimTagPresentation}
@@ -63,7 +62,7 @@ public class SimTagPresentation extends StackPane {
 
         label.layoutBoundsProperty().addListener((obs, oldBounds, newBounds) -> {
             double newWidth = Math.max(newBounds.getWidth(), 10);
-            final double res = GRID_SIZE * 2 - (newWidth % (GRID_SIZE * 2));
+            final double res = Ecdar.CANVAS_PADDING * 2 - (newWidth % (Ecdar.CANVAS_PADDING * 2));
             newWidth += res;
 
             l2.setX(newWidth + padding);

@@ -1,5 +1,6 @@
 package ecdar.presentations;
 
+import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
 import ecdar.abstractions.Location;
@@ -23,8 +24,6 @@ import javafx.scene.text.Font;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.function.BiConsumer;
-
-import static ecdar.presentations.Grid.GRID_SIZE;
 
 /**
  * The presenter of a Process which is shown in {@link SimulatorOverviewPresentation}. <br />
@@ -131,10 +130,10 @@ public class ProcessPresentation extends ModelPresentation {
             controller.background.setOpacity(0.5);
 
             // Bind the missing lines that we cropped away
-            controller.topLeftLine.setStartX(Grid.CORNER_SIZE);
+            controller.topLeftLine.setStartX(CORNER_SIZE);
             controller.topLeftLine.setStartY(0);
             controller.topLeftLine.setEndX(0);
-            controller.topLeftLine.setEndY(Grid.CORNER_SIZE);
+            controller.topLeftLine.setEndY(CORNER_SIZE);
             controller.topLeftLine.setStroke(newColor.getColor(newIntensity.next(2)));
             controller.topLeftLine.setStrokeWidth(1.25);
             StackPane.setAlignment(controller.topLeftLine, Pos.TOP_LEFT);
@@ -194,7 +193,7 @@ public class ProcessPresentation extends ModelPresentation {
             // Set the icon color and rippler color of the toggleDeclarationButton
             controller.toggleValuesButton.setRipplerFill(newColor.getTextColor(newIntensity));
 
-            controller.toolbar.setPrefHeight(Grid.TOOL_BAR_HEIGHT);
+            controller.toolbar.setPrefHeight(TOOLBAR_HEIGHT);
             controller.toggleValuesButton.setBackground(Background.EMPTY);
         };
         controller.getComponent().colorProperty().addListener(observable -> updateColor.accept(component.getColor(), component.getColorIntensity()));
@@ -237,15 +236,15 @@ public class ProcessPresentation extends ModelPresentation {
     @Deprecated
     double getDragAnchorMinWidth() {
         final Component component = controller.getComponent();
-        double minWidth = 10 * GRID_SIZE;
+        double minWidth = Ecdar.CANVAS_PADDING *10;
 
         for (final Location location : component.getLocations()) {
-            minWidth = Math.max(minWidth, location.getX() + GRID_SIZE * 2);
+            minWidth = Math.max(minWidth, location.getX() + Ecdar.CANVAS_PADDING * 2);
         }
 
         for (final Edge edge : component.getEdges()) {
             for (final Nail nail : edge.getNails()) {
-                minWidth = Math.max(minWidth, nail.getX() + GRID_SIZE);
+                minWidth = Math.max(minWidth, nail.getX() + Ecdar.CANVAS_PADDING);
             }
         }
         return minWidth;
@@ -261,15 +260,15 @@ public class ProcessPresentation extends ModelPresentation {
     @Deprecated
     double getDragAnchorMinHeight() {
         final Component component = controller.getComponent();
-        double minHeight = 10 * GRID_SIZE;
+        double minHeight = Ecdar.CANVAS_PADDING * 10;
 
         for (final Location location : component.getLocations()) {
-            minHeight = Math.max(minHeight, location.getY() + GRID_SIZE * 2);
+            minHeight = Math.max(minHeight, location.getY() + Ecdar.CANVAS_PADDING * 2);
         }
 
         for (final Edge edge : component.getEdges()) {
             for (final Nail nail : edge.getNails()) {
-                minHeight = Math.max(minHeight, nail.getY() + GRID_SIZE);
+                minHeight = Math.max(minHeight, nail.getY() + Ecdar.CANVAS_PADDING);
             }
         }
 
