@@ -53,7 +53,16 @@ After having retrieved the code and acquired all the dependencies mentioned in [
 
 <a id="engine_configuration"></a>
 ## Engine Configuration
+<<<<<<< HEAD
 In order to utilize the model-checking capabilities of the system, at least one engine must be configured. 
+=======
+In order to utilize the model-checking capabilities of the system, at least one engine must be configured.
+
+An engine can be added through the configurator found under `Options > Engines Options` in the menubar, which shows the pop-up shown below.
+
+<img src="presentation/EngineConfiguration.png" alt="Engine Configuration Pop-up">
+
+>>>>>>> d20a900d (WIP: Backend replaced with Engine to be consistent with naming)
 
 The distributions available at [ECDAR](https://github.com/Ecdar/ECDAR) will automatically load the default engines on startup, but this is currently not working when running the GUI through Gradle.
 For the same reason, the `Reset Engines` button will clear the engines but will not be able to load the packaged once.
