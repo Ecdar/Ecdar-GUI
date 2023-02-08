@@ -44,12 +44,23 @@ After having retrieved the code and acquired all the dependencies mentioned in [
 
 <a id="engine_configuration"></a>
 ## Engine Configuration
-In order to utilize the model-checking capabilities of the system, at least one engine must be configured.
+In order to utilize the model-checking capabilities of the system, at least one engine must be configured. The distributions available at [ECDAR](https://github.com/Ecdar/ECDAR) will automatically load the default engines on startup, but this is currently not working when running the GUI through Gradle. For the same reason, the `Reset Engines` button will clear the engines but will not be able to load the packaged once.
 
-An engine can be added through the configurator found under `Options > Engines Options` in the menubar, which shows the pop-up shown below.
+An engine can be added through the configurator found under `Options > Engines Options` in the menubar, which opens the pop-up shown below.
 
 <img src="presentation/EngineConfiguration.png" alt="Engine Configuration Pop-up">
 
+> :information_source: If you accidentally removed or changed an engine, these changes can be reverted be pressing `Cancel` or by clicking outside the pop-up. Consequently, if any changes should be saved, **MAKE SURE TO PRESS `Save`** 
+
+### Address
+The _Address_ is either the address of a server running the engine (for remote execution) or a path to a local engine binary (for this, the _Local_ checkbox must be checked).
+
+### Port range
+The GUI uses gRPC for the communication with the engines and will therefore need at least one free port. This range directly limits the number of instances of the engine that will be started.
+> :warning: Make sure AT LEAST one port is free within the specified range. For instance, the default port range for Reveaal is _5032_ - _5040_.
+
+### Default
+If an engine is marked with _Default_, all added queries will be assigned that engine.
 
 ## Screenshots
 
