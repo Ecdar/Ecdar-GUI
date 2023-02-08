@@ -44,7 +44,12 @@ After having retrieved the code and acquired all the dependencies mentioned in [
 
 <a id="engine_configuration"></a>
 ## Engine Configuration
-You can also configure custom engine locations from the GUI. 
+In order to utilize the model-checking capabilities of the system, at least one engine must be configured.
+
+An engine can be added through the configurator found under `Options > Engines Options` in the menubar, which shows the pop-up shown below.
+
+<img src="presentation/EngineConfiguration.png" alt="Engine Configuration Pop-up">
+
 
 ## Screenshots
 

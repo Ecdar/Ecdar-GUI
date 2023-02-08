@@ -128,7 +128,7 @@ public class EcdarController implements Initializable {
     public MenuItem menuBarFileExportAsPngNoBorder;
     public MenuItem menuBarOptionsCache;
     public MenuItem menuBarOptionsBackgroundQueries;
-    public MenuItem menuBarOptionsBackendOptions;
+    public MenuItem menuBarOptionsEngineOptions;
     public MenuItem menuBarHelpHelp;
     public MenuItem menuBarHelpAbout;
     public MenuItem menuBarHelpTest;
@@ -144,8 +144,8 @@ public class EcdarController implements Initializable {
     public Text queryTextResult;
     public Text queryTextQuery;
 
-    public StackPane backendOptionsDialogContainer;
-    public BackendOptionsDialogPresentation backendOptionsDialog;
+    public StackPane engineOptionsDialogContainer;
+    public EngineOptionsDialogPresentation engineOptionsDialog;
     public final DoubleProperty scalingProperty = new SimpleDoubleProperty();
 
     private static JFXDialog _queryDialog;
@@ -229,30 +229,30 @@ public class EcdarController implements Initializable {
         _queryTextQuery = queryTextQuery;
 
         initializeDialog(queryDialog, queryDialogContainer);
-        initializeDialog(backendOptionsDialog, backendOptionsDialogContainer);
+        initializeDialog(engineOptionsDialog, engineOptionsDialogContainer);
 
-        backendOptionsDialog.getController().resetBackendsButton.setOnMouseClicked(event -> {
-            backendOptionsDialog.getController().resetBackendsToDefault();
+        engineOptionsDialog.getController().resetEnginesButton.setOnMouseClicked(event -> {
+            engineOptionsDialog.getController().resetEnginesToDefault();
         });
 
-        backendOptionsDialog.getController().closeButton.setOnMouseClicked(event -> {
-            backendOptionsDialog.getController().cancelBackendOptionsChanges();
+        engineOptionsDialog.getController().closeButton.setOnMouseClicked(event -> {
+            engineOptionsDialog.getController().cancelEngineOptionsChanges();
             dialog.close();
-            backendOptionsDialog.close();
+            engineOptionsDialog.close();
         });
 
-        backendOptionsDialog.getController().saveButton.setOnMouseClicked(event -> {
-            if (backendOptionsDialog.getController().saveChangesToBackendOptions()) {
+        engineOptionsDialog.getController().saveButton.setOnMouseClicked(event -> {
+            if (engineOptionsDialog.getController().saveChangesToEngineOptions()) {
                 dialog.close();
-                backendOptionsDialog.close();
+                engineOptionsDialog.close();
             }
         });
 
-        if (BackendHelper.getBackendInstances().size() < 1) {
+        if (BackendHelper.getEngines().size() < 1) {
             Ecdar.showToast("No engines were found. Download j-Ecdar or Reveaal, or add another engine to fix this. No queries can be executed without engines.");
         } else {
-            BackendInstance defaultBackend = BackendHelper.getBackendInstances().stream().filter(BackendInstance::isDefault).findFirst().orElse(BackendHelper.getBackendInstances().get(0));
-            BackendHelper.setDefaultBackendInstance(defaultBackend);
+            Engine defaultBackend = BackendHelper.getEngines().stream().filter(Engine::isDefault).findFirst().orElse(BackendHelper.getEngines().get(0));
+            BackendHelper.setDefaultEngine(defaultBackend);
         }
     }
 
@@ -573,10 +573,10 @@ public class EcdarController implements Initializable {
             menuBarOptionsCache.getGraphic().opacityProperty().bind(new When(isCached).then(1).otherwise(0));
         });
 
-        menuBarOptionsBackendOptions.setOnAction(event -> {
-            backendOptionsDialogContainer.setVisible(true);
-            backendOptionsDialog.show(backendOptionsDialogContainer);
-            backendOptionsDialog.setMouseTransparent(false);
+        menuBarOptionsEngineOptions.setOnAction(event -> {
+            engineOptionsDialogContainer.setVisible(true);
+            engineOptionsDialog.show(engineOptionsDialogContainer);
+            engineOptionsDialog.setMouseTransparent(false);
         });
 
         menuBarOptionsBackgroundQueries.setOnAction(event -> {

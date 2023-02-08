@@ -9,12 +9,12 @@ public class BackendException extends Exception {
         super(message, cause);
     }
 
-    public static class NoAvailableBackendConnectionException extends BackendException {
-        public NoAvailableBackendConnectionException(final String message) {
+    public static class NoAvailableEngineConnectionException extends BackendException {
+        public NoAvailableEngineConnectionException(final String message) {
             super(message);
         }
 
-        public NoAvailableBackendConnectionException(final String message, final Throwable cause) {
+        public NoAvailableEngineConnectionException(final String message, final Throwable cause) {
             super(message, cause);
         }
     }

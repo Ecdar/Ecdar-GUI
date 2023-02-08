@@ -48,11 +48,11 @@ public class QueryPresentation extends HBox {
     }
 
     private void initializeBackendsDropdown() {
-        controller.backendsDropdown.setItems(BackendHelper.getBackendInstances());
+        controller.backendsDropdown.setItems(BackendHelper.getEngines());
         backendDropdownTooltip = new Tooltip();
         backendDropdownTooltip.setText("Current backend used for the query");
         JFXTooltip.install(controller.backendsDropdown, backendDropdownTooltip);
-        controller.backendsDropdown.setValue(BackendHelper.getDefaultBackendInstance());
+        controller.backendsDropdown.setValue(BackendHelper.getDefaultEngine());
     }
 
     private void initializeTextFields() {
