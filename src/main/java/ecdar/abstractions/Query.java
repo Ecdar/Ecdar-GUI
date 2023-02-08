@@ -3,7 +3,6 @@ package ecdar.abstractions;
 import ecdar.Ecdar;
 import ecdar.backend.*;
 import ecdar.controllers.EcdarController;
-import ecdar.utility.helpers.StringValidator;
 import ecdar.utility.serialize.Serializable;
 import com.google.gson.JsonObject;
 import javafx.application.Platform;
@@ -23,7 +22,7 @@ public class Query implements Serializable {
     private final SimpleBooleanProperty isPeriodic = new SimpleBooleanProperty(false);
     private final ObjectProperty<QueryState> queryState = new SimpleObjectProperty<>(QueryState.UNKNOWN);
     private final ObjectProperty<QueryType> type = new SimpleObjectProperty<>();
-    private BackendInstance backend;
+    private Engine backend;
 
 
     private final Consumer<Boolean> successConsumer = (aBoolean) -> {
@@ -61,7 +60,7 @@ public class Query implements Serializable {
         this.query.set(query);
         this.comment.set(comment);
         this.queryState.set(queryState);
-        setBackend(BackendHelper.getDefaultBackendInstance());
+        setBackend(BackendHelper.getDefaultEngine());
     }
 
     public Query(final JsonObject jsonElement) {
@@ -118,11 +117,11 @@ public class Query implements Serializable {
         this.isPeriodic.set(isPeriodic);
     }
 
-    public BackendInstance getBackend() {
+    public Engine getEngine() {
         return backend;
     }
 
-    public void setBackend(BackendInstance backend) {
+    public void setBackend(Engine backend) {
         this.backend = backend;
     }
 
@@ -177,9 +176,9 @@ public class Query implements Serializable {
         }
 
         if(json.has(BACKEND)) {
-            setBackend(BackendHelper.getBackendInstanceByName(json.getAsJsonPrimitive(BACKEND).getAsString()));
+            setBackend(BackendHelper.getEngineByName(json.getAsJsonPrimitive(BACKEND).getAsString()));
         } else {
-            setBackend(BackendHelper.getDefaultBackendInstance());
+            setBackend(BackendHelper.getDefaultEngine());
         }
     }
 

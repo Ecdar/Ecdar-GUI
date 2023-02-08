@@ -20,9 +20,9 @@ import java.util.Optional;
 
 public final class BackendHelper {
     final static String TEMP_DIRECTORY = "temporary";
-    private static BackendInstance defaultBackend = null;
-    private static ObservableList<BackendInstance> backendInstances = new SimpleListProperty<>();
-    private static List<Runnable> backendInstancesUpdatedListeners = new ArrayList<>();
+    private static Engine defaultEngine = null;
+    private static ObservableList<Engine> engines = new SimpleListProperty<>();
+    private static List<Runnable> enginesUpdatedListeners = new ArrayList<>();
 
     /**
      * Stores a query as a backend XML query file in the "temporary" directory.
@@ -93,57 +93,57 @@ public final class BackendHelper {
     }
 
     /**
-     * Returns the BackendInstance with the specified name, or null, if no such BackendInstance exists
+     * Returns the Engine with the specified name, or null, if no such Engine exists
      *
-     * @param backendInstanceName Name of the BackendInstance to return
-     * @return The BackendInstance with matching name
-     * or the default backend instance, if no matching backendInstance exists
+     * @param engineName Name of the Engine to return
+     * @return The Engine with matching name
+     * or the default engine, if no matching engine exists
      */
-    public static BackendInstance getBackendInstanceByName(String backendInstanceName) {
-        Optional<BackendInstance> backendInstance = BackendHelper.backendInstances.stream().filter(bi -> bi.getName().equals(backendInstanceName)).findFirst();
-        return backendInstance.orElse(BackendHelper.getDefaultBackendInstance());
+    public static Engine getEngineByName(String engineName) {
+        Optional<Engine> engine = BackendHelper.engines.stream().filter(bi -> bi.getName().equals(engineName)).findFirst();
+        return engine.orElse(BackendHelper.getDefaultEngine());
     }
 
     /**
-     * Returns the default BackendInstance
+     * Returns the default Engine
      *
-     * @return The default BackendInstance
+     * @return The default Engine
      */
-    public static BackendInstance getDefaultBackendInstance() {
-        return defaultBackend;
+    public static Engine getDefaultEngine() {
+        return defaultEngine;
     }
 
     /**
-     * Sets the list of BackendInstances to match the provided list
+     * Sets the list of engines to match the provided list
      *
-     * @param updatedBackendInstances The list of BackendInstances that should be stored
+     * @param updatedEngines The list of engines that should be stored
      */
-    public static void updateBackendInstances(ArrayList<BackendInstance> updatedBackendInstances) {
-        BackendHelper.backendInstances = FXCollections.observableList(updatedBackendInstances);
-        for (Runnable runnable : BackendHelper.backendInstancesUpdatedListeners) {
+    public static void updateEngineInstances(ArrayList<Engine> updatedEngines) {
+        BackendHelper.engines = FXCollections.observableList(updatedEngines);
+        for (Runnable runnable : BackendHelper.enginesUpdatedListeners) {
             runnable.run();
         }
     }
 
     /**
-     * Returns the ObservableList of BackendInstances
+     * Returns the ObservableList of engines
      *
-     * @return The ObservableList of BackendInstances
+     * @return The ObservableList of engines
      */
-    public static ObservableList<BackendInstance> getBackendInstances() {
-        return BackendHelper.backendInstances;
+    public static ObservableList<Engine> getEngines() {
+        return BackendHelper.engines;
     }
 
     /**
-     * Sets the default BackendInstance to the provided object
+     * Sets the default Engine to the provided object
      *
-     * @param newDefaultBackend The new defaultBackend
+     * @param newDefaultEngine The new default engine
      */
-    public static void setDefaultBackendInstance(BackendInstance newDefaultBackend) {
-        BackendHelper.defaultBackend = newDefaultBackend;
+    public static void setDefaultEngine(Engine newDefaultEngine) {
+        BackendHelper.defaultEngine = newDefaultEngine;
     }
 
-    public static void addBackendInstanceListener(Runnable runnable) {
-        BackendHelper.backendInstancesUpdatedListeners.add(runnable);
+    public static void addEngineInstanceListener(Runnable runnable) {
+        BackendHelper.enginesUpdatedListeners.add(runnable);
     }
 }

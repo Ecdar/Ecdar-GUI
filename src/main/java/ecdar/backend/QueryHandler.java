@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 public class QueryHandler {
     private final BackendDriver backendDriver;
-    private final ArrayList<BackendConnection> connections = new ArrayList<>();
+    private final ArrayList<EngineConnection> connections = new ArrayList<>();
 
     public QueryHandler(BackendDriver backendDriver) {
         this.backendDriver = backendDriver;
@@ -41,8 +41,8 @@ public class QueryHandler {
         query.setQueryState(QueryState.RUNNING);
         query.errors().set("");
 
-        GrpcRequest request = new GrpcRequest(backendConnection -> {
-            connections.add(backendConnection); // Save reference for closing connection on exit
+        GrpcRequest request = new GrpcRequest(engineConnection -> {
+            connections.add(engineConnection); // Save reference for closing connection on exit
             StreamObserver<QueryProtos.QueryResponse> responseObserver = new StreamObserver<>() {
                 @Override
                 public void onNext(QueryProtos.QueryResponse value) {
@@ -52,15 +52,15 @@ public class QueryHandler {
                 @Override
                 public void onError(Throwable t) {
                     handleQueryBackendError(t, query);
-                    backendDriver.addBackendConnection(backendConnection);
-                    connections.remove(backendConnection);
+                    backendDriver.addEngineConnection(engineConnection);
+                    connections.remove(engineConnection);
                 }
 
                 @Override
                 public void onCompleted() {
-                    // Release backend connection
-                    backendDriver.addBackendConnection(backendConnection);
-                    connections.remove(backendConnection);
+                    // Release engine connection
+                    backendDriver.addEngineConnection(engineConnection);
+                    connections.remove(engineConnection);
                 }
             };
 
@@ -68,18 +68,18 @@ public class QueryHandler {
                     .setId(0)
                     .setQuery(query.getType().getQueryName() + ": " + query.getQuery());
 
-            backendConnection.getStub().withDeadlineAfter(backendDriver.getResponseDeadline(), TimeUnit.MILLISECONDS)
+            engineConnection.getStub().withDeadlineAfter(backendDriver.getResponseDeadline(), TimeUnit.MILLISECONDS)
                     .sendQuery(queryBuilder.build(), responseObserver);
-        }, query.getBackend());
+        }, query.getEngine());
 
         backendDriver.addRequestToExecutionQueue(request);
     }
 
     /**
-     * Close all open backend connection and kill all locally running processes
+     * Close all open engine connection and kill all locally running processes
      */
-    public void closeAllBackendConnections() {
-        for (BackendConnection con : connections) {
+    public void closeAllEngineConnections() {
+        for (EngineConnection con : connections) {
             con.close();
         }
     }
@@ -117,7 +117,7 @@ public class QueryHandler {
 
         if ("DEADLINE_EXCEEDED".equals(errorType)) {
             query.setQueryState(QueryState.ERROR);
-            query.getFailureConsumer().accept(new BackendException.QueryErrorException("The backend did not answer the request in time"));
+            query.getFailureConsumer().accept(new BackendException.QueryErrorException("The engine did not answer the request in time"));
         } else {
             try {
                 query.setQueryState(QueryState.ERROR);

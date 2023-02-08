@@ -154,3 +154,4 @@ Besides the packages mentioned above, some larger functionalities are located in
 - `code_analysis`: Responsible for analysing the elements of the current project and construct messages if errors or warnings are encountered.
 - `issues`: Classes for representing `Errors`, `Issues`, and `Warnings`.
 - `model_canvas.arrow_heads`: Arrowheads used in the UI to visualize the direction of edges.
+
