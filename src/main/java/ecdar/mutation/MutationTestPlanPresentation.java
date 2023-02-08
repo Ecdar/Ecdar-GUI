@@ -6,6 +6,7 @@ import com.jfoenix.controls.JFXTextField;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.controllers.EcdarController;
+import ecdar.controllers.HighLevelModelController;
 import ecdar.mutation.models.ExpandableContent;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.mutation.models.TestResult;
@@ -699,4 +700,8 @@ public class MutationTestPlanPresentation extends HighLevelModelPresentation {
                 getPlan().setFormat(newValue.getText())));
     }
 
+    @Override
+    public HighLevelModelController getController() {
+        return controller;
+    }
 }

@@ -5,13 +5,13 @@ import ecdar.controllers.ProjectPaneController;
 import ecdar.utility.colors.Color;
 import ecdar.utility.helpers.DropShadowHelper;
 import com.jfoenix.controls.JFXRippler;
+import ecdar.utility.helpers.ImageScaler;
 import javafx.geometry.Insets;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 
 public class ProjectPanePresentation extends StackPane {
-
     private final ProjectPaneController controller;
 
     public ProjectPanePresentation() {
@@ -101,9 +101,9 @@ public class ProjectPanePresentation extends StackPane {
      */
     private void initializeAddModelIcons() {
         controller.createComponentImage.setImage(new Image(Ecdar.class.getResource("add_component_frame.png").toExternalForm()));
-        EcdarPresentation.fitSizeWhenAvailable(controller.createComponentImage, controller.createComponentPane);
+        ImageScaler.fitImageToPane(controller.createComponentImage, controller.createComponentPane);
         controller.createSystemImage.setImage(new Image(Ecdar.class.getResource("add_system_frame.png").toExternalForm()));
-        EcdarPresentation.fitSizeWhenAvailable(controller.createSystemImage, controller.createSystemPane);
+        ImageScaler.fitImageToPane(controller.createSystemImage, controller.createSystemPane);
     }
 
     /**

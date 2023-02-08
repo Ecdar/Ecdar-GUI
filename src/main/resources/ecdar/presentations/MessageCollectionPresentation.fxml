@@ -6,11 +6,12 @@
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
-         type="VBox">
+         type="VBox" fx:controller="ecdar.controllers.MessageCollectionController"
+         fx:id="root">
 
     <HBox>
         <StackPane>
-            <Circle id="indicator" radius="16"/>
+            <Circle fx:id="indicator" radius="16"/>
             <FontIcon iconLiteral="gmi-description" iconSize="22" fill="white" mouseTransparent="true"/>
         </StackPane>
 
@@ -18,9 +19,9 @@
     </HBox>
 
     <HBox translateX="15">
-        <Line endY="16" strokeWidth="2" id="line"/>
+        <Line endY="16" strokeWidth="2" fx:id="line"/>
         <Region minWidth="24"/>
-        <VBox id="children"/>
+        <VBox fx:id="messageBox"/>
     </HBox>
 
 </fx:root>

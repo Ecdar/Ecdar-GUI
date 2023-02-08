@@ -2,7 +2,7 @@ package ecdar.controllers;
 
 import ecdar.Ecdar;
 import ecdar.abstractions.Box;
-import ecdar.abstractions.HighLevelModelObject;
+import ecdar.abstractions.HighLevelModel;
 import com.jfoenix.controls.JFXTextField;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
@@ -23,7 +23,7 @@ import static ecdar.presentations.ModelPresentation.CORNER_SIZE;
 /**
  * Controller for a high level model, such as a component or a system.
  */
-public abstract class ModelController {
+public abstract class ModelController extends HighLevelModelController {
     public StackPane root;
     public Rectangle background;
     public BorderPane frame;
@@ -33,8 +33,6 @@ public abstract class ModelController {
     public Line topLeftLine;
     public BorderPane toolbar;
     public JFXTextField name;
-
-    public abstract HighLevelModelObject getModel();
 
     /**
      * Hides the border and background.
@@ -73,7 +71,7 @@ public abstract class ModelController {
      * Initializes handling of name.
      */
     private void initializeName() {
-        final HighLevelModelObject model = getModel();
+        final HighLevelModel model = getModel();
 
         final BooleanProperty initialized = new SimpleBooleanProperty(false);
 

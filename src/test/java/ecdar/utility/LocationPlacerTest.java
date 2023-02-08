@@ -1,6 +1,5 @@
 package ecdar.utility;
 
-import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Location;
 import ecdar.presentations.LocationPresentation;
@@ -16,7 +15,6 @@ public class LocationPlacerTest {
 
     @BeforeAll
     static void setup() {
-        Ecdar.setUpForTest();
         component = new Component(false, "test_comp");
     }
 

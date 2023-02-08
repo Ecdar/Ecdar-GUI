@@ -6,6 +6,7 @@ import ecdar.utility.colors.Color;
 import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.serialize.Serializable;
 import com.google.gson.JsonObject;
+import javafx.application.Platform;
 import javafx.beans.property.*;
 
 import java.util.ArrayList;
@@ -16,7 +17,7 @@ import java.util.Random;
  * An object used for verifications.
  * This could be a component, a global declarations object, or a system.
  */
-public abstract class HighLevelModelObject implements Serializable, DropDownMenu.HasColor {
+public abstract class HighLevelModel implements Serializable, DropDownMenu.HasColor {
     private static final String NAME = "name";
 
     static final String DECLARATIONS = "declarations";
@@ -28,7 +29,7 @@ public abstract class HighLevelModelObject implements Serializable, DropDownMenu
     private final ObjectProperty<Color.Intensity> colorIntensity;
     private boolean temporary = false;
 
-    public HighLevelModelObject() {
+    public HighLevelModel() {
         name = new SimpleStringProperty("");
         color = new SimpleObjectProperty<>(Color.GREY_BLUE);
         colorIntensity = new SimpleObjectProperty<>(Color.Intensity.I700);

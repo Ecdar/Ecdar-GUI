@@ -2,11 +2,6 @@ package ecdar.controllers;
 
 import com.jfoenix.controls.JFXRippler;
 import ecdar.Ecdar;
-import ecdar.abstractions.Component;
-import ecdar.abstractions.Declarations;
-import ecdar.abstractions.HighLevelModelObject;
-import ecdar.abstractions.EcdarSystem;
-import ecdar.mutation.models.MutationTestPlan;
 import ecdar.mutation.MutationTestPlanPresentation;
 import ecdar.presentations.*;
 import ecdar.utility.helpers.ZoomHelper;
@@ -39,8 +34,8 @@ public class CanvasController implements Initializable {
     public final double DECLARATION_Y_MARGIN = Ecdar.CANVAS_PADDING * 5.5;
     public ComponentPresentation activeComponentPresentation;
 
-    private final ObjectProperty<HighLevelModelObject> activeModel = new SimpleObjectProperty<>(null);
-    private final HashMap<HighLevelModelObject, Pair<Double, Double>> ModelObjectTranslateMap = new HashMap<>();
+    private final ObjectProperty<HighLevelModelPresentation> activeModelPresentation = new SimpleObjectProperty<>(null);
+    private final HashMap<HighLevelModelPresentation, Pair<Double, Double>> ModelObjectTranslateMap = new HashMap<>();
     private DoubleProperty width, height;
     private BooleanProperty insetShouldShow;
 
@@ -56,21 +51,22 @@ public class CanvasController implements Initializable {
         return insetShouldShow;
     }
 
-    public HighLevelModelObject getActiveModel() {
-        return activeModel.get();
+    public HighLevelModelPresentation getActiveModelPresentation() {
+        return activeModelPresentation.get();
     }
 
     /**
      * Sets the given model as the one to be active, e.g. to be shown on the screen.
      * @param model the given model
      */
-    public void setActiveModel(final HighLevelModelObject model) {
-        activeModel.set(model);
+    public void setActiveModelPresentation(final HighLevelModelPresentation model) {
+        activeModelPresentation.set(model);
         Platform.runLater(EcdarController.getActiveCanvasPresentation().getController()::leaveTextAreas);
+        Platform.runLater(zoomHelper::zoomToFit);
     }
 
-    public ObjectProperty<HighLevelModelObject> activeComponentProperty() {
-        return activeModel;
+    public ObjectProperty<HighLevelModelPresentation> activeModelProperty() {
+        return activeModelPresentation;
     }
 
     public void leaveTextAreas() {
@@ -101,9 +97,11 @@ public class CanvasController implements Initializable {
         root.widthProperty().addListener((observable, oldValue, newValue) -> width.setValue(newValue));
         root.heightProperty().addListener((observable, oldValue, newValue) -> height.setValue(newValue));
 
-        activeModel.addListener((obs, oldModel, newModel) -> onActiveModelChanged(oldModel, newModel));
+        activeModelPresentation.addListener((obs, oldModel, newModel) -> {
+            onActiveModelChanged(oldModel, newModel);
+        });
 
-        leaveTextAreas = () -> root.requestFocus();
+        Platform.runLater(() -> leaveTextAreas = () -> root.requestFocus());
         leaveOnEnterPressed = (keyEvent) -> {
             if (keyEvent.getCode().equals(KeyCode.ENTER) || keyEvent.getCode().equals(KeyCode.ESCAPE)) {
                 leaveTextAreas();
@@ -130,9 +128,9 @@ public class CanvasController implements Initializable {
      * @param oldObject old object
      * @param newObject new object
      */
-    private void onActiveModelChanged(final HighLevelModelObject oldObject, final HighLevelModelObject newObject) {
+    private void onActiveModelChanged(final HighLevelModelPresentation oldObject, final HighLevelModelPresentation newObject) {
         // If old object is a component or system, add to map in order to remember coordinate
-        if ((oldObject instanceof Component || oldObject instanceof EcdarSystem)) {
+        if (oldObject instanceof ComponentPresentation || oldObject instanceof SystemPresentation) {
             ModelObjectTranslateMap.put(oldObject, new Pair<>(modelPane.getTranslateX(), modelPane.getTranslateY()));
         }
 
@@ -142,27 +140,27 @@ public class CanvasController implements Initializable {
         // Remove old object from view
         modelPane.getChildren().removeIf(node -> node instanceof HighLevelModelPresentation);
 
-        if (newObject instanceof Component) {
-            activeComponentPresentation = new ComponentPresentation((Component) newObject);
+        if (newObject instanceof ComponentPresentation) {
+            activeComponentPresentation = (ComponentPresentation) newObject;
             modelPane.getChildren().add(activeComponentPresentation);
 
             // To avoid NullPointerException on initial model
             if (oldObject != null) zoomHelper.resetZoom();
 
-        } else if (newObject instanceof Declarations) {
+        } else if (newObject instanceof DeclarationsPresentation) {
             activeComponentPresentation = null;
-            modelPane.getChildren().add(new DeclarationPresentation((Declarations) newObject));
-        } else if (newObject instanceof EcdarSystem) {
+            modelPane.getChildren().add(newObject);
+        } else if (newObject instanceof SystemPresentation) {
             activeComponentPresentation = null;
-            modelPane.getChildren().add(new SystemPresentation((EcdarSystem) newObject));
-        } else if (newObject instanceof MutationTestPlan) {
+            modelPane.getChildren().add(newObject);
+        } else if (newObject instanceof MutationTestPlanPresentation) {
             activeComponentPresentation = null;
-            modelPane.getChildren().add(new MutationTestPlanPresentation((MutationTestPlan) newObject));
+            modelPane.getChildren().add(newObject);
         } else {
             throw new IllegalStateException("Type of object is not supported.");
         }
 
-        boolean shouldZoomBeActive = newObject instanceof Component || newObject instanceof EcdarSystem;
+        boolean shouldZoomBeActive = newObject instanceof ComponentPresentation || newObject instanceof SystemPresentation;
         setZoomAvailable(shouldZoomBeActive);
 
         root.requestFocus();

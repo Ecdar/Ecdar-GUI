@@ -90,7 +90,7 @@
         <left>
             <StackPane fx:id="leftPane" alignment="TOP_LEFT">
                 <ProjectPanePresentation
-                        fx:id="filePane"
+                        fx:id="projectPane"
                         StackPane.alignment="TOP_LEFT"/>
             </StackPane>
         </left>
@@ -116,7 +116,8 @@
                     <Menu text="File">
                         <MenuItem fx:id="menuBarFileCreateNewProject" text="New Project">
                             <graphic>
-                                <FontIcon iconLiteral="gmi-create-new-folder" fill="black" styleClass="icon-size-medium"/>
+                                <FontIcon iconLiteral="gmi-create-new-folder" fill="black"
+                                          styleClass="icon-size-medium"/>
                             </graphic>
                         </MenuItem>
                         <MenuItem fx:id="menuBarFileOpenProject" text="Open Project">
@@ -168,12 +169,14 @@
                     <Menu text="Edit">
                         <MenuItem fx:id="menuEditMoveLeft" text="Move All Nodes Left">
                             <graphic>
-                                <FontIcon iconLiteral="gmi-keyboard-arrow-left" fill="black" styleClass="icon-size-medium"/>
+                                <FontIcon iconLiteral="gmi-keyboard-arrow-left" fill="black"
+                                          styleClass="icon-size-medium"/>
                             </graphic>
                         </MenuItem>
                         <MenuItem fx:id="menuEditMoveUp" text="Move All Nodes Up">
                             <graphic>
-                                <FontIcon iconLiteral="gmi-keyboard-arrow-up" fill="black" styleClass="icon-size-medium"/>
+                                <FontIcon iconLiteral="gmi-keyboard-arrow-up" fill="black"
+                                          styleClass="icon-size-medium"/>
                             </graphic>
                         </MenuItem>
                         <MenuItem fx:id="menuEditMoveRight" text="Move All Nodes Right">
@@ -184,7 +187,8 @@
                         </MenuItem>
                         <MenuItem fx:id="menuEditMoveDown" text="Move All Nodes Down">
                             <graphic>
-                                <FontIcon iconLiteral="gmi-keyboard-arrow-down" fill="black" styleClass="icon-size-medium"/>
+                                <FontIcon iconLiteral="gmi-keyboard-arrow-down" fill="black"
+                                          styleClass="icon-size-medium"/>
                             </graphic>
                         </MenuItem>
                     </Menu>

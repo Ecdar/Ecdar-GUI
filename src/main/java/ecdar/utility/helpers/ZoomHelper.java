@@ -1,9 +1,8 @@
 package ecdar.utility.helpers;
 
 import ecdar.Ecdar;
-import ecdar.controllers.EcdarController;
-import ecdar.presentations.CanvasPresentation;
-import ecdar.presentations.ModelPresentation;
+import ecdar.controllers.ComponentController;
+import ecdar.presentations.*;
 import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -14,7 +13,7 @@ public class ZoomHelper {
     public double maxZoomFactor = 4;
 
     private CanvasPresentation canvasPresentation;
-    private ModelPresentation model;
+    private HighLevelModelPresentation model;
     private boolean active = true;
 
     /**
@@ -24,13 +23,13 @@ public class ZoomHelper {
      */
     public void setCanvas(CanvasPresentation newCanvasPresentation) {
         canvasPresentation = newCanvasPresentation;
-        model = canvasPresentation.getController().getActiveComponentPresentation();
+        model = canvasPresentation.getController().getActiveModelPresentation();
 
         // Update the model whenever the component is updated
-        canvasPresentation.getController().activeComponentProperty().addListener((observable) -> {
+        canvasPresentation.getController().activeModelProperty().addListener((observable) -> {
             // Run later to ensure that the active component presentation is up-to-date
             Platform.runLater(() -> {
-                model = canvasPresentation.getController().getActiveComponentPresentation();
+                model = canvasPresentation.getController().getActiveModelPresentation();
             });
         });
 
@@ -93,15 +92,19 @@ public class ZoomHelper {
      */
     public void zoomToFit() {
         if (active) {
-            if (EcdarController.getActiveCanvasPresentation().getController().getActiveModel() == null) {
+            if (!(canvasPresentation.getController().getActiveModelPresentation() instanceof ComponentPresentation || canvasPresentation.getController().getActiveModelPresentation() instanceof SystemPresentation)) {
                 resetZoom();
                 return;
             }
 
-            double neededWidth = canvasPresentation.getWidth() / (model.getWidth()
-                    + canvasPresentation.getController().getActiveComponentPresentation().getController().inputSignatureContainer.getWidth()
-                    + canvasPresentation.getController().getActiveComponentPresentation().getController().outputSignatureContainer.getWidth());
-            double newScale = Math.min(neededWidth, canvasPresentation.getHeight() / model.getHeight() - 0.2); //0.1 for width and 0.2 for height subtracted for margin
+            double neededWidth = (model instanceof ComponentPresentation ?
+                    (model.getMinWidth()
+                            + ((ComponentController) model.getController()).inputSignatureContainer.getWidth()
+                            + ((ComponentController) model.getController()).outputSignatureContainer.getWidth())
+                    : model.getMinWidth());
+
+
+            double newScale = Math.min(canvasPresentation.getWidth() / neededWidth, canvasPresentation.getHeight() / model.getMinHeight() - 0.2); // 0.2 subtracted for margin
 
             currentZoomFactor.set(newScale);
             centerComponent();
@@ -120,11 +123,17 @@ public class ZoomHelper {
     }
 
     private void centerComponent() {
-        EcdarController.getActiveCanvasPresentation().getController().modelPane.setTranslateX(0);
-        EcdarController.getActiveCanvasPresentation().getController().modelPane.setTranslateY(-Ecdar.CANVAS_PADDING * 2); // 0 is slightly below center, this looks better
+        canvasPresentation.getController().modelPane.setTranslateX(0);
+
+        if (canvasPresentation.getController().modelPane.getChildren().isEmpty() || canvasPresentation.getController().modelPane.getChildren().get(0) instanceof DeclarationsPresentation) {
+            canvasPresentation.getController().modelPane.setTranslateY(0);
+        } else {
+            canvasPresentation.getController().modelPane.setTranslateY(-Ecdar.CANVAS_PADDING * 2); // 0 is slightly below center, this looks better
+        }
 
         // Center the model within the modelPane to account for resized model
         model.setTranslateX(0);
         model.setTranslateY(0);
+
     }
 }

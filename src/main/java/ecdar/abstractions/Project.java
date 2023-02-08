@@ -416,6 +416,19 @@ public class Project {
     }
 
     /**
+     * Generate a unique name for the component
+     * @return A project unique name
+     */
+    public String getUniqueComponentName() {
+        for(int counter = 1; ; counter++) {
+            final String name = COMPONENT + counter;
+            if(!getComponentNames().contains(COMPONENT + counter)){
+                return name;
+            }
+        }
+    }
+
+    /**
      * Gets the name of all components in the project and inserts it into a set
      * @return the set of all component names
      */
@@ -429,15 +442,6 @@ public class Project {
         return names;
     }
 
-    public String getUniqueComponentName() {
-        for(int counter = 1; ; counter++) {
-            final String name = COMPONENT + counter;
-            if(!getComponentNames().contains(COMPONENT + counter)){
-                return name;
-            }
-        }
-    }
-
     /**
      * Find a component by its name.
      * @param name the name of the component looking for
@@ -449,5 +453,9 @@ public class Project {
         }
 
         return null;
+    }
+
+    public void addComponent(Component newComponent) {
+        components.add(newComponent);
     }
 }

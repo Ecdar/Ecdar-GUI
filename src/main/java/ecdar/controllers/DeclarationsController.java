@@ -2,6 +2,7 @@ package ecdar.controllers;
 
 import ecdar.Ecdar;
 import ecdar.abstractions.Declarations;
+import ecdar.abstractions.HighLevelModel;
 import ecdar.utility.helpers.UPPAALSyntaxHighlighter;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -17,7 +18,7 @@ import java.util.ResourceBundle;
 /**
  * Controller for overall declarations.
  */
-public class DeclarationsController implements Initializable {
+public class DeclarationsController extends HighLevelModelController implements Initializable {
     public StyleClassedTextArea textArea;
     public StackPane root;
     public BorderPane frame;
@@ -73,5 +74,10 @@ public class DeclarationsController implements Initializable {
      */
     public void updateHighlighting() {
         textArea.setStyleSpans(0, UPPAALSyntaxHighlighter.computeHighlighting(declarations.get().getDeclarationsText()));
+    }
+
+    @Override
+    public HighLevelModel getModel() {
+        return declarations.get();
     }
 }

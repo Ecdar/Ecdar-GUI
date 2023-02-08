@@ -7,11 +7,11 @@ import ecdar.utility.colors.Color;
 import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.Boxed;
 import ecdar.utility.helpers.MouseCircular;
-import ecdar.utility.keyboard.NudgeDirection;
 import com.bpodgursky.jbool_expressions.*;
 import com.bpodgursky.jbool_expressions.rules.RuleSet;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -30,7 +30,7 @@ import static ecdar.abstractions.Project.LOCATION;
 /**
  * A component that models an I/O automata.
  */
-public class Component extends HighLevelModelObject implements Boxed {
+public class Component extends HighLevelModel implements Boxed {
     private static final String LOCATIONS = "locations";
     private static final String EDGES = "edges";
     private static final String INCLUDE_IN_PERIODIC_CHECK = "includeInPeriodicCheck";
@@ -67,22 +67,29 @@ public class Component extends HighLevelModelObject implements Boxed {
     public Component(final boolean doRandomColor, final String name) {
         setName(name);
 
-        if(doRandomColor) {
-            setRandomColor();
-        }
-
         // Make initial location
         final Location initialLocation = new Location();
         initialLocation.initialize(LOCATION + 1);
         initialLocation.setType(Location.Type.INITIAL);
-        initialLocation.setColorIntensity(getColorIntensity());
-        initialLocation.setColor(getColor());
 
         // Place in center
         initialLocation.setX(box.getX() + box.getWidth() / 2);
         initialLocation.setY(box.getY() + box.getHeight() / 2);
 
+        if (doRandomColor) {
+            // Run random coloring later to avoid Ecdar.getProject() being null
+            Platform.runLater(() -> {
+                setRandomColor();
+                initialLocation.setColorIntensity(getColorIntensity());
+                initialLocation.setColor(getColor());
+            });
+        } else {
+            initialLocation.setColorIntensity(getColorIntensity());
+            initialLocation.setColor(getColor());
+        }
+
         locations.add(initialLocation);
+
         initializeIOListeners();
     }
 
@@ -897,38 +904,6 @@ public class Component extends HighLevelModelObject implements Boxed {
         if (uniLocs.isEmpty()) return null;
 
         return uniLocs.get(0);
-    }
-
-    /**
-     * Moves all nodes left.
-     */
-    public void moveAllNodesLeft() {
-        getLocations().forEach(loc -> loc.setX(loc.getX() + NudgeDirection.LEFT.getXOffset()));
-        getDisplayableEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setX(nail.getX() + NudgeDirection.LEFT.getXOffset())));
-    }
-
-    /**
-     * Moves all nodes right.
-     */
-    public void moveAllNodesRight() {
-        getLocations().forEach(loc -> loc.setX(loc.getX() + NudgeDirection.RIGHT.getXOffset()));
-        getDisplayableEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setX(nail.getX() + NudgeDirection.RIGHT.getXOffset())));
-    }
-
-    /**
-     * Moves all nodes down.
-     */
-    public void moveAllNodesDown() {
-        getLocations().forEach(loc -> loc.setY(loc.getY() + NudgeDirection.DOWN.getYOffset()));
-        getDisplayableEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setY(nail.getY() + NudgeDirection.DOWN.getYOffset())));
-    }
-
-    /**
-     * Moves all nodes up.
-     */
-    public void moveAllNodesUp() {
-        getLocations().forEach(loc -> loc.setY(loc.getY() + NudgeDirection.UP.getYOffset()));
-        getDisplayableEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setY(nail.getY() + NudgeDirection.UP.getYOffset())));
     }
 
     public List<DisplayableEdge> getInputEdges() {

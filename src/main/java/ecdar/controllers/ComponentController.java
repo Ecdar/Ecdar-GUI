@@ -10,6 +10,7 @@ import ecdar.utility.colors.Color;
 import ecdar.utility.helpers.*;
 import com.jfoenix.controls.JFXPopup;
 import com.jfoenix.controls.JFXRippler;
+import ecdar.utility.keyboard.NudgeDirection;
 import javafx.animation.Interpolator;
 import javafx.animation.Transition;
 import javafx.application.Platform;
@@ -417,12 +418,7 @@ public class ComponentController extends ModelController implements Initializabl
             initializeDropDownMenu.accept(newComponent);
         });
 
-        Ecdar.getProject().getComponents().addListener(new ListChangeListener<Component>() {
-            @Override
-            public void onChanged(final Change<? extends Component> c) {
-                initializeDropDownMenu.accept(getComponent());
-            }
-        });
+        Platform.runLater(() -> Ecdar.getProject().getComponents().addListener((ListChangeListener<Component>) c -> initializeDropDownMenu.accept(getComponent())));
 
         initializeDropDownMenu.accept(getComponent());
     }
@@ -778,6 +774,38 @@ public class ComponentController extends ModelController implements Initializabl
         return component;
     }
 
+    /**
+     * Moves all nodes left.
+     */
+    public void moveAllNodesLeft() {
+        getComponent().getLocations().forEach(loc -> loc.setX(loc.getX() + NudgeDirection.LEFT.getXOffset()));
+        getComponent().getDisplayableEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setX(nail.getX() + NudgeDirection.LEFT.getXOffset())));
+    }
+
+    /**
+     * Moves all nodes right.
+     */
+    public void moveAllNodesRight() {
+        getComponent().getLocations().forEach(loc -> loc.setX(loc.getX() + NudgeDirection.RIGHT.getXOffset()));
+        getComponent().getDisplayableEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setX(nail.getX() + NudgeDirection.RIGHT.getXOffset())));
+    }
+
+    /**
+     * Moves all nodes down.
+     */
+    public void moveAllNodesDown() {
+        getComponent().getLocations().forEach(loc -> loc.setY(loc.getY() + NudgeDirection.DOWN.getYOffset()));
+        getComponent().getDisplayableEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setY(nail.getY() + NudgeDirection.DOWN.getYOffset())));
+    }
+
+    /**
+     * Moves all nodes up.
+     */
+    public void moveAllNodesUp() {
+        getComponent().getLocations().forEach(loc -> loc.setY(loc.getY() + NudgeDirection.UP.getYOffset()));
+        getComponent().getDisplayableEdges().forEach(edge -> edge.getNails().forEach(nail -> nail.setY(nail.getY() + NudgeDirection.UP.getYOffset())));
+    }
+
     /***
      * Handle the component being pressed based on the mouse button and hotkeys
      * @param event to use for handling the action
@@ -866,7 +894,7 @@ public class ComponentController extends ModelController implements Initializabl
     }
 
     @Override
-    public HighLevelModelObject getModel() {
+    public HighLevelModel getModel() {
         return getComponent();
     }
 

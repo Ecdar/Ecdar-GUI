@@ -47,14 +47,6 @@ public class SystemController extends ModelController implements Initializable {
     private Circle dropDownMenuHelperCircle;
     private DropDownMenu contextMenu;
 
-    public EcdarSystem getSystem() {
-        return system.get();
-    }
-
-    public void setSystem(final EcdarSystem system) {
-        this.system.setValue(system);
-    }
-
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
         // Initialize when system is added
@@ -66,23 +58,31 @@ public class SystemController extends ModelController implements Initializable {
             initializeComponentInstanceHandling(newValue);
             initializeOperatorHandling(newValue);
             initializeEdgeHandling(newValue);
+
+            super.initialize(newValue.getBox());
+            initializeDimensions(newValue.getBox());
+
+            // Initialize methods that are sensitive to width and height
+            final Runnable onUpdateSize = () -> {
+                initializeToolbar();
+                initializeFrame();
+                initializeBackground();
+            };
+
+            onUpdateSize.run();
+
+            // Re-run initialisation on update of width and height property
+            newValue.getBox().getWidthProperty().addListener(obs -> onUpdateSize.run());
+            newValue.getBox().getHeightProperty().addListener(obs -> onUpdateSize.run());
         });
+    }
 
-        super.initialize(getSystem().getBox());
-        initializeDimensions(getSystem().getBox());
+    public void setSystem(final EcdarSystem system) {
+        this.system.setValue(system);
+    }
 
-        // Initialize methods that is sensitive to width and height
-        final Runnable onUpdateSize = () -> {
-            initializeToolbar();
-            initializeFrame();
-            initializeBackground();
-        };
-
-        onUpdateSize.run();
-
-        // Re-run initialisation on update of width and height property
-        getSystem().getBox().getWidthProperty().addListener(observable -> onUpdateSize.run());
-        getSystem().getBox().getHeightProperty().addListener(observable -> onUpdateSize.run());
+    public EcdarSystem getSystem() {
+        return system.get();
     }
 
     private void initializeSystemRoot(final EcdarSystem system) {
@@ -201,7 +201,7 @@ public class SystemController extends ModelController implements Initializable {
     }
 
     @Override
-    public HighLevelModelObject getModel() {
+    public HighLevelModel getModel() {
         return getSystem();
     }
 

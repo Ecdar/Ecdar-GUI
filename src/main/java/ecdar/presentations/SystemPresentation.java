@@ -12,5 +12,15 @@ public class SystemPresentation extends ModelPresentation {
     public SystemPresentation(final EcdarSystem system) {
         controller = new EcdarFXMLLoader().loadAndGetController("SystemPresentation.fxml", this);
         controller.setSystem(system);
+
+        minHeightProperty().bindBidirectional(system.getBox().getHeightProperty());
+        maxHeightProperty().bindBidirectional(system.getBox().getHeightProperty());
+        minWidthProperty().bindBidirectional(system.getBox().getWidthProperty());
+        maxWidthProperty().bindBidirectional(system.getBox().getWidthProperty());
+    }
+
+    @Override
+    public SystemController getController() {
+        return controller;
     }
 }

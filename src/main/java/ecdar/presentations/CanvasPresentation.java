@@ -32,8 +32,8 @@ public class CanvasPresentation extends StackPane implements LocationAware {
     private final CanvasController controller;
 
     public CanvasPresentation() {
-        mouseTracker = new MouseTracker(this);
         controller = new EcdarFXMLLoader().loadAndGetController("CanvasPresentation.fxml", this);
+        mouseTracker = new MouseTracker(this);
         mouseTracker.registerOnMousePressedEventHandler(this::startDragSelect);
 
         getController().root.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> EcdarController.setActiveCanvasPresentation(this));

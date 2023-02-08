@@ -11,6 +11,11 @@ public class ComponentPresentation extends ModelPresentation implements Location
     public ComponentPresentation(final Component component) {
         controller = new EcdarFXMLLoader().loadAndGetController("ComponentPresentation.fxml", this);
         controller.setComponent(component);
+
+        minHeightProperty().bindBidirectional(component.getBox().getHeightProperty());
+        maxHeightProperty().bindBidirectional(component.getBox().getHeightProperty());
+        minWidthProperty().bindBidirectional(component.getBox().getWidthProperty());
+        maxWidthProperty().bindBidirectional(component.getBox().getWidthProperty());
     }
 
     public ComponentController getController() {
