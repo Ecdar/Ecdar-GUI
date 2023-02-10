@@ -1,24 +1,24 @@
 package ecdar.backend;
 
-import ecdar.abstractions.Engine;
+import ecdar.abstractions.BackendInstance;
 
 import java.util.function.Consumer;
 
 public class GrpcRequest {
-    private final Consumer<EngineConnection> request;
-    private final Engine engine;
+    private final Consumer<BackendConnection> request;
+    private final BackendInstance backend;
     public int tries = 0;
 
-    public GrpcRequest(Consumer<EngineConnection> request, Engine engine) {
+    public GrpcRequest(Consumer<BackendConnection> request, BackendInstance backend) {
         this.request = request;
-        this.engine = engine;
+        this.backend = backend;
     }
 
-    public void execute(EngineConnection engineConnection) {
-        this.request.accept(engineConnection);
+    public void execute(BackendConnection backendConnection) {
+        this.request.accept(backendConnection);
     }
 
-    public Engine getEngine() {
-        return engine;
+    public BackendInstance getBackend() {
+        return backend;
     }
 }

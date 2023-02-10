@@ -257,7 +257,7 @@
 
                         <SeparatorMenuItem/>
 
-                        <MenuItem fx:id="menuBarOptionsEngineOptions" text="Engine Options">
+                        <MenuItem fx:id="menuBarOptionsBackendOptions" text="Backend options">
                             <graphic>
                                 <FontIcon iconLiteral="gmi-settings-input-component" styleClass="icon-size-medium"
                                           fill="black"/>
@@ -526,8 +526,8 @@
         </JFXDialog>
     </StackPane>
 
-    <!-- Engines Dialog -->
-    <StackPane fx:id="engineOptionsDialogContainer" style="-fx-background-color: #0000007F;" mouseTransparent="true">
-        <EngineOptionsDialogPresentation fx:id="engineOptionsDialog"/>
+    <!-- Backends Dialog -->
+    <StackPane fx:id="backendOptionsDialogContainer" style="-fx-background-color: #0000007F;" mouseTransparent="true">
+        <BackendOptionsDialogPresentation fx:id="backendOptionsDialog"/>
     </StackPane>
 </fx:root>
