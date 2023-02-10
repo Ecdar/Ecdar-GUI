@@ -1,115 +1,52 @@
 # Ecdar
+
 Ecdar is an abbreviation of Environment for Compositional Design and Analysis of Real Time Systems.
-This repo contains the source code for the graphical user interface. In order to run queries you will need the
+This repo contains the source code for the graphical user interface, in order to run queries you will need the
 j-ecdar and revaal executables.
 
-> :information_source: If the goal is to use ECDAR, please goto the [main ECDAR repository](https://github.com/Ecdar/ECDAR), which contains releases for all supported platforms. These releases contain all dependencies, including the engines and a JRE.
-
-<a id="dependencies"></a>
 ## Dependencies
-This section covers what dependencies are currently needed by the GUI.
+This repository utilizes the Ecdar-Proto repository for structuring the communication between the GUI and the engines. This dependency is implemented as a submodule which needs to be pulled and updated. If you have not yet cloned the code from this repository (the GUI), you can clone both the GUI and the submodule containing the Proto repository by running the following command:
 
-### JVM
-As with all Java applications, a working JVM is required to run the project. 
-
-You will need Java version 11 containing JavaFX. We suggest downloading one of the distributions from https://www.azul.com/downloads/?version=java-11-lts&package=jdk-fx, as this is the version used by the main development team.
-
-### Ecdar-ProtoBuf
-This repository utilizes the [Ecdar-ProtoBuf repository](https://github.com/Ecdar/Ecdar-ProtoBuf) for the communication with the engines. This dependency is implemented as a submodule that needs to be pulled and updated. If you have not yet cloned the code from this repository (the GUI), you can clone both the GUI and the submodule containing the ProtoBuf repository by running the following command:
-
-```shell
+``` sh
 git clone --recurse-submodules git@github.com:Ecdar/Ecdar-GUI.git
 ```
 
-If you have already cloned this repository, you can clone the ProtoBuf submodule by running the following command from a terminal in the GUI repository directory:
+If you have already cloned this repository, you can clone the Proto submodule by running the following command, from a terminal inside the GUI repository directory:
 
-```shell
+``` sh
 git submodule update --init --recursive
 ```
 
-### Engines (needed for model-checking)
-In order to use the model-checking capabilities of the system, it is necessary to download at least one engine for the used operating system and place it in the `lib` directory.
-
-> :information_source: The latest version of each engine can be downloaded from:
-> * https://github.com/Ecdar/j-Ecdar
-> * https://github.com/Ecdar/Reveaal
-
-The engines can then be configured in the GUI as described in [Engine Configuration](#engine_configuration).
-
 ## How to Run
-After having retrieved the code and acquired all the dependencies mentioned in [Dependencies](#dependencies), the GUI can be started using the following command:
-```shell
-./gradlew run
+You will need a working JVM verion 11 with java FX in order to run the GUI. We suggest downloading from https://www.azul.com/downloads/?version=java-11-lts&package=jdk-fx.
+
+To run the gui use the gradle wrapper script 
+
+``` sh
+./gradlew(.bat) run 
 ```
 
-> :information_source: All Gradle commands in this document are Unix specific, for Windows users, replace `./gradlew` with `./gradlew.bat`.
-
-<a id="engine_configuration"></a>
 ## Engine Configuration
-In order to utilize the model-checking capabilities of the system, at least one engine must be configured. 
-The distributions available at [ECDAR](https://github.com/Ecdar/ECDAR) will automatically load the default engines on startup, but this is currently not working when running the GUI through Gradle.
-For the same reason, the `Reset Engines` button will clear the engines but will not be able to load the packaged once.
+Download the latest version of the engine from: 
 
-An engine can be added through the configurator found under `Options > Engines Options` in the menubar, which opens the pop-up shown below.
+  * https://github.com/Ecdar/j-Ecdar
+  * https://github.com/Ecdar/Reveaal
 
-<img src="presentation/EngineConfiguration.png" alt="Engine Configuration Pop-up">
+Unpack and move the downloaded files to the `lib` folder. You can also configure custom engine locations from the GUI. 
 
-> :information_source: If you accidentally removed or changed an engine, these changes can be reverted be pressing `Cancel` or by clicking outside the pop-up. Consequently, if any changes should be saved, **MAKE SURE TO PRESS `Save`** 
-
-### Address
-The _Address_ is either the address of a server running the engine (for remote execution) or a path to a local engine binary (for this, the _Local_ checkbox must be checked).
-
-### Port range
-The GUI uses gRPC for the communication with the engines and will therefore need at least one free port. This range directly limits the number of instances of the engine that will be started.
-> :warning: Make sure AT LEAST one port is free within the specified range. For instance, the default port range for Reveaal is _5032_ - _5040_.
-
-### Default
-If an engine is marked with _Default_, all added queries will be assigned that engine.
-
-
-## Exemplary Projects
-To get started and get an idea of what the system can be used for, multiple exemplary can be found in the `examples` directory. 
-These projects include preconfigured models and queries to execute against them.
-
-For the theoretical background and what the tool can be used for, please check out the latest research links at [here](https://ulrik.blog.aau.dk/ecdar/).
-
-## Contributing
-When contributing to this repository, make your own fork and create pull requests to this repo from there.
-
-### Issues
-If you find a bug or a missing feature, feel free to create an issue. The system is continuously under development and suggestions are always welcome.
-
-If you create an issue, please add relevant tags (eg. `bug`, `feature`, etc.) as well as a detailed description.
-
-### Pull Requests
-Pull requests are continuously being reviewed and merged. In order to ease this process, please open a pull request as draft, as long as it is under development, to notify anyone else that a given feature/issue is being worked on.
-
-Additionally, please add `Closes #{ISSUE_ID}` if the pull request is linked to a specific issue. If a PR addresses multiple pull requests, please add `Closes #{ISSUE_ID}` for each one.
-
-A CI workflow is executed against all pull requests and must succeed before the pull request can be merged, so please make sure that you check the workflow status and potential error messages. 
-
-### Tests
-All non-UI tests are executed as part of the CI workflow and hence must succeed before merging. The tests are written with JUnit and relevant tests should be added when new code is added. If you are new to JUnit, you can check out syntax and structure [here](https://junit.org/junit5/docs/current/user-guide/).
-
-The test suite can be executed locally by running:
-```shell
-./gradlew test
-```
-
-> :information_source: Currently, the codebase has high coupling, which has made testing difficult and the test suite very small. 
-
-#### UI Tests
-For features that are highly coupled with the interface, a second test suite has been added under `src/test/java/ecdar/ui`. These tests are excluded from the `test` task are can be executed by running:
-```shell
-./gradlew uiTest
-```
-These tests are more intensive to run and utilizes a robot for interacting with a running process of the GUI. The tests are implemented using [TestFX](https://github.com/TestFX/TestFX). As these tests are more intensive, they are not run as part of the standard CI workflow.
-
-If you want to add any tests of this sort, please make sure that the functionality cannot be tested using non-UI tests. 
 
 ## Screenshots
+
 | <img src="presentation/Retailer.png" width="400">  <img src="presentation/Administration.png" width="400"> | <img src="presentation/UniversityExample.png" width="400"> | 
 |------------------------------------------------------------------------------------------------------------|------------------------------------------------------------|
 
-## H-UPPAAL
+Sample Projects
+----
+See sample projects in the `samples` folder.
+
+
+H-UPPAAL
+----------
 This project is a hard fork of https://github.com/ulriknyman/H-Uppaal.
+
+
