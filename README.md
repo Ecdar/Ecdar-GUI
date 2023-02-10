@@ -53,7 +53,8 @@ After having retrieved the code and acquired all the dependencies mentioned in [
 
 <a id="engine_configuration"></a>
 ## Engine Configuration
-In order to utilize the model-checking capabilities of the system, at least one engine must be configured.
+In order to utilize the model-checking capabilities of the system, at least one engine must be configured. 
+
 The distributions available at [ECDAR](https://github.com/Ecdar/ECDAR) will automatically load the default engines on startup, but this is currently not working when running the GUI through Gradle.
 For the same reason, the `Reset Engines` button will clear the engines but will not be able to load the packaged once.
 
@@ -72,7 +73,6 @@ The GUI uses gRPC for the communication with the engines and will therefore need
 
 ### Default
 If an engine is marked with _Default_, all added queries will be assigned that engine.
-
 
 ## Exemplary Projects
 To get started and get an idea of what the system can be used for, multiple examples can be found in the `examples` directory.
@@ -154,4 +154,3 @@ Besides the packages mentioned above, some larger functionalities are located in
 - `code_analysis`: Responsible for analysing the elements of the current project and construct messages if errors or warnings are encountered.
 - `issues`: Classes for representing `Errors`, `Issues`, and `Warnings`.
 - `model_canvas.arrow_heads`: Arrowheads used in the UI to visualize the direction of edges.
-
