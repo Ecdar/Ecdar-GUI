@@ -107,14 +107,10 @@ public class MutationTestPlanController extends HighLevelModelController {
     public Text failedNumber;
     public Text primaryFailedNumber;
 
-
-    /* Mutation fields */
     private MutationTestPlan plan;
     private TestingHandler testingHandler;
     public final ObservableList<TestResult> resultsToShow = new SimpleListProperty<>(FXCollections.observableArrayList());
 
-
-    /* Properties */
     public MutationTestPlan getPlan() {
         return plan;
     }
@@ -128,8 +124,6 @@ public class MutationTestPlanController extends HighLevelModelController {
         return testingHandler;
     }
 
-    /* Other methods */
-
     /**
      * Triggered when pressed the test button.
      * Conducts the test.
@@ -139,7 +133,7 @@ public class MutationTestPlanController extends HighLevelModelController {
 
         // Find test model from test model picker
         // Clone it, because we want to change its name
-        final Component testModel = Ecdar.getProject().findComponent(modelPicker.getValue().getText()).cloneForVerification();
+        final Component testModel = ComponentVerificationTransformer.cloneForVerification(plan.getTestModel());
 
         new MutationHandler(testModel, getPlan(), cases -> startGeneration(testModel, cases)).start();
     }

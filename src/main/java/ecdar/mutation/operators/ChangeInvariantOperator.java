@@ -2,6 +2,7 @@ package ecdar.mutation.operators;
 
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Location;
+import ecdar.mutation.ComponentVerificationTransformer;
 import ecdar.mutation.TextFlowBuilder;
 import ecdar.mutation.models.MutationTestCase;
 
@@ -39,7 +40,7 @@ public class ChangeInvariantOperator extends MutationOperator {
             final List<String> invariantParts = Arrays.stream(originalLocation.getInvariant()
                     .split("&&")).map(String::trim).collect(Collectors.toList());
             for (int partIndex = 0; partIndex < invariantParts.size(); partIndex++) {
-                final Component mutant = original.cloneForVerification();
+                final Component mutant = ComponentVerificationTransformer.cloneForVerification(original);
 
                 final List<String> newParts = new ArrayList<>(invariantParts);
                 newParts.set(partIndex, newParts.get(partIndex) + " + 1");

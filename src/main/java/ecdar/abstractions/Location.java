@@ -100,7 +100,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
      * Reachability analysis is not initialized.
      * @return the clone
      */
-    Location cloneForVerification() {
+    public Location cloneForVerification() {
         final Location location = new Location();
 
         location.setId(getId());

@@ -361,20 +361,6 @@ public class Project {
     }
 
     /**
-     * gets the id of all locations in the project and inserts it into a set
-     * @return the set of all location ids
-     */
-    Set<String> getLocationIds(){
-        final Set<String> ids = new HashSet<>();
-
-        for (final Component component : getComponents()) {
-            ids.addAll(component.getLocationIds());
-        }
-
-        return ids;
-    }
-
-    /**
      * gets the id of all edges in the project and inserts it into a set
      * @return the set of all edge ids
      */
@@ -382,7 +368,7 @@ public class Project {
         final Set<String> ids = new HashSet<>();
 
         for (final Component component : getComponents()) {
-            ids.addAll(component.getEdgeIds());
+            component.getEdges().forEach(edge -> ids.add(edge.getId().substring(Edge.ID_LETTER_LENGTH)));
         }
 
         return ids;

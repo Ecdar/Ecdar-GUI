@@ -86,18 +86,20 @@ public abstract class HighLevelModel implements Serializable, DropDownMenu.HasCo
      * Otherwise, choose a between all available colors.
      */
     void setRandomColor() {
-        // Color the new component in such a way that we avoid clashing with other components if possible
-        final List<EnabledColor> availableColors = new ArrayList<>(EnabledColor.enabledColors);
-        Ecdar.getProject().getComponents().forEach(component -> {
-            availableColors.removeIf(enabledColor -> enabledColor.color.equals(component.getColor()));
+        Platform.runLater(() -> {
+            // Color the new component in such a way that we avoid clashing with other components if possible
+            final List<EnabledColor> availableColors = new ArrayList<>(EnabledColor.enabledColors);
+            Ecdar.getProject().getComponents().forEach(component -> {
+                availableColors.removeIf(enabledColor -> enabledColor.color.equals(component.getColor()));
+            });
+            if (availableColors.size() == 0) {
+                availableColors.addAll(EnabledColor.enabledColors);
+            }
+            final int randomIndex = (new Random()).nextInt(availableColors.size());
+            final EnabledColor selectedColor = availableColors.get(randomIndex);
+            setColorIntensity(selectedColor.intensity);
+            setColor(selectedColor.color);
         });
-        if (availableColors.size() == 0) {
-            availableColors.addAll(EnabledColor.enabledColors);
-        }
-        final int randomIndex = (new Random()).nextInt(availableColors.size());
-        final EnabledColor selectedColor = availableColors.get(randomIndex);
-        setColorIntensity(selectedColor.intensity);
-        setColor(selectedColor.color);
     }
 
     @Override

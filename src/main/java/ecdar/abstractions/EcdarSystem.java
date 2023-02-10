@@ -21,7 +21,7 @@ import java.util.Set;
  * A model of a system.
  * The class is called EcdarSystem, since Java already has a System class.
  */
-public class EcdarSystem extends EcdarModel implements Boxed {
+public class EcdarSystem extends HighLevelModel implements Boxed {
     private static final String SYSTEM = "System";
     private static final String SYSTEM_ROOT_X = "systemRootX";
     private static final String INSTANCES = "componentInstances";
@@ -32,7 +32,7 @@ public class EcdarSystem extends EcdarModel implements Boxed {
     private final StringProperty description = new SimpleStringProperty("");
     private final ObservableList<ComponentInstance> componentInstances = FXCollections.observableArrayList();
     private final ObservableList<ComponentOperator> componentOperators = FXCollections.observableArrayList();
-    private final ObservableList<EcdarSystemEdge> edges = FXCollections.observableArrayList();
+    private final ObservableList<SystemEdge> edges = FXCollections.observableArrayList();
     private final SystemRoot systemRoot = new SystemRoot();
 
     // Styling properties
@@ -101,15 +101,15 @@ public class EcdarSystem extends EcdarModel implements Boxed {
 
     /* Edges */
 
-    public ObservableList<EcdarSystemEdge> getEdges() {
+    public ObservableList<SystemEdge> getEdges() {
         return edges;
     }
 
-    public void addEdge(final EcdarSystemEdge edge) {
+    public void addEdge(final SystemEdge edge) {
         edges.add(edge);
     }
 
-    public void removeEdge(final EcdarSystemEdge edge) {
+    public void removeEdge(final SystemEdge edge) {
         edges.remove(edge);
     }
 
@@ -187,7 +187,7 @@ public class EcdarSystem extends EcdarModel implements Boxed {
         });
 
         json.getAsJsonArray(EDGES).forEach(jsonEdge ->
-                getEdges().add(new EcdarSystemEdge((JsonObject) jsonEdge, this)));
+                getEdges().add(new SystemEdge((JsonObject) jsonEdge, this)));
     }
 
     /**
@@ -207,8 +207,8 @@ public class EcdarSystem extends EcdarModel implements Boxed {
      * An edge is unfinished, if the has no target.
      * @return The unfinished edge, or null if none was found.
      */
-    public EcdarSystemEdge getUnfinishedEdge() {
-        for (final EcdarSystemEdge edge : edges) {
+    public SystemEdge getUnfinishedEdge() {
+        for (final SystemEdge edge : edges) {
             if (!edge.isFinished()) return edge;
         }
         return null;

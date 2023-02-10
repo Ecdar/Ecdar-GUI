@@ -1,7 +1,7 @@
 package ecdar.controllers;
 import ecdar.abstractions.ComponentOperator;
 import ecdar.abstractions.EcdarSystem;
-import ecdar.abstractions.EcdarSystemEdge;
+import ecdar.abstractions.SystemEdge;
 import ecdar.presentations.DropDownMenu;
 import ecdar.presentations.MenuElement;
 import com.jfoenix.controls.JFXPopup;
@@ -14,7 +14,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
@@ -84,7 +83,7 @@ public class ComponentOperatorController implements Initializable {
 
         contextMenu.addMenuElement(new MenuElement("Draw Edge")
                 .setClickable(() -> {
-                    final EcdarSystemEdge edge = new EcdarSystemEdge(operator);
+                    final SystemEdge edge = new SystemEdge(operator);
                     getSystem().addEdge(edge);
 
                     contextMenu.hide();
@@ -105,7 +104,7 @@ public class ComponentOperatorController implements Initializable {
      * Listens to an edge to update whether the operator has a parent edge.
      * @param parentEdge the edge to update with
      */
-    private void updateHasParent(final EcdarSystemEdge parentEdge) {
+    private void updateHasParent(final SystemEdge parentEdge) {
         // The operator has a parent iff the supposed parent edge has the operator as a child
         parentEdge.getChildProperty().addListener(((observable, oldValue, newValue) -> hasParent.set(getOperator().equals(newValue))));
     }
@@ -118,7 +117,7 @@ public class ComponentOperatorController implements Initializable {
     private void onMouseClicked(final MouseEvent event) {
         event.consume();
 
-        final EcdarSystemEdge unfinishedEdge = getSystem().getUnfinishedEdge();
+        final SystemEdge unfinishedEdge = getSystem().getUnfinishedEdge();
 
         // if primary clicked and there is an unfinished edge, finish it with the system root as target
         if (unfinishedEdge != null && event.getButton().equals(MouseButton.PRIMARY)) {

@@ -40,7 +40,7 @@ public class SystemController extends ModelController implements Initializable {
     
     private final Map<ComponentInstance, ComponentInstancePresentation> componentInstancePresentationMap = new HashMap<>();
     private final Map<ComponentOperator, ComponentOperatorPresentation> componentOperatorPresentationMap = new HashMap<>();
-    private final Map<EcdarSystemEdge, SystemEdgePresentation> edgePresentationMap = new HashMap<>();
+    private final Map<SystemEdge, SystemEdgePresentation> edgePresentationMap = new HashMap<>();
 
     private final ObjectProperty<EcdarSystem> system = new SimpleObjectProperty<>();
 
@@ -374,7 +374,7 @@ public class SystemController extends ModelController implements Initializable {
      */
     private void initializeEdgeHandling(final EcdarSystem system) {
         system.getEdges().forEach(this::handleAddedEdge);
-        system.getEdges().addListener((ListChangeListener<EcdarSystemEdge>) change -> {
+        system.getEdges().addListener((ListChangeListener<SystemEdge>) change -> {
             if (change.next()) {
                 change.getAddedSubList().forEach(this::handleAddedEdge);
                 change.getRemoved().forEach(this::handleRemovedEdge);
@@ -386,7 +386,7 @@ public class SystemController extends ModelController implements Initializable {
      * Handles an added edge.
      * @param edge the edge
      */
-    private void handleAddedEdge(final EcdarSystemEdge edge) {
+    private void handleAddedEdge(final SystemEdge edge) {
         final SystemEdgePresentation presentation = new SystemEdgePresentation(edge, getSystem());
         edgePresentationMap.put(edge, presentation);
         edgeContainer.getChildren().add(presentation);
@@ -396,7 +396,7 @@ public class SystemController extends ModelController implements Initializable {
      * Handles a removed component instance.
      * @param edge the edge
      */
-    private void handleRemovedEdge(final EcdarSystemEdge edge) {
+    private void handleRemovedEdge(final SystemEdge edge) {
         edgeContainer.getChildren().remove(edgePresentationMap.get(edge));
         edgePresentationMap.remove(edge);
 

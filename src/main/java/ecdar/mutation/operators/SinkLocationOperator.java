@@ -4,6 +4,7 @@ import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
 import ecdar.abstractions.EdgeStatus;
 import ecdar.abstractions.Location;
+import ecdar.mutation.ComponentVerificationTransformer;
 import ecdar.mutation.TextFlowBuilder;
 import ecdar.mutation.models.MutationTestCase;
 
@@ -36,7 +37,7 @@ public class SinkLocationOperator extends MutationOperator {
             // Ignore if locked (e.g. if edge on the Inconsistent or Universal locations)
             if (originalEdge.getIsLockedProperty().get()) continue;
 
-            final Component mutant = original.cloneForVerification();
+            final Component mutant = ComponentVerificationTransformer.cloneForVerification(original);
 
             // Mutate
             final Edge mutantEdge = mutant.getEdges().get(edgeIndex);

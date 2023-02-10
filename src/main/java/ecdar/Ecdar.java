@@ -324,7 +324,7 @@ public class Ecdar extends Application {
             backendDriver = new BackendDriver();
         });
 
-        Platform.runLater(() -> project = presentation.getController().projectPane.getController().project);
+        project = presentation.getController().projectPane.getController().project;
     }
 
     private void loadFonts() {

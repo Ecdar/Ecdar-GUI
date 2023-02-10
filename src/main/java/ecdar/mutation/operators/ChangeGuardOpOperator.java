@@ -2,6 +2,7 @@ package ecdar.mutation.operators;
 
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
+import ecdar.mutation.ComponentVerificationTransformer;
 import ecdar.mutation.MutationTestingException;
 import ecdar.mutation.TextFlowBuilder;
 import ecdar.mutation.models.MutationTestCase;
@@ -108,7 +109,7 @@ public abstract class ChangeGuardOpOperator extends MutationOperator {
      */
     private static Component createMutant(final Component original, final String[] originalSimpleGuards,
                                           final String newSimpleGuard, final int simpleGuardIndex, final int edgeIndex) {
-        final Component mutant = original.cloneForVerification();
+        final Component mutant = ComponentVerificationTransformer.cloneForVerification(original);
 
         final String[] newSimpleGuards = originalSimpleGuards.clone();
         newSimpleGuards[simpleGuardIndex] = newSimpleGuard;

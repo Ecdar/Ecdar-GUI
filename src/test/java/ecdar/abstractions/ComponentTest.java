@@ -1,6 +1,7 @@
 package ecdar.abstractions;
 
 import ecdar.Ecdar;
+import ecdar.mutation.ComponentVerificationTransformer;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
@@ -26,7 +27,7 @@ public class ComponentTest {
         original.addLocation(loc1);
         final String id1 = loc1.getId();
 
-        final Component clone = original.cloneForVerification();
+        final Component clone = ComponentVerificationTransformer.cloneForVerification(original);
 
         // Clone has a location with the same id
         Assertions.assertNotNull(clone.findLocation(id1));
@@ -51,7 +52,7 @@ public class ComponentTest {
         edge1.setTargetLocation(loc1);
         original.addEdge(edge1);
 
-        final Component clone = original.cloneForVerification();
+        final Component clone = ComponentVerificationTransformer.cloneForVerification(original);
 
         // The two ids should be different
         Assertions.assertNotEquals(id1, id2);
@@ -86,7 +87,7 @@ public class ComponentTest {
         edge1.setTargetLocation(loc1);
         original.addEdge(edge1);
 
-        final Component clone = original.cloneForVerification();
+        final Component clone = ComponentVerificationTransformer.cloneForVerification(original);
 
         // The two ids should be different
         Assertions.assertNotEquals(id1, id2);
@@ -145,7 +146,7 @@ public class ComponentTest {
         Assertions.assertEquals(3, c.getLocations().size());
         Assertions.assertEquals(3, c.getEdges().size());
 
-        c.applyAngelicCompletion();
+        ComponentVerificationTransformer.applyAngelicCompletionForComponent(c);
 
         Assertions.assertEquals(3, c.getLocations().size());
 
@@ -211,7 +212,7 @@ public class ComponentTest {
         Assertions.assertEquals(1, c.getLocations().size());
         Assertions.assertEquals(1, c.getEdges().size());
 
-        c.applyAngelicCompletion();
+        ComponentVerificationTransformer.applyAngelicCompletionForComponent(c);
 
         Assertions.assertEquals(1, c.getLocations().size());
         Assertions.assertEquals(3, c.getEdges().size());
@@ -256,7 +257,7 @@ public class ComponentTest {
         Assertions.assertEquals(1, c.getLocations().size());
         Assertions.assertEquals(2, c.getEdges().size());
 
-        c.applyAngelicCompletion();
+        ComponentVerificationTransformer.applyAngelicCompletionForComponent(c);
 
         Assertions.assertEquals(1, c.getLocations().size());
         Assertions.assertEquals(3, c.getEdges().size());
@@ -288,7 +289,7 @@ public class ComponentTest {
         Assertions.assertEquals(1, c.getLocations().size());
         Assertions.assertEquals(1, c.getEdges().size());
 
-        c.applyAngelicCompletion();
+        ComponentVerificationTransformer.applyAngelicCompletionForComponent(c);
 
         Assertions.assertEquals(1, c.getLocations().size());
         Assertions.assertEquals(2, c.getEdges().size());

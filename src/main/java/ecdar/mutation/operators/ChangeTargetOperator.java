@@ -3,6 +3,7 @@ package ecdar.mutation.operators;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
 import ecdar.abstractions.Location;
+import ecdar.mutation.ComponentVerificationTransformer;
 import ecdar.mutation.TextFlowBuilder;
 import ecdar.mutation.models.MutationTestCase;
 
@@ -39,7 +40,7 @@ public class ChangeTargetOperator extends MutationOperator {
                 // Ignore if location is target in original edge
                 if (originalEdge.getTargetLocation() == originalLocation) continue;
 
-                final Component mutant = original.cloneForVerification();
+                final Component mutant = ComponentVerificationTransformer.cloneForVerification(original);
 
                 // Mutate
                 final Edge mutantEdge = mutant.getEdges().get(edgeIndex);

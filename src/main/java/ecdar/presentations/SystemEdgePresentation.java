@@ -1,7 +1,7 @@
 package ecdar.presentations;
 
 import ecdar.Ecdar;
-import ecdar.abstractions.EcdarSystemEdge;
+import ecdar.abstractions.SystemEdge;
 import ecdar.abstractions.EcdarSystem;
 import ecdar.controllers.EcdarController;
 import ecdar.controllers.SystemEdgeController;
@@ -26,7 +26,7 @@ public class SystemEdgePresentation extends Group implements SelectHelper.ItemSe
      * @param edge system edge to present
      * @param system system of the system edge
      */
-    public SystemEdgePresentation(final EcdarSystemEdge edge, final EcdarSystem system) {
+    public SystemEdgePresentation(final SystemEdge edge, final EcdarSystem system) {
         controller = new EcdarFXMLLoader().loadAndGetController("SystemEdgePresentation.fxml", this);
         controller.setEdge(edge);
         controller.setSystem(system);
@@ -35,7 +35,7 @@ public class SystemEdgePresentation extends Group implements SelectHelper.ItemSe
         initializeBinding(edge);
     }
 
-    private void initializeBinding(final EcdarSystemEdge edge) {
+    private void initializeBinding(final SystemEdge edge) {
         final Link link = new Link();
         links.add(link);
 
@@ -73,7 +73,7 @@ public class SystemEdgePresentation extends Group implements SelectHelper.ItemSe
      * Binds the end of the last link to the parent of the edge.
      * @param edge edge to bind with
      */
-    private void bindFinishedEdge(final EcdarSystemEdge edge) {
+    private void bindFinishedEdge(final SystemEdge edge) {
         final Link firstLink = links.get(0);
         final Link lastLink = links.get(links.size() - 1);
 

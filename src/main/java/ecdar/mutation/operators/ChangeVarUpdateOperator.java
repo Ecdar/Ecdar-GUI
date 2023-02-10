@@ -3,6 +3,7 @@ package ecdar.mutation.operators;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
+import ecdar.mutation.ComponentVerificationTransformer;
 import ecdar.mutation.TextFlowBuilder;
 import ecdar.mutation.models.MutationTestCase;
 import ecdar.utility.ExpressionHelper;
@@ -49,7 +50,7 @@ public class ChangeVarUpdateOperator extends MutationOperator {
                 if (sides.get(local.getLeft()) == null) {
                     // For each possible assignment of that variable
                     for (int value = local.getMiddle(); value <= local.getRight(); value++) {
-                        final Component mutant = original.cloneForVerification();
+                        final Component mutant = ComponentVerificationTransformer.cloneForVerification(original);
                         final Edge mutantEdge = mutant.getEdges().get(finalEdgeIndex);
 
                         final List<String> newSimpleUpdates = new ArrayList<>();
@@ -74,7 +75,7 @@ public class ChangeVarUpdateOperator extends MutationOperator {
                         // If this is already the original assignment, ignore
                         if (sides.get(local.getLeft()).equals(String.valueOf(value))) continue;
 
-                        final Component mutant = original.cloneForVerification();
+                        final Component mutant = ComponentVerificationTransformer.cloneForVerification(original);
                         final Edge mutantEdge = mutant.getEdges().get(finalEdgeIndex);
 
                         final List<String> newSimpleUpdates = new ArrayList<>();

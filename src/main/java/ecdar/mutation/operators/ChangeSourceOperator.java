@@ -3,6 +3,7 @@ package ecdar.mutation.operators;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
 import ecdar.abstractions.Location;
+import ecdar.mutation.ComponentVerificationTransformer;
 import ecdar.mutation.TextFlowBuilder;
 import ecdar.mutation.models.MutationTestCase;
 
@@ -46,7 +47,7 @@ class ChangeSourceOperator extends MutationOperator {
                 if (originalLocation.getType().equals(Location.Type.INCONSISTENT) || originalLocation.getType().equals(Location.Type.UNIVERSAL))
                     continue;
 
-                final Component mutant = original.cloneForVerification();
+                final Component mutant = ComponentVerificationTransformer.cloneForVerification(original);
 
                 // Mutate
                 final Edge mutantEdge = mutant.getEdges().get(edgeIndex);

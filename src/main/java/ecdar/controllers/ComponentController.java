@@ -16,6 +16,7 @@ import javafx.animation.Transition;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -423,15 +424,6 @@ public class ComponentController extends ModelController implements Initializabl
         initializeDropDownMenu.accept(getComponent());
     }
 
-    private String getUniqueLocationId() {
-        final var currentIds = getComponent().getLocations().stream().map(Location::getId).collect(Collectors.toSet());
-        for (int counter = 1; ; counter++) {
-            if (currentIds.contains(LOCATION + counter)) {
-                return LOCATION + counter;
-            }
-        }
-    }
-
     private void initializeFinishEdgeContextMenu(final DisplayableEdge unfinishedEdge) {
         final Consumer<Component> initializeDropDownMenu = (component) -> {
             if (component == null) {
@@ -608,23 +600,6 @@ public class ComponentController extends ModelController implements Initializabl
         });
     }
 
-    /***
-     * Handles the addition of a new location
-     * @param removeLocationPresentation A consumer used to remove the location in case it is impossible to place it in the component
-     * @param loc The location to add to the component
-     */
-    private void addLocation(Consumer<LocationPresentation> removeLocationPresentation, Location loc) {
-        LocationPresentation locationPresentation = ensureCorrectPlacementOfLocation(getComponent(), locationPresentationMap.values(), loc, removeLocationPresentation);
-        locationPresentationMap.put(loc, locationPresentation);
-        modelContainerLocation.getChildren().add(locationPresentation);
-
-        // Bind the newly created location to the mouse and tell the ui that it is not placed yet
-        if (loc.getX() == 0) {
-            locationPresentation.setPlaced(false);
-            BindingHelper.bind(loc, getComponent().getBox().getXProperty(), getComponent().getBox().getYProperty());
-        }
-    }
-
     private void initializeEdgeHandling() {
         final Consumer<DisplayableEdge> handleAddedEdge = edge -> {
             final EdgePresentation edgePresentation = new EdgePresentation(edge, getComponent());
@@ -682,6 +657,32 @@ public class ComponentController extends ModelController implements Initializabl
             inputSignatureContainer.getChildren().add(newArrow);
         } else {
             outputSignatureContainer.getChildren().add(newArrow);
+        }
+    }
+
+    private String getUniqueLocationId() {
+        final var currentIds = getComponent().getLocations().stream().map(Location::getId).collect(Collectors.toSet());
+        for (int counter = 1; ; counter++) {
+            if (currentIds.contains(LOCATION + counter)) {
+                return LOCATION + counter;
+            }
+        }
+    }
+
+    /***
+     * Handles the addition of a new location
+     * @param removeLocationPresentation A consumer used to remove the location in case it is impossible to place it in the component
+     * @param loc The location to add to the component
+     */
+    private void addLocation(Consumer<LocationPresentation> removeLocationPresentation, Location loc) {
+        LocationPresentation locationPresentation = ensureCorrectPlacementOfLocation(getComponent(), locationPresentationMap.values(), loc, removeLocationPresentation);
+        locationPresentationMap.put(loc, locationPresentation);
+        modelContainerLocation.getChildren().add(locationPresentation);
+
+        // Bind the newly created location to the mouse and tell the ui that it is not placed yet
+        if (loc.getX() == 0) {
+            locationPresentation.setPlaced(false);
+            BindingHelper.bind(loc, getComponent().getBox().getXProperty(), getComponent().getBox().getYProperty());
         }
     }
 
