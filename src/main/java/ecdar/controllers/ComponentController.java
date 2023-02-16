@@ -14,8 +14,11 @@ import ecdar.utility.keyboard.NudgeDirection;
 import javafx.animation.Interpolator;
 import javafx.animation.Transition;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -47,7 +50,7 @@ import java.util.stream.Collectors;
 
 import static ecdar.abstractions.Project.LOCATION;
 import static ecdar.presentations.ModelPresentation.*;
-import static ecdar.utility.helpers.LocationPlacer.ensureCorrectPlacementOfLocation;
+import static ecdar.utility.helpers.LocationPlacer.getFreeCoordinatesForLocation;
 
 public class ComponentController extends ModelController implements Initializable {
     private final List<BiConsumer<Color, Color.Intensity>> updateColorDelegates = new ArrayList<>();
@@ -534,30 +537,14 @@ public class ComponentController extends ModelController implements Initializabl
     }
 
     private void initializeLocationHandling() {
-        final Consumer<LocationPresentation> removeLocationPresentation = locationPresentation -> {
-            modelContainerLocation.getChildren().remove(locationPresentation);
-            locationPresentationMap.remove(locationPresentation.getController().locationProperty().getValue());
-            getComponent().getLocations().remove(locationPresentation.getController().locationProperty().getValue());
-            Ecdar.showToast("Please select an empty space for the new location");
-        };
-
         final ListChangeListener<Location> locationListChangeListener = c -> {
             if (c.next()) {
                 // Locations are added to the component
                 c.getAddedSubList().forEach((loc) -> {
                     // Check related to undo/redo stack
                     if (!locationPresentationMap.containsKey(loc)) {
-                        addLocation(removeLocationPresentation, loc);
+                        addLocation(loc);
                     }
-
-                    LocationPresentation locationPresentation = locationPresentationMap.get(loc);
-
-                    //Ensure that the location is inside the bounds of the component
-                    locationPresentation.setLayoutX(locationPresentation.getController().getDragBounds().trimX(locationPresentation.getLayoutX()));
-                    locationPresentation.setLayoutY(locationPresentation.getController().getDragBounds().trimY(locationPresentation.getLayoutY()));
-
-                    //Change the layoutXProperty slightly to invoke listener and ensure distance to existing locations
-                    locationPresentation.setLayoutX(locationPresentation.getLayoutX() + 0.00001);
                 });
 
                 // Locations are removed from the component
@@ -575,9 +562,7 @@ public class ComponentController extends ModelController implements Initializabl
             locationListChangeListenerMap.put(getComponent(), locationListChangeListener);
         }
 
-        getComponent().getLocations().forEach(loc -> {
-            addLocation(removeLocationPresentation, loc);
-        });
+        getComponent().getLocations().forEach(this::addLocation);
     }
 
     private void initializeEdgeHandling() {
@@ -651,17 +636,51 @@ public class ComponentController extends ModelController implements Initializabl
 
     /***
      * Handles the addition of a new location
-     * @param removeLocationPresentation A consumer used to remove the location in case it is impossible to place it in the component
      * @param loc The location to add to the component
      */
-    private void addLocation(Consumer<LocationPresentation> removeLocationPresentation, Location loc) {
-        LocationPresentation locationPresentation = ensureCorrectPlacementOfLocation(getComponent(), locationPresentationMap.values(), loc, removeLocationPresentation);
-        locationPresentationMap.put(loc, locationPresentation);
-        modelContainerLocation.getChildren().add(locationPresentation);
+    private void addLocation(Location loc) {
+        LocationPresentation newLocationPresentation = new LocationPresentation(loc, getComponent());
+        Point2D placement = getFreeCoordinatesForLocation(getComponent().getBox(), locationPresentationMap.values().stream().map(l -> new Point2D(l.getLayoutX(), l.getLayoutY())).collect(Collectors.toList()), new Point2D(loc.getX(), loc.getY()));
+
+        if (placement == null) {
+            getComponent().getLocations().remove(loc);
+            Ecdar.showToast("Please select an empty space for the new location");
+            return;
+        }
+
+        newLocationPresentation.setLayoutX(placement.getX());
+        newLocationPresentation.setLayoutY(placement.getY());
+
+        final BooleanProperty alreadyFoundPlacement = new SimpleBooleanProperty(false);
+        final ChangeListener<Number> locationPlacementChangedListener = (observable, oldValue, newValue) -> {
+            if (alreadyFoundPlacement.get()) {
+                alreadyFoundPlacement.set(false);
+                return;
+            }
+
+            Point2D newPlacement = getFreeCoordinatesForLocation(getComponent().getBox(), locationPresentationMap.values().stream().filter(l -> !l.getController().getLocation().equals(loc)).map(l -> new Point2D(l.getLayoutX(), l.getLayoutY())).collect(Collectors.toList()), new Point2D(loc.getX(), loc.getY()));
+
+            if (newPlacement == null) {
+                getComponent().getLocations().remove(loc);
+                Ecdar.showToast("Please select an empty space for the new location");
+                return;
+            }
+
+            newLocationPresentation.setLayoutX(newPlacement.getX());
+            newLocationPresentation.setLayoutY(newPlacement.getY());
+
+            alreadyFoundPlacement.set(true); // ToDo NIELS: Maybe find better solution
+        };
+
+        newLocationPresentation.layoutXProperty().addListener(locationPlacementChangedListener);
+        newLocationPresentation.layoutYProperty().addListener(locationPlacementChangedListener);
+
+        locationPresentationMap.put(loc, newLocationPresentation);
+        modelContainerLocation.getChildren().add(newLocationPresentation);
 
         // Bind the newly created location to the mouse and tell the ui that it is not placed yet
         if (loc.getX() == 0) {
-            locationPresentation.setPlaced(false);
+            newLocationPresentation.setPlaced(false);
             BindingHelper.bind(loc, getComponent().getBox().getXProperty(), getComponent().getBox().getYProperty());
         }
     }

@@ -1,170 +1,117 @@
 package ecdar.utility.helpers;
 
 import ecdar.Ecdar;
-import ecdar.abstractions.Component;
-import ecdar.abstractions.Location;
+import ecdar.abstractions.Box;
 import ecdar.presentations.LocationPresentation;
-import javafx.beans.value.ChangeListener;
+import javafx.geometry.Point2D;
 
 import java.util.Collection;
-import java.util.function.Consumer;
+
+import static ecdar.presentations.ModelPresentation.TOOLBAR_HEIGHT;
 
 public class LocationPlacer {
-    public static LocationPresentation ensureCorrectPlacementOfLocation(Component component, Collection<LocationPresentation> existingLocationPresentations, Location originalLocation, Consumer<LocationPresentation> failedToFindPlacement) {
-        // Create a new presentation, and register it on the map
-        final LocationPresentation newLocationPresentation = new LocationPresentation(originalLocation, component);
+    /**
+     * Finds an unoccupied space within the provided box, starting from the preferred placement.
+     * Returns null if no such space could be found given the existing locations
+     * @param bounds bounds within which to find the unoccupied space
+     * @param existingLocations array of coordinates that are occupied
+     * @param preferredPlacement the preferred coordinates for the free space
+     * @return a free space or null if unable to find one
+     */
+    public static Point2D getFreeCoordinatesForLocation(final Box bounds, final Collection<Point2D> existingLocations, final Point2D preferredPlacement) {
+        final double offset = LocationPresentation.RADIUS * 2 + Ecdar.CANVAS_PADDING;
+        boolean hit = false;
 
-        final ChangeListener<Number> locationPlacementChangedListener = (observable, oldValue, newValue) -> {
-            final double offset = newLocationPresentation.getController().circle.getRadius() * 2 + Ecdar.CANVAS_PADDING;
-            boolean hit = false;
-            ItemDragHelper.DragBounds componentBounds = newLocationPresentation.getController().getDragBounds();
+        double latestHitRight = 0,
+                latestHitDown = 0,
+                latestHitLeft = 0,
+                latestHitUp = 0;
 
-            //Define the x and y coordinates for the initial and final locations
-            final double initialLocationX = component.getBox().getX() + newLocationPresentation.getController().circle.getRadius() * 2, initialLocationY = component.getBox().getY() + newLocationPresentation.getController().circle.getRadius() * 2, finalLocationX = component.getBox().getX() + component.getBox().getWidth() - newLocationPresentation.getController().circle.getRadius() * 2, finalLocationY = component.getBox().getY() + component.getBox().getHeight() - newLocationPresentation.getController().circle.getRadius() * 2;
-
-            double latestHitRight = 0, latestHitDown = 0, latestHitLeft = 0, latestHitUp = 0;
-
-            //Check to see if the location is placed on top of the initial location
-            if (Math.abs(initialLocationX - (newLocationPresentation.getLayoutX())) < offset && Math.abs(initialLocationY - (newLocationPresentation.getLayoutY())) < offset) {
+        //Check to see if the location is placed on top of another location
+        for (Point2D entry : existingLocations) {
+            if (Math.abs(entry.getX() - (preferredPlacement.getX())) < offset && Math.abs(entry.getY() - (preferredPlacement.getY())) < offset) {
                 hit = true;
-                latestHitRight = initialLocationX;
-                latestHitDown = initialLocationY;
-                latestHitLeft = initialLocationX;
-                latestHitUp = initialLocationY;
+                latestHitRight = entry.getX();
+                latestHitDown = entry.getY();
+                latestHitLeft = entry.getX();
+                latestHitUp = entry.getY();
+                break;
             }
+        }
 
-            //Check to see if the location is placed on top of the final location
-            else if (Math.abs(finalLocationX - (newLocationPresentation.getLayoutX())) < offset && Math.abs(finalLocationY - (newLocationPresentation.getLayoutY())) < offset) {
-                hit = true;
-                latestHitRight = finalLocationX;
-                latestHitDown = finalLocationY;
-                latestHitLeft = finalLocationX;
-                latestHitUp = finalLocationY;
-            }
+        //If the location is not placed on top of any other locations, do not do anything
+        if (!hit) {
+            return preferredPlacement;
+        }
+        hit = false;
 
-            //Check to see if the location is placed on top of another location
-            else {
-                for (LocationPresentation entry : existingLocationPresentations) {
-                    if (entry != newLocationPresentation && Math.abs(entry.getLayoutX() - (newLocationPresentation.getLayoutX())) < offset && Math.abs(entry.getLayoutY() - (newLocationPresentation.getLayoutY())) < offset) {
+        //Find an unoccupied space for the location
+        for (int i = 1; i < bounds.getWidth() / offset; i++) {
+            //Check to see, if the location can be placed to the right of an existing location
+            if (latestHitRight > offset && bounds.getWidth() > latestHitRight + offset) {
+                for (Point2D entry : existingLocations) {
+                    if (Math.abs(entry.getX() - (latestHitRight + offset)) < offset && Math.abs(entry.getY() - (preferredPlacement.getY())) < offset) {
                         hit = true;
-                        latestHitRight = entry.getLayoutX();
-                        latestHitDown = entry.getLayoutY();
-                        latestHitLeft = entry.getLayoutX();
-                        latestHitUp = entry.getLayoutY();
+                        latestHitRight = entry.getX();
                         break;
                     }
                 }
-            }
 
-            //If the location is not placed on top of any other locations, do not do anything
-            if (!hit) {
-                return;
+                if (!hit) {
+                    return new Point2D(latestHitRight + offset, preferredPlacement.getY());
+                }
             }
             hit = false;
 
-            //Find an unoccupied space for the location
-            for (int i = 1; i < component.getBox().getWidth() / offset; i++) {
-
-                //Check to see, if the location can be placed to the right of the existing locations
-                if (componentBounds.trimX(latestHitRight + offset) == latestHitRight + offset) {
-
-                    //Check if the location would be placed on the final location
-                    if (Math.abs(finalLocationX - (latestHitRight + offset)) < offset && Math.abs(finalLocationY - (newLocationPresentation.getLayoutY())) < offset) {
+            //Check to see, if the location can be placed below an existing location
+            if (latestHitDown > offset && bounds.getHeight() > latestHitDown + offset) {
+                for (Point2D entry : existingLocations) {
+                    if (Math.abs(entry.getX() - (preferredPlacement.getX())) < offset && Math.abs(entry.getY() - (latestHitDown + offset)) < offset) {
                         hit = true;
-                        latestHitRight = finalLocationX;
-                    } else {
-                        for (LocationPresentation entry : existingLocationPresentations) {
-                            if (entry != newLocationPresentation && Math.abs(entry.getLayoutX() - (latestHitRight + offset)) < offset && Math.abs(entry.getLayoutY() - (newLocationPresentation.getLayoutY())) < offset) {
-                                hit = true;
-                                latestHitRight = entry.getLayoutX();
-                                break;
-                            }
-                        }
-                    }
-
-                    if (!hit) {
-                        newLocationPresentation.setLayoutX(latestHitRight + offset);
-                        return;
+                        latestHitDown = entry.getY();
+                        break;
                     }
                 }
-                hit = false;
 
-                //Check to see, if the location can be placed below the existing locations
-                if (componentBounds.trimY(latestHitDown + offset) == latestHitDown + offset) {
-
-                    //Check if the location would be placed on the final location
-                    if (Math.abs(finalLocationX - (newLocationPresentation.getLayoutX())) < offset && Math.abs(finalLocationY - (latestHitDown + offset)) < offset) {
-                        hit = true;
-                        latestHitDown = finalLocationY;
-                    } else {
-                        for (LocationPresentation entry : existingLocationPresentations) {
-                            if (entry != newLocationPresentation && Math.abs(entry.getLayoutX() - (newLocationPresentation.getLayoutX())) < offset && Math.abs(entry.getLayoutY() - (latestHitDown + offset)) < offset) {
-                                hit = true;
-                                latestHitDown = entry.getLayoutY();
-                                break;
-                            }
-                        }
-                    }
-                    if (!hit) {
-                        newLocationPresentation.setLayoutY(latestHitDown + offset);
-                        return;
-                    }
+                if (!hit) {
+                    return new Point2D(preferredPlacement.getX(), latestHitDown + offset);
                 }
-                hit = false;
-
-                //Check to see, if the location can be placed to the left of the existing locations
-                if (componentBounds.trimX(latestHitLeft - offset) == latestHitLeft - offset) {
-
-                    //Check if the location would be placed on the initial location
-                    if (Math.abs(initialLocationX - (latestHitLeft - offset)) < offset && Math.abs(initialLocationY - (newLocationPresentation.getLayoutY())) < offset) {
-                        hit = true;
-                        latestHitLeft = initialLocationX;
-                    } else {
-                        for (LocationPresentation entry : existingLocationPresentations) {
-                            if (entry != newLocationPresentation && Math.abs(entry.getLayoutX() - (latestHitLeft - offset)) < offset && Math.abs(entry.getLayoutY() - (newLocationPresentation.getLayoutY())) < offset) {
-                                hit = true;
-                                latestHitLeft = entry.getLayoutX();
-                                break;
-                            }
-                        }
-                    }
-                    if (!hit) {
-                        newLocationPresentation.setLayoutX(latestHitLeft - offset);
-                        return;
-                    }
-                }
-                hit = false;
-
-                //Check to see, if the location can be placed above the existing locations
-                if (componentBounds.trimY(latestHitUp - offset) == latestHitUp - offset) {
-
-                    //Check if the location would be placed on the initial location
-                    if (Math.abs(initialLocationX - (newLocationPresentation.getLayoutX())) < offset && Math.abs(initialLocationY - (latestHitUp - offset)) < offset) {
-                        hit = true;
-                        latestHitUp = initialLocationY;
-                    } else {
-                        for (LocationPresentation entry : existingLocationPresentations) {
-                            if (entry != newLocationPresentation && Math.abs(entry.getLayoutX() - (newLocationPresentation.getLayoutX())) < offset && Math.abs(entry.getLayoutY() - (latestHitUp - offset)) < offset) {
-                                hit = true;
-                                latestHitUp = entry.getLayoutY();
-                                break;
-                            }
-                        }
-                    }
-                    if (!hit) {
-                        newLocationPresentation.setLayoutY(latestHitUp - offset);
-                        return;
-                    }
-                }
-                hit = false;
             }
+            hit = false;
 
-            failedToFindPlacement.accept(newLocationPresentation);
-        };
+            //Check to see, if the location can be placed to the left of the existing location
+            if (latestHitLeft > offset && bounds.getWidth() > latestHitLeft - offset) {
+                for (Point2D entry : existingLocations) {
+                    if (Math.abs(entry.getX() - (latestHitLeft - offset)) < offset && Math.abs(entry.getY() - (preferredPlacement.getY())) < offset) {
+                        hit = true;
+                        latestHitLeft = entry.getX();
+                        break;
+                    }
+                }
 
-        newLocationPresentation.layoutXProperty().addListener(locationPlacementChangedListener);
-        newLocationPresentation.layoutYProperty().addListener(locationPlacementChangedListener);
+                if (!hit) {
+                    return new Point2D(latestHitLeft - offset, preferredPlacement.getY());
+                }
+            }
+            hit = false;
 
-        return newLocationPresentation;
+            //Check to see, if the location can be placed above an existing location
+            if (latestHitUp > offset + TOOLBAR_HEIGHT && bounds.getHeight() > latestHitUp - offset) {
+                for (Point2D entry : existingLocations) {
+                    if (Math.abs(entry.getX() - (preferredPlacement.getX())) < offset && Math.abs(entry.getY() - (latestHitUp - offset)) < offset) {
+                        hit = true;
+                        latestHitUp = entry.getY();
+                        break;
+                    }
+                }
+
+                if (!hit) {
+                    return new Point2D(preferredPlacement.getX(), latestHitUp - offset);
+                }
+            }
+            hit = false;
+        }
+
+        return null;
     }
 }
