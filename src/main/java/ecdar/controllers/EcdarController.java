@@ -538,7 +538,6 @@ public class EcdarController implements Initializable {
         activeCanvasPresentation.get().setOpacity(0.75);
         newActiveCanvasPresentation.setOpacity(1);
         activeCanvasPresentation.set(newActiveCanvasPresentation);
-        Platform.runLater(() -> newActiveCanvasPresentation.getController().zoomHelper.zoomToFit());
     }
 
     public void setActiveModelPresentationForActiveCanvas(HighLevelModelPresentation newActiveModelPresentation) {

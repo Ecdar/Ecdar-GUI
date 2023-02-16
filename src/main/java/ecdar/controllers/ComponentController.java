@@ -16,11 +16,11 @@ import javafx.animation.Transition;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
+import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.layout.*;
@@ -71,6 +71,7 @@ public class ComponentController extends ModelController implements Initializabl
 
     private DropDownMenu contextMenu;
     private DropDownMenu finishEdgeContextMenu;
+    private Point2D dropdownCoordinatesInComponent;
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
@@ -327,21 +328,12 @@ public class ComponentController extends ModelController implements Initializabl
                 return;
             }
 
-            contextMenu = new DropDownMenu(root);
+            contextMenu = new DropDownMenu(modelContainerSubComponent);
 
             contextMenu.addClickableListElement("Add Location", event -> {
                 contextMenu.hide();
-                final Location newLocation = new Location();
-                newLocation.initialize(getUniqueLocationId());
 
-                double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
-                newLocation.setX(x);
-
-                double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
-                newLocation.setY(y);
-
-                newLocation.setColorIntensity(component.getColorIntensity());
-                newLocation.setColor(component.getColor());
+                final Location newLocation = new Location(component, Location.Type.NORMAL, getUniqueLocationId(), dropdownCoordinatesInComponent.getX(), dropdownCoordinatesInComponent.getY());
 
                 // Add a new location
                 UndoRedoStack.pushAndPerform(() -> { // Perform
@@ -354,10 +346,7 @@ public class ComponentController extends ModelController implements Initializabl
             // Adds the add universal location element to the drop-down menu, this element adds an universal location and its required edges
             contextMenu.addClickableListElement("Add Universal Location", event -> {
                 contextMenu.hide();
-                double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
-                double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
-
-                final Location newLocation = new Location(component, Location.Type.UNIVERSAL, getUniqueLocationId(), x, y);
+                final Location newLocation = new Location(component, Location.Type.UNIVERSAL, getUniqueLocationId(), dropdownCoordinatesInComponent.getX(), dropdownCoordinatesInComponent.getY());
 
                 final Edge inputEdge = newLocation.addLeftEdge("*", EdgeStatus.INPUT);
                 inputEdge.setIsLocked(true);
@@ -380,10 +369,7 @@ public class ComponentController extends ModelController implements Initializabl
             // Adds the add inconsistent location element to the dropdown menu, this element adds an inconsistent location
             contextMenu.addClickableListElement("Add Inconsistent Location", event -> {
                 contextMenu.hide();
-                double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
-                double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
-
-                final Location newLocation = new Location(component, Location.Type.INCONSISTENT, getUniqueLocationId(), x, y);
+                final Location newLocation = new Location(component, Location.Type.INCONSISTENT, getUniqueLocationId(), dropdownCoordinatesInComponent.getX(), dropdownCoordinatesInComponent.getY());
 
                 // Add a new location
                 UndoRedoStack.pushAndPerform(() -> { // Perform
@@ -438,7 +424,7 @@ public class ComponentController extends ModelController implements Initializabl
                 locationAware.yProperty().set(y);
             };
 
-            finishEdgeContextMenu = new DropDownMenu(root);
+            finishEdgeContextMenu = new DropDownMenu(modelContainerSubComponent);
             finishEdgeContextMenu.addListElement("Finish edge in a:");
 
             finishEdgeContextMenu.addClickableListElement("Location", event -> {
@@ -475,10 +461,7 @@ public class ComponentController extends ModelController implements Initializabl
 
             finishEdgeContextMenu.addClickableListElement("Universal Location", event -> {
                 finishEdgeContextMenu.hide();
-                double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
-                double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
-
-                final Location newLocation = new Location(component, Location.Type.UNIVERSAL, getUniqueLocationId(), x, y);
+                final Location newLocation = new Location(component, Location.Type.UNIVERSAL, getUniqueLocationId(), dropdownCoordinatesInComponent.getX(), dropdownCoordinatesInComponent.getY());
 
                 final Edge inputEdge = newLocation.addLeftEdge("*", EdgeStatus.INPUT);
                 inputEdge.setIsLocked(true);
@@ -517,10 +500,7 @@ public class ComponentController extends ModelController implements Initializabl
 
             finishEdgeContextMenu.addClickableListElement("Inconsistent Location", event -> {
                 finishEdgeContextMenu.hide();
-                double x = DropDownMenu.x - LocationPresentation.RADIUS / 2;
-                double y = DropDownMenu.y - LocationPresentation.RADIUS / 2;
-
-                final Location newLocation = new Location(component, Location.Type.INCONSISTENT, getUniqueLocationId(), x, y);
+                final Location newLocation = new Location(component, Location.Type.INCONSISTENT, getUniqueLocationId(), dropdownCoordinatesInComponent.getX(), dropdownCoordinatesInComponent.getY());
 
                 if (component.isAnyEdgeWithoutSource()) {
                     unfinishedEdge.setSourceLocation(newLocation);
@@ -663,7 +643,7 @@ public class ComponentController extends ModelController implements Initializabl
     private String getUniqueLocationId() {
         final var currentIds = getComponent().getLocations().stream().map(Location::getId).collect(Collectors.toSet());
         for (int counter = 1; ; counter++) {
-            if (currentIds.contains(LOCATION + counter)) {
+            if (!currentIds.contains(LOCATION + counter)) {
                 return LOCATION + counter;
             }
         }
@@ -816,6 +796,8 @@ public class ComponentController extends ModelController implements Initializabl
         EcdarController.getActiveCanvasPresentation().getController().leaveTextAreas();
         final DisplayableEdge unfinishedEdge = getComponent().getUnfinishedEdge();
 
+        dropdownCoordinatesInComponent = new Point2D(event.getX(), event.getY());
+
         if ((event.isShiftDown() && event.isPrimaryButtonDown()) || event.isMiddleButtonDown()) {
             final Location location = new Location();
             location.initialize(getUniqueLocationId());
@@ -862,10 +844,10 @@ public class ComponentController extends ModelController implements Initializabl
             });
         } else if (event.isSecondaryButtonDown()) {
             if (unfinishedEdge == null) {
-                contextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX() * EcdarController.getActiveCanvasZoomFactor().get(), event.getY() * EcdarController.getActiveCanvasZoomFactor().get());
+                contextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX(), event.getY());
             } else {
                 initializeFinishEdgeContextMenu(unfinishedEdge);
-                finishEdgeContextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX() * EcdarController.getActiveCanvasZoomFactor().get(), event.getY() * EcdarController.getActiveCanvasZoomFactor().get());
+                finishEdgeContextMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX(), event.getY());
             }
         } else if (event.isPrimaryButtonDown()) {
             // We are drawing an edge
