@@ -503,24 +503,6 @@ public class Component extends HighLevelModel implements Boxed {
         outputStrings.setAll(localOutputStrings);
     }
 
-    /**
-     * Generates an id to be used by universal and inconsistent locations in this component,
-     * if one has already been generated, return that instead
-     * @return generated universal/inconsistent id
-     */
-    public String generateUniIncId(){// ToDo NIELS: Move this out of component
-        final String id = getUniIncId();
-        if(id != null){
-            return id;
-        } else {
-            for(int counter = 0; ;counter++){
-                if(!Ecdar.getProject().getUniIncIds().contains(String.valueOf(counter))){
-                    return String.valueOf(counter);
-                }
-            }
-        }
-    }
-
     @Override
     public Box getBox() {
         return box;

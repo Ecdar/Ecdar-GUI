@@ -2,23 +2,20 @@ package ecdar.mutation;
 
 import com.bpodgursky.jbool_expressions.*;
 import com.bpodgursky.jbool_expressions.rules.RuleSet;
-import ecdar.abstractions.Component;
-import ecdar.abstractions.Edge;
-import ecdar.abstractions.EdgeStatus;
-import ecdar.abstractions.Location;
+import ecdar.abstractions.*;
 import ecdar.utility.ExpressionHelper;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ComponentVerificationTransformer { //ToDo NIELS: Test the public methods
+public class ComponentVerificationTransformer {
     /**
      * Applies demonic completion on this component.
      */
-    public static void applyDemonicCompletionToComponent(final Component component) {
+    public static void applyDemonicCompletionToComponent(final Component component, final Project project) {
         // Make a universal location
-        final Location uniLocation = new Location(component, Location.Type.UNIVERSAL, component.generateUniIncId(), 0, 0);
+        final Location uniLocation = new Location(component, Location.Type.UNIVERSAL, generateUniIncId(component, project), 0, 0);
         component.addLocation(uniLocation);
 
         final Edge inputEdge = uniLocation.addLeftEdge("*", EdgeStatus.INPUT);
@@ -33,24 +30,8 @@ public class ComponentVerificationTransformer { //ToDo NIELS: Test the public me
         final List<String> inputStrings = new ArrayList<>(component.getInputStrings());
 
         component.getLocations().forEach(location -> inputStrings.forEach(input -> {
-            // Get outgoing input edges that has the chosen input
-            final List<Edge> matchingEdges = component.getListOfEdgesFromDisplayableEdges(component.getOutgoingEdges(location)).stream().filter(
-                    edge -> edge.getStatus().equals(EdgeStatus.INPUT) &&
-                            edge.getSync().equals(input)).collect(Collectors.toList()
-            );
-
-            // If no such edges, add an edge to Universal
-            if (matchingEdges.isEmpty()) {
-                final Edge edge = new Edge(location, EdgeStatus.INPUT);
-                edge.setTargetLocation(uniLocation);
-                edge.addSyncNail(input);
-                component.addEdge(edge);
-                return;
-            }
-            // If an edge has no guard and its target has no invariants, ignore.
-            // Component is already input-enabled with respect to this location and input.
-            if (matchingEdges.stream().anyMatch(edge -> edge.getGuard().isEmpty() &&
-                    edge.getTargetLocation().getInvariant().isEmpty())) return;
+            final List<Edge> matchingEdges = getOutgoingInputEdgesFromLocationWithSync(component, location, input);
+            if (matchingEdges.isEmpty()) return;
 
             // Extract expression for which edges to create.
             // The expression is in DNF
@@ -67,25 +48,8 @@ public class ComponentVerificationTransformer { //ToDo NIELS: Test the public me
         final List<String> inputStrings = new ArrayList<>(component.getInputStrings());
 
         component.getLocations().forEach(location -> inputStrings.forEach(input -> {
-            // Get outgoing input edges that has the chosen input
-            final List<Edge> matchingEdges = component.getListOfEdgesFromDisplayableEdges(component.getOutgoingEdges(location)).stream().filter(
-                    edge -> edge.getStatus().equals(EdgeStatus.INPUT) &&
-                            edge.getSync().equals(input)).collect(Collectors.toList()
-            );
-
-            // If no such edges, add a self loop without a guard
-            if (matchingEdges.isEmpty()) {
-                final Edge edge = new Edge(location, EdgeStatus.INPUT);
-                edge.setTargetLocation(location);
-                edge.addSyncNail(input);
-                component.addEdge(edge);
-                return;
-            }
-
-            // If an edge has no guard and its target has no invariants, ignore.
-            // Component is already input-enabled with respect to this location and input.
-            if (matchingEdges.stream().anyMatch(edge -> edge.getGuard().isEmpty() &&
-                    edge.getTargetLocation().getInvariant().isEmpty())) return;
+            final List<Edge> matchingEdges = getOutgoingInputEdgesFromLocationWithSync(component, location, input);
+            if (matchingEdges.isEmpty()) return;
 
             // Extract expression for which edges to create.
             // The expression is in DNF
@@ -112,6 +76,38 @@ public class ComponentVerificationTransformer { //ToDo NIELS: Test the public me
         clone.setName(component.getName());
 
         return clone;
+    }
+
+    /**
+     * Get the input edges starting from the location with the specified sync.
+     * If no edges match, this method adds a self loop on the location with the sync.
+     * @param component containing component
+     * @param location source location to check outgoing edges
+     * @param sync desired sync to check for and possibly create self-loop with
+     * @return list of matching edges (if empty, the self-loop might have been created)
+     */
+    private static List<Edge> getOutgoingInputEdgesFromLocationWithSync(Component component, Location location, String sync) {
+        // Get outgoing input edges that has the chosen sync
+        final List<Edge> matchingEdges = component.getListOfEdgesFromDisplayableEdges(component.getOutgoingEdges(location)).stream().filter(
+                edge -> edge.getStatus().equals(EdgeStatus.INPUT) &&
+                        edge.getSync().equals(sync)).collect(Collectors.toList()
+        );
+
+        // If no such edges, add a self loop without a guard
+        if (matchingEdges.isEmpty()) {
+            final Edge edge = new Edge(location, EdgeStatus.INPUT);
+            edge.setTargetLocation(location);
+            edge.addSyncNail(sync);
+            component.addEdge(edge);
+            return matchingEdges;
+        }
+
+        // If an edge has no guard and its target has no invariants, ignore.
+        // Component is already input-enabled with respect to this location and input.
+        if (matchingEdges.stream().anyMatch(edge -> edge.getGuard().isEmpty() &&
+                edge.getTargetLocation().getInvariant().isEmpty())) return matchingEdges;
+
+        return matchingEdges;
     }
 
     /**
@@ -245,5 +241,36 @@ public class ComponentVerificationTransformer { //ToDo NIELS: Test the public me
 
         clone.getListOfEdgesFromDisplayableEdges(original.getDisplayableEdges()).forEach(edge -> clone.addEdge((edge).cloneForVerification(original)));
         clone.setDeclarationsText(original.getDeclarationsText());
+    }
+
+    /**
+     * Generates an id to be used by universal and inconsistent locations in this component,
+     * if one has already been generated, return that instead
+     * @return generated universal/inconsistent id
+     */
+    private static String generateUniIncId(final Component component, final Project project){// ToDo NIELS: Move this out of component
+        final String id = component.getUniIncId();
+        if(id != null){
+            return id;
+        } else {
+            for(int counter = 0; ;counter++){
+                if(!getUniIncIds(project).contains(String.valueOf(counter))){
+                    return String.valueOf(counter);
+                }
+            }
+        }
+    }
+
+    /**
+     * Gets universal/inconsistent ids for all components in the project
+     * @return a list of universal/inconsistent ids
+     */
+    private static List<String> getUniIncIds(final Project project) {
+        final List<String> ids = new ArrayList<>();
+        for (final Component component : project.getComponents()){
+            ids.add(component.getUniIncId());
+        }
+
+        return ids;
     }
 }
