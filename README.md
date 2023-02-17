@@ -144,4 +144,14 @@ The FXML files are markup specifying how the elements should look in the UI and 
 > The advantage of during this is that the `controller` can contain all the business logic and bindings to the FXML elements, while the `presentation` can be used to instantiate and reference the UI elements inside the Java code. The `controller` should contain the logic and is bound within the FXML file, so the `presentation` Java file should be seen as a shell.
 
 #### Utility
-<!-- ToDo -->
+To increase the testability and separation of concern further, the `utility` package is introduced. This package includes useful functionality that is either used in multiple unrelated classes or outside the responsibility of the given class.
+
+An example of one of the classes located in this package is the `UndoRedoStack` used to keep track of actions performed by the user.
+
+#### Miscellaneous
+Besides the packages mentioned above, some larger functionalities are located in their own packages. Here is a small description of each:
+- `backend`: Responsible for the communication with the engines and model checking.
+- `code_analysis`: Responsible for analysing the elements of the current project and construct messages if errors or warnings are encountered.
+- `issues`: Classes for representing `Errors`, `Issues`, and `Warnings`.
+- `model_canvas.arrow_heads`: Arrowheads used in the UI to visualize the direction of edges.
+
