@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
 
 import static ecdar.abstractions.Project.LOCATION;
 import static ecdar.presentations.ModelPresentation.*;
-import static ecdar.utility.helpers.LocationPlacer.getFreeCoordinatesForLocation;
+import static ecdar.utility.helpers.UnoccupiedSpaceFinder.getUnoccupiedSpace;
 
 public class ComponentController extends ModelController implements Initializable {
     private final List<BiConsumer<Color, Color.Intensity>> updateColorDelegates = new ArrayList<>();
@@ -640,7 +640,7 @@ public class ComponentController extends ModelController implements Initializabl
      */
     private void addLocation(Location loc) {
         LocationPresentation newLocationPresentation = new LocationPresentation(loc, getComponent());
-        Point2D placement = getFreeCoordinatesForLocation(getComponent().getBox(), locationPresentationMap.values().stream().map(l -> new Point2D(l.getLayoutX(), l.getLayoutY())).collect(Collectors.toList()), new Point2D(loc.getX(), loc.getY()));
+        Point2D placement = getUnoccupiedSpace(getComponent().getBox(), locationPresentationMap.values().stream().map(l -> new Point2D(l.getLayoutX(), l.getLayoutY())).collect(Collectors.toList()), new Point2D(loc.getX(), loc.getY()), LocationPresentation.RADIUS * 2 + Ecdar.CANVAS_PADDING);
 
         if (placement == null) {
             getComponent().getLocations().remove(loc);
@@ -658,7 +658,7 @@ public class ComponentController extends ModelController implements Initializabl
                 return;
             }
 
-            Point2D newPlacement = getFreeCoordinatesForLocation(getComponent().getBox(), locationPresentationMap.values().stream().filter(l -> !l.getController().getLocation().equals(loc)).map(l -> new Point2D(l.getLayoutX(), l.getLayoutY())).collect(Collectors.toList()), new Point2D(loc.getX(), loc.getY()));
+            Point2D newPlacement = getUnoccupiedSpace(getComponent().getBox(), locationPresentationMap.values().stream().filter(l -> !l.getController().getLocation().equals(loc)).map(l -> new Point2D(l.getLayoutX(), l.getLayoutY())).collect(Collectors.toList()), new Point2D(loc.getX(), loc.getY()), LocationPresentation.RADIUS * 2 + Ecdar.CANVAS_PADDING);
 
             if (newPlacement == null) {
                 getComponent().getLocations().remove(loc);

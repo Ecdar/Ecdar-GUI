@@ -1,6 +1,5 @@
 package ecdar.abstractions;
 
-import ecdar.Ecdar;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
 import ecdar.utility.colors.EnabledColor;

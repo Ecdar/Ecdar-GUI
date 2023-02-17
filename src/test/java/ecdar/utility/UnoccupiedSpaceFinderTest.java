@@ -1,20 +1,17 @@
 package ecdar.utility;
 
+import ecdar.Ecdar;
 import ecdar.abstractions.Box;
-import ecdar.abstractions.Component;
-import ecdar.abstractions.Location;
 import ecdar.presentations.LocationPresentation;
-import ecdar.utility.helpers.LocationPlacer;
+import ecdar.utility.helpers.UnoccupiedSpaceFinder;
 import javafx.geometry.Point2D;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class LocationPlacerTest {
+public class UnoccupiedSpaceFinderTest {
     @Test
     public void testUnoccupiedPointIsGivenAndReturned() {
         Box box = new Box();
@@ -27,7 +24,7 @@ public class LocationPlacerTest {
         locations.add(new Point2D(150, 150));
         Point2D preferredPlacement = new Point2D(200, 200);
 
-        Point2D freePoint = LocationPlacer.getFreeCoordinatesForLocation(box, locations, preferredPlacement);
+        Point2D freePoint = UnoccupiedSpaceFinder.getUnoccupiedSpace(box, locations, preferredPlacement, LocationPresentation.RADIUS * 2 + Ecdar.CANVAS_PADDING);
 
         Assertions.assertEquals(preferredPlacement, freePoint);
     }
@@ -39,7 +36,7 @@ public class LocationPlacerTest {
         box.setHeight(300);
         Point2D preferredPlacement = new Point2D(100, 100);
 
-        Point2D freePoint = LocationPlacer.getFreeCoordinatesForLocation(box, new ArrayList<>(List.of(preferredPlacement)), preferredPlacement);
+        Point2D freePoint = UnoccupiedSpaceFinder.getUnoccupiedSpace(box, new ArrayList<>(List.of(preferredPlacement)), preferredPlacement, LocationPresentation.RADIUS * 2 + Ecdar.CANVAS_PADDING);
 
         Assertions.assertNotNull(freePoint);
         Assertions.assertNotEquals(preferredPlacement, freePoint);
@@ -60,7 +57,7 @@ public class LocationPlacerTest {
         }
         Point2D preferredPlacement = new Point2D(50, 50);
 
-        Point2D freePoint = LocationPlacer.getFreeCoordinatesForLocation(box, locations, preferredPlacement);
+        Point2D freePoint = UnoccupiedSpaceFinder.getUnoccupiedSpace(box, locations, preferredPlacement, LocationPresentation.RADIUS * 2 + Ecdar.CANVAS_PADDING);
 
         Assertions.assertNull(freePoint);
     }
