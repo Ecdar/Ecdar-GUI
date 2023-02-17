@@ -134,6 +134,5 @@ public class ZoomHelper {
         // Center the model within the modelPane to account for resized model
         model.setTranslateX(0);
         model.setTranslateY(0);
-
     }
 }

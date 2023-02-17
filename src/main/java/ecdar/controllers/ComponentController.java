@@ -94,7 +94,7 @@ public class ComponentController extends ModelController implements Initializabl
             inputSignatureContainer.heightProperty().addListener((change) -> updateMaxHeight());
             outputSignatureContainer.heightProperty().addListener((change) -> updateMaxHeight());
 
-            // Bind the declarations of the abstraction the view
+            // Bind the declarations of the abstraction to the view
             declarationTextArea.replaceText(0, declarationTextArea.getLength(), newComponent.getDeclarationsText());
             declarationTextArea.textProperty().addListener((observable, oldDeclaration, newDeclaration) -> newComponent.setDeclarationsText(newDeclaration));
 

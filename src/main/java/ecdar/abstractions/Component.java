@@ -63,7 +63,7 @@ public class Component extends HighLevelModel implements Boxed {
 
         // Make initial location
         final Location initialLocation = new Location();
-        initialLocation.initialize(LOCATION + 1);
+        initialLocation.initialize(LOCATION + "1");
         initialLocation.setType(Location.Type.INITIAL);
 
         // Place in center

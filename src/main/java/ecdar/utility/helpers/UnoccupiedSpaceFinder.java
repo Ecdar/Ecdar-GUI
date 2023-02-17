@@ -1,8 +1,6 @@
 package ecdar.utility.helpers;
 
-import ecdar.Ecdar;
 import ecdar.abstractions.Box;
-import ecdar.presentations.LocationPresentation;
 import javafx.geometry.Point2D;
 
 import java.util.Collection;
