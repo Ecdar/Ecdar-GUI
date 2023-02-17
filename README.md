@@ -5,6 +5,13 @@ j-ecdar and revaal executables.
 
 > :information_source: If the goal is to use ECDAR, please goto the [main ECDAR repository](https://github.com/Ecdar/ECDAR), which contains releases for all supported platforms. These releases contain all dependencies, including the engines and a JRE.
 
+## Screenshots
+| <img src="presentation/Retailer.png" width="400">  <img src="presentation/Administration.png" width="400"> | <img src="presentation/UniversityExample.png" width="400"> | 
+|------------------------------------------------------------------------------------------------------------|------------------------------------------------------------|
+
+## H-UPPAAL
+This project is a hard fork of https://github.com/ulriknyman/H-Uppaal.
+
 <a id="dependencies"></a>
 ## Dependencies
 This section covers what dependencies are currently needed by the GUI.
@@ -105,11 +112,36 @@ For features that are highly coupled with the interface, a second test suite has
 ```
 These tests are more intensive to run and utilizes a robot for interacting with a running process of the GUI. The tests are implemented using [TestFX](https://github.com/TestFX/TestFX). As these tests are more intensive, they are not run as part of the standard CI workflow.
 
-If you want to add any tests of this sort, please make sure that the functionality cannot be tested using non-UI tests. 
+If you want to add any tests of this sort, please make sure that the functionality cannot be tested using non-UI tests.
 
-## Screenshots
-| <img src="presentation/Retailer.png" width="400">  <img src="presentation/Administration.png" width="400"> | <img src="presentation/UniversityExample.png" width="400"> | 
-|------------------------------------------------------------------------------------------------------------|------------------------------------------------------------|
+### Code Organisation
+The code within the project is structure based on the Model-View-ViewModel (**MVVM**) architectural pattern. However, the terms _Abstraction_, _Controller_, and _Presentation_ are used instead.
+This means that each element in the system consists of:
+- An _Abstraction_ (located in `abstractions` package).
+- A _Controller_ (located in `controllers` package).
+- A _Presentation_ (located in `presentations` package).
+  - Most of the presentations are related to an `FXML` markup file that specifies the look of the presentation. These files are located in `src/main/resources/ecdar/presentations`.
 
-## H-UPPAAL
-This project is a hard fork of https://github.com/ulriknyman/H-Uppaal.
+In addition to these, a `utility` package is used for additional business logic to improve separation of concern and enhance the testability of the system.
+
+#### Abstractions
+The abstractions are used to represent logical elements, such as `components`, `locations`, and `edges`. These classes should mostly be pure data objects. They are used to save and load data to and from existing project files.
+
+#### Controllers
+The controllers contain the business logic of the system. They function as the link between the UI and the abstractions.
+This is implemented such that an action performed to an element in the UI triggers a method inside the controller, which then alters the state of the related abstraction.
+
+They implement the `Initializable` interface and are initialized through their associated presentation when an instance of that is instantiated. Hierarchically, a presentation therefor contains a controller.
+
+Each controller controls an instance of its related abstraction. If an action to one element should affect another element, this effect is enforced through the controller.
+
+#### Presentations
+As mentioned above, most of the presentations are split into a Java class and an FXML markup file. The Java class can be seen as a shell to initialize the FXML element from inside the business logic. It initializes the related controller and ensures that any needed elements are set within it. This allows the controllers to be initialized without any UI elements, which is very useful for testing, while ensuring that they are correctly connected while the UI is running.
+
+The FXML files are markup specifying how the elements should look in the UI and have a reference to the related controller. Each element that should be addressable or changeable from the controller has an `fx:id` that is directly referenced as a member inside the controller. The direct connection to a controller allows events, such as `onPressed`, to trigger the correct methods in the controller and also helps IDEs identified any potentially missing methods or members.
+
+> :question: **Why use both a controller and a presentation Java file?**\
+> The advantage of during this is that the `controller` can contain all the business logic and bindings to the FXML elements, while the `presentation` can be used to instantiate and reference the UI elements inside the Java code. The `controller` should contain the logic and is bound within the FXML file, so the `presentation` Java file should be seen as a shell.
+
+#### Utility
+<!-- ToDo -->
