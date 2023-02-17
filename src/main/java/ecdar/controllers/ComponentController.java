@@ -48,7 +48,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static ecdar.abstractions.Project.LOCATION;
 import static ecdar.presentations.ModelPresentation.*;
 import static ecdar.utility.helpers.UnoccupiedSpaceFinder.getUnoccupiedSpace;
 
@@ -305,22 +304,16 @@ public class ComponentController extends ModelController implements Initializabl
         checkLocations.accept(getComponent());
 
         // Check location whenever we get new edges
-        getComponent().getDisplayableEdges().addListener(new ListChangeListener<DisplayableEdge>() {
-            @Override
-            public void onChanged(final Change<? extends DisplayableEdge> c) {
-                while (c.next()) {
-                    checkLocations.accept(getComponent());
-                }
+        getComponent().getDisplayableEdges().addListener((ListChangeListener<DisplayableEdge>) c -> {
+            while (c.next()) {
+                checkLocations.accept(getComponent());
             }
         });
 
         // Check location whenever we get new locations
-        getComponent().getLocations().addListener(new ListChangeListener<Location>() {
-            @Override
-            public void onChanged(final Change<? extends Location> c) {
-                while (c.next()) {
-                    checkLocations.accept(getComponent());
-                }
+        getComponent().getLocations().addListener((ListChangeListener<Location>) c -> {
+            while (c.next()) {
+                checkLocations.accept(getComponent());
             }
         });
     }
@@ -336,7 +329,7 @@ public class ComponentController extends ModelController implements Initializabl
             contextMenu.addClickableListElement("Add Location", event -> {
                 contextMenu.hide();
 
-                final Location newLocation = new Location(component, Location.Type.NORMAL, getUniqueLocationId(), dropdownCoordinatesInComponent.getX(), dropdownCoordinatesInComponent.getY());
+                final Location newLocation = new Location(component, Location.Type.NORMAL, getComponent().getUniqueLocationId(), dropdownCoordinatesInComponent.getX(), dropdownCoordinatesInComponent.getY());
 
                 // Add a new location
                 UndoRedoStack.pushAndPerform(() -> { // Perform
@@ -346,10 +339,10 @@ public class ComponentController extends ModelController implements Initializabl
                 }, "Added location '" + newLocation + "' to component '" + component.getName() + "'", "add-circle");
             });
 
-            // Adds the add universal location element to the drop-down menu, this element adds an universal location and its required edges
+            // Adds the add universal location element to the drop-down menu, this element adds a universal location and its required edges
             contextMenu.addClickableListElement("Add Universal Location", event -> {
                 contextMenu.hide();
-                final Location newLocation = new Location(component, Location.Type.UNIVERSAL, getUniqueLocationId(), dropdownCoordinatesInComponent.getX(), dropdownCoordinatesInComponent.getY());
+                final Location newLocation = new Location(component, Location.Type.UNIVERSAL, getComponent().getUniqueLocationId(), dropdownCoordinatesInComponent.getX(), dropdownCoordinatesInComponent.getY());
 
                 final Edge inputEdge = newLocation.addLeftEdge("*", EdgeStatus.INPUT);
                 inputEdge.setIsLocked(true);
@@ -372,7 +365,7 @@ public class ComponentController extends ModelController implements Initializabl
             // Adds the add inconsistent location element to the dropdown menu, this element adds an inconsistent location
             contextMenu.addClickableListElement("Add Inconsistent Location", event -> {
                 contextMenu.hide();
-                final Location newLocation = new Location(component, Location.Type.INCONSISTENT, getUniqueLocationId(), dropdownCoordinatesInComponent.getX(), dropdownCoordinatesInComponent.getY());
+                final Location newLocation = new Location(component, Location.Type.INCONSISTENT, getComponent().getUniqueLocationId(), dropdownCoordinatesInComponent.getX(), dropdownCoordinatesInComponent.getY());
 
                 // Add a new location
                 UndoRedoStack.pushAndPerform(() -> { // Perform
@@ -433,7 +426,7 @@ public class ComponentController extends ModelController implements Initializabl
             finishEdgeContextMenu.addClickableListElement("Location", event -> {
                 finishEdgeContextMenu.hide();
                 final Location location = new Location();
-                location.initialize(getUniqueLocationId());
+                location.initialize(getComponent().getUniqueLocationId());
 
                 location.setColorIntensity(getComponent().getColorIntensity());
                 location.setColor(getComponent().getColor());
@@ -464,7 +457,7 @@ public class ComponentController extends ModelController implements Initializabl
 
             finishEdgeContextMenu.addClickableListElement("Universal Location", event -> {
                 finishEdgeContextMenu.hide();
-                final Location newLocation = new Location(component, Location.Type.UNIVERSAL, getUniqueLocationId(), dropdownCoordinatesInComponent.getX(), dropdownCoordinatesInComponent.getY());
+                final Location newLocation = new Location(component, Location.Type.UNIVERSAL, getComponent().getUniqueLocationId(), dropdownCoordinatesInComponent.getX(), dropdownCoordinatesInComponent.getY());
 
                 final Edge inputEdge = newLocation.addLeftEdge("*", EdgeStatus.INPUT);
                 inputEdge.setIsLocked(true);
@@ -503,7 +496,7 @@ public class ComponentController extends ModelController implements Initializabl
 
             finishEdgeContextMenu.addClickableListElement("Inconsistent Location", event -> {
                 finishEdgeContextMenu.hide();
-                final Location newLocation = new Location(component, Location.Type.INCONSISTENT, getUniqueLocationId(), dropdownCoordinatesInComponent.getX(), dropdownCoordinatesInComponent.getY());
+                final Location newLocation = new Location(component, Location.Type.INCONSISTENT, getComponent().getUniqueLocationId(), dropdownCoordinatesInComponent.getX(), dropdownCoordinatesInComponent.getY());
 
                 if (component.isAnyEdgeWithoutSource()) {
                     unfinishedEdge.setSourceLocation(newLocation);
@@ -622,15 +615,6 @@ public class ComponentController extends ModelController implements Initializabl
             inputSignatureContainer.getChildren().add(newArrow);
         } else {
             outputSignatureContainer.getChildren().add(newArrow);
-        }
-    }
-
-    private String getUniqueLocationId() {
-        final var currentIds = getComponent().getLocations().stream().map(Location::getId).collect(Collectors.toSet());
-        for (int counter = 1; ; counter++) {
-            if (!currentIds.contains(LOCATION + counter)) {
-                return LOCATION + counter;
-            }
         }
     }
 
@@ -819,7 +803,7 @@ public class ComponentController extends ModelController implements Initializabl
 
         if ((event.isShiftDown() && event.isPrimaryButtonDown()) || event.isMiddleButtonDown()) {
             final Location location = new Location();
-            location.initialize(getUniqueLocationId());
+            location.initialize(getComponent().getUniqueLocationId());
 
             location.setX(event.getX());
             location.setY(event.getY());

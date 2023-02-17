@@ -16,7 +16,7 @@ public class ComponentVerificationTransformerTest {
         final Component comp = new Component(false, "Comp");
         project.addComponent(comp);
 
-        applyDemonicCompletionToComponent(comp, project);
+        applyDemonicCompletionToComponent(comp);
 
         Assertions.assertTrue(comp.getLocations().stream().anyMatch(e -> e.getType().equals(Location.Type.UNIVERSAL)));
         Assertions.assertTrue(comp.getListOfEdgesFromDisplayableEdges(comp.getInputEdges()).stream().anyMatch(e -> e.getSync().equals("*")));

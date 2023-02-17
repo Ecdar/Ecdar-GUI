@@ -193,6 +193,15 @@ public class Component extends HighLevelModel implements Boxed {
         return locations.remove(location);
     }
 
+    public String getUniqueLocationId() {
+        final var currentIds = getLocations().stream().map(Location::getId).collect(Collectors.toSet());
+        for (int counter = 1; ; counter++) {
+            if (!currentIds.contains(LOCATION + counter)) {
+                return LOCATION + counter;
+            }
+        }
+    }
+
     /**
      * Returns all DisplayableEdges of the component (returning a list potentially containing GroupEdges and Edges)
      * @return All visual edges of the component

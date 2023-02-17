@@ -13,9 +13,9 @@ public class ComponentVerificationTransformer {
     /**
      * Applies demonic completion on this component.
      */
-    public static void applyDemonicCompletionToComponent(final Component component, final Project project) {
+    public static void applyDemonicCompletionToComponent(final Component component) {
         // Make a universal location
-        final Location uniLocation = new Location(component, Location.Type.UNIVERSAL, generateUniIncId(component, project), 0, 0);
+        final Location uniLocation = new Location(component, Location.Type.UNIVERSAL, component.getUniqueLocationId(), 0, 0);
         component.addLocation(uniLocation);
 
         final Edge inputEdge = uniLocation.addLeftEdge("*", EdgeStatus.INPUT);
@@ -241,36 +241,5 @@ public class ComponentVerificationTransformer {
 
         clone.getListOfEdgesFromDisplayableEdges(original.getDisplayableEdges()).forEach(edge -> clone.addEdge((edge).cloneForVerification(original)));
         clone.setDeclarationsText(original.getDeclarationsText());
-    }
-
-    /**
-     * Generates an id to be used by universal and inconsistent locations in this component,
-     * if one has already been generated, return that instead
-     * @return generated universal/inconsistent id
-     */
-    private static String generateUniIncId(final Component component, final Project project){// ToDo NIELS: Move this out of component
-        final String id = component.getUniIncId();
-        if(id != null){
-            return id;
-        } else {
-            for(int counter = 0; ;counter++){
-                if(!getUniIncIds(project).contains(String.valueOf(counter))){
-                    return String.valueOf(counter);
-                }
-            }
-        }
-    }
-
-    /**
-     * Gets universal/inconsistent ids for all components in the project
-     * @return a list of universal/inconsistent ids
-     */
-    private static List<String> getUniIncIds(final Project project) {
-        final List<String> ids = new ArrayList<>();
-        for (final Component component : project.getComponents()){
-            ids.add(component.getUniIncId());
-        }
-
-        return ids;
     }
 }

@@ -88,7 +88,7 @@ public class MutationHandler {
             testModel.setName(MutationTestPlanController.SPEC_NAME);
 
             // If chosen, apply demonic completion
-            if (getPlan().isDemonic()) ComponentVerificationTransformer.applyDemonicCompletionToComponent(testModel, Ecdar.getProject());
+            if (getPlan().isDemonic()) ComponentVerificationTransformer.applyDemonicCompletionToComponent(testModel);
 
             //Rename universal and inconsistent locations
             testModel.getLocations().forEach(location -> {
