@@ -150,7 +150,6 @@ public class BackendDriver {
 
         EcdarBackendGrpc.EcdarBackendStub stub = EcdarBackendGrpc.newStub(channel);
         BackendConnection newConnection = new BackendConnection(backend, p, stub, channel);
-        addBackendConnection(newConnection);
 
         QueryProtos.ComponentsUpdateRequest.Builder componentsBuilder = QueryProtos.ComponentsUpdateRequest.newBuilder();
         for (Component c : Ecdar.getProject().getComponents()) {
