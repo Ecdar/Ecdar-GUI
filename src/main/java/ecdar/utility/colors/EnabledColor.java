@@ -77,8 +77,16 @@ public class EnabledColor {
         return new EnabledColor(color, intensity.lowest());
     }
 
+    public EnabledColor nextIntensity() {
+        return nextIntensity(1);
+    }
+
     public EnabledColor nextIntensity(final int levelIncrement) {
         return new EnabledColor(this.color, this.intensity.next(levelIncrement));
+    }
+
+    public EnabledColor setIntensity(int i) {
+        return getLowestIntensity().nextIntensity(i);
     }
 
     @Override

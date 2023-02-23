@@ -11,13 +11,12 @@ import javafx.scene.layout.*;
 public class FilePresentation extends AnchorPane {
     private final FileController controller;
 
-    public FilePresentation(final HighLevelModel model, final ObservableList<FilePresentation> activeFilePresentations) {
+    public FilePresentation(final HighLevelModel model) {
         controller = new EcdarFXMLLoader().loadAndGetController("FilePresentation.fxml", this);
         controller.setModel(model);
 
         // Ensure that the icons are scaled to current font scale
         Platform.runLater(() -> Ecdar.getPresentation().getController().scaleIcons(this));
-        activeFilePresentations.addListener((ListChangeListener<FilePresentation>) c -> controller.setIsActive(activeFilePresentations.contains(this)));
     }
 
     public FileController getController() {

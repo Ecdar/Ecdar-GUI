@@ -128,7 +128,8 @@ public class ZoomHelper {
         if (canvasPresentation.getController().modelPane.getChildren().isEmpty() || canvasPresentation.getController().modelPane.getChildren().get(0) instanceof DeclarationsPresentation) {
             canvasPresentation.getController().modelPane.setTranslateY(0);
         } else {
-            canvasPresentation.getController().modelPane.setTranslateY(-Ecdar.CANVAS_PADDING * 2); // 0 is slightly below center, this looks better
+            // 0 is slightly below center, this looks better
+            canvasPresentation.getController().modelPane.setTranslateY(-Ecdar.CANVAS_PADDING * 2);
         }
 
         // Center the model within the modelPane to account for resized model

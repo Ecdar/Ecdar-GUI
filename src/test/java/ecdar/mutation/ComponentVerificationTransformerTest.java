@@ -23,15 +23,4 @@ public class ComponentVerificationTransformerTest {
         Assertions.assertTrue(comp.getListOfEdgesFromDisplayableEdges(comp.getInputEdges()).stream().anyMatch(e -> e.getSync().equals("*")));
         Assertions.assertTrue(comp.getListOfEdgesFromDisplayableEdges(comp.getOutputEdges()).stream().anyMatch(e -> e.getSync().equals("*")));
     }
-
-    @Test
-    public void angelicCompletionAddsUniversalLocationAndMatchAllInputAndOutputEdges() {
-        final Project project = new Project();
-        final Component comp = new Component(EnabledColor.getDefault(), "Comp");
-        project.addComponent(comp);
-
-        applyAngelicCompletionForComponent(comp);
-
-        // ToDo NIELS
-   }
 }

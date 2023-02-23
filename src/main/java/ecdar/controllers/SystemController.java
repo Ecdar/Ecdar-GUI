@@ -176,7 +176,7 @@ public class SystemController extends ModelController implements Initializable {
 
         final Consumer<EnabledColor> updateColor = (newColor) -> {
             // Set the background color to the lightest possible version of the color
-            background.setFill(newColor.color.getColor(newColor.intensity.next(-10).next(2)));
+            background.setFill(newColor.setIntensity(2).getPaintColor());
         };
 
         getSystem().colorProperty().addListener(observable -> updateColor.accept(getSystem().getColor()));

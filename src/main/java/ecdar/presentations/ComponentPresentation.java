@@ -49,6 +49,6 @@ public class ComponentPresentation extends ModelPresentation implements Location
 
     @Override
     public void deselect() {
-        controller.componentUnselected();
+        controller.componentDeselected();
     }
 }

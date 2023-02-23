@@ -1039,8 +1039,13 @@ public class EcdarController implements Initializable {
         canvasGrid.add(canvasPresentation, 1, 1);
 
         canvasPane.getChildren().add(canvasGrid);
+        projectPane.getController().setActiveModelPresentations(getActiveModelPresentations(canvasGrid));
+    }
 
-        projectPane.getController().setActiveModelPresentations((HighLevelModelPresentation[]) canvasGrid.getChildren().stream().map(canvas -> ((CanvasPresentation) canvas).getController().getActiveModelPresentation()).toArray());
+    private static List<HighLevelModelPresentation> getActiveModelPresentations(GridPane canvasGrid) {
+        return canvasGrid.getChildren()
+                .stream().map(canvas -> ((CanvasPresentation) canvas)
+                        .getController().getActiveModelPresentation()).collect(Collectors.toList());
     }
 
     /**

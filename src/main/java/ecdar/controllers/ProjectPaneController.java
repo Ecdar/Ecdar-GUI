@@ -61,17 +61,20 @@ public class ProjectPaneController implements Initializable {
     public final Project project = new Project();
     private final HashMap<HighLevelModelPresentation, FilePresentation> modelPresentationMap = new HashMap<>();
     private final ObservableList<ComponentPresentation> componentPresentations = FXCollections.observableArrayList();
-    private final ObservableList<FilePresentation> activeFilePresentations = FXCollections.observableArrayList();
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
-        // Bind global declarations and add mouse event
-        final FilePresentation globalDclPresentation = new FilePresentation(project.getGlobalDeclarations(), activeFilePresentations);
-        globalDclPresentation.setOnMousePressed(event -> {
-            Ecdar.getPresentation().getController().setActiveModelPresentationForActiveCanvas(new DeclarationsPresentation(Ecdar.getProject().getGlobalDeclarations()));
-        });
+        Platform.runLater(() -> {
+            // Bind global declarations and add mouse event
+            final DeclarationsPresentation globalDeclarationsPresentation = new DeclarationsPresentation(project.getGlobalDeclarations());
+            final FilePresentation globalDclPresentation = new FilePresentation(project.getGlobalDeclarations());
+            modelPresentationMap.put(globalDeclarationsPresentation, globalDclPresentation);
+            globalDclPresentation.setOnMousePressed(event -> {
+                Ecdar.getPresentation().getController().setActiveModelPresentationForActiveCanvas(globalDeclarationsPresentation);
+            });
 
-        filesList.getChildren().add(globalDclPresentation);
+            filesList.getChildren().add(globalDclPresentation);
+        });
 
         initializeComponentHandling();
         initializeSystemHandling();
@@ -80,7 +83,7 @@ public class ProjectPaneController implements Initializable {
         resetProject();
 
         Platform.runLater(() -> {
-            final var initializedModelPresentation = modelPresentationMap.keySet().stream().findAny().orElse(null);
+            final var initializedModelPresentation = modelPresentationMap.keySet().stream().filter(mp -> mp instanceof ComponentPresentation).findFirst().orElse(null);
             Ecdar.getPresentation().getController().setActiveModelPresentationForActiveCanvas(initializedModelPresentation);
         });
     }
@@ -127,9 +130,14 @@ public class ProjectPaneController implements Initializable {
     }
 
     private void sortPresentations() {
-        final ArrayList<HighLevelModelPresentation> sortedComponentList = new ArrayList<>(modelPresentationMap.keySet());
-        sortedComponentList.sort(Comparator.comparing(o -> o.getController().getModel().getName()));
-        sortedComponentList.forEach(component -> modelPresentationMap.get(component).toFront());
+        Platform.runLater(() -> {
+            final ArrayList<HighLevelModelPresentation> sortedComponentList = new ArrayList<>(modelPresentationMap.keySet());
+            sortedComponentList.sort(Comparator.comparing(o -> o.getController().getModel().getName()));
+            sortedComponentList.forEach(component -> modelPresentationMap.get(component).toFront());
+
+            var globalDec = modelPresentationMap.keySet().stream().filter(hp -> hp instanceof DeclarationsPresentation).findFirst().orElse(null);
+            modelPresentationMap.get(globalDec).toBack();
+        });
     }
 
     private void initializeMoreInformationDropDown(final FilePresentation filePresentation) {
@@ -208,7 +216,7 @@ public class ProjectPaneController implements Initializable {
                 });
 
                 moreInformationDropDown.addClickableListElement("Add as component", event -> {
-                    if(project.getComponents().stream().noneMatch(component -> component.getName().equals(model.getName()))) {
+                    if (project.getComponents().stream().noneMatch(component -> component.getName().equals(model.getName()))) {
                         UndoRedoStack.pushAndPerform(() -> { // Perform
                             project.getTempComponents().remove(model);
                             model.setTemporary(false);
@@ -221,9 +229,10 @@ public class ProjectPaneController implements Initializable {
                         moreInformationDropDown.hide();
                     } else {
                         String originalModelName = model.getName();
+                        // Get new model number starting from 2 to symbolize second version
                         for (int i = 2; i < 100; i++) {
                             final String newName = originalModelName + " #" + i;
-                            if(project.getComponents().stream().noneMatch(component -> component.getName().equals(newName))) {
+                            if (project.getComponents().stream().noneMatch(component -> component.getName().equals(newName))) {
                                 UndoRedoStack.pushAndPerform(() -> { // Perform
                                     project.getTempComponents().remove(model);
                                     model.setTemporary(false);
@@ -314,7 +323,7 @@ public class ProjectPaneController implements Initializable {
     }
 
     private void handleAddedModelPresentation(final HighLevelModelPresentation modelPresentation) {
-        final FilePresentation filePresentation = new FilePresentation(modelPresentation.getController().getModel(), activeFilePresentations);
+        final FilePresentation filePresentation = new FilePresentation(modelPresentation.getController().getModel());
         initializeMoreInformationDropDown(filePresentation);
 
         // Add the file presentation related to the modelPresentation to the project pane
@@ -396,12 +405,13 @@ public class ProjectPaneController implements Initializable {
 
     /**
      * Gets the name of all components in the project and inserts it into a set
+     *
      * @return the set of all component names
      */
-    private HashSet<String> getComponentNames(){
+    private HashSet<String> getComponentNames() {
         final HashSet<String> names = new HashSet<>();
 
-        for(final Component component : project.getComponents()){
+        for (final Component component : project.getComponents()) {
             names.add(component.getName());
         }
 
@@ -410,21 +420,23 @@ public class ProjectPaneController implements Initializable {
 
     /**
      * Generate a unique name for the component
+     *
      * @return A project unique name
      */
     public String getUniqueComponentName() {
-        for(int counter = 1; ; counter++) {
+        for (int counter = 1; ; counter++) {
             final String name = Project.COMPONENT + counter;
-            if(!getComponentNames().contains(Project.COMPONENT + counter)){
+            if (!getComponentNames().contains(name)) {
                 return name;
             }
         }
     }
 
     public String getUniqueSystemName() {
-        for(int counter = 1; ; counter++) {
-            if(!getSystemNames().contains(Project.SYSTEM + counter)){
-                return (Project.SYSTEM + counter);
+        for (int counter = 1; ; counter++) {
+            final String name = Project.SYSTEM + counter;
+            if (!getSystemNames().contains(name)) {
+                return name;
             }
         }
     }
@@ -432,7 +444,7 @@ public class ProjectPaneController implements Initializable {
     private HashSet<String> getSystemNames() {
         final HashSet<String> names = new HashSet<>();
 
-        for(final EcdarSystem component : project.getSystems()){
+        for (final EcdarSystem component : project.getSystems()) {
             names.add(component.getName());
         }
 
@@ -487,15 +499,27 @@ public class ProjectPaneController implements Initializable {
         return componentPresentations;
     }
 
-    public void setActiveModelPresentations(HighLevelModelPresentation ... currentlyActiveModelPresentations) {
-        activeFilePresentations.clear();
-        for (HighLevelModelPresentation modelPresentation : currentlyActiveModelPresentations) {
-            activeFilePresentations.add(modelPresentationMap.get(modelPresentation));
-        }
+    public void setActiveModelPresentations(HighLevelModelPresentation activeModelPresentation) {
+        Platform.runLater(() -> {
+            modelPresentationMap.values().forEach(fp -> fp.getController().setIsActive(false));
+            modelPresentationMap.get(activeModelPresentation).getController().setIsActive(true);
+        });
+    }
+
+    public void setActiveModelPresentations(List<HighLevelModelPresentation> currentlyActiveModelPresentations) {
+        Platform.runLater(() -> {
+            modelPresentationMap.values().forEach(fp -> fp.getController().setIsActive(false));
+
+            for (HighLevelModelPresentation modelPresentation : currentlyActiveModelPresentations) {
+                modelPresentationMap.get(modelPresentation).getController().setIsActive(true);
+            }
+        });
     }
 
     public void changeOneActiveModelPresentationForAnother(final HighLevelModelPresentation oldActive, final HighLevelModelPresentation newActive) {
-        activeFilePresentations.remove(modelPresentationMap.get(oldActive));
-        activeFilePresentations.add(modelPresentationMap.get(newActive));
+        if (modelPresentationMap.get(oldActive) != null) modelPresentationMap.get(oldActive)
+                .getController()
+                .setIsActive(false);
+        modelPresentationMap.get(newActive).getController().setIsActive(true);
     }
 }

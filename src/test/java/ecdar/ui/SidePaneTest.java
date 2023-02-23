@@ -46,7 +46,8 @@ public class SidePaneTest extends TestFXBase {
     }
 
     @Test
-    public void whenDeclarationIsPressedFilePresentationsAreNotActive() throws TimeoutException {
+    public void whenDeclarationIsPressedFilePresentationsAreNotActive() {
+        clickOn("#createComponent");
         WaitForAsyncUtils.waitForFxEvents();
 
         clickOn("Global Declarations");

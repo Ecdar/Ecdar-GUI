@@ -274,7 +274,7 @@ public class DropDownMenu extends JFXPopup {
 
         for (final EnabledColor color : enabledColors) {
             final Circle circle = new Circle(16, color.getPaintColor());
-            circle.setStroke(color.color.getColor(color.intensity.next(2)));
+            circle.setStroke(color.getStrokeColor());
             circle.setStrokeWidth(1);
 
             final FontIcon icon = new FontIcon();

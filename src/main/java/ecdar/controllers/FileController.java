@@ -7,6 +7,7 @@ import ecdar.abstractions.EcdarSystem;
 import ecdar.abstractions.HighLevelModel;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.utility.colors.Color;
+import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.ImageScaler;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -40,8 +41,7 @@ public class FileController implements Initializable {
 
     private final SimpleObjectProperty<HighLevelModel> model = new SimpleObjectProperty<>(null);
     private final BooleanProperty isActive = new SimpleBooleanProperty(false);
-    private final Color color = Color.GREY_BLUE;
-    private final Color.Intensity colorIntensity = Color.Intensity.I50;
+    private final EnabledColor color = EnabledColor.getDefault().getLowestIntensity();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -87,24 +87,24 @@ public class FileController implements Initializable {
         // Update the background when hovered
         root.setOnMouseEntered(event -> {
             if (isActive.get()) {
-                setBackground(color, colorIntensity.next(2));
+                setBackground(color.nextIntensity(2));
             } else {
-                setBackground(color, colorIntensity.next());
+                setBackground(color.nextIntensity());
             }
             root.setCursor(Cursor.HAND);
         });
 
         root.setOnMouseExited(event -> {
             if (isActive.get()) {
-                setBackground(color, colorIntensity.next(1));
+                setBackground(color.nextIntensity());
             } else {
-                setBackground(color, colorIntensity);
+                setBackground(color);
             }
             root.setCursor(Cursor.DEFAULT);
         });
 
         // Update the background initially
-        setBackground(color, colorIntensity);
+        setBackground(color);
     }
 
     /**
@@ -124,21 +124,21 @@ public class FileController implements Initializable {
         ImageScaler.fitImageToPane(fileImage, fileImageStackPane);
     }
 
-    private void setBackground(Color newColor, Color.Intensity newIntensity) {
+    private void setBackground(EnabledColor newColor) {
         root.setBackground(new Background(new BackgroundFill(
-                newColor.getColor(newIntensity),
+                newColor.getPaintColor(),
                 CornerRadii.EMPTY,
                 Insets.EMPTY
         )));
 
         root.setBorder(new Border(new BorderStroke(
-                newColor.getColor(newIntensity.next(2)),
+                newColor.getStrokeColor(),
                 BorderStrokeStyle.SOLID,
                 CornerRadii.EMPTY,
                 new BorderWidths(0, 0, 1, 0)
         )));
 
-        moreInformationIcon.setFill(newColor.getColor(newIntensity.next(5)));
+        moreInformationIcon.setFill(newColor.nextIntensity(5).getPaintColor());
     }
 
     public void setModel(HighLevelModel newModel) {
@@ -153,9 +153,9 @@ public class FileController implements Initializable {
         isActive.set(active);
 
         if (active) {
-            setBackground(color, colorIntensity.next(1));
+            setBackground(color.nextIntensity());
         } else {
-            setBackground(color, colorIntensity);
+            setBackground(color);
         }
     }
 }

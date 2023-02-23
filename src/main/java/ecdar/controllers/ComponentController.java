@@ -6,7 +6,6 @@ import ecdar.backend.BackendHelper;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.presentations.*;
 import ecdar.utility.UndoRedoStack;
-import ecdar.utility.colors.Color;
 import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.*;
 import com.jfoenix.controls.JFXPopup;
@@ -15,11 +14,8 @@ import ecdar.utility.keyboard.NudgeDirection;
 import javafx.animation.Interpolator;
 import javafx.animation.Transition;
 import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -42,7 +38,6 @@ import org.fxmisc.richtext.StyleClassedTextArea;
 
 import java.net.URL;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -179,13 +174,13 @@ public class ComponentController extends ModelController implements Initializabl
             topLeftLine.setStartY(0);
             topLeftLine.setEndX(0);
             topLeftLine.setEndY(CORNER_SIZE);
-            topLeftLine.setStroke(newColor.color.getColor(newColor.intensity.next(2)));
+            topLeftLine.setStroke(newColor.getStrokeColor());
             topLeftLine.setStrokeWidth(1.25);
             StackPane.setAlignment(topLeftLine, Pos.TOP_LEFT);
 
             // Set the stroke color to two shades darker
             frame.setBorder(new Border(new BorderStroke(
-                    newColor.color.getColor(newColor.intensity.next(2)),
+                    newColor.getStrokeColor(),
                     BorderStrokeStyle.SOLID,
                     CornerRadii.EMPTY,
                     new BorderWidths(1),
@@ -209,7 +204,7 @@ public class ComponentController extends ModelController implements Initializabl
 
         final Consumer<EnabledColor> updateColor = (newColor) -> {
             // Set the background color to the lightest possible version of the color and then increase by two
-            background.setFill(newColor.color.getColor(newColor.intensity.next(-10).next(2)));
+            background.setFill(newColor.getLowestIntensity().nextIntensity(2).getPaintColor());
         };
 
         updateColorDelegates.add(updateColor);
@@ -400,8 +395,6 @@ public class ComponentController extends ModelController implements Initializabl
         component.addListener((obs, oldComponent, newComponent) -> {
             initializeDropDownMenu.accept(newComponent);
         });
-
-        Platform.runLater(() -> Ecdar.getProject().getComponents().addListener((ListChangeListener<Component>) c -> initializeDropDownMenu.accept(getComponent())));
 
         initializeDropDownMenu.accept(getComponent());
     }
@@ -633,30 +626,6 @@ public class ComponentController extends ModelController implements Initializabl
         newLocationPresentation.setLayoutX(placement.getX());
         newLocationPresentation.setLayoutY(placement.getY());
 
-        final BooleanProperty alreadyFoundPlacement = new SimpleBooleanProperty(false);
-        final ChangeListener<Number> locationPlacementChangedListener = (observable, oldValue, newValue) -> {
-            if (alreadyFoundPlacement.get()) {
-                alreadyFoundPlacement.set(false);
-                return;
-            }
-
-            Point2D newPlacement = getUnoccupiedSpace(getComponent().getBox(), locationPresentationMap.values().stream().filter(l -> !l.getController().getLocation().equals(loc)).map(l -> new Point2D(l.getLayoutX(), l.getLayoutY())).collect(Collectors.toList()), new Point2D(loc.getX(), loc.getY()), LocationPresentation.RADIUS * 2 + Ecdar.CANVAS_PADDING);
-
-            if (newPlacement == null) {
-                getComponent().getLocations().remove(loc);
-                Ecdar.showToast("Please select an empty space for the new location");
-                return;
-            }
-
-            newLocationPresentation.setLayoutX(newPlacement.getX());
-            newLocationPresentation.setLayoutY(newPlacement.getY());
-
-            alreadyFoundPlacement.set(true); // ToDo NIELS: Maybe find better solution
-        };
-
-        newLocationPresentation.layoutXProperty().addListener(locationPlacementChangedListener);
-        newLocationPresentation.layoutYProperty().addListener(locationPlacementChangedListener);
-
         locationPresentationMap.put(loc, newLocationPresentation);
         modelContainerLocation.getChildren().add(newLocationPresentation);
 
@@ -740,7 +709,7 @@ public class ComponentController extends ModelController implements Initializabl
     /***
      * Mark the component as not selected in the view
      */
-    public void componentUnselected() {
+    public void componentDeselected() {
         updateColorDelegates.forEach(colorConsumer -> colorConsumer.accept(getComponent().getColor()));
     }
 

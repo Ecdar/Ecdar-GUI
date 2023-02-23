@@ -389,7 +389,7 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
                 controller.prohibitedLocStrikeThrough.setVisible(true);
             } else {
                 notCommittedShape.setStrokeWidth(1);
-                notCommittedShape.setStroke(location.getColor().nextIntensity(2).getPaintColor());
+                notCommittedShape.setStroke(location.getColor().getStrokeColor());
                 controller.prohibitedLocStrikeThrough.setVisible(false);
             }
         };

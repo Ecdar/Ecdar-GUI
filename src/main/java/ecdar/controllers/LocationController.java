@@ -510,7 +510,6 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
     }
 
     /**
-     * '
      * Method which has the logical expression for the shortcut of adding a new edge,
      * checks whether the location is locked and the correct buttons are held down
      *
