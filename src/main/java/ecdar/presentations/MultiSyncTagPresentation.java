@@ -183,12 +183,10 @@ public class MultiSyncTagPresentation extends TagPresentation {
 
     private void updateColorAndMouseShape() {
         EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation.getController().getComponent().colorProperty().addListener((observable, oldValue, newValue) -> {
-            controller.frame.setBackground(new Background(new BackgroundFill(newValue.getColor(
-                    EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation.getController().getComponent().getColorIntensity()), new CornerRadii(0), Insets.EMPTY)));
+            controller.frame.setBackground(new Background(new BackgroundFill(newValue.getPaintColor(), new CornerRadii(0), Insets.EMPTY)));
         });
 
-        Color color = EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation.getController().getComponent().getColor().getColor(
-                EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation.getController().getComponent().getColorIntensity());
+        Color color = EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation.getController().getComponent().getColor().getPaintColor();
 
         controller.frame.setBackground(new Background(new BackgroundFill(color, new CornerRadii(0), Insets.EMPTY)));
         controller.frame.setCursor(Cursor.OPEN_HAND);

@@ -22,13 +22,14 @@ import java.util.*;
  */
 public class Project {
     public static final String LOCATION = "L";
+    public static final String COMPONENT = "Component";
+    public static final String SYSTEM = "System";
     private final static String GLOBAL_DCL_FILENAME = "GlobalDeclarations";
     private final static String QUERIES_FILENAME = "Queries";
     private final static String JSON_FILENAME_EXTENSION = ".json";
     private static final String FOLDER_NAME_COMPONENTS = "Components";
     private static final String FOLDER_NAME_SYSTEMS = "Systems";
     private static final String FOLDER_NAME_TESTS = "Tests";
-    private static final String COMPONENT = "Component";
 
     private final ObservableList<Query> queries;
     private final ObservableList<Component> components;
@@ -58,7 +59,7 @@ public class Project {
         return tempComponents;
     }
 
-    public ObservableList<EcdarSystem> getSystemsProperty() {
+    public ObservableList<EcdarSystem> getSystems() {
         return systems;
     }
 
@@ -99,38 +100,11 @@ public class Project {
     HashSet<String> getSystemNames(){
         final HashSet<String> names = new HashSet<>();
 
-        for(final EcdarSystem system : getSystemsProperty()){
+        for(final EcdarSystem system : getSystems()){
             names.add(system.getName());
         }
 
         return names;
-    }
-
-    /**
-     * Gets the name of all components in the project and inserts it into a set
-     * @return the set of all component names
-     */
-    private HashSet<String> getComponentNames(){
-        final HashSet<String> names = new HashSet<>();
-
-        for(final Component component : getComponents()){
-            names.add(component.getName());
-        }
-
-        return names;
-    }
-
-    /**
-     * Generate a unique name for the component
-     * @return A project unique name
-     */
-    public String getUniqueComponentName() {
-        for(int counter = 1; ; counter++) {
-            final String name = COMPONENT + counter;
-            if(!getComponentNames().contains(COMPONENT + counter)){
-                return name;
-            }
-        }
     }
 
     /**
@@ -166,16 +140,6 @@ public class Project {
         }
 
         return null;
-    }
-
-    /**
-     * Resets components.
-     * After this, there is only one component.
-     * Be sure to disable code analysis before call and enable after call.
-     */
-    public void reset() {
-        clean();
-        components.add(new Component(true, getUniqueComponentName()));
     }
 
     /**
@@ -224,7 +188,7 @@ public class Project {
         }
 
         // Save systems
-        for (final EcdarSystem system : getSystemsProperty()) {
+        for (final EcdarSystem system : getSystems()) {
             final Writer writer = getSaveFileWriter(system.getName(), FOLDER_NAME_SYSTEMS);
             getNewGson().toJson(system.serialize(), writer);
             writer.close();
@@ -389,7 +353,7 @@ public class Project {
         Collections.reverse(orderedJsonSystems);
 
         // Add the systems to the list
-        orderedJsonSystems.forEach(json -> getSystemsProperty().add(new EcdarSystem(json)));
+        orderedJsonSystems.forEach(json -> getSystems().add(new EcdarSystem(json)));
     }
 
     /**

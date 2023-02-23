@@ -7,7 +7,6 @@ import ecdar.utility.helpers.Boxed;
 import ecdar.utility.helpers.MouseCircular;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -56,10 +55,11 @@ public class Component extends HighLevelModel implements Boxed {
 
     /**
      * Creates a component with a specific name and a boolean value that chooses whether the colour for this component is chosen at random
-     * @param doRandomColor boolean that is true if the component should choose a colour at random and false if not
+     * @param color boolean that is true if the component should choose a colour at random and false if not
      */
-    public Component(final boolean doRandomColor, final String name) {
+    public Component(final EnabledColor color, final String name) {
         setName(name);
+        setColor(color);
 
         // Make initial location
         final Location initialLocation = new Location();
@@ -69,18 +69,7 @@ public class Component extends HighLevelModel implements Boxed {
         // Place in center
         initialLocation.setX(box.getX() + box.getWidth() / 2);
         initialLocation.setY(box.getY() + box.getHeight() / 2);
-
-        if (doRandomColor) {
-            // Run random coloring later to avoid Ecdar.getProject() being null
-            Platform.runLater(() -> {
-                setRandomColor();
-                initialLocation.setColorIntensity(getColorIntensity());
-                initialLocation.setColor(getColor());
-            });
-        } else {
-            initialLocation.setColorIntensity(getColorIntensity());
-            initialLocation.setColor(getColor());
-        }
+        initialLocation.setColor(color);
 
         addLocation(initialLocation);
         initializeIOListeners();
@@ -426,40 +415,34 @@ public class Component extends HighLevelModel implements Boxed {
     /**
      * Dyes the component and its locations.
      * @param color the color to dye with
-     * @param intensity the intensity of the color
      */
-    public void dye(final Color color, final Color.Intensity intensity) {
-        final Color previousColor = colorProperty().get();
-        final Color.Intensity previousColorIntensity = colorIntensityProperty().get();
+    public void dye(final EnabledColor color) {
+        final EnabledColor previousColor = colorProperty().get();
 
-        final Map<Location, Pair<Color, Color.Intensity>> previousLocationColors = new HashMap<>();
+        final Map<Location, EnabledColor> previousLocationColors = new HashMap<>();
 
         for (final Location location : getLocations()) {
             if (!location.getColor().equals(previousColor)) continue;
-            previousLocationColors.put(location, new Pair<>(location.getColor(), location.getColorIntensity()));
+            previousLocationColors.put(location, location.getColor());
         }
 
         UndoRedoStack.pushAndPerform(() -> { // Perform
             // Color the component
-            setColorIntensity(intensity);
             setColor(color);
 
             // Color all of the locations
             previousLocationColors.keySet().forEach(location -> {
-                location.setColorIntensity(intensity);
                 location.setColor(color);
             });
         }, () -> { // Undo
             // Color the component
-            setColorIntensity(previousColorIntensity);
             setColor(previousColor);
 
             // Color the locations accordingly to the previous color for them
             previousLocationColors.keySet().forEach(location -> {
-                location.setColorIntensity(previousLocationColors.get(location).getValue());
-                location.setColor(previousLocationColors.get(location).getKey());
+                location.setColor(previousLocationColors.get(location));
             });
-        }, String.format("Changed the color of %s to %s", this, color.name()), "color-lens");
+        }, String.format("Changed the color of %s to %s", this, color.color.name()), "color-lens");
     }
 
     /**
@@ -531,7 +514,7 @@ public class Component extends HighLevelModel implements Boxed {
         result.add(EDGES, edges);
         result.addProperty(DESCRIPTION, getDescription());
         box.addProperties(result);
-        result.addProperty(COLOR, EnabledColor.getIdentifier(getColor()));
+        result.addProperty(COLOR, EnabledColor.getIdentifier(getColor().color));
         result.addProperty(INCLUDE_IN_PERIODIC_CHECK, isIncludeInPeriodicCheck());
 
         return result;
@@ -593,16 +576,10 @@ public class Component extends HighLevelModel implements Boxed {
             box.setHeight(locations.stream().max(Comparator.comparingDouble(Location::getY)).get().getY() + 10 * 10);
         }
 
-        final EnabledColor enabledColor = (json.has(COLOR) ? EnabledColor.fromIdentifier(json.getAsJsonPrimitive(COLOR).getAsString()) : null);
-        if (enabledColor != null) {
-            setColorIntensity(enabledColor.intensity);
-            setColor(enabledColor.color);
-        } else {
-            setRandomColor();
-            for(Location loc : locations) {
-                loc.setColor(this.getColor());
-                loc.setColorIntensity(this.getColorIntensity());
-            }
+        final EnabledColor enabledColor = (json.has(COLOR) ? EnabledColor.fromIdentifier(json.getAsJsonPrimitive(COLOR).getAsString()) : EnabledColor.getDefault());
+        setColor(enabledColor);
+        for(Location loc : locations) {
+            loc.setColor(enabledColor);
         }
 
         if(json.has(INCLUDE_IN_PERIODIC_CHECK)) {

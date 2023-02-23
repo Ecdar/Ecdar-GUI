@@ -6,6 +6,7 @@ import ecdar.abstractions.HighLevelModel;
 import com.jfoenix.controls.JFXTextField;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
+import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.StringValidator;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
@@ -95,12 +96,11 @@ public abstract class ModelController extends HighLevelModelController {
         });
 
         final Runnable updateColor = () -> {
-            final Color color = model.getColor();
-            final Color.Intensity colorIntensity = model.getColorIntensity();
+            final EnabledColor color = model.getColor();
 
             // Set the text color for the label
-            name.setStyle("-fx-text-fill: " + color.getTextColorRgbaString(colorIntensity) + ";");
-            name.setFocusColor(color.getTextColor(colorIntensity));
+            name.setStyle("-fx-text-fill: " + color.color.getTextColorRgbaString(color.intensity) + ";");
+            name.setFocusColor(color.getTextColor());
             name.setUnFocusColor(javafx.scene.paint.Color.TRANSPARENT);
         };
 

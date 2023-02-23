@@ -2,6 +2,7 @@ package ecdar.abstractions;
 
 import ecdar.utility.colors.Color;
 import com.google.gson.JsonObject;
+import ecdar.utility.colors.EnabledColor;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.apache.commons.lang3.tuple.Triple;
@@ -24,13 +25,13 @@ public class Declarations extends HighLevelModel {
      */
     public Declarations(final String name) {
         setName(name);
-        setColor(Color.AMBER);
+        setColor(EnabledColor.getDefault());
     }
 
 
     public Declarations(final JsonObject json) {
         deserialize(json);
-        setColor(Color.AMBER);
+        setColor(EnabledColor.getDefault());
     }
 
     public String getDeclarationsText() {

@@ -13,6 +13,9 @@ import ecdar.utility.UndoRedoStack;
 import com.jfoenix.controls.JFXPopup;
 import com.jfoenix.controls.JFXRippler;
 import com.jfoenix.controls.JFXTextArea;
+import ecdar.utility.colors.EnabledColor;
+import ecdar.utility.keyboard.Keybind;
+import ecdar.utility.keyboard.KeyboardTracker;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -20,10 +23,12 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
-import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -71,8 +76,8 @@ public class ProjectPaneController implements Initializable {
         initializeComponentHandling();
         initializeSystemHandling();
         initializeMutationTestPlanHandling();
-
-        project.reset();
+        initializeCreateComponentKeybinding();
+        resetProject();
 
         Platform.runLater(() -> {
             final var initializedModelPresentation = modelPresentationMap.keySet().stream().findAny().orElse(null);
@@ -81,7 +86,7 @@ public class ProjectPaneController implements Initializable {
     }
 
     private void initializeSystemHandling() {
-        project.getSystemsProperty().addListener((ListChangeListener<EcdarSystem>) change -> {
+        project.getSystems().addListener((ListChangeListener<EcdarSystem>) change -> {
             while (change.next()) {
                 change.getAddedSubList().forEach(o -> handleAddedModelPresentation(new SystemPresentation(o)));
                 change.getRemoved().forEach(o -> handleRemovedModelPresentation(modelPresentationMap.keySet().stream().filter(modelPresentation -> modelPresentation.getController().getModel().equals(o)).findFirst().orElse(null)));
@@ -244,9 +249,9 @@ public class ProjectPaneController implements Initializable {
             moreInformationDropDown.addSpacerElement();
             moreInformationDropDown.addClickableListElement("Delete", event -> {
                 UndoRedoStack.pushAndPerform(() -> { // Perform
-                    project.getSystemsProperty().remove(model);
+                    project.getSystems().remove(model);
                 }, () -> { // Undo
-                    project.getSystemsProperty().add((EcdarSystem) model);
+                    project.getSystems().add((EcdarSystem) model);
                 }, "Deleted system " + model.getName(), "delete");
                 moreInformationDropDown.hide();
             });
@@ -290,6 +295,22 @@ public class ProjectPaneController implements Initializable {
             }, "Component " + component.getName() + " is included in periodic check: " + !didIncludeInPeriodicCheck, "search");
             moreInformationDropDown.hide();
         });
+    }
+
+    private void initializeCreateComponentKeybinding() {
+        //Press ctrl+N or cmd+N to create a new component. The canvas changes to this new component
+        KeyCodeCombination combination = new KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN);
+        Keybind binding = new Keybind(combination, (event) -> {
+            final Component newComponent = new Component(getAvailableColor(), getUniqueComponentName());
+            UndoRedoStack.pushAndPerform(() -> { // Perform
+                project.addComponent(newComponent);
+            }, () -> { // Undo
+                project.getComponents().remove(newComponent);
+            }, "Created new component: " + newComponent.getName(), "add-circle");
+
+            EcdarController.getActiveCanvasPresentation().getController().setActiveModelPresentation(getComponentPresentations().stream().filter(componentPresentation -> componentPresentation.getController().getComponent().equals(newComponent)).findFirst().orElse(null));
+        });
+        KeyboardTracker.registerKeybind(KeyboardTracker.CREATE_COMPONENT, binding);
     }
 
     private void handleAddedModelPresentation(final HighLevelModelPresentation modelPresentation) {
@@ -351,11 +372,79 @@ public class ProjectPaneController implements Initializable {
     }
 
     /**
+     * Resets components.
+     * After this, there is only one component.
+     * Be sure to disable code analysis before call and enable after call.
+     */
+    public void resetProject() {
+        project.clean();
+        project.addComponent(new Component(getAvailableColor(), getUniqueComponentName()));
+    }
+
+    public EnabledColor getAvailableColor() {
+        ArrayList<EnabledColor> availableColors = new ArrayList<>(EnabledColor.enabledColors);
+        for (Component comp : project.getComponents()) {
+            availableColors.removeIf(c -> comp.getColor().equals(c));
+        }
+
+        if (availableColors.isEmpty()) {
+            return EnabledColor.enabledColors.get(new Random().nextInt(EnabledColor.enabledColors.size()));
+        }
+
+        return availableColors.get(0);
+    }
+
+    /**
+     * Gets the name of all components in the project and inserts it into a set
+     * @return the set of all component names
+     */
+    private HashSet<String> getComponentNames(){
+        final HashSet<String> names = new HashSet<>();
+
+        for(final Component component : project.getComponents()){
+            names.add(component.getName());
+        }
+
+        return names;
+    }
+
+    /**
+     * Generate a unique name for the component
+     * @return A project unique name
+     */
+    public String getUniqueComponentName() {
+        for(int counter = 1; ; counter++) {
+            final String name = Project.COMPONENT + counter;
+            if(!getComponentNames().contains(Project.COMPONENT + counter)){
+                return name;
+            }
+        }
+    }
+
+    public String getUniqueSystemName() {
+        for(int counter = 1; ; counter++) {
+            if(!getSystemNames().contains(Project.SYSTEM + counter)){
+                return (Project.SYSTEM + counter);
+            }
+        }
+    }
+
+    private HashSet<String> getSystemNames() {
+        final HashSet<String> names = new HashSet<>();
+
+        for(final EcdarSystem component : project.getSystems()){
+            names.add(component.getName());
+        }
+
+        return names;
+    }
+
+    /**
      * Method for creating a new component
      */
     @FXML
     private void createComponentClicked() {
-        final Component newComponent = new Component(true, project.getUniqueComponentName());
+        final Component newComponent = new Component(getAvailableColor(), getUniqueComponentName());
 
         UndoRedoStack.pushAndPerform(() -> { // Perform
             project.addComponent(newComponent);
@@ -369,12 +458,12 @@ public class ProjectPaneController implements Initializable {
      */
     @FXML
     private void createSystemClicked() {
-        final EcdarSystem newSystem = new EcdarSystem();
+        final EcdarSystem newSystem = new EcdarSystem(getAvailableColor(), getUniqueSystemName());
 
         UndoRedoStack.pushAndPerform(() -> { // Perform
-            project.getSystemsProperty().add(newSystem);
+            project.getSystems().add(newSystem);
         }, () -> { // Undo
-            project.getSystemsProperty().remove(newSystem);
+            project.getSystems().remove(newSystem);
         }, "Created new system: " + newSystem.getName(), "add-circle");
     }
 

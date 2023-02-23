@@ -6,6 +6,7 @@ import ecdar.abstractions.EcdarSystem;
 import ecdar.controllers.EcdarController;
 import ecdar.controllers.SystemEdgeController;
 import ecdar.utility.colors.Color;
+import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.ItemDragHelper;
 import ecdar.utility.helpers.SelectHelper;
 import javafx.beans.property.DoubleProperty;
@@ -87,10 +88,9 @@ public class SystemEdgePresentation extends Group implements SelectHelper.ItemSe
     /**
      * Does nothing, as this cannot change color.
      * @param color not used
-     * @param intensity not used
      */
     @Override
-    public void color(final Color color, final Color.Intensity intensity) {
+    public void color(final EnabledColor color) {
 
     }
 
@@ -99,16 +99,7 @@ public class SystemEdgePresentation extends Group implements SelectHelper.ItemSe
      * @return null
      */
     @Override
-    public Color getColor() {
-        return null;
-    }
-
-    /**
-     * Returns null, as this cannot change color.
-     * @return null
-     */
-    @Override
-    public Color.Intensity getColorIntensity() {
+    public EnabledColor getColor() {
         return null;
     }
 

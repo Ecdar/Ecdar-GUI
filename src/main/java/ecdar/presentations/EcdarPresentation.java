@@ -171,7 +171,7 @@ public class EcdarPresentation extends StackPane {
         final double listWidth = 136;
         final FlowPane list = new FlowPane();
         for (final EnabledColor color : enabledColors) {
-            final Circle circle = new Circle(16, color.color.getColor(color.intensity));
+            final Circle circle = new Circle(16, color.getPaintColor());
             circle.setStroke(color.color.getColor(color.intensity.next(2)));
             circle.setStrokeWidth(1);
 
@@ -205,7 +205,7 @@ public class EcdarPresentation extends StackPane {
                 final List<Pair<SelectHelper.ItemSelectable, EnabledColor>> previousColor = new ArrayList<>();
 
                 SelectHelper.getSelectedElements().forEach(selectable -> {
-                    previousColor.add(new Pair<>(selectable, new EnabledColor(selectable.getColor(), selectable.getColorIntensity())));
+                    previousColor.add(new Pair<>(selectable, selectable.getColor()));
                 });
 
                 controller.changeColorOnSelectedElements(color, previousColor);

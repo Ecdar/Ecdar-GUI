@@ -2,6 +2,7 @@ package ecdar.abstractions;
 
 import ecdar.Ecdar;
 import ecdar.mutation.ComponentVerificationTransformer;
+import ecdar.utility.colors.EnabledColor;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
@@ -21,7 +22,7 @@ public class ComponentTest {
 
     @Test
     public void testCloneSameId() {
-        final Component original = new Component(false, "test_comp");
+        final Component original = new Component(EnabledColor.getDefault(), "test_comp");
 
         final Location loc1 = new Location();
         original.addLocation(loc1);
@@ -35,7 +36,7 @@ public class ComponentTest {
 
     @Test
     public void testCloneChangeTargetOfOriginal() {
-        final Component original = new Component(false, "test_comp");
+        final Component original = new Component(EnabledColor.getDefault(), "test_comp");
         Ecdar.getProject().getComponents().add(original);
 
         final Location loc1 = new Location();
@@ -70,7 +71,7 @@ public class ComponentTest {
 
     @Test
     public void testCloneChangeTargetOfClone() {
-        final Component original = new Component(false, "test_comp");
+        final Component original = new Component(EnabledColor.getDefault(), "test_comp");
         Ecdar.getProject().getComponents().add(original);
 
         final Location loc1 = new Location();

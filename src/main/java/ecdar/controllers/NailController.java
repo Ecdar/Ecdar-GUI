@@ -6,6 +6,7 @@ import ecdar.abstractions.*;
 import ecdar.presentations.*;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
+import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.ItemDragHelper;
 import ecdar.utility.helpers.SelectHelper;
 import ecdar.utility.keyboard.NudgeDirection;
@@ -244,18 +245,13 @@ public class NailController implements Initializable, SelectHelper.ItemSelectabl
     }
 
     @Override
-    public void color(final Color color, final Color.Intensity intensity) {
+    public void color(final EnabledColor color) {
         // Do nothing. A nail cannot be colored, but can be colored as selected
     }
 
     @Override
-    public Color getColor() {
+    public EnabledColor getColor() {
         return getComponent().getColor();
-    }
-
-    @Override
-    public Color.Intensity getColorIntensity() {
-        return getComponent().getColorIntensity();
     }
 
     @Override

@@ -1,17 +1,10 @@
 package ecdar.abstractions;
 
-import ecdar.Ecdar;
 import ecdar.presentations.DropDownMenu;
-import ecdar.utility.colors.Color;
 import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.serialize.Serializable;
 import com.google.gson.JsonObject;
-import javafx.application.Platform;
 import javafx.beans.property.*;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 
 /**
  * An object used for verifications.
@@ -25,14 +18,12 @@ public abstract class HighLevelModel implements Serializable, DropDownMenu.HasCo
     static final String COLOR = "color";
 
     private final StringProperty name;
-    private final ObjectProperty<Color> color;
-    private final ObjectProperty<Color.Intensity> colorIntensity;
+    private final ObjectProperty<EnabledColor> color;
     private boolean temporary = false;
 
     public HighLevelModel() {
         name = new SimpleStringProperty("");
-        color = new SimpleObjectProperty<>(Color.GREY_BLUE);
-        colorIntensity = new SimpleObjectProperty<>(Color.Intensity.I700);
+        color = new SimpleObjectProperty<>(EnabledColor.getDefault());
     }
 
     public String getName() {
@@ -48,28 +39,19 @@ public abstract class HighLevelModel implements Serializable, DropDownMenu.HasCo
         return name;
     }
 
-    public Color getColor() {
+    public EnabledColor getColor() {
         return color.get();
     }
 
-    public void setColor(final Color color) {
+    /**
+     * Sets the color of the model
+     */
+    void setColor(final EnabledColor color) {
         this.color.set(color);
     }
 
-    public ObjectProperty<Color> colorProperty() {
+    public ObjectProperty<EnabledColor> colorProperty() {
         return color;
-    }
-
-    public Color.Intensity getColorIntensity() {
-        return colorIntensity.get();
-    }
-
-    public void setColorIntensity(final Color.Intensity colorIntensity) {
-        this.colorIntensity.set(colorIntensity);
-    }
-
-    public ObjectProperty<Color.Intensity> colorIntensityProperty() {
-        return colorIntensity;
     }
 
     public boolean isTemporary() {
@@ -78,28 +60,6 @@ public abstract class HighLevelModel implements Serializable, DropDownMenu.HasCo
 
     public void setTemporary(final boolean newValue) {
         this.temporary = newValue;
-    }
-
-    /**
-     * Sets a random color.
-     * If some colors are not currently in use, choose among those.
-     * Otherwise, choose a between all available colors.
-     */
-    void setRandomColor() {
-        Platform.runLater(() -> {
-            // Color the new component in such a way that we avoid clashing with other components if possible
-            final List<EnabledColor> availableColors = new ArrayList<>(EnabledColor.enabledColors);
-            Ecdar.getProject().getComponents().forEach(component -> {
-                availableColors.removeIf(enabledColor -> enabledColor.color.equals(component.getColor()));
-            });
-            if (availableColors.size() == 0) {
-                availableColors.addAll(EnabledColor.enabledColors);
-            }
-            final int randomIndex = (new Random()).nextInt(availableColors.size());
-            final EnabledColor selectedColor = availableColors.get(randomIndex);
-            setColorIntensity(selectedColor.intensity);
-            setColor(selectedColor.color);
-        });
     }
 
     @Override

@@ -1,8 +1,6 @@
 package ecdar.abstractions;
 
-import ecdar.Ecdar;
 import ecdar.utility.UndoRedoStack;
-import ecdar.utility.colors.Color;
 import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.Boxed;
 import com.google.gson.JsonArray;
@@ -22,7 +20,6 @@ import java.util.Set;
  * The class is called EcdarSystem, since Java already has a System class.
  */
 public class EcdarSystem extends HighLevelModel implements Boxed {
-    private static final String SYSTEM = "System";
     private static final String SYSTEM_ROOT_X = "systemRootX";
     private static final String INSTANCES = "componentInstances";
     private static final String OPERATORS = "operators";
@@ -38,9 +35,9 @@ public class EcdarSystem extends HighLevelModel implements Boxed {
     // Styling properties
     private final Box box = new Box();
 
-    public EcdarSystem() {
-        setSystemName();
-        setRandomColor();
+    public EcdarSystem(final EnabledColor color, final String name) {
+        this.nameProperty().set(name);
+        setColor(color);
 
         getBox().setWidth(600d);
 
@@ -116,21 +113,17 @@ public class EcdarSystem extends HighLevelModel implements Boxed {
     /**
      * Dyes the system.
      * @param color the color to dye with
-     * @param intensity the intensity of the color
      */
-    public void dye(final Color color, final Color.Intensity intensity) {
-        final Color previousColor = colorProperty().get();
-        final Color.Intensity previousColorIntensity = colorIntensityProperty().get();
+    public void dye(final EnabledColor color) {
+        final EnabledColor previousColor = colorProperty().get();
 
         UndoRedoStack.pushAndPerform(() -> { // Perform
             // Color the component
-            setColorIntensity(intensity);
             setColor(color);
         }, () -> { // Undo
             // Color the component
-            setColorIntensity(previousColorIntensity);
             setColor(previousColor);
-        }, String.format("Changed the color of %s to %s", this, color.name()), "color-lens");
+        }, String.format("Changed the color of %s to %s", this, color.color.name()), "color-lens");
     }
 
     @Override
@@ -141,7 +134,7 @@ public class EcdarSystem extends HighLevelModel implements Boxed {
 
         box.addProperties(result);
 
-        result.addProperty(COLOR, EnabledColor.getIdentifier(getColor()));
+        result.addProperty(COLOR, EnabledColor.getIdentifier(getColor().color));
 
         result.addProperty(SYSTEM_ROOT_X, systemRoot.getX());
 
@@ -170,8 +163,7 @@ public class EcdarSystem extends HighLevelModel implements Boxed {
 
         final EnabledColor enabledColor = EnabledColor.fromIdentifier(json.getAsJsonPrimitive(COLOR).getAsString());
         if (enabledColor != null) {
-            setColorIntensity(enabledColor.intensity);
-            setColor(enabledColor.color);
+            setColor(enabledColor);
         }
 
         systemRoot.setX(json.getAsJsonPrimitive(SYSTEM_ROOT_X).getAsDouble());
@@ -188,18 +180,6 @@ public class EcdarSystem extends HighLevelModel implements Boxed {
 
         json.getAsJsonArray(EDGES).forEach(jsonEdge ->
                 getEdges().add(new SystemEdge((JsonObject) jsonEdge, this)));
-    }
-
-    /**
-     * Generate and sets a unique id for this system
-     */
-    public void setSystemName() {
-        for(int counter = 1; ; counter++) {
-            if(!Ecdar.getProject().getSystemNames().contains(SYSTEM + counter)){
-                setName((SYSTEM + counter));
-                return;
-            }
-        }
     }
 
     /**

@@ -300,20 +300,6 @@ public class EcdarController implements Initializable {
      * - Colors
      */
     private void initializeKeybindings() {
-        //Press ctrl+N or cmd+N to create a new component. The canvas changes to this new component
-        KeyCodeCombination combination = new KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN);
-        Keybind binding = new Keybind(combination, (event) -> {
-            final Component newComponent = new Component(true, Ecdar.getProject().getUniqueComponentName()); // ToDo NIELS: Move to ProjectController
-            UndoRedoStack.pushAndPerform(() -> { // Perform
-                Ecdar.getProject().addComponent(newComponent);
-            }, () -> { // Undo
-                Ecdar.getProject().getComponents().remove(newComponent);
-            }, "Created new component: " + newComponent.getName(), "add-circle");
-
-            getActiveCanvasPresentation().getController().setActiveModelPresentation(projectPane.getController().getComponentPresentations().stream().filter(componentPresentation -> componentPresentation.getController().getComponent().equals(newComponent)).findFirst().orElse(null));
-        });
-        KeyboardTracker.registerKeybind(KeyboardTracker.CREATE_COMPONENT, binding);
-
         // Keybind for nudging the selected elements
         KeyboardTracker.registerKeybind(KeyboardTracker.NUDGE_UP, new Keybind(new KeyCodeCombination(KeyCode.UP), (event) -> {
             event.consume();
@@ -353,9 +339,7 @@ public class EcdarController implements Initializable {
 
                 final List<Pair<SelectHelper.ItemSelectable, EnabledColor>> previousColor = new ArrayList<>();
 
-                SelectHelper.getSelectedElements().forEach(selectable -> {
-                    previousColor.add(new Pair<>(selectable, new EnabledColor(selectable.getColor(), selectable.getColorIntensity())));
-                });
+                SelectHelper.getSelectedElements().forEach(selectable -> previousColor.add(new Pair<>(selectable, selectable.getColor())));
                 changeColorOnSelectedElements(enabledColor, previousColor);
                 SelectHelper.clearSelectedElements();
             }));
@@ -372,9 +356,9 @@ public class EcdarController implements Initializable {
                                               final List<Pair<SelectHelper.ItemSelectable, EnabledColor>> previousColor) {
         UndoRedoStack.pushAndPerform(() -> { // Perform
             SelectHelper.getSelectedElements()
-                    .forEach(selectable -> selectable.color(enabledColor.color, enabledColor.intensity));
+                    .forEach(selectable -> selectable.color(enabledColor));
         }, () -> { // Undo
-            previousColor.forEach(selectableEnabledColorPair -> selectableEnabledColorPair.getKey().color(selectableEnabledColorPair.getValue().color, selectableEnabledColorPair.getValue().intensity));
+            previousColor.forEach(selectableEnabledColorPair -> selectableEnabledColorPair.getKey().color(selectableEnabledColorPair.getValue()));
         }, String.format("Changed the color of %d elements to %s", previousColor.size(), enabledColor.color.name()), "color-lens");
     }
 
@@ -898,14 +882,14 @@ public class EcdarController implements Initializable {
     /**
      * Creates a new project.
      */
-    private static void createNewProject() {
+    private void createNewProject() {
         CodeAnalysis.disable();
 
         CodeAnalysis.clearErrorsAndWarnings();
 
         Ecdar.projectDirectory.set(null);
 
-        Ecdar.getProject().reset();
+        projectPane.getController().resetProject();
 
         UndoRedoStack.clear();
 

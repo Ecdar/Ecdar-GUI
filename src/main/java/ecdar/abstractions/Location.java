@@ -44,8 +44,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     private final DoubleProperty y = new SimpleDoubleProperty(0d);
     private final DoubleProperty radius = new SimpleDoubleProperty(0d);
     private final SimpleDoubleProperty scale = new SimpleDoubleProperty(1d);
-    private final ObjectProperty<Color> color = new SimpleObjectProperty<>(Color.GREY_BLUE);
-    private final ObjectProperty<Color.Intensity> colorIntensity = new SimpleObjectProperty<>(Color.Intensity.I700);
+    private final ObjectProperty<EnabledColor> color = new SimpleObjectProperty<>(EnabledColor.getDefault());
 
     private final DoubleProperty nicknameX = new SimpleDoubleProperty(0d);
     private final DoubleProperty nicknameY = new SimpleDoubleProperty(0d);
@@ -79,7 +78,6 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
             setId(id);
         }
 
-        setColorIntensity(component.getColorIntensity());
         setColor(component.getColor());
     }
 
@@ -211,30 +209,6 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
         return y;
     }
 
-    public Color getColor() {
-        return color.get();
-    }
-
-    public void setColor(final Color color) {
-        this.color.set(color);
-    }
-
-    public ObjectProperty<Color> colorProperty() {
-        return color;
-    }
-
-    public Color.Intensity getColorIntensity() {
-        return colorIntensity.get();
-    }
-
-    public void setColorIntensity(final Color.Intensity colorIntensity) {
-        this.colorIntensity.set(colorIntensity);
-    }
-
-    public ObjectProperty<Color.Intensity> colorIntensityProperty() {
-        return colorIntensity;
-    }
-
     public double getRadius() {
         return radius.get();
     }
@@ -309,6 +283,19 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
         } else {
             return getId();
         }
+    }
+
+    @Override
+    public ObjectProperty<EnabledColor> colorProperty() {
+        return color;
+    }
+
+    public void setColor(EnabledColor color) {
+        this.color.set(color);
+    }
+
+    public EnabledColor getColor() {
+        return color.get();
     }
 
     /**
@@ -392,7 +379,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
 
         result.addProperty(X, getX());
         result.addProperty(Y, getY());
-        result.addProperty(COLOR, EnabledColor.getIdentifier(getColor()));
+        result.addProperty(COLOR, EnabledColor.getIdentifier(getColor().color));
 
         result.addProperty(NICKNAME_X, getNicknameX());
         result.addProperty(NICKNAME_Y, getNicknameY());
@@ -413,11 +400,8 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
         setX(json.getAsJsonPrimitive(X).getAsDouble());
         setY(json.getAsJsonPrimitive(Y).getAsDouble());
 
-        final EnabledColor enabledColor = (json.has(COLOR) ? EnabledColor.fromIdentifier(json.getAsJsonPrimitive(COLOR).getAsString()) : null);
-        if (enabledColor != null) {
-            setColorIntensity(enabledColor.intensity);
-            setColor(enabledColor.color);
-        }
+        final EnabledColor enabledColor = (json.has(COLOR) ? EnabledColor.fromIdentifier(json.getAsJsonPrimitive(COLOR).getAsString()) : EnabledColor.getDefault());
+        setColor(enabledColor);
 
         if(json.has(NICKNAME_X) && json.has(NICKNAME_Y)) {
             setNicknameX(json.getAsJsonPrimitive(NICKNAME_X).getAsDouble());
@@ -440,6 +424,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     public String generateNearString() {
         return "Location " + (!Strings.isNullOrEmpty(getNickname()) ? (getNickname() + " (" + getId() + ")") : getId());
     }
+
     public enum Type {
         NORMAL, INITIAL, UNIVERSAL, INCONSISTENT
     }

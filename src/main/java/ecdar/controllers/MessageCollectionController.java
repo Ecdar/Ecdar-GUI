@@ -5,6 +5,7 @@ import ecdar.abstractions.Component;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.presentations.MessagePresentation;
 import ecdar.utility.colors.Color;
+import ecdar.utility.colors.EnabledColor;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.ListChangeListener;
@@ -105,12 +106,12 @@ public class MessageCollectionController implements Initializable {
         indicator.setOnMouseExited(onMouseExited);
         indicator.setOnMousePressed(onMousePressed);
 
-        final BiConsumer<Color, Color.Intensity> updateColor = (color, intensity) -> {
-            indicator.setFill(color.getColor(component.getColorIntensity()));
+        final Consumer<EnabledColor> updateColor = (color) -> {
+            indicator.setFill(color.getPaintColor());
         };
 
-        updateColor.accept(component.getColor(), component.getColorIntensity());
-        component.colorProperty().addListener((observable, oldColor, newColor) -> updateColor.accept(newColor, component.getColorIntensity()));
+        updateColor.accept(component.getColor());
+        component.colorProperty().addListener((observable, oldColor, newColor) -> updateColor.accept(newColor));
     }
 
     public void setComponent(Component newComponent) {

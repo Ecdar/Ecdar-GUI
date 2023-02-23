@@ -14,7 +14,6 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class MultiSyncTagController implements Initializable {
-
     public VBox syncList;
     public BorderPane topbar;
     public BorderPane frame;

@@ -8,6 +8,7 @@ import ecdar.code_analysis.Nearable;
 import ecdar.presentations.*;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
+import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.ItemDragHelper;
 import ecdar.utility.helpers.SelectHelper;
 import ecdar.utility.keyboard.Keybind;
@@ -206,8 +207,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
         dropDownMenu.addSpacerElement();
 
-        dropDownMenu.addColorPicker(getLocation(), (color, intensity) -> {
-            getLocation().setColorIntensity(intensity);
+        dropDownMenu.addColorPicker(getLocation(), (color) -> {
             getLocation().setColor(color);
         });
 
@@ -464,22 +464,16 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
     }
 
     @Override
-    public void color(final Color color, final Color.Intensity intensity) {
+    public void color(final EnabledColor color) {
         final Location location = getLocation();
 
         // Set the color of the location
-        location.setColorIntensity(intensity);
         location.setColor(color);
     }
 
     @Override
-    public Color getColor() {
+    public EnabledColor getColor() {
         return getLocation().getColor();
-    }
-
-    @Override
-    public Color.Intensity getColorIntensity() {
-        return getLocation().getColorIntensity();
     }
 
     @Override

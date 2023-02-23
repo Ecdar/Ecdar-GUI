@@ -4,7 +4,7 @@ import ecdar.abstractions.EcdarSystem;
 import ecdar.abstractions.SystemRoot;
 import ecdar.controllers.SystemRootController;
 import ecdar.utility.Highlightable;
-import ecdar.utility.colors.Color;
+import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.ItemDragHelper;
 import ecdar.utility.helpers.SelectHelper;
 import javafx.beans.property.BooleanProperty;
@@ -19,6 +19,7 @@ import javafx.scene.layout.StackPane;
  */
 public class SystemRootPresentation extends StackPane implements Highlightable {
     private final SystemRootController controller;
+    private final EnabledColor highlightColor = new EnabledColor(SelectHelper.SELECT_COLOR, SelectHelper.SELECT_COLOR_INTENSITY_NORMAL);
 
     public SystemRootPresentation(final EcdarSystem system) {
         controller = new EcdarFXMLLoader().loadAndGetController("SystemRootPresentation.fxml", this);
@@ -104,16 +105,15 @@ public class SystemRootPresentation extends StackPane implements Highlightable {
      * The color will be a bit darker than the color of the system.
      */
     private void dyeFromSystemColor() {
-        dye(controller.getSystem().getColor(), controller.getSystem().getColorIntensity().next(2));
+        dye(controller.getSystem().getColor());
     }
 
     /**
      * Dyes the polygon.
      * @param color the color to dye with
-     * @param intensity the intensity of the color to use
      */
-    private void dye(final Color color, final Color.Intensity intensity) {
-        controller.shape.setFill(color.getColor(intensity));
+    private void dye(final EnabledColor color) {
+        controller.shape.setFill(color.getPaintColor());
     }
 
     /**
@@ -133,7 +133,7 @@ public class SystemRootPresentation extends StackPane implements Highlightable {
 
     @Override
     public void highlight() {
-        dye(SelectHelper.SELECT_COLOR, SelectHelper.SELECT_COLOR_INTENSITY_NORMAL);
+        dye(highlightColor);
     }
 
     @Override

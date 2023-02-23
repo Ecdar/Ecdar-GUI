@@ -7,6 +7,7 @@ import ecdar.code_analysis.CodeAnalysis;
 import ecdar.presentations.*;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
+import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.*;
 import com.jfoenix.controls.JFXPopup;
 import com.jfoenix.controls.JFXRippler;
@@ -52,7 +53,7 @@ import static ecdar.presentations.ModelPresentation.*;
 import static ecdar.utility.helpers.UnoccupiedSpaceFinder.getUnoccupiedSpace;
 
 public class ComponentController extends ModelController implements Initializable {
-    private final List<BiConsumer<Color, Color.Intensity>> updateColorDelegates = new ArrayList<>();
+    private final List<Consumer<EnabledColor>> updateColorDelegates = new ArrayList<>();
     private static final Map<Component, ListChangeListener<Location>> locationListChangeListenerMap = new HashMap<>();
     private static final Map<Component, Boolean> errorsAndWarningsInitialized = new HashMap<>();
     private final ObjectProperty<Component> component = new SimpleObjectProperty<>(null);
@@ -135,16 +136,16 @@ public class ComponentController extends ModelController implements Initializabl
     }
 
     private void initializeToolbar() {
-        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
+        final Consumer<EnabledColor> updateColor = (newColor) -> {
             // Set the background of the toolbar
             toolbar.setBackground(new Background(new BackgroundFill(
-                    newColor.getColor(newIntensity),
+                    newColor.color.getColor(newColor.intensity),
                     CornerRadii.EMPTY,
                     Insets.EMPTY
             )));
 
             // Set the icon color and rippler color of the toggleDeclarationButton
-            toggleDeclarationButton.setRipplerFill(newColor.getTextColor(newIntensity));
+            toggleDeclarationButton.setRipplerFill(newColor.getTextColor());
 
             toolbar.setPrefHeight(TOOLBAR_HEIGHT);
             toggleDeclarationButton.setBackground(Background.EMPTY);
@@ -152,9 +153,9 @@ public class ComponentController extends ModelController implements Initializabl
 
         updateColorDelegates.add(updateColor);
 
-        getComponent().colorProperty().addListener(observable -> updateColor.accept(getComponent().getColor(), getComponent().getColorIntensity()));
+        getComponent().colorProperty().addListener(observable -> updateColor.accept(getComponent().getColor()));
 
-        updateColor.accept(getComponent().getColor(), getComponent().getColorIntensity());
+        updateColor.accept(getComponent().getColor());
 
         // Set a hover effect for the controller.toggleDeclarationButton
         toggleDeclarationButton.setOnMouseEntered(event -> toggleDeclarationButton.setCursor(Cursor.HAND));
@@ -166,7 +167,7 @@ public class ComponentController extends ModelController implements Initializabl
         final Shape[] mask = new Shape[1];
         final Rectangle rectangle = new Rectangle(getComponent().getBox().getWidth(), getComponent().getBox().getHeight());
 
-        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
+        final Consumer<EnabledColor> updateColor = (newColor) -> {
             // Mask the parent of the frame (will also mask the background)
             mask[0] = Path.subtract(rectangle, TOP_LEFT_CORNER);
             frame.setClip(mask[0]);
@@ -178,13 +179,13 @@ public class ComponentController extends ModelController implements Initializabl
             topLeftLine.setStartY(0);
             topLeftLine.setEndX(0);
             topLeftLine.setEndY(CORNER_SIZE);
-            topLeftLine.setStroke(newColor.getColor(newIntensity.next(2)));
+            topLeftLine.setStroke(newColor.color.getColor(newColor.intensity.next(2)));
             topLeftLine.setStrokeWidth(1.25);
             StackPane.setAlignment(topLeftLine, Pos.TOP_LEFT);
 
             // Set the stroke color to two shades darker
             frame.setBorder(new Border(new BorderStroke(
-                    newColor.getColor(newIntensity.next(2)),
+                    newColor.color.getColor(newColor.intensity.next(2)),
                     BorderStrokeStyle.SOLID,
                     CornerRadii.EMPTY,
                     new BorderWidths(1),
@@ -195,10 +196,10 @@ public class ComponentController extends ModelController implements Initializabl
         updateColorDelegates.add(updateColor);
 
         getComponent().colorProperty().addListener(observable -> {
-            updateColor.accept(getComponent().getColor(), getComponent().getColorIntensity());
+            updateColor.accept(getComponent().getColor());
         });
 
-        updateColor.accept(getComponent().getColor(), getComponent().getColorIntensity());
+        updateColor.accept(getComponent().getColor());
     }
 
     private void initializeBackground() {
@@ -206,18 +207,18 @@ public class ComponentController extends ModelController implements Initializabl
         background.widthProperty().bindBidirectional(getComponent().getBox().getWidthProperty());
         background.heightProperty().bindBidirectional(getComponent().getBox().getHeightProperty());
 
-        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
-            // Set the background color to the lightest possible version of the color
-            background.setFill(newColor.getColor(newIntensity.next(-10).next(2)));
+        final Consumer<EnabledColor> updateColor = (newColor) -> {
+            // Set the background color to the lightest possible version of the color and then increase by two
+            background.setFill(newColor.color.getColor(newColor.intensity.next(-10).next(2)));
         };
 
         updateColorDelegates.add(updateColor);
 
         getComponent().colorProperty().addListener(observable -> {
-            updateColor.accept(getComponent().getColor(), getComponent().getColorIntensity());
+            updateColor.accept(getComponent().getColor());
         });
 
-        updateColor.accept(getComponent().getColor(), getComponent().getColorIntensity());
+        updateColor.accept(getComponent().getColor());
     }
 
     /***
@@ -378,7 +379,6 @@ public class ComponentController extends ModelController implements Initializabl
             contextMenu.addSpacerElement();
 
             contextMenu.addClickableListElement("Contains deadlock?", event -> {
-
                 // Generate the query
                 final String deadlockQuery = BackendHelper.getExistDeadlockQuery(getComponent());
 
@@ -427,8 +427,6 @@ public class ComponentController extends ModelController implements Initializabl
                 finishEdgeContextMenu.hide();
                 final Location location = new Location();
                 location.initialize(getComponent().getUniqueLocationId());
-
-                location.setColorIntensity(getComponent().getColorIntensity());
                 location.setColor(getComponent().getColor());
 
                 if (component.isAnyEdgeWithoutSource()) {
@@ -736,14 +734,14 @@ public class ComponentController extends ModelController implements Initializabl
      * Mark the component as selected in the view
      */
     public void componentSelected() {
-        updateColorDelegates.forEach(colorConsumer -> colorConsumer.accept(SelectHelper.SELECT_COLOR, SelectHelper.SELECT_COLOR_INTENSITY_NORMAL));
+        updateColorDelegates.forEach(colorConsumer -> colorConsumer.accept(new EnabledColor(SelectHelper.SELECT_COLOR, SelectHelper.SELECT_COLOR_INTENSITY_NORMAL)));
     }
 
     /***
      * Mark the component as not selected in the view
      */
     public void componentUnselected() {
-        updateColorDelegates.forEach(colorConsumer -> colorConsumer.accept(getComponent().getColor(), getComponent().getColorIntensity()));
+        updateColorDelegates.forEach(colorConsumer -> colorConsumer.accept(getComponent().getColor()));
     }
 
     public Component getComponent() {
@@ -808,7 +806,6 @@ public class ComponentController extends ModelController implements Initializabl
             location.setX(event.getX());
             location.setY(event.getY());
 
-            location.setColorIntensity(getComponent().getColorIntensity());
             location.setColor(getComponent().getColor());
 
             if (unfinishedEdge != null) {

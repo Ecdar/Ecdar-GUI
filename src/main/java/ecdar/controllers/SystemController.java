@@ -5,6 +5,7 @@ import ecdar.abstractions.*;
 import ecdar.presentations.*;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
+import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.SelectHelper;
 import com.jfoenix.controls.JFXPopup;
 import javafx.beans.property.ObjectProperty;
@@ -23,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import static ecdar.Ecdar.CANVAS_PADDING;
 import static ecdar.presentations.ModelPresentation.*;
@@ -93,10 +95,10 @@ public class SystemController extends ModelController implements Initializable {
      * Initializes the toolbar.
      */
     private void initializeToolbar() {
-        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
+        final Consumer<EnabledColor> updateColor = (newColor) -> {
             // Set the background of the toolbar
             toolbar.setBackground(new Background(new BackgroundFill(
-                    newColor.getColor(newIntensity),
+                    newColor.getPaintColor(),
                     CornerRadii.EMPTY,
                     Insets.EMPTY
             )));
@@ -104,9 +106,9 @@ public class SystemController extends ModelController implements Initializable {
             toolbar.setPrefHeight(TOOLBAR_HEIGHT);
         };
 
-        getSystem().colorProperty().addListener(observable -> updateColor.accept(getSystem().getColor(), getSystem().getColorIntensity()));
+        getSystem().colorProperty().addListener(observable -> updateColor.accept(getSystem().getColor()));
 
-        updateColor.accept(getSystem().getColor(), getSystem().getColorIntensity());
+        updateColor.accept(getSystem().getColor());
     }
 
     /**
@@ -124,7 +126,7 @@ public class SystemController extends ModelController implements Initializable {
                 getSystem().getBox().getWidth(), CORNER_SIZE + 2
         );
 
-        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
+        final Consumer<EnabledColor> updateColor = (newColor) -> {
             // Mask the parent of the frame (will also mask the background)
             mask[0] = Path.subtract(rectangle, TOP_LEFT_CORNER);
             mask[0] = Path.subtract(mask[0], topRightCorner);
@@ -137,7 +139,7 @@ public class SystemController extends ModelController implements Initializable {
             topLeftLine.setStartY(0);
             topLeftLine.setEndX(0);
             topLeftLine.setEndY(CORNER_SIZE);
-            topLeftLine.setStroke(newColor.getColor(newIntensity.next(2)));
+            topLeftLine.setStroke(newColor.getStrokeColor());
             topLeftLine.setStrokeWidth(1.25);
             StackPane.setAlignment(topLeftLine, Pos.TOP_LEFT);
 
@@ -145,13 +147,13 @@ public class SystemController extends ModelController implements Initializable {
             topRightLine.setStartY(0);
             topRightLine.setEndX(CORNER_SIZE);
             topRightLine.setEndY(CORNER_SIZE);
-            topRightLine.setStroke(newColor.getColor(newIntensity.next(2)));
+            topRightLine.setStroke(newColor.getStrokeColor());
             topRightLine.setStrokeWidth(1.25);
             StackPane.setAlignment(topRightLine, Pos.TOP_RIGHT);
 
             // Set the stroke color to two shades darker
             frame.setBorder(new Border(new BorderStroke(
-                    newColor.getColor(newIntensity.next(2)),
+                    newColor.getStrokeColor(),
                     BorderStrokeStyle.SOLID,
                     CornerRadii.EMPTY,
                     new BorderWidths(1),
@@ -160,8 +162,8 @@ public class SystemController extends ModelController implements Initializable {
         };
 
         // Update now, and update on color change
-        updateColor.accept(getSystem().getColor(), getSystem().getColorIntensity());
-        getSystem().colorProperty().addListener(observable -> updateColor.accept(getSystem().getColor(), getSystem().getColorIntensity()));
+        updateColor.accept(getSystem().getColor());
+        getSystem().colorProperty().addListener(observable -> updateColor.accept(getSystem().getColor()));
     }
 
     /**
@@ -172,13 +174,13 @@ public class SystemController extends ModelController implements Initializable {
         background.widthProperty().bindBidirectional(getSystem().getBox().getWidthProperty());
         background.heightProperty().bindBidirectional(getSystem().getBox().getHeightProperty());
 
-        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
+        final Consumer<EnabledColor> updateColor = (newColor) -> {
             // Set the background color to the lightest possible version of the color
-            background.setFill(newColor.getColor(newIntensity.next(-10).next(2)));
+            background.setFill(newColor.color.getColor(newColor.intensity.next(-10).next(2)));
         };
 
-        getSystem().colorProperty().addListener(observable -> updateColor.accept(getSystem().getColor(), getSystem().getColorIntensity()));
-        updateColor.accept(getSystem().getColor(), getSystem().getColorIntensity());
+        getSystem().colorProperty().addListener(observable -> updateColor.accept(getSystem().getColor()));
+        updateColor.accept(getSystem().getColor());
     }
 
     /**

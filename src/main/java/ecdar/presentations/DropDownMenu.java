@@ -32,7 +32,6 @@ import static ecdar.utility.colors.EnabledColor.enabledColors;
 
 /**
  * DropDownMenu is a {@link JFXPopup} which is used as the right-click menu and options menu on for instance
- * {@link QueryPresentation#actionButton}.
  * The DropDownMenu includes methods for adding elements to the menu itself.
  *
  * Batteries included
@@ -267,14 +266,14 @@ public class DropDownMenu extends JFXPopup {
      * @param hasColor The current color
      * @param consumer A consumer for the color property
      */
-    public void addColorPicker(final HasColor hasColor, final BiConsumer<Color, Color.Intensity> consumer) {
+    public void addColorPicker(final HasColor hasColor, final Consumer<EnabledColor> consumer) {
         addListElement("Color");
 
         final FlowPane flowPane = new FlowPane();
         flowPane.setStyle("-fx-padding: 0 8 0 8");
 
         for (final EnabledColor color : enabledColors) {
-            final Circle circle = new Circle(16, color.color.getColor(color.intensity));
+            final Circle circle = new Circle(16, color.getPaintColor());
             circle.setStroke(color.color.getColor(color.intensity.next(2)));
             circle.setStrokeWidth(1);
 
@@ -311,7 +310,7 @@ public class DropDownMenu extends JFXPopup {
                 // Only color the subject if the user chooses a new color
                 if (hasColor.colorProperty().get().equals(color.color)) return;
 
-                consumer.accept(color.color, color.intensity);
+                consumer.accept(color);
             });
 
             flowPane.getChildren().add(child);
@@ -502,8 +501,6 @@ public class DropDownMenu extends JFXPopup {
     }
 
     public interface HasColor {
-        ObjectProperty<Color> colorProperty();
-
-        ObjectProperty<Color.Intensity> colorIntensityProperty();
+        ObjectProperty<EnabledColor> colorProperty();
     }
 }

@@ -79,8 +79,8 @@ public class FileController implements Initializable {
     }
 
     private void initializeIcon() {
-        model.get().colorProperty().addListener((obs, oldColor, newColor) -> iconBackground.setFill(newColor.getColor(model.get().getColorIntensity())));
-        iconBackground.setFill(model.get().getColor().getColor(model.get().getColorIntensity()));
+        model.get().colorProperty().addListener((obs, oldColor, newColor) -> iconBackground.setFill(newColor.getPaintColor()));
+        iconBackground.setFill(model.get().getColor().getPaintColor());
     }
 
     private void initializeColors() {
