@@ -8,6 +8,7 @@ import ecdar.controllers.EcdarController;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
 import ecdar.utility.colors.EnabledColor;
+import ecdar.utility.helpers.ImageScaler;
 import ecdar.utility.helpers.SelectHelper;
 import com.jfoenix.controls.JFXPopup;
 import com.jfoenix.controls.JFXRippler;
@@ -25,7 +26,6 @@ import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
@@ -171,8 +171,8 @@ public class EcdarPresentation extends StackPane {
         final double listWidth = 136;
         final FlowPane list = new FlowPane();
         for (final EnabledColor color : enabledColors) {
-            final Circle circle = new Circle(16, color.color.getColor(color.intensity));
-            circle.setStroke(color.color.getColor(color.intensity.next(2)));
+            final Circle circle = new Circle(16, color.getPaintColor());
+            circle.setStroke(color.getStrokeColor());
             circle.setStrokeWidth(1);
 
             final Label label = new Label(color.keyCode.getName());
@@ -205,7 +205,7 @@ public class EcdarPresentation extends StackPane {
                 final List<Pair<SelectHelper.ItemSelectable, EnabledColor>> previousColor = new ArrayList<>();
 
                 SelectHelper.getSelectedElements().forEach(selectable -> {
-                    previousColor.add(new Pair<>(selectable, new EnabledColor(selectable.getColor(), selectable.getColorIntensity())));
+                    previousColor.add(new Pair<>(selectable, selectable.getColor()));
                 });
 
                 controller.changeColorOnSelectedElements(color, previousColor);
@@ -285,10 +285,10 @@ public class EcdarPresentation extends StackPane {
         initializeCloseFilePaneAnimation();
 
         // Translate the x coordinate to create the open/close animations
-        controller.filePane.translateXProperty().bind(filePaneAnimationProperty.subtract(controller.filePane.widthProperty()));
+        controller.projectPane.translateXProperty().bind(filePaneAnimationProperty.subtract(controller.projectPane.widthProperty()));
 
         // Whenever the width of the file pane is updated, update the animations
-        controller.filePane.widthProperty().addListener((observable) -> {
+        controller.projectPane.widthProperty().addListener((observable) -> {
             initializeOpenFilePaneAnimation();
             initializeCloseFilePaneAnimation();
         });
@@ -299,7 +299,7 @@ public class EcdarPresentation extends StackPane {
 
         closeFilePaneAnimation = new Timeline();
 
-        final KeyValue open = new KeyValue(filePaneAnimationProperty, controller.filePane.getWidth(), interpolator);
+        final KeyValue open = new KeyValue(filePaneAnimationProperty, controller.projectPane.getWidth(), interpolator);
         final KeyValue closed = new KeyValue(filePaneAnimationProperty, 0, interpolator);
 
         final KeyFrame kf1 = new KeyFrame(Duration.millis(0), open);
@@ -314,7 +314,7 @@ public class EcdarPresentation extends StackPane {
         openFilePaneAnimation = new Timeline();
 
         final KeyValue closed = new KeyValue(filePaneAnimationProperty, 0, interpolator);
-        final KeyValue open = new KeyValue(filePaneAnimationProperty, controller.filePane.getWidth(), interpolator);
+        final KeyValue open = new KeyValue(filePaneAnimationProperty, controller.projectPane.getWidth(), interpolator);
 
         final KeyFrame kf1 = new KeyFrame(Duration.millis(0), closed);
         final KeyFrame kf2 = new KeyFrame(Duration.millis(200), open);
@@ -335,22 +335,24 @@ public class EcdarPresentation extends StackPane {
             initializeCloseQueryPaneAnimation();
         });
 
-        // When new queries are added, make sure that the query pane is open
-        Ecdar.getProject().getQueries().addListener((ListChangeListener<Query>) c -> {
-            if (closeQueryPaneAnimation == null)
-                return; // The query pane is not yet initialized
+        Platform.runLater(() -> {
+            // When new queries are added, make sure that the query pane is open
+            Ecdar.getProject().getQueries().addListener((ListChangeListener<Query>) c -> {
+                if (closeQueryPaneAnimation == null)
+                    return; // The query pane is not yet initialized
 
-            while (c.next()) {
-                c.getAddedSubList().forEach(o -> {
-                    if (!queryPaneOpen.get()) {
-                        // Open the pane
-                        openQueryPaneAnimation.play();
+                while (c.next()) {
+                    c.getAddedSubList().forEach(o -> {
+                        if (!queryPaneOpen.get()) {
+                            // Open the pane
+                            openQueryPaneAnimation.play();
 
-                        // Toggle the open state
-                        queryPaneOpen.set(queryPaneOpen.not().get());
-                    }
-                });
-            }
+                            // Toggle the open state
+                            queryPaneOpen.set(queryPaneOpen.not().get());
+                        }
+                    });
+                }
+            });
         });
     }
 
@@ -419,16 +421,16 @@ public class EcdarPresentation extends StackPane {
      */
     private void initializeHelpImages() {
         controller.helpInitialImage.setImage(new Image(Ecdar.class.getResource("ic_help_initial.png").toExternalForm()));
-        fitSizeWhenAvailable(controller.helpInitialImage, controller.helpInitialPane);
+        ImageScaler.fitImageToPane(controller.helpInitialImage, controller.helpInitialPane);
 
         controller.helpUrgentImage.setImage(new Image(Ecdar.class.getResource("ic_help_urgent.png").toExternalForm()));
-        fitSizeWhenAvailable(controller.helpUrgentImage, controller.helpUrgentPane);
+        ImageScaler.fitImageToPane(controller.helpUrgentImage, controller.helpUrgentPane);
 
         controller.helpInputImage.setImage(new Image(Ecdar.class.getResource("ic_help_input.png").toExternalForm()));
-        fitSizeWhenAvailable(controller.helpInputImage, controller.helpInputPane);
+        ImageScaler.fitImageToPane(controller.helpInputImage, controller.helpInputPane);
 
         controller.helpOutputImage.setImage(new Image(Ecdar.class.getResource("ic_help_output.png").toExternalForm()));
-        fitSizeWhenAvailable(controller.helpOutputImage, controller.helpOutputPane);
+        ImageScaler.fitImageToPane(controller.helpOutputImage, controller.helpOutputPane);
     }
 
     private void initializeResizeQueryPane() {
@@ -479,13 +481,6 @@ public class EcdarPresentation extends StackPane {
         queryPaneOpen.set(queryPaneOpen.not().get());
 
         return queryPaneOpen;
-    }
-
-    public static void fitSizeWhenAvailable(final ImageView imageView, final StackPane pane) {
-        pane.widthProperty().addListener((observable, oldValue, newValue) ->
-                imageView.setFitWidth(pane.getWidth()));
-        pane.heightProperty().addListener((observable, oldValue, newValue) ->
-                imageView.setFitHeight(pane.getHeight()));
     }
 
     public void showSnackbarMessage(final String message) {

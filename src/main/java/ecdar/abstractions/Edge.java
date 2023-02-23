@@ -84,7 +84,7 @@ public class Edge extends DisplayableEdge implements Serializable {
      * @param component component to select a source and a target location within
      * @return the edge
      */
-    Edge cloneForVerification(final Component component) {
+    public Edge cloneForVerification(final Component component) {
         final Edge clone = new Edge(component.findLocation(getSourceLocation().getId()), getStatus());
 
         // Clone target location

@@ -21,6 +21,9 @@ import java.util.*;
  * A project of models.
  */
 public class Project {
+    public static final String LOCATION = "L";
+    public static final String COMPONENT = "Component";
+    public static final String SYSTEM = "System";
     private final static String GLOBAL_DCL_FILENAME = "GlobalDeclarations";
     private final static String QUERIES_FILENAME = "Queries";
     private final static String JSON_FILENAME_EXTENSION = ".json";
@@ -56,7 +59,7 @@ public class Project {
         return tempComponents;
     }
 
-    public ObservableList<EcdarSystem> getSystemsProperty() {
+    public ObservableList<EcdarSystem> getSystems() {
         return systems;
     }
 
@@ -68,8 +71,93 @@ public class Project {
         return globalDeclarations.get();
     }
 
-    public void setGlobalDeclarations(final Declarations declarations) {
+    private void setGlobalDeclarations(final Declarations declarations) {
         globalDeclarations.set(declarations);
+    }
+
+    public void addComponent(Component newComponent) {
+        components.add(newComponent);
+    }
+
+    /**
+     * gets the id of all edges in the project and inserts it into a set
+     * @return the set of all edge ids
+     */
+    Set<String> getEdgeIds(){
+        final Set<String> ids = new HashSet<>();
+
+        for (final Component component : getComponents()) {
+            component.getEdges().forEach(edge -> ids.add(edge.getId().substring(Edge.ID_LETTER_LENGTH)));
+        }
+
+        return ids;
+    }
+
+    /**
+     * gets the id of all systems in the project and inserts it into a set
+     * @return the set of all system names
+     */
+    HashSet<String> getSystemNames(){
+        final HashSet<String> names = new HashSet<>();
+
+        for(final EcdarSystem system : getSystems()){
+            names.add(system.getName());
+        }
+
+        return names;
+    }
+
+    /**
+     * Gets a new GSON object.
+     * @return the GSON object
+     */
+    private static Gson getNewGson() {
+        return new GsonBuilder().setPrettyPrinting().create();
+    }
+
+    /**
+     * Gets a new file writer for saving a file.
+     * @param filename name of file without extension.
+     * @return the file writer
+     * @throws IOException if an IO error occurs
+     */
+    private static FileWriter getSaveFileWriter(final String filename) throws IOException {
+        return new FileWriter(Ecdar.projectDirectory.getValue() + File.separator + filename + ".json");
+    }
+
+    private static FileWriter getSaveFileWriter(final String filename, final String folderName) throws IOException {
+        return new FileWriter(Ecdar.projectDirectory.getValue() + File.separator + folderName + File.separator + filename + ".json");
+    }
+
+    /**
+     * Find a component by its name.
+     * @param name the name of the component looking for
+     * @return the component, or null if none is found
+     */
+    public Component findComponent(final String name) {
+        for (final Component component : getComponents()) {
+            if (component.getName().equals(name)) return component;
+        }
+
+        return null;
+    }
+
+    /**
+     * Cleans the project.
+     * Be sure to disable code analysis before call and enable after call.
+     */
+    public void clean() {
+        getGlobalDeclarations().clearDeclarationsText();
+
+        queries.clear();
+
+        components.clear();
+
+        tempComponents.clear();
+
+        systems.clear();
+
+        testPlans.clear();
     }
 
     /**
@@ -100,7 +188,7 @@ public class Project {
         }
 
         // Save systems
-        for (final EcdarSystem system : getSystemsProperty()) {
+        for (final EcdarSystem system : getSystems()) {
             final Writer writer = getSaveFileWriter(system.getName(), FOLDER_NAME_SYSTEMS);
             getNewGson().toJson(system.serialize(), writer);
             writer.close();
@@ -123,28 +211,6 @@ public class Project {
         }
 
         Ecdar.showToast("Project saved.");
-    }
-
-    /**
-     * Gets a new GSON object.
-     * @return the GSON object
-     */
-    private static Gson getNewGson() {
-        return new GsonBuilder().setPrettyPrinting().create();
-    }
-
-    /**
-     * Gets a new file writer for saving a file.
-     * @param filename name of file without extension.
-     * @return the file writer
-     * @throws IOException if an IO error occurs
-     */
-    private static FileWriter getSaveFileWriter(final String filename) throws IOException {
-        return new FileWriter(Ecdar.projectDirectory.getValue() + File.separator + filename + ".json");
-    }
-
-    private static FileWriter getSaveFileWriter(final String filename, final String folderName) throws IOException {
-        return new FileWriter(Ecdar.projectDirectory.getValue() + File.separator + folderName + File.separator + filename + ".json");
     }
 
     /**
@@ -275,7 +341,7 @@ public class Project {
 
         final List<Map.Entry<String, JsonObject>> list = new LinkedList<>(nameJsonMap.entrySet());
 
-        list.sort(Comparator.comparing(Map.Entry::getKey));
+        list.sort(Map.Entry.comparingByKey());
 
         final List<JsonObject> orderedJsonSystems = new ArrayList<>();
 
@@ -287,7 +353,7 @@ public class Project {
         Collections.reverse(orderedJsonSystems);
 
         // Add the systems to the list
-        orderedJsonSystems.forEach(json -> getSystemsProperty().add(new EcdarSystem(json)));
+        orderedJsonSystems.forEach(json -> getSystems().add(new EcdarSystem(json)));
     }
 
     /**
@@ -315,7 +381,7 @@ public class Project {
 
         final List<Map.Entry<String, JsonObject>> list = new LinkedList<>(nameJsonMap.entrySet());
 
-        list.sort(Comparator.comparing(Map.Entry::getKey));
+        list.sort(Map.Entry.comparingByKey());
 
         final List<JsonObject> orderedJsonSystems = new ArrayList<>();
 
@@ -328,115 +394,5 @@ public class Project {
 
         // Add the test objects to the list
         orderedJsonSystems.forEach(json -> getTestPlans().add(new MutationTestPlan(json)));
-    }
-
-    /**
-     * Resets components.
-     * After this, there is only one component.
-     * Be sure to disable code analysis before call and enable after call.
-     */
-    public void reset() {
-        clean();
-        components.add(new Component(true));
-    }
-
-    /**
-     * Cleans the project.
-     * Be sure to disable code analysis before call and enable after call.
-     */
-    public void clean() {
-        getGlobalDeclarations().clearDeclarationsText();
-
-        queries.clear();
-
-        components.clear();
-
-        tempComponents.clear();
-
-        systems.clear();
-
-        testPlans.clear();
-    }
-
-    /**
-     * gets the id of all locations in the project and inserts it into a set
-     * @return the set of all location ids
-     */
-    Set<String> getLocationIds(){
-        final Set<String> ids = new HashSet<>();
-
-        for (final Component component : getComponents()) {
-            ids.addAll(component.getLocationIds());
-        }
-
-        return ids;
-    }
-
-    /**
-     * gets the id of all edges in the project and inserts it into a set
-     * @return the set of all edge ids
-     */
-    Set<String> getEdgeIds(){
-        final Set<String> ids = new HashSet<>();
-
-        for (final Component component : getComponents()) {
-            ids.addAll(component.getEdgeIds());
-        }
-
-        return ids;
-    }
-
-    /**
-     * gets the id of all systems in the project and inserts it into a set
-     * @return the set of all system names
-     */
-    HashSet<String> getSystemNames(){
-        final HashSet<String> names = new HashSet<>();
-
-        for(final EcdarSystem system : getSystemsProperty()){
-            names.add(system.getName());
-        }
-
-        return names;
-    }
-
-    /**
-     * Gets universal/inconsistent ids for all components in the project
-     * @return a set of universal/inconsistent ids
-     */
-    HashSet<String> getUniIncIds() {
-        final HashSet<String> ids = new HashSet<>();
-        for (final Component component : getComponents()){
-            ids.add(component.getUniIncId());
-        }
-
-        return ids;
-    }
-
-    /**
-     * Gets the name of all components in the project and inserts it into a set
-     * @return the set of all component names
-     */
-    HashSet<String> getComponentNames(){
-        final HashSet<String> names = new HashSet<>();
-
-        for(final Component component : getComponents()){
-            names.add(component.getName());
-        }
-
-        return names;
-    }
-
-    /**
-     * Find a component by its name.
-     * @param name the name of the component looking for
-     * @return the component, or null if none is found
-     */
-    public Component findComponent(final String name) {
-        for (final Component component : getComponents()) {
-            if (component.getName().equals(name)) return component;
-        }
-
-        return null;
     }
 }

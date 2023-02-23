@@ -3,6 +3,7 @@ package ecdar.mutation.operators;
 import com.google.common.collect.Lists;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
+import ecdar.mutation.ComponentVerificationTransformer;
 import ecdar.mutation.TextFlowBuilder;
 import ecdar.mutation.models.MutationTestCase;
 
@@ -39,7 +40,7 @@ public class InvertResetOperator extends MutationOperator {
             // For each clock
             final int finalEdgeIndex = edgeIndex;
             clocks.forEach(clock -> {
-                final Component mutant = original.cloneForVerification();
+                final Component mutant = ComponentVerificationTransformer.cloneForVerification(original);
                 final Edge mutantEdge = mutant.getEdges().get(finalEdgeIndex);
 
                 // Mutate

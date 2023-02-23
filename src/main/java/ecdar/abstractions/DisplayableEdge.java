@@ -3,6 +3,7 @@ package ecdar.abstractions;
 import ecdar.Ecdar;
 import ecdar.code_analysis.Nearable;
 import ecdar.utility.colors.Color;
+import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.Circular;
 import ecdar.utility.helpers.MouseCircular;
 import javafx.beans.property.*;
@@ -25,8 +26,7 @@ public abstract class DisplayableEdge implements Nearable {
     private final StringProperty update = new SimpleStringProperty("");
 
     // Styling properties
-    private final ObjectProperty<Color> color = new SimpleObjectProperty<>(Color.GREY_BLUE);
-    private final ObjectProperty<Color.Intensity> colorIntensity = new SimpleObjectProperty<>(Color.Intensity.I700);
+    private final ObjectProperty<EnabledColor> color = new SimpleObjectProperty<>(EnabledColor.getDefault());
     private final ObservableList<Nail> nails = FXCollections.observableArrayList();
 
     // Circulars
@@ -104,28 +104,16 @@ public abstract class DisplayableEdge implements Nearable {
         return update;
     }
 
-    public Color getColor() {
+    public EnabledColor getColor() {
         return color.get();
     }
 
-    public void setColor(final Color color) {
+    public void setColor(final EnabledColor color) {
         this.color.set(color);
     }
 
-    public ObjectProperty<Color> colorProperty() {
+    public ObjectProperty<EnabledColor> colorProperty() {
         return color;
-    }
-
-    public Color.Intensity getColorIntensity() {
-        return colorIntensity.get();
-    }
-
-    public void setColorIntensity(final Color.Intensity colorIntensity) {
-        this.colorIntensity.set(colorIntensity);
-    }
-
-    public ObjectProperty<Color.Intensity> colorIntensityProperty() {
-        return colorIntensity;
     }
 
     public void setIsHighlighted(final boolean highlight){ this.isHighlighted.set(highlight);}

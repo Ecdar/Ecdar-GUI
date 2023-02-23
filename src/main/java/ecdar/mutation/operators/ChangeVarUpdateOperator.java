@@ -1,15 +1,17 @@
 package ecdar.mutation.operators;
 
+import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
+import ecdar.mutation.ComponentVerificationTransformer;
 import ecdar.mutation.TextFlowBuilder;
 import ecdar.mutation.models.MutationTestCase;
 import ecdar.utility.ExpressionHelper;
 import org.apache.commons.lang3.tuple.Triple;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Mutation operator that changes the assignment of local variables.
@@ -27,7 +29,7 @@ public class ChangeVarUpdateOperator extends MutationOperator {
 
     @Override
     public List<MutationTestCase> generateTestCases(final Component original) {
-        final List<Triple<String, Integer, Integer>> locals = original.getLocalVariablesWithBounds();
+        final List<Triple<String, Integer, Integer>> variablesWithBounds = getLocalComponentVariablesWithBounds(original);
 
         final List<MutationTestCase> cases = new ArrayList<>();
 
@@ -43,12 +45,12 @@ public class ChangeVarUpdateOperator extends MutationOperator {
 
             // For each variable
             final int finalEdgeIndex = edgeIndex;
-            locals.forEach(local -> {
+            variablesWithBounds.forEach(local -> {
                 // If variable is not assigned, add it
                 if (sides.get(local.getLeft()) == null) {
                     // For each possible assignment of that variable
                     for (int value = local.getMiddle(); value <= local.getRight(); value++) {
-                        final Component mutant = original.cloneForVerification();
+                        final Component mutant = ComponentVerificationTransformer.cloneForVerification(original);
                         final Edge mutantEdge = mutant.getEdges().get(finalEdgeIndex);
 
                         final List<String> newSimpleUpdates = new ArrayList<>();
@@ -73,7 +75,7 @@ public class ChangeVarUpdateOperator extends MutationOperator {
                         // If this is already the original assignment, ignore
                         if (sides.get(local.getLeft()).equals(String.valueOf(value))) continue;
 
-                        final Component mutant = original.cloneForVerification();
+                        final Component mutant = ComponentVerificationTransformer.cloneForVerification(original);
                         final Edge mutantEdge = mutant.getEdges().get(finalEdgeIndex);
 
                         final List<String> newSimpleUpdates = new ArrayList<>();
@@ -102,6 +104,31 @@ public class ChangeVarUpdateOperator extends MutationOperator {
         return cases;
     }
 
+    /**
+     * Gets the local variables defined in the declarations text.
+     * Also gets the lower and upper bounds for these variables.
+     *
+     * @return Triples containing (left) name of the variable, (middle) lower bound, (right) upper bound
+     */
+    private List<Triple<String, Integer, Integer>> getLocalComponentVariablesWithBounds(Component component) {
+        final List<Triple<String, Integer, Integer>> typedefs = Ecdar.getProject().getGlobalDeclarations().getTypedefs();
+
+        final List<Triple<String, Integer, Integer>> locals = new ArrayList<>();
+
+        Arrays.stream(component.getDeclarationsText().split(";")).forEach(statement -> {
+            final Matcher matcher = Pattern.compile("^\\s*(\\w+)\\s+(\\w+)(\\W|$)").matcher(statement);
+            if (!matcher.find()) return;
+
+            final Optional<Triple<String, Integer, Integer>> typedef = typedefs.stream()
+                    .filter(def -> def.getLeft().equals(matcher.group(1))).findAny();
+            if (typedef.isEmpty()) return;
+
+            locals.add(Triple.of(matcher.group(2), typedef.get().getMiddle(), typedef.get().getRight()));
+        });
+
+        return locals;
+    }
+
     @Override
     public String getDescription() {
         return "Changes the assignment (or adds, if the variable is not assigned in corresponding edge) of a local variable " +
@@ -114,10 +141,9 @@ public class ChangeVarUpdateOperator extends MutationOperator {
     @Override
     public int getUpperLimit(final Component original) {
         // Get the sum of valuations of each variable
-        final int varValueCount = original.getLocalVariablesWithBounds().stream().mapToInt(local -> local.getRight() - local.getMiddle() + 1).sum();
+        final int varValueCount = getLocalComponentVariablesWithBounds(original).stream().mapToInt(local -> local.getRight() - local.getMiddle() + 1).sum();
 
         return original.getDisplayableEdges().size() * varValueCount;
-
     }
 
     @Override

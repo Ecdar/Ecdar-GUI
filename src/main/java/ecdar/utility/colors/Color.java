@@ -368,6 +368,8 @@ public enum Color {
         A400,
         A700;
 
+        public Intensity lowest() { return next(-this.ordinal()); }
+
         public Intensity next() {
             return next(1);
         }
@@ -376,9 +378,8 @@ public enum Color {
             final Intensity[] values = values();
 
             // One of the first 10 elements
+            final int index = this.ordinal() + levels;
             if (this.ordinal() <= 9) {
-                final int index = this.ordinal() + levels;
-
                 if (index < 0) {
                     return values[0];
                 } else if (index > 9) {
@@ -389,8 +390,6 @@ public enum Color {
             }
             // One of the last 4 elements
             else {
-                final int index = this.ordinal() + levels;
-
                 if (index < 10) {
                     return values[10];
                 } else if (index > 13) {

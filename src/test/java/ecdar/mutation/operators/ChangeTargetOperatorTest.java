@@ -6,6 +6,7 @@ import ecdar.abstractions.Edge;
 import ecdar.abstractions.EdgeStatus;
 import ecdar.abstractions.Location;
 import ecdar.mutation.operators.ChangeTargetOperator;
+import ecdar.utility.colors.EnabledColor;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
@@ -19,7 +20,7 @@ public class ChangeTargetOperatorTest {
 
     @Test
     public void testNumberOfMutants() {
-        final Component component = new Component(false);
+        final Component component = new Component(EnabledColor.getDefault(), "test_comp");
         Ecdar.getProject().getComponents().add(component);
 
         // 3 locations in addition to the already created initial location

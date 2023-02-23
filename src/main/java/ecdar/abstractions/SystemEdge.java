@@ -2,7 +2,6 @@ package ecdar.abstractions;
 
 import ecdar.Ecdar;
 import ecdar.controllers.SystemRootController;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -11,9 +10,8 @@ import javafx.collections.ObservableList;
 
 /**
  * This is an edge in an Ecdar system.
- * The class is called EcdarSystemEdge, since there is already an SystemEdge in com.uppaal.model.system.
  */
-public class EcdarSystemEdge {
+public class SystemEdge {
     private static final String CHILD = "child";
     private static final String PARENT = "parent";
     // Verification properties
@@ -27,7 +25,7 @@ public class EcdarSystemEdge {
      * Constructor
      * @param node A node of this edge. This can either be a child or a parent
      */
-    public EcdarSystemEdge(final SystemElement node) {
+    public SystemEdge(final SystemElement node) {
         tempNode.set(node);
     }
 
@@ -36,7 +34,7 @@ public class EcdarSystemEdge {
      * @param json the JSON object
      * @param system system containing the edge
      */
-    public EcdarSystemEdge(final JsonObject json, final EcdarSystem system) {
+    public SystemEdge(final JsonObject json, final EcdarSystem system) {
         deserialize(json, system);
     }
 

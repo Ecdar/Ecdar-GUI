@@ -1,15 +1,12 @@
 package ecdar;
 
-import ecdar.abstractions.Component;
-import ecdar.abstractions.Project;
+import ecdar.abstractions.*;
 import ecdar.backend.BackendDriver;
 import ecdar.backend.BackendHelper;
 import ecdar.backend.QueryHandler;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.controllers.EcdarController;
-import ecdar.presentations.BackgroundThreadPresentation;
-import ecdar.presentations.EcdarPresentation;
-import ecdar.presentations.UndoRedoHistoryPresentation;
+import ecdar.presentations.*;
 import ecdar.utility.keyboard.Keybind;
 import ecdar.utility.keyboard.KeyboardTracker;
 import javafx.application.Application;
@@ -59,6 +56,7 @@ public class Ecdar extends Application {
 
     /**
      * Gets the absolute path to the server folder
+     *
      * @return
      */
     public static String getServerPath() {
@@ -73,6 +71,7 @@ public class Ecdar extends Application {
 
     /**
      * Gets the path to the root directory.
+     *
      * @return the path to the root directory
      * @throws URISyntaxException if the source code location could not be converted to an URI
      */
@@ -117,6 +116,7 @@ public class Ecdar extends Application {
 
     /**
      * Gets the project.
+     *
      * @return the project
      */
     public static Project getProject() {
@@ -145,6 +145,7 @@ public class Ecdar extends Application {
      * Toggles whether to cache UI.
      * Caching reduces CPU usage on some devices.
      * It also increases GPU 3D engine usage on some devices.
+     *
      * @return the property specifying whether to cache
      */
     public static BooleanProperty toggleUICache() {
@@ -155,6 +156,7 @@ public class Ecdar extends Application {
     /**
      * Toggles whether checks are run in the background.
      * Running checks in the background increases CPU usage and power consumption.
+     *
      * @return the property specifying whether to run checks in the background
      */
     public static BooleanProperty toggleRunBackgroundQueries() {
@@ -168,6 +170,7 @@ public class Ecdar extends Application {
 
     /**
      * Toggles whether to canvas is split or single.
+     *
      * @return the property specifying whether the canvas is split
      */
     public static BooleanProperty toggleCanvasSplit() {
@@ -178,6 +181,7 @@ public class Ecdar extends Application {
 
     /**
      * Returns the backend driver used to execute queries and handle simulation
+     *
      * @return BackendDriver
      */
     public static BackendDriver getBackendDriver() {
@@ -204,9 +208,6 @@ public class Ecdar extends Application {
     public void start(final Stage stage) {
         // Print launch message the user, if terminal is being launched
         System.out.println("Launching ECDAR...");
-
-        // Load or create new project
-        project = new Project();
 
         // Set the title for the application
         stage.setTitle("Ecdar " + VERSION);
@@ -257,11 +258,6 @@ public class Ecdar extends Application {
 
         // We're now ready! Let the curtains fall!
         stage.show();
-
-        project.reset();
-
-        // Set active model
-        Platform.runLater(() -> EcdarController.setActiveModelForActiveCanvas(Ecdar.getProject().getComponents().get(0)));
 
         EcdarController.reachabilityServiceEnabled = true;
 
@@ -327,58 +323,8 @@ public class Ecdar extends Application {
 
             backendDriver = new BackendDriver();
         });
-    }
 
-    /**
-     * Initializes and resets the project.
-     * This can be used as a test setup.
-     */
-    public static void setUpForTest() {
-        project = new Project();
-        project.reset();
-
-        // This implicitly starts the fx-application thread
-        // It prevents java.lang.RuntimeException: Internal graphics not initialized yet
-        // https://stackoverflow.com/questions/27839441/internal-graphics-not-initialized-yet-javafx
-        // new JFXPanel();
-    }
-
-    public static void initializeProjectFolder() throws IOException {
-        // Make sure that the project directory exists
-        final File directory = new File(projectDirectory.get());
-        FileUtils.forceMkdir(directory);
-
-        CodeAnalysis.getErrors().addListener(new ListChangeListener<CodeAnalysis.Message>() {
-            @Override
-            public void onChanged(Change<? extends CodeAnalysis.Message> c) {
-                CodeAnalysis.getErrors().forEach(message -> {
-                    System.out.println(message.getMessage());
-                });
-            }
-        });
-        CodeAnalysis.clearErrorsAndWarnings();
-        CodeAnalysis.disable();
-        getProject().clean();
-
-        // Deserialize the project
-        Ecdar.getProject().deserialize(directory);
-        CodeAnalysis.enable();
-
-        // Generate all component presentations by making them the active component in the view one by one
-        Component initialShownComponent = null;
-        for (final Component component : Ecdar.getProject().getComponents()) {
-            // The first component should be shown
-            if (initialShownComponent == null) {
-                initialShownComponent = component;
-            }
-            EcdarController.setActiveModelForActiveCanvas(component);
-        }
-
-        // If we found a component set that as active
-        if (initialShownComponent != null) {
-            EcdarController.setActiveModelForActiveCanvas(initialShownComponent);
-        }
-        serializationDone = true;
+        project = presentation.getController().projectPane.getController().project;
     }
 
     private void loadFonts() {
@@ -411,6 +357,56 @@ public class Ecdar extends Application {
         Font.loadFont(getClass().getResourceAsStream("fonts/roboto_mono/RobotoMono-Regular.ttf"), 14);
         Font.loadFont(getClass().getResourceAsStream("fonts/roboto_mono/RobotoMono-Thin.ttf"), 14);
         Font.loadFont(getClass().getResourceAsStream("fonts/roboto_mono/RobotoMono-ThinItalic.ttf"), 14);
+    }
+
+    /**
+     * Initializes and resets the project.
+     * This can be used as a test setup.
+     */
+    public static void setUpForTest() {
+        project = new Project();
+
+        // This implicitly starts the fx-application thread
+        // It prevents java.lang.RuntimeException: Internal graphics not initialized yet
+        // https://stackoverflow.com/questions/27839441/internal-graphics-not-initialized-yet-javafx
+        // new JFXPanel();
+    }
+
+    public static void initializeProjectFolder() throws IOException {
+        // Make sure that the project directory exists
+        final File directory = new File(projectDirectory.get());
+        FileUtils.forceMkdir(directory);
+
+        CodeAnalysis.getErrors().addListener((ListChangeListener<CodeAnalysis.Message>) c -> CodeAnalysis.getErrors().forEach(message -> {
+            System.out.println(message.getMessage());
+        }));
+
+        CodeAnalysis.clearErrorsAndWarnings();
+        CodeAnalysis.disable();
+        getProject().clean();
+
+        // Deserialize the project
+        getProject().deserialize(directory);
+        CodeAnalysis.enable();
+
+        // If we found a component set that as active
+        serializationDone = true;
+
+        // Update reachability check timer when components change
+        getProject().getComponents().addListener((ListChangeListener<Component>) c -> {
+            while (c.next()) {
+                c.getAddedSubList().forEach(component -> {
+                    component.getLocations().addListener((ListChangeListener<? super Location>) loc -> EcdarController.runReachabilityAnalysis());
+                    component.getDisplayableEdges().addListener((ListChangeListener<? super DisplayableEdge>) de -> EcdarController.runReachabilityAnalysis());
+                    component.declarationsTextProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
+                    component.includeInPeriodicCheckProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
+                });
+            }
+        });
+    }
+
+    public static ComponentPresentation getComponentPresentationOfComponent(Component component) {
+        return getPresentation().getController().projectPane.getController().getComponentPresentations().stream().filter(componentPresentation -> componentPresentation.getController().getComponent().equals(component)).findFirst().orElse(null);
     }
 
     private static String getVersion() {

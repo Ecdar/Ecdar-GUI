@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 public class EnabledColor {
 
-    public static final ArrayList<EnabledColor> enabledColors = new ArrayList<EnabledColor>() {{
+    public static final ArrayList<EnabledColor> enabledColors = new ArrayList<>() {{
         add(new EnabledColor(Color.GREY_BLUE, Color.Intensity.I700, KeyCode.DIGIT0));
         add(new EnabledColor(Color.DEEP_ORANGE, Color.Intensity.I700, KeyCode.DIGIT1));
         add(new EnabledColor(Color.RED, Color.Intensity.I500, KeyCode.DIGIT2));
@@ -51,6 +51,42 @@ public class EnabledColor {
         }
 
         return null;
+    }
+
+    public static EnabledColor getDefault() {
+        return enabledColors.get(0);
+    }
+
+    public javafx.scene.paint.Color getTextColor() {
+        return color.getTextColor(intensity);
+    }
+
+    public javafx.scene.paint.Color getPaintColor() {
+        return color.getColor(intensity);
+    }
+
+    public javafx.scene.paint.Color getStrokeColor() {
+        return nextIntensity(2).getPaintColor();
+    }
+
+    public String getTextColorRgbaString() {
+        return color.getTextColorRgbaString(intensity);
+    }
+
+    public EnabledColor getLowestIntensity() {
+        return new EnabledColor(color, intensity.lowest());
+    }
+
+    public EnabledColor nextIntensity() {
+        return nextIntensity(1);
+    }
+
+    public EnabledColor nextIntensity(final int levelIncrement) {
+        return new EnabledColor(this.color, this.intensity.next(levelIncrement));
+    }
+
+    public EnabledColor setIntensity(int i) {
+        return getLowestIntensity().nextIntensity(i);
     }
 
     @Override

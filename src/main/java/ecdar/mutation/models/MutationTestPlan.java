@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
-import ecdar.abstractions.HighLevelModelObject;
+import ecdar.abstractions.HighLevelModel;
 import ecdar.mutation.VisibilityHelper;
 import ecdar.mutation.operators.MutationOperator;
 import javafx.beans.property.*;
@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 /**
  * A test plan for conducting model-based mutation testing on a component.
  */
-public class MutationTestPlan extends HighLevelModelObject {
+public class MutationTestPlan extends HighLevelModel {
     /**
      * The status of the test plan.
      * STOPPING: Stopped by the user

@@ -36,9 +36,6 @@ public class MutationHandler {
         this.consumer = consumer;
     }
 
-
-    /* Properties */
-
     private Component getTestModel() {
         return testModel;
     }
@@ -50,9 +47,6 @@ public class MutationHandler {
     private Consumer<List<MutationTestCase>> getConsumer() {
         return consumer;
     }
-
-
-    /* Other */
 
     /**
      * Starts.
@@ -85,7 +79,7 @@ public class MutationHandler {
                 return;
             }
 
-            cases.forEach(testCase -> testCase.getMutant().applyAngelicCompletion());
+            cases.forEach(testCase -> ComponentVerificationTransformer.applyAngelicCompletionForComponent(testCase.getMutant()));
 
             Platform.runLater(() -> getPlan().setMutantsText("Mutants: " + cases.size() + " - Mutation time: " +
                     MutationTestPlanPresentation.readableFormat(Duration.between(start, Instant.now())))
@@ -94,7 +88,7 @@ public class MutationHandler {
             testModel.setName(MutationTestPlanController.SPEC_NAME);
 
             // If chosen, apply demonic completion
-            if (getPlan().isDemonic()) testModel.applyDemonicCompletion();
+            if (getPlan().isDemonic()) ComponentVerificationTransformer.applyDemonicCompletionToComponent(testModel);
 
             //Rename universal and inconsistent locations
             testModel.getLocations().forEach(location -> {
@@ -116,4 +110,5 @@ public class MutationHandler {
             Platform.runLater(() -> getConsumer().accept(cases));
         }).start();
     }
+
 }

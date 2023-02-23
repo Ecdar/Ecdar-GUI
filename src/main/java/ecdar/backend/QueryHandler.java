@@ -7,14 +7,12 @@ import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Query;
 import ecdar.abstractions.QueryState;
-import ecdar.controllers.EcdarController;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.helpers.StringValidator;
 import io.grpc.stub.StreamObserver;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
@@ -166,7 +164,7 @@ public class QueryHandler {
                 }, "Created new component: " + newComponent.getName(), "add-circle");
             }
 
-            EcdarController.getActiveCanvasPresentation().getController().setActiveModel(newComponent);
+            Ecdar.getProject().addComponent(newComponent);
         });
     }
 }

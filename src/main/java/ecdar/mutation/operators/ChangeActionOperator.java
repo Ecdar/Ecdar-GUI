@@ -3,6 +3,7 @@ package ecdar.mutation.operators;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
 import ecdar.abstractions.EdgeStatus;
+import ecdar.mutation.ComponentVerificationTransformer;
 import ecdar.mutation.TextFlowBuilder;
 import ecdar.mutation.models.MutationTestCase;
 
@@ -25,7 +26,7 @@ abstract class ChangeActionOperator extends MutationOperator {
         // If action is the action of the original edge, ignore
         if (originalEdge.getStatus().equals(status) && originalEdge.getSync().equals(sync)) return null;
 
-        final Component mutant = original.cloneForVerification();
+        final Component mutant = ComponentVerificationTransformer.cloneForVerification(original);
 
         // Mutate
         final Edge mutantEdge = mutant.getEdges().get(edgeIndex);

@@ -2,6 +2,7 @@ package ecdar.mutation.operators;
 
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
+import ecdar.mutation.ComponentVerificationTransformer;
 import ecdar.mutation.TextFlowBuilder;
 import ecdar.mutation.models.MutationTestCase;
 
@@ -41,7 +42,7 @@ public class ChangeGuardConstantOperator extends MutationOperator {
             int index = 0;
             while (matcher.find()) {
                 {
-                    final Component mutant = original.cloneForVerification();
+                    final Component mutant = ComponentVerificationTransformer.cloneForVerification(original);
                     final Edge mutantEdge = mutant.getEdges().get(edgeIndex);
                     final int newNumber = Integer.parseInt(matcher.group(1)) + 1;
 
@@ -54,7 +55,7 @@ public class ChangeGuardConstantOperator extends MutationOperator {
                                     .text(" to ").boldText(mutantEdge.getGuard()).build()
                     ));
                 } {
-                    final Component mutant = original.cloneForVerification();
+                    final Component mutant = ComponentVerificationTransformer.cloneForVerification(original);
                     final Edge mutantEdge = mutant.getEdges().get(edgeIndex);
                     final int newNumber = Integer.parseInt(matcher.group(1)) -1;
 

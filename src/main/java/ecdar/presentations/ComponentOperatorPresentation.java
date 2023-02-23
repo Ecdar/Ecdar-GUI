@@ -4,6 +4,7 @@ import ecdar.abstractions.ComponentOperator;
 import ecdar.abstractions.EcdarSystem;
 import ecdar.controllers.ComponentOperatorController;
 import ecdar.utility.colors.Color;
+import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.ItemDragHelper;
 import ecdar.utility.helpers.SelectHelper;
 import javafx.beans.property.DoubleProperty;
@@ -15,13 +16,14 @@ import javafx.scene.layout.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
  * Presentation of a component operator
  */
 public class ComponentOperatorPresentation extends StackPane implements SelectHelper.ItemSelectable {
     private final ComponentOperatorController controller;
-    private final List<BiConsumer<Color, Color.Intensity>> updateColorDelegates = new ArrayList<>();
+    private final List<Consumer<EnabledColor>> updateColorDelegates = new ArrayList<>();
 
     /**
      * Constructor for ComponentOperatorPresentation, sets the controller and initializes label, dimensions, frame and mouse controls
@@ -53,11 +55,11 @@ public class ComponentOperatorPresentation extends StackPane implements SelectHe
         idLabel.setTranslateY(-2);
 
         // Delegate to style the label based on the color of the location
-        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> idLabel.setTextFill(newColor.getTextColor(newIntensity));
+        final Consumer<EnabledColor> updateColor = (newColor) -> idLabel.setTextFill(newColor.getTextColor());
 
         // Update color now and on color change
-        updateColor.accept(system.getColor(), system.getColorIntensity());
-        system.colorProperty().addListener(observable -> updateColor.accept(system.getColor(), system.getColorIntensity()));
+        updateColor.accept(system.getColor());
+        system.colorProperty().addListener(observable -> updateColor.accept(system.getColor()));
         updateColorDelegates.add(updateColor);
     }
 
@@ -96,10 +98,10 @@ public class ComponentOperatorPresentation extends StackPane implements SelectHe
         controller.frame.getPoints().addAll(1d * Ecdar.CANVAS_PADDING, 1d * Ecdar.CANVAS_PADDING);
         controller.frame.getPoints().addAll(2d * Ecdar.CANVAS_PADDING, 0d);
 
-        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> controller.frame.setFill(newColor.getColor(newIntensity));
+        final Consumer<EnabledColor> updateColor = (newColor) -> controller.frame.setFill(newColor.getPaintColor());
 
-        updateColor.accept(system.getColor(), system.getColorIntensity());
-        system.colorProperty().addListener(observable -> updateColor.accept(system.getColor(), system.getColorIntensity()));
+        updateColor.accept(system.getColor());
+        system.colorProperty().addListener(observable -> updateColor.accept(system.getColor()));
         updateColorDelegates.add(updateColor);
     }
 
@@ -128,17 +130,12 @@ public class ComponentOperatorPresentation extends StackPane implements SelectHe
      * Is meant to set the color, but this feature is not available for operators so this method does nothing
      */
     @Override
-    public void color(final Color color, final Color.Intensity intensity) {
+    public void color(final EnabledColor color) {
     }
 
     @Override
-    public Color getColor() {
+    public EnabledColor getColor() {
         return controller.getSystem().getColor();
-    }
-
-    @Override
-    public Color.Intensity getColorIntensity() {
-        return controller.getSystem().getColorIntensity();
     }
 
     /**
@@ -191,7 +188,7 @@ public class ComponentOperatorPresentation extends StackPane implements SelectHe
      */
     @Override
     public void select() {
-        updateColorDelegates.forEach(colorConsumer -> colorConsumer.accept(SelectHelper.SELECT_COLOR, SelectHelper.SELECT_COLOR_INTENSITY_NORMAL));
+        updateColorDelegates.forEach(colorConsumer -> colorConsumer.accept(new EnabledColor(SelectHelper.SELECT_COLOR, SelectHelper.SELECT_COLOR_INTENSITY_NORMAL)));
     }
 
     /**
@@ -202,7 +199,7 @@ public class ComponentOperatorPresentation extends StackPane implements SelectHe
         updateColorDelegates.forEach(colorConsumer -> {
             final EcdarSystem system = controller.getSystem();
 
-            colorConsumer.accept(system.getColor(), system.getColorIntensity());
+            colorConsumer.accept(system.getColor());
         });
 
     }
