@@ -19,7 +19,7 @@ This section covers what dependencies are currently needed by the GUI.
 ### JVM
 As with all Java applications, a working JVM is required to run the project. 
 
-You will need Java version 11 containing JavaFX. We suggest downloading one of the distributions from https://www.azul.com/downloads/?version=java-11-lts&package=jdk-fx, as this is the version used by the main development team.
+You will need Java version 11 containing JavaFX. We suggest downloading Azul's Java 11 from https://www.azul.com/downloads/?version=java-11-lts&package=jdk-fx, as this is the version used by the main development team.
 
 ### Ecdar-ProtoBuf
 This repository utilizes the [Ecdar-ProtoBuf repository](https://github.com/Ecdar/Ecdar-ProtoBuf) for the communication with the engines. This dependency is implemented as a submodule that needs to be pulled and updated. If you have not yet cloned the code from this repository (the GUI), you can clone both the GUI and the submodule containing the ProtoBuf repository by running the following command:
@@ -75,7 +75,7 @@ If an engine is marked with _Default_, all added queries will be assigned that e
 
 
 ## Exemplary Projects
-To get started and get an idea of what the system can be used for, multiple exemplary can be found in the `examples` directory. 
+To get started and get an idea of what the system can be used for, multiple examples can be found in the `examples` directory. 
 These projects include preconfigured models and queries to execute against them.
 
 For the theoretical background and what the tool can be used for, please check out the latest research links at [here](https://ulrik.blog.aau.dk/ecdar/).
@@ -112,10 +112,10 @@ For features that are highly coupled with the interface, a second test suite has
 ```
 These tests are more intensive to run and utilizes a robot for interacting with a running process of the GUI. The tests are implemented using [TestFX](https://github.com/TestFX/TestFX). As these tests are more intensive, they are not run as part of the standard CI workflow.
 
-If you want to add any tests of this sort, please make sure that the functionality cannot be tested using non-UI tests.
+You should prefer writing non-UI tests, as they are less demanding and are part of the CI workflow.
 
 ### Code Organisation
-The code within the project is structure based on the Model-View-ViewModel (**MVVM**) architectural pattern. However, the terms _Abstraction_, _Controller_, and _Presentation_ are used instead.
+The code within the project is structure based on the Model-View-ViewModel (**MVVM**) architectural pattern. However, the terms _Abstraction_, _Presentation_, and _Controller_ are used instead of _Model_, _View_, and _View-Model_ respectively.
 This means that each element in the system consists of:
 - An _Abstraction_ (located in `abstractions` package).
 - A _Controller_ (located in `controllers` package).
@@ -131,7 +131,7 @@ The abstractions are used to represent logical elements, such as `components`, `
 The controllers contain the business logic of the system. They function as the link between the UI and the abstractions.
 This is implemented such that an action performed to an element in the UI triggers a method inside the controller, which then alters the state of the related abstraction.
 
-They implement the `Initializable` interface and are initialized through their associated presentation when an instance of that is instantiated. Hierarchically, a presentation therefor contains a controller.
+They implement the `Initializable` interface and are initialized through their associated presentation when an instance of that is instantiated. Hierarchically, a presentation therefore contains a controller.
 
 Each controller controls an instance of its related abstraction. If an action to one element should affect another element, this effect is enforced through the controller.
 
