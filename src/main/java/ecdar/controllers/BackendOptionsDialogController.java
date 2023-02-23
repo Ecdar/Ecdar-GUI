@@ -259,6 +259,7 @@ public class BackendOptionsDialogController implements Initializable {
      * @param newBackendInstancePresentation The presentation of the new backend instance
      */
     private void addBackendInstancePresentationToList(BackendInstancePresentation newBackendInstancePresentation) {
+        newBackendInstancePresentation.getController().defaultBackendRadioButton.setSelected(backendInstanceList.getChildren().isEmpty());
         backendInstanceList.getChildren().add(newBackendInstancePresentation);
         newBackendInstancePresentation.getController().moveBackendInstanceUpRippler.setOnMouseClicked((mouseEvent) -> moveBackendInstance(newBackendInstancePresentation, -1));
         newBackendInstancePresentation.getController().moveBackendInstanceDownRippler.setOnMouseClicked((mouseEvent) -> moveBackendInstance(newBackendInstancePresentation, +1));
