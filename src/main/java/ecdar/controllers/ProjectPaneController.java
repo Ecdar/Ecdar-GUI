@@ -456,21 +456,19 @@ public class ProjectPaneController implements Initializable {
     }
 
     public void setHighlightedForModelFiles(List<HighLevelModelPresentation> currentlyActiveModelPresentations) {
-        Platform.runLater(() -> {
-            modelPresentationMap.values().forEach(fp -> fp.getController().setIsActive(false));
+        modelPresentationMap.values().forEach(fp -> fp.getController().setIsActive(false));
 
-            for (HighLevelModelPresentation modelPresentation : currentlyActiveModelPresentations) {
-                modelPresentationMap.get(modelPresentation).getController().setIsActive(true);
-            }
-        });
+        for (HighLevelModelPresentation modelPresentation : currentlyActiveModelPresentations) {
+            modelPresentationMap.get(modelPresentation).getController().setIsActive(true);
+        }
     }
 
     public void swapHighlightBetweenTwoModelFiles(final HighLevelModelPresentation oldActive, final HighLevelModelPresentation newActive) {
-        if (newActive == null) return; // newActive is null when opening an existing project
-        if (modelPresentationMap.get(oldActive) != null) modelPresentationMap.get(oldActive)
+        if (modelPresentationMap.containsKey(oldActive)) modelPresentationMap.get(oldActive)
                 .getController()
                 .setIsActive(false);
-        modelPresentationMap.get(newActive).getController().setIsActive(true);
+
+        if (modelPresentationMap.containsKey(newActive)) modelPresentationMap.get(newActive).getController().setIsActive(true); // newActive is not in the map when opening an existing project
     }
 
     /**

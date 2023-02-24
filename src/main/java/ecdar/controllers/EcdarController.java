@@ -723,6 +723,7 @@ public class EcdarController implements Initializable {
                 try {
                     Ecdar.projectDirectory.set(file.getAbsolutePath());
                     Ecdar.initializeProjectFolder();
+                    setCanvasModeToSingular();
                     UndoRedoStack.clear();
                     addProjectToRecentProjects(file.getAbsolutePath());
                 } catch (final IOException e) {
@@ -744,6 +745,7 @@ public class EcdarController implements Initializable {
                 try {
                     Ecdar.projectDirectory.set(path);
                     Ecdar.initializeProjectFolder();
+                    setCanvasModeToSingular();
                 } catch (IOException ex) {
                     Ecdar.showToast("Unable to load project: \"" + path + "\"");
                 }
