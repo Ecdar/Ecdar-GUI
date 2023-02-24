@@ -466,6 +466,7 @@ public class ProjectPaneController implements Initializable {
     }
 
     public void swapHighlightBetweenTwoModelFiles(final HighLevelModelPresentation oldActive, final HighLevelModelPresentation newActive) {
+        if (newActive == null) return; // newActive is null when opening an existing project
         if (modelPresentationMap.get(oldActive) != null) modelPresentationMap.get(oldActive)
                 .getController()
                 .setIsActive(false);
