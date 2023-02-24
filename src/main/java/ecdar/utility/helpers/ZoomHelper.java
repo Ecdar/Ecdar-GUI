@@ -3,14 +3,9 @@ package ecdar.utility.helpers;
 import ecdar.Ecdar;
 import ecdar.controllers.ComponentController;
 import ecdar.presentations.*;
-import ecdar.utility.keyboard.Keybind;
-import ecdar.utility.keyboard.KeyboardTracker;
 import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
 
 public class ZoomHelper {
     public DoubleProperty currentZoomFactor = new SimpleDoubleProperty(1);
@@ -20,13 +15,6 @@ public class ZoomHelper {
     private CanvasPresentation canvasPresentation;
     private HighLevelModelPresentation model;
     private boolean active = true;
-
-    public ZoomHelper() {
-        KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_IN, new Keybind(new KeyCodeCombination(KeyCode.PLUS, KeyCombination.SHORTCUT_DOWN), this::zoomIn));
-        KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_OUT, new Keybind(new KeyCodeCombination(KeyCode.MINUS, KeyCombination.SHORTCUT_DOWN), this::zoomOut));
-        KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_TO_FIT, new Keybind(new KeyCodeCombination(KeyCode.EQUALS, KeyCombination.SHORTCUT_DOWN), this::zoomToFit));
-        KeyboardTracker.registerKeybind(KeyboardTracker.RESET_ZOOM, new Keybind(new KeyCodeCombination(KeyCode.DIGIT0, KeyCombination.SHORTCUT_DOWN), this::resetZoom));
-    }
 
     /**
      * Set the CanvasPresentation and add listeners for both the width and height of the new CanvasPresentation
