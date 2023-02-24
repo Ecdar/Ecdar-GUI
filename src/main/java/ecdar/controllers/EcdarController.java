@@ -525,7 +525,7 @@ public class EcdarController implements Initializable {
     }
 
     public void setActiveModelPresentationForActiveCanvas(HighLevelModelPresentation newActiveModelPresentation) {
-        projectPane.getController().changeOneActiveModelPresentationForAnother(EcdarController.getActiveCanvasPresentation().getController().getActiveModelPresentation(), newActiveModelPresentation);
+        projectPane.getController().swapHighlightBetweenTwoModelFiles(EcdarController.getActiveCanvasPresentation().getController().getActiveModelPresentation(), newActiveModelPresentation);
         EcdarController.getActiveCanvasPresentation().getController().setActiveModelPresentation(newActiveModelPresentation);
     }
 
@@ -974,7 +974,7 @@ public class EcdarController implements Initializable {
         canvasPresentation.getController().zoomablePane.minHeightProperty().bind(canvasPane.heightProperty());
         canvasPresentation.getController().zoomablePane.maxHeightProperty().bind(canvasPane.heightProperty());
 
-        projectPane.getController().setActiveModelPresentations(canvasPresentation.getController().getActiveModelPresentation());
+        projectPane.getController().setHighlightedForModelFiles(getActiveModelPresentations());
     }
 
     /**
@@ -1039,13 +1039,29 @@ public class EcdarController implements Initializable {
         canvasGrid.add(canvasPresentation, 1, 1);
 
         canvasPane.getChildren().add(canvasGrid);
-        projectPane.getController().setActiveModelPresentations(getActiveModelPresentations(canvasGrid));
+        projectPane.getController().setHighlightedForModelFiles(getActiveModelPresentations());
     }
 
-    private static List<HighLevelModelPresentation> getActiveModelPresentations(GridPane canvasGrid) {
-        return canvasGrid.getChildren()
-                .stream().map(canvas -> ((CanvasPresentation) canvas)
-                        .getController().getActiveModelPresentation()).collect(Collectors.toList());
+    /**
+     * Get list of shown HighLevelModelPresentations
+     * @return a list of all the HighLevelModelPresentations currently being shown
+     */
+    private List<HighLevelModelPresentation> getActiveModelPresentations() {
+        Pane canvasChild = (Pane) canvasPane.getChildren().get(0);
+
+        if (canvasChild instanceof GridPane) {
+            return canvasChild.getChildren()
+                    .stream().map(canvas -> ((CanvasPresentation) canvas)
+                            .getController().getActiveModelPresentation()).filter(Objects::nonNull).collect(Collectors.toList());
+        } else if (canvasChild instanceof CanvasPresentation) {
+            return new ArrayList<>() {
+                {
+                    ((CanvasPresentation) canvasChild).getController().getActiveModelPresentation();
+                }
+            };
+        }
+
+        return new ArrayList<>();
     }
 
     /**

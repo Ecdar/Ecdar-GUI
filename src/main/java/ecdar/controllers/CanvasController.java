@@ -150,6 +150,12 @@ public class CanvasController implements Initializable {
         } else if (newObject instanceof DeclarationsPresentation) {
             activeComponentPresentation = null;
             modelPane.getChildren().add(newObject);
+
+            // Bind size of Declaration to size of the model pane to ensure alignment and avoid drag
+            ((DeclarationsController) newObject.getController()).root.minWidthProperty().bind(modelPane.minWidthProperty());
+            ((DeclarationsController) newObject.getController()).root.maxWidthProperty().bind(modelPane.maxWidthProperty());
+            ((DeclarationsController) newObject.getController()).root.minHeightProperty().bind(modelPane.minHeightProperty());
+            ((DeclarationsController) newObject.getController()).root.maxHeightProperty().bind(modelPane.maxHeightProperty());
         } else if (newObject instanceof SystemPresentation) {
             activeComponentPresentation = null;
             modelPane.getChildren().add(newObject);

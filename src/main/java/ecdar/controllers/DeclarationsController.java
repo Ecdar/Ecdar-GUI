@@ -1,6 +1,5 @@
 package ecdar.controllers;
 
-import ecdar.Ecdar;
 import ecdar.abstractions.Declarations;
 import ecdar.abstractions.HighLevelModel;
 import ecdar.utility.helpers.UPPAALSyntaxHighlighter;
@@ -19,9 +18,9 @@ import java.util.ResourceBundle;
  * Controller for overall declarations.
  */
 public class DeclarationsController extends HighLevelModelController implements Initializable {
-    public StyleClassedTextArea textArea;
     public StackPane root;
     public BorderPane frame;
+    public StyleClassedTextArea textArea;
 
     private final ObjectProperty<Declarations> declarations;
 
@@ -35,20 +34,7 @@ public class DeclarationsController extends HighLevelModelController implements 
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
-        initializeWidthAndHeight();
         initializeText();
-    }
-
-    /**
-     * Initializes width and height of the text editor field, such that it fills up the whole canvas
-     */
-    private void initializeWidthAndHeight() {
-        // Fetch width and height of canvas and update
-        root.minWidthProperty().bind(Ecdar.getPresentation().getController().canvasPane.minWidthProperty());
-        root.maxWidthProperty().bind(Ecdar.getPresentation().getController().canvasPane.maxWidthProperty());
-        root.minHeightProperty().bind(Ecdar.getPresentation().getController().canvasPane.minHeightProperty());
-        root.maxHeightProperty().bind(Ecdar.getPresentation().getController().canvasPane.maxHeightProperty());
-        textArea.setTranslateY(20);
     }
 
     /**

@@ -451,6 +451,27 @@ public class ProjectPaneController implements Initializable {
         return names;
     }
 
+    public ObservableList<ComponentPresentation> getComponentPresentations() {
+        return componentPresentations;
+    }
+
+    public void setHighlightedForModelFiles(List<HighLevelModelPresentation> currentlyActiveModelPresentations) {
+        Platform.runLater(() -> {
+            modelPresentationMap.values().forEach(fp -> fp.getController().setIsActive(false));
+
+            for (HighLevelModelPresentation modelPresentation : currentlyActiveModelPresentations) {
+                modelPresentationMap.get(modelPresentation).getController().setIsActive(true);
+            }
+        });
+    }
+
+    public void swapHighlightBetweenTwoModelFiles(final HighLevelModelPresentation oldActive, final HighLevelModelPresentation newActive) {
+        if (modelPresentationMap.get(oldActive) != null) modelPresentationMap.get(oldActive)
+                .getController()
+                .setIsActive(false);
+        modelPresentationMap.get(newActive).getController().setIsActive(true);
+    }
+
     /**
      * Method for creating a new component
      */
@@ -493,33 +514,5 @@ public class ProjectPaneController implements Initializable {
             this.tempFilesList.setVisible(false);
             this.tempFilesList.setManaged(false);
         }
-    }
-
-    public ObservableList<ComponentPresentation> getComponentPresentations() {
-        return componentPresentations;
-    }
-
-    public void setActiveModelPresentations(HighLevelModelPresentation activeModelPresentation) {
-        Platform.runLater(() -> {
-            modelPresentationMap.values().forEach(fp -> fp.getController().setIsActive(false));
-            modelPresentationMap.get(activeModelPresentation).getController().setIsActive(true);
-        });
-    }
-
-    public void setActiveModelPresentations(List<HighLevelModelPresentation> currentlyActiveModelPresentations) {
-        Platform.runLater(() -> {
-            modelPresentationMap.values().forEach(fp -> fp.getController().setIsActive(false));
-
-            for (HighLevelModelPresentation modelPresentation : currentlyActiveModelPresentations) {
-                modelPresentationMap.get(modelPresentation).getController().setIsActive(true);
-            }
-        });
-    }
-
-    public void changeOneActiveModelPresentationForAnother(final HighLevelModelPresentation oldActive, final HighLevelModelPresentation newActive) {
-        if (modelPresentationMap.get(oldActive) != null) modelPresentationMap.get(oldActive)
-                .getController()
-                .setIsActive(false);
-        modelPresentationMap.get(newActive).getController().setIsActive(true);
     }
 }
