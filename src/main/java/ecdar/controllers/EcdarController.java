@@ -14,6 +14,7 @@ import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
 import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.SelectHelper;
+import ecdar.utility.helpers.ZoomHelper;
 import ecdar.utility.keyboard.Keybind;
 import ecdar.utility.keyboard.KeyboardTracker;
 import ecdar.utility.keyboard.NudgeDirection;
@@ -522,6 +523,17 @@ public class EcdarController implements Initializable {
         activeCanvasPresentation.get().setOpacity(0.75);
         newActiveCanvasPresentation.setOpacity(1);
         activeCanvasPresentation.set(newActiveCanvasPresentation);
+        updateZoomShortcutBindings(newActiveCanvasPresentation.getController().zoomHelper);
+    }
+
+    /**
+     * Binds the zoom shortcuts to the provided zoom helper (consequently unbinds the previously bound zoom helper)
+     */
+    private static void updateZoomShortcutBindings(ZoomHelper zoomHelper) {
+        KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_IN, new Keybind(new KeyCodeCombination(KeyCode.PLUS, KeyCombination.SHORTCUT_DOWN), zoomHelper::zoomIn));
+        KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_OUT, new Keybind(new KeyCodeCombination(KeyCode.MINUS, KeyCombination.SHORTCUT_DOWN), zoomHelper::zoomOut));
+        KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_TO_FIT, new Keybind(new KeyCodeCombination(KeyCode.EQUALS, KeyCombination.SHORTCUT_DOWN), zoomHelper::zoomToFit));
+        KeyboardTracker.registerKeybind(KeyboardTracker.RESET_ZOOM, new Keybind(new KeyCodeCombination(KeyCode.DIGIT0, KeyCombination.SHORTCUT_DOWN), zoomHelper::resetZoom));
     }
 
     public void setActiveModelPresentationForActiveCanvas(HighLevelModelPresentation newActiveModelPresentation) {
