@@ -150,7 +150,7 @@ public class CanvasController implements Initializable {
         } else if (newObject instanceof DeclarationsPresentation) {
             activeComponentPresentation = null;
             modelPane.getChildren().add(newObject);
-            ((DeclarationsController) newObject.getController()).bindWidthAndHeightToPane(modelPane); // ToDo NIELS: Test that this works and we can avoid using EcdarController.canvasPane
+            ((DeclarationsController) newObject.getController()).bindWidthAndHeightToPane(modelPane);
         } else if (newObject instanceof SystemPresentation) {
             activeComponentPresentation = null;
             modelPane.getChildren().add(newObject);
