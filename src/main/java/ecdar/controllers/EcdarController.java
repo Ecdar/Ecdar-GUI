@@ -6,6 +6,7 @@ import ecdar.Debug;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
 import ecdar.backend.BackendHelper;
+import ecdar.backend.QueryHandler;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.mutation.MutationTestPlanPresentation;
 import ecdar.mutation.models.MutationTestPlan;
@@ -74,8 +75,6 @@ public class EcdarController implements Initializable {
     public StackPane dialogContainer;
     public JFXDialog dialog;
     public StackPane modalBar;
-    public JFXTextField queryTextField;
-    public JFXTextField commentTextField;
     public JFXRippler colorSelected;
     public JFXRippler deleteSelected;
     public JFXRippler undo;
@@ -154,6 +153,7 @@ public class EcdarController implements Initializable {
     private static Text _queryTextResult;
     private static Text _queryTextQuery;
     private static final Text temporaryComponentWatermark = new Text("Temporary component");
+    private QueryHandler queryHandler;
 
     public static void runReachabilityAnalysis() {
         if (!reachabilityServiceEnabled) return;
@@ -208,17 +208,19 @@ public class EcdarController implements Initializable {
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
-        initilizeDialogs();
-        initializeCanvasPane();
-        initializeEdgeStatusHandling();
-        initializeKeybindings();
-        initializeStatusBar();
-        initializeMenuBar();
-        intitializeTemporaryComponentWatermark();
-        startBackgroundQueriesThread(); // Will terminate immediately if background queries are turned off
+        Platform.runLater(() -> {
+            initilizeDialogs();
+            initializeCanvasPane();
+            initializeEdgeStatusHandling();
+            initializeKeybindings();
+            initializeStatusBar();
+            initializeMenuBar();
+            intitializeTemporaryComponentWatermark();
+            startBackgroundQueriesThread(); // Will terminate immediately if background queries are turned off
 
-        bottomFillerElement.heightProperty().bind(messageTabPane.maxHeightProperty());
-        messageTabPane.getController().setRunnableForOpeningAndClosingMessageTabPane(this::changeInsetsOfFileAndQueryPanes);
+            bottomFillerElement.heightProperty().bind(messageTabPane.maxHeightProperty());
+            messageTabPane.getController().setRunnableForOpeningAndClosingMessageTabPane(this::changeInsetsOfFileAndQueryPanes);
+        });
     }
 
     private void initilizeDialogs() {
@@ -271,8 +273,10 @@ public class EcdarController implements Initializable {
             dialogContainer.setMouseTransparent(false);
         });
 
-        projectPane.getStyleClass().add("responsive-pane-sizing");
-        queryPane.getStyleClass().add("responsive-pane-sizing");
+        Platform.runLater(() -> {
+            projectPane.getStyleClass().add("responsive-pane-sizing");
+            queryPane.getStyleClass().add("responsive-pane-sizing");
+        });
 
         initializeEdgeStatusHandling();
         initializeKeybindings();
@@ -424,7 +428,7 @@ public class EcdarController implements Initializable {
                 if (!Ecdar.shouldRunBackgroundQueries.get()) return;
 
                 Ecdar.getProject().getQueries().forEach(query -> {
-                    if (query.isPeriodic()) Ecdar.getQueryExecutor().executeQuery(query);
+                    if (query.isPeriodic()) queryHandler.executeQuery(query);
                 });
 
                 // List of threads to start
@@ -442,9 +446,9 @@ public class EcdarController implements Initializable {
                             Query reachabilityQuery = new Query(locationReachableQuery, "", QueryState.UNKNOWN);
                             reachabilityQuery.setType(QueryType.REACHABILITY);
 
-                            Ecdar.getQueryExecutor().executeQuery(reachabilityQuery);
+                            queryHandler.executeQuery(reachabilityQuery);
 
-                            final Thread verifyThread = new Thread(() -> Ecdar.getQueryExecutor().executeQuery(reachabilityQuery));
+                            final Thread verifyThread = new Thread(() -> queryHandler.executeQuery(reachabilityQuery));
 
                             verifyThread.setName(locationReachableQuery + " (" + verifyThread.getName() + ")");
                             Debug.addThread(verifyThread);
@@ -1259,11 +1263,11 @@ public class EcdarController implements Initializable {
     private void changeInsetsOfFileAndQueryPanes() {
         if (messageTabPane.getController().isOpen()) {
             projectPane.showBottomInset(false);
-            queryPane.showBottomInset(false);
+            queryPane.getController().showBottomInset(false);
             getActiveCanvasPresentation().getController().updateOffset(false);
         } else {
             projectPane.showBottomInset(true);
-            queryPane.showBottomInset(true);
+            queryPane.getController().showBottomInset(true);
             getActiveCanvasPresentation().getController().updateOffset(true);
         }
     }

@@ -4,6 +4,7 @@ import com.jfoenix.controls.JFXSnackbarLayout;
 import ecdar.Ecdar;
 import ecdar.abstractions.Query;
 import ecdar.abstractions.Snackbar;
+import ecdar.backend.QueryHandler;
 import ecdar.controllers.EcdarController;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
@@ -51,26 +52,32 @@ public class EcdarPresentation extends StackPane {
     private Timeline openFilePaneAnimation;
     private Timeline closeFilePaneAnimation;
 
-    public EcdarPresentation() {
+    public EcdarPresentation(QueryHandler queryHandler) {
         controller = new EcdarFXMLLoader().loadAndGetController("EcdarPresentation.fxml", this);
-        initializeTopBar();
-        initializeToolbar();
-        initializeQueryDetailsDialog();
-        initializeColorSelector();
+        controller.queryPane = new QueryPanePresentation(queryHandler);
+        controller.rightPane.getChildren().add(controller.queryPane);
+        initializeResizeQueryPane();
 
-        initializeToggleQueryPaneFunctionality();
-        initializeToggleFilePaneFunctionality();
+        Platform.runLater(() -> {
+            initializeTopBar();
+            initializeToolbar();
+            initializeQueryDetailsDialog();
+            initializeColorSelector();
 
-        initializeSelectDependentToolbarButton(controller.colorSelected);
-        Tooltip.install(controller.colorSelected, new Tooltip("Colour"));
+            initializeToggleQueryPaneFunctionality();
+            initializeToggleFilePaneFunctionality();
 
-        initializeSelectDependentToolbarButton(controller.deleteSelected);
-        Tooltip.install(controller.deleteSelected, new Tooltip("Delete"));
+            initializeSelectDependentToolbarButton(controller.colorSelected);
+            Tooltip.install(controller.colorSelected, new Tooltip("Colour"));
 
-        initializeToolbarButton(controller.undo);
-        initializeToolbarButton(controller.redo);
-        initializeUndoRedoButtons();
-        initializeSnackbar();
+            initializeSelectDependentToolbarButton(controller.deleteSelected);
+            Tooltip.install(controller.deleteSelected, new Tooltip("Delete"));
+
+            initializeToolbarButton(controller.undo);
+            initializeToolbarButton(controller.redo);
+            initializeUndoRedoButtons();
+            initializeSnackbar();
+        });
 
         // Open the file and query panel initially
         Platform.runLater(() -> {
@@ -117,8 +124,6 @@ public class EcdarPresentation extends StackPane {
         KeyboardTracker.registerKeybind(KeyboardTracker.RESET_ZOOM, new Keybind(new KeyCodeCombination(KeyCode.DIGIT0, KeyCombination.SHORTCUT_DOWN), () -> EcdarController.getActiveCanvasPresentation().getController().zoomHelper.resetZoom()));
         KeyboardTracker.registerKeybind(KeyboardTracker.UNDO, new Keybind(new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN), UndoRedoStack::undo));
         KeyboardTracker.registerKeybind(KeyboardTracker.REDO, new Keybind(new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN), UndoRedoStack::redo));
-
-        initializeResizeQueryPane();
     }
 
     private void initializeSnackbar() {

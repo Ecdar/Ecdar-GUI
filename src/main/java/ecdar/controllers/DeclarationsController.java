@@ -1,6 +1,5 @@
 package ecdar.controllers;
 
-import ecdar.Ecdar;
 import ecdar.abstractions.Declarations;
 import ecdar.abstractions.HighLevelModel;
 import ecdar.utility.helpers.UPPAALSyntaxHighlighter;
@@ -35,20 +34,7 @@ public class DeclarationsController extends HighLevelModelController implements 
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
-        initializeWidthAndHeight();
         initializeText();
-    }
-
-    /**
-     * Initializes width and height of the text editor field, such that it fills up the whole canvas
-     */
-    private void initializeWidthAndHeight() {
-        // Fetch width and height of canvas and update
-        root.minWidthProperty().bind(Ecdar.getPresentation().getController().canvasPane.minWidthProperty());
-        root.maxWidthProperty().bind(Ecdar.getPresentation().getController().canvasPane.maxWidthProperty());
-        root.minHeightProperty().bind(Ecdar.getPresentation().getController().canvasPane.minHeightProperty());
-        root.maxHeightProperty().bind(Ecdar.getPresentation().getController().canvasPane.maxHeightProperty());
-        textArea.setTranslateY(20);
     }
 
     /**
@@ -67,6 +53,18 @@ public class DeclarationsController extends HighLevelModelController implements 
 
         textArea.textProperty().addListener((observable, oldDeclaration, newDeclaration) ->
                 declarations.get().setDeclarationsText(newDeclaration));
+    }
+
+    /**
+     * Bind width and height of the text editor field, such that it fills up the provided canvas
+     */
+    public void bindWidthAndHeightToPane(StackPane pane) {
+        // Fetch width and height of canvas and update
+        root.minWidthProperty().bind(pane.minWidthProperty());
+        root.maxWidthProperty().bind(pane.maxWidthProperty());
+        root.minHeightProperty().bind(pane.minHeightProperty());
+        root.maxHeightProperty().bind(pane.maxHeightProperty());
+        textArea.setTranslateY(20);
     }
 
     /**
