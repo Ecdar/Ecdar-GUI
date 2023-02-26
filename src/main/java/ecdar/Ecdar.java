@@ -190,7 +190,6 @@ public class Ecdar extends Application {
 
     public static QueryHandler getQueryExecutor() {
         return queryHandler;
-
     }
 
     public static double getDpiScale() {
@@ -220,7 +219,7 @@ public class Ecdar extends Application {
         //stage.initStyle(StageStyle.UNIFIED);
 
         // Make the view used for the application
-        presentation = new EcdarPresentation();
+        presentation = new EcdarPresentation(queryHandler);
 
         // Bind presentation to cached property
         isUICached.addListener(((observable, oldValue, newValue) -> presentation.setCache(newValue)));
@@ -320,6 +319,7 @@ public class Ecdar extends Application {
             }
 
             backendDriver = new BackendDriver();
+            queryHandler = new QueryHandler(backendDriver);
         });
 
         project = presentation.getController().projectPane.getController().project;
