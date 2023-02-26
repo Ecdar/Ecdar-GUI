@@ -18,11 +18,13 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public class BackendDriver {
-    private final BlockingQueue<GrpcRequest> requestQueue = new ArrayBlockingQueue<>(200);
-    private final Map<BackendInstance, BlockingQueue<BackendConnection>> openBackendConnections = new HashMap<>();
     private final int responseDeadline = 20000;
     private final int rerunRequestDelay = 200;
     private final int numberOfRetriesPerQuery = 5;
+
+    private final List<BackendConnection> startedBackendConnections = new ArrayList<>();
+    private final Map<BackendInstance, BlockingQueue<BackendConnection>> availableBackendConnections = new HashMap<>();
+    private final BlockingQueue<GrpcRequest> requestQueue = new ArrayBlockingQueue<>(200);
 
     public BackendDriver() {
         // ToDo NIELS: Consider multiple consumer threads using 'for(int i = 0; i < x; i++) {}'
@@ -45,7 +47,7 @@ public class BackendDriver {
     }
 
     public void addBackendConnection(BackendConnection backendConnection) {
-        var relatedQueue = this.openBackendConnections.get(backendConnection.getBackendInstance());
+        var relatedQueue = this.availableBackendConnections.get(backendConnection.getBackendInstance());
         if (!relatedQueue.contains(backendConnection)) relatedQueue.add(backendConnection);
     }
 
@@ -55,9 +57,8 @@ public class BackendDriver {
      * @throws IOException if any of the sockets do not respond
      */
     public void closeAllBackendConnections() throws IOException {
-        for (BlockingQueue<BackendConnection> bq : openBackendConnections.values()) {
-            for (BackendConnection bc : bq) bc.close();
-        }
+        availableBackendConnections.clear();
+        for (BackendConnection bc : startedBackendConnections) bc.close();
     }
 
     /**
@@ -73,16 +74,16 @@ public class BackendDriver {
     private BackendConnection getBackendConnection(BackendInstance backend) throws BackendException.NoAvailableBackendConnectionException {
         BackendConnection connection;
         try {
-            if (!openBackendConnections.containsKey(backend))
-                openBackendConnections.put(backend, new ArrayBlockingQueue<>(backend.getNumberOfInstances() + 1));
+            if (!availableBackendConnections.containsKey(backend))
+                availableBackendConnections.put(backend, new ArrayBlockingQueue<>(backend.getNumberOfInstances() + 1));
 
             // If no open connection is free, attempt to start a new one
-            if (openBackendConnections.get(backend).size() < 1) {
+            if (availableBackendConnections.get(backend).size() < 1) {
                 tryStartNewBackendConnection(backend);
             }
 
             // Block until a connection becomes available
-            connection = openBackendConnections.get(backend).take();
+            connection = availableBackendConnections.get(backend).take();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -123,7 +124,7 @@ public class BackendDriver {
             } while (!p.isAlive());
         } else {
             // Filter open connections to this backend and map their used ports to an int stream
-            var activeEnginePorts = openBackendConnections.get(backend).stream()
+            var activeEnginePorts = availableBackendConnections.get(backend).stream()
                     .mapToInt((bi) -> Integer.parseInt(bi.getStub().getChannel().authority().split(":", 2)[1]));
 
             int currentPort = backend.getPortStart();
@@ -167,6 +168,7 @@ public class BackendDriver {
 
             @Override
             public void onCompleted() {
+                startedBackendConnections.add(newConnection);
                 addBackendConnection(newConnection);
             }
         };

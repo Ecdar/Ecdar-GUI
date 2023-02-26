@@ -73,7 +73,6 @@ public class BackendOptionsDialogController implements Initializable {
             // Close all backend connections to avoid dangling backend connections when port range is changed
             try {
                 Ecdar.getBackendDriver().closeAllBackendConnections();
-                Ecdar.getQueryExecutor().closeAllBackendConnections();
             } catch (IOException e) {
                 e.printStackTrace();
             }

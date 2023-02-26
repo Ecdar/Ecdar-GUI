@@ -19,7 +19,6 @@ import java.util.concurrent.TimeUnit;
 
 public class QueryHandler {
     private final BackendDriver backendDriver;
-    private final ArrayList<BackendConnection> connections = new ArrayList<>();
 
     public QueryHandler(BackendDriver backendDriver) {
         this.backendDriver = backendDriver;
@@ -42,7 +41,6 @@ public class QueryHandler {
         query.errors().set("");
 
         GrpcRequest request = new GrpcRequest(backendConnection -> {
-            connections.add(backendConnection); // Save reference for closing connection on exit
             StreamObserver<QueryProtos.QueryResponse> responseObserver = new StreamObserver<>() {
                 @Override
                 public void onNext(QueryProtos.QueryResponse value) {
@@ -53,14 +51,12 @@ public class QueryHandler {
                 public void onError(Throwable t) {
                     handleQueryBackendError(t, query);
                     backendDriver.addBackendConnection(backendConnection);
-                    connections.remove(backendConnection);
                 }
 
                 @Override
                 public void onCompleted() {
                     // Release backend connection
                     backendDriver.addBackendConnection(backendConnection);
-                    connections.remove(backendConnection);
                 }
             };
 
@@ -73,15 +69,6 @@ public class QueryHandler {
         }, query.getBackend());
 
         backendDriver.addRequestToExecutionQueue(request);
-    }
-
-    /**
-     * Close all open backend connection and kill all locally running processes
-     */
-    public void closeAllBackendConnections() {
-        for (BackendConnection con : connections) {
-            con.close();
-        }
     }
 
     private void handleQueryResponse(QueryProtos.QueryResponse value, Query query) {
