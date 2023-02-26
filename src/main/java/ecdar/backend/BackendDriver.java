@@ -27,7 +27,6 @@ public class BackendDriver {
     private final BlockingQueue<GrpcRequest> requestQueue = new ArrayBlockingQueue<>(200);
 
     public BackendDriver() {
-        // ToDo NIELS: Consider multiple consumer threads using 'for(int i = 0; i < x; i++) {}'
         GrpcRequestConsumer consumer = new GrpcRequestConsumer();
         Thread consumerThread = new Thread(consumer);
         consumerThread.start();
