@@ -654,13 +654,15 @@ public class EcdarController implements Initializable {
 
         menuBarViewCanvasSplit.getGraphic().setOpacity(1);
         menuBarViewCanvasSplit.setOnAction(event -> {
-            final BooleanProperty isSplit = Ecdar.toggleCanvasSplit();
-            if (isSplit.get()) {
-                Platform.runLater(this::setCanvasModeToSingular);
-                menuBarViewCanvasSplit.setText("Split canvas");
-            } else {
+            Ecdar.toggleCanvasSplit();
+        });
+        Ecdar.isSplitProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
                 Platform.runLater(this::setCanvasModeToSplit);
                 menuBarViewCanvasSplit.setText("Merge canvases");
+            } else {
+                Platform.runLater(this::setCanvasModeToSingular);
+                menuBarViewCanvasSplit.setText("Split canvas");
             }
         });
 
@@ -723,7 +725,7 @@ public class EcdarController implements Initializable {
                 try {
                     Ecdar.projectDirectory.set(file.getAbsolutePath());
                     Ecdar.initializeProjectFolder();
-                    setCanvasModeToSingular();
+                    Ecdar.isSplitProperty().set(false);
                     UndoRedoStack.clear();
                     addProjectToRecentProjects(file.getAbsolutePath());
                 } catch (final IOException e) {
@@ -745,7 +747,7 @@ public class EcdarController implements Initializable {
                 try {
                     Ecdar.projectDirectory.set(path);
                     Ecdar.initializeProjectFolder();
-                    setCanvasModeToSingular();
+                    Ecdar.isSplitProperty().set(false);
                 } catch (IOException ex) {
                     Ecdar.showToast("Unable to load project: \"" + path + "\"");
                 }
@@ -903,6 +905,8 @@ public class EcdarController implements Initializable {
 
         Ecdar.projectDirectory.set(null);
 
+        Ecdar.isSplitProperty().set(false);
+
         projectPane.getController().resetProject();
 
         UndoRedoStack.clear();
@@ -1058,6 +1062,7 @@ public class EcdarController implements Initializable {
 
     /**
      * Get list of shown HighLevelModelPresentations
+     *
      * @return a list of all the HighLevelModelPresentations currently being shown
      */
     private List<HighLevelModelPresentation> getActiveModelPresentations() {

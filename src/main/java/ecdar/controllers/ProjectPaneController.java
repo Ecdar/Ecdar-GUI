@@ -459,7 +459,7 @@ public class ProjectPaneController implements Initializable {
         modelPresentationMap.values().forEach(fp -> fp.getController().setIsActive(false));
 
         for (HighLevelModelPresentation modelPresentation : currentlyActiveModelPresentations) {
-            modelPresentationMap.get(modelPresentation).getController().setIsActive(true);
+            if (modelPresentationMap.containsKey(modelPresentation)) modelPresentationMap.get(modelPresentation).getController().setIsActive(true);
         }
     }
 
