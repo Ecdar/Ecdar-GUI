@@ -46,7 +46,7 @@ public class BackendDriver {
         requestQueue.add(request);
     }
 
-    public void addBackendConnection(BackendConnection backendConnection) {
+    public void setConnectionAsAvailable(BackendConnection backendConnection) {
         var relatedQueue = this.availableBackendConnections.get(backendConnection.getBackendInstance());
         if (!relatedQueue.contains(backendConnection)) relatedQueue.add(backendConnection);
     }
@@ -169,7 +169,7 @@ public class BackendDriver {
             @Override
             public void onCompleted() {
                 startedBackendConnections.add(newConnection);
-                addBackendConnection(newConnection);
+                setConnectionAsAvailable(newConnection);
             }
         };
 

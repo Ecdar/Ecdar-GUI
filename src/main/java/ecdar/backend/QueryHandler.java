@@ -13,7 +13,6 @@ import io.grpc.stub.StreamObserver;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 
-import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 
@@ -50,13 +49,13 @@ public class QueryHandler {
                 @Override
                 public void onError(Throwable t) {
                     handleQueryBackendError(t, query);
-                    backendDriver.addBackendConnection(backendConnection);
+                    backendDriver.setConnectionAsAvailable(backendConnection);
                 }
 
                 @Override
                 public void onCompleted() {
                     // Release backend connection
-                    backendDriver.addBackendConnection(backendConnection);
+                    backendDriver.setConnectionAsAvailable(backendConnection);
                 }
             };
 
