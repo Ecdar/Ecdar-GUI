@@ -5,6 +5,7 @@ import com.google.gson.JsonArray;
 import ecdar.Debug;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
+import ecdar.backend.BackendDriver;
 import ecdar.backend.BackendHelper;
 import ecdar.backend.QueryHandler;
 import ecdar.code_analysis.CodeAnalysis;
@@ -154,6 +155,7 @@ public class EcdarController implements Initializable {
     private static Text _queryTextQuery;
     private static final Text temporaryComponentWatermark = new Text("Temporary component");
     private QueryHandler queryHandler;
+    private BackendDriver backendDriver;
 
     public static void runReachabilityAnalysis() {
         if (!reachabilityServiceEnabled) return;
@@ -208,14 +210,16 @@ public class EcdarController implements Initializable {
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
+        initializeQueryPane();
+
         Platform.runLater(() -> {
-            initilizeDialogs();
+            initializeDialogs();
             initializeCanvasPane();
             initializeEdgeStatusHandling();
             initializeKeybindings();
             initializeStatusBar();
             initializeMenuBar();
-            intitializeTemporaryComponentWatermark();
+            initializeTemporaryComponentWatermark();
             startBackgroundQueriesThread(); // Will terminate immediately if background queries are turned off
 
             bottomFillerElement.heightProperty().bind(messageTabPane.maxHeightProperty());
@@ -223,7 +227,14 @@ public class EcdarController implements Initializable {
         });
     }
 
-    private void initilizeDialogs() {
+    private void initializeQueryPane() {
+        backendDriver = new BackendDriver();
+        queryHandler = new QueryHandler(backendDriver);
+        queryPane = new QueryPanePresentation(backendDriver);
+        rightPane.getChildren().add(queryPane);
+    }
+
+    private void initializeDialogs() {
         dialog.setDialogContainer(dialogContainer);
         dialogContainer.opacityProperty().bind(dialog.getChildren().get(0).scaleXProperty());
         dialog.setOnDialogClosed(event -> dialogContainer.setVisible(false));
@@ -286,7 +297,7 @@ public class EcdarController implements Initializable {
     /**
      * Initializes the watermark for temporary/generated components
      */
-    private void intitializeTemporaryComponentWatermark() {
+    private void initializeTemporaryComponentWatermark() {
         temporaryComponentWatermark.getStyleClass().add("display4");
         temporaryComponentWatermark.setOpacity(0.1);
         temporaryComponentWatermark.setRotate(-45);
@@ -1050,6 +1061,10 @@ public class EcdarController implements Initializable {
         return canvasGrid.getChildren()
                 .stream().map(canvas -> ((CanvasPresentation) canvas)
                         .getController().getActiveModelPresentation()).collect(Collectors.toList());
+    }
+
+    public BackendDriver getBackendDriver() {
+        return this.backendDriver;
     }
 
     /**

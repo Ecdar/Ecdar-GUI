@@ -51,16 +51,6 @@ public class BackendDriver {
     }
 
     /**
-     * Close all open backend connection and kill all locally running processes
-     *
-     * @throws IOException if any of the sockets do not respond
-     */
-    public void closeAllBackendConnections() throws IOException {
-        availableBackendConnections.clear();
-        for (BackendConnection bc : startedBackendConnections) bc.close();
-    }
-
-    /**
      * Filters the list of open {@link BackendConnection}s to the specified {@link BackendInstance} and returns the
      * first match or attempts to start a new connection if none is found.
      *
@@ -174,6 +164,31 @@ public class BackendDriver {
 
         newConnection.getStub().withDeadlineAfter(responseDeadline, TimeUnit.MILLISECONDS)
                 .updateComponents(componentsBuilder.build(), observer);
+    }
+
+    /**
+     * Resets the driver by closing all connections to engines and clearing the request queue
+     * WARNING: Make sure to cancel any queries that might be running
+     */
+    public void reset() {
+        try {
+            closeAllBackendConnections();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        requestQueue.clear();
+    }
+
+    /**
+     * Close all open backend connection and kill all locally running processes
+     *
+     * @throws IOException if any of the sockets do not respond
+     */
+    public void closeAllBackendConnections() throws IOException {
+        availableBackendConnections.clear();
+        for (BackendConnection bc : startedBackendConnections) bc.close();
+        startedBackendConnections.clear();
     }
 
     private class GrpcRequestConsumer implements Runnable {

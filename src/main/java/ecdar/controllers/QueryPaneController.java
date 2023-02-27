@@ -3,7 +3,8 @@ package ecdar.controllers;
 import ecdar.Ecdar;
 import ecdar.abstractions.Query;
 import ecdar.abstractions.QueryState;
-import ecdar.backend.QueryHandler;
+import ecdar.backend.BackendDriver;
+import ecdar.backend.BackendHelper;
 import ecdar.presentations.QueryPresentation;
 import com.jfoenix.controls.JFXRippler;
 import ecdar.utility.colors.Color;
@@ -14,6 +15,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tooltip;
@@ -37,7 +39,7 @@ public class QueryPaneController implements Initializable {
     public JFXRippler addButton;
 
     private final Map<Query, QueryPresentation> queryPresentationMap = new HashMap<>();
-    private QueryHandler queryHandler;
+    private BackendDriver backendDriver;
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
@@ -50,14 +52,14 @@ public class QueryPaneController implements Initializable {
                     }
 
                     for (final Query newQuery : change.getAddedSubList()) {
-                        final QueryPresentation newQueryPresentation = new QueryPresentation(newQuery);
+                        final QueryPresentation newQueryPresentation = new QueryPresentation(newQuery, this.backendDriver);
                         queryPresentationMap.put(newQuery, newQueryPresentation);
                         queriesList.getChildren().add(newQueryPresentation);
                     }
                 }
             });
             for (final Query newQuery : Ecdar.getProject().getQueries()) {
-                queriesList.getChildren().add(new QueryPresentation(newQuery));
+                queriesList.getChildren().add(new QueryPresentation(newQuery, this.backendDriver));
             }
         });
 
@@ -65,6 +67,13 @@ public class QueryPaneController implements Initializable {
         initializeToolbar();
         initializeBackground();
         initializeResizeAnchor();
+
+        BackendHelper.addBackendInstanceListener(() -> {
+            // When the backend instances change, reset the backendDriver and
+            // cancel all queries to prevent dangling connections and queries
+            this.stopAllQueries();
+            backendDriver.reset();
+        });
     }
 
     private void initializeResizeAnchor() {
@@ -150,8 +159,14 @@ public class QueryPaneController implements Initializable {
         )));
     }
     
-    public void setQueryHandler(QueryHandler queryHandler) {
-        this.queryHandler = queryHandler;
+    public void setBackendDriver(BackendDriver backendDriver) {
+        this.backendDriver = backendDriver;
+    }
+
+    public void stopAllQueries() {
+        for (Node qp : queriesList.getChildren()) {
+            ((QueryPresentation) qp).getController().cancelQuery();
+        }
     }
 
     @FXML
@@ -161,11 +176,14 @@ public class QueryPaneController implements Initializable {
 
     @FXML
     private void runAllQueriesButtonClicked() {
-        Ecdar.getProject().getQueries().forEach(query -> {
-            if (query.getType() == null) return;
-            query.cancel();
-            queryHandler.executeQuery(query);
-        });
+        for (Node qp : queriesList.getChildren()) {
+            if (!(qp instanceof QueryPresentation)) continue;
+            QueryController controller = ((QueryPresentation) qp).getController();
+
+            if (controller.getQuery().getType() == null) return;
+            controller.cancelQuery();
+            controller.runQuery();
+        }
     }
 
     @FXML

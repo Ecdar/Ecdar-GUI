@@ -6,6 +6,7 @@ import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXRippler;
 import ecdar.Ecdar;
 import ecdar.abstractions.BackendInstance;
+import ecdar.backend.BackendDriver;
 import ecdar.backend.BackendHelper;
 import ecdar.presentations.BackendInstancePresentation;
 import javafx.fxml.Initializable;
@@ -70,13 +71,6 @@ public class BackendOptionsDialogController implements Initializable {
                 return false;
             }
 
-            // Close all backend connections to avoid dangling backend connections when port range is changed
-            try {
-                Ecdar.getBackendDriver().closeAllBackendConnections();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
             BackendHelper.updateBackendInstances(backendInstances);
 
             JsonArray jsonArray = new JsonArray();
@@ -102,7 +96,10 @@ public class BackendOptionsDialogController implements Initializable {
      * Resets the backends to the default backends present in the 'default_backends.json' file.
      */
     public void resetBackendsToDefault() {
-        updateBackendsInGUI(getPackagedBackends());
+        var packagedBackends = getPackagedBackends();
+
+        updateBackendsInGUI(packagedBackends);
+        BackendHelper.updateBackendInstances(packagedBackends);
     }
 
     private void initializeBackendInstanceList() {
@@ -126,6 +123,7 @@ public class BackendOptionsDialogController implements Initializable {
         });
 
         updateBackendsInGUI(backends);
+        BackendHelper.updateBackendInstances(backends);
     }
 
     /**
@@ -146,8 +144,6 @@ public class BackendOptionsDialogController implements Initializable {
             newBackendInstancePresentation.getController().isLocal.disableProperty().bind(bi.getLockedProperty());
             addBackendInstancePresentationToList(newBackendInstancePresentation);
         });
-
-        BackendHelper.updateBackendInstances(backends);
     }
 
     /**
@@ -251,10 +247,7 @@ public class BackendOptionsDialogController implements Initializable {
 
     /**
      * Add the new backend instance presentation to the backend options dialog
-<<<<<<< HEAD
-=======
      *
->>>>>>> main
      * @param newBackendInstancePresentation The presentation of the new backend instance
      */
     private void addBackendInstancePresentationToList(BackendInstancePresentation newBackendInstancePresentation) {

@@ -52,10 +52,8 @@ public class EcdarPresentation extends StackPane {
     private Timeline openFilePaneAnimation;
     private Timeline closeFilePaneAnimation;
 
-    public EcdarPresentation(QueryHandler queryHandler) {
+    public EcdarPresentation() {
         controller = new EcdarFXMLLoader().loadAndGetController("EcdarPresentation.fxml", this);
-        controller.queryPane = new QueryPanePresentation(queryHandler);
-        controller.rightPane.getChildren().add(controller.queryPane);
         initializeResizeQueryPane();
 
         Platform.runLater(() -> {

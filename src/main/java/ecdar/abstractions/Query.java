@@ -3,7 +3,6 @@ package ecdar.abstractions;
 import ecdar.Ecdar;
 import ecdar.backend.*;
 import ecdar.controllers.EcdarController;
-import ecdar.utility.helpers.StringValidator;
 import ecdar.utility.serialize.Serializable;
 import com.google.gson.JsonObject;
 import javafx.application.Platform;
@@ -183,11 +182,8 @@ public class Query implements Serializable {
         }
     }
 
-    public void cancel() {
-        if (getQueryState().equals(QueryState.RUNNING)) {
-            forcedCancel = true;
-            setQueryState(QueryState.UNKNOWN);
-        }
+    public void setForcedCancel(Boolean forcedCancel) {
+        this.forcedCancel = forcedCancel;
     }
 
     public void addError(String e) {
