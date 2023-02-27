@@ -37,28 +37,9 @@ public class BackendDriver {
         return responseDeadline;
     }
 
-    /**
-     * Add a GrpcRequest to the request queue to be executed when a backend is available
-     *
-     * @param request The GrpcRequest to be executed later
-     */
-    public void addRequestToExecutionQueue(GrpcRequest request) {
-        requestQueue.add(request);
-    }
-
     public void addBackendConnection(BackendConnection backendConnection) {
         var relatedQueue = this.availableBackendConnections.get(backendConnection.getBackendInstance());
         if (!relatedQueue.contains(backendConnection)) relatedQueue.add(backendConnection);
-    }
-
-    /**
-     * Close all open backend connection and kill all locally running processes
-     *
-     * @throws IOException if any of the sockets do not respond
-     */
-    public void closeAllBackendConnections() throws IOException {
-        availableBackendConnections.clear();
-        for (BackendConnection bc : startedBackendConnections) bc.close();
     }
 
     /**
@@ -89,6 +70,15 @@ public class BackendDriver {
         }
 
         return connection;
+    }
+
+    /**
+     * Add a GrpcRequest to the request queue to be executed when a backend is available
+     *
+     * @param request The GrpcRequest to be executed later
+     */
+    public void addRequestToExecutionQueue(GrpcRequest request) {
+        requestQueue.add(request);
     }
 
     /**
@@ -175,6 +165,31 @@ public class BackendDriver {
 
         newConnection.getStub().withDeadlineAfter(responseDeadline, TimeUnit.MILLISECONDS)
                 .updateComponents(componentsBuilder.build(), observer);
+    }
+
+    /**
+     * Resets the driver by closing all connections to engines and clearing the request queue
+     * WARNING: Make sure to cancel any queries that might be running
+     */
+    public void reset() {
+        try {
+            closeAllBackendConnections();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        requestQueue.clear();
+    }
+
+    /**
+     * Close all open backend connection and kill all locally running processes
+     *
+     * @throws IOException if any of the sockets do not respond
+     */
+    public void closeAllBackendConnections() throws IOException {
+        availableBackendConnections.clear();
+        for (BackendConnection bc : startedBackendConnections) bc.close();
+        startedBackendConnections.clear();
     }
 
     private class GrpcRequestConsumer implements Runnable {

@@ -6,7 +6,9 @@ import ecdar.abstractions.BackendInstance;
 import ecdar.abstractions.Query;
 import ecdar.abstractions.QueryState;
 import ecdar.abstractions.QueryType;
+import ecdar.backend.BackendDriver;
 import ecdar.backend.BackendHelper;
+import ecdar.backend.QueryHandler;
 import ecdar.presentations.DropDownMenu;
 import ecdar.presentations.InformationDialogPresentation;
 import ecdar.presentations.MenuElement;
@@ -57,6 +59,7 @@ public class QueryController implements Initializable {
     private Query query;
     private final Map<QueryType, SimpleBooleanProperty> queryTypeListElementsSelectedState = new HashMap<>();
     private final Tooltip noQueryTypeSetTooltip = new Tooltip("Please select a query type beneath the status icon");
+    private QueryHandler queryHandler;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -67,55 +70,6 @@ public class QueryController implements Initializable {
         initializeTextFields();
         initializeMoreInformationButtonAndQueryTypeSymbol();
         initializeBackendsDropdown();
-    }
-
-    public void setQuery(Query query) {
-        this.query = query;
-        this.query.getTypeProperty().addListener(((observable, oldValue, newValue) -> {
-            if(newValue != null) {
-                actionButton.setDisable(false);
-                actionButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I900));
-                Platform.runLater(() -> {
-                    Tooltip.uninstall(actionButton.getParent(), noQueryTypeSetTooltip);
-                });
-            } else {
-                actionButton.setDisable(true);
-                actionButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I500));
-                Platform.runLater(() -> {
-                    Tooltip.install(actionButton.getParent(), noQueryTypeSetTooltip);
-                });
-            }
-        }));
-
-        if (BackendHelper.getBackendInstances().contains(query.getBackend())) {
-            backendsDropdown.setValue(query.getBackend());
-        } else {
-            backendsDropdown.setValue(BackendHelper.getDefaultBackendInstance());
-        }
-
-        backendsDropdown.valueProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                query.setBackend(newValue);
-            } else {
-                backendsDropdown.setValue(BackendHelper.getDefaultBackendInstance());
-            }
-        });
-
-        BackendHelper.addBackendInstanceListener(() -> {
-            Platform.runLater(() -> {
-                // The value must be set before the items (https://stackoverflow.com/a/29483445)
-                if (BackendHelper.getBackendInstances().contains(query.getBackend())) {
-                    backendsDropdown.setValue(query.getBackend());
-                } else {
-                    backendsDropdown.setValue(BackendHelper.getDefaultBackendInstance());
-                }
-                backendsDropdown.setItems(BackendHelper.getBackendInstances());
-            });
-        });
-    }
-
-    public Query getQuery() {
-        return query;
     }
 
     private void initializeBackendsDropdown() {
@@ -221,7 +175,7 @@ public class QueryController implements Initializable {
             actionButton.getChildren().get(0).setOnMousePressed(event -> {
                 Platform.runLater(() -> {
                     if (getQuery().getQueryState().equals(QueryState.RUNNING)) {
-                        getQuery().cancel();
+                        cancelQuery();
                     } else {
                         runQuery();
                     }
@@ -343,6 +297,55 @@ public class QueryController implements Initializable {
         });
     }
 
+    public void setQuery(final Query query, final BackendDriver backendDriver) {
+        this.query = query;
+        this.query.getTypeProperty().addListener(((observable, oldValue, newValue) -> {
+            if(newValue != null) {
+                actionButton.setDisable(false);
+                actionButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I900));
+                Platform.runLater(() -> {
+                    Tooltip.uninstall(actionButton.getParent(), noQueryTypeSetTooltip);
+                });
+            } else {
+                actionButton.setDisable(true);
+                actionButtonIcon.setIconColor(Color.GREY.getColor(Color.Intensity.I500));
+                Platform.runLater(() -> {
+                    Tooltip.install(actionButton.getParent(), noQueryTypeSetTooltip);
+                });
+            }
+        }));
+
+        if (BackendHelper.getBackendInstances().contains(query.getBackend())) {
+            backendsDropdown.setValue(query.getBackend());
+        } else {
+            backendsDropdown.setValue(BackendHelper.getDefaultBackendInstance());
+        }
+
+        backendsDropdown.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                query.setBackend(newValue);
+            } else {
+                backendsDropdown.setValue(BackendHelper.getDefaultBackendInstance());
+            }
+        });
+
+        BackendHelper.addBackendInstanceListener(() -> Platform.runLater(() -> {
+            // The value must be set before the items (https://stackoverflow.com/a/29483445)
+            if (BackendHelper.getBackendInstances().contains(query.getBackend())) {
+                backendsDropdown.setValue(query.getBackend());
+            } else {
+                backendsDropdown.setValue(BackendHelper.getDefaultBackendInstance());
+            }
+            backendsDropdown.setItems(BackendHelper.getBackendInstances());
+        }));
+
+        this.queryHandler = new QueryHandler(backendDriver);
+    }
+
+    public Query getQuery() {
+        return query;
+    }
+
     private void setStatusIndicatorContentColor(javafx.scene.paint.Color color, FontIcon statusIcon, FontIcon queryTypeExpandIcon, QueryState queryState) {
         statusIcon.setIconColor(color);
         queryTypeSymbol.setFill(color);
@@ -375,8 +378,15 @@ public class QueryController implements Initializable {
         dropDownMenu.addMenuElement(listElement);
     }
 
-    private void runQuery() {
-        Ecdar.getQueryExecutor().executeQuery(this.getQuery());
+    public void runQuery() {
+        queryHandler.executeQuery(this.getQuery());
+    }
+
+    public void cancelQuery() {
+        if (query.getQueryState().equals(QueryState.RUNNING)) {
+            query.setForcedCancel(true);
+            query.setQueryState(QueryState.UNKNOWN);
+        }
     }
 
     public Map<QueryType, SimpleBooleanProperty> getQueryTypeListElementsSelectedState() {

@@ -372,23 +372,6 @@ public class ComponentController extends ModelController implements Initializabl
             });
 
             contextMenu.addSpacerElement();
-
-            contextMenu.addClickableListElement("Contains deadlock?", event -> {
-                // Generate the query
-                final String deadlockQuery = BackendHelper.getExistDeadlockQuery(getComponent());
-
-                // Add proper comment
-                final String deadlockComment = "Does " + component.getName() + " contain a deadlock?";
-
-                // Add new query for this component
-                final Query query = new Query(deadlockQuery, deadlockComment, QueryState.UNKNOWN);
-                query.setType(QueryType.REACHABILITY);
-                Ecdar.getProject().getQueries().add(query);
-                Ecdar.getQueryExecutor().executeQuery(query);
-                contextMenu.hide();
-            });
-
-            contextMenu.addSpacerElement();
             contextMenu.addColorPicker(component, component::dye);
         };
 

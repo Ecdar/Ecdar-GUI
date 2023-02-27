@@ -1,9 +1,7 @@
 package ecdar;
 
 import ecdar.abstractions.*;
-import ecdar.backend.BackendDriver;
 import ecdar.backend.BackendHelper;
-import ecdar.backend.QueryHandler;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.controllers.EcdarController;
 import ecdar.presentations.*;
@@ -50,8 +48,6 @@ public class Ecdar extends Application {
     private static BooleanProperty isUICached = new SimpleBooleanProperty();
     public static BooleanProperty shouldRunBackgroundQueries = new SimpleBooleanProperty(true);
     private static final BooleanProperty isSplit = new SimpleBooleanProperty(true); //Set to true to ensure correct behaviour at first toggle.
-    private static BackendDriver backendDriver = new BackendDriver();
-    private static QueryHandler queryHandler = new QueryHandler(backendDriver);
     private Stage debugStage;
 
     /**
@@ -179,19 +175,6 @@ public class Ecdar extends Application {
         return isSplit;
     }
 
-    /**
-     * Returns the backend driver used to execute queries and handle simulation
-     *
-     * @return BackendDriver
-     */
-    public static BackendDriver getBackendDriver() {
-        return backendDriver;
-    }
-
-    public static QueryHandler getQueryExecutor() {
-        return queryHandler;
-    }
-
     public static double getDpiScale() {
         if (!autoScalingEnabled.getValue())
             return 1;
@@ -219,7 +202,7 @@ public class Ecdar extends Application {
         //stage.initStyle(StageStyle.UNIFIED);
 
         // Make the view used for the application
-        presentation = new EcdarPresentation(queryHandler);
+        presentation = new EcdarPresentation();
 
         // Bind presentation to cached property
         isUICached.addListener(((observable, oldValue, newValue) -> presentation.setCache(newValue)));
@@ -297,29 +280,16 @@ public class Ecdar extends Application {
         }));
 
         stage.setOnCloseRequest(event -> {
-            BackendHelper.stopQueries();
+            presentation.getController().queryPane.getController().stopAllQueries();
 
             try {
-                backendDriver.closeAllBackendConnections();
+                presentation.getController().getBackendDriver().closeAllBackendConnections();
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
             Platform.exit();
             System.exit(0);
-        });
-
-        BackendHelper.addBackendInstanceListener(() -> {
-            // When the backend instances change, re-instantiate the backendDriver
-            // to prevent dangling connections and queries
-            try {
-                backendDriver.closeAllBackendConnections();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
-            backendDriver = new BackendDriver();
-            queryHandler = new QueryHandler(backendDriver);
         });
 
         project = presentation.getController().projectPane.getController().project;

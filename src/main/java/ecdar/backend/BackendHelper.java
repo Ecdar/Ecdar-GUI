@@ -57,13 +57,6 @@ public final class BackendHelper {
     }
 
     /**
-     * Stop all running queries.
-     */
-    public static void stopQueries() {
-        Ecdar.getProject().getQueries().forEach(Query::cancel);
-    }
-
-    /**
      * Generates a reachability query based on the given location and component
      *
      * @param location  The location which should be checked for reachability
@@ -72,24 +65,6 @@ public final class BackendHelper {
      */
     public static String getLocationReachableQuery(final Location location, final Component component) {
         return component.getName() + "." + location.getId();
-    }
-
-    /**
-     * Generates a string for a deadlock query based on the component
-     *
-     * @param component The component which should be checked for deadlocks
-     * @return A deadlock query string
-     */
-    public static String getExistDeadlockQuery(final Component component) {
-        // Get the names of the locations of this component. Used to produce the deadlock query
-        final String templateName = component.getName();
-        final List<String> locationNames = new ArrayList<>();
-
-        for (final Location location : component.getLocations()) {
-            locationNames.add(templateName + "." + location.getId());
-        }
-
-        return "(" + String.join(" || ", locationNames) + ") && deadlock";
     }
 
     /**

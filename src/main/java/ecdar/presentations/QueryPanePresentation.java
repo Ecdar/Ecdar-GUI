@@ -1,15 +1,15 @@
 package ecdar.presentations;
 
-import ecdar.backend.QueryHandler;
+import ecdar.backend.BackendDriver;
 import ecdar.controllers.QueryPaneController;
 import javafx.scene.layout.*;
 
 public class QueryPanePresentation extends StackPane {
     private final QueryPaneController controller;
 
-    public QueryPanePresentation(QueryHandler queryHandler) {
+    public QueryPanePresentation(final BackendDriver backendDriver) {
         controller = new EcdarFXMLLoader().loadAndGetController("QueryPanePresentation.fxml", this);
-        controller.setQueryHandler(queryHandler);
+        controller.setBackendDriver(backendDriver);
     }
 
     public QueryPaneController getController() {

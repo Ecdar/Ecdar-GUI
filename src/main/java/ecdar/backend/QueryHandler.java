@@ -13,7 +13,6 @@ import io.grpc.stub.StreamObserver;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 
-import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 
