@@ -124,7 +124,7 @@ public class BackendDriver {
             } while (!p.isAlive());
         } else {
             // Filter open connections to this backend and map their used ports to an int stream
-            var activeEnginePorts = availableBackendConnections.get(backend).stream()
+            var activeEnginePorts = startedBackendConnections.stream()
                     .mapToInt((bi) -> Integer.parseInt(bi.getStub().getChannel().authority().split(":", 2)[1]));
 
             int currentPort = backend.getPortStart();
@@ -151,6 +151,7 @@ public class BackendDriver {
 
         EcdarBackendGrpc.EcdarBackendStub stub = EcdarBackendGrpc.newStub(channel);
         BackendConnection newConnection = new BackendConnection(backend, p, stub, channel);
+        startedBackendConnections.add(newConnection);
 
         QueryProtos.ComponentsUpdateRequest.Builder componentsBuilder = QueryProtos.ComponentsUpdateRequest.newBuilder();
         for (Component c : Ecdar.getProject().getComponents()) {
@@ -168,7 +169,6 @@ public class BackendDriver {
 
             @Override
             public void onCompleted() {
-                startedBackendConnections.add(newConnection);
                 setConnectionAsAvailable(newConnection);
             }
         };
