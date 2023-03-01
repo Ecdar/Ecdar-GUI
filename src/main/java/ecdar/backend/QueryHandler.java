@@ -87,7 +87,7 @@ public class QueryHandler {
             query.setQueryState(QueryState.SUCCESSFUL);
             query.getSuccessConsumer().accept(true);
             JsonObject returnedComponent = (JsonObject) JsonParser.parseString(value.getComponent().getComponent().getJson());
-            addGeneratedComponent(new Component(returnedComponent));
+            addGeneratedComponent(Ecdar.getProject().getTempComponents(), new Component(returnedComponent)); // ToDo NIELS: Remove dependency
         } else {
             query.setQueryState(QueryState.ERROR);
             query.getSuccessConsumer().accept(false);
@@ -114,14 +114,12 @@ public class QueryHandler {
         }
     }
 
-    private void addGeneratedComponent(Component newComponent) {
+    private void addGeneratedComponent(ObservableList<Component> tempComponents, Component newComponent) {
         Platform.runLater(() -> {
             newComponent.setTemporary(true);
-
-            ObservableList<Component> listOfGeneratedComponents = Ecdar.getProject().getTempComponents(); // ToDo NIELS: Refactor
             Component matchedComponent = null;
 
-            for (Component currentGeneratedComponent : listOfGeneratedComponents) {
+            for (Component currentGeneratedComponent : tempComponents) {
                 int comparisonOfNames = currentGeneratedComponent.getName().compareTo(newComponent.getName());
 
                 if (comparisonOfNames == 0) {
@@ -134,23 +132,21 @@ public class QueryHandler {
 
             if (matchedComponent == null) {
                 UndoRedoStack.pushAndPerform(() -> { // Perform
-                    Ecdar.getProject().getTempComponents().add(newComponent);
+                    tempComponents.add(newComponent);
                 }, () -> { // Undo
-                    Ecdar.getProject().getTempComponents().remove(newComponent);
+                    tempComponents.remove(newComponent);
                 }, "Created new component: " + newComponent.getName(), "add-circle");
             } else {
                 // Remove current component with name and add the newly generated one
-                Component finalMatchedComponent = matchedComponent;
+                Component finalMatchedComponent = matchedComponent; // Potentially null
                 UndoRedoStack.pushAndPerform(() -> { // Perform
-                    Ecdar.getProject().getTempComponents().remove(finalMatchedComponent);
-                    Ecdar.getProject().getTempComponents().add(newComponent);
+                    tempComponents.remove(finalMatchedComponent);
+                    tempComponents.add(newComponent);
                 }, () -> { // Undo
-                    Ecdar.getProject().getTempComponents().remove(newComponent);
-                    Ecdar.getProject().getTempComponents().add(finalMatchedComponent);
+                    tempComponents.remove(newComponent);
+                    tempComponents.add(finalMatchedComponent);
                 }, "Created new component: " + newComponent.getName(), "add-circle");
             }
-
-            Ecdar.getProject().addComponent(newComponent);
         });
     }
 }
