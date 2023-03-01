@@ -96,16 +96,22 @@ public class ZoomHelper {
     public void zoomToFit() {
         if (!active || model == null) return;
 
-        double neededWidth = (model instanceof ComponentPresentation ?
-                (model.getMinWidth()
-                        + ((ComponentController) model.getController()).inputSignatureContainer.getWidth()
-                        + ((ComponentController) model.getController()).outputSignatureContainer.getWidth())
-                : model.getMinWidth());
-
+        double neededWidth = getWidthNeededForModel();
         double newScale = Math.min(canvasPresentation.getWidth() / neededWidth, canvasPresentation.getHeight() / model.getMinHeight() - 0.2); // 0.2 subtracted for margin
 
         currentZoomFactor.set(newScale);
         centerComponentOrSystem();
+    }
+
+    private double getWidthNeededForModel() {
+        if (model instanceof ComponentPresentation) {
+            ComponentController componentController = (ComponentController) model.getController();
+            return model.getMinWidth()
+                    + componentController.inputSignatureContainer.getWidth()
+                    + componentController.outputSignatureContainer.getWidth();
+        }
+
+        return model.getMinWidth();
     }
 
     /**
