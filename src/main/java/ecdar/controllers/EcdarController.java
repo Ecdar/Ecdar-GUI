@@ -523,13 +523,13 @@ public class EcdarController implements Initializable {
         activeCanvasPresentation.get().setOpacity(0.75);
         newActiveCanvasPresentation.setOpacity(1);
         activeCanvasPresentation.set(newActiveCanvasPresentation);
-        updateZoomShortcutBindings(newActiveCanvasPresentation.getController().zoomHelper);
+        rebindZoomShortcutBindings(newActiveCanvasPresentation.getController().zoomHelper);
     }
 
     /**
      * Binds the zoom shortcuts to the provided zoom helper (consequently unbinds the previously bound zoom helper)
      */
-    private static void updateZoomShortcutBindings(ZoomHelper zoomHelper) {
+    private static void rebindZoomShortcutBindings(ZoomHelper zoomHelper) {
         KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_IN, new Keybind(new KeyCodeCombination(KeyCode.PLUS, KeyCombination.SHORTCUT_DOWN), zoomHelper::zoomIn));
         KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_OUT, new Keybind(new KeyCodeCombination(KeyCode.MINUS, KeyCombination.SHORTCUT_DOWN), zoomHelper::zoomOut));
         KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_TO_FIT, new Keybind(new KeyCodeCombination(KeyCode.EQUALS, KeyCombination.SHORTCUT_DOWN), zoomHelper::zoomToFit));
@@ -656,13 +656,12 @@ public class EcdarController implements Initializable {
         menuBarViewCanvasSplit.setOnAction(event -> {
             Ecdar.toggleCanvasSplit();
         });
+
         Ecdar.isSplitProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 Platform.runLater(this::setCanvasModeToSplit);
-                menuBarViewCanvasSplit.setText("Merge canvases");
             } else {
                 Platform.runLater(this::setCanvasModeToSingular);
-                menuBarViewCanvasSplit.setText("Split canvas");
             }
         });
 
@@ -723,9 +722,7 @@ public class EcdarController implements Initializable {
             final File file = projectPicker.showDialog(root.getScene().getWindow());
             if (file != null) {
                 try {
-                    Ecdar.projectDirectory.set(file.getAbsolutePath());
-                    Ecdar.initializeProjectFolder();
-                    Ecdar.isSplitProperty().set(false);
+                    setProjectDirectory(file.getAbsolutePath());
                     UndoRedoStack.clear();
                     addProjectToRecentProjects(file.getAbsolutePath());
                 } catch (final IOException e) {
@@ -745,9 +742,7 @@ public class EcdarController implements Initializable {
 
             item.setOnAction(event -> {
                 try {
-                    Ecdar.projectDirectory.set(path);
-                    Ecdar.initializeProjectFolder();
-                    Ecdar.isSplitProperty().set(false);
+                    setProjectDirectory(path);
                 } catch (IOException ex) {
                     Ecdar.showToast("Unable to load project: \"" + path + "\"");
                 }
@@ -771,6 +766,12 @@ public class EcdarController implements Initializable {
         }
 
         menuBarFileRecentProjects.getItems().add(item);
+    }
+
+    private static void setProjectDirectory(String path) throws IOException {
+        Ecdar.projectDirectory.set(path);
+        Ecdar.initializeProjectFolder();
+        Ecdar.isSplitProperty().set(false);
     }
 
     /**
@@ -903,11 +904,11 @@ public class EcdarController implements Initializable {
 
         CodeAnalysis.clearErrorsAndWarnings();
 
-        Ecdar.projectDirectory.set(null);
-
-        Ecdar.isSplitProperty().set(false);
-
-        projectPane.getController().resetProject();
+        try {
+            setProjectDirectory(null);
+        } catch (IOException ex) {
+            Ecdar.showToast("Unable to initialize new project directory");
+        }
 
         UndoRedoStack.clear();
 
@@ -993,6 +994,8 @@ public class EcdarController implements Initializable {
         canvasPresentation.getController().zoomablePane.maxHeightProperty().bind(canvasPane.heightProperty());
 
         projectPane.getController().setHighlightedForModelFiles(getActiveModelPresentations());
+
+        menuBarViewCanvasSplit.setText("Split canvas");
     }
 
     /**
@@ -1058,6 +1061,8 @@ public class EcdarController implements Initializable {
 
         canvasPane.getChildren().add(canvasGrid);
         projectPane.getController().setHighlightedForModelFiles(getActiveModelPresentations());
+
+        menuBarViewCanvasSplit.setText("Merge canvases");
     }
 
     /**
