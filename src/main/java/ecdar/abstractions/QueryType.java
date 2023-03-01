@@ -7,7 +7,7 @@ public enum QueryType {
     IMPLEMENTATION("implementation", "Imp"),
     CONSISTENCY("consistency", "Con"),
     LOCAL_CONSISTENCY("local-consistency", "LCon"),
-    BISIM("bi-simulation", "BSim"),
+    BISIM_MINIM("bisim-minim", "Bsim"),
     GET_COMPONENT("get-component", "Get");
 
     private final String queryName;
@@ -41,7 +41,7 @@ public enum QueryType {
             case "local-consistency":
                 return LOCAL_CONSISTENCY;
             case "bisim":
-                return BISIM;
+                return BISIM_MINIM;
             case "get":
             case "get-component":
                 return GET_COMPONENT;
