@@ -40,7 +40,7 @@ public enum QueryType {
                 return CONSISTENCY;
             case "local-consistency":
                 return LOCAL_CONSISTENCY;
-            case "bisim":
+            case "bisim-minim":
                 return BISIM_MINIM;
             case "get":
             case "get-component":
