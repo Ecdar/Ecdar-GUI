@@ -13,13 +13,11 @@ import io.grpc.stub.StreamObserver;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 
-import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 
 public class QueryHandler {
     private final BackendDriver backendDriver;
-    private final ArrayList<EngineConnection> connections = new ArrayList<>();
 
     public QueryHandler(BackendDriver backendDriver) {
         this.backendDriver = backendDriver;
@@ -42,7 +40,6 @@ public class QueryHandler {
         query.errors().set("");
 
         GrpcRequest request = new GrpcRequest(engineConnection -> {
-            connections.add(engineConnection); // Save reference for closing connection on exit
             StreamObserver<QueryProtos.QueryResponse> responseObserver = new StreamObserver<>() {
                 @Override
                 public void onNext(QueryProtos.QueryResponse value) {
@@ -52,15 +49,13 @@ public class QueryHandler {
                 @Override
                 public void onError(Throwable t) {
                     handleQueryBackendError(t, query);
-                    backendDriver.addEngineConnection(engineConnection);
-                    connections.remove(engineConnection);
+                    backendDriver.setConnectionAsAvailable(engineConnection);
                 }
 
                 @Override
                 public void onCompleted() {
-                    // Release engine connection
-                    backendDriver.addEngineConnection(engineConnection);
-                    connections.remove(engineConnection);
+                    // Release backend connection
+                    backendDriver.setConnectionAsAvailable(engineConnection);
                 }
             };
 
@@ -73,15 +68,6 @@ public class QueryHandler {
         }, query.getEngine());
 
         backendDriver.addRequestToExecutionQueue(request);
-    }
-
-    /**
-     * Close all open engine connection and kill all locally running processes
-     */
-    public void closeAllEngineConnections() {
-        for (EngineConnection con : connections) {
-            con.close();
-        }
     }
 
     private void handleQueryResponse(QueryProtos.QueryResponse value, Query query) {

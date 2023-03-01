@@ -73,7 +73,6 @@ public class EngineOptionsDialogController implements Initializable {
             // Close all engine connections to avoid dangling engine connections when port range is changed
             try {
                 Ecdar.getBackendDriver().closeAllEngineConnections();
-                Ecdar.getQueryExecutor().closeAllEngineConnections();
             } catch (IOException e) {
                 e.printStackTrace();
             }

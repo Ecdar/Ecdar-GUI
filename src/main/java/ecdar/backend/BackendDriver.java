@@ -18,11 +18,13 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public class BackendDriver {
-    private final BlockingQueue<GrpcRequest> requestQueue = new ArrayBlockingQueue<>(200);
-    private final Map<Engine, BlockingQueue<EngineConnection>> openEngineConnections = new HashMap<>();
     private final int responseDeadline = 20000;
     private final int rerunRequestDelay = 200;
     private final int numberOfRetriesPerQuery = 5;
+
+    private final List<EngineConnection> startedEngineConnections = new ArrayList<>();
+    private final Map<Engine, BlockingQueue<EngineConnection>> availableEngineConnections = new HashMap<>();
+    private final BlockingQueue<GrpcRequest> requestQueue = new ArrayBlockingQueue<>(200);
 
     public BackendDriver() {
         // ToDo NIELS: Consider multiple consumer threads using 'for(int i = 0; i < x; i++) {}'
@@ -44,8 +46,8 @@ public class BackendDriver {
         requestQueue.add(request);
     }
 
-    public void addEngineConnection(EngineConnection engineConnection) {
-        var relatedQueue = this.openEngineConnections.get(engineConnection.getEngine());
+    public void setConnectionAsAvailable(EngineConnection engineConnection) {
+        var relatedQueue = this.availableEngineConnections.get(engineConnection.getEngine());
         if (!relatedQueue.contains(engineConnection)) relatedQueue.add(engineConnection);
     }
 
@@ -55,9 +57,7 @@ public class BackendDriver {
      * @throws IOException if any of the sockets do not respond
      */
     public void closeAllEngineConnections() throws IOException {
-        for (BlockingQueue<EngineConnection> bq : openEngineConnections.values()) {
-            for (EngineConnection bc : bq) bc.close();
-        }
+        for (EngineConnection ec : startedEngineConnections) ec.close();
     }
 
     /**
@@ -73,16 +73,16 @@ public class BackendDriver {
     private EngineConnection getEngineConnection(Engine engine) throws BackendException.NoAvailableEngineConnectionException {
         EngineConnection connection;
         try {
-            if (!openEngineConnections.containsKey(engine))
-                openEngineConnections.put(engine, new ArrayBlockingQueue<>(engine.getNumberOfInstances() + 1));
+            if (!availableEngineConnections.containsKey(engine))
+                availableEngineConnections.put(engine, new ArrayBlockingQueue<>(engine.getNumberOfInstances() + 1));
 
             // If no open connection is free, attempt to start a new one
-            if (openEngineConnections.get(engine).size() < 1) {
+            if (availableEngineConnections.get(engine).size() < 1) {
                 tryStartNewEngineConnection(engine);
             }
 
             // Block until a connection becomes available
-            connection = openEngineConnections.get(engine).take();
+            connection = availableEngineConnections.get(engine).take();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -122,8 +122,8 @@ public class BackendDriver {
                 // If the process is not alive, it failed while starting up, try again
             } while (!p.isAlive());
         } else {
-            // Filter open connections to this engine and map their used ports to an int stream
-            var activeEnginePorts = openEngineConnections.get(engine).stream()
+            // Filter open connections to this backend and map their used ports to an int stream
+            var activeEnginePorts = startedEngineConnections.stream()
                     .mapToInt((bi) -> Integer.parseInt(bi.getStub().getChannel().authority().split(":", 2)[1]));
 
             int currentPort = engine.getPortStart();
@@ -150,7 +150,7 @@ public class BackendDriver {
 
         EcdarBackendGrpc.EcdarBackendStub stub = EcdarBackendGrpc.newStub(channel);
         EngineConnection newConnection = new EngineConnection(engine, p, stub, channel);
-        addEngineConnection(newConnection);
+        startedEngineConnections.add(newConnection);
 
         QueryProtos.ComponentsUpdateRequest.Builder componentsBuilder = QueryProtos.ComponentsUpdateRequest.newBuilder();
         for (Component c : Ecdar.getProject().getComponents()) {
@@ -168,7 +168,7 @@ public class BackendDriver {
 
             @Override
             public void onCompleted() {
-                addEngineConnection(newConnection);
+                setConnectionAsAvailable(newConnection);
             }
         };
 
