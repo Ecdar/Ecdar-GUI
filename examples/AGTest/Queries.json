@@ -5,7 +5,7 @@
     "isPeriodic": false,
     "ignoredInputs": {},
     "ignoredOutputs": {},
-    "backend": "Reveaal"
+    "engine": "Reveaal"
   },
   {
     "query": "refinement: ((A1 || G2) \\ A2) \u003c\u003d G1",
@@ -13,7 +13,7 @@
     "isPeriodic": false,
     "ignoredInputs": {},
     "ignoredOutputs": {},
-    "backend": "Reveaal"
+    "engine": "Reveaal"
   },
   {
     "query": "refinement:  ((A1 || G1) \\ A2) \u003c\u003d Imp",
@@ -21,6 +21,6 @@
     "isPeriodic": false,
     "ignoredInputs": {},
     "ignoredOutputs": {},
-    "backend": "Reveaal"
+    "engine": "Reveaal"
   }
 ]

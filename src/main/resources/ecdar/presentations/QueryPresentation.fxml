@@ -65,7 +65,7 @@
                 </JFXRippler>
             </HBox>
             <StackPane style="-fx-min-width: 6.5em; -fx-max-width: 6.5em;">
-                <JFXComboBox fx:id="backendsDropdown" styleClass="caption, responsive-text-area-sizing"/>
+                <JFXComboBox fx:id="enginesDropdown" styleClass="caption, responsive-text-area-sizing"/>
             </StackPane>
         </VBox>
         <StackPane prefHeight="1" style="-fx-background-color:-grey-300;" AnchorPane.rightAnchor="0"
