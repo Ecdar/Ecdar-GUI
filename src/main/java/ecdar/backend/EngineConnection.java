@@ -39,6 +39,10 @@ public class EngineConnection {
         return engine;
     }
 
+    public int getPort() {
+        return Integer.parseInt(getStub().getChannel().authority().split(":", 2)[1]);
+    }
+
     /**
      * Close the gRPC connection and end the process
      */

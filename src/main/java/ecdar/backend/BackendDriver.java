@@ -16,6 +16,8 @@ import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class BackendDriver {
     private final int responseDeadline = 20000;
@@ -68,7 +70,7 @@ public class BackendDriver {
      * @return a EngineConnection object linked to the engine, either from the open engine connection list
      * or a newly started connection.
      * @throws BackendException.NoAvailableEngineConnectionException if unable to retrieve a connection to the engine
-     *                                                                and unable to start a new one
+     *                                                               and unable to start a new one
      */
     private EngineConnection getEngineConnection(Engine engine) throws BackendException.NoAvailableEngineConnectionException {
         EngineConnection connection;
@@ -123,22 +125,21 @@ public class BackendDriver {
             } while (!p.isAlive());
         } else {
             // Filter open connections to this backend and map their used ports to an int stream
-            var activeEnginePorts = startedEngineConnections.stream()
-                    .mapToInt((bi) -> Integer.parseInt(bi.getStub().getChannel().authority().split(":", 2)[1]));
+            // and use supplier to reuse the stream for each check
+            Supplier<Stream<Integer>> activeEnginePortsStream = () -> startedEngineConnections.stream()
+                    .mapToInt(EngineConnection::getPort).boxed();
 
             int currentPort = engine.getPortStart();
-            do {
-                // Find port not already connected to
-                int tempPortNumber = currentPort;
-                if (activeEnginePorts.noneMatch((i) -> i == tempPortNumber)) {
-                    portNumber = tempPortNumber;
-                } else {
-                    currentPort++;
+            for (int port = engine.getPortStart(); port <= engine.getPortEnd(); port++) {
+                int tempPort = port;
+                if (activeEnginePortsStream.get().anyMatch((i) -> i == tempPort)) {
+                    currentPort = port;
+                    break;
                 }
-            } while (portNumber == 0 && currentPort <= engine.getPortEnd());
+            }
 
             if (currentPort > engine.getPortEnd()) {
-                Ecdar.showToast("Unable to connect to remote engine: " + engine.getName() + " within port range " + engine.getPortStart() + " - " + engine.getPortEnd());
+                Ecdar.showToast("Could not connect to '" + engine.getName() + "' through any of the ports in the range " + engine.getPortStart() + " - " + engine.getPortEnd());
                 return;
             }
         }
