@@ -41,43 +41,43 @@ public class ZoomHelper {
     }
 
     public void setZoomLevel(Double zoomLevel) {
-        if (active && model != null) {
-            currentZoomFactor.set(zoomLevel);
-        }
+        if (!active || model == null) return;
+
+        currentZoomFactor.set(zoomLevel);
     }
 
     /**
      * Zoom in with a delta of 1.2
      */
     public void zoomIn() {
-        if (active) {
-            double delta = 1.2;
-            double newScale = currentZoomFactor.get() * delta;
+        if (!active) return;
 
-            //Limit for zooming in
-            if (newScale > maxZoomFactor) {
-                return;
-            }
+        double delta = 1.2;
+        double newScale = currentZoomFactor.get() * delta;
 
-            currentZoomFactor.set(newScale);
+        //Limit for zooming in
+        if (newScale > maxZoomFactor) {
+            return;
         }
+
+        currentZoomFactor.set(newScale);
     }
 
     /**
      * Zoom out with a delta of 1.2
      */
     public void zoomOut() {
-        if (active) {
-            double delta = 1.2;
-            double newScale = currentZoomFactor.get() / delta;
+        if (!active) return;
 
-            //Limit for zooming out
-            if (newScale < minZoomFactor) {
-                return;
-            }
+        double delta = 1.2;
+        double newScale = currentZoomFactor.get() / delta;
 
-            currentZoomFactor.set(newScale);
+        //Limit for zooming out
+        if (newScale < minZoomFactor) {
+            return;
         }
+
+        currentZoomFactor.set(newScale);
     }
 
     /**
@@ -85,30 +85,33 @@ public class ZoomHelper {
      */
     public void resetZoom() {
         currentZoomFactor.set(1);
+        if (canvasPresentation
+                .getController()
+                .getActiveModelPresentation() instanceof DeclarationsPresentation) alignDeclaration();
     }
 
     /**
      * Zoom in to fit the component on screen
      */
     public void zoomToFit() {
-        if (active) {
-            if (!(canvasPresentation.getController().getActiveModelPresentation() instanceof ComponentPresentation || canvasPresentation.getController().getActiveModelPresentation() instanceof SystemPresentation)) {
-                resetZoom();
-                return;
-            }
+        if (!active || model == null) return;
 
-            double neededWidth = (model instanceof ComponentPresentation ?
-                    (model.getMinWidth()
-                            + ((ComponentController) model.getController()).inputSignatureContainer.getWidth()
-                            + ((ComponentController) model.getController()).outputSignatureContainer.getWidth())
-                    : model.getMinWidth());
+        double neededWidth = getWidthNeededForModel();
+        double newScale = Math.min(canvasPresentation.getWidth() / neededWidth, canvasPresentation.getHeight() / model.getMinHeight() - 0.2); // 0.2 subtracted for margin
 
+        currentZoomFactor.set(newScale);
+        centerComponentOrSystem();
+    }
 
-            double newScale = Math.min(canvasPresentation.getWidth() / neededWidth, canvasPresentation.getHeight() / model.getMinHeight() - 0.2); // 0.2 subtracted for margin
-
-            currentZoomFactor.set(newScale);
-            centerComponent();
+    private double getWidthNeededForModel() {
+        if (model instanceof ComponentPresentation) {
+            ComponentController componentController = (ComponentController) model.getController();
+            return model.getMinWidth()
+                    + componentController.inputSignatureContainer.getWidth()
+                    + componentController.outputSignatureContainer.getWidth();
         }
+
+        return model.getMinWidth();
     }
 
     /**
@@ -118,22 +121,22 @@ public class ZoomHelper {
         this.active = activeState;
         if (!activeState) {
             // If zoom has been disabled, reset the zoom level
-            resetZoom();
+            Platform.runLater(this::resetZoom);
         }
     }
 
-    private void centerComponent() {
+    private void centerComponentOrSystem() {
+        // 0 is slightly below center, this looks better
+        canvasPresentation.getController().modelPane.setTranslateY(-Ecdar.CANVAS_PADDING * 2);
         canvasPresentation.getController().modelPane.setTranslateX(0);
-
-        if (canvasPresentation.getController().modelPane.getChildren().isEmpty() || canvasPresentation.getController().modelPane.getChildren().get(0) instanceof DeclarationsPresentation) {
-            canvasPresentation.getController().modelPane.setTranslateY(0);
-        } else {
-            // 0 is slightly below center, this looks better
-            canvasPresentation.getController().modelPane.setTranslateY(-Ecdar.CANVAS_PADDING * 2);
-        }
 
         // Center the model within the modelPane to account for resized model
         model.setTranslateX(0);
         model.setTranslateY(0);
+    }
+
+    private void alignDeclaration() {
+        canvasPresentation.getController().modelPane.setTranslateX(0);
+        canvasPresentation.getController().modelPane.setTranslateY(0);
     }
 }
