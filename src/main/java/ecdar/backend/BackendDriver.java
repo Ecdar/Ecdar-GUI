@@ -23,13 +23,13 @@ public class BackendDriver {
     private final int responseDeadline = 20000;
     private final int rerunRequestDelay = 200;
     private final int numberOfRetriesPerQuery = 5;
+    private final int maxRetriesForStartingEngineProcess = 3;
 
     private final List<EngineConnection> startedEngineConnections = new ArrayList<>();
     private final Map<Engine, BlockingQueue<EngineConnection>> availableEngineConnections = new HashMap<>();
     private final BlockingQueue<GrpcRequest> requestQueue = new ArrayBlockingQueue<>(200);
 
     public BackendDriver() {
-        // ToDo NIELS: Consider multiple consumer threads using 'for(int i = 0; i < x; i++) {}'
         GrpcRequestConsumer consumer = new GrpcRequestConsumer();
         Thread consumerThread = new Thread(consumer);
         consumerThread.start();
@@ -99,48 +99,22 @@ public class BackendDriver {
      * @param engine the target engine for the connection
      */
     private void tryStartNewEngineConnection(Engine engine) {
-        Process p = null;
+        Process p = null; // Will remain null if the engine is running remotely
         String hostAddress = (engine.isLocal() ? "127.0.0.1" : engine.getEngineLocation());
-        long portNumber = 0;
+        long portNumber;
 
         if (engine.isLocal()) {
             try {
                 portNumber = SocketUtils.findAvailableTcpPort(engine.getPortStart(), engine.getPortEnd());
             } catch (IllegalStateException e) {
-                // No port was available in range, we assume that connections are running on all ports
+                // All ports specified for engine are already used for running engines
                 return;
             }
 
-            do {
-                ProcessBuilder pb = new ProcessBuilder(engine.getEngineLocation(), "-p", hostAddress + ":" + portNumber);
-
-                try {
-                    p = pb.start();
-                } catch (IOException ioException) {
-                    Ecdar.showToast("Unable to start local engine instance");
-                    ioException.printStackTrace();
-                    return;
-                }
-                // If the process is not alive, it failed while starting up, try again
-            } while (!p.isAlive());
+            if ((p = getEngineProcess(engine, hostAddress, portNumber)) == null) return;
         } else {
-            // Filter open connections to this engine and map their used ports to an int stream
-            // and use supplier to reuse the stream for each check
-            Supplier<Stream<Integer>> activeEnginePortsStream = () -> startedEngineConnections.stream()
-                    .filter(ec -> ec.getEngine().equals(engine))
-                    .mapToInt(EngineConnection::getPort).boxed();
-
-            int currentPort = engine.getPortStart();
-            for (int port = engine.getPortStart(); port <= engine.getPortEnd(); port++) {
-                int tempPort = port;
-                if (activeEnginePortsStream.get().noneMatch((i) -> i == tempPort)) {
-                    currentPort = port;
-                    break;
-                }
-            }
-
-            if (currentPort > engine.getPortEnd()) {
-                Ecdar.showToast("Could not create a new connection to '" + engine.getName() + ". All ports in range " + engine.getPortStart() + " - " + engine.getPortEnd() + " are already in use.");
+            if ((portNumber = getPortForRemoteEngine(engine)) == -1) {
+                // All ports specified for remote engine are already connected
                 return;
             }
         }
@@ -176,6 +150,63 @@ public class BackendDriver {
 
         newConnection.getStub().withDeadlineAfter(responseDeadline, TimeUnit.MILLISECONDS)
                 .updateComponents(componentsBuilder.build(), observer);
+    }
+
+    /**
+     * Start process with specified engine and return it
+     *
+     * @param engine to run in the process
+     * @param hostAddress to reach the engine
+     * @param port to reach the engine
+     * @return a running process of the specified engine,
+     *         or null if no process was started after 3 attempts
+     */
+    private Process getEngineProcess(final Engine engine, final String hostAddress, final long port) {
+        Process p;
+        int attempts = 0;
+        do {
+            attempts++;
+            ProcessBuilder pb = new ProcessBuilder(engine.getEngineLocation(), "-p", hostAddress + ":" + port);
+
+            try {
+                p = pb.start();
+            } catch (IOException ioException) {
+                Ecdar.showToast("Unable to start local engine instance");
+                ioException.printStackTrace();
+                return null;
+            }
+            // If the process is not alive, it failed while starting up, try again
+        } while (!p.isAlive() && attempts < maxRetriesForStartingEngineProcess);
+        return p;
+    }
+
+    /**
+     * Get a port from the specified port range that is not already connected to
+     *
+     * @param engine to connect to
+     * @return a port that is not already connected to within the port range,
+     *         or -1 if no such port exists
+     */
+    private long getPortForRemoteEngine(Engine engine) {
+        // Filter open connections to this backend and map their used ports to an int stream
+        // and use supplier to reuse the stream for each check
+        Supplier<Stream<Integer>> activeEnginePortsStream = () -> startedEngineConnections.stream()
+                .mapToInt(EngineConnection::getPort).boxed();
+
+        int currentPort = engine.getPortStart();
+        for (int port = engine.getPortStart(); port <= engine.getPortEnd(); port++) {
+            int tempPort = port;
+            if (activeEnginePortsStream.get().anyMatch((i) -> i == tempPort)) {
+                currentPort = port;
+                break;
+            }
+        }
+
+        if (currentPort > engine.getPortEnd()) {
+            Ecdar.showToast("Could not connect to remote engine: '" + engine.getName() + "' through any of the ports in the range " + engine.getPortStart() + " - " + engine.getPortEnd());
+            return -1;
+        }
+        return currentPort;
     }
 
     private class GrpcRequestConsumer implements Runnable {
