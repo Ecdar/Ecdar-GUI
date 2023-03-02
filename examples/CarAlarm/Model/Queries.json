@@ -5,7 +5,7 @@
     "isPeriodic": false,
     "ignoredInputs": {},
     "ignoredOutputs": {},
-    "backend": "Reveaal"
+    "engine": "Reveaal"
   },
   {
     "query": "specification: Alarm",
@@ -13,7 +13,7 @@
     "isPeriodic": false,
     "ignoredInputs": {},
     "ignoredOutputs": {},
-    "backend": "Reveaal"
+    "engine": "Reveaal"
   },
   {
     "query": "reachability: Alarm.L11",
@@ -21,7 +21,7 @@
     "isPeriodic": false,
     "ignoredInputs": {},
     "ignoredOutputs": {},
-    "backend": "Reveaal"
+    "engine": "Reveaal"
   },
   {
     "query": "reachability: Alarm.L12",
@@ -29,7 +29,7 @@
     "isPeriodic": false,
     "ignoredInputs": {},
     "ignoredOutputs": {},
-    "backend": "Reveaal"
+    "engine": "Reveaal"
   },
   {
     "query": "reachability: Alarm.L9",
@@ -37,7 +37,7 @@
     "isPeriodic": false,
     "ignoredInputs": {},
     "ignoredOutputs": {},
-    "backend": "Reveaal"
+    "engine": "Reveaal"
   },
   {
     "query": "specification: (Alarm: A[] not Alarm.L7 || Alarm.x\u003c\u003d30)",
@@ -45,6 +45,6 @@
     "isPeriodic": false,
     "ignoredInputs": {},
     "ignoredOutputs": {},
-    "backend": "Reveaal"
+    "engine": "Reveaal"
   }
 ]

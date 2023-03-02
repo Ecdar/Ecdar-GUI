@@ -23,7 +23,7 @@ public class QueryController implements Initializable {
     public JFXRippler actionButton;
     public JFXRippler queryTypeExpand;
     public Text queryTypeSymbol;
-    public JFXComboBox<Engine> backendsDropdown;
+    public JFXComboBox<Engine> enginesDropdown;
     private Query query;
     private final Map<QueryType, SimpleBooleanProperty> queryTypeListElementsSelectedState = new HashMap<>();
     private final Tooltip noQueryTypeSetTooltip = new Tooltip("Please select a query type beneath the status icon");
@@ -52,16 +52,16 @@ public class QueryController implements Initializable {
         }));
 
         if (BackendHelper.getEngines().contains(query.getEngine())) {
-            backendsDropdown.setValue(query.getEngine());
+            enginesDropdown.setValue(query.getEngine());
         } else {
-            backendsDropdown.setValue(BackendHelper.getDefaultEngine());
+            enginesDropdown.setValue(BackendHelper.getDefaultEngine());
         }
 
-        backendsDropdown.valueProperty().addListener((observable, oldValue, newValue) -> {
+        enginesDropdown.valueProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
-                query.setBackend(newValue);
+                query.setEngine(newValue);
             } else {
-                backendsDropdown.setValue(BackendHelper.getDefaultEngine());
+                enginesDropdown.setValue(BackendHelper.getDefaultEngine());
             }
         });
 
@@ -69,11 +69,11 @@ public class QueryController implements Initializable {
             Platform.runLater(() -> {
                 // The value must be set before the items (https://stackoverflow.com/a/29483445)
                 if (BackendHelper.getEngines().contains(query.getEngine())) {
-                    backendsDropdown.setValue(query.getEngine());
+                    enginesDropdown.setValue(query.getEngine());
                 } else {
-                    backendsDropdown.setValue(BackendHelper.getDefaultEngine());
+                    enginesDropdown.setValue(BackendHelper.getDefaultEngine());
                 }
-                backendsDropdown.setItems(BackendHelper.getEngines());
+                enginesDropdown.setItems(BackendHelper.getEngines());
             });
         });
     }

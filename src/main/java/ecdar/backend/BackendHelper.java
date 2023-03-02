@@ -22,7 +22,7 @@ public final class BackendHelper {
     final static String TEMP_DIRECTORY = "temporary";
     private static Engine defaultEngine = null;
     private static ObservableList<Engine> engines = new SimpleListProperty<>();
-    private static List<Runnable> enginesUpdatedListeners = new ArrayList<>();
+    private static final List<Runnable> enginesUpdatedListeners = new ArrayList<>();
 
     /**
      * Stores a query as a backend XML query file in the "temporary" directory.
@@ -100,7 +100,7 @@ public final class BackendHelper {
      * or the default engine, if no matching engine exists
      */
     public static Engine getEngineByName(String engineName) {
-        Optional<Engine> engine = BackendHelper.engines.stream().filter(bi -> bi.getName().equals(engineName)).findFirst();
+        Optional<Engine> engine = BackendHelper.engines.stream().filter(e -> e.getName().equals(engineName)).findFirst();
         return engine.orElse(BackendHelper.getDefaultEngine());
     }
 
