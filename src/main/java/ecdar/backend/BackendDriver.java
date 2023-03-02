@@ -107,7 +107,7 @@ public class BackendDriver {
             try {
                 portNumber = SocketUtils.findAvailableTcpPort(engine.getPortStart(), engine.getPortEnd());
             } catch (IllegalStateException e) {
-                // No port was available in range, we assume that connections are running on all ports
+                // All ports specified for engine are already used for running engines
                 return;
             }
 
@@ -124,22 +124,8 @@ public class BackendDriver {
                 // If the process is not alive, it failed while starting up, try again
             } while (!p.isAlive());
         } else {
-            // Filter open connections to this backend and map their used ports to an int stream
-            // and use supplier to reuse the stream for each check
-            Supplier<Stream<Integer>> activeEnginePortsStream = () -> startedEngineConnections.stream()
-                    .mapToInt(EngineConnection::getPort).boxed();
-
-            int currentPort = engine.getPortStart();
-            for (int port = engine.getPortStart(); port <= engine.getPortEnd(); port++) {
-                int tempPort = port;
-                if (activeEnginePortsStream.get().anyMatch((i) -> i == tempPort)) {
-                    currentPort = port;
-                    break;
-                }
-            }
-
-            if (currentPort > engine.getPortEnd()) {
-                Ecdar.showToast("Could not connect to '" + engine.getName() + "' through any of the ports in the range " + engine.getPortStart() + " - " + engine.getPortEnd());
+            if (getPortForRemoteEngine(engine) == -1) {
+                // All ports specified for remote engine are already connected
                 return;
             }
         }
@@ -175,6 +161,28 @@ public class BackendDriver {
 
         newConnection.getStub().withDeadlineAfter(responseDeadline, TimeUnit.MILLISECONDS)
                 .updateComponents(componentsBuilder.build(), observer);
+    }
+
+    private long getPortForRemoteEngine(Engine engine) {
+        // Filter open connections to this backend and map their used ports to an int stream
+        // and use supplier to reuse the stream for each check
+        Supplier<Stream<Integer>> activeEnginePortsStream = () -> startedEngineConnections.stream()
+                .mapToInt(EngineConnection::getPort).boxed();
+
+        int currentPort = engine.getPortStart();
+        for (int port = engine.getPortStart(); port <= engine.getPortEnd(); port++) {
+            int tempPort = port;
+            if (activeEnginePortsStream.get().anyMatch((i) -> i == tempPort)) {
+                currentPort = port;
+                break;
+            }
+        }
+
+        if (currentPort > engine.getPortEnd()) {
+            Ecdar.showToast("Could not connect to '" + engine.getName() + "' through any of the ports in the range " + engine.getPortStart() + " - " + engine.getPortEnd());
+            return -1;
+        }
+        return currentPort;
     }
 
     private class GrpcRequestConsumer implements Runnable {
