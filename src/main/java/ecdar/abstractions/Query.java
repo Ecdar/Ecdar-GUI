@@ -22,7 +22,7 @@ public class Query implements Serializable {
     private final SimpleBooleanProperty isPeriodic = new SimpleBooleanProperty(false);
     private final ObjectProperty<QueryState> queryState = new SimpleObjectProperty<>(QueryState.UNKNOWN);
     private final ObjectProperty<QueryType> type = new SimpleObjectProperty<>();
-    private Engine backend;
+    private Engine engine;
 
 
     private final Consumer<Boolean> successConsumer = (aBoolean) -> {
