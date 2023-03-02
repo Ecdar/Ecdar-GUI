@@ -100,7 +100,7 @@ public final class BackendHelper {
      * or the default engine, if no matching engine exists
      */
     public static Engine getEngineByName(String engineName) {
-        Optional<Engine> engine = BackendHelper.engines.stream().filter(bi -> bi.getName().equals(engineName)).findFirst();
+        Optional<Engine> engine = BackendHelper.engines.stream().filter(engine -> engine.getName().equals(engineName)).findFirst();
         return engine.orElse(BackendHelper.getDefaultEngine());
     }
 
