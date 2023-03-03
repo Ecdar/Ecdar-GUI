@@ -127,19 +127,20 @@ public class BackendDriver {
             // Filter open connections to this backend and map their used ports to an int stream
             // and use supplier to reuse the stream for each check
             Supplier<Stream<Integer>> activeEnginePortsStream = () -> startedEngineConnections.stream()
+                    .filter(ec -> ec.getEngine().equals(engine))
                     .mapToInt(EngineConnection::getPort).boxed();
 
             int currentPort = engine.getPortStart();
             for (int port = engine.getPortStart(); port <= engine.getPortEnd(); port++) {
                 int tempPort = port;
-                if (activeEnginePortsStream.get().anyMatch((i) -> i == tempPort)) {
+                if (activeEnginePortsStream.get().noneMatch((i) -> i == tempPort)) {
                     currentPort = port;
                     break;
                 }
             }
 
             if (currentPort > engine.getPortEnd()) {
-                Ecdar.showToast("Could not connect to '" + engine.getName() + "' through any of the ports in the range " + engine.getPortStart() + " - " + engine.getPortEnd());
+                Ecdar.showToast("Could not create a new connection to '" + engine.getName() + ". All ports in range " + engine.getPortStart() + " - " + engine.getPortEnd() + " are already in use.");
                 return;
             }
         }
