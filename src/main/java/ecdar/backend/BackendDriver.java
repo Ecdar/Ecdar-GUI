@@ -124,7 +124,7 @@ public class BackendDriver {
                 // If the process is not alive, it failed while starting up, try again
             } while (!p.isAlive());
         } else {
-            // Filter open connections to this backend and map their used ports to an int stream
+            // Filter open connections to this engine and map their used ports to an int stream
             // and use supplier to reuse the stream for each check
             Supplier<Stream<Integer>> activeEnginePortsStream = () -> startedEngineConnections.stream()
                     .filter(ec -> ec.getEngine().equals(engine))

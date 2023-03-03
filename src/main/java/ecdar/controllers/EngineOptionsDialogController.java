@@ -80,8 +80,8 @@ public class EngineOptionsDialogController implements Initializable {
             BackendHelper.updateEngineInstances(engines);
 
             JsonArray jsonArray = new JsonArray();
-            for (Engine bi : engines) {
-                jsonArray.add(bi.serialize());
+            for (Engine engine : engines) {
+                jsonArray.add(engine.serialize());
             }
 
             Ecdar.preferences.put("engines", jsonArray.toString());
@@ -136,14 +136,14 @@ public class EngineOptionsDialogController implements Initializable {
     private void updateEnginesInGUI(ArrayList<Engine> engines) {
         engineInstanceList.getChildren().clear();
 
-        engines.forEach((bi) -> {
-            EnginePresentation newEnginePresentation = new EnginePresentation(bi);
+        engines.forEach((engine) -> {
+            EnginePresentation newEnginePresentation = new EnginePresentation(engine);
 
             // Bind input fields that should not be changed for packaged engines to the locked property of the engine instance
-            newEnginePresentation.getController().engineName.disableProperty().bind(bi.getLockedProperty());
-            newEnginePresentation.getController().pathToEngine.disableProperty().bind(bi.getLockedProperty());
-            newEnginePresentation.getController().pickPathToEngine.disableProperty().bind(bi.getLockedProperty());
-            newEnginePresentation.getController().isLocal.disableProperty().bind(bi.getLockedProperty());
+            newEnginePresentation.getController().engineName.disableProperty().bind(engine.getLockedProperty());
+            newEnginePresentation.getController().pathToEngine.disableProperty().bind(engine.getLockedProperty());
+            newEnginePresentation.getController().pickPathToEngine.disableProperty().bind(engine.getLockedProperty());
+            newEnginePresentation.getController().isLocal.disableProperty().bind(engine.getLockedProperty());
             addEnginePresentationToList(newEnginePresentation);
         });
 

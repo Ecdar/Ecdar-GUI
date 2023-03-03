@@ -54,7 +54,7 @@ public class QueryHandler {
 
                 @Override
                 public void onCompleted() {
-                    // Release backend connection
+                    // Release engine connection
                     backendDriver.setConnectionAsAvailable(engineConnection);
                 }
             };

@@ -16,7 +16,7 @@ public class Engine implements Serializable {
     private String name;
     private boolean isLocal;
     private boolean isDefault;
-    private String backendLocation;
+    private String engineLocation;
     private int portStart;
     private int portEnd;
     private SimpleBooleanProperty locked = new SimpleBooleanProperty(false);
@@ -52,11 +52,11 @@ public class Engine implements Serializable {
     }
 
     public String getEngineLocation() {
-        return backendLocation;
+        return engineLocation;
     }
 
-    public void setEngineLocation(String backendLocation) {
-        this.backendLocation = backendLocation;
+    public void setEngineLocation(String engineLocation) {
+        this.engineLocation = engineLocation;
     }
 
     public int getPortStart() {
