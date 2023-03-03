@@ -299,27 +299,16 @@ public class Ecdar extends Application {
 
         stage.setOnCloseRequest(event -> {
             BackendHelper.stopQueries();
-
-            try {
-                backendDriver.closeAllEngineConnections();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            backendDriver.closeAllEngineConnections();
 
             Platform.exit();
             System.exit(0);
         });
 
         BackendHelper.addEngineInstanceListener(() -> {
-            // When the engines change, re-instantiate the backendDriver
+            // When the engines change, reset the backendDriver
             // to prevent dangling connections and queries
-            try {
-                backendDriver.closeAllEngineConnections();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
-            backendDriver = new BackendDriver();
+            backendDriver.reset();
         });
 
         project = presentation.getController().projectPane.getController().project;

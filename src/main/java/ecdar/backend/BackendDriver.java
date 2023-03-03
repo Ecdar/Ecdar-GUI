@@ -48,18 +48,32 @@ public class BackendDriver {
         requestQueue.add(request);
     }
 
-    public void setConnectionAsAvailable(EngineConnection engineConnection) {
-        var relatedQueue = this.availableEngineConnections.get(engineConnection.getEngine());
-        if (!relatedQueue.contains(engineConnection)) relatedQueue.add(engineConnection);
+    /**
+     * Signal that the EngineConnection can be used not in use and available for queries
+     *
+     * @param connection to make available
+     */
+    public void setConnectionAsAvailable(EngineConnection connection) {
+        var relatedQueue = this.availableEngineConnections.get(connection.getEngine());
+        if (!relatedQueue.contains(connection)) relatedQueue.add(connection);
     }
 
     /**
      * Close all open engine connection and kill all locally running processes
-     *
-     * @throws IOException if any of the sockets do not respond
      */
-    public void closeAllEngineConnections() throws IOException {
+    public void closeAllEngineConnections() {
         for (EngineConnection ec : startedEngineConnections) ec.close();
+        startedEngineConnections.clear();
+        availableEngineConnections.clear();
+    }
+
+    /**
+     * Close all engine connections and stop all queries
+     */
+    public void reset() {
+        closeAllEngineConnections();
+        BackendHelper.stopQueries();
+        requestQueue.clear();
     }
 
     /**
@@ -83,7 +97,7 @@ public class BackendDriver {
                 tryStartNewEngineConnection(engine);
             }
 
-            // Block until a connection becomes available
+            // Blocks until a connection becomes available
             connection = availableEngineConnections.get(engine).take();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
@@ -99,33 +113,17 @@ public class BackendDriver {
      * @param engine the target engine for the connection
      */
     private void tryStartNewEngineConnection(Engine engine) {
-        Process p = null; // Will remain null if the engine is running remotely
-        String hostAddress = (engine.isLocal() ? "127.0.0.1" : engine.getEngineLocation());
-        long portNumber;
+        EngineConnection newConnection;
 
         if (engine.isLocal()) {
-            try {
-                portNumber = SocketUtils.findAvailableTcpPort(engine.getPortStart(), engine.getPortEnd());
-            } catch (IllegalStateException e) {
-                // All ports specified for engine are already used for running engines
-                return;
-            }
-
-            if ((p = getEngineProcess(engine, hostAddress, portNumber)) == null) return;
+            newConnection = startEngineProcess(engine);
         } else {
-            if ((portNumber = getPortForRemoteEngine(engine)) == -1) {
-                // All ports specified for remote engine are already connected
-                return;
-            }
+            newConnection = startConnectionToRemoteEngine(engine);
         }
 
-        ManagedChannel channel = ManagedChannelBuilder.forTarget(hostAddress + ":" + portNumber)
-                .usePlaintext()
-                .keepAliveTime(1000, TimeUnit.MILLISECONDS)
-                .build();
+        // If the connection is null, no new connection was started
+        if (newConnection == null) return;
 
-        EcdarBackendGrpc.EcdarBackendStub stub = EcdarBackendGrpc.newStub(channel);
-        EngineConnection newConnection = new EngineConnection(engine, p, stub, channel);
         startedEngineConnections.add(newConnection);
 
         QueryProtos.ComponentsUpdateRequest.Builder componentsBuilder = QueryProtos.ComponentsUpdateRequest.newBuilder();
@@ -140,11 +138,13 @@ public class BackendDriver {
 
             @Override
             public void onError(Throwable t) {
+                newConnection.close();
+                startedEngineConnections.remove(newConnection);
             }
 
             @Override
             public void onCompleted() {
-                setConnectionAsAvailable(newConnection);
+                if (startedEngineConnections.contains(newConnection)) setConnectionAsAvailable(newConnection);
             }
         };
 
@@ -153,20 +153,27 @@ public class BackendDriver {
     }
 
     /**
-     * Start process with specified engine and return it
+     * Start a process, create an EngineConnection to it, and return connection
      *
      * @param engine to run in the process
-     * @param hostAddress to reach the engine
-     * @param port to reach the engine
-     * @return a running process of the specified engine,
-     *         or null if no process was started after 3 attempts
+     * @return an EngineConnection to a local engine running in a Process or null if all ports are already in use
      */
-    private Process getEngineProcess(final Engine engine, final String hostAddress, final long port) {
+    private EngineConnection startEngineProcess(final Engine engine) {
+        long port;
+        try {
+            port = SocketUtils.findAvailableTcpPort(engine.getPortStart(), engine.getPortEnd());
+        } catch (IllegalStateException e) {
+            // All ports specified for engine are already used for running engines
+            return null;
+        }
+
+        // Start local process of engine
         Process p;
         int attempts = 0;
+
         do {
             attempts++;
-            ProcessBuilder pb = new ProcessBuilder(engine.getEngineLocation(), "-p", hostAddress + ":" + port);
+            ProcessBuilder pb = new ProcessBuilder(engine.getEngineLocation(), "-p", "127.0.0.1:" + port);
 
             try {
                 p = pb.start();
@@ -175,38 +182,55 @@ public class BackendDriver {
                 ioException.printStackTrace();
                 return null;
             }
-            // If the process is not alive, it failed while starting up, try again
         } while (!p.isAlive() && attempts < maxRetriesForStartingEngineProcess);
-        return p;
+
+        ManagedChannel channel = startGrpcChannel("127.0.0.1", port);
+        EcdarBackendGrpc.EcdarBackendStub stub = EcdarBackendGrpc.newStub(channel);
+        return new EngineConnection(engine, channel, stub, p);
     }
 
     /**
      * Get a port from the specified port range that is not already connected to
      *
      * @param engine to connect to
-     * @return a port that is not already connected to within the port range,
-     *         or -1 if no such port exists
+     * @return an EngineConnection to a remote engine or null if all ports are already connected to
      */
-    private long getPortForRemoteEngine(Engine engine) {
-        // Filter open connections to this backend and map their used ports to an int stream
-        // and use supplier to reuse the stream for each check
+    private EngineConnection startConnectionToRemoteEngine(Engine engine) {
+        // Get a stream of ports already used for connections
         Supplier<Stream<Integer>> activeEnginePortsStream = () -> startedEngineConnections.stream()
                 .mapToInt(EngineConnection::getPort).boxed();
 
-        int currentPort = engine.getPortStart();
-        for (int port = engine.getPortStart(); port <= engine.getPortEnd(); port++) {
-            int tempPort = port;
+        long port = engine.getPortStart();
+        for (int currentPort = engine.getPortStart(); currentPort <= engine.getPortEnd(); currentPort++) {
+            final int tempPort = currentPort;
             if (activeEnginePortsStream.get().anyMatch((i) -> i == tempPort)) {
-                currentPort = port;
+                port = currentPort;
                 break;
             }
         }
 
-        if (currentPort > engine.getPortEnd()) {
-            Ecdar.showToast("Could not connect to remote engine: '" + engine.getName() + "' through any of the ports in the range " + engine.getPortStart() + " - " + engine.getPortEnd());
-            return -1;
+        if (port > engine.getPortEnd()) {
+            // All ports specified for engine are already used for connections
+            return null;
         }
-        return currentPort;
+
+        ManagedChannel channel = startGrpcChannel(engine.getEngineLocation(), port);
+        EcdarBackendGrpc.EcdarBackendStub stub = EcdarBackendGrpc.newStub(channel);
+        return new EngineConnection(engine, channel, stub);
+    }
+
+    /**
+     * Connects a gRPC channel to the address at the specified port, expecting that an engine is running there
+     *
+     * @param address of the target engine
+     * @param port    of the target engine at the address
+     * @return the created gRPC channel
+     */
+    private ManagedChannel startGrpcChannel(final String address, final long port) {
+        return ManagedChannelBuilder.forTarget(address + ":" + port)
+                .usePlaintext()
+                .keepAliveTime(1000, TimeUnit.MILLISECONDS)
+                .build();
     }
 
     private class GrpcRequestConsumer implements Runnable {

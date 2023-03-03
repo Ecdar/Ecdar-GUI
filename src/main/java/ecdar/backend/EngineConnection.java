@@ -7,16 +7,20 @@ import io.grpc.ManagedChannel;
 import java.util.concurrent.TimeUnit;
 
 public class EngineConnection {
-    private final Process process;
+    private final Engine engine;
     private final EcdarBackendGrpc.EcdarBackendStub stub;
     private final ManagedChannel channel;
-    private final Engine engine;
+    private final Process process;
 
-    EngineConnection(Engine engine, Process process, EcdarBackendGrpc.EcdarBackendStub stub, ManagedChannel channel) {
-        this.process = process;
+    EngineConnection(Engine engine, ManagedChannel channel, EcdarBackendGrpc.EcdarBackendStub stub) {
+        this(engine, channel, stub, null);
+    }
+
+    EngineConnection(Engine engine, ManagedChannel channel, EcdarBackendGrpc.EcdarBackendStub stub, Process process) {
         this.engine = engine;
         this.stub = stub;
         this.channel = channel;
+        this.process = process;
     }
 
     /**
