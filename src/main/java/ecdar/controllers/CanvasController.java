@@ -145,11 +145,18 @@ public class CanvasController implements Initializable {
             modelPane.getChildren().add(activeComponentPresentation);
 
             // To avoid NullPointerException on initial model
-            if (oldObject != null) zoomHelper.resetZoom();
+            Platform.runLater(zoomHelper::resetZoom);
 
         } else if (newObject instanceof DeclarationsPresentation) {
             activeComponentPresentation = null;
             modelPane.getChildren().add(newObject);
+
+            // Bind size of Declaration to size of the model pane to ensure alignment and avoid drag
+            DeclarationsController declarationsController = (DeclarationsController) newObject.getController();
+            declarationsController.root.minWidthProperty().bind(modelPane.minWidthProperty());
+            declarationsController.root.maxWidthProperty().bind(modelPane.maxWidthProperty());
+            declarationsController.root.minHeightProperty().bind(modelPane.minHeightProperty());
+            declarationsController.root.maxHeightProperty().bind(modelPane.maxHeightProperty());
         } else if (newObject instanceof SystemPresentation) {
             activeComponentPresentation = null;
             modelPane.getChildren().add(newObject);

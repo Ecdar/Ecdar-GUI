@@ -14,6 +14,7 @@ import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
 import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.SelectHelper;
+import ecdar.utility.helpers.ZoomHelper;
 import ecdar.utility.keyboard.Keybind;
 import ecdar.utility.keyboard.KeyboardTracker;
 import ecdar.utility.keyboard.NudgeDirection;
@@ -522,10 +523,21 @@ public class EcdarController implements Initializable {
         activeCanvasPresentation.get().setOpacity(0.75);
         newActiveCanvasPresentation.setOpacity(1);
         activeCanvasPresentation.set(newActiveCanvasPresentation);
+        rebindZoomShortcutBindings(newActiveCanvasPresentation.getController().zoomHelper);
+    }
+
+    /**
+     * Binds the zoom shortcuts to the provided zoom helper (consequently unbinds the previously bound zoom helper)
+     */
+    private static void rebindZoomShortcutBindings(ZoomHelper zoomHelper) {
+        KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_IN, new Keybind(new KeyCodeCombination(KeyCode.PLUS, KeyCombination.SHORTCUT_DOWN), zoomHelper::zoomIn));
+        KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_OUT, new Keybind(new KeyCodeCombination(KeyCode.MINUS, KeyCombination.SHORTCUT_DOWN), zoomHelper::zoomOut));
+        KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_TO_FIT, new Keybind(new KeyCodeCombination(KeyCode.EQUALS, KeyCombination.SHORTCUT_DOWN), zoomHelper::zoomToFit));
+        KeyboardTracker.registerKeybind(KeyboardTracker.RESET_ZOOM, new Keybind(new KeyCodeCombination(KeyCode.DIGIT0, KeyCombination.SHORTCUT_DOWN), zoomHelper::resetZoom));
     }
 
     public void setActiveModelPresentationForActiveCanvas(HighLevelModelPresentation newActiveModelPresentation) {
-        projectPane.getController().changeOneActiveModelPresentationForAnother(EcdarController.getActiveCanvasPresentation().getController().getActiveModelPresentation(), newActiveModelPresentation);
+        projectPane.getController().swapHighlightBetweenTwoModelFiles(EcdarController.getActiveCanvasPresentation().getController().getActiveModelPresentation(), newActiveModelPresentation);
         EcdarController.getActiveCanvasPresentation().getController().setActiveModelPresentation(newActiveModelPresentation);
     }
 
@@ -642,13 +654,14 @@ public class EcdarController implements Initializable {
 
         menuBarViewCanvasSplit.getGraphic().setOpacity(1);
         menuBarViewCanvasSplit.setOnAction(event -> {
-            final BooleanProperty isSplit = Ecdar.toggleCanvasSplit();
-            if (isSplit.get()) {
-                Platform.runLater(this::setCanvasModeToSingular);
-                menuBarViewCanvasSplit.setText("Split canvas");
-            } else {
+            Ecdar.toggleCanvasSplit();
+        });
+
+        Ecdar.isSplitProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
                 Platform.runLater(this::setCanvasModeToSplit);
-                menuBarViewCanvasSplit.setText("Merge canvases");
+            } else {
+                Platform.runLater(this::setCanvasModeToSingular);
             }
         });
 
@@ -709,8 +722,7 @@ public class EcdarController implements Initializable {
             final File file = projectPicker.showDialog(root.getScene().getWindow());
             if (file != null) {
                 try {
-                    Ecdar.projectDirectory.set(file.getAbsolutePath());
-                    Ecdar.initializeProjectFolder();
+                    setProjectDirectory(file.getAbsolutePath());
                     UndoRedoStack.clear();
                     addProjectToRecentProjects(file.getAbsolutePath());
                 } catch (final IOException e) {
@@ -730,8 +742,7 @@ public class EcdarController implements Initializable {
 
             item.setOnAction(event -> {
                 try {
-                    Ecdar.projectDirectory.set(path);
-                    Ecdar.initializeProjectFolder();
+                    setProjectDirectory(path);
                 } catch (IOException ex) {
                     Ecdar.showToast("Unable to load project: \"" + path + "\"");
                 }
@@ -755,6 +766,12 @@ public class EcdarController implements Initializable {
         }
 
         menuBarFileRecentProjects.getItems().add(item);
+    }
+
+    private static void setProjectDirectory(String path) throws IOException {
+        Ecdar.projectDirectory.set(path);
+        Ecdar.initializeProjectFolder();
+        Ecdar.isSplitProperty().set(false);
     }
 
     /**
@@ -887,9 +904,11 @@ public class EcdarController implements Initializable {
 
         CodeAnalysis.clearErrorsAndWarnings();
 
-        Ecdar.projectDirectory.set(null);
-
-        projectPane.getController().resetProject();
+        try {
+            setProjectDirectory(null);
+        } catch (IOException ex) {
+            Ecdar.showToast("Unable to initialize new project directory");
+        }
 
         UndoRedoStack.clear();
 
@@ -974,7 +993,9 @@ public class EcdarController implements Initializable {
         canvasPresentation.getController().zoomablePane.minHeightProperty().bind(canvasPane.heightProperty());
         canvasPresentation.getController().zoomablePane.maxHeightProperty().bind(canvasPane.heightProperty());
 
-        projectPane.getController().setActiveModelPresentations(canvasPresentation.getController().getActiveModelPresentation());
+        projectPane.getController().setHighlightedForModelFiles(getActiveModelPresentations());
+
+        menuBarViewCanvasSplit.setText("Split canvas");
     }
 
     /**
@@ -1039,13 +1060,32 @@ public class EcdarController implements Initializable {
         canvasGrid.add(canvasPresentation, 1, 1);
 
         canvasPane.getChildren().add(canvasGrid);
-        projectPane.getController().setActiveModelPresentations(getActiveModelPresentations(canvasGrid));
+        projectPane.getController().setHighlightedForModelFiles(getActiveModelPresentations());
+
+        menuBarViewCanvasSplit.setText("Merge canvases");
     }
 
-    private static List<HighLevelModelPresentation> getActiveModelPresentations(GridPane canvasGrid) {
-        return canvasGrid.getChildren()
-                .stream().map(canvas -> ((CanvasPresentation) canvas)
-                        .getController().getActiveModelPresentation()).collect(Collectors.toList());
+    /**
+     * Get list of shown HighLevelModelPresentations
+     *
+     * @return a list of all the HighLevelModelPresentations currently being shown
+     */
+    private List<HighLevelModelPresentation> getActiveModelPresentations() {
+        Pane canvasChild = (Pane) canvasPane.getChildren().get(0);
+
+        if (canvasChild instanceof GridPane) {
+            return canvasChild.getChildren()
+                    .stream().map(canvas -> ((CanvasPresentation) canvas)
+                            .getController().getActiveModelPresentation()).filter(Objects::nonNull).collect(Collectors.toList());
+        } else if (canvasChild instanceof CanvasPresentation) {
+            return new ArrayList<>() {
+                {
+                    ((CanvasPresentation) canvasChild).getController().getActiveModelPresentation();
+                }
+            };
+        }
+
+        return new ArrayList<>();
     }
 
     /**

@@ -49,7 +49,7 @@ public class Ecdar extends Application {
     private static EcdarPresentation presentation;
     private static BooleanProperty isUICached = new SimpleBooleanProperty();
     public static BooleanProperty shouldRunBackgroundQueries = new SimpleBooleanProperty(true);
-    private static final BooleanProperty isSplit = new SimpleBooleanProperty(true); //Set to true to ensure correct behaviour at first toggle.
+    private static final BooleanProperty isSplit = new SimpleBooleanProperty(false);
     private static BackendDriver backendDriver = new BackendDriver();
     private static QueryHandler queryHandler = new QueryHandler(backendDriver);
     private Stage debugStage;
@@ -168,15 +168,15 @@ public class Ecdar extends Application {
         return presentation.toggleQueryPane();
     }
 
+    public static BooleanProperty isSplitProperty() {
+        return isSplit;
+    }
+
     /**
      * Toggles whether to canvas is split or single.
-     *
-     * @return the property specifying whether the canvas is split
      */
-    public static BooleanProperty toggleCanvasSplit() {
+    public static void toggleCanvasSplit() {
         isSplit.set(!isSplit.get());
-
-        return isSplit;
     }
 
     /**
