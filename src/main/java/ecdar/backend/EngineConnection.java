@@ -1,23 +1,24 @@
 package ecdar.backend;
 
 import EcdarProtoBuf.EcdarBackendGrpc;
-import ecdar.abstractions.BackendInstance;
+import ecdar.abstractions.Engine;
 import io.grpc.ManagedChannel;
 
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-public class BackendConnection {
+public class EngineConnection {
     private final Process process;
     private final EcdarBackendGrpc.EcdarBackendStub stub;
     private final ManagedChannel channel;
-    private final BackendInstance backendInstance;
+    private final Engine engine;
+    private final int port;
 
-    BackendConnection(BackendInstance backendInstance, Process process, EcdarBackendGrpc.EcdarBackendStub stub, ManagedChannel channel) {
+    EngineConnection(Engine engine, Process process, EcdarBackendGrpc.EcdarBackendStub stub, ManagedChannel channel) {
         this.process = process;
-        this.backendInstance = backendInstance;
+        this.engine = engine;
         this.stub = stub;
         this.channel = channel;
+        this.port = Integer.parseInt(getStub().getChannel().authority().split(":", 2)[1]);
     }
 
     /**
@@ -30,14 +31,18 @@ public class BackendConnection {
     }
 
     /**
-     * Get the backend instance that should be used to execute
-     * the query currently associated with this backend connection
+     * Get the engine that should be used to execute
+     * the query currently associated with this engine connection
      *
      * @return the instance of the associated executable query object,
      * or null, if no executable query is currently associated
      */
-    public BackendInstance getBackendInstance() {
-        return backendInstance;
+    public Engine getEngine() {
+        return engine;
+    }
+
+    public int getPort() {
+        return port;
     }
 
     /**
@@ -55,7 +60,7 @@ public class BackendConnection {
             }
         }
 
-        // If the backend-instance is remote, there will not be a process
+        // If the engine is remote, there will not be a process
         if (process != null) {
             process.destroy();
         }

@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 import ecdar.utility.serialize.Serializable;
 import javafx.beans.property.SimpleBooleanProperty;
 
-public class BackendInstance implements Serializable {
+public class Engine implements Serializable {
     private static final String NAME = "name";
     private static final String IS_LOCAL = "isLocal";
     private static final String IS_DEFAULT = "isDefault";
@@ -16,14 +16,14 @@ public class BackendInstance implements Serializable {
     private String name;
     private boolean isLocal;
     private boolean isDefault;
-    private String backendLocation;
+    private String engineLocation;
     private int portStart;
     private int portEnd;
     private SimpleBooleanProperty locked = new SimpleBooleanProperty(false);
 
-    public BackendInstance() {};
+    public Engine() {};
 
-    public BackendInstance(final JsonObject jsonObject) {
+    public Engine(final JsonObject jsonObject) {
         deserialize(jsonObject);
     };
 
@@ -51,12 +51,12 @@ public class BackendInstance implements Serializable {
         isDefault = aDefault;
     }
 
-    public String getBackendLocation() {
-        return backendLocation;
+    public String getEngineLocation() {
+        return engineLocation;
     }
 
-    public void setBackendLocation(String backendLocation) {
-        this.backendLocation = backendLocation;
+    public void setEngineLocation(String engineLocation) {
+        this.engineLocation = engineLocation;
     }
 
     public int getPortStart() {
@@ -76,7 +76,7 @@ public class BackendInstance implements Serializable {
     }
 
     public int getNumberOfInstances() {
-        return this.portEnd - this.portStart;
+        return this.portEnd - this.portStart + 1;
     }
 
     public void lockInstance() {
@@ -93,7 +93,7 @@ public class BackendInstance implements Serializable {
         result.addProperty(NAME, getName());
         result.addProperty(IS_LOCAL, isLocal());
         result.addProperty(IS_DEFAULT, isDefault());
-        result.addProperty(LOCATION, getBackendLocation());
+        result.addProperty(LOCATION, getEngineLocation());
         result.addProperty(PORT_RANGE_START, getPortStart());
         result.addProperty(PORT_RANGE_END, getPortEnd());
         result.addProperty(LOCKED, getLockedProperty().get());
@@ -106,7 +106,7 @@ public class BackendInstance implements Serializable {
         setName(json.getAsJsonPrimitive(NAME).getAsString());
         setLocal(json.getAsJsonPrimitive(IS_LOCAL).getAsBoolean());
         setDefault(json.getAsJsonPrimitive(IS_DEFAULT).getAsBoolean());
-        setBackendLocation(json.getAsJsonPrimitive(LOCATION).getAsString());
+        setEngineLocation(json.getAsJsonPrimitive(LOCATION).getAsString());
         setPortStart(json.getAsJsonPrimitive(PORT_RANGE_START).getAsInt());
         setPortEnd(json.getAsJsonPrimitive(PORT_RANGE_END).getAsInt());
         if (json.getAsJsonPrimitive(LOCKED).getAsBoolean()) lockInstance();

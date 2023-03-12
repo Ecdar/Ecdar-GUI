@@ -10,7 +10,7 @@
 <?import javafx.geometry.Insets?>
 <fx:root xmlns="http://javafx.com/javafx"
          xmlns:fx="http://javafx.com/fxml"
-         type="JFXDialog" fx:controller="ecdar.controllers.BackendOptionsDialogController"
+         type="JFXDialog" fx:controller="ecdar.controllers.EngineOptionsDialogController"
          prefHeight="400.0" prefWidth="600.0"
          style="-fx-background-color: #0000007F;">
     <VBox>
@@ -22,17 +22,17 @@
                 <Insets topRightBottomLeft="10"/>
             </padding>
             <HBox>
-                <Text styleClass="headline" HBox.hgrow="ALWAYS">Backends</Text>
+                <Text styleClass="headline" HBox.hgrow="ALWAYS">Engines</Text>
                 <Region HBox.hgrow="ALWAYS"/>
-                <JFXButton fx:id="resetBackendsButton" text="Reset backends" styleClass="button-danger"/>
+                <JFXButton fx:id="resetEnginesButton" text="Reset Engines" styleClass="button-danger"/>
             </HBox>
             <Region prefHeight="10"/>
-            <ScrollPane styleClass="backend-instances-list"
+            <ScrollPane styleClass="engine-instances-list"
                         style="-fx-background-color:transparent;" hbarPolicy="NEVER"
                         fitToWidth="true" fitToHeight="true" maxHeight="600">
-                <VBox fx:id="backendInstanceList" prefWidth="600" spacing="5"/>
+                <VBox fx:id="engineInstanceList" prefWidth="600" spacing="5"/>
             </ScrollPane>
-            <JFXRippler fx:id="addBackendButton" alignment="CENTER_RIGHT">
+            <JFXRippler fx:id="addEngineButton" alignment="CENTER_RIGHT">
                 <StackPane minWidth="300" minHeight="40"
                            StackPane.alignment="CENTER">
                     <FontIcon iconLiteral="gmi-add" styleClass="icon-size-small" fill="black"/>

@@ -301,7 +301,7 @@ public class Ecdar extends Application {
             BackendHelper.stopQueries();
 
             try {
-                backendDriver.closeAllBackendConnections();
+                backendDriver.closeAllEngineConnections();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -310,11 +310,11 @@ public class Ecdar extends Application {
             System.exit(0);
         });
 
-        BackendHelper.addBackendInstanceListener(() -> {
-            // When the backend instances change, re-instantiate the backendDriver
+        BackendHelper.addEngineInstanceListener(() -> {
+            // When the engines change, re-instantiate the backendDriver
             // to prevent dangling connections and queries
             try {
-                backendDriver.closeAllBackendConnections();
+                backendDriver.closeAllEngineConnections();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

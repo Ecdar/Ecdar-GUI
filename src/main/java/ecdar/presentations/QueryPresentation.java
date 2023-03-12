@@ -28,7 +28,6 @@ import static javafx.scene.paint.Color.*;
 
 public class QueryPresentation extends HBox {
     private final Tooltip tooltip = new Tooltip();
-    private Tooltip backendDropdownTooltip;
     private final QueryController controller;
 
     public QueryPresentation(final Query query) {
@@ -41,18 +40,19 @@ public class QueryPresentation extends HBox {
         initializeDetailsButton();
         initializeTextFields();
         initializeMoreInformationButtonAndQueryTypeSymbol();
-        initializeBackendsDropdown();
+        initializeEnginesDropdown();
 
         // Ensure that the icons are scaled to current font scale
         Platform.runLater(() -> Ecdar.getPresentation().getController().scaleIcons(this));
     }
 
-    private void initializeBackendsDropdown() {
-        controller.backendsDropdown.setItems(BackendHelper.getBackendInstances());
-        backendDropdownTooltip = new Tooltip();
-        backendDropdownTooltip.setText("Current backend used for the query");
-        JFXTooltip.install(controller.backendsDropdown, backendDropdownTooltip);
-        controller.backendsDropdown.setValue(BackendHelper.getDefaultBackendInstance());
+    private void initializeEnginesDropdown() {
+        controller.enginesDropdown.setItems(BackendHelper.getEngines());
+
+        Tooltip enginesDropdownTooltip = new Tooltip();
+        enginesDropdownTooltip.setText("Current engine used for the query");
+        JFXTooltip.install(controller.enginesDropdown, enginesDropdownTooltip);
+        controller.enginesDropdown.setValue(BackendHelper.getDefaultEngine());
     }
 
     private void initializeTextFields() {

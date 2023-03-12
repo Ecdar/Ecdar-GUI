@@ -39,7 +39,7 @@ public class QueryHandler {
         query.setQueryState(QueryState.RUNNING);
         query.errors().set("");
 
-        GrpcRequest request = new GrpcRequest(backendConnection -> {
+        GrpcRequest request = new GrpcRequest(engineConnection -> {
             StreamObserver<QueryProtos.QueryResponse> responseObserver = new StreamObserver<>() {
                 @Override
                 public void onNext(QueryProtos.QueryResponse value) {
@@ -49,13 +49,13 @@ public class QueryHandler {
                 @Override
                 public void onError(Throwable t) {
                     handleQueryBackendError(t, query);
-                    backendDriver.setConnectionAsAvailable(backendConnection);
+                    backendDriver.setConnectionAsAvailable(engineConnection);
                 }
 
                 @Override
                 public void onCompleted() {
-                    // Release backend connection
-                    backendDriver.setConnectionAsAvailable(backendConnection);
+                    // Release engine connection
+                    backendDriver.setConnectionAsAvailable(engineConnection);
                 }
             };
 
@@ -63,9 +63,9 @@ public class QueryHandler {
                     .setId(0)
                     .setQuery(query.getType().getQueryName() + ": " + query.getQuery());
 
-            backendConnection.getStub().withDeadlineAfter(backendDriver.getResponseDeadline(), TimeUnit.MILLISECONDS)
+            engineConnection.getStub().withDeadlineAfter(backendDriver.getResponseDeadline(), TimeUnit.MILLISECONDS)
                     .sendQuery(queryBuilder.build(), responseObserver);
-        }, query.getBackend());
+        }, query.getEngine());
 
         backendDriver.addRequestToExecutionQueue(request);
     }
@@ -103,7 +103,7 @@ public class QueryHandler {
 
         if ("DEADLINE_EXCEEDED".equals(errorType)) {
             query.setQueryState(QueryState.ERROR);
-            query.getFailureConsumer().accept(new BackendException.QueryErrorException("The backend did not answer the request in time"));
+            query.getFailureConsumer().accept(new BackendException.QueryErrorException("The engine did not answer the request in time"));
         } else {
             try {
                 query.setQueryState(QueryState.ERROR);

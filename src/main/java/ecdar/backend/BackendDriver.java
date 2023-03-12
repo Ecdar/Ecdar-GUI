@@ -5,7 +5,7 @@ import EcdarProtoBuf.EcdarBackendGrpc;
 import EcdarProtoBuf.QueryProtos;
 import com.google.protobuf.Empty;
 import ecdar.Ecdar;
-import ecdar.abstractions.BackendInstance;
+import ecdar.abstractions.Engine;
 import ecdar.abstractions.Component;
 import io.grpc.*;
 import io.grpc.stub.StreamObserver;
@@ -16,14 +16,16 @@ import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class BackendDriver {
     private final int responseDeadline = 20000;
     private final int rerunRequestDelay = 200;
     private final int numberOfRetriesPerQuery = 5;
 
-    private final List<BackendConnection> startedBackendConnections = new ArrayList<>();
-    private final Map<BackendInstance, BlockingQueue<BackendConnection>> availableBackendConnections = new HashMap<>();
+    private final List<EngineConnection> startedEngineConnections = new ArrayList<>();
+    private final Map<Engine, BlockingQueue<EngineConnection>> availableEngineConnections = new HashMap<>();
     private final BlockingQueue<GrpcRequest> requestQueue = new ArrayBlockingQueue<>(200);
 
     public BackendDriver() {
@@ -38,7 +40,7 @@ public class BackendDriver {
     }
 
     /**
-     * Add a GrpcRequest to the request queue to be executed when a backend is available
+     * Add a GrpcRequest to the request queue to be executed when an engine is available
      *
      * @param request The GrpcRequest to be executed later
      */
@@ -46,44 +48,43 @@ public class BackendDriver {
         requestQueue.add(request);
     }
 
-    public void setConnectionAsAvailable(BackendConnection backendConnection) {
-        var relatedQueue = this.availableBackendConnections.get(backendConnection.getBackendInstance());
-        if (!relatedQueue.contains(backendConnection)) relatedQueue.add(backendConnection);
+    public void setConnectionAsAvailable(EngineConnection engineConnection) {
+        var relatedQueue = this.availableEngineConnections.get(engineConnection.getEngine());
+        if (!relatedQueue.contains(engineConnection)) relatedQueue.add(engineConnection);
     }
 
     /**
-     * Close all open backend connection and kill all locally running processes
+     * Close all open engine connection and kill all locally running processes
      *
      * @throws IOException if any of the sockets do not respond
      */
-    public void closeAllBackendConnections() throws IOException {
-        availableBackendConnections.clear();
-        for (BackendConnection bc : startedBackendConnections) bc.close();
+    public void closeAllEngineConnections() throws IOException {
+        for (EngineConnection ec : startedEngineConnections) ec.close();
     }
 
     /**
-     * Filters the list of open {@link BackendConnection}s to the specified {@link BackendInstance} and returns the
+     * Filters the list of open {@link EngineConnection}s to the specified {@link Engine} and returns the
      * first match or attempts to start a new connection if none is found.
      *
-     * @param backend backend instance to get a connection to (e.g. Reveaal, j-Ecdar, custom_engine)
-     * @return a BackendConnection object linked to the backend, either from the open backend connection list
+     * @param engine engine to get a connection to (e.g. Reveaal, j-Ecdar, custom_engine)
+     * @return a EngineConnection object linked to the engine, either from the open engine connection list
      * or a newly started connection.
-     * @throws BackendException.NoAvailableBackendConnectionException if unable to retrieve a connection to the backend
-     *                                                                and unable to start a new one
+     * @throws BackendException.NoAvailableEngineConnectionException if unable to retrieve a connection to the engine
+     *                                                               and unable to start a new one
      */
-    private BackendConnection getBackendConnection(BackendInstance backend) throws BackendException.NoAvailableBackendConnectionException {
-        BackendConnection connection;
+    private EngineConnection getEngineConnection(Engine engine) throws BackendException.NoAvailableEngineConnectionException {
+        EngineConnection connection;
         try {
-            if (!availableBackendConnections.containsKey(backend))
-                availableBackendConnections.put(backend, new ArrayBlockingQueue<>(backend.getNumberOfInstances() + 1));
+            if (!availableEngineConnections.containsKey(engine))
+                availableEngineConnections.put(engine, new ArrayBlockingQueue<>(engine.getNumberOfInstances() + 1));
 
             // If no open connection is free, attempt to start a new one
-            if (availableBackendConnections.get(backend).size() < 1) {
-                tryStartNewBackendConnection(backend);
+            if (availableEngineConnections.get(engine).size() < 1) {
+                tryStartNewEngineConnection(engine);
             }
 
             // Block until a connection becomes available
-            connection = availableBackendConnections.get(backend).take();
+            connection = availableEngineConnections.get(engine).take();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -92,54 +93,54 @@ public class BackendDriver {
     }
 
     /**
-     * Attempts to start a new connection to the specified backend. On success, the backend is added to the associated
+     * Attempts to start a new connection to the specified engine. On success, the engine is added to the associated
      * queue, otherwise, nothing happens.
      *
-     * @param backend the target backend for the connection
+     * @param engine the target engine for the connection
      */
-    private void tryStartNewBackendConnection(BackendInstance backend) {
+    private void tryStartNewEngineConnection(Engine engine) {
         Process p = null;
-        String hostAddress = (backend.isLocal() ? "127.0.0.1" : backend.getBackendLocation());
+        String hostAddress = (engine.isLocal() ? "127.0.0.1" : engine.getEngineLocation());
         long portNumber = 0;
 
-        if (backend.isLocal()) {
+        if (engine.isLocal()) {
             try {
-                portNumber = SocketUtils.findAvailableTcpPort(backend.getPortStart(), backend.getPortEnd());
+                portNumber = SocketUtils.findAvailableTcpPort(engine.getPortStart(), engine.getPortEnd());
             } catch (IllegalStateException e) {
                 // No port was available in range, we assume that connections are running on all ports
                 return;
             }
 
             do {
-                ProcessBuilder pb = new ProcessBuilder(backend.getBackendLocation(), "-p", hostAddress + ":" + portNumber);
+                ProcessBuilder pb = new ProcessBuilder(engine.getEngineLocation(), "-p", hostAddress + ":" + portNumber);
 
                 try {
                     p = pb.start();
                 } catch (IOException ioException) {
-                    Ecdar.showToast("Unable to start local backend instance");
+                    Ecdar.showToast("Unable to start local engine instance");
                     ioException.printStackTrace();
                     return;
                 }
                 // If the process is not alive, it failed while starting up, try again
             } while (!p.isAlive());
         } else {
-            // Filter open connections to this backend and map their used ports to an int stream
-            var activeEnginePorts = startedBackendConnections.stream()
-                    .mapToInt((bi) -> Integer.parseInt(bi.getStub().getChannel().authority().split(":", 2)[1]));
+            // Filter open connections to this engine and map their used ports to an int stream
+            // and use supplier to reuse the stream for each check
+            Supplier<Stream<Integer>> activeEnginePortsStream = () -> startedEngineConnections.stream()
+                    .filter(ec -> ec.getEngine().equals(engine))
+                    .mapToInt(EngineConnection::getPort).boxed();
 
-            int currentPort = backend.getPortStart();
-            do {
-                // Find port not already connected to
-                int tempPortNumber = currentPort;
-                if (activeEnginePorts.noneMatch((i) -> i == tempPortNumber)) {
-                    portNumber = tempPortNumber;
-                } else {
-                    currentPort++;
+            int currentPort = engine.getPortStart();
+            for (int port = engine.getPortStart(); port <= engine.getPortEnd(); port++) {
+                int tempPort = port;
+                if (activeEnginePortsStream.get().noneMatch((i) -> i == tempPort)) {
+                    currentPort = port;
+                    break;
                 }
-            } while (portNumber == 0 && currentPort <= backend.getPortEnd());
+            }
 
-            if (currentPort > backend.getPortEnd()) {
-                Ecdar.showToast("Unable to connect to remote engine: " + backend.getName() + " within port range " + backend.getPortStart() + " - " + backend.getPortEnd());
+            if (currentPort > engine.getPortEnd()) {
+                Ecdar.showToast("Could not create a new connection to '" + engine.getName() + ". All ports in range " + engine.getPortStart() + " - " + engine.getPortEnd() + " are already in use.");
                 return;
             }
         }
@@ -150,8 +151,8 @@ public class BackendDriver {
                 .build();
 
         EcdarBackendGrpc.EcdarBackendStub stub = EcdarBackendGrpc.newStub(channel);
-        BackendConnection newConnection = new BackendConnection(backend, p, stub, channel);
-        startedBackendConnections.add(newConnection);
+        EngineConnection newConnection = new EngineConnection(engine, p, stub, channel);
+        startedEngineConnections.add(newConnection);
 
         QueryProtos.ComponentsUpdateRequest.Builder componentsBuilder = QueryProtos.ComponentsUpdateRequest.newBuilder();
         for (Component c : Ecdar.getProject().getComponents()) {
@@ -186,8 +187,8 @@ public class BackendDriver {
 
                     try {
                         request.tries++;
-                        request.execute(getBackendConnection(request.getBackend()));
-                    } catch (BackendException.NoAvailableBackendConnectionException e) {
+                        request.execute(getEngineConnection(request.getEngine()));
+                    } catch (BackendException.NoAvailableEngineConnectionException e) {
                         e.printStackTrace();
                         if (request.tries < numberOfRetriesPerQuery) {
                             new Timer().schedule(new TimerTask() {

@@ -3,7 +3,6 @@ package ecdar.abstractions;
 import ecdar.Ecdar;
 import ecdar.backend.*;
 import ecdar.controllers.EcdarController;
-import ecdar.utility.helpers.StringValidator;
 import ecdar.utility.serialize.Serializable;
 import com.google.gson.JsonObject;
 import javafx.application.Platform;
@@ -15,7 +14,7 @@ public class Query implements Serializable {
     private static final String QUERY = "query";
     private static final String COMMENT = "comment";
     private static final String IS_PERIODIC = "isPeriodic";
-    private static final String BACKEND = "backend";
+    private static final String ENGINE = "engine";
 
     private final StringProperty query = new SimpleStringProperty("");
     private final StringProperty comment = new SimpleStringProperty("");
@@ -23,7 +22,7 @@ public class Query implements Serializable {
     private final SimpleBooleanProperty isPeriodic = new SimpleBooleanProperty(false);
     private final ObjectProperty<QueryState> queryState = new SimpleObjectProperty<>(QueryState.UNKNOWN);
     private final ObjectProperty<QueryType> type = new SimpleObjectProperty<>();
-    private BackendInstance backend;
+    private Engine engine;
 
 
     private final Consumer<Boolean> successConsumer = (aBoolean) -> {
@@ -61,7 +60,7 @@ public class Query implements Serializable {
         this.query.set(query);
         this.comment.set(comment);
         this.queryState.set(queryState);
-        setBackend(BackendHelper.getDefaultBackendInstance());
+        setEngine(BackendHelper.getDefaultEngine());
     }
 
     public Query(final JsonObject jsonElement) {
@@ -118,12 +117,12 @@ public class Query implements Serializable {
         this.isPeriodic.set(isPeriodic);
     }
 
-    public BackendInstance getBackend() {
-        return backend;
+    public Engine getEngine() {
+        return engine;
     }
 
-    public void setBackend(BackendInstance backend) {
-        this.backend = backend;
+    public void setEngine(Engine engine) {
+        this.engine = engine;
     }
 
     public void setType(QueryType type) {
@@ -153,7 +152,7 @@ public class Query implements Serializable {
         result.addProperty(QUERY, getType().getQueryName() + ": " + getQuery());
         result.addProperty(COMMENT, getComment());
         result.addProperty(IS_PERIODIC, isPeriodic());
-        result.addProperty(BACKEND, backend.getName());
+        result.addProperty(ENGINE, engine.getName());
 
         return result;
     }
@@ -176,10 +175,10 @@ public class Query implements Serializable {
             setIsPeriodic(json.getAsJsonPrimitive(IS_PERIODIC).getAsBoolean());
         }
 
-        if(json.has(BACKEND)) {
-            setBackend(BackendHelper.getBackendInstanceByName(json.getAsJsonPrimitive(BACKEND).getAsString()));
+        if(json.has(ENGINE)) {
+            setEngine(BackendHelper.getEngineByName(json.getAsJsonPrimitive(ENGINE).getAsString()));
         } else {
-            setBackend(BackendHelper.getDefaultBackendInstance());
+            setEngine(BackendHelper.getDefaultEngine());
         }
     }
 

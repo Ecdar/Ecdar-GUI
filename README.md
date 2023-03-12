@@ -17,7 +17,7 @@ This project is a hard fork of https://github.com/ulriknyman/H-Uppaal.
 This section covers what dependencies are currently needed by the GUI.
 
 ### JVM
-As with all Java applications, a working JVM is required to run the project. 
+As with all Java applications, a working JVM is required to run the project.
 
 You will need Java version 11 containing JavaFX. We suggest downloading Azul's Java 11 from https://www.azul.com/downloads/?version=java-11-lts&package=jdk-fx, as this is the version used by the main development team.
 
@@ -53,7 +53,7 @@ After having retrieved the code and acquired all the dependencies mentioned in [
 
 <a id="engine_configuration"></a>
 ## Engine Configuration
-In order to utilize the model-checking capabilities of the system, at least one engine must be configured. 
+In order to utilize the model-checking capabilities of the system, at least one engine must be configured.
 The distributions available at [ECDAR](https://github.com/Ecdar/ECDAR) will automatically load the default engines on startup, but this is currently not working when running the GUI through Gradle.
 For the same reason, the `Reset Engines` button will clear the engines but will not be able to load the packaged once.
 
@@ -61,7 +61,7 @@ An engine can be added through the configurator found under `Options > Engines O
 
 <img src="presentation/EngineConfiguration.png" alt="Engine Configuration Pop-up">
 
-> :information_source: If you accidentally removed or changed an engine, these changes can be reverted be pressing `Cancel` or by clicking outside the pop-up. Consequently, if any changes should be saved, **MAKE SURE TO PRESS `Save`** 
+> :information_source: If you accidentally removed or changed an engine, these changes can be reverted be pressing `Cancel` or by clicking outside the pop-up. Consequently, if any changes should be saved, **MAKE SURE TO PRESS `Save`**
 
 ### Address
 The _Address_ is either the address of a server running the engine (for remote execution) or a path to a local engine binary (for this, the _Local_ checkbox must be checked).
@@ -75,7 +75,7 @@ If an engine is marked with _Default_, all added queries will be assigned that e
 
 
 ## Exemplary Projects
-To get started and get an idea of what the system can be used for, multiple examples can be found in the `examples` directory. 
+To get started and get an idea of what the system can be used for, multiple examples can be found in the `examples` directory.
 These projects include preconfigured models and queries to execute against them.
 
 For the theoretical background and what the tool can be used for, please check out the latest research links at [here](https://ulrik.blog.aau.dk/ecdar/).
@@ -93,7 +93,7 @@ Pull requests are continuously being reviewed and merged. In order to ease this 
 
 Additionally, please add `Closes #{ISSUE_ID}` if the pull request is linked to a specific issue. If a PR addresses multiple pull requests, please add `Closes #{ISSUE_ID}` for each one.
 
-A CI workflow is executed against all pull requests and must succeed before the pull request can be merged, so please make sure that you check the workflow status and potential error messages. 
+A CI workflow is executed against all pull requests and must succeed before the pull request can be merged, so please make sure that you check the workflow status and potential error messages.
 
 ### Tests
 All non-UI tests are executed as part of the CI workflow and hence must succeed before merging. The tests are written with JUnit and relevant tests should be added when new code is added. If you are new to JUnit, you can check out syntax and structure [here](https://junit.org/junit5/docs/current/user-guide/).
@@ -103,7 +103,7 @@ The test suite can be executed locally by running:
 ./gradlew test
 ```
 
-> :information_source: Currently, the codebase has high coupling, which has made testing difficult and the test suite very small. 
+> :information_source: Currently, the codebase has high coupling, which has made testing difficult and the test suite very small.
 
 #### UI Tests
 For features that are highly coupled with the interface, a second test suite has been added under `src/test/java/ecdar/ui`. These tests are excluded from the `test` task are can be executed by running:
@@ -154,4 +154,4 @@ Besides the packages mentioned above, some larger functionalities are located in
 - `code_analysis`: Responsible for analysing the elements of the current project and construct messages if errors or warnings are encountered.
 - `issues`: Classes for representing `Errors`, `Issues`, and `Warnings`.
 - `model_canvas.arrow_heads`: Arrowheads used in the UI to visualize the direction of edges.
-
+- `mutation [Deprecrated]`: Functionality for supporting mutation testing of components. **This feature is currently not implemented in the engines and is therefor currently not supported**.  

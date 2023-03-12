@@ -2,7 +2,7 @@ package ecdar.controllers;
 
 import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXRippler;
-import ecdar.abstractions.BackendInstance;
+import ecdar.abstractions.Engine;
 import ecdar.abstractions.Query;
 import ecdar.abstractions.QueryType;
 import ecdar.backend.BackendHelper;
@@ -23,7 +23,7 @@ public class QueryController implements Initializable {
     public JFXRippler actionButton;
     public JFXRippler queryTypeExpand;
     public Text queryTypeSymbol;
-    public JFXComboBox<BackendInstance> backendsDropdown;
+    public JFXComboBox<Engine> enginesDropdown;
     private Query query;
     private final Map<QueryType, SimpleBooleanProperty> queryTypeListElementsSelectedState = new HashMap<>();
     private final Tooltip noQueryTypeSetTooltip = new Tooltip("Please select a query type beneath the status icon");
@@ -51,29 +51,29 @@ public class QueryController implements Initializable {
             }
         }));
 
-        if (BackendHelper.getBackendInstances().contains(query.getBackend())) {
-            backendsDropdown.setValue(query.getBackend());
+        if (BackendHelper.getEngines().contains(query.getEngine())) {
+            enginesDropdown.setValue(query.getEngine());
         } else {
-            backendsDropdown.setValue(BackendHelper.getDefaultBackendInstance());
+            enginesDropdown.setValue(BackendHelper.getDefaultEngine());
         }
 
-        backendsDropdown.valueProperty().addListener((observable, oldValue, newValue) -> {
+        enginesDropdown.valueProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
-                query.setBackend(newValue);
+                query.setEngine(newValue);
             } else {
-                backendsDropdown.setValue(BackendHelper.getDefaultBackendInstance());
+                enginesDropdown.setValue(BackendHelper.getDefaultEngine());
             }
         });
 
-        BackendHelper.addBackendInstanceListener(() -> {
+        BackendHelper.addEngineInstanceListener(() -> {
             Platform.runLater(() -> {
                 // The value must be set before the items (https://stackoverflow.com/a/29483445)
-                if (BackendHelper.getBackendInstances().contains(query.getBackend())) {
-                    backendsDropdown.setValue(query.getBackend());
+                if (BackendHelper.getEngines().contains(query.getEngine())) {
+                    enginesDropdown.setValue(query.getEngine());
                 } else {
-                    backendsDropdown.setValue(BackendHelper.getDefaultBackendInstance());
+                    enginesDropdown.setValue(BackendHelper.getDefaultEngine());
                 }
-                backendsDropdown.setItems(BackendHelper.getBackendInstances());
+                enginesDropdown.setItems(BackendHelper.getEngines());
             });
         });
     }
