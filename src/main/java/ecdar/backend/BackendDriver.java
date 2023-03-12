@@ -116,9 +116,9 @@ public class BackendDriver {
         EngineConnection newConnection;
 
         if (engine.isLocal()) {
-            newConnection = startEngineProcess(engine);
+            newConnection = startAndGetConnectionToEngineProcess(engine);
         } else {
-            newConnection = startConnectionToRemoteEngine(engine);
+            newConnection = startAndGetConnectionToRemoteEngine(engine);
         }
 
         // If the connection is null, no new connection was started
@@ -153,12 +153,12 @@ public class BackendDriver {
     }
 
     /**
-     * Start a process, create an EngineConnection to it, and return connection
+     * Starts a process, creates an EngineConnection to it, and returns that connection
      *
      * @param engine to run in the process
      * @return an EngineConnection to a local engine running in a Process or null if all ports are already in use
      */
-    private EngineConnection startEngineProcess(final Engine engine) {
+    private EngineConnection startAndGetConnectionToEngineProcess(final Engine engine) {
         long port;
         try {
             port = SocketUtils.findAvailableTcpPort(engine.getPortStart(), engine.getPortEnd());
@@ -190,12 +190,12 @@ public class BackendDriver {
     }
 
     /**
-     * Get a port from the specified port range that is not already connected to
+     * Creates and returns an EngineConnection to the remote engine
      *
      * @param engine to connect to
      * @return an EngineConnection to a remote engine or null if all ports are already connected to
      */
-    private EngineConnection startConnectionToRemoteEngine(Engine engine) {
+    private EngineConnection startAndGetConnectionToRemoteEngine(Engine engine) {
         // Get a stream of ports already used for connections
         Supplier<Stream<Integer>> activeEnginePortsStream = () -> startedEngineConnections.stream()
                 .mapToInt(EngineConnection::getPort).boxed();
