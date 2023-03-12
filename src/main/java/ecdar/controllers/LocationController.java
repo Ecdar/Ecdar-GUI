@@ -191,7 +191,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
         dropDownMenu.addClickableListElement("Is " + getLocation().getId() + " reachable?", event -> {
             dropDownMenu.hide();
-            // Generate the query from the backend
+            // Generate the query from the engine
             final String reachabilityQuery = BackendHelper.getLocationReachableQuery(getLocation(), getComponent());
 
             // Add proper comment
