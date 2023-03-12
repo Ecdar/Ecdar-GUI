@@ -76,7 +76,7 @@ public class Engine implements Serializable {
     }
 
     public int getNumberOfInstances() {
-        return this.portEnd - this.portStart;
+        return this.portEnd - this.portStart + 1;
     }
 
     public void lockInstance() {

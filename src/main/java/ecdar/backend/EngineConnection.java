@@ -11,12 +11,14 @@ public class EngineConnection {
     private final EcdarBackendGrpc.EcdarBackendStub stub;
     private final ManagedChannel channel;
     private final Engine engine;
+    private final int port;
 
     EngineConnection(Engine engine, Process process, EcdarBackendGrpc.EcdarBackendStub stub, ManagedChannel channel) {
         this.process = process;
         this.engine = engine;
         this.stub = stub;
         this.channel = channel;
+        this.port = Integer.parseInt(getStub().getChannel().authority().split(":", 2)[1]);
     }
 
     /**
@@ -40,7 +42,7 @@ public class EngineConnection {
     }
 
     public int getPort() {
-        return Integer.parseInt(getStub().getChannel().authority().split(":", 2)[1]);
+        return port;
     }
 
     /**
