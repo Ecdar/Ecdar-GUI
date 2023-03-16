@@ -244,8 +244,7 @@ public class BackendDriver {
         for (EngineConnection ec : startedEngineConnections) {
             try {
                 ec.close();
-
-                // If connection is not available,
+                
                 availableEngineConnections.get(ec.getEngine()).remove(ec);
                 terminatedConnections.add(ec);
             } catch (BackendException.gRpcChannelShutdownException |
