@@ -13,6 +13,6 @@ public class QueryTest {
         Query q = new Query("refinement: (Administration || Machine || Researcher) <= Spec", "", QueryState.UNKNOWN, e);
         q.execute();
 
-        verify(e, times(1)).enqueueRequest(eq(q), any(), any());
+        verify(e, times(1)).enqueueQuery(eq(q), any(), any());
     }
 }

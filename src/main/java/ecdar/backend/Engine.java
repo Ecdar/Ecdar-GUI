@@ -125,7 +125,7 @@ public class Engine implements Serializable {
      *
      * ToDo NIELS: Update
      */
-    public void enqueueRequest(Query query, Consumer<QueryProtos.QueryResponse> successConsumer, Consumer<Throwable> errorConsumer) {
+    public void enqueueQuery(Query query, Consumer<QueryProtos.QueryResponse> successConsumer, Consumer<Throwable> errorConsumer) {
         GrpcRequest request = new GrpcRequest(engineConnection -> {
             StreamObserver<QueryProtos.QueryResponse> responseObserver = new StreamObserver<>() {
                 @Override
@@ -172,7 +172,7 @@ public class Engine implements Serializable {
     public void clear() throws BackendException {
         BackendHelper.stopQueries();
         requestQueue.clear();
-        closeAllEngineConnections();
+        closeConnections();
     }
 
     /**
@@ -184,12 +184,12 @@ public class Engine implements Serializable {
      * @throws BackendException.NoAvailableEngineConnectionException if unable to retrieve a connection to the engine
      *                                                               and unable to start a new one
      */
-    private EngineConnection getEngineConnection() throws BackendException.NoAvailableEngineConnectionException {
+    private EngineConnection getConnection() throws BackendException.NoAvailableEngineConnectionException {
         EngineConnection connection;
         try {
             // If no open connection is free, attempt to start a new one
             if (availableConnections.size() < 1) {
-                tryStartNewEngineConnection();
+                tryStartNewConnection();
             }
 
             // Blocks until a connection becomes available
@@ -205,13 +205,13 @@ public class Engine implements Serializable {
      * Attempts to start a new connection to the specified engine. On success, the engine is added to the associated
      * queue, otherwise, nothing happens.
      */
-    private void tryStartNewEngineConnection() {
+    private void tryStartNewConnection() {
         EngineConnection newConnection;
 
         if (isLocal()) {
-            newConnection = startAndGetConnectionToEngineProcess();
+            newConnection = startLocalConnection();
         } else {
-            newConnection = startAndGetConnectionToRemoteEngine();
+            newConnection = startRemoteConnection();
         }
 
         // If the connection is null, no new connection was started
@@ -255,7 +255,7 @@ public class Engine implements Serializable {
      *
      * @return an EngineConnection to a local engine running in a Process or null if all ports are already in use
      */
-    private EngineConnection startAndGetConnectionToEngineProcess() {
+    private EngineConnection startLocalConnection() {
         long port;
         try {
             port = SocketUtils.findAvailableTcpPort(getPortStart(), getPortEnd());
@@ -291,7 +291,7 @@ public class Engine implements Serializable {
      *
      * @return an EngineConnection to a remote engine or null if all ports are already connected to
      */
-    private EngineConnection startAndGetConnectionToRemoteEngine() {
+    private EngineConnection startRemoteConnection() {
         // Get a stream of ports already used for connections
         Supplier<Stream<Integer>> activeEnginePortsStream = () -> startedConnections.stream()
                 .mapToInt(EngineConnection::getPort).boxed();
@@ -327,47 +327,6 @@ public class Engine implements Serializable {
                 .usePlaintext()
                 .keepAliveTime(1000, TimeUnit.MILLISECONDS)
                 .build();
-    }
-
-    /**
-     * Close all open engine connection and kill all locally running processes
-     *
-     * @throws BackendException if one or more connections throw an exception on {@link EngineConnection#close()}
-     *                          (use getSuppressed() to see all thrown exceptions)
-     */
-    private void closeAllEngineConnections() throws BackendException {
-        // Create a list for storing all terminated connection
-        List<CompletableFuture<EngineConnection>> closeFutures = new ArrayList<>();
-        BackendException exceptions = new BackendException("Exceptions were thrown while attempting to close engine connections");
-
-        // Attempt to close all connections
-        for (EngineConnection ec : startedConnections) {
-            CompletableFuture<EngineConnection> closeFuture = CompletableFuture.supplyAsync(() -> {
-                try {
-                    ec.close();
-                } catch (BackendException.gRpcChannelShutdownException |
-                         BackendException.EngineProcessDestructionException e) {
-                    throw new RuntimeException(e);
-                }
-
-                return ec;
-            });
-
-            closeFutures.add(closeFuture);
-        }
-
-        for (CompletableFuture<EngineConnection> closeFuture : closeFutures) {
-            try {
-                EngineConnection ec = closeFuture.get();
-
-                availableConnections.remove(ec);
-                startedConnections.remove(ec);
-            } catch (InterruptedException | ExecutionException e) {
-                exceptions.addSuppressed(e.getCause());
-            }
-        }
-
-        if (!startedConnections.isEmpty()) throw exceptions;
     }
 
     /**
@@ -420,7 +379,7 @@ public class Engine implements Serializable {
 
                     try {
                         request.tries++;
-                        request.execute(getEngineConnection());
+                        request.execute(getConnection());
                     } catch (BackendException.NoAvailableEngineConnectionException e) {
                         e.printStackTrace();
                         if (request.tries < numberOfRetriesPerQuery) {

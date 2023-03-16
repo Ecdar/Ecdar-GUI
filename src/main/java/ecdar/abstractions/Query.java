@@ -171,7 +171,7 @@ public class Query implements Serializable {
         setQueryState(QueryState.RUNNING);
         errors().set("");
 
-        getEngine().enqueueRequest(this, this::handleQueryResponse, this::handleQueryBackendError);
+        getEngine().enqueueQuery(this, this::handleQueryResponse, this::handleQueryBackendError);
     }
 
     private void handleQueryResponse(QueryProtos.QueryResponse value) {
