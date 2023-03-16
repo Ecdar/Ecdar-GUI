@@ -299,23 +299,27 @@ public class Ecdar extends Application {
         }));
 
         stage.setOnCloseRequest(event -> {
+            int status = 0;
             try {
-                backendDriver.reset();
+                backendDriver.clear();
             } catch (BackendException e) {
-                // ToDO NIELS: Handle exceptions from resetting backend
+                // -1 indicates that an exception was thrown
+                status = -1;
+                // ToDO NIELS: Add logging
             }
 
             Platform.exit();
-            System.exit(0);
+            System.exit(status);
         });
 
         BackendHelper.addEngineInstanceListener(() -> {
             // When the engines change, reset the backendDriver
             // to prevent dangling connections and queries
             try {
-                backendDriver.reset();
+                backendDriver.clear();
             } catch (BackendException e) {
-                // ToDO NIELS: Handle exceptions from resetting backend
+                showToast("An exception was encountered during shutdown of engine connections");
+                // ToDO NIELS: Add logging
             }
         });
 

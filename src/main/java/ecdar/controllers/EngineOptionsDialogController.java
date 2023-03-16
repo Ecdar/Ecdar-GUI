@@ -73,9 +73,9 @@ public class EngineOptionsDialogController implements Initializable {
 
             // Close all engine connections to avoid dangling engine connections when port range is changed
             try {
-                Ecdar.getBackendDriver().reset();
+                Ecdar.getBackendDriver().clear();
             } catch (BackendException e) {
-                // ToDO NIELS: Handle exceptions from resetting backend
+                // ToDO NIELS: Handle exceptions from clearing backend
             }
 
             BackendHelper.updateEngineInstances(engines);

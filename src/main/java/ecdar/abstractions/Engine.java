@@ -16,7 +16,7 @@ public class Engine implements Serializable {
     private String name;
     private boolean isLocal;
     private boolean isDefault;
-    private String engineLocation;
+    private String engineLocation; // ToDo NIELS: Refactor into an enum of local path an remote IP
     private int portStart;
     private int portEnd;
     private SimpleBooleanProperty locked = new SimpleBooleanProperty(false);

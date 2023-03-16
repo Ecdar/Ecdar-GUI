@@ -13,11 +13,11 @@ import org.springframework.util.SocketUtils;
 
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+
+import static java.util.concurrent.CompletableFuture.runAsync;
 
 public class BackendDriver {
     private final int responseDeadline = 20000;
@@ -59,9 +59,9 @@ public class BackendDriver {
     }
 
     /**
-     * Close all engine connections and stop all queries
+     * Clears all queued queries, stops all active engines, and closes all open engine connections
      */
-    public void reset() throws BackendException {
+    public void clear() throws BackendException {
         BackendHelper.stopQueries();
         requestQueue.clear();
         closeAllEngineConnections();
@@ -233,28 +233,40 @@ public class BackendDriver {
      * Close all open engine connection and kill all locally running processes
      *
      * @throws BackendException if one or more connections throw an exception on {@link EngineConnection#close()}
-     * (use getSuppressed() to see all thrown exceptions)
+     *                          (use getSuppressed() to see all thrown exceptions)
      */
     private void closeAllEngineConnections() throws BackendException {
         // Create a list for storing all terminated connection
-        ArrayList<EngineConnection> terminatedConnections = new ArrayList<>();
+        List<CompletableFuture<EngineConnection>> closeFutures = new ArrayList<>();
         BackendException exceptions = new BackendException("Exceptions were thrown while attempting to close engine connections");
 
         // Attempt to close all connections
         for (EngineConnection ec : startedEngineConnections) {
+            CompletableFuture<EngineConnection> closeFuture = CompletableFuture.supplyAsync(() -> {
+                try {
+                    ec.close();
+                } catch (BackendException.gRpcChannelShutdownException |
+                         BackendException.EngineProcessDestructionException e) {
+                    throw new RuntimeException(e);
+                }
+
+                return ec;
+            });
+
+            closeFutures.add(closeFuture);
+        }
+
+        for (CompletableFuture<EngineConnection> closeFuture : closeFutures) {
             try {
-                ec.close();
-                
+                EngineConnection ec = closeFuture.get();
+
                 availableEngineConnections.get(ec.getEngine()).remove(ec);
-                terminatedConnections.add(ec);
-            } catch (BackendException.gRpcChannelShutdownException |
-                     BackendException.EngineProcessDestructionException e) {
-                exceptions.addSuppressed(e);
+                startedEngineConnections.remove(ec);
+            } catch (InterruptedException | ExecutionException e) {
+                exceptions.addSuppressed(e.getCause());
             }
         }
 
-        // Remove all successfully terminated connections
-        startedEngineConnections.removeAll(terminatedConnections);
         if (!startedEngineConnections.isEmpty()) throw exceptions;
     }
 

@@ -65,19 +65,20 @@ public class EngineConnection {
                     channel.shutdownNow(); // Forcefully close the connection
                 }
             } catch (InterruptedException e) {
-                throw new BackendException.gRpcChannelShutdownException("The gRPC channel to \"" + this.engine.getName() + "\" instance running at: " + this.engine.getEngineLocation() + ":" + this.port + "was interrupted during termination", e.getCause());
+                // Engine location is either the file path or the IP, here we want the channel address
+                throw new BackendException.gRpcChannelShutdownException("The gRPC channel to \"" + this.engine.getName() + "\" instance running at: " + (this.engine.isLocal() ? "127.0.0.1" : this.engine.getEngineLocation()) + ":" + this.port + "was interrupted during termination", e.getCause());
             }
         }
 
         // If the engine is remote, there will not be a process
         if (process != null) {
-            java.util.concurrent.CompletableFuture<Process> terminated = process.onExit();
-            process.destroy();
             try {
+                java.util.concurrent.CompletableFuture<Process> terminated = process.onExit();
+                process.destroy();
                 terminated.get(45, TimeUnit.SECONDS);
             } catch (ExecutionException | InterruptedException | TimeoutException e) {
                 // Add the engine location to the exception, as it contains the path to the executable
-                throw new BackendException.EngineProcessDestructionException("A process running: " + this.engine.getEngineLocation() + " threw an exception during shutdown", e.getCause());
+                throw new BackendException.EngineProcessDestructionException("A process running: " + this.engine.getEngineLocation() + " on port " + this.port + " threw an exception during shutdown", e.getCause());
             }
         }
     }
