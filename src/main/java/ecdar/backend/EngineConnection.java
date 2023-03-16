@@ -4,7 +4,9 @@ import EcdarProtoBuf.EcdarBackendGrpc;
 import ecdar.abstractions.Engine;
 import io.grpc.ManagedChannel;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class EngineConnection {
     private final Engine engine;
@@ -13,16 +15,16 @@ public class EngineConnection {
     private final Process process;
     private final int port;
 
-    EngineConnection(Engine engine, ManagedChannel channel, EcdarBackendGrpc.EcdarBackendStub stub) {
-        this(engine, channel, stub, null);
-    }
-
     EngineConnection(Engine engine, ManagedChannel channel, EcdarBackendGrpc.EcdarBackendStub stub, Process process) {
         this.engine = engine;
         this.stub = stub;
         this.channel = channel;
         this.process = process;
         this.port = Integer.parseInt(getStub().getChannel().authority().split(":", 2)[1]);
+    }
+
+    EngineConnection(Engine engine, ManagedChannel channel, EcdarBackendGrpc.EcdarBackendStub stub) {
+        this(engine, channel, stub, null);
     }
 
     /**
@@ -51,22 +53,32 @@ public class EngineConnection {
 
     /**
      * Close the gRPC connection and end the process
+     *
+     * @throws BackendException.gRpcChannelShutdownException      if an InterruptedException is encountered while trying to shut down the gRPC channel.
+     * @throws BackendException.EngineProcessDestructionException if the connected engine process throws an ExecutionException, an InterruptedException, or a TimeoutException.
      */
-    public void close() {
+    public void close() throws BackendException.gRpcChannelShutdownException, BackendException.EngineProcessDestructionException {
         if (!channel.isShutdown()) {
             try {
                 channel.shutdown();
                 if (!channel.awaitTermination(45, TimeUnit.SECONDS)) {
                     channel.shutdownNow(); // Forcefully close the connection
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (InterruptedException e) {
+                throw new BackendException.gRpcChannelShutdownException("The gRPC channel to \"" + this.engine.getName() + "\" instance running at: " + this.engine.getEngineLocation() + ":" + this.port + "was interrupted during termination", e.getCause());
             }
         }
 
         // If the engine is remote, there will not be a process
         if (process != null) {
+            java.util.concurrent.CompletableFuture<Process> terminated = process.onExit();
             process.destroy();
+            try {
+                terminated.get(45, TimeUnit.SECONDS);
+            } catch (ExecutionException | InterruptedException | TimeoutException e) {
+                // Add the engine location to the exception, as it contains the path to the executable
+                throw new BackendException.EngineProcessDestructionException("A process running: " + this.engine.getEngineLocation() + " threw an exception during shutdown", e.getCause());
+            }
         }
     }
 }

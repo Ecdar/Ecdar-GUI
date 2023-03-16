@@ -2,6 +2,7 @@ package ecdar;
 
 import ecdar.abstractions.*;
 import ecdar.backend.BackendDriver;
+import ecdar.backend.BackendException;
 import ecdar.backend.BackendHelper;
 import ecdar.backend.QueryHandler;
 import ecdar.code_analysis.CodeAnalysis;
@@ -298,8 +299,11 @@ public class Ecdar extends Application {
         }));
 
         stage.setOnCloseRequest(event -> {
-            BackendHelper.stopQueries();
-            backendDriver.closeAllEngineConnections();
+            try {
+                backendDriver.reset();
+            } catch (BackendException e) {
+                // ToDO NIELS: Handle exceptions from resetting backend
+            }
 
             Platform.exit();
             System.exit(0);
@@ -308,7 +312,11 @@ public class Ecdar extends Application {
         BackendHelper.addEngineInstanceListener(() -> {
             // When the engines change, reset the backendDriver
             // to prevent dangling connections and queries
-            backendDriver.reset();
+            try {
+                backendDriver.reset();
+            } catch (BackendException e) {
+                // ToDO NIELS: Handle exceptions from resetting backend
+            }
         });
 
         project = presentation.getController().projectPane.getController().project;

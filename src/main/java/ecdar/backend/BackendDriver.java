@@ -25,7 +25,7 @@ public class BackendDriver {
     private final int numberOfRetriesPerQuery = 5;
     private final int maxRetriesForStartingEngineProcess = 3;
 
-    private final List<EngineConnection> startedEngineConnections = new ArrayList<>();
+    private final ArrayList<EngineConnection> startedEngineConnections = new ArrayList<>();
     private final Map<Engine, BlockingQueue<EngineConnection>> availableEngineConnections = new HashMap<>();
     private final BlockingQueue<GrpcRequest> requestQueue = new ArrayBlockingQueue<>(200);
 
@@ -59,21 +59,12 @@ public class BackendDriver {
     }
 
     /**
-     * Close all open engine connection and kill all locally running processes
-     */
-    public void closeAllEngineConnections() {
-        for (EngineConnection ec : startedEngineConnections) ec.close();
-        startedEngineConnections.clear();
-        availableEngineConnections.clear();
-    }
-
-    /**
      * Close all engine connections and stop all queries
      */
-    public void reset() {
-        closeAllEngineConnections();
+    public void reset() throws BackendException {
         BackendHelper.stopQueries();
         requestQueue.clear();
+        closeAllEngineConnections();
     }
 
     /**
@@ -138,7 +129,12 @@ public class BackendDriver {
 
             @Override
             public void onError(Throwable t) {
-                newConnection.close();
+                try {
+                    newConnection.close();
+                } catch (BackendException.gRpcChannelShutdownException |
+                         BackendException.EngineProcessDestructionException e) {
+                    Ecdar.showToast("An error occurred while trying to start new connection to: \"" + engine.getName() + "\" and an exception was thrown while trying to remove gRPC channel and potential process");
+                }
                 startedEngineConnections.remove(newConnection);
             }
 
@@ -231,6 +227,36 @@ public class BackendDriver {
                 .usePlaintext()
                 .keepAliveTime(1000, TimeUnit.MILLISECONDS)
                 .build();
+    }
+
+    /**
+     * Close all open engine connection and kill all locally running processes
+     *
+     * @throws BackendException if one or more connections throw an exception on {@link EngineConnection#close()}
+     * (use getSuppressed() to see all thrown exceptions)
+     */
+    private void closeAllEngineConnections() throws BackendException {
+        // Create a list for storing all terminated connection
+        ArrayList<EngineConnection> terminatedConnections = new ArrayList<>();
+        BackendException exceptions = new BackendException("Exceptions were thrown while attempting to close engine connections");
+
+        // Attempt to close all connections
+        for (EngineConnection ec : startedEngineConnections) {
+            try {
+                ec.close();
+
+                // If connection is not available,
+                availableEngineConnections.get(ec.getEngine()).remove(ec);
+                terminatedConnections.add(ec);
+            } catch (BackendException.gRpcChannelShutdownException |
+                     BackendException.EngineProcessDestructionException e) {
+                exceptions.addSuppressed(e);
+            }
+        }
+
+        // Remove all successfully terminated connections
+        startedEngineConnections.removeAll(terminatedConnections);
+        if (!startedEngineConnections.isEmpty()) throw exceptions;
     }
 
     private class GrpcRequestConsumer implements Runnable {

@@ -21,11 +21,11 @@ public class Engine implements Serializable {
     private int portEnd;
     private SimpleBooleanProperty locked = new SimpleBooleanProperty(false);
 
-    public Engine() {};
+    public Engine() {}
 
     public Engine(final JsonObject jsonObject) {
         deserialize(jsonObject);
-    };
+    }
 
     public String getName() {
         return name;
