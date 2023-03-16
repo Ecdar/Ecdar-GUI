@@ -1,7 +1,6 @@
 package ecdar.backend;
 
 import EcdarProtoBuf.EcdarBackendGrpc;
-import ecdar.abstractions.Engine;
 import io.grpc.ManagedChannel;
 
 import java.util.concurrent.ExecutionException;

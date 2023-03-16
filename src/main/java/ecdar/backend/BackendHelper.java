@@ -57,6 +57,26 @@ public final class BackendHelper {
     }
 
     /**
+     * Clears all queued queries, stops all active engines, and closes all open engine connections
+     */
+    public static void clearEngineConnections() throws BackendException {
+        BackendHelper.stopQueries();
+
+        BackendException exception = new BackendException("Exceptions were thrown while attempting to close engine connections");
+        for (Engine engine : engines) {
+            try {
+                engine.closeConnections();
+            } catch (BackendException e) {
+                exception.addSuppressed(e);
+            }
+        }
+
+        if (exception.getSuppressed().length > 0) {
+            throw exception;
+        }
+    }
+
+    /**
      * Stop all running queries.
      */
     public static void stopQueries() {
@@ -120,6 +140,7 @@ public final class BackendHelper {
      */
     public static void updateEngineInstances(ArrayList<Engine> updatedEngines) {
         BackendHelper.engines = FXCollections.observableList(updatedEngines);
+        // ToDo NIELS: Close channels not within the updated port range for changed engines
         for (Runnable runnable : BackendHelper.enginesUpdatedListeners) {
             runnable.run();
         }

@@ -1,10 +1,8 @@
 package ecdar;
 
 import ecdar.abstractions.*;
-import ecdar.backend.BackendDriver;
 import ecdar.backend.BackendException;
 import ecdar.backend.BackendHelper;
-import ecdar.backend.QueryHandler;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.controllers.EcdarController;
 import ecdar.presentations.*;
@@ -51,8 +49,6 @@ public class Ecdar extends Application {
     private static BooleanProperty isUICached = new SimpleBooleanProperty();
     public static BooleanProperty shouldRunBackgroundQueries = new SimpleBooleanProperty(true);
     private static final BooleanProperty isSplit = new SimpleBooleanProperty(false);
-    private static BackendDriver backendDriver = new BackendDriver();
-    private static QueryHandler queryHandler = new QueryHandler(backendDriver);
     private Stage debugStage;
 
     /**
@@ -180,20 +176,6 @@ public class Ecdar extends Application {
         isSplit.set(!isSplit.get());
     }
 
-    /**
-     * Returns the backend driver used to execute queries and handle simulation
-     *
-     * @return BackendDriver
-     */
-    public static BackendDriver getBackendDriver() {
-        return backendDriver;
-    }
-
-    public static QueryHandler getQueryExecutor() {
-        return queryHandler;
-
-    }
-
     public static double getDpiScale() {
         if (!autoScalingEnabled.getValue())
             return 1;
@@ -301,7 +283,7 @@ public class Ecdar extends Application {
         stage.setOnCloseRequest(event -> {
             int status = 0;
             try {
-                backendDriver.clear();
+                BackendHelper.clearEngineConnections();
             } catch (BackendException e) {
                 // -1 indicates that an exception was thrown
                 status = -1;
@@ -313,10 +295,10 @@ public class Ecdar extends Application {
         });
 
         BackendHelper.addEngineInstanceListener(() -> {
-            // When the engines change, reset the backendDriver
+            // When the engines change, clear the backendDriver
             // to prevent dangling connections and queries
             try {
-                backendDriver.clear();
+                BackendHelper.clearEngineConnections();
             } catch (BackendException e) {
                 showToast("An exception was encountered during shutdown of engine connections");
                 // ToDO NIELS: Add logging

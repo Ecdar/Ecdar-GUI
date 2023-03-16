@@ -6,6 +6,7 @@ import ecdar.Debug;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
 import ecdar.backend.BackendHelper;
+import ecdar.backend.Engine;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.mutation.MutationTestPlanPresentation;
 import ecdar.mutation.models.MutationTestPlan;
@@ -425,7 +426,7 @@ public class EcdarController implements Initializable {
                 if (!Ecdar.shouldRunBackgroundQueries.get()) return;
 
                 Ecdar.getProject().getQueries().forEach(query -> {
-                    if (query.isPeriodic()) Ecdar.getQueryExecutor().executeQuery(query);
+                    if (query.isPeriodic()) query.execute();
                 });
 
                 // List of threads to start
@@ -443,9 +444,9 @@ public class EcdarController implements Initializable {
                             Query reachabilityQuery = new Query(locationReachableQuery, "", QueryState.UNKNOWN);
                             reachabilityQuery.setType(QueryType.REACHABILITY);
 
-                            Ecdar.getQueryExecutor().executeQuery(reachabilityQuery);
+                            reachabilityQuery.execute();
 
-                            final Thread verifyThread = new Thread(() -> Ecdar.getQueryExecutor().executeQuery(reachabilityQuery));
+                            final Thread verifyThread = new Thread(reachabilityQuery::execute);
 
                             verifyThread.setName(locationReachableQuery + " (" + verifyThread.getName() + ")");
                             Debug.addThread(verifyThread);

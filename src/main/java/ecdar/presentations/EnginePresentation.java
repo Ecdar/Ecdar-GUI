@@ -2,7 +2,7 @@ package ecdar.presentations;
 
 import com.jfoenix.controls.JFXRippler;
 import ecdar.Ecdar;
-import ecdar.abstractions.Engine;
+import ecdar.backend.Engine;
 import ecdar.controllers.EngineInstanceController;
 import ecdar.utility.colors.Color;
 import javafx.application.Platform;
