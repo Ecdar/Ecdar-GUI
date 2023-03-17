@@ -73,9 +73,9 @@ public class EngineOptionsDialogController implements Initializable {
 
             // Close all engine connections to avoid dangling engine connections when port range is changed
             try {
-                BackendHelper.clearEngineConnections(); // ToDO NIELS: Only clear affected engines/connections
+                BackendHelper.clearEngineConnections();
             } catch (BackendException e) {
-                // ToDO NIELS: Handle exceptions from clearing backend
+                e.printStackTrace();
             }
 
             BackendHelper.updateEngineInstances(engines);

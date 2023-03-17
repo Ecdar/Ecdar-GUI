@@ -287,7 +287,6 @@ public class Ecdar extends Application {
             } catch (BackendException e) {
                 // -1 indicates that an exception was thrown
                 status = -1;
-                // ToDO NIELS: Add logging
             }
 
             Platform.exit();
@@ -301,7 +300,6 @@ public class Ecdar extends Application {
                 BackendHelper.clearEngineConnections();
             } catch (BackendException e) {
                 showToast("An exception was encountered during shutdown of engine connections");
-                // ToDO NIELS: Add logging
             }
         });
 
