@@ -1,7 +1,6 @@
 package ecdar.backend;
 
 import EcdarProtoBuf.ComponentProtos;
-import EcdarProtoBuf.EcdarBackendGrpc;
 import EcdarProtoBuf.QueryProtos;
 import com.google.gson.JsonObject;
 import com.google.protobuf.Empty;
@@ -9,18 +8,12 @@ import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Query;
 import ecdar.utility.serialize.Serializable;
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import javafx.beans.property.SimpleBooleanProperty;
-import org.springframework.util.SocketUtils;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 public class Engine implements Serializable {
     private static final String NAME = "name";
@@ -33,7 +26,6 @@ public class Engine implements Serializable {
     private final int responseDeadline = 20000;
     private final int rerunRequestDelay = 200;
     private final int numberOfRetriesPerQuery = 5;
-    private final int maxRetriesForStartingEngineProcess = 3;
 
     private String name;
     private boolean isLocal;
@@ -50,6 +42,7 @@ public class Engine implements Serializable {
     private final BlockingQueue<GrpcRequest> requestQueue = new ArrayBlockingQueue<>(200); // Magic number
     // ToDo NIELS: Refactor to resize queue on port range change
     private final BlockingQueue<EngineConnection> availableConnections = new ArrayBlockingQueue<>(200); // Magic number
+    private final EngineConnectionStarter connectionStarter = new EngineConnectionStarter(this);
 
     public Engine() {
         GrpcRequestConsumer consumer = new GrpcRequestConsumer();
@@ -130,6 +123,10 @@ public class Engine implements Serializable {
         return locked;
     }
 
+    public ArrayList<EngineConnection> getStartedConnections() {
+        return startedConnections;
+    }
+
     /**
      * Enqueue query for execution with consumers for success and error
      *
@@ -201,7 +198,12 @@ public class Engine implements Serializable {
         try {
             // If no open connection is free, attempt to start a new one
             if (availableConnections.size() < 1) {
-                tryStartNewConnection();
+                EngineConnection newConnection = this.connectionStarter.tryStartNewConnection();
+
+                if (newConnection != null) {
+                    startedConnections.add(newConnection);
+                    initializeConnection(newConnection);
+                }
             }
 
             // Blocks until a connection becomes available
@@ -214,23 +216,10 @@ public class Engine implements Serializable {
     }
 
     /**
-     * Attempts to start a new connection to the specified engine. On success, the engine is added to the associated
-     * queue, otherwise, nothing happens.
+     * Executes the gRPC requests required to initialize the connection for query execution
+     * NOTE: This will be unnecessary with the SW5 changes for the ProtoBuf
      */
-    private void tryStartNewConnection() {
-        EngineConnection newConnection;
-
-        if (isLocal()) {
-            newConnection = startLocalConnection();
-        } else {
-            newConnection = startRemoteConnection();
-        }
-
-        // If the connection is null, no new connection was started
-        if (newConnection == null) return;
-
-        startedConnections.add(newConnection);
-
+    private void initializeConnection(EngineConnection connection) {
         QueryProtos.ComponentsUpdateRequest.Builder componentsBuilder = QueryProtos.ComponentsUpdateRequest.newBuilder();
         for (Component c : Ecdar.getProject().getComponents()) {
             componentsBuilder.addComponents(ComponentProtos.Component.newBuilder().setJson(c.serialize().toString()).build());
@@ -244,101 +233,22 @@ public class Engine implements Serializable {
             @Override
             public void onError(Throwable t) {
                 try {
-                    newConnection.close();
+                    connection.close();
                 } catch (BackendException.gRpcChannelShutdownException |
                          BackendException.EngineProcessDestructionException e) {
                     Ecdar.showToast("An error occurred while trying to start new connection to: \"" + getName() + "\" and an exception was thrown while trying to remove gRPC channel and potential process");
                 }
-                startedConnections.remove(newConnection);
+                startedConnections.remove(connection);
             }
 
             @Override
             public void onCompleted() {
-                if (startedConnections.contains(newConnection)) setConnectionAsAvailable(newConnection);
+                if (startedConnections.contains(connection)) setConnectionAsAvailable(connection);
             }
         };
 
-        newConnection.getStub().withDeadlineAfter(responseDeadline, TimeUnit.MILLISECONDS)
+        connection.getStub().withDeadlineAfter(responseDeadline, TimeUnit.MILLISECONDS)
                 .updateComponents(componentsBuilder.build(), observer);
-    }
-
-    /**
-     * Starts a process, creates an EngineConnection to it, and returns that connection
-     *
-     * @return an EngineConnection to a local engine running in a Process or null if all ports are already in use
-     */
-    private EngineConnection startLocalConnection() {
-        long port;
-        try {
-            port = SocketUtils.findAvailableTcpPort(getPortStart(), getPortEnd());
-        } catch (IllegalStateException e) {
-            // All ports specified for engine are already used for running engines
-            return null;
-        }
-
-        // Start local process of engine
-        Process p;
-        int attempts = 0;
-
-        do {
-            attempts++;
-            ProcessBuilder pb = new ProcessBuilder(getEngineLocation(), "-p", getIpAddress() + ":" + port);
-
-            try {
-                p = pb.start();
-            } catch (IOException ioException) {
-                Ecdar.showToast("Unable to start local engine instance");
-                ioException.printStackTrace(); // ToDo NIELS: Logging
-                return null;
-            }
-        } while (!p.isAlive() && attempts < maxRetriesForStartingEngineProcess);
-
-        ManagedChannel channel = startGrpcChannel(getIpAddress(), port);
-        EcdarBackendGrpc.EcdarBackendStub stub = EcdarBackendGrpc.newStub(channel);
-        return new EngineConnection(this, channel, stub, p);
-    }
-
-    /**
-     * Creates and returns an EngineConnection to the remote engine
-     *
-     * @return an EngineConnection to a remote engine or null if all ports are already connected to
-     */
-    private EngineConnection startRemoteConnection() {
-        // Get a stream of ports already used for connections
-        Supplier<Stream<Integer>> activeEnginePortsStream = () -> startedConnections.stream()
-                .mapToInt(EngineConnection::getPort).boxed();
-
-        long port = getPortStart();
-        for (int currentPort = getPortStart(); currentPort <= getPortEnd(); currentPort++) {
-            final int tempPort = currentPort;
-            if (activeEnginePortsStream.get().anyMatch((i) -> i == tempPort)) {
-                port = currentPort;
-                break;
-            }
-        }
-
-        if (port > getPortEnd()) {
-            // All ports specified for engine are already used for connections
-            return null;
-        }
-
-        ManagedChannel channel = startGrpcChannel(getIpAddress(), port);
-        EcdarBackendGrpc.EcdarBackendStub stub = EcdarBackendGrpc.newStub(channel);
-        return new EngineConnection(this, channel, stub);
-    }
-
-    /**
-     * Connects a gRPC channel to the address at the specified port, expecting that an engine is running there
-     *
-     * @param address of the target engine
-     * @param port    of the target engine at the address
-     * @return the created gRPC channel
-     */
-    private ManagedChannel startGrpcChannel(final String address, final long port) {
-        return ManagedChannelBuilder.forTarget(address + ":" + port)
-                .usePlaintext()
-                .keepAliveTime(1000, TimeUnit.MILLISECONDS)
-                .build();
     }
 
     /**
