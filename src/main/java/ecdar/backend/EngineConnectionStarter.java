@@ -64,7 +64,7 @@ public class EngineConnectionStarter {
                 p = pb.start();
             } catch (IOException ioException) {
                 Ecdar.showToast("Unable to start local engine instance");
-                ioException.printStackTrace(); // ToDo NIELS: Logging
+                ioException.printStackTrace();
                 return null;
             }
         } while (!p.isAlive() && attempts < maxRetriesForStartingEngineProcess);

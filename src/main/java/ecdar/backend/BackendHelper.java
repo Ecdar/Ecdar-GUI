@@ -140,7 +140,6 @@ public final class BackendHelper {
      */
     public static void updateEngineInstances(ArrayList<Engine> updatedEngines) {
         BackendHelper.engines = FXCollections.observableList(updatedEngines);
-        // ToDo NIELS: Close channels not within the updated port range for changed engines
         for (Runnable runnable : BackendHelper.enginesUpdatedListeners) {
             runnable.run();
         }
