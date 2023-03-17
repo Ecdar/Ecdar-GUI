@@ -65,7 +65,7 @@ public class EngineConnection {
                 }
             } catch (InterruptedException e) {
                 // Engine location is either the file path or the IP, here we want the channel address
-                throw new BackendException.gRpcChannelShutdownException("The gRPC channel to \"" + this.engine.getName() + "\" instance running at: " + (this.engine.isLocal() ? "127.0.0.1" : this.engine.getEngineLocation()) + ":" + this.port + "was interrupted during termination", e.getCause());
+                throw new BackendException.gRpcChannelShutdownException("The gRPC channel to \"" + this.engine.getName() + "\" instance running at: " + engine.getIpAddress() + ":" + this.port + "was interrupted during termination", e.getCause());
             }
         }
 

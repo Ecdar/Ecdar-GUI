@@ -38,14 +38,16 @@ public class Engine implements Serializable {
     private String name;
     private boolean isLocal;
     private boolean isDefault;
-    private String engineLocation; // ToDo NIELS: Refactor into an enum of local path an remote IP
     private int portStart;
     private int portEnd;
     private SimpleBooleanProperty locked = new SimpleBooleanProperty(false);
+    /**
+     * This is either a path to the engines executable or an IP address at which the engine is running
+     */
+    private String engineLocation;
 
     private final ArrayList<EngineConnection> startedConnections = new ArrayList<>();
     private final BlockingQueue<GrpcRequest> requestQueue = new ArrayBlockingQueue<>(200); // Magic number
-
     // ToDo NIELS: Refactor to resize queue on port range change
     private final BlockingQueue<EngineConnection> availableConnections = new ArrayBlockingQueue<>(200); // Magic number
 
@@ -92,6 +94,14 @@ public class Engine implements Serializable {
         this.engineLocation = engineLocation;
     }
 
+    public String getIpAddress() {
+        if (isLocal()) {
+            return "127.0.0.1";
+        } else {
+            return getEngineLocation();
+        }
+    }
+
     public int getPortStart() {
         return portStart;
     }
@@ -121,9 +131,11 @@ public class Engine implements Serializable {
     }
 
     /**
-     * Add a GrpcRequest to the request queue to be executed when an engine is available
+     * Enqueue query for execution with consumers for success and error
      *
-     * ToDo NIELS: Update
+     * @param query the query to enqueue for execution
+     * @param successConsumer consumer for returned QueryResponse
+     * @param errorConsumer consumer for any throwable that might result from the execution
      */
     public void enqueueQuery(Query query, Consumer<QueryProtos.QueryResponse> successConsumer, Consumer<Throwable> errorConsumer) {
         GrpcRequest request = new GrpcRequest(engineConnection -> {
@@ -270,7 +282,7 @@ public class Engine implements Serializable {
 
         do {
             attempts++;
-            ProcessBuilder pb = new ProcessBuilder(getEngineLocation(), "-p", "127.0.0.1:" + port);
+            ProcessBuilder pb = new ProcessBuilder(getEngineLocation(), "-p", getIpAddress() + ":" + port);
 
             try {
                 p = pb.start();
@@ -281,7 +293,7 @@ public class Engine implements Serializable {
             }
         } while (!p.isAlive() && attempts < maxRetriesForStartingEngineProcess);
 
-        ManagedChannel channel = startGrpcChannel("127.0.0.1", port);
+        ManagedChannel channel = startGrpcChannel(getIpAddress(), port);
         EcdarBackendGrpc.EcdarBackendStub stub = EcdarBackendGrpc.newStub(channel);
         return new EngineConnection(this, channel, stub, p);
     }
@@ -310,7 +322,7 @@ public class Engine implements Serializable {
             return null;
         }
 
-        ManagedChannel channel = startGrpcChannel(getEngineLocation(), port);
+        ManagedChannel channel = startGrpcChannel(getIpAddress(), port);
         EcdarBackendGrpc.EcdarBackendStub stub = EcdarBackendGrpc.newStub(channel);
         return new EngineConnection(this, channel, stub);
     }

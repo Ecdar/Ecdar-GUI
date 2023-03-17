@@ -98,7 +98,7 @@ public class EngineInstanceController implements Initializable {
         if (isLocal.isSelected()) {
             this.pathToEngine.setText(instance.getEngineLocation());
         } else {
-            this.address.setText(instance.getEngineLocation());
+            this.address.setText(instance.getIpAddress());
         }
 
         this.portRangeStart.setText(String.valueOf(instance.getPortStart()));
