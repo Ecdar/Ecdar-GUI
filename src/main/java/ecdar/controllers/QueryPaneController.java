@@ -3,7 +3,6 @@ package ecdar.controllers;
 import ecdar.Ecdar;
 import ecdar.abstractions.Query;
 import ecdar.abstractions.QueryState;
-import ecdar.backend.BackendDriver;
 import ecdar.backend.BackendHelper;
 import ecdar.presentations.QueryPresentation;
 import com.jfoenix.controls.JFXRippler;
@@ -39,7 +38,6 @@ public class QueryPaneController implements Initializable {
     public JFXRippler addButton;
 
     private final Map<Query, QueryPresentation> queryPresentationMap = new HashMap<>();
-    private BackendDriver backendDriver;
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
@@ -52,14 +50,14 @@ public class QueryPaneController implements Initializable {
                     }
 
                     for (final Query newQuery : change.getAddedSubList()) {
-                        final QueryPresentation newQueryPresentation = new QueryPresentation(newQuery, this.backendDriver);
+                        final QueryPresentation newQueryPresentation = new QueryPresentation(newQuery);
                         queryPresentationMap.put(newQuery, newQueryPresentation);
                         queriesList.getChildren().add(newQueryPresentation);
                     }
                 }
             });
             for (final Query newQuery : Ecdar.getProject().getQueries()) {
-                queriesList.getChildren().add(new QueryPresentation(newQuery, this.backendDriver));
+                queriesList.getChildren().add(new QueryPresentation(newQuery));
             }
         });
 
@@ -68,12 +66,9 @@ public class QueryPaneController implements Initializable {
         initializeBackground();
         initializeResizeAnchor();
 
-        BackendHelper.addBackendInstanceListener(() -> {
-            // When the backend instances change, reset the backendDriver and
-            // cancel all queries to prevent dangling connections and queries
-            this.stopAllQueries();
-            backendDriver.reset();
-        });
+        // When the backend instances change, reset the backendDriver and
+        // cancel all queries to prevent dangling connections and queries
+        BackendHelper.addEngineInstanceListener(this::stopAllQueries);
     }
 
     private void initializeResizeAnchor() {
@@ -157,10 +152,6 @@ public class QueryPaneController implements Initializable {
                 CornerRadii.EMPTY,
                 new BorderWidths(0, 1, bottomInsetWidth, 0)
         )));
-    }
-    
-    public void setBackendDriver(BackendDriver backendDriver) {
-        this.backendDriver = backendDriver;
     }
 
     public void stopAllQueries() {

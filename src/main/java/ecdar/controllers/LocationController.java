@@ -192,7 +192,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
 
         dropDownMenu.addClickableListElement("Is " + getLocation().getId() + " reachable?", event -> {
             dropDownMenu.hide();
-            // Generate the query from the backend
+            // Generate the query from the engine
             final String reachabilityQuery = BackendHelper.getLocationReachableQuery(getLocation(), getComponent());
 
             // Add proper comment
@@ -202,13 +202,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
             final Query query = new Query(reachabilityQuery, reachabilityComment, QueryState.UNKNOWN);
             query.setType(QueryType.REACHABILITY);
             Ecdar.getProject().getQueries().add(query);
-
-            // Find query and execute ToDo NIELS: Refactor
-            Platform.runLater(() -> {
-                var presentation = Ecdar.getPresentation().getController().queryPane.getController().queriesList.getChildren().stream().filter(c -> ((QueryPresentation) c).getController().getQuery().equals(query)).findFirst().get();
-                ((QueryPresentation) presentation).getController().runQuery();
-            });
-
+            query.execute();
             dropDownMenu.hide();
         });
 

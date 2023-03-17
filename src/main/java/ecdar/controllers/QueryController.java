@@ -2,13 +2,13 @@ package ecdar.controllers;
 
 import com.jfoenix.controls.*;
 import ecdar.Ecdar;
-import ecdar.abstractions.BackendInstance;
+import com.jfoenix.controls.JFXComboBox;
+import com.jfoenix.controls.JFXRippler;
+import ecdar.backend.Engine;
 import ecdar.abstractions.Query;
 import ecdar.abstractions.QueryState;
 import ecdar.abstractions.QueryType;
-import ecdar.backend.BackendDriver;
 import ecdar.backend.BackendHelper;
-import ecdar.backend.QueryHandler;
 import ecdar.presentations.DropDownMenu;
 import ecdar.presentations.InformationDialogPresentation;
 import ecdar.presentations.MenuElement;
@@ -53,13 +53,12 @@ public class QueryController implements Initializable {
     public FontIcon actionButtonIcon;
     public JFXRippler detailsButton;
     public FontIcon detailsButtonIcon;
-    public JFXComboBox<BackendInstance> backendsDropdown;
+    public JFXComboBox<Engine> enginesDropdown;
 
     private final Tooltip tooltip = new Tooltip();
     private Query query;
     private final Map<QueryType, SimpleBooleanProperty> queryTypeListElementsSelectedState = new HashMap<>();
     private final Tooltip noQueryTypeSetTooltip = new Tooltip("Please select a query type beneath the status icon");
-    private QueryHandler queryHandler;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -73,11 +72,11 @@ public class QueryController implements Initializable {
     }
 
     private void initializeBackendsDropdown() {
-        backendsDropdown.setItems(BackendHelper.getBackendInstances());
+        enginesDropdown.setItems(BackendHelper.getEngines());
         Tooltip backendDropdownTooltip = new Tooltip();
         backendDropdownTooltip.setText("Current backend used for the query");
-        JFXTooltip.install(backendsDropdown, backendDropdownTooltip);
-        backendsDropdown.setValue(BackendHelper.getDefaultBackendInstance());
+        JFXTooltip.install(enginesDropdown, backendDropdownTooltip);
+        enginesDropdown.setValue(BackendHelper.getDefaultEngine());
     }
 
     private void initializeTextFields() {
@@ -297,7 +296,7 @@ public class QueryController implements Initializable {
         });
     }
 
-    public void setQuery(final Query query, final BackendDriver backendDriver) {
+    public void setQuery(final Query query) {
         this.query = query;
         this.query.getTypeProperty().addListener(((observable, oldValue, newValue) -> {
             if(newValue != null) {
@@ -315,31 +314,31 @@ public class QueryController implements Initializable {
             }
         }));
 
-        if (BackendHelper.getBackendInstances().contains(query.getBackend())) {
-            backendsDropdown.setValue(query.getBackend());
+        if (BackendHelper.getEngines().contains(query.getEngine())) {
+            enginesDropdown.setValue(query.getEngine());
         } else {
-            backendsDropdown.setValue(BackendHelper.getDefaultBackendInstance());
+            enginesDropdown.setValue(BackendHelper.getDefaultEngine());
         }
 
-        backendsDropdown.valueProperty().addListener((observable, oldValue, newValue) -> {
+        enginesDropdown.valueProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
-                query.setBackend(newValue);
+                query.setEngine(newValue);
             } else {
-                backendsDropdown.setValue(BackendHelper.getDefaultBackendInstance());
+                enginesDropdown.setValue(BackendHelper.getDefaultEngine());
             }
         });
 
-        BackendHelper.addBackendInstanceListener(() -> Platform.runLater(() -> {
-            // The value must be set before the items (https://stackoverflow.com/a/29483445)
-            if (BackendHelper.getBackendInstances().contains(query.getBackend())) {
-                backendsDropdown.setValue(query.getBackend());
-            } else {
-                backendsDropdown.setValue(BackendHelper.getDefaultBackendInstance());
-            }
-            backendsDropdown.setItems(BackendHelper.getBackendInstances());
-        }));
-
-        this.queryHandler = new QueryHandler(backendDriver);
+        BackendHelper.addEngineInstanceListener(() -> {
+            Platform.runLater(() -> {
+                // The value must be set before the items (https://stackoverflow.com/a/29483445)
+                if (BackendHelper.getEngines().contains(query.getEngine())) {
+                    enginesDropdown.setValue(query.getEngine());
+                } else {
+                    enginesDropdown.setValue(BackendHelper.getDefaultEngine());
+                }
+                enginesDropdown.setItems(BackendHelper.getEngines());
+            });
+        });
     }
 
     public Query getQuery() {
@@ -379,7 +378,7 @@ public class QueryController implements Initializable {
     }
 
     public void runQuery() {
-        queryHandler.executeQuery(this.getQuery());
+        this.getQuery().execute();
     }
 
     public void cancelQuery() {

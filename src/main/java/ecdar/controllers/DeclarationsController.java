@@ -18,9 +18,9 @@ import java.util.ResourceBundle;
  * Controller for overall declarations.
  */
 public class DeclarationsController extends HighLevelModelController implements Initializable {
-    public StyleClassedTextArea textArea;
     public StackPane root;
     public BorderPane frame;
+    public StyleClassedTextArea textArea;
 
     private final ObjectProperty<Declarations> declarations;
 

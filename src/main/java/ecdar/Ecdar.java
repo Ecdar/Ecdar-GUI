@@ -1,6 +1,7 @@
 package ecdar;
 
 import ecdar.abstractions.*;
+import ecdar.backend.BackendException;
 import ecdar.backend.BackendHelper;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.controllers.EcdarController;
@@ -47,7 +48,7 @@ public class Ecdar extends Application {
     private static EcdarPresentation presentation;
     private static BooleanProperty isUICached = new SimpleBooleanProperty();
     public static BooleanProperty shouldRunBackgroundQueries = new SimpleBooleanProperty(true);
-    private static final BooleanProperty isSplit = new SimpleBooleanProperty(true); //Set to true to ensure correct behaviour at first toggle.
+    private static final BooleanProperty isSplit = new SimpleBooleanProperty(false);
     private Stage debugStage;
 
     /**
@@ -164,15 +165,15 @@ public class Ecdar extends Application {
         return presentation.toggleQueryPane();
     }
 
+    public static BooleanProperty isSplitProperty() {
+        return isSplit;
+    }
+
     /**
      * Toggles whether to canvas is split or single.
-     *
-     * @return the property specifying whether the canvas is split
      */
-    public static BooleanProperty toggleCanvasSplit() {
+    public static void toggleCanvasSplit() {
         isSplit.set(!isSplit.get());
-
-        return isSplit;
     }
 
     public static double getDpiScale() {
@@ -282,14 +283,27 @@ public class Ecdar extends Application {
         stage.setOnCloseRequest(event -> {
             presentation.getController().queryPane.getController().stopAllQueries();
 
+            int status = 0;
             try {
-                presentation.getController().getBackendDriver().closeAllBackendConnections();
-            } catch (IOException e) {
-                e.printStackTrace();
+                BackendHelper.clearEngineConnections();
+            } catch (BackendException e) {
+                // -1 indicates that an exception was thrown
+                status = -1;
             }
 
             Platform.exit();
-            System.exit(0);
+            System.exit(status);
+        });
+
+        BackendHelper.addEngineInstanceListener(() -> {
+            // When the engines change, clear the backendDriver
+            // to prevent dangling connections and queries
+            presentation.getController().queryPane.getController().stopAllQueries();
+            try {
+                BackendHelper.clearEngineConnections();
+            } catch (BackendException e) {
+                showToast("An exception was encountered during shutdown of engine connections");
+            }
         });
 
         project = presentation.getController().projectPane.getController().project;

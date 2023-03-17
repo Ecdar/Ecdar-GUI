@@ -5,9 +5,8 @@ import com.google.gson.JsonArray;
 import ecdar.Debug;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
-import ecdar.backend.BackendDriver;
 import ecdar.backend.BackendHelper;
-import ecdar.backend.QueryHandler;
+import ecdar.backend.Engine;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.mutation.MutationTestPlanPresentation;
 import ecdar.mutation.models.MutationTestPlan;
@@ -16,6 +15,7 @@ import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
 import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.SelectHelper;
+import ecdar.utility.helpers.ZoomHelper;
 import ecdar.utility.keyboard.Keybind;
 import ecdar.utility.keyboard.KeyboardTracker;
 import ecdar.utility.keyboard.NudgeDirection;
@@ -130,7 +130,7 @@ public class EcdarController implements Initializable {
     public MenuItem menuBarFileExportAsPngNoBorder;
     public MenuItem menuBarOptionsCache;
     public MenuItem menuBarOptionsBackgroundQueries;
-    public MenuItem menuBarOptionsBackendOptions;
+    public MenuItem menuBarOptionsEngineOptions;
     public MenuItem menuBarHelpHelp;
     public MenuItem menuBarHelpAbout;
     public MenuItem menuBarHelpTest;
@@ -146,16 +146,14 @@ public class EcdarController implements Initializable {
     public Text queryTextResult;
     public Text queryTextQuery;
 
-    public StackPane backendOptionsDialogContainer;
-    public BackendOptionsDialogPresentation backendOptionsDialog;
+    public StackPane engineOptionsDialogContainer;
+    public EngineOptionsDialogPresentation engineOptionsDialog;
     public final DoubleProperty scalingProperty = new SimpleDoubleProperty();
 
     private static JFXDialog _queryDialog;
     private static Text _queryTextResult;
     private static Text _queryTextQuery;
     private static final Text temporaryComponentWatermark = new Text("Temporary component");
-    private QueryHandler queryHandler;
-    private BackendDriver backendDriver;
 
     public static void runReachabilityAnalysis() {
         if (!reachabilityServiceEnabled) return;
@@ -179,9 +177,7 @@ public class EcdarController implements Initializable {
      * @param node The "root" to start the search from
      */
     public void scaleIcons(Node node) {
-        Platform.runLater(() -> {
             scaleIcons(node, getNewCalculatedScale());
-        });
     }
 
     private void scaleIcons(Node node, double size) {
@@ -200,6 +196,11 @@ public class EcdarController implements Initializable {
     }
 
     private double getNewCalculatedScale() {
+        // If the UI is not fully loaded, no toggle will be selected
+        if (scaling.getSelectedToggle() == null) {
+            return Ecdar.getDpiScale() * 13.0;
+        }
+
         return (Double.parseDouble(scaling.getSelectedToggle().getProperties().get("scale").toString()) * Ecdar.getDpiScale()) * 13.0;
     }
 
@@ -228,9 +229,7 @@ public class EcdarController implements Initializable {
     }
 
     private void initializeQueryPane() {
-        backendDriver = new BackendDriver();
-        queryHandler = new QueryHandler(backendDriver);
-        queryPane = new QueryPanePresentation(backendDriver);
+        queryPane = new QueryPanePresentation();
         rightPane.getChildren().add(queryPane);
     }
 
@@ -244,30 +243,30 @@ public class EcdarController implements Initializable {
         _queryTextQuery = queryTextQuery;
 
         initializeDialog(queryDialog, queryDialogContainer);
-        initializeDialog(backendOptionsDialog, backendOptionsDialogContainer);
+        initializeDialog(engineOptionsDialog, engineOptionsDialogContainer);
 
-        backendOptionsDialog.getController().resetBackendsButton.setOnMouseClicked(event -> {
-            backendOptionsDialog.getController().resetBackendsToDefault();
+        engineOptionsDialog.getController().resetEnginesButton.setOnMouseClicked(event -> {
+            engineOptionsDialog.getController().resetEnginesToDefault();
         });
 
-        backendOptionsDialog.getController().closeButton.setOnMouseClicked(event -> {
-            backendOptionsDialog.getController().cancelBackendOptionsChanges();
+        engineOptionsDialog.getController().closeButton.setOnMouseClicked(event -> {
+            engineOptionsDialog.getController().cancelEngineOptionsChanges();
             dialog.close();
-            backendOptionsDialog.close();
+            engineOptionsDialog.close();
         });
 
-        backendOptionsDialog.getController().saveButton.setOnMouseClicked(event -> {
-            if (backendOptionsDialog.getController().saveChangesToBackendOptions()) {
+        engineOptionsDialog.getController().saveButton.setOnMouseClicked(event -> {
+            if (engineOptionsDialog.getController().saveChangesToEngineOptions()) {
                 dialog.close();
-                backendOptionsDialog.close();
+                engineOptionsDialog.close();
             }
         });
 
-        if (BackendHelper.getBackendInstances().size() < 1) {
+        if (BackendHelper.getEngines().size() < 1) {
             Ecdar.showToast("No engines were found. Download j-Ecdar or Reveaal, or add another engine to fix this. No queries can be executed without engines.");
         } else {
-            BackendInstance defaultBackend = BackendHelper.getBackendInstances().stream().filter(BackendInstance::isDefault).findFirst().orElse(BackendHelper.getBackendInstances().get(0));
-            BackendHelper.setDefaultBackendInstance(defaultBackend);
+            Engine defaultBackend = BackendHelper.getEngines().stream().filter(Engine::isDefault).findFirst().orElse(BackendHelper.getEngines().get(0));
+            BackendHelper.setDefaultEngine(defaultBackend);
         }
     }
 
@@ -439,7 +438,7 @@ public class EcdarController implements Initializable {
                 if (!Ecdar.shouldRunBackgroundQueries.get()) return;
 
                 Ecdar.getProject().getQueries().forEach(query -> {
-                    if (query.isPeriodic()) queryHandler.executeQuery(query);
+                    if (query.isPeriodic()) query.execute();
                 });
 
                 // List of threads to start
@@ -456,10 +455,9 @@ public class EcdarController implements Initializable {
 
                             Query reachabilityQuery = new Query(locationReachableQuery, "", QueryState.UNKNOWN);
                             reachabilityQuery.setType(QueryType.REACHABILITY);
+                            reachabilityQuery.execute();
 
-                            queryHandler.executeQuery(reachabilityQuery);
-
-                            final Thread verifyThread = new Thread(() -> queryHandler.executeQuery(reachabilityQuery));
+                            final Thread verifyThread = new Thread(reachabilityQuery::execute);
 
                             verifyThread.setName(locationReachableQuery + " (" + verifyThread.getName() + ")");
                             Debug.addThread(verifyThread);
@@ -537,10 +535,21 @@ public class EcdarController implements Initializable {
         activeCanvasPresentation.get().setOpacity(0.75);
         newActiveCanvasPresentation.setOpacity(1);
         activeCanvasPresentation.set(newActiveCanvasPresentation);
+        rebindZoomShortcutBindings(newActiveCanvasPresentation.getController().zoomHelper);
+    }
+
+    /**
+     * Binds the zoom shortcuts to the provided zoom helper (consequently unbinds the previously bound zoom helper)
+     */
+    private static void rebindZoomShortcutBindings(ZoomHelper zoomHelper) {
+        KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_IN, new Keybind(new KeyCodeCombination(KeyCode.PLUS, KeyCombination.SHORTCUT_DOWN), zoomHelper::zoomIn));
+        KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_OUT, new Keybind(new KeyCodeCombination(KeyCode.MINUS, KeyCombination.SHORTCUT_DOWN), zoomHelper::zoomOut));
+        KeyboardTracker.registerKeybind(KeyboardTracker.ZOOM_TO_FIT, new Keybind(new KeyCodeCombination(KeyCode.EQUALS, KeyCombination.SHORTCUT_DOWN), zoomHelper::zoomToFit));
+        KeyboardTracker.registerKeybind(KeyboardTracker.RESET_ZOOM, new Keybind(new KeyCodeCombination(KeyCode.DIGIT0, KeyCombination.SHORTCUT_DOWN), zoomHelper::resetZoom));
     }
 
     public void setActiveModelPresentationForActiveCanvas(HighLevelModelPresentation newActiveModelPresentation) {
-        projectPane.getController().changeOneActiveModelPresentationForAnother(EcdarController.getActiveCanvasPresentation().getController().getActiveModelPresentation(), newActiveModelPresentation);
+        projectPane.getController().swapHighlightBetweenTwoModelFiles(EcdarController.getActiveCanvasPresentation().getController().getActiveModelPresentation(), newActiveModelPresentation);
         EcdarController.getActiveCanvasPresentation().getController().setActiveModelPresentation(newActiveModelPresentation);
     }
 
@@ -572,10 +581,10 @@ public class EcdarController implements Initializable {
             menuBarOptionsCache.getGraphic().opacityProperty().bind(new When(isCached).then(1).otherwise(0));
         });
 
-        menuBarOptionsBackendOptions.setOnAction(event -> {
-            backendOptionsDialogContainer.setVisible(true);
-            backendOptionsDialog.show(backendOptionsDialogContainer);
-            backendOptionsDialog.setMouseTransparent(false);
+        menuBarOptionsEngineOptions.setOnAction(event -> {
+            engineOptionsDialogContainer.setVisible(true);
+            engineOptionsDialog.show(engineOptionsDialogContainer);
+            engineOptionsDialog.setMouseTransparent(false);
         });
 
         menuBarOptionsBackgroundQueries.setOnAction(event -> {
@@ -657,13 +666,14 @@ public class EcdarController implements Initializable {
 
         menuBarViewCanvasSplit.getGraphic().setOpacity(1);
         menuBarViewCanvasSplit.setOnAction(event -> {
-            final BooleanProperty isSplit = Ecdar.toggleCanvasSplit();
-            if (isSplit.get()) {
-                Platform.runLater(this::setCanvasModeToSingular);
-                menuBarViewCanvasSplit.setText("Split canvas");
-            } else {
+            Ecdar.toggleCanvasSplit();
+        });
+
+        Ecdar.isSplitProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
                 Platform.runLater(this::setCanvasModeToSplit);
-                menuBarViewCanvasSplit.setText("Merge canvases");
+            } else {
+                Platform.runLater(this::setCanvasModeToSingular);
             }
         });
 
@@ -724,8 +734,7 @@ public class EcdarController implements Initializable {
             final File file = projectPicker.showDialog(root.getScene().getWindow());
             if (file != null) {
                 try {
-                    Ecdar.projectDirectory.set(file.getAbsolutePath());
-                    Ecdar.initializeProjectFolder();
+                    setProjectDirectory(file.getAbsolutePath());
                     UndoRedoStack.clear();
                     addProjectToRecentProjects(file.getAbsolutePath());
                 } catch (final IOException e) {
@@ -745,8 +754,7 @@ public class EcdarController implements Initializable {
 
             item.setOnAction(event -> {
                 try {
-                    Ecdar.projectDirectory.set(path);
-                    Ecdar.initializeProjectFolder();
+                    setProjectDirectory(path);
                 } catch (IOException ex) {
                     Ecdar.showToast("Unable to load project: \"" + path + "\"");
                 }
@@ -770,6 +778,12 @@ public class EcdarController implements Initializable {
         }
 
         menuBarFileRecentProjects.getItems().add(item);
+    }
+
+    private static void setProjectDirectory(String path) throws IOException {
+        Ecdar.projectDirectory.set(path);
+        Ecdar.initializeProjectFolder();
+        Ecdar.isSplitProperty().set(false);
     }
 
     /**
@@ -902,9 +916,11 @@ public class EcdarController implements Initializable {
 
         CodeAnalysis.clearErrorsAndWarnings();
 
-        Ecdar.projectDirectory.set(null);
-
-        projectPane.getController().resetProject();
+        try {
+            setProjectDirectory(null);
+        } catch (IOException ex) {
+            Ecdar.showToast("Unable to initialize new project directory");
+        }
 
         UndoRedoStack.clear();
 
@@ -989,7 +1005,9 @@ public class EcdarController implements Initializable {
         canvasPresentation.getController().zoomablePane.minHeightProperty().bind(canvasPane.heightProperty());
         canvasPresentation.getController().zoomablePane.maxHeightProperty().bind(canvasPane.heightProperty());
 
-        projectPane.getController().setActiveModelPresentations(canvasPresentation.getController().getActiveModelPresentation());
+        projectPane.getController().setHighlightedForModelFiles(getActiveModelPresentations());
+
+        menuBarViewCanvasSplit.setText("Split canvas");
     }
 
     /**
@@ -1054,17 +1072,32 @@ public class EcdarController implements Initializable {
         canvasGrid.add(canvasPresentation, 1, 1);
 
         canvasPane.getChildren().add(canvasGrid);
-        projectPane.getController().setActiveModelPresentations(getActiveModelPresentations(canvasGrid));
+        projectPane.getController().setHighlightedForModelFiles(getActiveModelPresentations());
+
+        menuBarViewCanvasSplit.setText("Merge canvases");
     }
 
-    private static List<HighLevelModelPresentation> getActiveModelPresentations(GridPane canvasGrid) {
-        return canvasGrid.getChildren()
-                .stream().map(canvas -> ((CanvasPresentation) canvas)
-                        .getController().getActiveModelPresentation()).collect(Collectors.toList());
-    }
+    /**
+     * Get list of shown HighLevelModelPresentations
+     *
+     * @return a list of all the HighLevelModelPresentations currently being shown
+     */
+    private List<HighLevelModelPresentation> getActiveModelPresentations() {
+        Pane canvasChild = (Pane) canvasPane.getChildren().get(0);
 
-    public BackendDriver getBackendDriver() {
-        return this.backendDriver;
+        if (canvasChild instanceof GridPane) {
+            return canvasChild.getChildren()
+                    .stream().map(canvas -> ((CanvasPresentation) canvas)
+                            .getController().getActiveModelPresentation()).filter(Objects::nonNull).collect(Collectors.toList());
+        } else if (canvasChild instanceof CanvasPresentation) {
+            return new ArrayList<>() {
+                {
+                    ((CanvasPresentation) canvasChild).getController().getActiveModelPresentation();
+                }
+            };
+        }
+
+        return new ArrayList<>();
     }
 
     /**
