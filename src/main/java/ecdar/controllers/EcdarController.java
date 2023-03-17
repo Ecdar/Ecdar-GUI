@@ -154,7 +154,7 @@ public class EcdarController implements Initializable {
     private static Text _queryTextResult;
     private static Text _queryTextQuery;
     private static final Text temporaryComponentWatermark = new Text("Temporary component");
-
+    
     public static void runReachabilityAnalysis() {
         if (!reachabilityServiceEnabled) return;
 
@@ -437,8 +437,9 @@ public class EcdarController implements Initializable {
                 // Stop thread if background queries have been toggled off
                 if (!Ecdar.shouldRunBackgroundQueries.get()) return;
 
-                Ecdar.getProject().getQueries().forEach(query -> {
-                    if (query.isPeriodic()) query.execute();
+                queryPane.getController().queriesList.getChildren().forEach(queryPresentation -> {
+                    QueryController queryController = ((QueryPresentation) queryPresentation).getController();
+                    if (queryController.getQuery().isPeriodic()) queryController.runQuery();
                 });
 
                 // List of threads to start
@@ -455,9 +456,12 @@ public class EcdarController implements Initializable {
 
                             Query reachabilityQuery = new Query(locationReachableQuery, "", QueryState.UNKNOWN);
                             reachabilityQuery.setType(QueryType.REACHABILITY);
-                            reachabilityQuery.execute();
 
-                            final Thread verifyThread = new Thread(reachabilityQuery::execute);
+                            QueryController controller = new QueryController();
+                            controller.setQuery(reachabilityQuery);
+                            controller.runQuery();
+
+                            final Thread verifyThread = new Thread(controller::runQuery);
 
                             verifyThread.setName(locationReachableQuery + " (" + verifyThread.getName() + ")");
                             Debug.addThread(verifyThread);
