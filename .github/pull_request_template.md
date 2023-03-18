@@ -1,4 +1,4 @@
 Closes #{ISSUE_ID}
 
-### Proposed changes:
+### Changes/Additions:
 -
