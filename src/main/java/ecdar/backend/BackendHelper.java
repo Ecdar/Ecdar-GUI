@@ -21,7 +21,7 @@ import java.util.Optional;
 public final class BackendHelper {
     final static String TEMP_DIRECTORY = "temporary";
     private static Engine defaultEngine = null;
-    private static ObservableList<Engine> engines = new SimpleListProperty<>();
+    private static ObservableList<Engine> engines = FXCollections.observableArrayList();
     private static final List<Runnable> enginesUpdatedListeners = new ArrayList<>();
 
     /**

@@ -253,35 +253,33 @@ public class QueryController implements Initializable {
             };
 
             // Delegate that based on a query state updates the color of the state indicator
-            final Consumer<QueryState> updateStateIndicator = (queryState) -> {
-                Platform.runLater(() -> {
-                    this.tooltip.setText("");
+            final Consumer<QueryState> updateStateIndicator = (queryState) -> Platform.runLater(() -> {
+                this.tooltip.setText("");
 
-                    final Color color = queryState.getColor();
-                    final Color.Intensity colorIntensity = queryState.getColorIntensity();
+                final Color color = queryState.getColor();
+                final Color.Intensity colorIntensity = queryState.getColorIntensity();
 
-                    if (queryState.equals(QueryState.UNKNOWN) || queryState.equals(QueryState.RUNNING)) {
-                        stateIndicator.setBackground(new Background(new BackgroundFill(TRANSPARENT,
-                                CornerRadii.EMPTY,
-                                Insets.EMPTY)
-                        ));
-                    } else {
-                        stateIndicator.setBackground(new Background(new BackgroundFill(color.getColor(colorIntensity),
-                                CornerRadii.EMPTY,
-                                Insets.EMPTY)
-                        ));
-                    }
+                if (queryState.equals(QueryState.UNKNOWN) || queryState.equals(QueryState.RUNNING)) {
+                    stateIndicator.setBackground(new Background(new BackgroundFill(TRANSPARENT,
+                            CornerRadii.EMPTY,
+                            Insets.EMPTY)
+                    ));
+                } else {
+                    stateIndicator.setBackground(new Background(new BackgroundFill(color.getColor(colorIntensity),
+                            CornerRadii.EMPTY,
+                            Insets.EMPTY)
+                    ));
+                }
 
-                    setStatusIndicatorContentColor(new javafx.scene.paint.Color(1, 1, 1, 1), statusIcon, queryTypeExpandIcon, queryState);
+                setStatusIndicatorContentColor(new javafx.scene.paint.Color(1, 1, 1, 1), statusIcon, queryTypeExpandIcon, queryState);
 
-                    if (queryState.equals(QueryState.RUNNING) || queryState.equals(QueryState.UNKNOWN)) {
-                        setStatusIndicatorContentColor(Color.GREY.getColor(Color.Intensity.I700), statusIcon, queryTypeExpandIcon, null);
-                    }
+                if (queryState.equals(QueryState.RUNNING) || queryState.equals(QueryState.UNKNOWN)) {
+                    setStatusIndicatorContentColor(Color.GREY.getColor(Color.Intensity.I700), statusIcon, queryTypeExpandIcon, null);
+                }
 
-                    // The tooltip is updated here to handle all cases that are not syntax error
-                    updateToolTip.accept(queryState);
-                });
-            };
+                // The tooltip is updated here to handle all cases that are not syntax error
+                updateToolTip.accept(queryState);
+            });
 
             // Update the initial color
             updateStateIndicator.accept(getQuery().getQueryState());
