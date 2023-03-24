@@ -5,7 +5,8 @@ import com.google.gson.JsonParser;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXRippler;
 import ecdar.Ecdar;
-import ecdar.abstractions.Engine;
+import ecdar.backend.Engine;
+import ecdar.backend.BackendException;
 import ecdar.backend.BackendHelper;
 import ecdar.presentations.EnginePresentation;
 import javafx.fxml.Initializable;
@@ -72,8 +73,8 @@ public class EngineOptionsDialogController implements Initializable {
 
             // Close all engine connections to avoid dangling engine connections when port range is changed
             try {
-                Ecdar.getBackendDriver().closeAllEngineConnections();
-            } catch (IOException e) {
+                BackendHelper.clearEngineConnections();
+            } catch (BackendException e) {
                 e.printStackTrace();
             }
 

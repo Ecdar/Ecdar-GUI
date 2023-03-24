@@ -313,6 +313,6 @@ public class QueryPresentation extends HBox {
     }
 
     private void runQuery() {
-        Ecdar.getQueryExecutor().executeQuery(this.controller.getQuery());
+        this.controller.getQuery().execute();
     }
 }

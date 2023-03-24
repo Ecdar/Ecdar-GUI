@@ -201,7 +201,7 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
             final Query query = new Query(reachabilityQuery, reachabilityComment, QueryState.UNKNOWN);
             query.setType(QueryType.REACHABILITY);
             Ecdar.getProject().getQueries().add(query);
-            Ecdar.getQueryExecutor().executeQuery(query);
+            query.execute();
             dropDownMenu.hide();
         });
 

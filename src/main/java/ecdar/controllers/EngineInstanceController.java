@@ -3,7 +3,7 @@ package ecdar.controllers;
 import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXRippler;
 import com.jfoenix.controls.JFXTextField;
-import ecdar.abstractions.Engine;
+import ecdar.backend.Engine;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.fxml.FXML;
@@ -98,7 +98,7 @@ public class EngineInstanceController implements Initializable {
         if (isLocal.isSelected()) {
             this.pathToEngine.setText(instance.getEngineLocation());
         } else {
-            this.address.setText(instance.getEngineLocation());
+            this.address.setText(instance.getIpAddress());
         }
 
         this.portRangeStart.setText(String.valueOf(instance.getPortStart()));
