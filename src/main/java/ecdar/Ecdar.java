@@ -5,6 +5,7 @@ import ecdar.backend.BackendException;
 import ecdar.backend.BackendHelper;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.controllers.EcdarController;
+import ecdar.issues.ExitStatusCodes;
 import ecdar.presentations.*;
 import ecdar.utility.keyboard.Keybind;
 import ecdar.utility.keyboard.KeyboardTracker;
@@ -239,6 +240,21 @@ public class Ecdar extends Application {
             Ecdar.showToast("The application icon could not be loaded");
         }
 
+        BackendHelper.addEngineInstanceListener(() -> {
+            // When the engines change, clear the backendDriver
+            // to prevent dangling connections and queries
+            try {
+                presentation.getController().queryPane.getController().stopAllQueries();
+                BackendHelper.clearEngineConnections();
+            } catch (BackendException e) {
+                showToast("An exception was encountered during shutdown of engine connections");
+            }
+        });
+
+        // Whenever the Runtime is requested to exit, first stop all queries and exit the Platform
+        Runtime.getRuntime().addShutdownHook(new Thread(presentation.getController().queryPane.getController()::stopAllQueries));
+        Runtime.getRuntime().addShutdownHook(new Thread(Platform::exit));
+
         // We're now ready! Let the curtains fall!
         stage.show();
 
@@ -281,28 +297,18 @@ public class Ecdar extends Application {
         }));
 
         stage.setOnCloseRequest(event -> {
-            presentation.getController().queryPane.getController().stopAllQueries();
-
-            int status = 0;
+            int statusCode = ExitStatusCodes.SHUTDOWN_SUCCESSFUL.getStatusCode();
             try {
                 BackendHelper.clearEngineConnections();
             } catch (BackendException e) {
-                // -1 indicates that an exception was thrown
-                status = -1;
+                statusCode = ExitStatusCodes.CLOSE_ENGINE_CONNECTIONS_FAILED.getStatusCode();
             }
 
-            Platform.exit();
-            System.exit(status);
-        });
-
-        BackendHelper.addEngineInstanceListener(() -> {
-            // When the engines change, clear the backendDriver
-            // to prevent dangling connections and queries
-            presentation.getController().queryPane.getController().stopAllQueries();
             try {
-                BackendHelper.clearEngineConnections();
-            } catch (BackendException e) {
-                showToast("An exception was encountered during shutdown of engine connections");
+                System.exit(statusCode);
+            } catch (SecurityException e) {
+                // Forcefully shutdown the Java Runtime
+                Runtime.getRuntime().halt(ExitStatusCodes.GRACEFUL_SHUTDOWN_FAILED.getStatusCode());
             }
         });
 
