@@ -22,7 +22,7 @@ Should include:
 
 
 - [ ] Using a local JDK 
-  - **Used JDK** (ex. Azul JDK FX 11.62.17):
+  - **Used JDK** (ex. Zulu 11.62.17 JDK FX 11.0.18):
   - **Operating System**:
     - [ ] Linux
     - [ ] MacOS Arm
