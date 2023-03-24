@@ -79,3 +79,6 @@ To get started and get an idea of what the system can be used for, multiple exam
 These projects include preconfigured models and queries to execute against them.
 
 For the theoretical background and what the tool can be used for, please check out the latest research links at [here](https://ulrik.blog.aau.dk/ecdar/).
+
+# Contributing
+If you are interested in contributing to the project, please read the [contributing](.github/CONTRIBUTING.md) file. Here you will find guides on how to create issues and commit changes to the repository.

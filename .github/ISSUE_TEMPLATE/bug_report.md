@@ -17,8 +17,19 @@ Should include:
 2. What was expected to happen
 3. Suggestion on possible cause [Not required]
 -->
+#### Where was the error encountered
+- [ ] Using a distribution from the main ECDAR repository
 
-### Steps To Reproduce:
+
+- [ ] Using a local JDK 
+  - **Used JDK** (ex. Azul JDK FX 11.62.17):
+  - **Operating System**:
+    - [ ] Linux
+    - [ ] MacOS Arm
+    - [ ] MacOS Intel
+    - [ ] Windows
+
+### Steps To Reproduce
 <!--
 Example: steps to reproduce the behavior:
 1. In this environment...
