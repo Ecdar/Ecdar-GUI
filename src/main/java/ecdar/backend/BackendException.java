@@ -19,6 +19,26 @@ public class BackendException extends Exception {
         }
     }
 
+    public static class gRpcChannelShutdownException extends BackendException {
+        public gRpcChannelShutdownException(final String message) {
+            super(message);
+        }
+
+        public gRpcChannelShutdownException(final String message, final Throwable cause) {
+            super(message, cause);
+        }
+    }
+
+    public static class EngineProcessDestructionException extends BackendException {
+        public EngineProcessDestructionException(final String message) {
+            super(message);
+        }
+
+        public EngineProcessDestructionException(final String message, final Throwable cause) {
+            super(message, cause);
+        }
+    }
+
     public static class BadBackendQueryException extends BackendException {
         public BadBackendQueryException(final String message) {
             super(message);

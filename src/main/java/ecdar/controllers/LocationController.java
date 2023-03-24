@@ -16,6 +16,7 @@ import ecdar.utility.keyboard.KeyboardTracker;
 import ecdar.utility.keyboard.NudgeDirection;
 import ecdar.utility.keyboard.Nudgeable;
 import com.jfoenix.controls.JFXPopup;
+import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.beans.value.ObservableDoubleValue;
 import javafx.collections.ListChangeListener;
@@ -201,7 +202,6 @@ public class LocationController implements Initializable, SelectHelper.ItemSelec
             final Query query = new Query(reachabilityQuery, reachabilityComment, QueryState.UNKNOWN);
             query.setType(QueryType.REACHABILITY);
             Ecdar.getProject().getQueries().add(query);
-            Ecdar.getQueryExecutor().executeQuery(query);
             dropDownMenu.hide();
         });
 

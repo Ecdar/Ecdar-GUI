@@ -1,11 +1,11 @@
 package ecdar;
 
 import ecdar.abstractions.*;
-import ecdar.backend.BackendDriver;
+import ecdar.backend.BackendException;
 import ecdar.backend.BackendHelper;
-import ecdar.backend.QueryHandler;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.controllers.EcdarController;
+import ecdar.issues.ExitStatusCodes;
 import ecdar.presentations.*;
 import ecdar.utility.keyboard.Keybind;
 import ecdar.utility.keyboard.KeyboardTracker;
@@ -50,8 +50,6 @@ public class Ecdar extends Application {
     private static BooleanProperty isUICached = new SimpleBooleanProperty();
     public static BooleanProperty shouldRunBackgroundQueries = new SimpleBooleanProperty(true);
     private static final BooleanProperty isSplit = new SimpleBooleanProperty(false);
-    private static BackendDriver backendDriver = new BackendDriver();
-    private static QueryHandler queryHandler = new QueryHandler(backendDriver);
     private Stage debugStage;
 
     /**
@@ -179,20 +177,6 @@ public class Ecdar extends Application {
         isSplit.set(!isSplit.get());
     }
 
-    /**
-     * Returns the backend driver used to execute queries and handle simulation
-     *
-     * @return BackendDriver
-     */
-    public static BackendDriver getBackendDriver() {
-        return backendDriver;
-    }
-
-    public static QueryHandler getQueryExecutor() {
-        return queryHandler;
-
-    }
-
     public static double getDpiScale() {
         if (!autoScalingEnabled.getValue())
             return 1;
@@ -256,6 +240,21 @@ public class Ecdar extends Application {
             Ecdar.showToast("The application icon could not be loaded");
         }
 
+        BackendHelper.addEngineInstanceListener(() -> {
+            // When the engines change, clear the backendDriver
+            // to prevent dangling connections and queries
+            try {
+                presentation.getController().queryPane.getController().stopAllQueries();
+                BackendHelper.clearEngineConnections();
+            } catch (BackendException e) {
+                showToast("An exception was encountered during shutdown of engine connections");
+            }
+        });
+
+        // Whenever the Runtime is requested to exit, first stop all queries and exit the Platform
+        Runtime.getRuntime().addShutdownHook(new Thread(presentation.getController().queryPane.getController()::stopAllQueries));
+        Runtime.getRuntime().addShutdownHook(new Thread(Platform::exit));
+
         // We're now ready! Let the curtains fall!
         stage.show();
 
@@ -298,28 +297,19 @@ public class Ecdar extends Application {
         }));
 
         stage.setOnCloseRequest(event -> {
-            BackendHelper.stopQueries();
-
+            int statusCode = ExitStatusCodes.SHUTDOWN_SUCCESSFUL.getStatusCode();
             try {
-                backendDriver.closeAllEngineConnections();
-            } catch (IOException e) {
-                e.printStackTrace();
+                BackendHelper.clearEngineConnections();
+            } catch (BackendException e) {
+                statusCode = ExitStatusCodes.CLOSE_ENGINE_CONNECTIONS_FAILED.getStatusCode();
             }
 
-            Platform.exit();
-            System.exit(0);
-        });
-
-        BackendHelper.addEngineInstanceListener(() -> {
-            // When the engines change, re-instantiate the backendDriver
-            // to prevent dangling connections and queries
             try {
-                backendDriver.closeAllEngineConnections();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+                System.exit(statusCode);
+            } catch (SecurityException e) {
+                // Forcefully shutdown the Java Runtime
+                Runtime.getRuntime().halt(ExitStatusCodes.GRACEFUL_SHUTDOWN_FAILED.getStatusCode());
             }
-
-            backendDriver = new BackendDriver();
         });
 
         project = presentation.getController().projectPane.getController().project;

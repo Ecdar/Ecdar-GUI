@@ -53,24 +53,28 @@ public class EcdarPresentation extends StackPane {
 
     public EcdarPresentation() {
         controller = new EcdarFXMLLoader().loadAndGetController("EcdarPresentation.fxml", this);
-        initializeTopBar();
-        initializeToolbar();
-        initializeQueryDetailsDialog();
-        initializeColorSelector();
+        initializeResizeQueryPane();
 
-        initializeToggleQueryPaneFunctionality();
-        initializeToggleFilePaneFunctionality();
+        Platform.runLater(() -> {
+            initializeTopBar();
+            initializeToolbar();
+            initializeQueryDetailsDialog();
+            initializeColorSelector();
 
-        initializeSelectDependentToolbarButton(controller.colorSelected);
-        Tooltip.install(controller.colorSelected, new Tooltip("Colour"));
+            initializeToggleQueryPaneFunctionality();
+            initializeToggleFilePaneFunctionality();
 
-        initializeSelectDependentToolbarButton(controller.deleteSelected);
-        Tooltip.install(controller.deleteSelected, new Tooltip("Delete"));
+            initializeSelectDependentToolbarButton(controller.colorSelected);
+            Tooltip.install(controller.colorSelected, new Tooltip("Colour"));
 
-        initializeToolbarButton(controller.undo);
-        initializeToolbarButton(controller.redo);
-        initializeUndoRedoButtons();
-        initializeSnackbar();
+            initializeSelectDependentToolbarButton(controller.deleteSelected);
+            Tooltip.install(controller.deleteSelected, new Tooltip("Delete"));
+
+            initializeToolbarButton(controller.undo);
+            initializeToolbarButton(controller.redo);
+            initializeUndoRedoButtons();
+            initializeSnackbar();
+        });
 
         // Open the file and query panel initially
         Platform.runLater(() -> {
@@ -113,8 +117,6 @@ public class EcdarPresentation extends StackPane {
         initializeHelpImages();
         KeyboardTracker.registerKeybind(KeyboardTracker.UNDO, new Keybind(new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN), UndoRedoStack::undo));
         KeyboardTracker.registerKeybind(KeyboardTracker.REDO, new Keybind(new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN), UndoRedoStack::redo));
-
-        initializeResizeQueryPane();
     }
 
     private void initializeSnackbar() {

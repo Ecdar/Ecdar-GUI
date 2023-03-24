@@ -56,6 +56,18 @@ public class DeclarationsController extends HighLevelModelController implements 
     }
 
     /**
+     * Bind width and height of the text editor field, such that it fills up the provided canvas
+     */
+    public void bindWidthAndHeightToPane(StackPane pane) {
+        // Fetch width and height of canvas and update
+        root.minWidthProperty().bind(pane.minWidthProperty());
+        root.maxWidthProperty().bind(pane.maxWidthProperty());
+        root.minHeightProperty().bind(pane.minHeightProperty());
+        root.maxHeightProperty().bind(pane.maxHeightProperty());
+        textArea.setTranslateY(20);
+    }
+
+    /**
      * Updates highlighting of the text in the text area.
      */
     public void updateHighlighting() {

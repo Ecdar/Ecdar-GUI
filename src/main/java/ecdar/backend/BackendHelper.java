@@ -21,7 +21,7 @@ import java.util.Optional;
 public final class BackendHelper {
     final static String TEMP_DIRECTORY = "temporary";
     private static Engine defaultEngine = null;
-    private static ObservableList<Engine> engines = new SimpleListProperty<>();
+    private static ObservableList<Engine> engines = FXCollections.observableArrayList();
     private static final List<Runnable> enginesUpdatedListeners = new ArrayList<>();
 
     /**
@@ -57,10 +57,21 @@ public final class BackendHelper {
     }
 
     /**
-     * Stop all running queries.
+     * Clears all queued queries, stops all active engines, and closes all open engine connections
      */
-    public static void stopQueries() {
-        Ecdar.getProject().getQueries().forEach(Query::cancel);
+    public static void clearEngineConnections() throws BackendException {
+        BackendException exception = new BackendException("Exceptions were thrown while attempting to close engine connections");
+        for (Engine engine : engines) {
+            try {
+                engine.closeConnections();
+            } catch (BackendException e) {
+                exception.addSuppressed(e);
+            }
+        }
+
+        if (exception.getSuppressed().length > 0) {
+            throw exception;
+        }
     }
 
     /**
@@ -75,25 +86,7 @@ public final class BackendHelper {
     }
 
     /**
-     * Generates a string for a deadlock query based on the component
-     *
-     * @param component The component which should be checked for deadlocks
-     * @return A deadlock query string
-     */
-    public static String getExistDeadlockQuery(final Component component) {
-        // Get the names of the locations of this component. Used to produce the deadlock query
-        final String templateName = component.getName();
-        final List<String> locationNames = new ArrayList<>();
-
-        for (final Location location : component.getLocations()) {
-            locationNames.add(templateName + "." + location.getId());
-        }
-
-        return "(" + String.join(" || ", locationNames) + ") && deadlock";
-    }
-
-    /**
-     * Returns the Engine with the specified name, or null, if no such Engine exists
+     * Returns the BackendInstance with the specified name, or null, if no such BackendInstance exists
      *
      * @param engineName Name of the Engine to return
      * @return The Engine with matching name

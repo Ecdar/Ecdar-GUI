@@ -1,14 +1,9 @@
 package ecdar.abstractions;
 
-import ecdar.Ecdar;
 import ecdar.backend.*;
-import ecdar.controllers.EcdarController;
 import ecdar.utility.serialize.Serializable;
 import com.google.gson.JsonObject;
-import javafx.application.Platform;
 import javafx.beans.property.*;
-
-import java.util.function.Consumer;
 
 public class Query implements Serializable {
     private static final String QUERY = "query";
@@ -18,49 +13,20 @@ public class Query implements Serializable {
 
     private final StringProperty query = new SimpleStringProperty("");
     private final StringProperty comment = new SimpleStringProperty("");
-    private final StringProperty errors = new SimpleStringProperty("");
     private final SimpleBooleanProperty isPeriodic = new SimpleBooleanProperty(false);
     private final ObjectProperty<QueryState> queryState = new SimpleObjectProperty<>(QueryState.UNKNOWN);
     private final ObjectProperty<QueryType> type = new SimpleObjectProperty<>();
     private Engine engine;
 
-
-    private final Consumer<Boolean> successConsumer = (aBoolean) -> {
-        if (aBoolean) {
-            setQueryState(QueryState.SUCCESSFUL);
-        } else {
-            setQueryState(QueryState.ERROR);
-        }
-    };
-
-    private Boolean forcedCancel = false;
-    private final Consumer<Exception> failureConsumer = (e) -> {
-        if (forcedCancel) {
-            setQueryState(QueryState.UNKNOWN);
-        } else {
-            setQueryState(QueryState.SYNTAX_ERROR);
-            if (e instanceof BackendException.MissingFileQueryException) {
-                Ecdar.showToast("Please save the project before trying to run queries");
-            }
-
-            this.addError(e.getMessage());
-            final Throwable cause = e.getCause();
-            if (cause != null) {
-                // We had trouble generating the model if we get a NullPointerException
-                if (cause instanceof NullPointerException) {
-                    setQueryState(QueryState.UNKNOWN);
-                } else {
-                    Platform.runLater(() -> EcdarController.openQueryDialog(this, cause.toString()));
-                }
-            }
-        }
-    };
-
-    public Query(final String query, final String comment, final QueryState queryState) {
+    public Query(final String query, final String comment, final QueryState queryState, final Engine engine) {
         this.query.set(query);
         this.comment.set(comment);
         this.queryState.set(queryState);
-        setEngine(BackendHelper.getDefaultEngine());
+        setEngine(engine);
+    }
+
+    public Query(final String query, final String comment, final QueryState queryState) {
+        this(query, comment, queryState, BackendHelper.getDefaultEngine());
     }
 
     public Query(final JsonObject jsonElement) {
@@ -103,8 +69,6 @@ public class Query implements Serializable {
         return comment;
     }
 
-    public StringProperty errors() { return errors; }
-
     public boolean isPeriodic() {
         return isPeriodic.get();
     }
@@ -135,14 +99,6 @@ public class Query implements Serializable {
 
     public ObjectProperty<QueryType> getTypeProperty() {
         return this.type;
-    }
-
-    public Consumer<Boolean> getSuccessConsumer() {
-        return successConsumer;
-    }
-
-    public Consumer<Exception> getFailureConsumer() {
-        return failureConsumer;
     }
 
     @Override
@@ -180,20 +136,5 @@ public class Query implements Serializable {
         } else {
             setEngine(BackendHelper.getDefaultEngine());
         }
-    }
-
-    public void cancel() {
-        if (getQueryState().equals(QueryState.RUNNING)) {
-            forcedCancel = true;
-            setQueryState(QueryState.UNKNOWN);
-        }
-    }
-
-    public void addError(String e) {
-        errors.set(errors.getValue() + e + "\n");
-    }
-
-    public String getCurrentErrors() {
-        return errors.getValue();
     }
 }

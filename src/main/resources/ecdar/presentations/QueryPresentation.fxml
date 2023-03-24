@@ -2,8 +2,6 @@
 <?import com.jfoenix.controls.*?>
 <?import javafx.scene.layout.*?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
-<?import javafx.scene.control.TitledPane?>
-<?import javafx.scene.control.Separator?>
 <?import javafx.scene.text.Text?>
 <?import javafx.geometry.Insets?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
@@ -12,19 +10,19 @@
          HBox.hgrow="ALWAYS"
          alignment="CENTER"
          fx:controller="ecdar.controllers.QueryController">
-        <VBox id="stateIndicator">
+        <VBox fx:id="stateIndicator" alignment="CENTER" style="-fx-min-width: 4.5em; -fx-max-width: 4.5em;">
             <padding>
                 <Insets topRightBottomLeft="10"/>
             </padding>
             <Region style="-fx-max-height: 2em; -fx-min-height: 2em"/>
             <StackPane styleClass="responsive-icon-stack-pane-sizing">
-                <FontIcon id="statusIcon" iconLiteral="gmi-hourglass-full" styleClass="icon-size-medium"/>
+                <FontIcon fx:id="statusIcon" iconLiteral="gmi-hourglass-full" styleClass="icon-size-medium"/>
             </StackPane>
             <Region style="-fx-max-height: 1em; -fx-min-height: 1em"/>
             <JFXRippler fx:id="queryTypeExpand">
                 <HBox alignment="CENTER">
                     <Text fx:id="queryTypeSymbol" styleClass="sub-caption"/>
-                    <FontIcon id="queryTypeExpandIcon" iconLiteral="gmi-expand-more"
+                    <FontIcon fx:id="queryTypeExpandIcon" iconLiteral="gmi-expand-more"
                               styleClass="icon-size-x-small"/>
                 </HBox>
             </JFXRippler>
@@ -33,10 +31,10 @@
             <padding>
                 <Insets topRightBottomLeft="10"/>
             </padding>
-            <JFXTextField id="query"
+            <JFXTextField fx:id="queryTextField"
                           style="-fx-unfocus-color:transparent;" styleClass="subhead, responsive-text-area-sizing"
                           HBox.hgrow="ALWAYS" promptText="Query"/>
-            <JFXTextField id="comment"
+            <JFXTextField fx:id="commentTextField"
                           style="-fx-unfocus-color:transparent;" styleClass="caption, responsive-text-area-sizing"
                           HBox.hgrow="ALWAYS" promptText="Comment"/>
         </VBox>
@@ -46,10 +44,10 @@
             </padding>
             <HBox alignment="CENTER">
                 <StackPane>
-                    <JFXSpinner id="progressIndicator" radius="20"/>
+                    <JFXSpinner fx:id="progressIndicator" radius="20"/>
                     <JFXRippler fx:id="actionButton">
                         <StackPane styleClass="responsive-icon-stack-pane-sizing">
-                            <FontIcon id="actionButtonIcon" iconLiteral="gmi-play-arrow"
+                            <FontIcon fx:id="actionButtonIcon" iconLiteral="gmi-play-arrow"
                                       styleClass="icon-size-medium"/>
                         </StackPane>
                     </JFXRippler>
@@ -57,9 +55,9 @@
 
                 <Region minWidth="10"/>
 
-                <JFXRippler id="detailsButton">
+                <JFXRippler fx:id="detailsButton">
                     <StackPane styleClass="responsive-icon-stack-pane-sizing">
-                        <FontIcon id="detailsButtonIcon" iconLiteral="gmi-more-vert"
+                        <FontIcon fx:id="detailsButtonIcon" iconLiteral="gmi-more-vert"
                                   styleClass="icon-size-medium"/>
                     </StackPane>
                 </JFXRippler>

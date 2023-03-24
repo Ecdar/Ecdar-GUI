@@ -97,11 +97,7 @@
 
         <!-- Query pane -->
         <right>
-            <StackPane fx:id="rightPane" alignment="TOP_RIGHT">
-                <QueryPanePresentation
-                        fx:id="queryPane"
-                        StackPane.alignment="TOP_RIGHT"/>
-            </StackPane>
+            <StackPane fx:id="rightPane" alignment="TOP_RIGHT"/>
         </right>
 
         <!-- Message container -->
