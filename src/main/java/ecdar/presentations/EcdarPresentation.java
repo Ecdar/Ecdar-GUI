@@ -125,11 +125,11 @@ public class EcdarPresentation extends StackPane {
         });
 
         // Whenever the width of the file pane is updated, update the animations
+        // NOT USED, BUT ALLOWS FOR LEFT PANE RESIZING TO BE ADDED
         controller.leftPane.widthProperty().addListener((observable) -> {
             initializeOpenLeftPaneAnimation();
             initializeCloseLeftPaneAnimation();
         });
-
     }
 
     private void initializeCloseLeftPaneAnimation() {
@@ -169,8 +169,7 @@ public class EcdarPresentation extends StackPane {
 
         // Whenever the width of the query pane is updated, update the animations
         controller.getRightModePane().widthProperty().addListener((observable, oldWidth, newWidth) -> {
-            Platform.runLater(() -> rightPaneAnimationProperty.set(controller.getRightModePane().getWidth()));
-
+            rightPaneAnimationProperty.set(controller.getRightModePane().getWidth());
             initializeOpenRightPaneAnimation();
             initializeCloseRightPaneAnimation();
         });
