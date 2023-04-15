@@ -255,7 +255,6 @@ public class EngineOptionsDialogController implements Initializable {
      * @param newEnginePresentation The presentation of the new engine instance
      */
     private void addEnginePresentationToList(EnginePresentation newEnginePresentation) {
-        newEnginePresentation.getController().defaultEngineRadioButton.setSelected(engineInstanceList.getChildren().isEmpty());
         engineInstanceList.getChildren().add(newEnginePresentation);
         newEnginePresentation.getController().moveEngineInstanceUpRippler.setOnMouseClicked((mouseEvent) -> moveEngineInstance(newEnginePresentation, -1));
         newEnginePresentation.getController().moveEngineInstanceDownRippler.setOnMouseClicked((mouseEvent) -> moveEngineInstance(newEnginePresentation, +1));
