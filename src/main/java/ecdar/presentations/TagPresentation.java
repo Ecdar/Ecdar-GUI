@@ -1,9 +1,11 @@
 package ecdar.presentations;
 
+import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.controllers.EcdarController;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
+import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.ItemDragHelper;
 import ecdar.utility.helpers.LocationAware;
 import com.jfoenix.controls.JFXTextField;
@@ -24,6 +26,7 @@ import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import static javafx.scene.paint.Color.TRANSPARENT;
 
@@ -69,7 +72,7 @@ public class TagPresentation extends StackPane {
             textFieldFocusProperty().addListener((observable, oldValue, newValue) -> {
                 if (!hadInitialFocus && newValue) {
                     hadInitialFocus = true;
-                    EcdarController.getActiveCanvasPresentation().getController().leaveTextAreas();
+                    Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasPresentation().getController().leaveTextAreas();
                 }
             });
         });
@@ -119,7 +122,9 @@ public class TagPresentation extends StackPane {
         });
 
         // When enter or escape is pressed release focus
-        textField.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
+        Platform.runLater(() -> {
+            textField.setOnKeyPressed(Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
+        });
     }
 
     private void initializeDragging(JFXTextField textField, Path shape) {
@@ -145,8 +150,8 @@ public class TagPresentation extends StackPane {
         shape.addEventHandler(MouseEvent.MOUSE_DRAGGED, event -> {
             event.consume();
 
-            final double dragDistanceX = (event.getSceneX() - dragOffsetX.get()) / EcdarController.getActiveCanvasZoomFactor().get();
-            final double dragDistanceY = (event.getSceneY() - dragOffsetY.get()) / EcdarController.getActiveCanvasZoomFactor().get();
+            final double dragDistanceX = (event.getSceneX() - dragOffsetX.get()) / Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasZoomFactor().get();
+            final double dragDistanceY = (event.getSceneY() - dragOffsetY.get()) / Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasZoomFactor().get();
             double draggableNewX = getDragBounds().trimX(draggablePreviousX.get() + dragDistanceX);
             double draggableNewY = getDragBounds().trimY(draggablePreviousY.get() + dragDistanceY);
 
@@ -237,32 +242,30 @@ public class TagPresentation extends StackPane {
         l3.xProperty().bind(textField.widthProperty());
     }
 
-    public void bindToColor(final ObjectProperty<Color> color, final ObjectProperty<Color.Intensity> intensity) {
-        bindToColor(color, intensity, false);
+    public void bindToColor(final ObjectProperty<EnabledColor> color) {
+        bindToColor(color, false);
     }
 
-    public void bindToColor(final ObjectProperty<Color> color, final ObjectProperty<Color.Intensity> intensity, final boolean doColorBackground) {
-        final BiConsumer<Color, Color.Intensity> recolor = (newColor, newIntensity) -> {
+    public void bindToColor(final ObjectProperty<EnabledColor> color, final boolean doColorBackground) {
+        final Consumer<EnabledColor> recolor = (newColor) -> {
             final JFXTextField textField = (JFXTextField) lookup("#textField");
             textField.setUnFocusColor(TRANSPARENT);
-            textField.setFocusColor(newColor.getColor(newIntensity));
+            textField.setFocusColor(newColor.getPaintColor());
 
             if (doColorBackground) {
                 final Path shape = (Path) lookup("#shape");
-                shape.setFill(newColor.getColor(newIntensity.next(-1)));
-                shape.setStroke(newColor.getColor(newIntensity.next(-1).next(2)));
+                shape.setFill(newColor.nextIntensity(-1).getPaintColor());
+                shape.setStroke(newColor.nextIntensity(1).getPaintColor());
 
-                textField.setStyle("-fx-prompt-text-fill: rgba(255, 255, 255, 0.6); -fx-text-fill: " + newColor.getTextColorRgbaString(newIntensity) + ";");
-                textField.setFocusColor(newColor.getTextColor(newIntensity));
+                textField.setStyle("-fx-prompt-text-fill: rgba(255, 255, 255, 0.6); -fx-text-fill: " + newColor.getTextColorRgbaString() + ";");
+                textField.setFocusColor(newColor.getTextColor());
             } else {
                 textField.setStyle("-fx-prompt-text-fill: rgba(0, 0, 0, 0.6);");
             }
         };
 
-        color.addListener(observable -> recolor.accept(color.get(), intensity.get()));
-        intensity.addListener(observable -> recolor.accept(color.get(), intensity.get()));
-
-        recolor.accept(color.get(), intensity.get());
+        color.addListener(observable -> recolor.accept(color.get()));
+        recolor.accept(color.get());
     }
 
     public void setAndBindString(final StringProperty stringProperty) {

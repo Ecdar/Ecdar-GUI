@@ -1,14 +1,13 @@
 package ecdar.controllers;
 
 import com.jfoenix.controls.JFXPopup;
-import ecdar.Ecdar;
 import ecdar.abstractions.*;
-import ecdar.backend.BackendHelper;
 import ecdar.backend.SimulationHandler;
 import ecdar.presentations.DropDownMenu;
 import ecdar.presentations.SimLocationPresentation;
 import ecdar.presentations.SimTagPresentation;
-import ecdar.utility.colors.Color;
+import ecdar.simulation.SimulationState;
+import ecdar.utility.colors.EnabledColor;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -46,6 +45,109 @@ public class SimLocationController implements Initializable {
     private DropDownMenu dropDownMenu;
     private SimulationHandler simulationHandler;
 
+    public static String getSimLocationReachableQuery(final Location endLocation, final Component component, final String query) {
+        return getSimLocationReachableQuery(endLocation, component, query, null);
+    }
+
+    /**
+         * Generates a reachability query based on the given location and component
+         *
+         * @param endLocation  The location which should be checked for reachability
+         * @return A reachability query string
+         */
+    public static String getSimLocationReachableQuery(final Location endLocation, final Component component, final String query, final SimulationState state) {
+        var stringBuilder = new StringBuilder();
+
+        // append simulation query
+        stringBuilder.append(query);
+
+        // append arrow
+        stringBuilder.append(" -> ");
+
+        // ToDo: append start location here
+        if (state != null){
+            stringBuilder.append(getStartStateString(state));
+            stringBuilder.append(";");
+        }
+
+        // append end state
+        stringBuilder.append(getEndStateString(component.getName(), endLocation.getId()));
+
+        //  return example: m1||M2->[L1,L4](y<3);[L2, L7](y<2)
+        System.out.println(stringBuilder);
+        return stringBuilder.toString();
+    }
+
+    private static String getStartStateString(SimulationState state) {
+        var stringBuilder = new StringBuilder();
+
+        // append locations
+        var locations = state.getLocations();
+        stringBuilder.append("[");
+        var appendLocationWithSeparator = false;
+        for(var componentName : SimulatorController.getSimulationHandler().getComponentsInSimulation()){
+            var locationFound = false;
+
+            for(var location:locations){
+                if (location.getKey().equals(componentName)){
+                    if (appendLocationWithSeparator){
+                        stringBuilder.append("," + location.getValue());
+                    }
+                    else{
+                        stringBuilder.append(location.getValue());
+                    }
+                    locationFound = true;
+                }
+                if (locationFound){
+                    // don't go through more locations, when a location is found for the specific component that we're looking at
+                    break;
+                }
+            }
+            appendLocationWithSeparator = true;
+        }
+        stringBuilder.append("]");
+
+        // append clock values
+        var clocks = state.getSimulationClocks();
+        stringBuilder.append("()");
+
+        return stringBuilder.toString();
+    }
+
+    private static String getEndStateString(String componentName, String endLocationId) {
+        var stringBuilder = new StringBuilder();
+
+        stringBuilder.append("[");
+        var appendLocationWithSeparator = false;
+
+        for (var component : SimulatorController.getSimulationHandler().getComponentsInSimulation())
+        {
+            if (component.equals(componentName)){
+                if (appendLocationWithSeparator){
+                    stringBuilder.append("," + endLocationId);
+                }
+                else{
+                    stringBuilder.append(endLocationId);
+                }
+            }
+            else{ // add underscore to indicate, that we don't care about the end locations in the other components
+                if (appendLocationWithSeparator){
+                    stringBuilder.append(",_");
+                }
+                else{
+                    stringBuilder.append("_");
+                }
+            }
+            if (!appendLocationWithSeparator) {
+                appendLocationWithSeparator = true;
+            }
+        }
+        stringBuilder.append("]");
+        stringBuilder.append("()");
+
+        return stringBuilder.toString();
+    }
+
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
         this.location.addListener((obsLocation, oldLocation, newLocation) -> {
@@ -60,7 +162,7 @@ public class SimLocationController implements Initializable {
         scaleContent.scaleYProperty().bind(scaleContent.scaleXProperty());
         initializeMouseControls();
 
-        simulationHandler = Ecdar.getSimulationHandler();
+        simulationHandler = SimulatorController.getSimulationHandler();
     }
 
     private void initializeMouseControls() {
@@ -88,7 +190,7 @@ public class SimLocationController implements Initializable {
 
         dropDownMenu.addClickableListElement("Is " + getLocation().getId() + " reachable from initial state?", event -> {
             // Generate the query from the backend
-            final String reachabilityQuery = BackendHelper.getLocationReachableQuery(getLocation(), getComponent(), simulationHandler.getSimulationQuery());
+            final String reachabilityQuery = getSimLocationReachableQuery(getLocation(), getComponent(), simulationHandler.getSimulationQuery());
 
             // Add proper comment
             final String reachabilityComment = "Is " + getLocation().getMostDescriptiveIdentifier() + " reachable from initial state?";
@@ -98,14 +200,14 @@ public class SimLocationController implements Initializable {
             query.setType(QueryType.REACHABILITY);
 
             // execute query
-            Ecdar.getQueryExecutor().executeQuery(query);
+            query.execute();
 
             dropDownMenu.hide();
         });
 
         dropDownMenu.addClickableListElement("Is " + getLocation().getId() + " reachable from current locations?", event -> {
             // Generate the query from the backend
-            final String reachabilityQuery = BackendHelper.getLocationReachableQuery(getLocation(), getComponent(), simulationHandler.getSimulationQuery(), simulationHandler.getCurrentState());
+            final String reachabilityQuery = getSimLocationReachableQuery(getLocation(), getComponent(), simulationHandler.getSimulationQuery(), simulationHandler.getCurrentState());
 
             // Add proper comment
             final String reachabilityComment = "Is " + getLocation().getMostDescriptiveIdentifier() + " reachable from current locations?";
@@ -115,7 +217,7 @@ public class SimLocationController implements Initializable {
             query.setType(QueryType.REACHABILITY);
 
             // execute query
-            Ecdar.getQueryExecutor().executeQuery(query);
+            query.execute();
 
             dropDownMenu.hide();
         });
@@ -157,22 +259,16 @@ public class SimLocationController implements Initializable {
     /**
      * Colors the location model
      * @param color the new color of the location
-     * @param intensity the intensity of the color
      */
-    public void color(final Color color, final Color.Intensity intensity) {
+    public void color(final EnabledColor color) {
         final Location location = getLocation();
 
         // Set the color of the location
-        location.setColorIntensity(intensity);
         location.setColor(color);
     }
 
-    public Color getColor() {
+    public EnabledColor getColor() {
         return getLocation().getColor();
-    }
-
-    public Color.Intensity getColorIntensity() {
-        return getLocation().getColorIntensity();
     }
 
     public DoubleProperty xProperty() {

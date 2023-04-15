@@ -4,6 +4,7 @@ import EcdarProtoBuf.ObjectProtos;
 import EcdarProtoBuf.ObjectProtos.State;
 import ecdar.Ecdar;
 import ecdar.backend.SimulationHandler;
+import ecdar.controllers.SimulatorController;
 import javafx.collections.ObservableMap;
 import javafx.util.Pair;
 
@@ -71,6 +72,6 @@ public class SimulationState {
      */
     public ObservableMap<String, BigDecimal> getSimulationClocks() {
         // TODO move clocks from SimulationHandler to SimulationState
-        return Ecdar.getSimulationHandler().getSimulationClocks();
+        return SimulatorController.getSimulationHandler().getSimulationClocks();
     }
 }

@@ -8,6 +8,7 @@ import ecdar.controllers.SimEdgeController;
 import ecdar.controllers.SimNailController;
 import ecdar.utility.Highlightable;
 import ecdar.utility.colors.Color;
+import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.BindingHelper;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
@@ -88,7 +89,7 @@ public class SimNailPresentation extends Group implements Highlightable {
         BindingHelper.bind(propertyTagLine, propertyTag);
 
         // Bind the color of the tag to the color of the component
-        propertyTag.bindToColor(controller.getComponent().colorProperty(), controller.getComponent().colorIntensityProperty());
+        propertyTag.bindToColor(controller.getComponent().colorProperty());
 
         // Updates visibility and placeholder of the tag depending on the type of nail
         final Consumer<Edge.PropertyType> updatePropertyType = (propertyType) -> {
@@ -175,12 +176,11 @@ public class SimNailPresentation extends Group implements Highlightable {
      */
     private void initializeNailCircleColor() {
         final Runnable updateNailColor = () -> {
-            final Color color = controller.getComponent().getColor();
-            final Color.Intensity colorIntensity = controller.getComponent().getColorIntensity();
+            final EnabledColor color = controller.getComponent().getColor();
 
             if(!controller.getNail().getPropertyType().equals(Edge.PropertyType.NONE)) {
-                controller.nailCircle.setFill(color.getColor(colorIntensity));
-                controller.nailCircle.setStroke(color.getColor(colorIntensity.next(2)));
+                controller.nailCircle.setFill(color.getPaintColor());
+                controller.nailCircle.setStroke(color.getStrokeColor());
             } else {
                 controller.nailCircle.setFill(Color.GREY_BLUE.getColor(Color.Intensity.I800));
                 controller.nailCircle.setStroke(Color.GREY_BLUE.getColor(Color.Intensity.I900));
@@ -189,9 +189,6 @@ public class SimNailPresentation extends Group implements Highlightable {
 
         // When the color of the component updates, update the nail indicator as well
         controller.getComponent().colorProperty().addListener((observable) -> updateNailColor.run());
-
-        // When the color intensity of the component updates, update the nail indicator
-        controller.getComponent().colorIntensityProperty().addListener((observable) -> updateNailColor.run());
 
         // Initialize the color of the nail
         updateNailColor.run();
@@ -253,16 +250,14 @@ public class SimNailPresentation extends Group implements Highlightable {
      */
     @Override
     public void unhighlight() {
-        Color color = Color.GREY_BLUE;
-        Color.Intensity intensity = Color.Intensity.I800;
+        EnabledColor color = new EnabledColor(Color.GREY_BLUE, Color.Intensity.I800);
 
         // Set the color
         if(!controller.getNail().getPropertyType().equals(Edge.PropertyType.NONE)) {
             color = controller.getComponent().getColor();
-            intensity = controller.getComponent().getColorIntensity();
         }
 
-        controller.nailCircle.setFill(color.getColor(intensity));
-        controller.nailCircle.setStroke(color.getColor(intensity.next(2)));
+        controller.nailCircle.setFill(color.getPaintColor());
+        controller.nailCircle.setStroke(color.getStrokeColor());
     }
 }

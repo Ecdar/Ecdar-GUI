@@ -42,7 +42,7 @@ public class TracePaneElementController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        simulationHandler = Ecdar.getSimulationHandler();
+        simulationHandler = SimulatorController.getSimulationHandler();
 
         simulationHandler.getTraceLog().addListener((ListChangeListener<SimulationState>) c -> {
             while (c.next()) {
@@ -64,7 +64,7 @@ public class TracePaneElementController implements Initializable {
 
     /**
      * Initializes the expand functionality that allows the user to show or hide the trace.
-     * By default the trace is shown.
+     * By default, the trace is shown.
      */
     private void initializeTraceExpand() {
         isTraceExpanded.addListener((obs, oldVal, newVal) -> {

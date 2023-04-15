@@ -5,6 +5,7 @@ import ecdar.abstractions.*;
 import ecdar.controllers.ComponentInstanceController;
 import ecdar.controllers.EcdarController;
 import ecdar.utility.colors.Color;
+import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.ItemDragHelper;
 import ecdar.utility.helpers.SelectHelper;
 import javafx.beans.property.BooleanProperty;
@@ -24,13 +25,14 @@ import javafx.scene.shape.Shape;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
  * Presentation for a component instance.
  */
 public class ComponentInstancePresentation extends StackPane implements SelectHelper.ItemSelectable {
     private final ComponentInstanceController controller;
-    private final List<BiConsumer<Color, Color.Intensity>> updateColorDelegates = new ArrayList<>();
+    private final List<Consumer<EnabledColor>> updateColorDelegates = new ArrayList<>();
 
     public ComponentInstancePresentation(final ComponentInstance instance, final EcdarSystem system) {
         controller = new EcdarFXMLLoader().loadAndGetController("ComponentInstancePresentation.fxml", this);
@@ -64,28 +66,21 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
      */
     private void initializeNails() {
         final Component component = controller.getInstance().getComponent();
-        final BiConsumer<Color, Color.Intensity> updateNailColor = (newColor, newIntensity) ->
+        final Consumer<EnabledColor> updateNailColor = (newColor) ->
         {
-            final Color color = newColor;
-            final Color.Intensity colorIntensity = newIntensity;
+            controller.inputNailCircle.setFill(newColor.getPaintColor());
+            controller.inputNailCircle.setStroke(newColor.getStrokeColor());
 
-            controller.inputNailCircle.setFill(color.getColor(colorIntensity));
-            controller.inputNailCircle.setStroke(color.getColor(colorIntensity.next(2)));
-
-            controller.outputNailCircle.setFill(color.getColor(colorIntensity));
-            controller.outputNailCircle.setStroke(color.getColor(colorIntensity.next(2)));
+            controller.outputNailCircle.setFill(newColor.getPaintColor());
+            controller.outputNailCircle.setStroke(newColor.getStrokeColor());
         };
 
         // When the color of the component updates, update the nail indicator as well
         controller.getInstance().getComponent().colorProperty().addListener(
-                (observable) -> updateNailColor.accept(component.getColor(), component.getColorIntensity()));
-
-        // When the color intensity of the component updates, update the nail indicator
-        controller.getInstance().getComponent().colorIntensityProperty().addListener(
-                (observable) -> updateNailColor.accept(component.getColor(), component.getColorIntensity()));
+                (observable) -> updateNailColor.accept(component.getColor()));
 
         // Initialize the color of the nail with the current color
-        updateNailColor.accept(component.getColor(), component.getColorIntensity());
+        updateNailColor.accept(component.getColor());
         updateColorDelegates.add(updateNailColor);
     }
 
@@ -107,15 +102,14 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
         controller.identifier.textProperty().bindBidirectional(instance.getInstanceIdProperty());
 
         final Runnable updateColor = () -> {
-            final Color color = instance.getComponent().getColor();
-            final Color.Intensity colorIntensity = instance.getComponent().getColorIntensity();
+            final EnabledColor color = instance.getComponent().getColor();
 
             // Set the text color for the label
-            controller.identifier.setStyle("-fx-text-fill: " + color.getTextColorRgbaString(colorIntensity) + ";");
-            controller.identifier.setFocusColor(color.getTextColor(colorIntensity));
+            controller.identifier.setStyle("-fx-text-fill: " + color.getTextColorRgbaString() + ";");
+            controller.identifier.setFocusColor(color.getTextColor());
             controller.identifier.setUnFocusColor(javafx.scene.paint.Color.TRANSPARENT);
 
-            controller.originalComponentLabel.setStyle("-fx-text-fill: " + color.getTextColorRgbaString(colorIntensity) + ";");
+            controller.originalComponentLabel.setStyle("-fx-text-fill: " + color.getTextColorRgbaString() + ";");
         };
 
         // Update color and whenever color of the component changes
@@ -124,7 +118,7 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
 
         // Center the text vertically and aff a left padding of CORNER_SIZE
         controller.identifier.setPadding(new Insets(2, 0, 0, Ecdar.CANVAS_PADDING * 4));
-        controller.identifier.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
+        controller.identifier.setOnKeyPressed(Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
 
         controller.originalComponentLabel.setPadding(new Insets(0, 5, 0, 15));
         controller.originalComponentLabel.textProperty().bind(instance.getComponent().nameProperty());
@@ -158,10 +152,10 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
     private void initializeToolbar() {
         final Component component = controller.getInstance().getComponent();
 
-        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
+        final Consumer<EnabledColor> updateColor = (newColor) -> {
             // Set the background of the toolbar
             controller.toolbar.setBackground(new Background(new BackgroundFill(
-                    newColor.getColor(newIntensity),
+                    newColor.getPaintColor(),
                     CornerRadii.EMPTY,
                     Insets.EMPTY
             )));
@@ -170,8 +164,8 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
         };
 
         // Update color now, whenever color of component changes, and when someone uses the color delegates
-        updateColor.accept(component.getColor(), component.getColorIntensity());
-        component.colorProperty().addListener(observable -> updateColor.accept(component.getColor(), component.getColorIntensity()));
+        updateColor.accept(component.getColor());
+        component.colorProperty().addListener(observable -> updateColor.accept(component.getColor()));
         updateColorDelegates.add(updateColor);
     }
 
@@ -183,8 +177,8 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
     private void initializeSeparator() {
         final Component component = controller.getInstance().getComponent();
 
-        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
-            controller.separatorLine.setStroke(newColor.getColor(newIntensity.next(2)));
+        final Consumer<EnabledColor> updateColor = (newColor) -> {
+            controller.separatorLine.setStroke(newColor.getStrokeColor());
         };
 
         final Runnable drawLine = () -> {
@@ -201,8 +195,8 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
         heightProperty().addListener(observable -> drawLine.run());
         controller.toolbar.heightProperty().addListener(obs -> drawLine.run());
 
-        updateColor.accept(component.getColor(), component.getColorIntensity());
-        component.colorProperty().addListener(observable -> updateColor.accept(component.getColor(), component.getColorIntensity()));
+        updateColor.accept(component.getColor());
+        component.colorProperty().addListener(observable -> updateColor.accept(component.getColor()));
         updateColorDelegates.add(updateColor);
     }
 
@@ -222,7 +216,7 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
                 0, Ecdar.CANVAS_PADDING * 4 + 2
         );
 
-        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
+        final Consumer<EnabledColor> updateColor = (newColor) -> {
             // Mask the parent of the frame (will also mask the background)
             mask[0] = Path.subtract(rectangle, corner1);
             controller.frame.setClip(mask[0]);
@@ -233,13 +227,13 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
             controller.line1.setStartY(0);
             controller.line1.setEndX(0);
             controller.line1.setEndY(Ecdar.CANVAS_PADDING * 4);
-            controller.line1.setStroke(newColor.getColor(newIntensity.next(2)));
+            controller.line1.setStroke(newColor.getStrokeColor());
             controller.line1.setStrokeWidth(1.25);
             StackPane.setAlignment(controller.line1, Pos.TOP_LEFT);
 
             // Set the stroke color to two shades darker
             controller.frame.setBorder(new Border(new BorderStroke(
-                    newColor.getColor(newIntensity.next(2)),
+                    newColor.getStrokeColor(),
                     BorderStrokeStyle.SOLID,
                     CornerRadii.EMPTY,
                     new BorderWidths(1),
@@ -248,8 +242,8 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
         };
 
         // Update color now, whenever color of component changes, and when someone uses the color delegates
-        updateColor.accept(component.getColor(), component.getColorIntensity());
-        component.colorProperty().addListener(observable -> updateColor.accept(component.getColor(), component.getColorIntensity()));
+        updateColor.accept(component.getColor());
+        component.colorProperty().addListener(observable -> updateColor.accept(component.getColor()));
         updateColorDelegates.add(updateColor);
     }
 
@@ -263,14 +257,14 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
         controller.background.widthProperty().bind(minWidthProperty());
         controller.background.heightProperty().bind(minHeightProperty());
 
-        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
+        final Consumer<EnabledColor> updateColor = (newColor) -> {
             // Set the background color to the lightest possible version of the color
-            controller.background.setFill(newColor.getColor(newIntensity.next(-20)));
+            controller.background.setFill(newColor.getLowestIntensity().getPaintColor());
         };
 
         // Update color now, whenever color of component changes, and when someone uses the color delegates
-        updateColor.accept(component.getColor(), component.getColorIntensity());
-        component.colorProperty().addListener(observable -> updateColor.accept(component.getColor(), component.getColorIntensity()));
+        updateColor.accept(component.getColor());
+        component.colorProperty().addListener(observable -> updateColor.accept(component.getColor()));
         updateColorDelegates.add(updateColor);
     }
 
@@ -301,7 +295,7 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
      */
     @Override
     public void select() {
-        updateColorDelegates.forEach(colorConsumer -> colorConsumer.accept(SelectHelper.SELECT_COLOR, SelectHelper.SELECT_COLOR_INTENSITY_NORMAL));
+        updateColorDelegates.forEach(colorConsumer -> colorConsumer.accept(new EnabledColor(SelectHelper.SELECT_COLOR, SelectHelper.SELECT_COLOR_INTENSITY_NORMAL)));
     }
 
     /**
@@ -312,7 +306,7 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
         updateColorDelegates.forEach(colorConsumer -> {
             final Component component = controller.getInstance().getComponent();
 
-            colorConsumer.accept(component.getColor(), component.getColorIntensity());
+            colorConsumer.accept(component.getColor());
         });
     }
 
@@ -321,28 +315,18 @@ public class ComponentInstancePresentation extends StackPane implements SelectHe
      * But since, component instances use the color of the corresponding component,
      * this method does nothing.
      * @param color not used
-     * @param intensity not used
      */
     @Override
     @Deprecated
-    public void color(final Color color, final Color.Intensity intensity) { }
+    public void color(final EnabledColor color) { }
 
     /**
      * Gets the color of the corresponding component.
      * @return the color of the component.
      */
     @Override
-    public Color getColor() {
+    public EnabledColor getColor() {
         return controller.getInstance().getComponent().getColor();
-    }
-
-    /**
-     * Gets the color intensity of the corresponding component.
-     * @return the color of the component
-     */
-    @Override
-    public Color.Intensity getColorIntensity() {
-        return controller.getInstance().getComponent().getColorIntensity();
     }
 
     /**

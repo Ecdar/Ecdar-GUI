@@ -1,6 +1,5 @@
 package ecdar.controllers;
 
-import ecdar.Ecdar;
 import ecdar.abstractions.*;
 import ecdar.backend.SimulationHandler;
 import ecdar.presentations.ProcessPresentation;
@@ -67,7 +66,7 @@ public class SimulatorOverviewController implements Initializable {
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
-        simulationHandler = Ecdar.getSimulationHandler();
+        simulationHandler = SimulatorController.getSimulationHandler();
 
         groupContainer = new Group();
         processContainer = new FlowPane();

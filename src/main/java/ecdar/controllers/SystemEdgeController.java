@@ -1,7 +1,7 @@
 package ecdar.controllers;
 
 import ecdar.abstractions.EcdarSystem;
-import ecdar.abstractions.EcdarSystemEdge;
+import ecdar.abstractions.SystemEdge;
 import ecdar.presentations.DropDownMenu;
 import ecdar.utility.helpers.SelectHelper;
 import ecdar.utility.keyboard.Keybind;
@@ -27,7 +27,7 @@ import java.util.ResourceBundle;
 public class SystemEdgeController implements Initializable {
     public Group root;
 
-    private EcdarSystemEdge edge;
+    private SystemEdge edge;
     private final ObjectProperty<EcdarSystem> system = new SimpleObjectProperty<>();
     private SelectHelper.ItemSelectable selectable;
 
@@ -48,11 +48,11 @@ public class SystemEdgeController implements Initializable {
         });
     }
 
-    public EcdarSystemEdge getEdge() {
+    public SystemEdge getEdge() {
         return edge;
     }
 
-    public void setEdge(final EcdarSystemEdge edge) {
+    public void setEdge(final SystemEdge edge) {
         this.edge = edge;
     }
 

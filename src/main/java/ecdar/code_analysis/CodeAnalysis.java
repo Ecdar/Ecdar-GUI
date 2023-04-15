@@ -188,5 +188,4 @@ public class CodeAnalysis {
     public static void disable() {
         ENABLED = false;
     }
-
 }

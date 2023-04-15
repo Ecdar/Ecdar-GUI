@@ -2,10 +2,11 @@ package ecdar.presentations;
 
 import com.jfoenix.controls.JFXRippler;
 import com.jfoenix.skins.ValidationPane;
+import ecdar.Ecdar;
 import ecdar.controllers.CanvasController;
 import ecdar.controllers.EcdarController;
 import ecdar.utility.colors.Color;
-import ecdar.utility.helpers.MouseTrackable;
+import ecdar.utility.helpers.LocationAware;
 import ecdar.utility.helpers.SelectHelper;
 import ecdar.utility.mouse.MouseTracker;
 import javafx.application.Platform;
@@ -23,7 +24,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
 
-public class CanvasPresentation extends StackPane implements MouseTrackable {
+public class CanvasPresentation extends StackPane implements LocationAware {
     public MouseTracker mouseTracker;
 
     private final DoubleProperty x = new SimpleDoubleProperty(0);
@@ -32,11 +33,11 @@ public class CanvasPresentation extends StackPane implements MouseTrackable {
     private final CanvasController controller;
 
     public CanvasPresentation() {
-        mouseTracker = new MouseTracker(this);
         controller = new EcdarFXMLLoader().loadAndGetController("CanvasPresentation.fxml", this);
+        mouseTracker = new MouseTracker(this);
         mouseTracker.registerOnMousePressedEventHandler(this::startDragSelect);
 
-        getController().root.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> EcdarController.setActiveCanvasPresentation(this));
+        getController().root.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> Ecdar.getPresentation().getController().getEditorPresentation().getController().setActiveCanvasPresentation(this));
 
         initializeModelDrag();
         initializeToolbar();
@@ -121,14 +122,6 @@ public class CanvasPresentation extends StackPane implements MouseTrackable {
         controller.zoomHelper.setCanvas(this);
     }
 
-    /**
-     * Updates if views should show an inset behind the error view.
-     * @param shouldShow true iff views should show an inset
-     */
-    public static void showBottomInset(final Boolean shouldShow) {
-        EcdarController.getActiveCanvasPresentation().getController().updateOffset(shouldShow);
-    }
-
     @Override
     public DoubleProperty xProperty() {
         return x;
@@ -149,15 +142,14 @@ public class CanvasPresentation extends StackPane implements MouseTrackable {
         return yProperty().get();
     }
 
-    @Override
-    public MouseTracker getMouseTracker() {
-        return mouseTracker;
-    }
-
     public CanvasController getController() {
         return controller;
     }
 
+    /***
+     * Start drawing selection rectangle for area selection
+     * @param event used for the origin of the selection rectangle
+     */
     private void startDragSelect(final MouseEvent event) {
         if(event.isPrimaryButtonDown()) {
             SelectHelper.clearSelectedElements();
@@ -200,6 +192,12 @@ public class CanvasPresentation extends StackPane implements MouseTrackable {
         }
     }
 
+    /***
+     * Initialize the rectangle to use for selection
+     * @param mouseDownX X-coordinate for the initial mouse press
+     * @param mouseDownY Y-coordinate for the initial mouse press
+     * @return the initialized rectangle
+     */
     private Rectangle initializeRectangleForSelectionBox(double mouseDownX, double mouseDownY) {
         Rectangle selectionRectangle = new Rectangle();
         selectionRectangle.setStroke(SelectHelper.SELECT_COLOR.getColor(SelectHelper.SELECT_COLOR_INTENSITY_BORDER));
@@ -216,6 +214,11 @@ public class CanvasPresentation extends StackPane implements MouseTrackable {
         return selectionRectangle;
     }
 
+    /***
+     * Traverse the node graph recursively to update the set of nodes that should be selected
+     * @param currentNode the current 'root' node to traverse
+     * @param selectionRectangle the rectangle representing the selection area
+     */
     private void updateSelection(Parent currentNode, Rectangle selectionRectangle) {
         // None of these nodes contain ItemSelectable nodes, so avoiding traversing these sub-trees improves performance
         if (currentNode instanceof VBox || currentNode instanceof ValidationPane || currentNode instanceof JFXRippler || currentNode instanceof BorderPane) {
@@ -245,7 +248,7 @@ public class CanvasPresentation extends StackPane implements MouseTrackable {
         });
     }
 
-    /**
+    /***
      * Returns whether the item is within the selection box.
      * @param item the node to potentially be selected.
      * @param itemSelectable the ItemSelectable object related to the item (in order to get width and height for the checks).

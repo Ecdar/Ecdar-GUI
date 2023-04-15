@@ -1,5 +1,6 @@
 package ecdar.presentations;
 
+import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.EdgeStatus;
 import ecdar.controllers.EcdarController;
@@ -128,14 +129,14 @@ public class SignatureArrow extends Group implements Highlightable {
             // Color matching SignatureArrow red
             SignatureArrow matchingSignatureArrow;
             if (controller.getEdgeStatus().equals(EdgeStatus.INPUT)) {
-                matchingSignatureArrow = (SignatureArrow) EcdarController.getActiveCanvasPresentation().getController()
+                matchingSignatureArrow = (SignatureArrow) Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasPresentation().getController()
                         .activeComponentPresentation.getController()
                         .outputSignatureContainer.getChildren()
                         .stream().filter(node -> node instanceof SignatureArrow && ((SignatureArrow) node).controller.getSyncText().equals(controller.getSyncText()))
                         .findFirst().orElse(null);
 
             } else {
-                matchingSignatureArrow = (SignatureArrow) EcdarController.getActiveCanvasPresentation().getController()
+                matchingSignatureArrow = (SignatureArrow) Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasPresentation().getController()
                         .activeComponentPresentation.getController()
                         .inputSignatureContainer.getChildren()
                         .stream().filter(node -> node instanceof SignatureArrow && ((SignatureArrow) node).controller.getSyncText().equals(controller.getSyncText()))

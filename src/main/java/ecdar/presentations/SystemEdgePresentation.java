@@ -1,11 +1,12 @@
 package ecdar.presentations;
 
 import ecdar.Ecdar;
-import ecdar.abstractions.EcdarSystemEdge;
+import ecdar.abstractions.SystemEdge;
 import ecdar.abstractions.EcdarSystem;
 import ecdar.controllers.EcdarController;
 import ecdar.controllers.SystemEdgeController;
 import ecdar.utility.colors.Color;
+import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.ItemDragHelper;
 import ecdar.utility.helpers.SelectHelper;
 import javafx.beans.property.DoubleProperty;
@@ -26,7 +27,7 @@ public class SystemEdgePresentation extends Group implements SelectHelper.ItemSe
      * @param edge system edge to present
      * @param system system of the system edge
      */
-    public SystemEdgePresentation(final EcdarSystemEdge edge, final EcdarSystem system) {
+    public SystemEdgePresentation(final SystemEdge edge, final EcdarSystem system) {
         controller = new EcdarFXMLLoader().loadAndGetController("SystemEdgePresentation.fxml", this);
         controller.setEdge(edge);
         controller.setSystem(system);
@@ -35,7 +36,7 @@ public class SystemEdgePresentation extends Group implements SelectHelper.ItemSe
         initializeBinding(edge);
     }
 
-    private void initializeBinding(final EcdarSystemEdge edge) {
+    private void initializeBinding(final SystemEdge edge) {
         final Link link = new Link();
         links.add(link);
 
@@ -50,8 +51,8 @@ public class SystemEdgePresentation extends Group implements SelectHelper.ItemSe
             link.startYProperty().bind(edge.getTempNode().getEdgeY());
 
             // Bind to mouse position
-            link.endXProperty().bind(EcdarController.getActiveCanvasPresentation().mouseTracker.xProperty().subtract(Ecdar.CANVAS_PADDING / 2));
-            link.endYProperty().bind(EcdarController.getActiveCanvasPresentation().mouseTracker.xProperty().subtract(Ecdar.CANVAS_PADDING / 2));
+            link.endXProperty().bind(Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasPresentation().mouseTracker.xProperty().subtract(Ecdar.CANVAS_PADDING / 2));
+            link.endYProperty().bind(Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasPresentation().mouseTracker.xProperty().subtract(Ecdar.CANVAS_PADDING / 2));
         }
 
         // If edge source and target changes, bind
@@ -73,7 +74,7 @@ public class SystemEdgePresentation extends Group implements SelectHelper.ItemSe
      * Binds the end of the last link to the parent of the edge.
      * @param edge edge to bind with
      */
-    private void bindFinishedEdge(final EcdarSystemEdge edge) {
+    private void bindFinishedEdge(final SystemEdge edge) {
         final Link firstLink = links.get(0);
         final Link lastLink = links.get(links.size() - 1);
 
@@ -87,10 +88,9 @@ public class SystemEdgePresentation extends Group implements SelectHelper.ItemSe
     /**
      * Does nothing, as this cannot change color.
      * @param color not used
-     * @param intensity not used
      */
     @Override
-    public void color(final Color color, final Color.Intensity intensity) {
+    public void color(final EnabledColor color) {
 
     }
 
@@ -99,16 +99,7 @@ public class SystemEdgePresentation extends Group implements SelectHelper.ItemSe
      * @return null
      */
     @Override
-    public Color getColor() {
-        return null;
-    }
-
-    /**
-     * Returns null, as this cannot change color.
-     * @return null
-     */
-    @Override
-    public Color.Intensity getColorIntensity() {
+    public EnabledColor getColor() {
         return null;
     }
 

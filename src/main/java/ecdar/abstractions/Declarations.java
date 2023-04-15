@@ -2,6 +2,7 @@ package ecdar.abstractions;
 
 import ecdar.utility.colors.Color;
 import com.google.gson.JsonObject;
+import ecdar.utility.colors.EnabledColor;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import org.apache.commons.lang3.tuple.Triple;
@@ -15,7 +16,7 @@ import java.util.regex.Pattern;
  * Overall declarations of a model.
  * This could be global declarations or system declarations.
  */
-public class Declarations extends HighLevelModelObject {
+public class Declarations extends HighLevelModel {
     private final StringProperty declarationsText = new SimpleStringProperty("");
 
     /**
@@ -24,13 +25,13 @@ public class Declarations extends HighLevelModelObject {
      */
     public Declarations(final String name) {
         setName(name);
-        setColor(Color.AMBER);
+        setColor(EnabledColor.getDefault());
     }
 
 
     public Declarations(final JsonObject json) {
         deserialize(json);
-        setColor(Color.AMBER);
+        setColor(EnabledColor.getDefault());
     }
 
     public String getDeclarationsText() {

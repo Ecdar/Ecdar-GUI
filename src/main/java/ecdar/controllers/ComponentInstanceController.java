@@ -96,7 +96,7 @@ public class ComponentInstanceController implements Initializable {
      * Listens to an edge to update whether the root has an edge.
      * @param edge the edge to update with
      */
-    private void handleHasEdge(final EcdarSystemEdge edge) {
+    private void handleHasEdge(final SystemEdge edge) {
         edge.getTempNodeProperty().addListener((observable -> updateHasEdge(edge)));
         edge.getChildProperty().addListener((observable -> updateHasEdge(edge)));
         edge.getParentProperty().addListener((observable -> updateHasEdge(edge)));
@@ -106,7 +106,7 @@ public class ComponentInstanceController implements Initializable {
      * Update has edge property to whether the instance is in a given edge.
      * @param edge the given edge
      */
-    private void updateHasEdge(final EcdarSystemEdge edge) {
+    private void updateHasEdge(final SystemEdge edge) {
         hasEdge.set(edge.isInEdge(getInstance()));
     }
 
@@ -114,7 +114,7 @@ public class ComponentInstanceController implements Initializable {
     private void onMouseClicked(final MouseEvent event) {
         event.consume();
 
-        final EcdarSystemEdge unfinishedEdge = getSystem().getUnfinishedEdge();
+        final SystemEdge unfinishedEdge = getSystem().getUnfinishedEdge();
 
         if ((event.isShiftDown() && event.getButton().equals(MouseButton.PRIMARY)) || event.getButton().equals(MouseButton.MIDDLE)) {
             // If shift click or middle click a component instance, create a new edge
@@ -147,11 +147,11 @@ public class ComponentInstanceController implements Initializable {
     }
 
     /***
-     * Helper method to create a new EcdarSystemEdge and add it to the current system and component instance
-     * @return The newly created EcdarSystemEdge
+     * Helper method to create a new SystemEdge and add it to the current system and component instance
+     * @return The newly created SystemEdge
      */
-    private EcdarSystemEdge createNewSystemEdge() {
-        final EcdarSystemEdge edge = new EcdarSystemEdge(getInstance());
+    private SystemEdge createNewSystemEdge() {
+        final SystemEdge edge = new SystemEdge(getInstance());
         getSystem().addEdge(edge);
         hasEdge.set(true);
   

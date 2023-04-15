@@ -1,13 +1,15 @@
 package ecdar.presentations;
 
+import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Location;
-import ecdar.controllers.EcdarController;
 import ecdar.controllers.LocationController;
 import ecdar.utility.colors.Color;
+import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.BindingHelper;
 import ecdar.utility.helpers.SelectHelper;
 import javafx.animation.*;
+import javafx.application.Platform;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.*;
 import javafx.scene.Group;
@@ -20,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import static javafx.util.Duration.millis;
 
@@ -39,7 +40,7 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
     private final Timeline hiddenAreaAnimationExited = new Timeline();
     private final Timeline scaleShakeIndicatorBackgroundAnimation = new Timeline();
     private final Timeline shakeContentAnimation = new Timeline();
-    private final List<BiConsumer<Color, Color.Intensity>> updateColorDelegates = new ArrayList<>();
+    private final List<Consumer<EnabledColor>> updateColorDelegates = new ArrayList<>();
     private final DoubleProperty animation = new SimpleDoubleProperty(0);
     private final DoubleBinding reverseAnimation = new SimpleDoubleProperty(1).subtract(animation);
     private final boolean interactable;
@@ -90,33 +91,29 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
         idLabel.widthProperty().addListener((obsWidth, oldWidth, newWidth) -> idLabel.translateXProperty().set(newWidth.doubleValue() / -2));
         idLabel.heightProperty().addListener((obsHeight, oldHeight, newHeight) -> idLabel.translateYProperty().set(newHeight.doubleValue() / -2));
 
-        final ObjectProperty<Color> color = location.colorProperty();
-        final ObjectProperty<Color.Intensity> colorIntensity = location.colorIntensityProperty();
-        final BooleanProperty failing = location.failingProperty();
-
         // Delegate to style the label based on the color of the location
-        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
+        final Consumer<EnabledColor> updateColor = (newColor) -> {
             if (location.getFailing()) {
-                idLabel.setTextFill(Color.RED.getTextColor(newIntensity));
-                ds.setColor(Color.RED.getColor(newIntensity));
+                idLabel.setTextFill(Color.RED.getTextColor(Color.Intensity.I700));
+                ds.setColor(Color.RED.getColor(Color.Intensity.I700));
             } else {
-                idLabel.setTextFill(newColor.getTextColor(newIntensity));
-                ds.setColor(newColor.getColor(newIntensity));
+                idLabel.setTextFill(newColor.getTextColor());
+                ds.setColor(newColor.getPaintColor());
             }
         };
 
         updateColorDelegates.add(updateColor);
 
         // Set the initial color
-        updateColor.accept(color.get(), colorIntensity.get());
+        updateColor.accept(location.getColor());
 
         // Update the color of the circle when the color of the location is updated
-        color.addListener((obs, old, newColor) -> updateColor.accept(newColor, colorIntensity.get()));
-        failing.addListener((obs, old, newFailing) -> updateColor.accept(color.get(), colorIntensity.get()          ));
+        location.colorProperty().addListener((obs, old, newColor) -> updateColor.accept(newColor));
+        location.failingProperty().addListener((obs, old, newFailing) -> updateColor.accept(location.getColor())); // RED if failing, provided color otherwise
     }
 
     private void initializeTags() {
-        if(!interactable) {
+        if (!interactable) {
             controller.nicknameTag.setVisible(false);
             controller.invariantTag.setVisible(false);
             return;
@@ -129,12 +126,12 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
 
         // Set the layout from the model (if they are not both 0)
         final Location loc = controller.getLocation();
-        if((loc.getNicknameX() != 0) && (loc.getNicknameY() != 0)) {
+        if ((loc.getNicknameX() != 0) && (loc.getNicknameY() != 0)) {
             controller.nicknameTag.setTranslateX(loc.getNicknameX());
             controller.nicknameTag.setTranslateY(loc.getNicknameY());
         }
 
-        if((loc.getInvariantX() != 0) && (loc.getInvariantY() != 0)) {
+        if ((loc.getInvariantX() != 0) && (loc.getInvariantY() != 0)) {
             controller.invariantTag.setTranslateX(loc.getInvariantX());
             controller.invariantTag.setTranslateY(loc.getInvariantY());
         }
@@ -152,8 +149,8 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
 
         final Consumer<Location> updateTags = location -> {
             // Update the color
-            controller.nicknameTag.bindToColor(location.colorProperty(), location.colorIntensityProperty(), true);
-            controller.invariantTag.bindToColor(location.colorProperty(), location.colorIntensityProperty(), false);
+            controller.nicknameTag.bindToColor(location.colorProperty(), true);
+            controller.invariantTag.bindToColor(location.colorProperty(), false);
 
             // Update the invariant
             controller.nicknameTag.setAndBindString(location.nicknameProperty());
@@ -167,7 +164,8 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
             final Consumer<String> updateVisibilityFromNickName = (nickname) -> {
                 if (nickname.equals("") && !controller.nicknameTag.textFieldFocusProperty().get()) {
                     controller.nicknameTag.setOpacity(0);
-                } else {controller.nicknameTag.setOpacity(1);
+                } else {
+                    controller.nicknameTag.setOpacity(1);
                 }
             };
 
@@ -207,8 +205,10 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
             BindingHelper.bind(controller.invariantTagLine, controller.invariantTag);
         };
 
-        controller.nicknameTag.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
-        controller.invariantTag.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
+        Platform.runLater(() -> {
+            controller.nicknameTag.setOnKeyPressed(Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
+            controller.invariantTag.setOnKeyPressed(Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
+        });
 
         // Update the tags when the loc updates
         controller.locationProperty().addListener(observable -> updateTags.accept(loc));
@@ -260,23 +260,21 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
 
         final Circle circle = controller.circle;
         circle.setRadius(RADIUS);
-        final ObjectProperty<Color> color = location.colorProperty();
-        final ObjectProperty<Color.Intensity> colorIntensity = location.colorIntensityProperty();
+        final ObjectProperty<EnabledColor> color = location.colorProperty();
 
         // Delegate to style the label based on the color of the location
-        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
-            circle.setFill(newColor.getColor(newIntensity));
-            circle.setStroke(newColor.getColor(newIntensity.next(2)));
+        final Consumer<EnabledColor> updateColor = (newColor) -> {
+            circle.setFill(newColor.getPaintColor());
+            circle.setStroke(newColor.getStrokeColor());
         };
 
         updateColorDelegates.add(updateColor);
 
         // Set the initial color
-        updateColor.accept(color.get(), colorIntensity.get());
+        updateColor.accept(color.get());
 
         // Update the color of the circle when the color of the location is updated
-        color.addListener((obs, old, newColor) -> updateColor.accept(newColor, colorIntensity.get()));
-        colorIntensity.addListener((obs, old, newIntensity) -> updateColor.accept(color.get(), newIntensity));
+        color.addListener((obs, old, newColor) -> updateColor.accept(newColor));
     }
 
     private void initializeLocationShapes() {
@@ -314,19 +312,19 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
 
                 @Override
                 protected void interpolate(final double frac) {
-                    animation.set(1-frac);
+                    animation.set(1 - frac);
                 }
             };
 
             boolean isNormalOrProhibited = newUrgency.equals(Location.Urgency.NORMAL) || newUrgency.equals(Location.Urgency.PROHIBITED);
 
-            if(!oldUrgency.equals(Location.Urgency.URGENT) && !isNormalOrProhibited) {
+            if (!oldUrgency.equals(Location.Urgency.URGENT) && !isNormalOrProhibited) {
                 toUrgent.play();
-            } else if(isNormalOrProhibited && oldUrgency.equals(Location.Urgency.URGENT)) {
+            } else if (isNormalOrProhibited && oldUrgency.equals(Location.Urgency.URGENT)) {
                 toNormal.play();
             }
 
-            if(newUrgency.equals(Location.Urgency.COMMITTED)) {
+            if (newUrgency.equals(Location.Urgency.COMMITTED)) {
                 committedShape.setVisible(true);
                 notCommittedShape.setVisible(false);
             } else {
@@ -334,13 +332,13 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
                 notCommittedShape.setVisible(true);
             }
 
-            if(newUrgency.equals(Location.Urgency.PROHIBITED)) {
+            if (newUrgency.equals(Location.Urgency.PROHIBITED)) {
                 notCommittedShape.setStrokeWidth(4);
                 notCommittedShape.setStroke(Color.RED.getColor(Color.Intensity.A700));
                 controller.prohibitedLocStrikeThrough.setVisible(true);
             } else {
                 notCommittedShape.setStrokeWidth(1);
-                notCommittedShape.setStroke(location.getColor().getColor(location.getColorIntensity().next(2)));
+                notCommittedShape.setStroke(location.getColor().getStrokeColor());
                 controller.prohibitedLocStrikeThrough.setVisible(false);
             }
         };
@@ -351,48 +349,33 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
 
         updateUrgencies.accept(Location.Urgency.NORMAL, location.getUrgency());
 
-        // Update the colors
-        final ObjectProperty<Color> color = location.colorProperty();
-        final ObjectProperty<Color.Intensity> colorIntensity = location.colorIntensityProperty();
-        final BooleanProperty failing = location.failingProperty();
-
         // Delegate to style the label based on the color of the location
-        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
-
+        final Consumer<EnabledColor> updateColor = (newColor) -> { // ToDo NIELS: Fix this consumer, it seems a bit weird
             if (!location.getUrgency().equals(Location.Urgency.PROHIBITED)) {
                 if (location.getFailing()) {
-                    notCommittedShape.setStroke(Color.RED.getColor(newIntensity));
+                    notCommittedShape.setFill(Color.RED.getColor(Color.Intensity.I700));
                 } else {
-                    notCommittedShape.setStroke(newColor.getColor(newIntensity.next(2)));
+                    notCommittedShape.setFill(newColor.getStrokeColor());
                 }
-            }
-            if (location.getFailing()) {
-                notCommittedShape.setFill(Color.RED.getColor(newIntensity));
-                committedShape.setFill(Color.RED.getColor(newIntensity));
-                committedShape.setStroke(Color.RED.getColor(newIntensity.next(2)));
+            } else if (location.getFailing()) {
+                notCommittedShape.setFill(Color.RED.getColor(Color.Intensity.I700));
+                committedShape.setFill(Color.RED.getColor(Color.Intensity.I700));
+                committedShape.setStroke(Color.RED.getColor(Color.Intensity.I700.next(2)));
             } else {
-                notCommittedShape.setFill(newColor.getColor(newIntensity));
-                committedShape.setFill(newColor.getColor(newIntensity));
-                committedShape.setStroke(newColor.getColor(newIntensity.next(2)));
-            }
-        };
-
-        final Consumer<Boolean> handleFailingUpdate = (isFailing) -> {
-            if(isFailing) {
-                updateColor.accept(Color.RED, colorIntensity.get());
-            } else {
-                updateColor.accept(location.getColor(), colorIntensity.get());
+                notCommittedShape.setFill(newColor.getPaintColor());
+                committedShape.setFill(newColor.getPaintColor());
+                committedShape.setStroke(newColor.getStrokeColor());
             }
         };
 
         updateColorDelegates.add(updateColor);
 
         // Set the initial color
-        updateColor.accept(color.get(), colorIntensity.get());
+        updateColor.accept(location.getColor());
 
         // Update the color of the circle when the color of the location is updated
-        color.addListener((obs, old, newColor) -> updateColor.accept(newColor, colorIntensity.get()));
-        failing.addListener((obs, old, newFailing) -> updateColor.accept(color.get(), colorIntensity.get()));
+        location.colorProperty().addListener((obs, old, newColor) -> updateColor.accept(newColor));
+        location.failingProperty().addListener(obs -> updateColor.accept(location.getColor()));
     }
 
     private void initializeTypeGraphics() {
@@ -550,7 +533,7 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
 
     @Override
     public void select() {
-        updateColorDelegates.forEach(colorConsumer -> colorConsumer.accept(SelectHelper.SELECT_COLOR, SelectHelper.SELECT_COLOR_INTENSITY_NORMAL));
+        updateColorDelegates.forEach(colorConsumer -> colorConsumer.accept(new EnabledColor(SelectHelper.SELECT_COLOR, SelectHelper.SELECT_COLOR_INTENSITY_NORMAL)));
     }
 
     @Override
@@ -558,7 +541,7 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
         updateColorDelegates.forEach(colorConsumer -> {
             final Location location = controller.getLocation();
 
-            colorConsumer.accept(location.getColor(), location.getColorIntensity());
+            colorConsumer.accept(location.getColor());
         });
     }
 

@@ -5,7 +5,7 @@
     "isPeriodic": false,
     "ignoredInputs": {},
     "ignoredOutputs": {},
-    "backend": "Reveaal"
+    "engine": "Reveaal"
   },
   {
     "query": "specification: Sender",
@@ -13,7 +13,7 @@
     "isPeriodic": false,
     "ignoredInputs": {},
     "ignoredOutputs": {},
-    "backend": "Reveaal"
+    "engine": "Reveaal"
   },
   {
     "query": "implementation: Sender",
@@ -21,6 +21,6 @@
     "isPeriodic": false,
     "ignoredInputs": {},
     "ignoredOutputs": {},
-    "backend": "Reveaal"
+    "engine": "Reveaal"
   }
 ]

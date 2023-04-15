@@ -5,6 +5,6 @@
     "isPeriodic": false,
     "ignoredInputs": {},
     "ignoredOutputs": {},
-    "backend": "Reveaal"
+    "engine": "Reveaal"
   }
 ]

@@ -5,6 +5,7 @@ import ecdar.abstractions.Location;
 import ecdar.controllers.SimLocationController;
 import ecdar.utility.Highlightable;
 import ecdar.utility.colors.Color;
+import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.BindingHelper;
 import ecdar.utility.helpers.SelectHelper;
 import javafx.animation.*;
@@ -41,7 +42,7 @@ public class SimLocationPresentation extends Group implements Highlightable {
     private final Timeline hiddenAreaAnimationExited = new Timeline();
     private final Timeline scaleShakeIndicatorBackgroundAnimation = new Timeline();
     private final Timeline shakeContentAnimation = new Timeline();
-    private final List<BiConsumer<Color, Color.Intensity>> updateColorDelegates = new ArrayList<>();
+    private final List<Consumer<EnabledColor>> updateColorDelegates = new ArrayList<>();
     private final DoubleProperty animation = new SimpleDoubleProperty(0);
     private final DoubleBinding reverseAnimation = new SimpleDoubleProperty(1).subtract(animation);
     private BooleanProperty isPlaced = new SimpleBooleanProperty(true);
@@ -87,22 +88,21 @@ public class SimLocationPresentation extends Group implements Highlightable {
         idLabel.widthProperty().addListener((obsWidth, oldWidth, newWidth) -> idLabel.translateXProperty().set(newWidth.doubleValue() / -2));
         idLabel.heightProperty().addListener((obsHeight, oldHeight, newHeight) -> idLabel.translateYProperty().set(newHeight.doubleValue() / -2));
 
-        final ObjectProperty<Color> color = location.colorProperty();
-        final ObjectProperty<Color.Intensity> colorIntensity = location.colorIntensityProperty();
+        final ObjectProperty<EnabledColor> color = location.colorProperty();
 
         // Delegate to style the label based on the color of the location
-        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
-            idLabel.setTextFill(newColor.getTextColor(newIntensity));
-            ds.setColor(newColor.getColor(newIntensity));
+        final Consumer<EnabledColor> updateColor = (newColor) -> {
+            idLabel.setTextFill(newColor.getTextColor());
+            ds.setColor(newColor.getPaintColor());
         };
 
         updateColorDelegates.add(updateColor);
 
         // Set the initial color
-        updateColor.accept(color.get(), colorIntensity.get());
+        updateColor.accept(color.get());
 
         // Update the color of the circle when the color of the location is updated
-        color.addListener((obs, old, newColor) -> updateColor.accept(newColor, colorIntensity.get()));
+        color.addListener((obs, old, newColor) -> updateColor.accept(newColor));
     }
 
     /**
@@ -130,8 +130,8 @@ public class SimLocationPresentation extends Group implements Highlightable {
 
         final Consumer<Location> updateTags = location -> {
             // Update the color
-            controller.nicknameTag.bindToColor(location.colorProperty(), location.colorIntensityProperty(), true);
-            controller.invariantTag.bindToColor(location.colorProperty(), location.colorIntensityProperty(), false);
+            controller.nicknameTag.bindToColor(location.colorProperty(), true);
+            controller.invariantTag.bindToColor(location.colorProperty(), false);
 
             // Update the invariant
             controller.nicknameTag.setAndBindString(location.nicknameProperty());
@@ -185,23 +185,21 @@ public class SimLocationPresentation extends Group implements Highlightable {
 
         final Circle circle = controller.circle;
         circle.setRadius(RADIUS);
-        final ObjectProperty<Color> color = location.colorProperty();
-        final ObjectProperty<Color.Intensity> colorIntensity = location.colorIntensityProperty();
+        final ObjectProperty<EnabledColor> color = location.colorProperty();
 
         // Delegate to style the label based on the color of the location
-        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
-            circle.setFill(newColor.getColor(newIntensity));
-            circle.setStroke(newColor.getColor(newIntensity.next(2)));
+        final Consumer<EnabledColor> updateColor = (newColor) -> {
+            circle.setFill(newColor.getPaintColor());
+            circle.setStroke(newColor.getStrokeColor());
         };
 
         updateColorDelegates.add(updateColor);
 
         // Set the initial color
-        updateColor.accept(color.get(), colorIntensity.get());
+        updateColor.accept(color.get());
 
         // Update the color of the circle when the color of the location is updated
-        color.addListener((obs, old, newColor) -> updateColor.accept(newColor, colorIntensity.get()));
-        colorIntensity.addListener((obs, old, newIntensity) -> updateColor.accept(color.get(), newIntensity));
+        color.addListener((obs, old, newColor) -> updateColor.accept(newColor));
     }
 
     /**
@@ -253,22 +251,21 @@ public class SimLocationPresentation extends Group implements Highlightable {
         updateUrgencies.accept(Location.Urgency.NORMAL, location.getUrgency());
 
         // Update the colors
-        final ObjectProperty<Color> color = location.colorProperty();
-        final ObjectProperty<Color.Intensity> colorIntensity = location.colorIntensityProperty();
+        final ObjectProperty<EnabledColor> color = location.colorProperty();
 
         // Delegate to style the label based on the color of the location
-        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
-            notCommittedShape.setFill(newColor.getColor(newIntensity));
-            notCommittedShape.setStroke(newColor.getColor(newIntensity.next(2)));
+        final Consumer<EnabledColor> updateColor = (newColor) -> {
+            notCommittedShape.setFill(newColor.getPaintColor());
+            notCommittedShape.setStroke(newColor.getStrokeColor());
         };
 
         updateColorDelegates.add(updateColor);
 
         // Set the initial color
-        updateColor.accept(color.get(), colorIntensity.get());
+        updateColor.accept(color.get());
 
         // Update the color of the circle when the color of the location is updated
-        color.addListener((obs, old, newColor) -> updateColor.accept(newColor, colorIntensity.get()));
+        color.addListener((obs, old, newColor) -> updateColor.accept(newColor));
     }
 
     /**
@@ -491,15 +488,13 @@ public class SimLocationPresentation extends Group implements Highlightable {
 
     @Override
     public void highlight() {
-        updateColorDelegates.forEach(colorConsumer -> colorConsumer.accept(SelectHelper.SELECT_COLOR, SelectHelper.SELECT_COLOR_INTENSITY_NORMAL));
+        updateColorDelegates.forEach(colorConsumer -> colorConsumer.accept(new EnabledColor(SelectHelper.SELECT_COLOR, SelectHelper.SELECT_COLOR_INTENSITY_NORMAL)));
     }
 
     @Override
     public void unhighlight() {
         updateColorDelegates.forEach(colorConsumer -> {
-            final Location location = controller.getLocation();
-
-            colorConsumer.accept(location.getColor(), location.getColorIntensity());
+            colorConsumer.accept(controller.getLocation().getColor());
         });
     }
 }

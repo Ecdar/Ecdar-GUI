@@ -7,8 +7,7 @@ import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.DisplayableEdge;
 import ecdar.abstractions.EdgeStatus;
-import ecdar.abstractions.HighLevelModelObject;
-import ecdar.presentations.CanvasPresentation;
+import ecdar.presentations.*;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
 import ecdar.utility.colors.EnabledColor;
@@ -16,7 +15,9 @@ import ecdar.utility.helpers.SelectHelper;
 import ecdar.utility.keyboard.Keybind;
 import ecdar.utility.keyboard.KeyboardTracker;
 import javafx.application.Platform;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -30,10 +31,11 @@ import javafx.util.Pair;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class EditorController implements Initializable {
+public class EditorController implements ModeController, Initializable {
     public VBox root;
     public HBox toolbar;
     public JFXRippler colorSelected;
@@ -45,6 +47,9 @@ public class EditorController implements Initializable {
     public JFXToggleButton switchEdgeStatusButton;
     public StackPane canvasPane;
 
+    public final ProjectPanePresentation projectPane = new ProjectPanePresentation();
+    public final QueryPanePresentation queryPane = new QueryPanePresentation();
+
     private final ObjectProperty<EdgeStatus> globalEdgeStatus = new SimpleObjectProperty<>(EdgeStatus.INPUT);
     private final ObjectProperty<CanvasPresentation> activeCanvasPresentation = new SimpleObjectProperty<>(new CanvasPresentation());
 
@@ -53,6 +58,35 @@ public class EditorController implements Initializable {
         initializeCanvasPane();
         initializeEdgeStatusHandling();
         initializeKeybindings();
+        Platform.runLater(this::initializeSidePanes);
+
+        // Update file coloring when active model changes
+        getActiveCanvasPresentation().getController().activeModelProperty().addListener((observable, oldModel, newModel) -> projectPane.getController().swapHighlightBetweenTwoModelFiles(oldModel, newModel));
+    }
+
+    private void initializeSidePanes() {
+        final DoubleProperty prevX = new SimpleDoubleProperty();
+        final DoubleProperty prevWidth = new SimpleDoubleProperty();
+
+        queryPane.getController().resizeAnchor.setOnMousePressed(event -> {
+            event.consume();
+
+            prevX.set(event.getScreenX());
+            prevWidth.set(queryPane.getWidth());
+        });
+
+        queryPane.getController().resizeAnchor.setOnMouseDragged(event -> {
+            double diff = prevX.get() - event.getScreenX();
+
+            // Set bounds for resizing to be between 280px and half the screen width
+            final double newWidth = Math.min(Math.max(prevWidth.get() + diff, 280), Ecdar.getPresentation().getWidth() / 2);
+
+            queryPane.setMinWidth(newWidth);
+            queryPane.setMaxWidth(newWidth);
+        });
+
+        projectPane.getStyleClass().add("responsive-pane-sizing");
+        queryPane.getStyleClass().add("responsive-pane-sizing");
     }
 
     public EdgeStatus getGlobalEdgeStatus() {
@@ -73,11 +107,15 @@ public class EditorController implements Initializable {
         activeCanvasPresentation.set(newActiveCanvasPresentation);
     }
 
-    public void setActiveModelForActiveCanvas(HighLevelModelObject newActiveModel) {
-        EcdarController.setActiveModelForActiveCanvas(newActiveModel);
+    public void setActiveModelPresentationForActiveCanvas(HighLevelModelPresentation newActiveModelPresentation) {
+        getActiveCanvasPresentation().getController().setActiveModelPresentation(newActiveModelPresentation);
 
         // Change zoom level to fit new active model
-        Platform.runLater(() -> EcdarController.getActiveCanvasPresentation().getController().zoomHelper.zoomToFit());
+        Platform.runLater(() -> getActiveCanvasPresentation().getController().zoomHelper.zoomToFit());
+    }
+
+    public DoubleProperty getActiveCanvasZoomFactor() {
+        return getActiveCanvasPresentation().getController().zoomHelper.currentZoomFactor;
     }
 
     private void initializeCanvasPane() {
@@ -92,7 +130,7 @@ public class EditorController implements Initializable {
                 final List<Pair<SelectHelper.ItemSelectable, EnabledColor>> previousColor = new ArrayList<>();
 
                 SelectHelper.getSelectedElements().forEach(selectable -> {
-                    previousColor.add(new Pair<>(selectable, new EnabledColor(selectable.getColor(), selectable.getColorIntensity())));
+                    previousColor.add(new Pair<>(selectable, selectable.getColor()));
                 });
                 changeColorOnSelectedElements(enabledColor, previousColor);
                 SelectHelper.clearSelectedElements();
@@ -159,9 +197,9 @@ public class EditorController implements Initializable {
                                               final List<Pair<SelectHelper.ItemSelectable, EnabledColor>> previousColor) {
         UndoRedoStack.pushAndPerform(() -> { // Perform
             SelectHelper.getSelectedElements()
-                    .forEach(selectable -> selectable.color(enabledColor.color, enabledColor.intensity));
+                    .forEach(selectable -> selectable.color(enabledColor));
         }, () -> { // Undo
-            previousColor.forEach(selectableEnabledColorPair -> selectableEnabledColorPair.getKey().color(selectableEnabledColorPair.getValue().color, selectableEnabledColorPair.getValue().intensity));
+            previousColor.forEach(selectableEnabledColorPair -> selectableEnabledColorPair.getKey().color(selectableEnabledColorPair.getValue()));
         }, String.format("Changed the color of %d elements to %s", previousColor.size(), enabledColor.color.name()), "color-lens");
     }
 
@@ -171,28 +209,26 @@ public class EditorController implements Initializable {
     void setCanvasModeToSingular() {
         canvasPane.getChildren().clear();
         CanvasPresentation canvasPresentation = new CanvasPresentation();
-        HighLevelModelObject model = activeCanvasPresentation.get().getController().getActiveModel();
-        if (model != null) {
-            canvasPresentation.getController().setActiveModel(activeCanvasPresentation.get().getController().getActiveModel());
-        } else {
-            // If no components where found, the project has not been initialized. The active model will be updated when the project is initialized
-            canvasPresentation.getController().setActiveModel(Ecdar.getProject().getComponents().stream().findFirst().orElse(null));
+        if (activeCanvasPresentation.get().getController().getActiveModelPresentation() != null) {
+            canvasPresentation.getController().setActiveModelPresentation(activeCanvasPresentation.get().getController().getActiveModelPresentation());
         }
 
         canvasPane.getChildren().add(canvasPresentation);
-        activeCanvasPresentation.set(canvasPresentation);
+        setActiveCanvasPresentation(canvasPresentation);
 
         Rectangle clip = new Rectangle();
         clip.setArcWidth(1);
         clip.setArcHeight(1);
         clip.widthProperty().bind(canvasPane.widthProperty());
         clip.heightProperty().bind(canvasPane.heightProperty());
-
         canvasPresentation.getController().zoomablePane.setClip(clip);
+
         canvasPresentation.getController().zoomablePane.minWidthProperty().bind(canvasPane.widthProperty());
         canvasPresentation.getController().zoomablePane.maxWidthProperty().bind(canvasPane.widthProperty());
         canvasPresentation.getController().zoomablePane.minHeightProperty().bind(canvasPane.heightProperty());
         canvasPresentation.getController().zoomablePane.maxHeightProperty().bind(canvasPane.heightProperty());
+
+        Platform.runLater(() -> projectPane.getController().setHighlightedForModelFiles(Collections.singletonList(getActiveCanvasPresentation().getController().getActiveModelPresentation())));
     }
 
     /**
@@ -220,12 +256,12 @@ public class EditorController implements Initializable {
         canvasGrid.getRowConstraints().add(row1);
         canvasGrid.getRowConstraints().add(row1);
 
-        ObservableList<Component> components = Ecdar.getProject().getComponents();
+        ObservableList<ComponentPresentation> components = projectPane.getController().getComponentPresentations();
         int currentCompNum = 0, numComponents = components.size();
 
         // Add the canvasPresentation at the top-left
         CanvasPresentation canvasPresentation = initializeNewCanvasPresentation();
-        canvasPresentation.getController().setActiveModel(getActiveCanvasPresentation().getController().getActiveModel());
+        canvasPresentation.getController().setActiveModelPresentation(getActiveCanvasPresentation().getController().getActiveModelPresentation());
         canvasGrid.add(canvasPresentation, 0, 0);
         setActiveCanvasPresentation(canvasPresentation);
 
@@ -236,7 +272,7 @@ public class EditorController implements Initializable {
 
         // Update the startIndex for the next canvasPresentation
         for (int i = 0; i < numComponents; i++) {
-            if (canvasPresentation.getController().getActiveModel() != null && canvasPresentation.getController().getActiveModel().equals(components.get(i))) {
+            if (canvasPresentation.getController().getActiveModelPresentation() != null && canvasPresentation.getController().getActiveModelPresentation().getController().getModel().equals(components.get(i))) {
                 currentCompNum = i + 1;
             }
         }
@@ -248,7 +284,7 @@ public class EditorController implements Initializable {
 
         // Update the startIndex for the next canvasPresentation
         for (int i = 0; i < numComponents; i++)
-            if (canvasPresentation.getController().getActiveModel() != null && canvasPresentation.getController().getActiveModel().equals(components.get(i))) {
+            if (canvasPresentation.getController().getActiveModelPresentation() != null && canvasPresentation.getController().getActiveModelPresentation().getController().getModel().equals(components.get(i))) {
                 currentCompNum = i + 1;
             }
 
@@ -263,18 +299,18 @@ public class EditorController implements Initializable {
     /**
      * Initialize a new CanvasShellPresentation and set its active component to the next component encountered from the startIndex and return it
      *
-     * @param components the list of components for assigning active component of the CanvasPresentation
+     * @param componentPresentations the list of componentPresentations for assigning active component of the CanvasPresentation
      * @param startIndex the index to start at when trying to find the component to set as active
      * @return new CanvasShellPresentation
      */
-    private CanvasPresentation initializeNewCanvasPresentationWithActiveComponent(ObservableList<Component> components, int startIndex) {
+    private CanvasPresentation initializeNewCanvasPresentationWithActiveComponent(ObservableList<ComponentPresentation> componentPresentations, int startIndex) {
         CanvasPresentation canvasPresentation = initializeNewCanvasPresentation();
 
-        int numComponents = components.size();
-        canvasPresentation.getController().setActiveModel(null);
+        int numComponents = componentPresentations.size();
+        canvasPresentation.getController().setActiveModelPresentation(null);
         for (int currentCompNum = startIndex; currentCompNum < numComponents; currentCompNum++) {
-            if (getActiveCanvasPresentation().getController().getActiveModel() != components.get(currentCompNum)) {
-                canvasPresentation.getController().setActiveModel(components.get(currentCompNum));
+            if (getActiveCanvasPresentation().getController().getActiveModelPresentation() != componentPresentations.get(currentCompNum)) {
+                canvasPresentation.getController().setActiveModelPresentation(componentPresentations.get(currentCompNum));
                 break;
             }
         }
@@ -376,5 +412,15 @@ public class EditorController implements Initializable {
         });
 
         SelectHelper.clearSelectedElements();
+    }
+
+    @Override
+    public StackPane getLeftPane() {
+        return projectPane;
+    }
+
+    @Override
+    public StackPane getRightPane() {
+        return queryPane;
     }
 }

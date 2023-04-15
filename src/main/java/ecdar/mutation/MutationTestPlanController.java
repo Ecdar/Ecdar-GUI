@@ -6,6 +6,8 @@ import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXTextField;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
+import ecdar.abstractions.HighLevelModel;
+import ecdar.controllers.HighLevelModelController;
 import ecdar.mutation.models.MutationTestCase;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.mutation.models.TestResult;
@@ -30,7 +32,7 @@ import java.util.stream.Collectors;
 /**
  * Controller for a test plan with model-based mutation testing.
  */
-public class MutationTestPlanController {
+public class MutationTestPlanController extends HighLevelModelController {
     public final static String SPEC_NAME = "S";
     public final static String MUTANT_NAME = "M";
 
@@ -105,15 +107,9 @@ public class MutationTestPlanController {
     public Text failedNumber;
     public Text primaryFailedNumber;
 
-
-    /* Mutation fields */
-
     private MutationTestPlan plan;
     private TestingHandler testingHandler;
     public final ObservableList<TestResult> resultsToShow = new SimpleListProperty<>(FXCollections.observableArrayList());
-
-
-    /* Properties */
 
     public MutationTestPlan getPlan() {
         return plan;
@@ -128,8 +124,6 @@ public class MutationTestPlanController {
         return testingHandler;
     }
 
-    /* Other methods */
-
     /**
      * Triggered when pressed the test button.
      * Conducts the test.
@@ -139,7 +133,7 @@ public class MutationTestPlanController {
 
         // Find test model from test model picker
         // Clone it, because we want to change its name
-        final Component testModel = Ecdar.getProject().findComponent(modelPicker.getValue().getText()).cloneForVerification();
+        final Component testModel = ComponentVerificationTransformer.cloneForVerification(plan.getTestModel());
 
         new MutationHandler(testModel, getPlan(), cases -> startGeneration(testModel, cases)).start();
     }
@@ -233,5 +227,10 @@ public class MutationTestPlanController {
     public void onExportButtonPressed() {
         getPlan().clearResults();
         new ExportHandler(getPlan(), Ecdar.getProject().findComponent(modelPicker.getValue().getText())).start();
+    }
+
+    @Override
+    public HighLevelModel getModel() {
+        return plan;
     }
 }

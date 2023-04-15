@@ -16,7 +16,6 @@ import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.util.Pair;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,16 +44,16 @@ public class SimulationHandler {
     private final ObservableMap<String, BigDecimal> simulationVariables = FXCollections.observableHashMap();
     private final ObservableMap<String, BigDecimal> simulationClocks = FXCollections.observableHashMap();
     public ObservableList<SimulationState> traceLog = FXCollections.observableArrayList();
-    private final BackendDriver backendDriver;
-    private final ArrayList<BackendConnection> connections = new ArrayList<>();
 
     private List<String> ComponentsInSimulation = new ArrayList<>();
+
+    private EngineConnection con;
 
     /**
      * Empty constructor that should be used if the system or project has not be initialized yet
      */
-    public SimulationHandler(BackendDriver backendDriver) {
-        this.backendDriver = backendDriver;
+    public SimulationHandler() {
+
     }
 
     public void clearComponentsInSimulation() {
@@ -75,6 +74,11 @@ public class SimulationHandler {
         this.selectedEdge.set(null);
         this.traceLog.clear();
         this.system = getSystem();
+
+        if (con == null) {
+            EngineConnectionStarter ecs = new EngineConnectionStarter(BackendHelper.getDefaultEngine());
+            con = ecs.tryStartNewConnection();
+        }
     }
 
     /**
@@ -83,11 +87,11 @@ public class SimulationHandler {
     public void initialStep() {
         initializeSimulation();
 
-        GrpcRequest request = new GrpcRequest(backendConnection -> {
+        GrpcRequest request = new GrpcRequest(engineConnection -> {
             StreamObserver<SimulationStepResponse> responseObserver = new StreamObserver<>() {
                 @Override
                 public void onNext(QueryProtos.SimulationStepResponse value) {
-                    // TODO this is temp solution to compile but should be fixed to handle ambiguity
+                    // ToDo: This is temp solution to compile but should be fixed to handle ambiguity
                     currentState.set(new SimulationState(value.getNewDecisionPoints(0)));
                     Platform.runLater(() -> traceLog.add(currentState.get()));
                 }
@@ -95,17 +99,10 @@ public class SimulationHandler {
                 @Override
                 public void onError(Throwable t) {
                     Ecdar.showToast("Could not start simulation:\n" + t.getMessage());
-                    
-                    // Release backend connection
-                    backendDriver.addBackendConnection(backendConnection);
-                    connections.remove(backendConnection);
                 }
 
                 @Override
                 public void onCompleted() {
-                    // Release backend connection
-                    backendDriver.addBackendConnection(backendConnection);
-                    connections.remove(backendConnection);
                 }
             };
 
@@ -120,12 +117,11 @@ public class SimulationHandler {
                     .setComponentComposition(composition)
                     .setComponentsInfo(comInfo);
             simStartRequest.setSimulationInfo(simInfo);
-            backendConnection.getStub().withDeadlineAfter(this.backendDriver.getResponseDeadline(), TimeUnit.MILLISECONDS)
+            engineConnection.getStub().withDeadlineAfter(20000, TimeUnit.MILLISECONDS)
                     .startSimulation(simStartRequest.build(), responseObserver);
-        }, BackendHelper.getDefaultBackendInstance());
-        
-        backendDriver.addRequestToExecutionQueue(request);
-        
+        });
+
+        request.execute(con);
         numberOfSteps++;
     }
     
@@ -143,7 +139,7 @@ public class SimulationHandler {
         // removes invalid states from the log when stepping forward after previewing a previous state
         removeStatesFromLog(currentState.get()); 
         
-        GrpcRequest request = new GrpcRequest(backendConnection -> {
+        GrpcRequest request = new GrpcRequest(engineConnection -> {
             StreamObserver<SimulationStepResponse> responseObserver = new StreamObserver<>() {
                 @Override
                 public void onNext(QueryProtos.SimulationStepResponse value) {
@@ -155,17 +151,10 @@ public class SimulationHandler {
                 @Override
                 public void onError(Throwable t) {
                     Ecdar.showToast("Could not take next step in simulation\nError: " + t.getMessage());
-                    
-                    // Release backend connection
-                    backendDriver.addBackendConnection(backendConnection);
-                    connections.remove(backendConnection);
-                }
+                  }
                 
                 @Override
                 public void onCompleted() {
-                    // Release backend connection
-                    backendDriver.addBackendConnection(backendConnection);
-                    connections.remove(backendConnection);
                 }
             };
             
@@ -173,6 +162,7 @@ public class SimulationHandler {
             for (Component c : Ecdar.getProject().getComponents()) {
                 comInfo.addComponents(ComponentProtos.Component.newBuilder().setJson(c.serialize().toString()).build());
             }
+
             comInfo.setComponentsHash(comInfo.getComponentsList().hashCode());
             var simStepRequest = SimulationStepRequest.newBuilder();
             var simInfo = SimulationInfo.newBuilder()
@@ -185,13 +175,11 @@ public class SimulationHandler {
             var decision = Decision.newBuilder().setEdge(edge).setSource(source);
             simStepRequest.setChosenDecision(decision);
 
-            backendConnection.getStub().withDeadlineAfter(this.backendDriver.getResponseDeadline(), TimeUnit.MILLISECONDS)
+            engineConnection.getStub().withDeadlineAfter(20000, TimeUnit.MILLISECONDS)
                     .takeSimulationStep(simStepRequest.build(), responseObserver);
-        }, BackendHelper.getDefaultBackendInstance());
-        
-        backendDriver.addRequestToExecutionQueue(request);
+        });
 
-        // increments the number of steps taken during this simulation
+        request.execute(con);
         numberOfSteps++;
     }
 
@@ -295,17 +283,6 @@ public class SimulationHandler {
 
     public boolean isSimulationRunning() {
         return false; // ToDo: Implement
-    }
-
-    /**
-     * Close all open backend connection and kill all locally running processes
-     *
-     * @throws IOException if any of the sockets do not respond
-     */
-    public void closeAllBackendConnections() throws IOException {
-        for (BackendConnection con : connections) {
-            con.close();
-        }
     }
 
     /**

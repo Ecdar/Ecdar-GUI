@@ -4,6 +4,8 @@ import ecdar.Ecdar;
 import ecdar.abstractions.*;
 import ecdar.presentations.*;
 import ecdar.utility.UndoRedoStack;
+import ecdar.utility.colors.Color;
+import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.SelectHelper;
 import com.jfoenix.controls.JFXPopup;
 import javafx.beans.property.ObjectProperty;
@@ -11,15 +13,21 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Pane;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Line;
+import javafx.scene.layout.*;
+import javafx.scene.shape.*;
 
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+
+import static ecdar.Ecdar.CANVAS_PADDING;
+import static ecdar.presentations.ModelPresentation.*;
 
 /**
  * Controller for a system.
@@ -34,20 +42,12 @@ public class SystemController extends ModelController implements Initializable {
     
     private final Map<ComponentInstance, ComponentInstancePresentation> componentInstancePresentationMap = new HashMap<>();
     private final Map<ComponentOperator, ComponentOperatorPresentation> componentOperatorPresentationMap = new HashMap<>();
-    private final Map<EcdarSystemEdge, SystemEdgePresentation> edgePresentationMap = new HashMap<>();
+    private final Map<SystemEdge, SystemEdgePresentation> edgePresentationMap = new HashMap<>();
 
     private final ObjectProperty<EcdarSystem> system = new SimpleObjectProperty<>();
 
     private Circle dropDownMenuHelperCircle;
     private DropDownMenu contextMenu;
-
-    public EcdarSystem getSystem() {
-        return system.get();
-    }
-
-    public void setSystem(final EcdarSystem system) {
-        this.system.setValue(system);
-    }
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
@@ -60,11 +60,127 @@ public class SystemController extends ModelController implements Initializable {
             initializeComponentInstanceHandling(newValue);
             initializeOperatorHandling(newValue);
             initializeEdgeHandling(newValue);
+
+            super.initialize(newValue.getBox());
+            initializeDimensions(newValue.getBox());
+
+            // Initialize methods that are sensitive to width and height
+            final Runnable onUpdateSize = () -> {
+                initializeToolbar();
+                initializeFrame();
+                initializeBackground();
+            };
+
+            onUpdateSize.run();
+
+            // Re-run initialisation on update of width and height property
+            newValue.getBox().getWidthProperty().addListener(obs -> onUpdateSize.run());
+            newValue.getBox().getHeightProperty().addListener(obs -> onUpdateSize.run());
         });
+    }
+
+    public void setSystem(final EcdarSystem system) {
+        this.system.setValue(system);
+    }
+
+    public EcdarSystem getSystem() {
+        return system.get();
     }
 
     private void initializeSystemRoot(final EcdarSystem system) {
         systemRootContainer.getChildren().add(new SystemRootPresentation(system));
+    }
+
+    /**
+     * Initializes the toolbar.
+     */
+    private void initializeToolbar() {
+        final Consumer<EnabledColor> updateColor = (newColor) -> {
+            // Set the background of the toolbar
+            toolbar.setBackground(new Background(new BackgroundFill(
+                    newColor.getPaintColor(),
+                    CornerRadii.EMPTY,
+                    Insets.EMPTY
+            )));
+
+            toolbar.setPrefHeight(TOOLBAR_HEIGHT);
+        };
+
+        getSystem().colorProperty().addListener(observable -> updateColor.accept(getSystem().getColor()));
+
+        updateColor.accept(getSystem().getColor());
+    }
+
+    /**
+     * Initializes the frame and handling of it.
+     * The frame is a rectangle minus two cutouts.
+     */
+    private void initializeFrame() {
+        final Shape[] mask = new Shape[1];
+        final Rectangle rectangle = new Rectangle(getSystem().getBox().getWidth(), getSystem().getBox().getHeight());
+
+        // Generate top right corner (to subtract)
+        final Polygon topRightCorner = new Polygon(
+                getSystem().getBox().getWidth(), 0,
+                getSystem().getBox().getWidth() - (CORNER_SIZE + 2), 0,
+                getSystem().getBox().getWidth(), CORNER_SIZE + 2
+        );
+
+        final Consumer<EnabledColor> updateColor = (newColor) -> {
+            // Mask the parent of the frame (will also mask the background)
+            mask[0] = Path.subtract(rectangle, TOP_LEFT_CORNER);
+            mask[0] = Path.subtract(mask[0], topRightCorner);
+            frame.setClip(mask[0]);
+            background.setClip(Path.union(mask[0], mask[0]));
+            background.setOpacity(0.5);
+
+            // Bind the missing lines that we cropped away
+            topLeftLine.setStartX(CORNER_SIZE);
+            topLeftLine.setStartY(0);
+            topLeftLine.setEndX(0);
+            topLeftLine.setEndY(CORNER_SIZE);
+            topLeftLine.setStroke(newColor.getStrokeColor());
+            topLeftLine.setStrokeWidth(1.25);
+            StackPane.setAlignment(topLeftLine, Pos.TOP_LEFT);
+
+            topRightLine.setStartX(0);
+            topRightLine.setStartY(0);
+            topRightLine.setEndX(CORNER_SIZE);
+            topRightLine.setEndY(CORNER_SIZE);
+            topRightLine.setStroke(newColor.getStrokeColor());
+            topRightLine.setStrokeWidth(1.25);
+            StackPane.setAlignment(topRightLine, Pos.TOP_RIGHT);
+
+            // Set the stroke color to two shades darker
+            frame.setBorder(new Border(new BorderStroke(
+                    newColor.getStrokeColor(),
+                    BorderStrokeStyle.SOLID,
+                    CornerRadii.EMPTY,
+                    new BorderWidths(1),
+                    Insets.EMPTY
+            )));
+        };
+
+        // Update now, and update on color change
+        updateColor.accept(getSystem().getColor());
+        getSystem().colorProperty().addListener(observable -> updateColor.accept(getSystem().getColor()));
+    }
+
+    /**
+     * Initializes the background
+     */
+    private void initializeBackground() {
+        // Bind the background width and height to the values in the model
+        background.widthProperty().bindBidirectional(getSystem().getBox().getWidthProperty());
+        background.heightProperty().bindBidirectional(getSystem().getBox().getHeightProperty());
+
+        final Consumer<EnabledColor> updateColor = (newColor) -> {
+            // Set the background color to the lightest possible version of the color
+            background.setFill(newColor.setIntensity(2).getPaintColor());
+        };
+
+        getSystem().colorProperty().addListener(observable -> updateColor.accept(getSystem().getColor()));
+        updateColor.accept(getSystem().getColor());
     }
 
     /**
@@ -73,7 +189,7 @@ public class SystemController extends ModelController implements Initializable {
      */
     @FXML
     private void modelContainerPressed(final MouseEvent event) {
-        EcdarController.getActiveCanvasPresentation().getController().leaveTextAreas();
+        Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasPresentation().getController().leaveTextAreas();
         SelectHelper.clearSelectedElements();
 
         if (event.isSecondaryButtonDown()) {
@@ -87,7 +203,7 @@ public class SystemController extends ModelController implements Initializable {
     }
 
     @Override
-    public HighLevelModelObject getModel() {
+    public HighLevelModel getModel() {
         return getSystem();
     }
 
@@ -260,7 +376,7 @@ public class SystemController extends ModelController implements Initializable {
      */
     private void initializeEdgeHandling(final EcdarSystem system) {
         system.getEdges().forEach(this::handleAddedEdge);
-        system.getEdges().addListener((ListChangeListener<EcdarSystemEdge>) change -> {
+        system.getEdges().addListener((ListChangeListener<SystemEdge>) change -> {
             if (change.next()) {
                 change.getAddedSubList().forEach(this::handleAddedEdge);
                 change.getRemoved().forEach(this::handleRemovedEdge);
@@ -272,7 +388,7 @@ public class SystemController extends ModelController implements Initializable {
      * Handles an added edge.
      * @param edge the edge
      */
-    private void handleAddedEdge(final EcdarSystemEdge edge) {
+    private void handleAddedEdge(final SystemEdge edge) {
         final SystemEdgePresentation presentation = new SystemEdgePresentation(edge, getSystem());
         edgePresentationMap.put(edge, presentation);
         edgeContainer.getChildren().add(presentation);
@@ -282,7 +398,7 @@ public class SystemController extends ModelController implements Initializable {
      * Handles a removed component instance.
      * @param edge the edge
      */
-    private void handleRemovedEdge(final EcdarSystemEdge edge) {
+    private void handleRemovedEdge(final SystemEdge edge) {
         edgeContainer.getChildren().remove(edgePresentationMap.get(edge));
         edgePresentationMap.remove(edge);
 
@@ -308,5 +424,45 @@ public class SystemController extends ModelController implements Initializable {
     void showBorderAndBackground() {
         super.showBorderAndBackground();
         topRightLine.setVisible(true);
+    }
+
+    /**
+     * Gets the minimum allowed width when dragging the anchor.
+     * It is determined by the position and size of the system nodes.
+     * @return the minimum allowed width
+     */
+    @Override
+    double getDragAnchorMinWidth() {
+        double minWidth = getSystem().getSystemRoot().getX() + SystemRoot.WIDTH + 2 * CANVAS_PADDING;
+
+        for (final ComponentInstance instance : getSystem().getComponentInstances()) {
+            minWidth = Math.max(minWidth, instance.getBox().getX() + instance.getBox().getWidth() + CANVAS_PADDING);
+        }
+
+        for (final ComponentOperator operator : getSystem().getComponentOperators()) {
+            minWidth = Math.max(minWidth, operator.getBox().getX() + operator.getBox().getWidth() + CANVAS_PADDING);
+        }
+
+        return minWidth;
+    }
+
+    /**
+     * Gets the minimum allowed height when dragging the anchor.
+     * It is determined by the position and size of the system nodes.
+     * @return the minimum allowed height
+     */
+    @Override
+    double getDragAnchorMinHeight() {
+        double minHeight = 10 * CANVAS_PADDING;
+
+        for (final ComponentInstance instance : getSystem().getComponentInstances()) {
+            minHeight = Math.max(minHeight, instance.getBox().getY() + instance.getBox().getHeight() + CANVAS_PADDING);
+        }
+
+        for (final ComponentOperator operator : getSystem().getComponentOperators()) {
+            minHeight = Math.max(minHeight, operator.getBox().getY() + operator.getBox().getHeight() + CANVAS_PADDING);
+        }
+
+        return minHeight;
     }
 }

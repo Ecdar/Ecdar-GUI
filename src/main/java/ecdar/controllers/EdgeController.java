@@ -8,6 +8,7 @@ import ecdar.presentations.*;
 import ecdar.utility.Highlightable;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
+import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.*;
 import ecdar.utility.keyboard.Keybind;
 import ecdar.utility.keyboard.KeyboardTracker;
@@ -442,11 +443,11 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
                             dropDownMenu.hide();
                         });
                         
-                        dropDownMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX() * EcdarController.getActiveCanvasZoomFactor().get(), event.getY() * EcdarController.getActiveCanvasZoomFactor().get());
+                        dropDownMenu.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, event.getX() * Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasZoomFactor().get(), event.getY() * Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasZoomFactor().get());
 
                     } else if ((event.isShiftDown() && event.isPrimaryButtonDown()) || event.isMiddleButtonDown()) {
-                        final double nailX = EcdarController.getActiveCanvasPresentation().mouseTracker.xProperty().subtract(getComponent().getBox().getXProperty()).doubleValue();
-                        final double nailY = EcdarController.getActiveCanvasPresentation().mouseTracker.yProperty().subtract(getComponent().getBox().getYProperty()).doubleValue();
+                        final double nailX = Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasPresentation().mouseTracker.xProperty().subtract(getComponent().getBox().getXProperty()).doubleValue();
+                        final double nailY = Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasPresentation().mouseTracker.yProperty().subtract(getComponent().getBox().getYProperty()).doubleValue();
 
                         final Nail newNail = new Nail(nailX, nailY);
 
@@ -593,8 +594,8 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
     }
 
     private Nail getNewNailBasedOnDropdownPosition() {
-        final double nailX = DropDownMenu.x / EcdarController.getActiveCanvasZoomFactor().get();
-        final double nailY = DropDownMenu.y / EcdarController.getActiveCanvasZoomFactor().get();
+        final double nailX = DropDownMenu.x / Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasZoomFactor().get();
+        final double nailY = DropDownMenu.y / Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasZoomFactor().get();
         return new Nail(nailX, nailY);
     }
 
@@ -722,22 +723,16 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
     }
 
     @Override
-    public void color(final Color color, final Color.Intensity intensity) {
+    public void color(final EnabledColor color) {
         final DisplayableEdge edge = getEdge();
 
         // Set the color of the edge
-        edge.setColorIntensity(intensity);
         edge.setColor(color);
     }
 
     @Override
-    public Color getColor() {
+    public EnabledColor getColor() {
         return getEdge().getColor();
-    }
-
-    @Override
-    public Color.Intensity getColorIntensity() {
-        return getEdge().getColorIntensity();
     }
 
     @Override

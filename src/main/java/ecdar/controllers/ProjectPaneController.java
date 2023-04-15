@@ -4,23 +4,31 @@ import com.jfoenix.controls.JFXTextField;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.EcdarSystem;
-import ecdar.abstractions.HighLevelModelObject;
+import ecdar.abstractions.HighLevelModel;
+import ecdar.abstractions.Project;
+import ecdar.mutation.MutationTestPlanPresentation;
 import ecdar.mutation.models.MutationTestPlan;
-import ecdar.presentations.DropDownMenu;
-import ecdar.presentations.FilePresentation;
+import ecdar.presentations.*;
 import ecdar.utility.UndoRedoStack;
 import com.jfoenix.controls.JFXPopup;
 import com.jfoenix.controls.JFXRippler;
 import com.jfoenix.controls.JFXTextArea;
+import ecdar.utility.colors.EnabledColor;
+import ecdar.utility.keyboard.Keybind;
+import ecdar.utility.keyboard.KeyboardTracker;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
-import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -28,10 +36,7 @@ import org.kordamp.ikonli.javafx.FontIcon;
 import org.kordamp.ikonli.material.Material;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class ProjectPaneController implements Initializable {
     public StackPane root;
@@ -52,65 +57,71 @@ public class ProjectPaneController implements Initializable {
     public ImageView createSystemImage;
     public StackPane createSystemPane;
 
-    private final HashMap<HighLevelModelObject, FilePresentation> modelPresentationMap = new HashMap<>();
+
+    public final Project project = new Project();
+    private final HashMap<HighLevelModelPresentation, FilePresentation> modelPresentationMap = new HashMap<>();
+    private final ObservableList<ComponentPresentation> componentPresentations = FXCollections.observableArrayList();
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
-        // Bind global declarations and add mouse event
-        final FilePresentation globalDclPresentation = new FilePresentation(Ecdar.getProject().getGlobalDeclarations());
-        globalDclPresentation.setOnMousePressed(event -> {
-            event.consume();
-            EcdarController.setActiveModelForActiveCanvas(Ecdar.getProject().getGlobalDeclarations());
-            updateColorsOnFilePresentations();
-        });
-        filesList.getChildren().add(globalDclPresentation);
+        Platform.runLater(() -> {
+            // Bind global declarations and add mouse event
+            final DeclarationsPresentation globalDeclarationsPresentation = new DeclarationsPresentation(project.getGlobalDeclarations());
+            final FilePresentation globalDclPresentation = new FilePresentation(project.getGlobalDeclarations());
+            modelPresentationMap.put(globalDeclarationsPresentation, globalDclPresentation);
+            globalDclPresentation.setOnMousePressed(event -> {
+                Ecdar.getPresentation().getController().getEditorPresentation().getController().setActiveModelPresentationForActiveCanvas(globalDeclarationsPresentation);
+            });
 
-        Ecdar.getProject().getComponents().addListener(new ListChangeListener<Component>() {
-            @Override
-            public void onChanged(final Change<? extends Component> c) {
-                while (c.next()) {
-                    c.getAddedSubList().forEach(o -> handleAddedModel(o));
-                    c.getRemoved().forEach(o -> handleRemovedModel(o));
-
-                    // Sort the children alphabetically
-                    sortPresentations();
-                }
-            }
+            filesList.getChildren().add(globalDclPresentation);
         });
 
-        Ecdar.getProject().getTempComponents().addListener((ListChangeListener<Component>) c -> {
-            while (c.next()) {
-                c.getAddedSubList().forEach(this::handleAddedModel);
-                c.getRemoved().forEach(this::handleRemovedModel);
-
-                generatedComponentsDivider.setVisible(!tempFilesList.getChildren().isEmpty());
-
-                // Sort the children alphabetically
-                sortPresentations();
-            }
-        });
-
-        Ecdar.getProject().getComponents().forEach(this::handleAddedModel);
-
-        // Listen to added and removed systems
-        Ecdar.getProject().getSystemsProperty().addListener((ListChangeListener<EcdarSystem>) change -> {
-            while (change.next()) {
-                change.getAddedSubList().forEach(this::handleAddedModel);
-                change.getRemoved().forEach(this::handleRemovedModel);
-
-                // Sort the children alphabetically
-                sortPresentations();
-            }
-        });
-
+        initializeComponentHandling();
+        initializeSystemHandling();
         initializeMutationTestPlanHandling();
+        initializeCreateComponentKeybinding();
+        resetProject();
+
+        Platform.runLater(() -> {
+            final var initializedModelPresentation = modelPresentationMap.keySet().stream().filter(mp -> mp instanceof ComponentPresentation).findFirst().orElse(null);
+            Ecdar.getPresentation().getController().getEditorPresentation().getController().setActiveModelPresentationForActiveCanvas(initializedModelPresentation);
+        });
+    }
+
+    private void initializeSystemHandling() {
+        project.getSystems().addListener((ListChangeListener<EcdarSystem>) change -> {
+            while (change.next()) {
+                change.getAddedSubList().forEach(o -> handleAddedModelPresentation(new SystemPresentation(o)));
+                change.getRemoved().forEach(o -> handleRemovedModelPresentation(modelPresentationMap.keySet().stream().filter(modelPresentation -> modelPresentation.getController().getModel().equals(o)).findFirst().orElse(null)));
+
+                // Sort the children alphabetically
+                sortPresentations();
+            }
+        });
+    }
+
+    private void initializeComponentHandling() {
+        project.getComponents().addListener(getComponentListChangeListener());
+        project.getTempComponents().addListener(getComponentListChangeListener());
+    }
+
+    private ListChangeListener<Component> getComponentListChangeListener() {
+        return c -> {
+            while (c.next()) {
+                c.getAddedSubList().forEach(o -> handleAddedModelPresentation(new ComponentPresentation(o)));
+                c.getRemoved().forEach(o -> handleRemovedModelPresentation(modelPresentationMap.keySet().stream().filter(modelPresentation -> modelPresentation.getController().getModel().equals(o)).findFirst().orElse(null)));
+
+                // Sort the children alphabetically
+                sortPresentations();
+            }
+        };
     }
 
     private void initializeMutationTestPlanHandling() {
-        Ecdar.getProject().getTestPlans().addListener((ListChangeListener<MutationTestPlan>) change -> {
+        project.getTestPlans().addListener((ListChangeListener<MutationTestPlan>) change -> {
             while (change.next()) {
-                change.getAddedSubList().forEach(this::handleAddedModel);
-                change.getRemoved().forEach(this::handleRemovedModel);
+                change.getAddedSubList().forEach(o -> handleAddedModelPresentation(new MutationTestPlanPresentation(o)));
+                change.getRemoved().forEach(o -> handleRemovedModelPresentation(new MutationTestPlanPresentation(o)));
 
                 // Sort the children alphabetically
                 sortPresentations();
@@ -119,15 +130,20 @@ public class ProjectPaneController implements Initializable {
     }
 
     private void sortPresentations() {
-        final ArrayList<HighLevelModelObject> sortedComponentList = new ArrayList<>(modelPresentationMap.keySet());
-        sortedComponentList.sort(Comparator.comparing(HighLevelModelObject::getName));
-        sortedComponentList.forEach(component -> modelPresentationMap.get(component).toFront());
+        Platform.runLater(() -> {
+            final ArrayList<HighLevelModelPresentation> sortedComponentList = new ArrayList<>(modelPresentationMap.keySet());
+            sortedComponentList.sort(Comparator.comparing(o -> o.getController().getModel().getName()));
+            sortedComponentList.forEach(component -> modelPresentationMap.get(component).toFront());
+
+            var globalDec = modelPresentationMap.keySet().stream().filter(hp -> hp instanceof DeclarationsPresentation).findFirst().orElse(null);
+            modelPresentationMap.get(globalDec).toBack();
+        });
     }
 
     private void initializeMoreInformationDropDown(final FilePresentation filePresentation) {
         final JFXRippler moreInformation = (JFXRippler) filePresentation.lookup("#moreInformation");
         final DropDownMenu moreInformationDropDown = new DropDownMenu(moreInformation);
-        final HighLevelModelObject model = filePresentation.getModel();
+        final HighLevelModel model = filePresentation.getController().getModel();
 
         // If component, added toggle for periodic check
         if (model instanceof Component) {
@@ -166,13 +182,13 @@ public class ProjectPaneController implements Initializable {
         // Add color picker
         if (model instanceof Component) {
             moreInformationDropDown.addColorPicker(
-                    filePresentation.getModel(),
-                    ((Component) filePresentation.getModel())::dye
+                    model,
+                    ((Component) model)::dye
             );
         } else if (model instanceof EcdarSystem) {
             moreInformationDropDown.addColorPicker(
-                    filePresentation.getModel(),
-                    ((EcdarSystem) filePresentation.getModel())::dye
+                    model,
+                    ((EcdarSystem) model)::dye
             );
         }
 
@@ -180,54 +196,52 @@ public class ProjectPaneController implements Initializable {
         if (model instanceof Component) {
             moreInformationDropDown.addSpacerElement();
 
-            if (!filePresentation.getModel().isTemporary()) {
+            if (!filePresentation.getController().getModel().isTemporary()) {
                 moreInformationDropDown.addClickableListElement("Delete", event -> {
                     UndoRedoStack.pushAndPerform(() -> { // Perform
-                        Ecdar.getProject().getComponents().remove(model);
+                        project.getComponents().remove(model);
                     }, () -> { // Undo
-                        Ecdar.getProject().getComponents().add((Component) model);
+                        project.addComponent((Component) model);
                     }, "Deleted component " + model.getName(), "delete");
                     moreInformationDropDown.hide();
                 });
             } else {
                 moreInformationDropDown.addClickableListElement("Delete", event -> {
                     UndoRedoStack.pushAndPerform(() -> { // Perform
-                        Ecdar.getProject().getTempComponents().remove(model);
+                        project.getTempComponents().remove(model);
                     }, () -> { // Undo
-                        Ecdar.getProject().getTempComponents().add((Component) model);
+                        project.getTempComponents().add((Component) model);
                     }, "Deleted component " + model.getName(), "delete");
                     moreInformationDropDown.hide();
                 });
-                
+
                 moreInformationDropDown.addClickableListElement("Add as component", event -> {
-                    if(Ecdar.getProject().getComponents().stream().noneMatch(component -> component.getName().equals(model.getName()))) {
+                    if (project.getComponents().stream().noneMatch(component -> component.getName().equals(model.getName()))) {
                         UndoRedoStack.pushAndPerform(() -> { // Perform
-                            Ecdar.getProject().getTempComponents().remove(model);
+                            project.getTempComponents().remove(model);
                             model.setTemporary(false);
-                            Ecdar.getProject().getComponents().add((Component) model);
-                            EcdarController.setActiveModelForActiveCanvas(model);
+                            project.addComponent((Component) model);
                         }, () -> { // Undo
-                            Ecdar.getProject().getComponents().remove(model);
+                            project.getComponents().remove(model);
                             model.setTemporary(true);
-                            Ecdar.getProject().getTempComponents().add((Component) model);
-                            EcdarController.setActiveModelForActiveCanvas(model);
+                            project.getTempComponents().add((Component) model);
                         }, "Add component " + model.getName(), "add");
                         moreInformationDropDown.hide();
                     } else {
                         String originalModelName = model.getName();
+                        // Get new model number starting from 2 to symbolize second version
                         for (int i = 2; i < 100; i++) {
                             final String newName = originalModelName + " #" + i;
-                            if(Ecdar.getProject().getComponents().stream().noneMatch(component -> component.getName().equals(newName))) {
+                            if (project.getComponents().stream().noneMatch(component -> component.getName().equals(newName))) {
                                 UndoRedoStack.pushAndPerform(() -> { // Perform
-                                    Ecdar.getProject().getTempComponents().remove(model);
+                                    project.getTempComponents().remove(model);
                                     model.setTemporary(false);
-                                    Ecdar.getProject().getComponents().add((Component) model);
-                                    EcdarController.setActiveModelForActiveCanvas(model);
+                                    project.addComponent((Component) model);
                                     model.setName(newName);
                                 }, () -> { // Undo
-                                    Ecdar.getProject().getComponents().remove(model);
+                                    project.getComponents().remove(model);
                                     model.setTemporary(true);
-                                    Ecdar.getProject().getTempComponents().add((Component) model);
+                                    project.getTempComponents().add((Component) model);
                                     model.setName(originalModelName);
                                 }, "Add component " + model.getName(), "add");
                                 moreInformationDropDown.hide();
@@ -244,9 +258,9 @@ public class ProjectPaneController implements Initializable {
             moreInformationDropDown.addSpacerElement();
             moreInformationDropDown.addClickableListElement("Delete", event -> {
                 UndoRedoStack.pushAndPerform(() -> { // Perform
-                    Ecdar.getProject().getSystemsProperty().remove(model);
+                    project.getSystems().remove(model);
                 }, () -> { // Undo
-                    Ecdar.getProject().getSystemsProperty().add((EcdarSystem) model);
+                    project.getSystems().add((EcdarSystem) model);
                 }, "Deleted system " + model.getName(), "delete");
                 moreInformationDropDown.hide();
             });
@@ -265,9 +279,9 @@ public class ProjectPaneController implements Initializable {
             // Delete button for test plan
             moreInformationDropDown.addClickableListElement("Delete", event -> {
                 UndoRedoStack.pushAndPerform(() -> { // Perform
-                    Ecdar.getProject().getTestPlans().remove(model);
+                    project.getTestPlans().remove(model);
                 }, () -> { // Undo
-                    Ecdar.getProject().getTestPlans().add((MutationTestPlan) model);
+                    project.getTestPlans().add((MutationTestPlan) model);
                 }, "Deleted test plan " + model.getName(), "delete");
                 moreInformationDropDown.hide();
             });
@@ -292,66 +306,169 @@ public class ProjectPaneController implements Initializable {
         });
     }
 
-    private void handleAddedModel(final HighLevelModelObject model) {
-        final FilePresentation filePresentation = new FilePresentation(model);
+    private void initializeCreateComponentKeybinding() {
+        //Press ctrl+N or cmd+N to create a new component. The canvas changes to this new component
+        KeyCodeCombination combination = new KeyCodeCombination(KeyCode.N, KeyCombination.SHORTCUT_DOWN);
+        Keybind binding = new Keybind(combination, (event) -> {
+            final Component newComponent = new Component(getAvailableColor(), getUniqueComponentName());
+            UndoRedoStack.pushAndPerform(() -> { // Perform
+                project.addComponent(newComponent);
+            }, () -> { // Undo
+                project.getComponents().remove(newComponent);
+            }, "Created new component: " + newComponent.getName(), "add-circle");
+
+            Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasPresentation().getController().setActiveModelPresentation(getComponentPresentations().stream().filter(componentPresentation -> componentPresentation.getController().getComponent().equals(newComponent)).findFirst().orElse(null));
+        });
+        KeyboardTracker.registerKeybind(KeyboardTracker.CREATE_COMPONENT, binding);
+    }
+
+    private void handleAddedModelPresentation(final HighLevelModelPresentation modelPresentation) {
+        final FilePresentation filePresentation = new FilePresentation(modelPresentation.getController().getModel());
         initializeMoreInformationDropDown(filePresentation);
 
-        // Add the file presentation related to the model to the project pane
-        if (model.isTemporary()) {
+        // Add the file presentation related to the modelPresentation to the project pane
+        if (modelPresentation.getController().getModel().isTemporary()) {
             tempFilesList.getChildren().add(filePresentation);
         } else {
             filesList.getChildren().add(filePresentation);
         }
-        modelPresentationMap.put(model, filePresentation);
 
-        // Open the component if the presentation is pressed
+        modelPresentationMap.put(modelPresentation, filePresentation);// ToDo NIELS: Bind these two
+        if (modelPresentation instanceof ComponentPresentation) {
+            componentPresentations.add((ComponentPresentation) modelPresentation);
+        }
+
+        // Open the component if the file is pressed
         filePresentation.setOnMousePressed(event -> {
-            event.consume();
-            EcdarController.setActiveModelForActiveCanvas(model);
-            updateColorsOnFilePresentations();
+            final var previouslyActiveFile = modelPresentationMap.get(Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasPresentation()
+                    .getController()
+                    .getActiveModelPresentation());
+            if (previouslyActiveFile != null) previouslyActiveFile.getController().setIsActive(false);
+
+            Ecdar.getPresentation().getController().getEditorPresentation().getController().setActiveModelPresentationForActiveCanvas(modelPresentation);
+            Platform.runLater(() -> {
+                filePresentation.getController().setIsActive(true);
+            });
         });
 
-        model.nameProperty().addListener(obs -> sortPresentations());
+        modelPresentation.getController().getModel().nameProperty().addListener(obs -> sortPresentations());
+        filePresentation.getController().setIsActive(true);
+        Platform.runLater(() -> Ecdar.getPresentation().getController().getEditorPresentation().getController().setActiveModelPresentationForActiveCanvas(modelPresentation));
     }
 
-    private void handleRemovedModel(final HighLevelModelObject model) {
-        // If we remove the model active on the canvas
-        if (EcdarController.getActiveCanvasPresentation().getController().getActiveModel() == model) {
-            if (Ecdar.getProject().getComponents().size() > 0) {
+    private void handleRemovedModelPresentation(final HighLevelModelPresentation modelPresentation) {
+        // If we remove the modelPresentation active on the canvas
+        if (Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasPresentation().getController().getActiveModelPresentation() == modelPresentation) {
+            if (project.getComponents().size() > 0) {
                 // Find the first available component and show it instead of the removed one
-                final Component component = Ecdar.getProject().getComponents().get(0);
-                EcdarController.setActiveModelForActiveCanvas(component);
-                updateColorsOnFilePresentations();
+                final HighLevelModelPresentation newActiveModelPresentation = modelPresentationMap.keySet().iterator().next();
+                Ecdar.getPresentation().getController().getEditorPresentation().getController().setActiveModelPresentationForActiveCanvas(newActiveModelPresentation);
+                modelPresentationMap.get(newActiveModelPresentation).getController().setIsActive(true);
             } else {
                 // Show no components (since there are none in the project)
-                EcdarController.setActiveModelForActiveCanvas(null);
+                Ecdar.getPresentation().getController().getEditorPresentation().getController().setActiveModelPresentationForActiveCanvas(null);
             }
         }
 
         // Remove the file presentation related to the model from the project pane
-        if (model.isTemporary()) {
-            tempFilesList.getChildren().remove(modelPresentationMap.get(model));
+        if (modelPresentation.getController().getModel().isTemporary()) {
+            tempFilesList.getChildren().removeIf(n -> n == modelPresentationMap.get(modelPresentation));
         } else {
-            filesList.getChildren().remove(modelPresentationMap.get(model));
+            filesList.getChildren().removeIf(n -> n == modelPresentationMap.get(modelPresentation));
         }
-        modelPresentationMap.remove(model);
+
+        modelPresentationMap.remove(modelPresentation);
     }
 
     /**
-     * Update the color of all FilePresentations to display currently active components
+     * Resets components.
+     * After this, there is only one component.
+     * Be sure to disable code analysis before call and enable after call.
      */
-    public void updateColorsOnFilePresentations() {
-        for (Node child : filesList.getChildren()) {
-            if (child instanceof FilePresentation) {
-                Platform.runLater(() -> ((FilePresentation) child).updateColors());
-            }
+    public void resetProject() {
+        project.clean();
+        project.addComponent(new Component(getAvailableColor(), getUniqueComponentName()));
+    }
+
+    public EnabledColor getAvailableColor() {
+        ArrayList<EnabledColor> availableColors = new ArrayList<>(EnabledColor.enabledColors);
+        for (Component comp : project.getComponents()) {
+            availableColors.removeIf(c -> comp.getColor().equals(c));
         }
 
-        for (Node child : tempFilesList.getChildren()) {
-            if (child instanceof FilePresentation) {
-                ((FilePresentation) child).updateColors();
+        if (availableColors.isEmpty()) {
+            return EnabledColor.enabledColors.get(new Random().nextInt(EnabledColor.enabledColors.size()));
+        }
+
+        return availableColors.get(0);
+    }
+
+    /**
+     * Gets the name of all components in the project and inserts it into a set
+     *
+     * @return the set of all component names
+     */
+    private HashSet<String> getComponentNames() {
+        final HashSet<String> names = new HashSet<>();
+
+        for (final Component component : project.getComponents()) {
+            names.add(component.getName());
+        }
+
+        return names;
+    }
+
+    /**
+     * Generate a unique name for the component
+     *
+     * @return A project unique name
+     */
+    public String getUniqueComponentName() {
+        for (int counter = 1; ; counter++) {
+            final String name = Project.COMPONENT + counter;
+            if (!getComponentNames().contains(name)) {
+                return name;
             }
         }
+    }
+
+    public String getUniqueSystemName() {
+        for (int counter = 1; ; counter++) {
+            final String name = Project.SYSTEM + counter;
+            if (!getSystemNames().contains(name)) {
+                return name;
+            }
+        }
+    }
+
+    private HashSet<String> getSystemNames() {
+        final HashSet<String> names = new HashSet<>();
+
+        for (final EcdarSystem component : project.getSystems()) {
+            names.add(component.getName());
+        }
+
+        return names;
+    }
+
+    public ObservableList<ComponentPresentation> getComponentPresentations() {
+        return componentPresentations;
+    }
+
+    public void setHighlightedForModelFiles(List<HighLevelModelPresentation> currentlyActiveModelPresentations) {
+        modelPresentationMap.values().forEach(fp -> fp.getController().setIsActive(false));
+
+        for (HighLevelModelPresentation modelPresentation : currentlyActiveModelPresentations) {
+            if (modelPresentationMap.containsKey(modelPresentation)) modelPresentationMap.get(modelPresentation).getController().setIsActive(true);
+        }
+    }
+
+    public void swapHighlightBetweenTwoModelFiles(final HighLevelModelPresentation oldActive, final HighLevelModelPresentation newActive) {
+        if (modelPresentationMap.containsKey(oldActive)) modelPresentationMap.get(oldActive)
+                .getController()
+                .setIsActive(false);
+
+        if (modelPresentationMap.containsKey(newActive)) modelPresentationMap.get(newActive).getController().setIsActive(true); // newActive is not in the map when opening an existing project
     }
 
     /**
@@ -359,16 +476,13 @@ public class ProjectPaneController implements Initializable {
      */
     @FXML
     private void createComponentClicked() {
-        final Component newComponent = new Component(true);
+        final Component newComponent = new Component(getAvailableColor(), getUniqueComponentName());
 
         UndoRedoStack.pushAndPerform(() -> { // Perform
-            Ecdar.getProject().getComponents().add(newComponent);
-            EcdarController.setActiveModelForActiveCanvas(newComponent);
+            project.addComponent(newComponent);
         }, () -> { // Undo
-            Ecdar.getProject().getComponents().remove(newComponent);
+            project.getComponents().remove(newComponent);
         }, "Created new component: " + newComponent.getName(), "add-circle");
-
-        updateColorsOnFilePresentations();
     }
 
     /**
@@ -376,13 +490,12 @@ public class ProjectPaneController implements Initializable {
      */
     @FXML
     private void createSystemClicked() {
-        final EcdarSystem newSystem = new EcdarSystem();
+        final EcdarSystem newSystem = new EcdarSystem(getAvailableColor(), getUniqueSystemName());
 
         UndoRedoStack.pushAndPerform(() -> { // Perform
-            Ecdar.getProject().getSystemsProperty().add(newSystem);
-            EcdarController.setActiveModelForActiveCanvas(newSystem);
+            project.getSystems().add(newSystem);
         }, () -> { // Undo
-            Ecdar.getProject().getSystemsProperty().remove(newSystem);
+            project.getSystems().remove(newSystem);
         }, "Created new system: " + newSystem.getName(), "add-circle");
     }
 

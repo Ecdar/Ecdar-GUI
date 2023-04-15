@@ -3,6 +3,7 @@ package ecdar.presentations;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.utility.colors.Color;
+import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.LocationAware;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -15,6 +16,7 @@ import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
  * The presentation for the tag shown on a {@link SimEdgePresentation} in the {@link SimulatorOverviewPresentation}<br />
@@ -112,22 +114,21 @@ public class SimTagPresentation extends StackPane {
         shape.setStroke(backgroundColor.getColor(backgroundColorIntensity.next(4)));
     }
 
-    public void bindToColor(final ObjectProperty<Color> color, final ObjectProperty<Color.Intensity> intensity) {
-        bindToColor(color, intensity, false);
+    public void bindToColor(final ObjectProperty<EnabledColor> color) {
+        bindToColor(color, false);
     }
 
-    public void bindToColor(final ObjectProperty<Color> color, final ObjectProperty<Color.Intensity> intensity, final boolean doColorBackground) {
-        final BiConsumer<Color, Color.Intensity> recolor = (newColor, newIntensity) -> {
+    public void bindToColor(final ObjectProperty<EnabledColor> color, final boolean doColorBackground) {
+        final Consumer<EnabledColor> recolor = (newColor) -> {
             if (doColorBackground) {
                 final Path shape = (Path) lookup("#shape");
-                shape.setFill(newColor.getColor(newIntensity.next(-1)));
-                shape.setStroke(newColor.getColor(newIntensity.next(-1).next(2)));
+                shape.setFill(newColor.nextIntensity(-1).getPaintColor());
+                shape.setStroke(newColor.getStrokeColor());
             }
         };
 
-        color.addListener(observable -> recolor.accept(color.get(), intensity.get()));
-        intensity.addListener(observable -> recolor.accept(color.get(), intensity.get()));
-        recolor.accept(color.get(), intensity.get());
+        color.addListener(observable -> recolor.accept(color.get()));
+        recolor.accept(color.get());
     }
 
     /**

@@ -3,9 +3,9 @@ package ecdar.simulation;
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Location;
-import ecdar.backend.BackendDriver;
-import ecdar.backend.BackendHelper;
 import ecdar.backend.SimulationHandler;
+import ecdar.controllers.SimLocationController;
+import ecdar.controllers.SimulatorController;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -31,7 +31,7 @@ public class ReachabilityTest {
         var component = new Component();
         component.setName("C1");
 
-        SimulationHandler simulationHandler = new SimulationHandler(new BackendDriver());
+        SimulationHandler simulationHandler = new SimulationHandler();
 
         List<String> components = new ArrayList<>();
         components.add("C1");
@@ -40,9 +40,9 @@ public class ReachabilityTest {
 
         simulationHandler.setComponentsInSimulation(components);
 
-        Ecdar.setSimulationHandler(simulationHandler);
+        SimulatorController.setSimulationHandler(simulationHandler);
 
-        var result = BackendHelper.getLocationReachableQuery(location, component, "query");
+        var result = SimLocationController.getSimLocationReachableQuery(location, component, "query");
 
         assertTrue(result.matches(regex));
     }
@@ -54,7 +54,7 @@ public class ReachabilityTest {
         var component = new Component();
         component.setName("C1");
 
-        SimulationHandler simulationHandler = new SimulationHandler(new BackendDriver());
+        SimulationHandler simulationHandler = new SimulationHandler();
 
         List<String> components = new ArrayList<>();
         components.add("C1");
@@ -65,7 +65,7 @@ public class ReachabilityTest {
 
         Ecdar.setSimulationHandler(simulationHandler);
 
-        var result = BackendHelper.getLocationReachableQuery(location, component, "query");
+        var result = SimLocationController.getSimLocationReachableQuery(location, component, "query");
 
         int indexOfOpeningBracket = result.indexOf('[');
         int indexOfComma = 0;
@@ -88,7 +88,7 @@ public class ReachabilityTest {
         var component = new Component();
         component.setName("C2");
 
-        SimulationHandler simulationHandler = new SimulationHandler(new BackendDriver());
+        SimulationHandler simulationHandler = new SimulationHandler();
 
         List<String> components = new ArrayList<>();
         components.add("C1");
@@ -99,7 +99,7 @@ public class ReachabilityTest {
 
         Ecdar.setSimulationHandler(simulationHandler);
 
-        var result = BackendHelper.getLocationReachableQuery(location, component, "query");
+        var result = SimLocationController.getSimLocationReachableQuery(location, component, "query");
 
         int indexOfFirstComma = 0;
         int indexofSecondComma = 0;
@@ -128,7 +128,7 @@ public class ReachabilityTest {
         var component = new Component();
         component.setName("C3");
 
-        SimulationHandler simulationHandler = new SimulationHandler(new BackendDriver());
+        SimulationHandler simulationHandler = new SimulationHandler();
 
         List<String> components = new ArrayList<>();
         components.add("C1");
@@ -139,7 +139,7 @@ public class ReachabilityTest {
 
         Ecdar.setSimulationHandler(simulationHandler);
 
-        var query = BackendHelper.getLocationReachableQuery(location, component, "query");
+        var query = SimLocationController.getSimLocationReachableQuery(location, component, "query");
 
         int indexOfLastComma = 0;
 
@@ -164,7 +164,7 @@ public class ReachabilityTest {
         var component = new Component();
         component.setName("C1");
 
-        SimulationHandler simulationHandler = new SimulationHandler(new BackendDriver());
+        SimulationHandler simulationHandler = new SimulationHandler();
 
         List<String> components = new ArrayList<>();
         components.add("C1");
@@ -176,7 +176,7 @@ public class ReachabilityTest {
 
         Ecdar.setSimulationHandler(simulationHandler);
 
-        var query = BackendHelper.getLocationReachableQuery(location, component, "query");
+        var query = SimLocationController.getSimLocationReachableQuery(location, component, "query");
         int commaCount = 0;
         for (int i = 0; i < query.length(); i++) {
             if (query.charAt(i) == ',') {
@@ -186,6 +186,6 @@ public class ReachabilityTest {
 
         int expected = commaCount + 1;
 
-        assertEquals(expected, Ecdar.getSimulationHandler().getComponentsInSimulation().size());
+        assertEquals(expected, SimulatorController.getSimulationHandler().getComponentsInSimulation().size());
     }
 }

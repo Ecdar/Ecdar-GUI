@@ -1,6 +1,6 @@
 package ecdar.controllers;
 
-import ecdar.abstractions.EcdarSystemEdge;
+import ecdar.abstractions.SystemEdge;
 import ecdar.abstractions.EcdarSystem;
 import ecdar.abstractions.SystemRoot;
 import ecdar.presentations.DropDownMenu;
@@ -85,7 +85,7 @@ public class SystemRootController implements Initializable {
      * Listens to an edge to update whether the root has an edge.
      * @param edge the edge to update with
      */
-    private void handleHasEdge(final EcdarSystemEdge edge) {
+    private void handleHasEdge(final SystemEdge edge) {
         edge.getTempNodeProperty().addListener((observable -> updateHasEdge(edge)));
         edge.getChildProperty().addListener((observable -> updateHasEdge(edge)));
         edge.getParentProperty().addListener((observable -> updateHasEdge(edge)));
@@ -95,7 +95,7 @@ public class SystemRootController implements Initializable {
      * Update has edge property to whether the root is in a given edge.
      * @param edge the given edge
      */
-    private void updateHasEdge(final EcdarSystemEdge edge) {
+    private void updateHasEdge(final SystemEdge edge) {
         hasEdge.set(edge.isInEdge(getSystemRoot()));
     }
 
@@ -103,7 +103,7 @@ public class SystemRootController implements Initializable {
     private void onMouseClicked(final MouseEvent event) {
         event.consume();
 
-        final EcdarSystemEdge unfinishedEdge = getSystem().getUnfinishedEdge();
+        final SystemEdge unfinishedEdge = getSystem().getUnfinishedEdge();
 
         if ((event.isShiftDown() && event.getButton().equals(MouseButton.PRIMARY)) || event.getButton().equals(MouseButton.MIDDLE)) {
             // If shift click or middle click a component instance, create a new edge
@@ -131,11 +131,11 @@ public class SystemRootController implements Initializable {
     }
 
     /***
-     * Helper method to create a new EcdarSystemEdge and add it to the current system and system root
-     * @return The newly created EcdarSystemEdge
+     * Helper method to create a new SystemEdge and add it to the current system and system root
+     * @return The newly created SystemEdge
      */
-    private EcdarSystemEdge createNewSystemEdge() {
-        final EcdarSystemEdge edge = new EcdarSystemEdge(systemRoot);
+    private SystemEdge createNewSystemEdge() {
+        final SystemEdge edge = new SystemEdge(systemRoot);
         getSystem().addEdge(edge);
         hasEdge.set(true);
         handleHasEdge(edge);

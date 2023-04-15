@@ -1,16 +1,12 @@
 package ecdar;
 
-import ecdar.abstractions.Component;
-import ecdar.abstractions.Project;
-import ecdar.backend.BackendDriver;
+import ecdar.abstractions.*;
+import ecdar.backend.BackendException;
 import ecdar.backend.BackendHelper;
-import ecdar.backend.QueryHandler;
 import ecdar.backend.SimulationHandler;
 import ecdar.code_analysis.CodeAnalysis;
-import ecdar.controllers.EcdarController;
-import ecdar.presentations.BackgroundThreadPresentation;
-import ecdar.presentations.EcdarPresentation;
-import ecdar.presentations.UndoRedoHistoryPresentation;
+import ecdar.issues.ExitStatusCodes;
+import ecdar.presentations.*;
 import ecdar.utility.keyboard.Keybind;
 import ecdar.utility.keyboard.KeyboardTracker;
 import javafx.application.Application;
@@ -53,14 +49,13 @@ public class Ecdar extends Application {
     private static EcdarPresentation presentation;
     private static BooleanProperty isUICached = new SimpleBooleanProperty();
     public static BooleanProperty shouldRunBackgroundQueries = new SimpleBooleanProperty(true);
-    private static final BooleanProperty isSplit = new SimpleBooleanProperty(true); //Set to true to ensure correct behaviour at first toggle.
-    private static BackendDriver backendDriver = new BackendDriver();
-    private static QueryHandler queryHandler = new QueryHandler(backendDriver);
+    private static final BooleanProperty isSplit = new SimpleBooleanProperty(false);
     private static SimulationHandler simulationHandler;
     private Stage debugStage;
 
     /**
      * Gets the absolute path to the server folder
+     *
      * @return
      */
     public static String getServerPath() {
@@ -75,6 +70,7 @@ public class Ecdar extends Application {
 
     /**
      * Gets the path to the root directory.
+     *
      * @return the path to the root directory
      * @throws URISyntaxException if the source code location could not be converted to an URI
      */
@@ -119,6 +115,7 @@ public class Ecdar extends Application {
 
     /**
      * Gets the project.
+     *
      * @return the project
      */
     public static Project getProject() {
@@ -147,6 +144,7 @@ public class Ecdar extends Application {
      * Toggles whether to cache UI.
      * Caching reduces CPU usage on some devices.
      * It also increases GPU 3D engine usage on some devices.
+     *
      * @return the property specifying whether to cache
      */
     public static BooleanProperty toggleUICache() {
@@ -157,6 +155,7 @@ public class Ecdar extends Application {
     /**
      * Toggles whether checks are run in the background.
      * Running checks in the background increases CPU usage and power consumption.
+     *
      * @return the property specifying whether to run checks in the background
      */
     public static BooleanProperty toggleRunBackgroundQueries() {
@@ -168,26 +167,15 @@ public class Ecdar extends Application {
         return presentation.toggleRightPane();
     }
 
-    /**
-     * Toggles whether to canvas is split or single.
-     * @return the property specifying whether the canvas is split
-     */
-    public static BooleanProperty toggleCanvasSplit() {
-        isSplit.set(!isSplit.get());
-
+    public static BooleanProperty isSplitProperty() {
         return isSplit;
     }
 
     /**
-     * Returns the backend driver used to execute queries and handle simulation
-     * @return BackendDriver
+     * Toggles whether to canvas is split or single.
      */
-    public static BackendDriver getBackendDriver() {
-        return backendDriver;
-    }
-
-    public static QueryHandler getQueryExecutor() {
-        return queryHandler;
+    public static void toggleCanvasSplit() {
+        isSplit.set(!isSplit.get());
     }
 
     public static SimulationHandler getSimulationHandler() { return simulationHandler; }
@@ -212,10 +200,6 @@ public class Ecdar extends Application {
     public void start(final Stage stage) {
         // Print launch message the user, if terminal is being launched
         System.out.println("Launching ECDAR...");
-
-        // Load or create new project
-        project = new Project();
-        simulationHandler = new SimulationHandler(getBackendDriver());
 
         // Set the title for the application
         stage.setTitle("Ecdar " + VERSION);
@@ -264,13 +248,21 @@ public class Ecdar extends Application {
             Ecdar.showToast("The application icon could not be loaded");
         }
 
+        BackendHelper.addEngineInstanceListener(() -> {
+            // When the engines change, clear the backendDriver
+            // to prevent dangling connections and queries
+            try {
+                BackendHelper.clearEngineConnections();
+            } catch (BackendException e) {
+                showToast("An exception was encountered during shutdown of engine connections");
+            }
+        });
+
+        // Whenever the Runtime is requested to exit, exit the Platform first
+        Runtime.getRuntime().addShutdownHook(new Thread(Platform::exit));
+
         // We're now ready! Let the curtains fall!
         stage.show();
-
-        project.reset();
-
-        // Set active model
-        Platform.runLater(() -> EcdarController.setActiveModelForActiveCanvas(Ecdar.getProject().getComponents().get(0)));
 
         // Register a key-bind for showing debug-information
         KeyboardTracker.registerKeybind("DEBUG", new Keybind(new KeyCodeCombination(KeyCode.F12), () -> {
@@ -309,85 +301,23 @@ public class Ecdar extends Application {
         }));
 
         stage.setOnCloseRequest(event -> {
-            BackendHelper.stopQueries();
+            int statusCode = ExitStatusCodes.SHUTDOWN_SUCCESSFUL.getStatusCode();
 
             try {
-                backendDriver.closeAllBackendConnections();
-                queryHandler.closeAllBackendConnections();
-                simulationHandler.closeAllBackendConnections();
-            } catch (IOException e) {
-                e.printStackTrace();
+                BackendHelper.clearEngineConnections();
+            } catch (BackendException e) {
+                statusCode = ExitStatusCodes.CLOSE_ENGINE_CONNECTIONS_FAILED.getStatusCode();
             }
 
-            Platform.exit();
-            System.exit(0);
-        });
-
-        BackendHelper.addBackendInstanceListener(() -> {
-            // When the backend instances change, re-instantiate the backendDriver
-            // to prevent dangling connections and queries
             try {
-                backendDriver.closeAllBackendConnections();
-                queryHandler.closeAllBackendConnections();
-                simulationHandler.closeAllBackendConnections();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
-            backendDriver = new BackendDriver();
-        });
-    }
-
-    /**
-     * Initializes and resets the project.
-     * This can be used as a test setup.
-     */
-    public static void setUpForTest() {
-        project = new Project();
-        project.reset();
-
-        // This implicitly starts the fx-application thread
-        // It prevents java.lang.RuntimeException: Internal graphics not initialized yet
-        // https://stackoverflow.com/questions/27839441/internal-graphics-not-initialized-yet-javafx
-        // new JFXPanel();
-    }
-
-    public static void initializeProjectFolder() throws IOException {
-        // Make sure that the project directory exists
-        final File directory = new File(projectDirectory.get());
-        FileUtils.forceMkdir(directory);
-
-        CodeAnalysis.getErrors().addListener(new ListChangeListener<CodeAnalysis.Message>() {
-            @Override
-            public void onChanged(Change<? extends CodeAnalysis.Message> c) {
-                CodeAnalysis.getErrors().forEach(message -> {
-                    System.out.println(message.getMessage());
-                });
+                System.exit(statusCode);
+            } catch (SecurityException e) {
+                // Forcefully shutdown the Java Runtime
+                Runtime.getRuntime().halt(ExitStatusCodes.GRACEFUL_SHUTDOWN_FAILED.getStatusCode());
             }
         });
-        CodeAnalysis.clearErrorsAndWarnings();
-        CodeAnalysis.disable();
-        getProject().clean();
 
-        // Deserialize the project
-        Ecdar.getProject().deserialize(directory);
-        CodeAnalysis.enable();
-
-        // Generate all component presentations by making them the active component in the view one by one
-        Component initialShownComponent = null;
-        for (final Component component : Ecdar.getProject().getComponents()) {
-            // The first component should be shown
-            if (initialShownComponent == null) {
-                initialShownComponent = component;
-            }
-            EcdarController.setActiveModelForActiveCanvas(component);
-        }
-
-        // If we found a component set that as active
-        if (initialShownComponent != null) {
-            EcdarController.setActiveModelForActiveCanvas(initialShownComponent);
-        }
-        serializationDone = true;
+        project = presentation.getController().getEditorPresentation().getController().projectPane.getController().project;
     }
 
     private void loadFonts() {
@@ -420,6 +350,44 @@ public class Ecdar extends Application {
         Font.loadFont(getClass().getResourceAsStream("fonts/roboto_mono/RobotoMono-Regular.ttf"), 14);
         Font.loadFont(getClass().getResourceAsStream("fonts/roboto_mono/RobotoMono-Thin.ttf"), 14);
         Font.loadFont(getClass().getResourceAsStream("fonts/roboto_mono/RobotoMono-ThinItalic.ttf"), 14);
+    }
+
+    /**
+     * Initializes and resets the project.
+     * This can be used as a test setup.
+     */
+    public static void setUpForTest() {
+        project = new Project();
+
+        // This implicitly starts the fx-application thread
+        // It prevents java.lang.RuntimeException: Internal graphics not initialized yet
+        // https://stackoverflow.com/questions/27839441/internal-graphics-not-initialized-yet-javafx
+        // new JFXPanel();
+    }
+
+    public static void initializeProjectFolder() throws IOException {
+        // Make sure that the project directory exists
+        final File directory = new File(projectDirectory.get());
+        FileUtils.forceMkdir(directory);
+
+        CodeAnalysis.getErrors().addListener((ListChangeListener<CodeAnalysis.Message>) c -> CodeAnalysis.getErrors().forEach(message -> {
+            System.out.println(message.getMessage());
+        }));
+
+        CodeAnalysis.clearErrorsAndWarnings();
+        CodeAnalysis.disable();
+        getProject().clean();
+
+        // Deserialize the project
+        getProject().deserialize(directory);
+        CodeAnalysis.enable();
+
+        // If we found a component set that as active
+        serializationDone = true;
+    }
+
+    public static ComponentPresentation getComponentPresentationOfComponent(Component component) {
+        return getPresentation().getController().getEditorPresentation().getController().projectPane.getController().getComponentPresentations().stream().filter(componentPresentation -> componentPresentation.getController().getComponent().equals(component)).findFirst().orElse(null);
     }
 
     private static String getVersion() {

@@ -6,6 +6,7 @@ import ecdar.abstractions.QueryState;
 import ecdar.presentations.QueryPresentation;
 import com.jfoenix.controls.JFXRippler;
 import ecdar.utility.colors.Color;
+import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -36,24 +37,25 @@ public class QueryPaneController implements Initializable {
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
-        Ecdar.getProject().getQueries().addListener((ListChangeListener<Query>) change -> {
-            while (change.next()) {
-                for (final Query removeQuery : change.getRemoved()) {
-                    queriesList.getChildren().remove(queryPresentationMap.get(removeQuery));
-                    queryPresentationMap.remove(removeQuery);
-                }
+        Platform.runLater(() -> {
+            Ecdar.getProject().getQueries().addListener((ListChangeListener<Query>) change -> {
+                while (change.next()) {
+                    for (final Query removeQuery : change.getRemoved()) {
+                        queriesList.getChildren().remove(queryPresentationMap.get(removeQuery));
+                        queryPresentationMap.remove(removeQuery);
+                    }
 
-                for (final Query newQuery : change.getAddedSubList()) {
-                    final QueryPresentation newQueryPresentation = new QueryPresentation(newQuery);
-                    queryPresentationMap.put(newQuery, newQueryPresentation);
-                    queriesList.getChildren().add(newQueryPresentation);
+                    for (final Query newQuery : change.getAddedSubList()) {
+                        final QueryPresentation newQueryPresentation = new QueryPresentation(newQuery);
+                        queryPresentationMap.put(newQuery, newQueryPresentation);
+                        queriesList.getChildren().add(newQueryPresentation);
+                    }
                 }
+            });
+            for (final Query newQuery : Ecdar.getProject().getQueries()) {
+                queriesList.getChildren().add(new QueryPresentation(newQuery));
             }
         });
-
-        for (final Query newQuery : Ecdar.getProject().getQueries()) {
-            queriesList.getChildren().add(new QueryPresentation(newQuery));
-        }
 
         initializeResizeAnchor();
     }
@@ -78,7 +80,7 @@ public class QueryPaneController implements Initializable {
         Ecdar.getProject().getQueries().forEach(query -> {
             if (query.getType() == null) return;
             query.cancel();
-            Ecdar.getQueryExecutor().executeQuery(query);
+            query.execute();
         });
     }
 

@@ -3,7 +3,6 @@ package ecdar.backend;
 import EcdarProtoBuf.ComponentProtos;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
-import ecdar.simulation.SimulationState;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -22,9 +21,9 @@ import java.util.Optional;
 
 public final class BackendHelper {
     final static String TEMP_DIRECTORY = "temporary";
-    private static BackendInstance defaultBackend = null;
-    private static ObservableList<BackendInstance> backendInstances = new SimpleListProperty<>();
-    private static List<Runnable> backendInstancesUpdatedListeners = new ArrayList<>();
+    private static Engine defaultEngine = null;
+    private static ObservableList<Engine> engines = new SimpleListProperty<>();
+    private static final List<Runnable> enginesUpdatedListeners = new ArrayList<>();
 
     /**
      * Stores a query as a backend XML query file in the "temporary" directory.
@@ -59,185 +58,85 @@ public final class BackendHelper {
     }
 
     /**
+     * Clears all queued queries, stops all active engines, and closes all open engine connections
+     */
+    public static void clearEngineConnections() throws BackendException {
+        BackendHelper.stopQueries();
+
+        BackendException exception = new BackendException("Exceptions were thrown while attempting to close engine connections");
+        for (Engine engine : engines) {
+            try {
+                engine.closeConnections();
+            } catch (BackendException e) {
+                exception.addSuppressed(e);
+            }
+        }
+
+        if (exception.getSuppressed().length > 0) {
+            throw exception;
+        }
+    }
+
+    /**
      * Stop all running queries.
      */
     public static void stopQueries() {
         Ecdar.getProject().getQueries().forEach(Query::cancel);
     }
 
-    public static String getLocationReachableQuery(final Location endLocation, final Component component, final String query) {
-        return getLocationReachableQuery(endLocation, component, query, null);
-    }
-        /**
-         * Generates a reachability query based on the given location and component
-         *
-         * @param endLocation  The location which should be checked for reachability
-         * @return A reachability query string
-         */
-    public static String getLocationReachableQuery(final Location endLocation, final Component component, final String query, final SimulationState state) {
-        var stringBuilder = new StringBuilder();
-
-        // append simulation query
-        stringBuilder.append(query);
-
-        // append arrow
-        stringBuilder.append(" -> ");
-
-        // append start location here TODO
-        if (state != null){
-            stringBuilder.append(getStartStateString(state));
-            stringBuilder.append(";");
-        }
-
-        // append end state
-        stringBuilder.append(getEndStateString(component.getName(), endLocation.getId()));
-
-        //  return example: m1||M2->[L1,L4](y<3);[L2, L7](y<2)
-        System.out.println(stringBuilder);
-        return stringBuilder.toString();
-    }
-
-    private static String getStartStateString(SimulationState state) {
-        var stringBuilder = new StringBuilder();
-
-        // append locations
-        var locations = state.getLocations();
-        stringBuilder.append("[");
-        var appendLocationWithSeparator = false;
-        for(var componentName:Ecdar.getSimulationHandler().getComponentsInSimulation()){
-            var locationFound = false;
-
-            for(var location:locations){
-                if (location.getKey().equals(componentName)){
-                    if (appendLocationWithSeparator){
-                        stringBuilder.append("," + location.getValue());
-                    }
-                    else{
-                        stringBuilder.append(location.getValue());
-                    }
-                    locationFound = true;
-                }
-                if (locationFound){
-                    // don't go through more locations, when a location is found for the specific component that we're looking at
-                    break;
-                }
-            }
-            appendLocationWithSeparator = true;
-        }
-        stringBuilder.append("]");
-
-        // append clock values
-        var clocks = state.getSimulationClocks();
-        stringBuilder.append("()");
-
-        return stringBuilder.toString();
-    }
-
-    private static String getEndStateString(String componentName, String endLocationId) {
-        var stringBuilder = new StringBuilder();
-
-        stringBuilder.append("[");
-        var appendLocationWithSeparator = false;
-
-        for (var component:Ecdar.getSimulationHandler().getComponentsInSimulation())
-        {
-            if (component.equals(componentName)){
-                if (appendLocationWithSeparator){
-                    stringBuilder.append("," + endLocationId);
-                }
-                else{
-                    stringBuilder.append(endLocationId);
-                }
-            }
-            else{ // add underscore to indicate, that we don't care about the end locations in the other components
-                if (appendLocationWithSeparator){
-                    stringBuilder.append(",_");
-                }
-                else{
-                    stringBuilder.append("_");
-                }
-            }
-            if (!appendLocationWithSeparator) {
-                appendLocationWithSeparator = true;
-            }
-        }
-        stringBuilder.append("]");
-        stringBuilder.append("()");
-
-        return stringBuilder.toString();
+    /**
+     * Returns the Engine with the specified name, or null, if no such Engine exists
+     *
+     * @param engineName Name of the Engine to return
+     * @return The Engine with matching name
+     * or the default engine, if no matching engine exists
+     */
+    public static Engine getEngineByName(String engineName) {
+        Optional<Engine> engine = BackendHelper.engines.stream().filter(e -> e.getName().equals(engineName)).findFirst();
+        return engine.orElse(BackendHelper.getDefaultEngine());
     }
 
     /**
-     * Generates a string for a deadlock query based on the component
+     * Returns the default Engine
      *
-     * @param component The component which should be checked for deadlocks
-     * @return A deadlock query string
+     * @return The default Engine
      */
-    public static String getExistDeadlockQuery(final Component component) {
-        // Get the names of the locations of this component. Used to produce the deadlock query
-        final String templateName = component.getName();
-        final List<String> locationNames = new ArrayList<>();
-
-        for (final Location location : component.getLocations()) {
-            locationNames.add(templateName + "." + location.getId());
-        }
-
-        return "(" + String.join(" || ", locationNames) + ") && deadlock";
+    public static Engine getDefaultEngine() {
+        return defaultEngine;
     }
 
     /**
-     * Returns the BackendInstance with the specified name, or null, if no such BackendInstance exists
+     * Sets the list of engines to match the provided list
      *
-     * @param backendInstanceName Name of the BackendInstance to return
-     * @return The BackendInstance with matching name
-     * or the default backend instance, if no matching backendInstance exists
+     * @param updatedEngines The list of engines that should be stored
      */
-    public static BackendInstance getBackendInstanceByName(String backendInstanceName) {
-        Optional<BackendInstance> backendInstance = BackendHelper.backendInstances.stream().filter(bi -> bi.getName().equals(backendInstanceName)).findFirst();
-        return backendInstance.orElse(BackendHelper.getDefaultBackendInstance());
-    }
-
-    /**
-     * Returns the default BackendInstance
-     *
-     * @return The default BackendInstance
-     */
-    public static BackendInstance getDefaultBackendInstance() {
-        return defaultBackend;
-    }
-
-    /**
-     * Sets the list of BackendInstances to match the provided list
-     *
-     * @param updatedBackendInstances The list of BackendInstances that should be stored
-     */
-    public static void updateBackendInstances(ArrayList<BackendInstance> updatedBackendInstances) {
-        BackendHelper.backendInstances = FXCollections.observableList(updatedBackendInstances);
-        for (Runnable runnable : BackendHelper.backendInstancesUpdatedListeners) {
+    public static void updateEngineInstances(ArrayList<Engine> updatedEngines) {
+        BackendHelper.engines = FXCollections.observableList(updatedEngines);
+        for (Runnable runnable : BackendHelper.enginesUpdatedListeners) {
             runnable.run();
         }
     }
 
     /**
-     * Returns the ObservableList of BackendInstances
+     * Returns the ObservableList of engines
      *
-     * @return The ObservableList of BackendInstances
+     * @return The ObservableList of engines
      */
-    public static ObservableList<BackendInstance> getBackendInstances() {
-        return BackendHelper.backendInstances;
+    public static ObservableList<Engine> getEngines() {
+        return BackendHelper.engines;
     }
 
     /**
-     * Sets the default BackendInstance to the provided object
+     * Sets the default Engine to the provided object
      *
-     * @param newDefaultBackend The new defaultBackend
+     * @param newDefaultEngine The new default engine
      */
-    public static void setDefaultBackendInstance(BackendInstance newDefaultBackend) {
-        BackendHelper.defaultBackend = newDefaultBackend;
+    public static void setDefaultEngine(Engine newDefaultEngine) {
+        BackendHelper.defaultEngine = newDefaultEngine;
     }
 
-    public static void addBackendInstanceListener(Runnable runnable) {
-        BackendHelper.backendInstancesUpdatedListeners.add(runnable);
+    public static void addEngineInstanceListener(Runnable runnable) {
+        BackendHelper.enginesUpdatedListeners.add(runnable);
     }
 
     public static ComponentProtos.ComponentsInfo.Builder getComponentsInfoBuilder(String query) {

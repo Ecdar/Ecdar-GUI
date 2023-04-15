@@ -1,10 +1,13 @@
 package ecdar.controllers;
 
 import com.jfoenix.controls.JFXRippler;
+import ecdar.Ecdar;
 import ecdar.abstractions.*;
 import ecdar.presentations.ComponentPresentation;
+import ecdar.presentations.ModelPresentation;
 import ecdar.presentations.SimEdgePresentation;
 import ecdar.presentations.SimLocationPresentation;
+import ecdar.utility.helpers.UPPAALSyntaxHighlighter;
 import javafx.animation.Interpolator;
 import javafx.animation.Transition;
 import javafx.beans.property.ObjectProperty;
@@ -18,6 +21,7 @@ import javafx.scene.layout.*;
 import javafx.scene.shape.Circle;
 import javafx.util.Duration;
 
+import org.checkerframework.checker.units.qual.K;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.StyleClassedTextArea;
 import org.kordamp.ikonli.javafx.FontIcon;
@@ -50,7 +54,7 @@ public class ProcessController extends ModelController implements Initializable 
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
-        component = new SimpleObjectProperty<>(new Component(true));
+        component = new SimpleObjectProperty<>(new Component());
         // add line numbers to the declaration text area
         declarationTextArea.setParagraphGraphicFactory(LineNumberFactory.get(declarationTextArea));
         initializeValues();
@@ -205,7 +209,7 @@ public class ProcessController extends ModelController implements Initializable 
         });
 
         declarationTextArea.appendText(component.getDeclarationsText());
-        declarationTextArea.setStyleSpans(0, ComponentPresentation.computeHighlighting(getComponent().getDeclarationsText()));
+        declarationTextArea.setStyleSpans(0, UPPAALSyntaxHighlighter.computeHighlighting(getComponent().getDeclarationsText()));
         declarationTextArea.getStyleClass().add("component-declaration");
     }
 
@@ -249,7 +253,7 @@ public class ProcessController extends ModelController implements Initializable 
     }
 
     @Override
-    public HighLevelModelObject getModel() {
+    public HighLevelModel getModel() {
         return component.get();
     }
 
@@ -259,5 +263,50 @@ public class ProcessController extends ModelController implements Initializable 
 
     public ObservableMap<String, BigDecimal> getClocks() {
         return clocks;
+    }
+
+    /**
+     * Gets the minimum possible width when dragging the anchor.
+     * The width is based on the x coordinate of locations, nails and the signature arrows.
+     * @return the minimum possible width.
+     */
+    @Override
+    double getDragAnchorMinWidth() {
+        final Component component = getComponent();
+        double minWidth = Ecdar.CANVAS_PADDING * 10;
+
+        for (final Location location : component.getLocations()) {
+            minWidth = Math.max(minWidth, location.getX() + Ecdar.CANVAS_PADDING * 2);
+        }
+
+        for (final Edge edge : component.getEdges()) {
+            for (final Nail nail : edge.getNails()) {
+                minWidth = Math.max(minWidth, nail.getX() + Ecdar.CANVAS_PADDING);
+            }
+        }
+        return minWidth;
+    }
+
+    /**
+     * Gets the minimum possible height when dragging the anchor.
+     * The height is based on the y coordinate of locations, nails and the signature arrows.
+     * @return the minimum possible height.
+     */
+    @Override
+    double getDragAnchorMinHeight() {
+        final Component component = getComponent();
+        double minHeight = Ecdar.CANVAS_PADDING * 10;
+
+        for (final Location location : component.getLocations()) {
+            minHeight = Math.max(minHeight, location.getY() + Ecdar.CANVAS_PADDING * 2);
+        }
+
+        for (final Edge edge : component.getEdges()) {
+            for (final Nail nail : edge.getNails()) {
+                minHeight = Math.max(minHeight, nail.getY() + Ecdar.CANVAS_PADDING);
+            }
+        }
+
+        return minHeight;
     }
 }

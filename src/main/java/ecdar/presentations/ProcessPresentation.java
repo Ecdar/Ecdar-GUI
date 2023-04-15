@@ -8,6 +8,7 @@ import ecdar.abstractions.Nail;
 import ecdar.controllers.ModelController;
 import ecdar.controllers.ProcessController;
 import ecdar.utility.colors.Color;
+import ecdar.utility.colors.EnabledColor;
 import javafx.beans.InvalidationListener;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -24,6 +25,7 @@ import javafx.scene.text.Font;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
  * The presenter of a Process which is shown in {@link SimulatorOverviewPresentation}. <br />
@@ -40,7 +42,7 @@ public class ProcessPresentation extends ModelPresentation {
     public ProcessPresentation(final Component component){
         controller = new EcdarFXMLLoader().loadAndGetController("ProcessPresentation.fxml", this);
         controller.setComponent(component);
-        super.initialize(component.getBox());
+
         // Initialize methods that is sensitive to width and height
         final Runnable onUpdateSize = () -> {
             initializeToolbar();
@@ -122,7 +124,7 @@ public class ProcessPresentation extends ModelPresentation {
         final Shape[] mask = new Shape[1];
         final Rectangle rectangle = new Rectangle(component.getBox().getWidth(), component.getBox().getHeight());
 
-        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
+        final Consumer<EnabledColor> updateColor = (newColor) -> {
             // Mask the parent of the frame (will also mask the background)
             mask[0] = Path.subtract(rectangle, TOP_LEFT_CORNER);
             controller.frame.setClip(mask[0]);
@@ -134,13 +136,13 @@ public class ProcessPresentation extends ModelPresentation {
             controller.topLeftLine.setStartY(0);
             controller.topLeftLine.setEndX(0);
             controller.topLeftLine.setEndY(CORNER_SIZE);
-            controller.topLeftLine.setStroke(newColor.getColor(newIntensity.next(2)));
+            controller.topLeftLine.setStroke(newColor.getStrokeColor());
             controller.topLeftLine.setStrokeWidth(1.25);
             StackPane.setAlignment(controller.topLeftLine, Pos.TOP_LEFT);
 
             // Set the stroke color to two shades darker
             controller.frame.setBorder(new Border(new BorderStroke(
-                    newColor.getColor(newIntensity.next(2)),
+                    newColor.getStrokeColor(),
                     BorderStrokeStyle.SOLID,
                     CornerRadii.EMPTY,
                     new BorderWidths(1),
@@ -148,9 +150,9 @@ public class ProcessPresentation extends ModelPresentation {
             )));
         };
         component.colorProperty().addListener(observable -> {
-            updateColor.accept(component.getColor(), component.getColorIntensity());
+            updateColor.accept(component.getColor());
         });
-        updateColor.accept(component.getColor(), component.getColorIntensity());
+        updateColor.accept(component.getColor());
     }
 
     /**
@@ -163,16 +165,16 @@ public class ProcessPresentation extends ModelPresentation {
         // Bind the background width and height to the values in the model
         controller.background.widthProperty().bind(component.getBox().getWidthProperty());
         controller.background.heightProperty().bind(component.getBox().getHeightProperty());
-        controller.background.setFill(component.getColor().getColor(component.getColorIntensity().next(-10).next(2)));
-        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
+        controller.background.setFill(component.getColor().setIntensity(2).getPaintColor());
+        final Consumer<EnabledColor> updateColor = (newColor) -> {
             // Set the background color to the lightest possible version of the color
-            controller.background.setFill(newColor.getColor(newIntensity.next(-10).next(2)));
+            controller.background.setFill(newColor.setIntensity(2).getPaintColor());
         };
         component.colorProperty().addListener(observable -> {
-            updateColor.accept(component.getColor(), component.getColorIntensity());
+            updateColor.accept(component.getColor());
         });
 
-        updateColor.accept(component.getColor(), component.getColorIntensity());
+        updateColor.accept(component.getColor());
     }
 
     /**
@@ -182,23 +184,23 @@ public class ProcessPresentation extends ModelPresentation {
     private void initializeToolbar() {
         final Component component = controller.getComponent();
 
-        final BiConsumer<Color, Color.Intensity> updateColor = (newColor, newIntensity) -> {
+        final Consumer<EnabledColor> updateColor = (newColor) -> {
             // Set the background of the toolbar
             controller.toolbar.setBackground(new Background(new BackgroundFill(
-                    newColor.getColor(newIntensity),
+                    newColor.getPaintColor(),
                     CornerRadii.EMPTY,
                     Insets.EMPTY
             )));
 
             // Set the icon color and rippler color of the toggleDeclarationButton
-            controller.toggleValuesButton.setRipplerFill(newColor.getTextColor(newIntensity));
+            controller.toggleValuesButton.setRipplerFill(newColor.getTextColor());
 
             controller.toolbar.setPrefHeight(TOOLBAR_HEIGHT);
             controller.toggleValuesButton.setBackground(Background.EMPTY);
         };
-        controller.getComponent().colorProperty().addListener(observable -> updateColor.accept(component.getColor(), component.getColorIntensity()));
+        controller.getComponent().colorProperty().addListener(observable -> updateColor.accept(component.getColor()));
 
-        updateColor.accept(component.getColor(), component.getColorIntensity());
+        updateColor.accept(component.getColor());
 
         // Set a hover effect for the controller.toggleDeclarationButton
         controller.toggleValuesButton.setOnMouseEntered(event -> controller.toggleValuesButton.setCursor(Cursor.HAND));
@@ -222,59 +224,6 @@ public class ProcessPresentation extends ModelPresentation {
     }
 
     @Override
-    ModelController getModelController() {
-        return controller;
-    }
-
-    /**
-     * Gets the minimum possible width when dragging the anchor.
-     * The width is based on the x coordinate of locations, nails and the signature arrows. <br />
-     * This should be removed from {@link ModelPresentation} and made into an interface of its own
-     * @return the minimum possible width.
-     */
-    @Override
-    @Deprecated
-    double getDragAnchorMinWidth() {
-        final Component component = controller.getComponent();
-        double minWidth = Ecdar.CANVAS_PADDING *10;
-
-        for (final Location location : component.getLocations()) {
-            minWidth = Math.max(minWidth, location.getX() + Ecdar.CANVAS_PADDING * 2);
-        }
-
-        for (final Edge edge : component.getEdges()) {
-            for (final Nail nail : edge.getNails()) {
-                minWidth = Math.max(minWidth, nail.getX() + Ecdar.CANVAS_PADDING);
-            }
-        }
-        return minWidth;
-    }
-
-    /**
-     * Gets the minimum possible height when dragging the anchor.
-     * The height is based on the y coordinate of locations, nails and the signature arrows <br />
-     * This should be removed from {@link ModelPresentation} and made into an interface of its own
-     * @return the minimum possible height.
-     */
-    @Override
-    @Deprecated
-    double getDragAnchorMinHeight() {
-        final Component component = controller.getComponent();
-        double minHeight = Ecdar.CANVAS_PADDING * 10;
-
-        for (final Location location : component.getLocations()) {
-            minHeight = Math.max(minHeight, location.getY() + Ecdar.CANVAS_PADDING * 2);
-        }
-
-        for (final Edge edge : component.getEdges()) {
-            for (final Nail nail : edge.getNails()) {
-                minHeight = Math.max(minHeight, nail.getY() + Ecdar.CANVAS_PADDING);
-            }
-        }
-
-        return minHeight;
-    }
-
     public ProcessController getController() {
         return controller;
     }

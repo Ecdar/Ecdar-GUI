@@ -3,7 +3,7 @@ package ecdar.controllers;
 import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXRippler;
 import com.jfoenix.controls.JFXTextField;
-import ecdar.backend.BackendInstance;
+import ecdar.backend.Engine;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.fxml.FXML;
@@ -22,22 +22,22 @@ import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class BackendInstanceController implements Initializable {
-    private BackendInstance backendInstance = new BackendInstance();
+public class EngineInstanceController implements Initializable {
+    private Engine engine = new Engine();
 
     /* Design elements */
-    public Label backendNameIssue;
-    public JFXRippler removeBackendRippler;
-    public FontIcon removeBackendIcon;
+    public Label engineNameIssue;
+    public JFXRippler removeEngineRippler;
+    public FontIcon removeEngineIcon;
     public FontIcon expansionIcon;
     public StackPane content;
     public JFXCheckBox isLocal;
     public HBox addressSection;
-    public HBox pathToBackendSection;
-    public JFXRippler pickPathToBackend;
-    public FontIcon pickPathToBackendIcon;
-    public StackPane moveBackendInstanceUpRippler;
-    public StackPane moveBackendInstanceDownRippler;
+    public HBox pathToEngineSection;
+    public JFXRippler pickPathToEngine;
+    public FontIcon pickPathToEngineIcon;
+    public StackPane moveEngineInstanceUpRippler;
+    public StackPane moveEngineInstanceDownRippler;
 
     // Labels for showing potential issues
     public Label locationIssue;
@@ -46,25 +46,24 @@ public class BackendInstanceController implements Initializable {
     public Label portRangeIssue;
 
     /* Input fields */
-    public JFXTextField backendName;
+    public JFXTextField engineName;
     public JFXTextField address;
-    public JFXTextField pathToBackend;
+    public JFXTextField pathToEngine;
     public JFXTextField portRangeStart;
     public JFXTextField portRangeEnd;
-    public RadioButton defaultBackendRadioButton;
-    public JFXCheckBox threadSafeBackendCheckBox;
+    public RadioButton defaultEngineRadioButton;
+    public JFXCheckBox threadSafeEngineCheckBox;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         Platform.runLater(() -> {
             this.handleLocalPropertyChanged();
-            moveBackendInstanceUpRippler.setCursor(Cursor.HAND);
-            moveBackendInstanceDownRippler.setCursor(Cursor.HAND);
+            moveEngineInstanceUpRippler.setCursor(Cursor.HAND);
+            moveEngineInstanceDownRippler.setCursor(Cursor.HAND);
             setHGrow();
 
-            colorIconAsDisabledBasedOnProperty(removeBackendIcon, defaultBackendRadioButton.selectedProperty());
-            colorIconAsDisabledBasedOnProperty(removeBackendIcon, threadSafeBackendCheckBox.selectedProperty());
-            colorIconAsDisabledBasedOnProperty(pickPathToBackendIcon, backendInstance.getLockedProperty());
+            colorIconAsDisabledBasedOnProperty(removeEngineIcon, defaultEngineRadioButton.selectedProperty());
+            colorIconAsDisabledBasedOnProperty(pickPathToEngineIcon, engine.getLockedProperty());
         });
     }
 
@@ -74,7 +73,7 @@ public class BackendInstanceController implements Initializable {
      * @param property The property to bind to
      */
     private void colorIconAsDisabledBasedOnProperty(FontIcon icon, BooleanProperty property) {
-        // Disallow the user to pick new backend file location for locked backends
+        // Disallow the user to pick new engine file location for locked engines
         property.addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 icon.setFill(Color.GREY);
@@ -86,22 +85,22 @@ public class BackendInstanceController implements Initializable {
     }
 
     /***
-     * Sets the backend instance and overrides the current values of the input fields in the GUI.
-     * @param instance the new BackendInstance
+     * Sets the engine instance and overrides the current values of the input fields in the GUI.
+     * @param instance the new Engine
      */
-    public void setBackendInstance(BackendInstance instance) {
-        this.backendInstance = instance;
+    public void setEngine(Engine instance) {
+        this.engine = instance;
 
-        this.backendName.setText(instance.getName());
+        this.engineName.setText(instance.getName());
         this.isLocal.setSelected(instance.isLocal());
-        this.defaultBackendRadioButton.setSelected(instance.isDefault());
-        this.threadSafeBackendCheckBox.setSelected(instance.isThreadSafe());
+        this.defaultEngineRadioButton.setSelected(instance.isDefault());
+        this.threadSafeEngineCheckBox.setSelected(instance.isThreadSafe());
 
         // Check if the path or the address should be used
         if (isLocal.isSelected()) {
-            this.pathToBackend.setText(instance.getBackendLocation());
+            this.pathToEngine.setText(instance.getEngineLocation());
         } else {
-            this.address.setText(instance.getBackendLocation());
+            this.address.setText(instance.getIpAddress());
         }
 
         this.portRangeStart.setText(String.valueOf(instance.getPortStart()));
@@ -109,30 +108,30 @@ public class BackendInstanceController implements Initializable {
     }
 
     /**
-     * Updates the values of the backend instance to the values from the input fields.
-     * @return The updated backend instance
+     * Updates the values of the engine instance to the values from the input fields.
+     * @return The updated engine instance
      */
-    public BackendInstance updateBackendInstance() {
-        backendInstance.setName(backendName.getText());
-        backendInstance.setLocal(isLocal.isSelected());
-        backendInstance.setDefault(defaultBackendRadioButton.isSelected());
-        backendInstance.setIsThreadSafe(threadSafeBackendCheckBox.isSelected());
-        backendInstance.setBackendLocation(isLocal.isSelected() ? pathToBackend.getText() : address.getText());
-        backendInstance.setPortStart(Integer.parseInt(portRangeStart.getText()));
-        backendInstance.setPortEnd(Integer.parseInt(portRangeEnd.getText()));
+    public Engine updateEngineInstance() {
+        engine.setName(engineName.getText());
+        engine.setLocal(isLocal.isSelected());
+        engine.setDefault(defaultEngineRadioButton.isSelected());
+        engine.setIsThreadSafe(threadSafeEngineCheckBox.isSelected());
+        engine.setEngineLocation(isLocal.isSelected() ? pathToEngine.getText() : address.getText());
+        engine.setPortStart(Integer.parseInt(portRangeStart.getText()));
+        engine.setPortEnd(Integer.parseInt(portRangeEnd.getText()));
 
-        return backendInstance;
+        return engine;
     }
 
     private void setHGrow() {
-        HBox.setHgrow(backendName.getParent().getParent().getParent(), Priority.ALWAYS);
-        HBox.setHgrow(backendName.getParent(), Priority.ALWAYS);
-        HBox.setHgrow(backendName, Priority.ALWAYS);
+        HBox.setHgrow(engineName.getParent().getParent().getParent(), Priority.ALWAYS);
+        HBox.setHgrow(engineName.getParent(), Priority.ALWAYS);
+        HBox.setHgrow(engineName, Priority.ALWAYS);
         HBox.setHgrow(content, Priority.ALWAYS);
         HBox.setHgrow(addressSection, Priority.ALWAYS);
         HBox.setHgrow(address, Priority.ALWAYS);
-        HBox.setHgrow(pathToBackendSection, Priority.ALWAYS);
-        HBox.setHgrow(pathToBackend, Priority.ALWAYS);
+        HBox.setHgrow(pathToEngineSection, Priority.ALWAYS);
+        HBox.setHgrow(pathToEngine, Priority.ALWAYS);
         HBox.setHgrow(portRangeStart, Priority.ALWAYS);
         HBox.setHgrow(portRangeEnd, Priority.ALWAYS);
     }
@@ -142,14 +141,14 @@ public class BackendInstanceController implements Initializable {
             address.setDisable(true);
             addressSection.setVisible(false);
             addressSection.setManaged(false);
-            pathToBackendSection.setVisible(true);
-            pathToBackendSection.setManaged(true);
+            pathToEngineSection.setVisible(true);
+            pathToEngineSection.setManaged(true);
         } else {
             address.setDisable(false);
             addressSection.setVisible(true);
             addressSection.setManaged(true);
-            pathToBackendSection.setVisible(false);
-            pathToBackendSection.setManaged(false);
+            pathToEngineSection.setVisible(false);
+            pathToEngineSection.setManaged(false);
         }
     }
 
@@ -172,23 +171,23 @@ public class BackendInstanceController implements Initializable {
     }
 
     @FXML
-    private void openPathToBackendDialog() {
+    private void openPathToEngineDialog() {
         // Dialog title
-        final FileChooser backendPicker = new FileChooser();
-        backendPicker.setTitle("Choose backend");
+        final FileChooser enginePicker = new FileChooser();
+        enginePicker.setTitle("Choose Engine");
 
         // The initial location for the file choosing dialog
-        final File jarDir = new File(pathToBackend.getText()).getAbsoluteFile().getParentFile();
+        final File jarDir = new File(pathToEngine.getText()).getAbsoluteFile().getParentFile();
 
         // If the file does not exist, we must be running it from a development environment, use a default location
         if(jarDir.exists()) {
-            backendPicker.setInitialDirectory(jarDir);
+            enginePicker.setInitialDirectory(jarDir);
         }
 
         // Prompt the user to find a file (will halt the UI thread)
-        final File file = backendPicker.showOpenDialog(null);
+        final File file = enginePicker.showOpenDialog(null);
         if(file != null) {
-            pathToBackend.setText(file.getAbsolutePath());
+            pathToEngine.setText(file.getAbsolutePath());
         }
     }
 }

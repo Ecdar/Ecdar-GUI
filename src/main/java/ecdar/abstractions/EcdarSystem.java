@@ -1,8 +1,6 @@
 package ecdar.abstractions;
 
-import ecdar.Ecdar;
 import ecdar.utility.UndoRedoStack;
-import ecdar.utility.colors.Color;
 import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.Boxed;
 import com.google.gson.JsonArray;
@@ -21,8 +19,7 @@ import java.util.Set;
  * A model of a system.
  * The class is called EcdarSystem, since Java already has a System class.
  */
-public class EcdarSystem extends EcdarModel implements Boxed {
-    private static final String SYSTEM = "System";
+public class EcdarSystem extends HighLevelModel implements Boxed {
     private static final String SYSTEM_ROOT_X = "systemRootX";
     private static final String INSTANCES = "componentInstances";
     private static final String OPERATORS = "operators";
@@ -32,15 +29,15 @@ public class EcdarSystem extends EcdarModel implements Boxed {
     private final StringProperty description = new SimpleStringProperty("");
     private final ObservableList<ComponentInstance> componentInstances = FXCollections.observableArrayList();
     private final ObservableList<ComponentOperator> componentOperators = FXCollections.observableArrayList();
-    private final ObservableList<EcdarSystemEdge> edges = FXCollections.observableArrayList();
+    private final ObservableList<SystemEdge> edges = FXCollections.observableArrayList();
     private final SystemRoot systemRoot = new SystemRoot();
 
     // Styling properties
     private final Box box = new Box();
 
-    public EcdarSystem() {
-        setSystemName();
-        setRandomColor();
+    public EcdarSystem(final EnabledColor color, final String name) {
+        this.nameProperty().set(name);
+        setColor(color);
 
         getBox().setWidth(600d);
 
@@ -101,36 +98,32 @@ public class EcdarSystem extends EcdarModel implements Boxed {
 
     /* Edges */
 
-    public ObservableList<EcdarSystemEdge> getEdges() {
+    public ObservableList<SystemEdge> getEdges() {
         return edges;
     }
 
-    public void addEdge(final EcdarSystemEdge edge) {
+    public void addEdge(final SystemEdge edge) {
         edges.add(edge);
     }
 
-    public void removeEdge(final EcdarSystemEdge edge) {
+    public void removeEdge(final SystemEdge edge) {
         edges.remove(edge);
     }
 
     /**
      * Dyes the system.
      * @param color the color to dye with
-     * @param intensity the intensity of the color
      */
-    public void dye(final Color color, final Color.Intensity intensity) {
-        final Color previousColor = colorProperty().get();
-        final Color.Intensity previousColorIntensity = colorIntensityProperty().get();
+    public void dye(final EnabledColor color) {
+        final EnabledColor previousColor = colorProperty().get();
 
         UndoRedoStack.pushAndPerform(() -> { // Perform
             // Color the component
-            setColorIntensity(intensity);
             setColor(color);
         }, () -> { // Undo
             // Color the component
-            setColorIntensity(previousColorIntensity);
             setColor(previousColor);
-        }, String.format("Changed the color of %s to %s", this, color.name()), "color-lens");
+        }, String.format("Changed the color of %s to %s", this, color.color.name()), "color-lens");
     }
 
     @Override
@@ -141,7 +134,7 @@ public class EcdarSystem extends EcdarModel implements Boxed {
 
         box.addProperties(result);
 
-        result.addProperty(COLOR, EnabledColor.getIdentifier(getColor()));
+        result.addProperty(COLOR, EnabledColor.getIdentifier(getColor().color));
 
         result.addProperty(SYSTEM_ROOT_X, systemRoot.getX());
 
@@ -170,8 +163,7 @@ public class EcdarSystem extends EcdarModel implements Boxed {
 
         final EnabledColor enabledColor = EnabledColor.fromIdentifier(json.getAsJsonPrimitive(COLOR).getAsString());
         if (enabledColor != null) {
-            setColorIntensity(enabledColor.intensity);
-            setColor(enabledColor.color);
+            setColor(enabledColor);
         }
 
         systemRoot.setX(json.getAsJsonPrimitive(SYSTEM_ROOT_X).getAsDouble());
@@ -187,19 +179,7 @@ public class EcdarSystem extends EcdarModel implements Boxed {
         });
 
         json.getAsJsonArray(EDGES).forEach(jsonEdge ->
-                getEdges().add(new EcdarSystemEdge((JsonObject) jsonEdge, this)));
-    }
-
-    /**
-     * Generate and sets a unique id for this system
-     */
-    public void setSystemName() {
-        for(int counter = 1; ; counter++) {
-            if(!Ecdar.getProject().getSystemNames().contains(SYSTEM + counter)){
-                setName((SYSTEM + counter));
-                return;
-            }
-        }
+                getEdges().add(new SystemEdge((JsonObject) jsonEdge, this)));
     }
 
     /**
@@ -207,8 +187,8 @@ public class EcdarSystem extends EcdarModel implements Boxed {
      * An edge is unfinished, if the has no target.
      * @return The unfinished edge, or null if none was found.
      */
-    public EcdarSystemEdge getUnfinishedEdge() {
-        for (final EcdarSystemEdge edge : edges) {
+    public SystemEdge getUnfinishedEdge() {
+        for (final SystemEdge edge : edges) {
             if (!edge.isFinished()) return edge;
         }
         return null;

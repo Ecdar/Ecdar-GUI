@@ -21,8 +21,7 @@ public class MessagePresentation extends HBox {
 
     public MessagePresentation(final CodeAnalysis.Message message) {
         this.message = message;
-
-        new EcdarFXMLLoader().loadAndGetController("MessagePresentation.fxml", this);
+          new EcdarFXMLLoader().loadAndGetController("MessagePresentation.fxml", this);
 
         // Initialize
         initializeMessage();
@@ -81,9 +80,9 @@ public class MessagePresentation extends HBox {
                             }
 
                             if (openComponent[0] != null) {
-                                if (!EcdarController.getActiveCanvasPresentation().getController().getActiveModel().equals(openComponent[0])) {
+                                if (!Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasPresentation().getController().getActiveModelPresentation().getController().getModel().equals(openComponent[0])) {
                                     SelectHelper.elementsToBeSelected = FXCollections.observableArrayList();
-                                    EcdarController.setActiveModelForActiveCanvas(openComponent[0]);
+                                    Ecdar.getPresentation().getController().getEditorPresentation().getController().setActiveModelPresentationForActiveCanvas(Ecdar.getComponentPresentationOfComponent(openComponent[0]));
                                 }
 
                                 SelectHelper.clearSelectedElements();

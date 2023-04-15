@@ -79,7 +79,7 @@ class ExportHandler {
 
         // Apply angelic completion if selected
         if (getPlan().isAngelicWhenExport())
-            cases.stream().map(MutationTestCase::getMutant).forEach(Component::applyAngelicCompletion);
+            cases.stream().map(MutationTestCase::getMutant).forEach(ComponentVerificationTransformer::applyAngelicCompletionForComponent);
 
         getPlan().setMutantsText("Mutants: " + cases.size() + " - Execution time: " + MutationTestPlanPresentation.readableFormat(Duration.between(start, Instant.now())));
 

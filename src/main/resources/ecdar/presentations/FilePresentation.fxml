@@ -8,23 +8,23 @@
 <?import javafx.geometry.Insets?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
-         type="AnchorPane"
+         type="AnchorPane" fx:id="root"
          fx:controller="ecdar.controllers.FileController">
-    <JFXRippler id="rippler" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+    <JFXRippler fx:id="rippler" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
         <HBox style="-fx-min-height: 3.7em; -fx-max-height: 3.7em" alignment="CENTER">
             <padding>
                 <Insets top="10" bottom="10"/>
             </padding>
             <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
                 <StackPane  style="-fx-padding: 0em 1em 0em 1em;">
-                    <Circle id="iconBackground" radius="1.25" styleClass="responsive-circle-radius"/>
+                    <Circle fx:id="iconBackground" radius="1.25" styleClass="responsive-circle-radius"/>
                     <StackPane fx:id="fileImageStackPane" styleClass="responsive-small-image-sizing">
                         <ImageView fx:id="fileImage"/>
                     </StackPane>
                 </StackPane>
 
                 <StackPane>
-                    <Label id="fileName" styleClass="body1"/>
+                    <Label fx:id="fileName" styleClass="body1"/>
                 </StackPane>
             </HBox>
 
@@ -32,7 +32,7 @@
                 <!-- MORE INFORMATION -->
                 <JFXRippler fx:id="moreInformation" visible="false">
                     <StackPane styleClass="responsive-icon-stack-pane-sizing">
-                        <FontIcon id="moreInformationIcon" iconLiteral="gmi-more-vert" fill="white"
+                        <FontIcon fx:id="moreInformationIcon" iconLiteral="gmi-more-vert" fill="white"
                                   styleClass="icon-size-medium"/>
                     </StackPane>
                 </JFXRippler>

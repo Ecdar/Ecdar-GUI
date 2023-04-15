@@ -163,7 +163,7 @@ public class EditorPresentation extends VBox {
                 final List<Pair<SelectHelper.ItemSelectable, EnabledColor>> previousColor = new ArrayList<>();
 
                 SelectHelper.getSelectedElements().forEach(selectable -> {
-                    previousColor.add(new Pair<>(selectable, new EnabledColor(selectable.getColor(), selectable.getColorIntensity())));
+                    previousColor.add(new Pair<>(selectable, selectable.getColor()));
                 });
 
                 controller.changeColorOnSelectedElements(color, previousColor);

@@ -1,9 +1,9 @@
 package ecdar.presentations;
 
-import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
 import ecdar.controllers.SimEdgeController;
+import ecdar.controllers.SimulatorController;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Group;
@@ -20,7 +20,7 @@ public class SimEdgePresentation extends Group {
 
     public SimEdgePresentation(final Edge edge, final Component component) {
         controller = new EcdarFXMLLoader().loadAndGetController("SimEdgePresentation.fxml", this);
-        var simulationHandler = Ecdar.getSimulationHandler();
+        var simulationHandler = SimulatorController.getSimulationHandler();
 
         controller.setEdge(edge);
         this.edge.bind(controller.edgeProperty());

@@ -46,7 +46,7 @@ public class MultiSyncTagPresentation extends TagPresentation {
         Platform.runLater(() -> {
             // Added to avoid NullPointer exception for location aware and component in getDragBounds method
             edge.getNails().stream().filter(n -> n.getPropertyType().equals(DisplayableEdge.PropertyType.SYNCHRONIZATION)).findFirst().ifPresent(this::setLocationAware);
-            setComponent(EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation.getController().getComponent());
+            setComponent(Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasPresentation().getController().activeComponentPresentation.getController().getComponent());
 
             updateTopBorder();
             initializeMouseTransparency();
@@ -165,7 +165,7 @@ public class MultiSyncTagPresentation extends TagPresentation {
 
         for (Node child : controller.syncList.getChildren()) {
             ((SyncTextFieldPresentation) child).getController().textField
-                    .setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController()
+                    .setOnKeyPressed(Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasPresentation().getController()
                             .getLeaveTextAreaKeyHandler((keyEvent) -> {
 
                 if (keyEvent.getCode().equals(KeyCode.ENTER)) {
@@ -181,13 +181,11 @@ public class MultiSyncTagPresentation extends TagPresentation {
     }
 
     private void updateColorAndMouseShape() {
-        EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation.getController().getComponent().colorProperty().addListener((observable, oldValue, newValue) -> {
-            controller.frame.setBackground(new Background(new BackgroundFill(newValue.getColor(
-                    EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation.getController().getComponent().getColorIntensity()), new CornerRadii(0), Insets.EMPTY)));
+        Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasPresentation().getController().activeComponentPresentation.getController().getComponent().colorProperty().addListener((observable, oldValue, newValue) -> {
+            controller.frame.setBackground(new Background(new BackgroundFill(newValue.getPaintColor(), new CornerRadii(0), Insets.EMPTY)));
         });
 
-        Color color = EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation.getController().getComponent().getColor().getColor(
-                EcdarController.getActiveCanvasPresentation().getController().activeComponentPresentation.getController().getComponent().getColorIntensity());
+        Color color = Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasPresentation().getController().activeComponentPresentation.getController().getComponent().getColor().getPaintColor();
 
         controller.frame.setBackground(new Background(new BackgroundFill(color, new CornerRadii(0), Insets.EMPTY)));
         controller.frame.setCursor(Cursor.OPEN_HAND);
@@ -216,8 +214,8 @@ public class MultiSyncTagPresentation extends TagPresentation {
             event.consume();
 
             Platform.runLater(() -> {
-                final double dragDistanceX = (event.getSceneX() - dragOffsetX.get()) / EcdarController.getActiveCanvasZoomFactor().get();
-                final double dragDistanceY = (event.getSceneY() - dragOffsetY.get()) / EcdarController.getActiveCanvasZoomFactor().get();
+                final double dragDistanceX = (event.getSceneX() - dragOffsetX.get()) / Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasZoomFactor().get();
+                final double dragDistanceY = (event.getSceneY() - dragOffsetY.get()) / Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasZoomFactor().get();
                 double draggableNewX = getDragBounds().trimX(draggablePreviousX.get() + dragDistanceX);
                 double draggableNewY = getDragBounds().trimY(draggablePreviousY.get() + dragDistanceY);
 

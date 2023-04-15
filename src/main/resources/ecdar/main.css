@@ -259,14 +259,14 @@
 	-fx-background-insets: 0em 0em 0em 0em;
 }
 
-.backend-instances-list {
+.engine-instances-list {
     -fx-padding: 5;
     -fx-border-style: SOLID HIDDEN SOLID HIDDEN;
     -fx-border-color: -divider-color;
     -fx-border-width: 2px;
 }
 
-.backend-instance {
+.engine-instance {
     -fx-border-style: SOLID SOLID SOLID SOLID;
     -fx-border-color: -divider-color;
     -fx-border-width: 1px;

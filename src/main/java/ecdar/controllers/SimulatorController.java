@@ -3,6 +3,8 @@ package ecdar.controllers;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
 import ecdar.backend.SimulationHandler;
+import ecdar.presentations.LeftSimPanePresentation;
+import ecdar.presentations.RightSimPanePresentation;
 import ecdar.presentations.SimulatorOverviewPresentation;
 import ecdar.simulation.SimulationState;
 import javafx.beans.property.DoubleProperty;
@@ -17,12 +19,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class SimulatorController implements Initializable {
+public class SimulatorController implements ModeController, Initializable {
     public StackPane root;
-    private SimulationHandler simulationHandler;
+    public static SimulationHandler simulationHandler = new SimulationHandler();
     public SimulatorOverviewPresentation overviewPresentation;
     public StackPane toolbar;
 
+    public final LeftSimPanePresentation leftSimPane = new LeftSimPanePresentation();
+    public final RightSimPanePresentation rightSimPane = new RightSimPanePresentation();
     private boolean firstTimeInSimulator;
     private final static DoubleProperty width = new SimpleDoubleProperty(),
             height = new SimpleDoubleProperty();
@@ -33,7 +37,12 @@ public class SimulatorController implements Initializable {
         root.widthProperty().addListener((observable, oldValue, newValue) -> width.setValue(newValue));
         root.heightProperty().addListener((observable, oldValue, newValue) -> height.setValue(newValue));
         firstTimeInSimulator = true;
-        simulationHandler = Ecdar.getSimulationHandler();
+    }
+
+    public static SimulationHandler getSimulationHandler() { return simulationHandler; }
+
+    public static void setSimulationHandler(SimulationHandler simHandler) {
+        simulationHandler = simHandler;
     }
 
     /**
@@ -127,5 +136,15 @@ public class SimulatorController implements Initializable {
 
     public static void setSelectedState(SimulationState selectedState) {
         SimulatorController.selectedState.set(selectedState);
+    }
+
+    @Override
+    public StackPane getLeftPane() {
+        return leftSimPane;
+    }
+
+    @Override
+    public StackPane getRightPane() {
+        return rightSimPane;
     }
 }

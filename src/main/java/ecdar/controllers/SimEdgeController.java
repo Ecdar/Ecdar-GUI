@@ -10,6 +10,7 @@ import ecdar.presentations.NailPresentation;
 import ecdar.presentations.SimNailPresentation;
 import ecdar.utility.Highlightable;
 import ecdar.utility.colors.Color;
+import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.BindingHelper;
 import ecdar.utility.helpers.Circular;
 import ecdar.utility.helpers.ItemDragHelper;
@@ -371,22 +372,16 @@ public class SimEdgeController implements Initializable, Highlightable {
      * Colors the edge model
      *
      * @param color     the new color of the edge
-     * @param intensity the intensity of the edge
      */
-    public void color(final Color color, final Color.Intensity intensity) {
+    public void color(final EnabledColor color) {
         final Edge edge = getEdge();
 
         // Set the color of the edge
-        edge.setColorIntensity(intensity);
         edge.setColor(color);
     }
 
-    public Color getColor() {
+    public EnabledColor getColor() {
         return getEdge().getColor();
-    }
-
-    public Color.Intensity getColorIntensity() {
-        return getEdge().getColorIntensity();
     }
 
     public ItemDragHelper.DragBounds getDragBounds() {

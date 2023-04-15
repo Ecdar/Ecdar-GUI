@@ -42,6 +42,6 @@ public class SimulationInitializationDialogController implements Initializable {
     }
 
     public void initialize(URL location, ResourceBundle resources) {
-        simulationHandler = Ecdar.getSimulationHandler();
+        simulationHandler = SimulatorController.getSimulationHandler();
     }
 }

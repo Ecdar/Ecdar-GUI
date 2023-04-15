@@ -1,8 +1,10 @@
 package ecdar.utility.helpers;
 
+import ecdar.Ecdar;
 import ecdar.code_analysis.Nearable;
 import ecdar.controllers.EcdarController;
 import ecdar.utility.colors.Color;
+import ecdar.utility.colors.EnabledColor;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -18,7 +20,7 @@ public class SelectHelper {
 
     public static void select(final ItemSelectable selectable) {
 
-        EcdarController.getActiveCanvasPresentation().getController().leaveTextAreas();
+        Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasPresentation().getController().leaveTextAreas();
 
         // Check if the element is already selected
         if (selectedElements.contains(selectable)) return;
@@ -79,11 +81,9 @@ public class SelectHelper {
     }
 
     public interface ItemSelectable extends Selectable, LocationAware {
-        void color(Color color, Color.Intensity intensity);
+        void color(EnabledColor color);
 
-        Color getColor();
-
-        Color.Intensity getColorIntensity();
+        EnabledColor getColor();
 
         ItemDragHelper.DragBounds getDragBounds();
 
