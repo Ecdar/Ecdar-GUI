@@ -47,14 +47,10 @@ public class SimulationHandler {
 
     private List<String> ComponentsInSimulation = new ArrayList<>();
 
-    private EngineConnection con; // ToDo NIELS: Remove in favor of using open connections through engines
-
     /**
      * Empty constructor that should be used if the system or project has not be initialized yet
      */
-    public SimulationHandler() {
-
-    }
+    public SimulationHandler() {}
 
     public void clearComponentsInSimulation() {
         ComponentsInSimulation.clear();
@@ -74,11 +70,6 @@ public class SimulationHandler {
         this.selectedEdge.set(null);
         this.traceLog.clear();
         this.system = getSystem();
-
-        if (con == null) {
-            EngineConnectionStarter ecs = new EngineConnectionStarter(BackendHelper.getDefaultEngine());
-            con = ecs.tryStartNewConnection();
-        }
     }
 
     /**
@@ -87,49 +78,16 @@ public class SimulationHandler {
     public void initialStep() {
         initializeSimulation();
 
-        GrpcRequest request = new GrpcRequest(engineConnection -> {
-            StreamObserver<SimulationStepResponse> responseObserver = new StreamObserver<>() {
-                @Override
-                public void onNext(QueryProtos.SimulationStepResponse value) {
+        BackendHelper.getDefaultEngine().enqueueInitialSimulationStepRequest(
+                composition,
+                (response) -> {
                     // ToDo: This is temp solution to compile but should be fixed to handle ambiguity
-                    currentState.set(new SimulationState(value.getNewDecisionPoints(0)));
+                    currentState.set(new SimulationState(response.getNewDecisionPoints(0)));
                     Platform.runLater(() -> traceLog.add(currentState.get()));
-                }
-                
-                @Override
-                public void onError(Throwable t) {
-                    Ecdar.showToast("Could not start simulation:\n" + t.getMessage());
-                }
+                },
+                (error) -> Ecdar.showToast("Could not start simulation:\n" + error.getMessage()));
 
-                @Override
-                public void onCompleted() {
-                }
-            };
-
-            var comInfo = ComponentProtos.ComponentsInfo.newBuilder();
-            for (Component c : Ecdar.getProject().getComponents()) {
-                comInfo.addComponents(ComponentProtos.Component.newBuilder().setJson(c.serialize().toString()).build());
-            }
-
-            comInfo.setComponentsHash(comInfo.getComponentsList().hashCode());
-            var simStartRequest = QueryProtos.SimulationStartRequest.newBuilder();
-            var simInfo = QueryProtos.SimulationInfo.newBuilder()
-                    .setComponentComposition(composition)
-                    .setComponentsInfo(comInfo);
-            simStartRequest.setSimulationInfo(simInfo);
-            engineConnection.getStub().withDeadlineAfter(20000, TimeUnit.MILLISECONDS)
-                    .startSimulation(simStartRequest.build(), responseObserver);
-        });
-
-        request.execute(con);
         numberOfSteps++;
-    }
-    
-    /**
-     * Resets the simulation to the initial location
-     */
-    public void resetToInitialLocation() {
-        initialStep();
     }
 
     /**
@@ -137,50 +95,29 @@ public class SimulationHandler {
      */
     public void nextStep() {
         // removes invalid states from the log when stepping forward after previewing a previous state
-        removeStatesFromLog(currentState.get()); 
-        
-        GrpcRequest request = new GrpcRequest(engineConnection -> {
-            StreamObserver<SimulationStepResponse> responseObserver = new StreamObserver<>() {
-                @Override
-                public void onNext(QueryProtos.SimulationStepResponse value) {
-                    // TODO this is temp solution to compile but should be fixed to handle ambiguity
-                    currentState.set(new SimulationState(value.getNewDecisionPoints(0)));
+        removeStatesFromLog(currentState.get());
+
+        BackendHelper.getDefaultEngine().enqueueSimulationStepRequest(
+                composition,
+                currentState.get(),
+                selectedEdge.get().getId(),
+                getComponentName(selectedEdge.get()),
+                getComponentIndex(selectedEdge.get()),
+                (response) -> {
+                    // ToDo: This is temp solution to compile but should be fixed to handle ambiguity
+                    currentState.set(new SimulationState(response.getNewDecisionPoints(0)));
                     Platform.runLater(() -> traceLog.add(currentState.get()));
-                }
-                
-                @Override
-                public void onError(Throwable t) {
-                    Ecdar.showToast("Could not take next step in simulation\nError: " + t.getMessage());
-                  }
-                
-                @Override
-                public void onCompleted() {
-                }
-            };
-            
-            var comInfo = ComponentProtos.ComponentsInfo.newBuilder();
-            for (Component c : Ecdar.getProject().getComponents()) {
-                comInfo.addComponents(ComponentProtos.Component.newBuilder().setJson(c.serialize().toString()).build());
-            }
+                },
+                (error) -> Ecdar.showToast("Could not take next step in simulation\nError: " + error.getMessage()));
 
-            comInfo.setComponentsHash(comInfo.getComponentsList().hashCode());
-            var simStepRequest = SimulationStepRequest.newBuilder();
-            var simInfo = SimulationInfo.newBuilder()
-                    .setComponentComposition(composition)
-                    .setComponentsInfo(comInfo);
-            simStepRequest.setSimulationInfo(simInfo);
-            var source = currentState.get().getState();
-            var specComp = ObjectProtos.SpecificComponent.newBuilder().setComponentName(getComponentName(selectedEdge.get())).setComponentIndex(getComponentIndex(selectedEdge.get()));
-            var edge = EcdarProtoBuf.ObjectProtos.Edge.newBuilder().setId(selectedEdge.get().getId()).setSpecificComponent(specComp);
-            var decision = Decision.newBuilder().setEdge(edge).setSource(source);
-            simStepRequest.setChosenDecision(decision);
-
-            engineConnection.getStub().withDeadlineAfter(20000, TimeUnit.MILLISECONDS)
-                    .takeSimulationStep(simStepRequest.build(), responseObserver);
-        });
-
-        request.execute(con);
         numberOfSteps++;
+    }
+
+    /**
+     * Resets the simulation to the initial location
+     */
+    public void resetToInitialLocation() {
+        initialStep();
     }
 
     private String getComponentName(Edge edge) {
@@ -196,7 +133,7 @@ public class SimulationHandler {
         throw new RuntimeException("Could not find component name for edge with id " + edge.getId());
     }
 
-    private int getComponentIndex (Edge edge) {
+    private int getComponentIndex(Edge edge) {
         for (int i = 0; i < Ecdar.getProject().getComponents().size(); i++) {
             if (Ecdar.getProject().getComponents().get(i).getEdges().stream().anyMatch(p -> Objects.equals(p.getId(), edge.getId()))) {
                 return i;
@@ -226,8 +163,8 @@ public class SimulationHandler {
 
     /**
      * All the available transitions in this state
-     * @return 
      *
+     * @return
      * @return an {@link ObservableList} of all the currently available transitions in this state
      */
     public ArrayList<Pair<String, String>> getAvailableTransitions() {
@@ -277,9 +214,13 @@ public class SimulationHandler {
         return system;
     }
 
-    public String getComposition() { return composition;}
+    public String getComposition() {
+        return composition;
+    }
 
-    public void setComposition(String composition) {this.composition = composition;}
+    public void setComposition(String composition) {
+        this.composition = composition;
+    }
 
     public boolean isSimulationRunning() {
         return false; // ToDo: Implement
@@ -306,39 +247,39 @@ public class SimulationHandler {
         simulationQuery = query;
     }
 
-    public String getSimulationQuery(){
+    public String getSimulationQuery() {
         return simulationQuery;
     }
 
     /**
      * Set list of components used in the simulation
      */
-    public void setSimulationComponents(ArrayList<Component> components){
+    public void setSimulationComponents(ArrayList<Component> components) {
         simulationComponents = components;
     }
 
     /**
      * Get list of components used in the simulation
      */
-    public ArrayList<Component> getSimulationComponents(){
+    public ArrayList<Component> getSimulationComponents() {
         return simulationComponents;
     }
 
     /**
      * Highlights the edges from the reachability response
      */
-    public void highlightReachabilityEdges(ArrayList<String> ids){
+    public void highlightReachabilityEdges(ArrayList<String> ids) {
         //unhighlight all edges
-        for(var comp : simulationComponents){
-            for(var edge : comp.getEdges()){
+        for (var comp : simulationComponents) {
+            for (var edge : comp.getEdges()) {
                 edge.setIsHighlightedForReachability(false);
             }
         }
         //highlight the edges from the reachability response
-        for(var comp : simulationComponents){
-            for(var edge : comp.getEdges()){
-                for(var id : ids){
-                    if(edge.getId().equals(id)){
+        for (var comp : simulationComponents) {
+            for (var edge : comp.getEdges()) {
+                for (var id : ids) {
+                    if (edge.getId().equals(id)) {
                         edge.setIsHighlightedForReachability(true);
                     }
                 }
