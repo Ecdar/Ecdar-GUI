@@ -15,7 +15,6 @@ import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -33,8 +32,6 @@ public class SimTagPresentation extends StackPane {
 
     private LineTo l2;
     private LineTo l3;
-
-    private final static double TAG_HEIGHT = 16; // ToDo NIELS: This should be changed to follow the same value as TagPresentation
 
     /**
      * Constructs the {@link SimTagPresentation}
@@ -82,7 +79,7 @@ public class SimTagPresentation extends StackPane {
 
             if (getWidth() >= 1000) {
                 setWidth(newWidth);
-                setHeight(TAG_HEIGHT);
+                setHeight(TagPresentation.TAG_HEIGHT);
                 shape.setTranslateY(-1);
             }
 
@@ -98,7 +95,7 @@ public class SimTagPresentation extends StackPane {
      */
     private void initializeShape() {
         final int WIDTH = 5000;
-        final double HEIGHT = TAG_HEIGHT;
+        final double HEIGHT = TagPresentation.TAG_HEIGHT;
 
         final Path shape = (Path) lookup("#shape");
 

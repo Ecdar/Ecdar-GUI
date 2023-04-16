@@ -350,7 +350,7 @@ public class LocationPresentation extends Group implements SelectHelper.Selectab
         updateUrgencies.accept(Location.Urgency.NORMAL, location.getUrgency());
 
         // Delegate to style the label based on the color of the location
-        final Consumer<EnabledColor> updateColor = (newColor) -> { // ToDo NIELS: Fix this consumer, it seems a bit weird
+        final Consumer<EnabledColor> updateColor = (newColor) -> {
             if (!location.getUrgency().equals(Location.Urgency.PROHIBITED)) {
                 if (location.getFailing()) {
                     notCommittedShape.setFill(Color.RED.getColor(Color.Intensity.I700));

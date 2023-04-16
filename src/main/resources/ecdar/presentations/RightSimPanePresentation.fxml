@@ -17,7 +17,7 @@
                     AnchorPane.rightAnchor="0"
                     styleClass="edge-to-edge">
             <VBox fx:id="scrollPaneVbox" >
-                <!-- ToDo NIELS: Previously contained <QueryPaneElementPresentation fx:id="queryPaneElement"/>, i.e. queries identical to the editor, should now contain the queries, but maybe in a different format -->
+                <!-- Waiting on feature to be specified -->
             </VBox>
         </ScrollPane>
     </AnchorPane>

@@ -43,7 +43,6 @@ public class Engine implements Serializable {
 
     private final ArrayList<EngineConnection> startedConnections = new ArrayList<>();
     private final BlockingQueue<GrpcRequest> requestQueue = new ArrayBlockingQueue<>(200); // Magic number
-    // ToDo NIELS: Refactor to resize queue on port range change
     private final BlockingQueue<EngineConnection> availableConnections = new ArrayBlockingQueue<>(200); // Magic number
     private final EngineConnectionStarter connectionStarter = new EngineConnectionStarter(this);
 

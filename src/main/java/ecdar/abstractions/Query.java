@@ -359,7 +359,7 @@ public class Query implements Serializable {
         Platform.runLater(() -> {
             newComponent.setTemporary(true);
 
-            ObservableList<Component> listOfGeneratedComponents = Ecdar.getProject().getTempComponents(); // ToDo NIELS: Refactor
+            ObservableList<Component> listOfGeneratedComponents = Ecdar.getProject().getTempComponents();
             Component matchedComponent = null;
 
             for (Component currentGeneratedComponent : listOfGeneratedComponents) {

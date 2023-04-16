@@ -333,7 +333,7 @@ public class ProjectPaneController implements Initializable {
             filesList.getChildren().add(filePresentation);
         }
 
-        modelPresentationMap.put(modelPresentation, filePresentation);// ToDo NIELS: Bind these two
+        modelPresentationMap.put(modelPresentation, filePresentation);
         if (modelPresentation instanceof ComponentPresentation) {
             componentPresentations.add((ComponentPresentation) modelPresentation);
         }

@@ -5,7 +5,6 @@ import ecdar.abstractions.Box;
 import ecdar.abstractions.HighLevelModel;
 import com.jfoenix.controls.JFXTextField;
 import ecdar.utility.UndoRedoStack;
-import ecdar.utility.colors.Color;
 import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.StringValidator;
 import javafx.application.Platform;
@@ -275,11 +274,11 @@ public abstract class ModelController extends HighLevelModelController {
         });
 
         cornerAnchor.setOnMouseDragged(event -> {
-            double xDiff = (event.getScreenX() - prevX.get()) / Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasZoomFactor().get(); // ToDo NIELS: Fix dependency
+            double xDiff = (event.getScreenX() - prevX.get());
             final double newWidth = Math.max(prevWidth.get() + xDiff, getDragAnchorMinWidth());
             box.setWidth(newWidth);
 
-            double yDiff = (event.getScreenY() - prevY.get()) / Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasZoomFactor().get();
+            double yDiff = (event.getScreenY() - prevY.get());
             final double newHeight = Math.max(prevHeight.get() + yDiff, getDragAnchorMinHeight());
             box.setHeight(newHeight);
 
