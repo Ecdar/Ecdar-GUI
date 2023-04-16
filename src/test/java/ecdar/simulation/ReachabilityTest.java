@@ -63,8 +63,6 @@ public class ReachabilityTest {
 
         simulationHandler.setComponentsInSimulation(components);
 
-        Ecdar.setSimulationHandler(simulationHandler);
-
         var result = SimLocationController.getSimLocationReachableQuery(location, component, "query");
 
         int indexOfOpeningBracket = result.indexOf('[');
@@ -96,8 +94,6 @@ public class ReachabilityTest {
         components.add("C3");
 
         simulationHandler.setComponentsInSimulation(components);
-
-        Ecdar.setSimulationHandler(simulationHandler);
 
         var result = SimLocationController.getSimLocationReachableQuery(location, component, "query");
 
@@ -137,8 +133,6 @@ public class ReachabilityTest {
 
         simulationHandler.setComponentsInSimulation(components);
 
-        Ecdar.setSimulationHandler(simulationHandler);
-
         var query = SimLocationController.getSimLocationReachableQuery(location, component, "query");
 
         int indexOfLastComma = 0;
@@ -173,8 +167,6 @@ public class ReachabilityTest {
         components.add("C4");
 
         simulationHandler.setComponentsInSimulation(components);
-
-        Ecdar.setSimulationHandler(simulationHandler);
 
         var query = SimLocationController.getSimLocationReachableQuery(location, component, "query");
         int commaCount = 0;

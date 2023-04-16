@@ -9,7 +9,7 @@
 <?import javafx.geometry.Insets?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
-         fx:controller="ecdar.controllers.TransitionPaneElementController"
+         fx:controller="ecdar.controllers.TransitionPaneController"
          fx:id="root" type="VBox"
          AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
     <HBox fx:id="toolbar" alignment="CENTER">

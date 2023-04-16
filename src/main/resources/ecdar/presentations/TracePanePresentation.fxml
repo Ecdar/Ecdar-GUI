@@ -9,7 +9,7 @@
 <fx:root xmlns="http://javafx.com/javafx"
          xmlns:fx="http://javafx.com/fxml"
          type="VBox" fx:id="root" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"
-         fx:controller="ecdar.controllers.TracePaneElementController">
+         fx:controller="ecdar.controllers.TracePaneController">
     <HBox fx:id="toolbar" alignment="CENTER">
         <padding>
             <Insets topRightBottomLeft="10"/>

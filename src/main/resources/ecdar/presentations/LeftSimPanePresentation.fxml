@@ -2,8 +2,8 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import ecdar.presentations.TracePaneElementPresentation?>
-<?import ecdar.presentations.TransitionPaneElementPresentation?>
+<?import ecdar.presentations.TracePanePresentation?>
+<?import ecdar.presentations.TransitionPanePresentation?>
 
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
@@ -19,8 +19,8 @@
                     AnchorPane.rightAnchor="0"
                     styleClass="edge-to-edge">
             <VBox fx:id="scrollPaneVbox">
-                <TransitionPaneElementPresentation fx:id="transitionPanePresentation"/>
-                <TracePaneElementPresentation fx:id="tracePanePresentation"/>
+                <TransitionPanePresentation fx:id="transitionPanePresentation"/>
+                <TracePanePresentation fx:id="tracePanePresentation"/>
             </VBox>
         </ScrollPane>
     </AnchorPane>

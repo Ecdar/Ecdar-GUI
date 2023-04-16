@@ -3,7 +3,6 @@ package ecdar;
 import ecdar.abstractions.*;
 import ecdar.backend.BackendException;
 import ecdar.backend.BackendHelper;
-import ecdar.backend.SimulationHandler;
 import ecdar.code_analysis.CodeAnalysis;
 import ecdar.issues.ExitStatusCodes;
 import ecdar.presentations.*;
@@ -50,7 +49,6 @@ public class Ecdar extends Application {
     private static BooleanProperty isUICached = new SimpleBooleanProperty();
     public static BooleanProperty shouldRunBackgroundQueries = new SimpleBooleanProperty(true);
     private static final BooleanProperty isSplit = new SimpleBooleanProperty(false);
-    private static SimulationHandler simulationHandler;
     private Stage debugStage;
 
     /**
@@ -177,13 +175,6 @@ public class Ecdar extends Application {
     public static void toggleCanvasSplit() {
         isSplit.set(!isSplit.get());
     }
-
-    public static SimulationHandler getSimulationHandler() { return simulationHandler; }
-
-    public static void setSimulationHandler(SimulationHandler simHandler) {
-        simulationHandler = simHandler;
-    }
-
 
     public static double getDpiScale() {
         if (!autoScalingEnabled.getValue())

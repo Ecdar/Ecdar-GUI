@@ -2,7 +2,6 @@ package ecdar.controllers;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
-import ecdar.Ecdar;
 import ecdar.backend.SimulationHandler;
 import javafx.fxml.Initializable;
 
@@ -17,6 +16,10 @@ public class SimulationInitializationDialogController implements Initializable {
     public JFXButton startButton;
 
     private SimulationHandler simulationHandler;
+
+    public void initialize(URL location, ResourceBundle resources) {
+        simulationHandler = SimulatorController.getSimulationHandler();
+    }
 
     /**
      * Function extracts data from simulation initialization (query and list of components to simulation)
@@ -39,9 +42,5 @@ public class SimulationInitializationDialogController implements Initializable {
             }
         }
         simulationHandler.setComponentsInSimulation(listOfComponentsToSimulate);
-    }
-
-    public void initialize(URL location, ResourceBundle resources) {
-        simulationHandler = SimulatorController.getSimulationHandler();
     }
 }

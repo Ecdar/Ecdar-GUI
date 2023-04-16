@@ -6,12 +6,15 @@ import ecdar.abstractions.Location;
 import ecdar.backend.SimulationHandler;
 import ecdar.simulation.SimulationState;
 import ecdar.presentations.TransitionPresentation;
+import ecdar.utility.colors.Color;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.ListChangeListener;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
+import javafx.scene.Cursor;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import org.kordamp.ikonli.javafx.FontIcon;
@@ -20,11 +23,12 @@ import java.net.URL;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.function.BiConsumer;
 
 /**
  * The controller class for the trace pane element that can be inserted into a simulator pane
  */
-public class TracePaneElementController implements Initializable {
+public class TracePaneController implements Initializable {
     public VBox root;
     public HBox toolbar;
     public Label traceTitle;
@@ -35,14 +39,19 @@ public class TracePaneElementController implements Initializable {
     public Label summaryTitleLabel;
     public Label summarySubtitleLabel;
 
-    private SimpleBooleanProperty isTraceExpanded = new SimpleBooleanProperty(false);
-    private Map<SimulationState, TransitionPresentation> transitionPresentationMap = new LinkedHashMap<>();
-    private SimpleIntegerProperty numberOfSteps = new SimpleIntegerProperty(0);
+    private final SimpleBooleanProperty isTraceExpanded = new SimpleBooleanProperty(false);
+    private final SimpleIntegerProperty numberOfSteps = new SimpleIntegerProperty(0);
+    private final Map<SimulationState, TransitionPresentation> transitionPresentationMap = new LinkedHashMap<>();
+
     private SimulationHandler simulationHandler;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         simulationHandler = SimulatorController.getSimulationHandler();
+
+        initializeToolbar();
+        initializeSummaryView();
+        initializeTraceExpand();
 
         simulationHandler.getTraceLog().addListener((ListChangeListener<SimulationState>) c -> {
             while (c.next()) {
@@ -58,8 +67,74 @@ public class TracePaneElementController implements Initializable {
 
             numberOfSteps.set(transitionPresentationMap.size());
         });
+    }
 
-        initializeTraceExpand();
+    /**
+     * Initializes the toolbar that contains the trace pane element's title and buttons
+     * Sets the color of the bar and title label. Also sets the look of the rippler effect
+     */
+    private void initializeToolbar() {
+        final Color color = Color.GREY_BLUE;
+        final Color.Intensity colorIntensity = Color.Intensity.I800;
+
+        toolbar.setBackground(new Background(new BackgroundFill(
+                color.getColor(colorIntensity),
+                CornerRadii.EMPTY,
+                Insets.EMPTY)));
+        traceTitle.setTextFill(color.getTextColor(colorIntensity));
+
+        expandTrace.setMaskType(JFXRippler.RipplerMask.CIRCLE);
+        expandTrace.setRipplerFill(color.getTextColor(colorIntensity));
+    }
+
+    /**
+     * Initializes the summary view to be updated when steps are taken in the trace.
+     * Also changes the color and cursor when mouse enters and exits the summary view.
+     */
+    private void initializeSummaryView() {
+        getNumberOfStepsProperty().addListener(
+                (observable, oldValue, newValue) -> updateSummaryTitle(newValue.intValue()));
+
+        final Color color = Color.GREY_BLUE;
+        final Color.Intensity colorIntensity = Color.Intensity.I50;
+
+        final BiConsumer<Color, Color.Intensity> setBackground = (newColor, newIntensity) -> {
+            traceSummary.setBackground(new Background(new BackgroundFill(
+                    newColor.getColor(newIntensity),
+                    CornerRadii.EMPTY,
+                    Insets.EMPTY
+            )));
+
+            traceSummary.setBorder(new Border(new BorderStroke(
+                    newColor.getColor(newIntensity.next(2)),
+                    BorderStrokeStyle.SOLID,
+                    CornerRadii.EMPTY,
+                    new BorderWidths(0, 0, 1, 0)
+            )));
+        };
+
+        // Update the background when hovered
+        traceSummary.setOnMouseEntered(event -> {
+            setBackground.accept(color, colorIntensity.next());
+            root.setCursor(Cursor.HAND);
+        });
+
+        // Update the background when the mouse exits
+        traceSummary.setOnMouseExited(event -> {
+            setBackground.accept(color, colorIntensity);
+            root.setCursor(Cursor.DEFAULT);
+        });
+
+        // Update the background initially
+        setBackground.accept(color, colorIntensity);
+    }
+
+    /**
+     * Updates the text of the summary title label with the current number of steps in the trace
+     * @param steps The number of steps in the trace
+     */
+    private void updateSummaryTitle(int steps) {
+        summaryTitleLabel.setText(steps + " number of steps in trace");
     }
 
     /**

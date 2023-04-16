@@ -21,16 +21,17 @@ import java.util.ResourceBundle;
 
 public class SimulatorController implements ModeController, Initializable {
     public StackPane root;
-    public static SimulationHandler simulationHandler = new SimulationHandler();
     public SimulatorOverviewPresentation overviewPresentation;
     public StackPane toolbar;
 
     public final LeftSimPanePresentation leftSimPane = new LeftSimPanePresentation();
     public final RightSimPanePresentation rightSimPane = new RightSimPanePresentation();
+
+    public static SimulationHandler simulationHandler = new SimulationHandler();
     private boolean firstTimeInSimulator;
     private final static DoubleProperty width = new SimpleDoubleProperty(),
             height = new SimpleDoubleProperty();
-    private static ObjectProperty<SimulationState> selectedState = new SimpleObjectProperty<>();
+    private static final ObjectProperty<SimulationState> selectedState = new SimpleObjectProperty<>();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {

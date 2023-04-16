@@ -47,7 +47,7 @@ public class SimulationHandler {
 
     private List<String> ComponentsInSimulation = new ArrayList<>();
 
-    private EngineConnection con;
+    private EngineConnection con; // ToDo NIELS: Remove in favor of using open connections through engines
 
     /**
      * Empty constructor that should be used if the system or project has not be initialized yet

@@ -2,20 +2,21 @@ package ecdar.controllers;
 
 import com.jfoenix.controls.JFXRippler;
 import com.jfoenix.controls.JFXTextField;
-import ecdar.Ecdar;
 import ecdar.abstractions.Edge;
 import ecdar.backend.SimulationHandler;
 import ecdar.simulation.Transition;
 import ecdar.presentations.TransitionPresentation;
+import ecdar.utility.colors.EnabledColor;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.*;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.math.BigDecimal;
@@ -27,7 +28,7 @@ import java.util.ResourceBundle;
 /**
  * The controller class for the transition pane element that can be inserted into the simulator panes
  */
-public class TransitionPaneElementController implements Initializable {
+public class TransitionPaneController implements Initializable {
     public VBox root;
     public VBox transitionList;
     public HBox toolbar;
@@ -38,16 +39,38 @@ public class TransitionPaneElementController implements Initializable {
     public VBox delayChooser;
     public JFXTextField delayTextField;
 
-    private SimpleBooleanProperty isTransitionExpanded = new SimpleBooleanProperty(false);
-    private Map<Transition, TransitionPresentation> transitionPresentationMap = new HashMap<>();
-    private SimpleObjectProperty<BigDecimal> delay = new SimpleObjectProperty<>(BigDecimal.ZERO);
+    private final SimpleBooleanProperty isTransitionExpanded = new SimpleBooleanProperty(false);
+    private final Map<Transition, TransitionPresentation> transitionPresentationMap = new HashMap<>();
+    private final SimpleObjectProperty<BigDecimal> delay = new SimpleObjectProperty<>(BigDecimal.ZERO);
     private SimulationHandler simulationHandler;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         simulationHandler = SimulatorController.getSimulationHandler();
+        initializeToolbar();
         initializeTransitionExpand();
         initializeDelayChooser();
+    }
+
+    /**
+     * Initializes the toolbar for the transition pane element.
+     * Sets the background of the toolbar and changes the title color.
+     * Also changes the look of the rippler effect.
+     */
+    private void initializeToolbar() {
+        // Set the background of the toolbar
+        toolbar.setBackground(new Background(new BackgroundFill(
+                EnabledColor.getDefault().getStrokeColor(),
+                CornerRadii.EMPTY,
+                Insets.EMPTY)));
+        // Set the font color of elements in the toolbar
+        toolbarTitle.setTextFill(EnabledColor.getDefault().getTextColor());
+
+        refreshRippler.setMaskType(JFXRippler.RipplerMask.CIRCLE);
+        refreshRippler.setRipplerFill(EnabledColor.getDefault().getTextColor());
+
+        expandTransition.setMaskType(JFXRippler.RipplerMask.CIRCLE);
+        expandTransition.setRipplerFill(EnabledColor.getDefault().getTextColor());
     }
 
     /**
@@ -57,6 +80,19 @@ public class TransitionPaneElementController implements Initializable {
      * Adds tooltip for the textfield.
      */
     private void initializeDelayChooser() {
+        delayChooser.setBackground(new Background(new BackgroundFill(
+                EnabledColor.getDefault().getLowestIntensity().getPaintColor(),
+                CornerRadii.EMPTY,
+                Insets.EMPTY
+        )));
+
+        delayChooser.setBorder(new Border(new BorderStroke(
+                EnabledColor.getDefault().getLowestIntensity().nextIntensity(2).getPaintColor(),
+                BorderStrokeStyle.SOLID,
+                CornerRadii.EMPTY,
+                new BorderWidths(0, 0, 1, 0)
+        )));
+
         delayTextField.textProperty().addListener(((observable, oldValue, newValue) -> {
             delayTextChanged(oldValue, newValue);
         }));
@@ -74,7 +110,7 @@ public class TransitionPaneElementController implements Initializable {
 
     /**
      * Initializes the expand functionality that allows the user to show or hide the transitions.
-     * By default the transitions are shown.
+     * By default, the transitions are shown.
      */
     private void initializeTransitionExpand() {
         isTransitionExpanded.addListener((obs, oldVal, newVal) -> {
@@ -132,10 +168,8 @@ public class TransitionPaneElementController implements Initializable {
         //     mouseEntered.handle(event);
         // });
 
-        EventHandler mouseExited = transitionPresentation.getOnMouseExited();
-        transitionPresentation.setOnMouseExited(event -> {
-            mouseExited.handle(event);
-        });
+        EventHandler<? super MouseEvent> mouseExited = transitionPresentation.getOnMouseExited();
+        transitionPresentation.setOnMouseExited(mouseExited);
 
         transitionPresentationMap.put(transition, transitionPresentation);
 
@@ -152,13 +186,13 @@ public class TransitionPaneElementController implements Initializable {
      * @return A string representing the transition
      */
     private String transitionString(Transition transition) {
-        String title = transition.getLabel();
+        StringBuilder title = new StringBuilder(transition.getLabel());
         if(transition.getEdges() != null) {
             for (Edge edge : transition.getEdges()) {
-                title += " " + edge.getId();
+                title.append(" ").append(edge.getId());
             }
         }
-        return title;
+        return title.toString();
     }
 
     /**
@@ -166,11 +200,7 @@ public class TransitionPaneElementController implements Initializable {
      */
     @FXML
     private void expandTransitions() {
-        if(isTransitionExpanded.get()) {
-            isTransitionExpanded.set(false);
-        } else {
-            isTransitionExpanded.set(true);
-        }
+        isTransitionExpanded.set(!isTransitionExpanded.get());
     }
 
     /**

@@ -14,7 +14,7 @@ import java.util.function.BiConsumer;
 
 /**
  * The presentation class for a transition view element.
- * It represents a single transition and may be used by classes like {@see TransitionPaneElementController}
+ * It represents a single transition and may be used by classes like {@see TransitionPaneController}
  * to show a list of transitions
  */
 public class TransitionPresentation extends AnchorPane {
