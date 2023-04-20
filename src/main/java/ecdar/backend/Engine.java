@@ -23,16 +23,16 @@ public class Engine implements Serializable {
     private static final String PORT_RANGE_START = "portRangeStart";
     private static final String PORT_RANGE_END = "portRangeEnd";
     private static final String LOCKED = "locked";
-    private final int responseDeadline = 20000;
-    private final int rerunRequestDelay = 200;
-    private final int numberOfRetriesPerQuery = 5;
+    private static final int responseDeadline = 20000;
+    private static final int rerunRequestDelay = 200;
+    private static final int numberOfRetriesPerQuery = 5;
 
     private String name;
     private boolean isLocal;
     private boolean isDefault;
     private int portStart;
     private int portEnd;
-    private SimpleBooleanProperty locked = new SimpleBooleanProperty(false);
+    private final SimpleBooleanProperty locked = new SimpleBooleanProperty(false);
     /**
      * This is either a path to the engines executable or an IP address at which the engine is running
      */
@@ -123,7 +123,7 @@ public class Engine implements Serializable {
         return locked;
     }
 
-    public ArrayList<EngineConnection> getStartedConnections() {
+    protected ArrayList<EngineConnection> getStartedConnections() {
         return startedConnections;
     }
 
@@ -171,17 +171,8 @@ public class Engine implements Serializable {
      *
      * @param connection to make available
      */
-    public void setConnectionAsAvailable(EngineConnection connection) {
+    private void setConnectionAsAvailable(EngineConnection connection) {
         if (!availableConnections.contains(connection)) availableConnections.add(connection);
-    }
-
-    /**
-     * Clears all queued queries, stops all active engines, and closes all open engine connections
-     */
-    public void clear() throws BackendException {
-        BackendHelper.stopQueries();
-        requestQueue.clear();
-        closeConnections();
     }
 
     /**
@@ -257,7 +248,7 @@ public class Engine implements Serializable {
      * @throws BackendException if one or more connections throw an exception on {@link EngineConnection#close()}
      *                          (use getSuppressed() to see all thrown exceptions)
      */
-    public void closeConnections() throws BackendException {
+    protected void closeConnections() throws BackendException {
         // Create a list for storing all terminated connection
         List<CompletableFuture<EngineConnection>> closeFutures = new ArrayList<>();
         BackendException exceptions = new BackendException("Exceptions were thrown while attempting to close engine connections on " + getName());
