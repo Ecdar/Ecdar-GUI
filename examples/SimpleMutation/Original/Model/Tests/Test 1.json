@@ -25,11 +25,11 @@
   "stepBounds": 100,
   "simulateTime": false,
   "verdictFAIL_PRIMARY": false,
-  "verdictNO_RULE": false,
+  "verdictMAX_WAIT": false,
   "verdictPASS": false,
   "verdictFAIL_NORMAL": false,
-  "verdictMAX_WAIT": false,
+  "verdictNON_DETERMINISM": false,
   "verdictMUT_NO_DELAY": false,
-  "verdictOUT_OF_BOUNDS": false,
-  "verdictNON_DETERMINISM": false
+  "verdictNO_RULE": false,
+  "verdictOUT_OF_BOUNDS": false
 }

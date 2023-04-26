@@ -162,9 +162,8 @@ public abstract class ModelController extends HighLevelModelController {
         });
 
         rightAnchor.setOnMouseDragged(event -> {
-            double diff = event.getScreenX() - prevX.get();
-            diff -= diff % Ecdar.CANVAS_PADDING;
-
+            final double diff = event.getScreenX() - prevX.get();
+            
             final double newWidth = prevWidth.get() + diff;
             final double minWidth = getDragAnchorMinWidth();
 

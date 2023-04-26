@@ -8,8 +8,8 @@
       "invariant": "",
       "type": "INITIAL",
       "urgency": "NORMAL",
-      "x": 250.0,
-      "y": 280.0,
+      "x": 178.4722222222222,
+      "y": 65.41666666666664,
       "color": "2",
       "nicknameX": 30.0,
       "nicknameY": -10.0,
@@ -22,8 +22,8 @@
       "invariant": "",
       "type": "NORMAL",
       "urgency": "NORMAL",
-      "x": 130.0,
-      "y": 400.0,
+      "x": 58.47222222222222,
+      "y": 185.41666666666666,
       "color": "2",
       "nicknameX": 30.0,
       "nicknameY": -10.0,
@@ -36,8 +36,8 @@
       "invariant": "x\u003c\u003d7",
       "type": "NORMAL",
       "urgency": "NORMAL",
-      "x": 370.0,
-      "y": 400.0,
+      "x": 298.47222222222223,
+      "y": 185.41666666666666,
       "color": "2",
       "nicknameX": 30.0,
       "nicknameY": -10.0,
@@ -50,8 +50,8 @@
       "invariant": "",
       "type": "NORMAL",
       "urgency": "NORMAL",
-      "x": 250.0,
-      "y": 520.0,
+      "x": 178.4722222222222,
+      "y": 305.41666666666663,
       "color": "2",
       "nicknameX": 30.0,
       "nicknameY": -10.0,
@@ -73,15 +73,15 @@
       "isLocked": false,
       "nails": [
         {
-          "x": 210.0,
-          "y": 320.0,
+          "x": 138.4722222222222,
+          "y": 105.41666666666664,
           "propertyType": "SYNCHRONIZATION",
           "propertyX": 10.0,
           "propertyY": -10.0
         },
         {
-          "x": 170.0,
-          "y": 360.0,
+          "x": 98.47222222222223,
+          "y": 145.41666666666666,
           "propertyType": "UPDATE",
           "propertyX": 10.0,
           "propertyY": -10.0
@@ -101,15 +101,15 @@
       "isLocked": false,
       "nails": [
         {
-          "x": 290.0,
-          "y": 320.0,
+          "x": 218.4722222222222,
+          "y": 105.41666666666664,
           "propertyType": "SYNCHRONIZATION",
           "propertyX": 10.0,
           "propertyY": -10.0
         },
         {
-          "x": 330.0,
-          "y": 360.0,
+          "x": 258.47222222222223,
+          "y": 145.41666666666666,
           "propertyType": "UPDATE",
           "propertyX": 10.0,
           "propertyY": -10.0
@@ -129,15 +129,15 @@
       "isLocked": false,
       "nails": [
         {
-          "x": 210.0,
-          "y": 400.0,
+          "x": 138.4722222222222,
+          "y": 185.41666666666666,
           "propertyType": "GUARD",
           "propertyX": -20.0,
           "propertyY": -30.0
         },
         {
-          "x": 290.0,
-          "y": 400.0,
+          "x": 218.4722222222222,
+          "y": 185.41666666666666,
           "propertyType": "SYNCHRONIZATION",
           "propertyX": 10.0,
           "propertyY": -10.0
@@ -157,15 +157,15 @@
       "isLocked": false,
       "nails": [
         {
-          "x": 330.0,
-          "y": 440.0,
+          "x": 258.47222222222223,
+          "y": 225.41666666666666,
           "propertyType": "GUARD",
           "propertyX": 10.0,
           "propertyY": -10.0
         },
         {
-          "x": 290.0,
-          "y": 480.0,
+          "x": 218.4722222222222,
+          "y": 265.41666666666663,
           "propertyType": "SYNCHRONIZATION",
           "propertyX": 10.0,
           "propertyY": -10.0
@@ -174,10 +174,10 @@
     }
   ],
   "description": "",
-  "x": 513.0,
-  "y": 192.0,
-  "width": 450.0,
-  "height": 600.0,
+  "x": 423.0,
+  "y": 316.0,
+  "width": 366.94444444444446,
+  "height": 352.77777777777777,
   "color": "2",
   "includeInPeriodicCheck": false
 }
