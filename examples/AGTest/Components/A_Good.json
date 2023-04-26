@@ -8,8 +8,8 @@
       "invariant": "",
       "type": "INITIAL",
       "urgency": "NORMAL",
-      "x": 210.0,
-      "y": 190.0,
+      "x": 128.25598464317977,
+      "y": 122.84355239385728,
       "color": "9",
       "nicknameX": 30.0,
       "nicknameY": -10.0,
@@ -31,15 +31,15 @@
       "isLocked": false,
       "nails": [
         {
-          "x": 150.0,
-          "y": 210.0,
+          "x": 68.25598464317976,
+          "y": 142.84355239385727,
           "propertyType": "SYNCHRONIZATION",
           "propertyX": -30.0,
           "propertyY": 10.0
         },
         {
-          "x": 150.0,
-          "y": 160.0,
+          "x": 68.25598464317976,
+          "y": 92.84355239385728,
           "propertyType": "NONE",
           "propertyX": 0.0,
           "propertyY": 0.0
@@ -59,15 +59,15 @@
       "isLocked": false,
       "nails": [
         {
-          "x": 180.0,
-          "y": 140.0,
+          "x": 98.25598464317976,
+          "y": 72.84355239385728,
           "propertyType": "SYNCHRONIZATION",
           "propertyX": 10.0,
           "propertyY": -10.0
         },
         {
-          "x": 240.0,
-          "y": 140.0,
+          "x": 158.25598464317977,
+          "y": 72.84355239385728,
           "propertyType": "NONE",
           "propertyX": 0.0,
           "propertyY": 0.0
@@ -87,15 +87,15 @@
       "isLocked": false,
       "nails": [
         {
-          "x": 240.0,
-          "y": 240.0,
+          "x": 158.25598464317977,
+          "y": 172.84355239385727,
           "propertyType": "SYNCHRONIZATION",
           "propertyX": 10.0,
           "propertyY": -10.0
         },
         {
-          "x": 180.0,
-          "y": 240.0,
+          "x": 98.25598464317976,
+          "y": 172.84355239385727,
           "propertyType": "NONE",
           "propertyX": 0.0,
           "propertyY": 0.0
@@ -104,10 +104,10 @@
     }
   ],
   "description": "",
-  "x": 5.0,
-  "y": 5.0,
-  "width": 450.0,
-  "height": 600.0,
+  "x": 618.0,
+  "y": 377.0,
+  "width": 240.7746160794941,
+  "height": 230.6543586269196,
   "color": "9",
   "includeInPeriodicCheck": true
 }

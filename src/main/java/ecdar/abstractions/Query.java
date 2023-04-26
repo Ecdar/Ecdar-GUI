@@ -223,18 +223,7 @@ public class Query implements Serializable {
             newComponent.setTemporary(true);
 
             ObservableList<Component> listOfGeneratedComponents = Ecdar.getProject().getTempComponents(); // ToDo NIELS: Refactor
-            Component matchedComponent = null;
-
-            for (Component currentGeneratedComponent : listOfGeneratedComponents) {
-                int comparisonOfNames = currentGeneratedComponent.getName().compareTo(newComponent.getName());
-
-                if (comparisonOfNames == 0) {
-                    matchedComponent = currentGeneratedComponent;
-                    break;
-                } else if (comparisonOfNames < 0) {
-                    break;
-                }
-            }
+            Component matchedComponent = listOfGeneratedComponents.stream().filter(tempComp -> tempComp.getName().equals(newComponent.getName())).findFirst().orElse(null);
 
             if (matchedComponent == null) {
                 UndoRedoStack.pushAndPerform(() -> { // Perform
@@ -244,17 +233,14 @@ public class Query implements Serializable {
                 }, "Created new component: " + newComponent.getName(), "add-circle");
             } else {
                 // Remove current component with name and add the newly generated one
-                Component finalMatchedComponent = matchedComponent;
                 UndoRedoStack.pushAndPerform(() -> { // Perform
-                    Ecdar.getProject().getTempComponents().remove(finalMatchedComponent);
+                    Ecdar.getProject().getTempComponents().remove(matchedComponent);
                     Ecdar.getProject().getTempComponents().add(newComponent);
                 }, () -> { // Undo
                     Ecdar.getProject().getTempComponents().remove(newComponent);
-                    Ecdar.getProject().getTempComponents().add(finalMatchedComponent);
+                    Ecdar.getProject().getTempComponents().add(matchedComponent);
                 }, "Created new component: " + newComponent.getName(), "add-circle");
             }
-
-            Ecdar.getProject().addComponent(newComponent);
         });
     }
 

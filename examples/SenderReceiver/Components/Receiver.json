@@ -8,8 +8,8 @@
       "invariant": "",
       "type": "INITIAL",
       "urgency": "NORMAL",
-      "x": 160.0,
-      "y": 200.0,
+      "x": 84.30555555555556,
+      "y": 171.52777777777777,
       "color": "5",
       "nicknameX": 30.0,
       "nicknameY": -10.0,
@@ -22,8 +22,8 @@
       "invariant": "",
       "type": "NORMAL",
       "urgency": "NORMAL",
-      "x": 250.0,
-      "y": 160.0,
+      "x": 174.30555555555554,
+      "y": 131.52777777777777,
       "color": "5",
       "nicknameX": 30.0,
       "nicknameY": -10.0,
@@ -45,15 +45,15 @@
       "isLocked": false,
       "nails": [
         {
-          "x": 310.0,
-          "y": 230.0,
+          "x": 234.30555555555554,
+          "y": 201.52777777777777,
           "propertyType": "NONE",
           "propertyX": 0.0,
           "propertyY": 0.0
         },
         {
-          "x": 290.0,
-          "y": 210.0,
+          "x": 214.30555555555554,
+          "y": 181.52777777777777,
           "propertyType": "SYNCHRONIZATION",
           "propertyX": 10.0,
           "propertyY": -10.0
@@ -73,22 +73,22 @@
       "isLocked": false,
       "nails": [
         {
-          "x": 320.0,
-          "y": 110.0,
+          "x": 244.30555555555554,
+          "y": 81.52777777777777,
           "propertyType": "NONE",
           "propertyX": 0.0,
           "propertyY": 0.0
         },
         {
-          "x": 280.0,
-          "y": 100.0,
+          "x": 204.30555555555554,
+          "y": 71.52777777777777,
           "propertyType": "SYNCHRONIZATION",
           "propertyX": 10.0,
           "propertyY": -10.0
         },
         {
-          "x": 240.0,
-          "y": 90.0,
+          "x": 164.30555555555554,
+          "y": 61.52777777777777,
           "propertyType": "NONE",
           "propertyX": 0.0,
           "propertyY": 0.0
@@ -97,10 +97,10 @@
     }
   ],
   "description": "",
-  "x": 5.0,
-  "y": 5.0,
-  "width": 450.0,
-  "height": 600.0,
+  "x": 571.0,
+  "y": 355.0,
+  "width": 334.7222222222222,
+  "height": 273.6111111111111,
   "color": "5",
   "includeInPeriodicCheck": true
 }
