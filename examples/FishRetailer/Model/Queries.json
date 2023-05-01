@@ -3,8 +3,6 @@
     "query": "consistency: Retailer",
     "comment": "",
     "isPeriodic": false,
-    "ignoredInputs": {},
-    "ignoredOutputs": {},
     "engine": "Reveaal"
   }
 ]

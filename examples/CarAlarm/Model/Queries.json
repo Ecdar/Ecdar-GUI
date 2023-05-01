@@ -3,48 +3,36 @@
     "query": "consistency: Alarm",
     "comment": "",
     "isPeriodic": false,
-    "ignoredInputs": {},
-    "ignoredOutputs": {},
     "engine": "Reveaal"
   },
   {
     "query": "specification: Alarm",
     "comment": "",
     "isPeriodic": false,
-    "ignoredInputs": {},
-    "ignoredOutputs": {},
     "engine": "Reveaal"
   },
   {
     "query": "reachability: Alarm.L11",
     "comment": "",
     "isPeriodic": false,
-    "ignoredInputs": {},
-    "ignoredOutputs": {},
     "engine": "Reveaal"
   },
   {
     "query": "reachability: Alarm.L12",
     "comment": "",
     "isPeriodic": false,
-    "ignoredInputs": {},
-    "ignoredOutputs": {},
     "engine": "Reveaal"
   },
   {
     "query": "reachability: Alarm.L9",
     "comment": "",
     "isPeriodic": false,
-    "ignoredInputs": {},
-    "ignoredOutputs": {},
     "engine": "Reveaal"
   },
   {
-    "query": "specification: (Alarm: A[] not Alarm.L7 || Alarm.x\u003c\u003d30)",
+    "query": "specification: (Alarm",
     "comment": "",
     "isPeriodic": false,
-    "ignoredInputs": {},
-    "ignoredOutputs": {},
     "engine": "Reveaal"
   }
 ]

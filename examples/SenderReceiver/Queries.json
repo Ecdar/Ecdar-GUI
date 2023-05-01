@@ -3,24 +3,18 @@
     "query": "reachability: Receiver.L4",
     "comment": "",
     "isPeriodic": false,
-    "ignoredInputs": {},
-    "ignoredOutputs": {},
     "engine": "Reveaal"
   },
   {
     "query": "specification: Sender",
     "comment": "",
     "isPeriodic": false,
-    "ignoredInputs": {},
-    "ignoredOutputs": {},
     "engine": "Reveaal"
   },
   {
     "query": "implementation: Sender",
     "comment": "",
     "isPeriodic": false,
-    "ignoredInputs": {},
-    "ignoredOutputs": {},
     "engine": "Reveaal"
   }
 ]

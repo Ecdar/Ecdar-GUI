@@ -8,8 +8,8 @@
       "invariant": "",
       "type": "INITIAL",
       "urgency": "NORMAL",
-      "x": 230.0,
-      "y": 300.0,
+      "x": 140.87962962962962,
+      "y": 123.8651761517615,
       "color": "5",
       "nicknameX": 30.0,
       "nicknameY": -10.0,
@@ -31,15 +31,15 @@
       "isLocked": false,
       "nails": [
         {
-          "x": 180.0,
-          "y": 330.0,
+          "x": 90.87962962962962,
+          "y": 153.86517615176152,
           "propertyType": "SYNCHRONIZATION",
-          "propertyX": 10.0,
-          "propertyY": -10.0
+          "propertyX": -61.454381210478765,
+          "propertyY": -8.41915085817525
         },
         {
-          "x": 180.0,
-          "y": 270.0,
+          "x": 90.87962962962962,
+          "y": 93.8651761517615,
           "propertyType": "NONE",
           "propertyX": 0.0,
           "propertyY": 0.0
@@ -59,15 +59,15 @@
       "isLocked": false,
       "nails": [
         {
-          "x": 260.0,
-          "y": 360.0,
+          "x": 170.87962962962962,
+          "y": 183.86517615176152,
           "propertyType": "SYNCHRONIZATION",
-          "propertyX": 10.0,
-          "propertyY": -10.0
+          "propertyX": 17.904245709123757,
+          "propertyY": -8.419150858175247
         },
         {
-          "x": 200.0,
-          "y": 360.0,
+          "x": 110.87962962962962,
+          "y": 183.86517615176152,
           "propertyType": "NONE",
           "propertyX": 0.0,
           "propertyY": 0.0
@@ -87,15 +87,15 @@
       "isLocked": false,
       "nails": [
         {
-          "x": 280.0,
-          "y": 270.0,
+          "x": 190.87962962962962,
+          "y": 93.8651761517615,
           "propertyType": "SYNCHRONIZATION",
-          "propertyX": 10.0,
-          "propertyY": -10.0
+          "propertyX": 19.48509485094851,
+          "propertyY": -8.102981029810302
         },
         {
-          "x": 280.0,
-          "y": 330.0,
+          "x": 190.87962962962962,
+          "y": 153.86517615176152,
           "propertyType": "NONE",
           "propertyX": 0.0,
           "propertyY": 0.0
@@ -104,10 +104,10 @@
     }
   ],
   "description": "",
-  "x": 5.0,
-  "y": 5.0,
-  "width": 450.0,
-  "height": 600.0,
+  "x": 593.0,
+  "y": 369.0,
+  "width": 289.74706413730803,
+  "height": 245.7994579945799,
   "color": "5",
   "includeInPeriodicCheck": true
 }
