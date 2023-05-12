@@ -3,14 +3,13 @@ package ecdar.presentations;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Edge;
 import ecdar.controllers.SimEdgeController;
-import ecdar.controllers.SimulatorController;
+import ecdar.controllers.SimulationController;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Group;
-import javafx.util.Pair;
 
 /**
- * The presentation class for the edges shown in the {@link SimulatorOverviewPresentation}
+ * The presentation class for the edges shown in the {@link SimulationPresentation}
  */
 public class SimEdgePresentation extends Group {
     private final SimEdgeController controller;
@@ -20,7 +19,6 @@ public class SimEdgePresentation extends Group {
 
     public SimEdgePresentation(final Edge edge, final Component component) {
         controller = new EcdarFXMLLoader().loadAndGetController("SimEdgePresentation.fxml", this);
-        var simulationHandler = SimulatorController.getSimulationHandler();
 
         controller.setEdge(edge);
         this.edge.bind(controller.edgeProperty());
@@ -30,18 +28,11 @@ public class SimEdgePresentation extends Group {
 
         // when hovering mouse the cursor should change to hand
         this.setOnMouseEntered(event -> {
-            if (simulationHandler.currentState.get().getEnabledEdges().contains(new Pair<>(component.getName(), edge.getId())))
+            // ToDo NIELS: Handle change of functionality and utilization of ComponentInstances
+            if (controller.getEdge().isHighlighted())
                 this.getScene().setCursor(javafx.scene.Cursor.HAND);
         });
         this.setOnMouseExited(event -> this.getScene().setCursor(javafx.scene.Cursor.DEFAULT));
-
-        // when clicking the edge, the edge should be selected and the simulation should take next step (if the edge is enabled)
-        this.setOnMouseClicked(event -> {
-            if (simulationHandler.currentState.get().getEnabledEdges().contains(new Pair<>(component.getName(), edge.getId()))) {
-                simulationHandler.selectedEdge.set(edge);
-                simulationHandler.nextStep();
-            }
-        });
     }
 
     public SimEdgeController getController() {

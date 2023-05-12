@@ -1,44 +1,23 @@
 package ecdar.presentations;
 
+import ecdar.abstractions.Decision;
 import ecdar.controllers.RightSimPaneController;
-import ecdar.utility.colors.Color;
-import javafx.geometry.Insets;
 import javafx.scene.layout.*;
+
+import java.util.function.Consumer;
 
 /**
  * Presentation class for the right pane in the simulator
  */
 public class RightSimPanePresentation extends StackPane {
-    private RightSimPaneController controller;
+    private final RightSimPaneController controller;
 
-    public RightSimPanePresentation() {
+    public RightSimPanePresentation(Consumer<Decision> onDecisionSelected) {
         controller = new EcdarFXMLLoader().loadAndGetController("RightSimPanePresentation.fxml", this);
-
-        initializeBackground();
-        initializeLeftBorder();
+        controller.setOnDecisionSelected(onDecisionSelected);
     }
 
-    /**
-     * Sets the background color of the ScrollPane Vbox
-     */
-    private void initializeBackground() {
-        controller.scrollPaneVbox.setBackground(new Background(new BackgroundFill(
-                Color.GREY.getColor(Color.Intensity.I200),
-                CornerRadii.EMPTY,
-                Insets.EMPTY
-        )));
+    public RightSimPaneController getController() {
+        return controller;
     }
-
-    /**
-     * Initializes the thin border on the left side of the querypane toolbar
-     */
-    private void initializeLeftBorder() {
-        setBorder(new Border(new BorderStroke(
-                Color.GREY_BLUE.getColor(Color.Intensity.I900),
-                BorderStrokeStyle.SOLID,
-                CornerRadii.EMPTY,
-                new BorderWidths(0, 0, 0, 1)
-        )));
-    }
-
 }

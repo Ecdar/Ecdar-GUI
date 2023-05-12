@@ -1,7 +1,7 @@
 package ecdar.controllers;
 
 import com.jfoenix.controls.JFXRippler;
-import ecdar.simulation.Transition;
+import ecdar.abstractions.State;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
@@ -12,17 +12,17 @@ import java.util.ResourceBundle;
 
 /**
  * The controller class for the transition view element.
- * It represents a single transition and may be used by classes like {@see TransitionPaneController}
+ * It represents a single transition and may be used by classes like {@see StatePaneController}
  * to show a list of transitions
  */
-public class TransitionController implements Initializable {
+public class StateController implements Initializable {
     public AnchorPane root;
     public Label titleLabel;
     public JFXRippler rippler;
 
     // The transition that the view represents
-    private SimpleObjectProperty<Transition> transition = new SimpleObjectProperty<>();
-    private SimpleObjectProperty<String> title = new SimpleObjectProperty<>();
+    private final SimpleObjectProperty<State> state = new SimpleObjectProperty<>();
+    private final SimpleObjectProperty<String> title = new SimpleObjectProperty<>();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -35,11 +35,11 @@ public class TransitionController implements Initializable {
         this.title.set(title);
     }
 
-    public void setTransition(Transition transition) {
-        this.transition.set(transition);
+    public void setState(State state) {
+        this.state.set(state);
     }
 
-    public Transition getTransition() {
-        return transition.get();
+    public State getState() {
+        return state.get();
     }
 }

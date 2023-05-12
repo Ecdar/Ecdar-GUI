@@ -3,8 +3,6 @@ package ecdar.controllers;
 import com.jfoenix.controls.JFXRippler;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
-import ecdar.presentations.ComponentPresentation;
-import ecdar.presentations.ModelPresentation;
 import ecdar.presentations.SimEdgePresentation;
 import ecdar.presentations.SimLocationPresentation;
 import ecdar.utility.helpers.UPPAALSyntaxHighlighter;
@@ -21,7 +19,6 @@ import javafx.scene.layout.*;
 import javafx.scene.shape.Circle;
 import javafx.util.Duration;
 
-import org.checkerframework.checker.units.qual.K;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.StyleClassedTextArea;
 import org.kordamp.ikonli.javafx.FontIcon;
@@ -31,7 +28,7 @@ import java.net.URL;
 import java.util.*;
 
 /**
- * The controller for the process shown in the {@link SimulatorOverviewController}
+ * The controller for a process shown in the {@link SimulationController}
  */
 public class ProcessController extends ModelController implements Initializable {
     public StackPane componentPane;

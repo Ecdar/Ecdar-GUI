@@ -67,8 +67,10 @@ public class EcdarPresentation extends StackPane {
             controller.topPane.maxHeightProperty().bind(controller.menuBar.heightProperty());
 
             EcdarController.currentMode.addListener(observable -> {
-                initializeToggleLeftPaneFunctionality();
-                initializeToggleRightPaneFunctionality();
+                Platform.runLater(() -> {
+                    initializeToggleLeftPaneFunctionality();
+                    initializeToggleRightPaneFunctionality();
+                });
             });
 
             Ecdar.getPresentation().controller.scalingProperty.addListener((observable, oldValue, newValue) -> {

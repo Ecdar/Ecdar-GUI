@@ -553,7 +553,7 @@ public class ComponentController extends ModelController implements Initializabl
 
     private void initializeLocationHandling() {
         final ListChangeListener<Location> locationListChangeListener = c -> {
-            if (c.next()) {
+            while (c.next()) {
                 // Locations are added to the component
                 c.getAddedSubList().forEach((loc) -> {
                     // Check related to undo/redo stack
@@ -596,7 +596,7 @@ public class ComponentController extends ModelController implements Initializabl
 
         // React on addition of edges to the component
         getComponent().getDisplayableEdges().addListener((ListChangeListener<DisplayableEdge>) c -> {
-            if (c.next()) {
+            while (c.next()) {
                 // Edges are added to the component
                 c.getAddedSubList().forEach(handleAddedEdge);
 

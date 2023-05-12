@@ -1,7 +1,6 @@
 package ecdar.utility.helpers;
 
 import ecdar.Ecdar;
-import ecdar.controllers.EcdarController;
 import ecdar.model_canvas.arrow_heads.ArrowHead;
 import ecdar.model_canvas.arrow_heads.ChannelReceiverArrowHead;
 import ecdar.model_canvas.arrow_heads.ChannelSenderArrowHead;

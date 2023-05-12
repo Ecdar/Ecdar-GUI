@@ -3,8 +3,8 @@ package ecdar.presentations;
 import ecdar.abstractions.Component;
 import ecdar.abstractions.Location;
 import ecdar.controllers.SimLocationController;
+import ecdar.controllers.SimulationController;
 import ecdar.utility.Highlightable;
-import ecdar.utility.colors.Color;
 import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.BindingHelper;
 import ecdar.utility.helpers.SelectHelper;
@@ -27,7 +27,7 @@ import static ecdar.presentations.LocationPresentation.INITIAL_RADIUS;
 import static ecdar.presentations.LocationPresentation.RADIUS;
 
 /**
- * Presentation for a location in the {@link SimulatorOverviewPresentation}.
+ * Presentation for a location in the {@link SimulationPresentation}.
  * This class should be refactored such that the shared code between this class
  * and {@link LocationPresentation} is placed in a base class.
  */

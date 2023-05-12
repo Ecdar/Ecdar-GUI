@@ -1,12 +1,17 @@
 package ecdar.abstractions;
 
-import EcdarProtoBuf.ObjectProtos;
+import ecdar.abstractions.Edge;
+
 import java.util.ArrayList;
 
 public class Transition {
-    public final ArrayList<Edge> edges = new ArrayList<>();
+    public String getLabel() {
+        // ToDo: Implement
+        return "Transition label";
+    }
 
-    public Transition(ObjectProtos protoBufTransition) {
-        // ToDo: Construct transition instance based on protoBuf input
+    public ArrayList<Edge> getEdges() {
+        // ToDo: Implement
+        return new ArrayList<>();
     }
 }

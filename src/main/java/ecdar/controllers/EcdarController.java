@@ -11,6 +11,8 @@ import ecdar.code_analysis.CodeAnalysis;
 import ecdar.mutation.MutationTestPlanPresentation;
 import ecdar.mutation.models.MutationTestPlan;
 import ecdar.presentations.*;
+import ecdar.presentations.SimulationInitializationDialogPresentation;
+import ecdar.presentations.SimulationPresentation;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.colors.Color;
 import ecdar.utility.helpers.SelectHelper;
@@ -150,7 +152,7 @@ public class EcdarController implements Initializable {
     public static final ObjectProperty<Mode> currentMode = new SimpleObjectProperty<>(Mode.Editor);
 
     private static final EditorPresentation editorPresentation = new EditorPresentation();
-    private static final SimulatorPresentation simulatorPresentation = new SimulatorPresentation();
+    private SimulationPresentation simulationPresentation;
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
@@ -166,7 +168,7 @@ public class EcdarController implements Initializable {
         if (currentMode.get().equals(Mode.Editor)) {
             return editorPresentation.getController().canvasPane;
         } else {
-            return simulatorPresentation;
+            return simulationPresentation;
         }
     }
 
@@ -178,15 +180,11 @@ public class EcdarController implements Initializable {
         return editorPresentation;
     }
 
-    public SimulatorPresentation getSimulatorPresentation() {
-        return simulatorPresentation;
-    }
-
     public StackPane getLeftModePane() {
         if (currentMode.get().equals(Mode.Editor)) {
             return editorPresentation.getController().getLeftPane();
         } else {
-            return simulatorPresentation.getController().getLeftPane();
+            return simulationPresentation.getController().getLeftPane();
         }
     }
 
@@ -194,7 +192,7 @@ public class EcdarController implements Initializable {
         if (currentMode.get().equals(Mode.Editor)) {
             return editorPresentation.getController().getRightPane();
         } else {
-            return simulatorPresentation.getController().getRightPane();
+            return simulationPresentation.getController().getRightPane();
         }
     }
 
@@ -276,7 +274,6 @@ public class EcdarController implements Initializable {
         });
 
         simulationInitializationDialog.getController().startButton.setOnMouseClicked(event -> {
-            SimulatorController.simulationHandler.setComposition(simulationInitializationDialog.getController().simulationComboBox.getSelectionModel().getSelectedItem());
             currentMode.setValue(Mode.Simulator);
             simulationInitializationDialog.close();
         });
@@ -527,7 +524,7 @@ public class EcdarController implements Initializable {
                     return;
                 }
 
-                if (!SimulatorController.getSimulationHandler().isSimulationRunning()) {
+                if (true) { // ToDo NIELS: Add check for whether the simulation is running
                     ArrayList<String> queryOptions = Ecdar.getProject().getQueries().stream().map(Query::getQuery).collect(Collectors.toCollection(ArrayList::new));
                     if (!simulationInitializationDialog.getController().simulationComboBox.getItems().equals(queryOptions)) {
                         simulationInitializationDialog.getController().simulationComboBox.getItems().setAll(queryOptions);
@@ -872,9 +869,10 @@ public class EcdarController implements Initializable {
      * Only enter if the mode is not already Simulator
      */
     private void enterSimulatorMode() {
-        simulatorPresentation.getController().willShow();
-        borderPane.setCenter(simulatorPresentation);
-        updateSidePanes(simulatorPresentation.getController());
+        simulationPresentation = new SimulationPresentation(simulationInitializationDialog.getController().simulationComboBox.getSelectionModel().getSelectedItem());
+
+        borderPane.setCenter(simulationPresentation);
+        updateSidePanes(simulationPresentation.getController());
     }
 
     private void updateSidePanes(ModeController modeController) {

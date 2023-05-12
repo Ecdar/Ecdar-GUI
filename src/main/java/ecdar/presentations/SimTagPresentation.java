@@ -18,7 +18,7 @@ import javafx.scene.shape.Path;
 import java.util.function.Consumer;
 
 /**
- * The presentation for the tag shown on a {@link SimEdgePresentation} in the {@link SimulatorOverviewPresentation}<br />
+ * The presentation for the tag shown on a {@link SimEdgePresentation} in the {@link SimulationPresentation}<br />
  * This class should be refactored such that code which are duplicated from {@link TagPresentation}
  * have its own base class.
  */

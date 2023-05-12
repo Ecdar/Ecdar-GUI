@@ -3,12 +3,13 @@ package ecdar.controllers;
 import com.jfoenix.controls.JFXRippler;
 import com.jfoenix.controls.JFXTextField;
 import ecdar.abstractions.Edge;
-import ecdar.backend.SimulationHandler;
-import ecdar.simulation.Transition;
-import ecdar.presentations.TransitionPresentation;
+import ecdar.abstractions.Transition;
+import ecdar.presentations.StatePresentation;
 import ecdar.utility.colors.EnabledColor;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -21,14 +22,12 @@ import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.math.BigDecimal;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.ResourceBundle;
 
 /**
  * The controller class for the transition pane element that can be inserted into the simulator panes
  */
-public class TransitionPaneController implements Initializable {
+public class StatePaneController implements Initializable {
     public VBox root;
     public VBox transitionList;
     public HBox toolbar;
@@ -40,13 +39,12 @@ public class TransitionPaneController implements Initializable {
     public JFXTextField delayTextField;
 
     private final SimpleBooleanProperty isTransitionExpanded = new SimpleBooleanProperty(false);
-    private final Map<Transition, TransitionPresentation> transitionPresentationMap = new HashMap<>();
     private final SimpleObjectProperty<BigDecimal> delay = new SimpleObjectProperty<>(BigDecimal.ZERO);
-    private SimulationHandler simulationHandler;
+
+    private ObservableList<StatePresentation> statePresentations = FXCollections.observableArrayList();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        simulationHandler = SimulatorController.getSimulationHandler();
         initializeToolbar();
         initializeTransitionExpand();
         initializeDelayChooser();
@@ -133,6 +131,10 @@ public class TransitionPaneController implements Initializable {
         isTransitionExpanded.set(true);
     }
 
+    protected void setTraceLog(ObservableList<StatePresentation> traceLog) {
+        statePresentations = traceLog;
+    }
+
     /**
      * Removes all the transition view elements as to hide the transitions from the user
      */
@@ -141,42 +143,35 @@ public class TransitionPaneController implements Initializable {
     }
 
     /**
-     * Shows the available transitions by inserting a {@link TransitionPresentation} for each transition
+     * Shows the available transitions by inserting a {@link StatePresentation} for each transition
      */
     private void showTransitions() {
-        transitionPresentationMap.forEach((transition, presentation) -> {
-            insertTransition(transition);
-        });
+        transitionList.getChildren().addAll(statePresentations);
     }
 
     /**
-     * Instantiates a TransitionPresentation for a Transition and adds it to the view
-     * @param transition The transition that should be inserted into the view
+     * Instantiates a StatePresentation for a Transition and adds it to the view
+     * @param statePresentation The state presentation that should be inserted into the view
      */
-    private void insertTransition(Transition transition) {
-        final TransitionPresentation transitionPresentation = new TransitionPresentation();
-        String title = transitionString(transition);
-        transitionPresentation.getController().setTitle(title);
-        transitionPresentation.getController().setTransition(transition);
+    private void insertState(StatePresentation statePresentation) {
+        String title = "Not yet implemented"; // ToDo NIELS: Re-implement - transitionString(statePresentation);
 
         // Update the selected transition when mouse entered.
         // Add the event to existing mouseEntered events
-        // e.g. TransitionPresentation already has mouseEntered functionality and we want to keep it
-        EventHandler mouseEntered = transitionPresentation.getOnMouseEntered();
-        // transitionPresentation.setOnMouseEntered(event -> {
-        //     SimulatorController.setSelectedTransition(transitionPresentation.getController().getTransition());
+        // e.g. StatePresentation already has mouseEntered functionality and we want to keep it
+        EventHandler mouseEntered = statePresentation.getOnMouseEntered();
+        // statePresentation.setOnMouseEntered(event -> {
+        //     SimulationController.setSelectedTransition(statePresentation.getController().getTransition());
         //     mouseEntered.handle(event);
         // });
 
-        EventHandler<? super MouseEvent> mouseExited = transitionPresentation.getOnMouseExited();
-        transitionPresentation.setOnMouseExited(mouseExited);
-
-        transitionPresentationMap.put(transition, transitionPresentation);
+        EventHandler<? super MouseEvent> mouseExited = statePresentation.getOnMouseExited();
+        statePresentation.setOnMouseExited(mouseExited);
 
         // Only insert the presentation into the view if the transitions are expanded
         // Avoids inserting duplicate elements in the view (it's still added to the map)
         if(isTransitionExpanded.get()) {
-            transitionList.getChildren().add(transitionPresentation);
+            transitionList.getChildren().add(statePresentation);
         }
     }
 
@@ -208,8 +203,8 @@ public class TransitionPaneController implements Initializable {
      */
     @FXML
     private void restartSimulation() {
-        simulationHandler.resetToInitialLocation();
-    }
+        return;
+    } // ToDo NIELS: Use simulation controller
 
     /**
      * Sanitizes the input that the user inserts into the delay textfield.
@@ -244,5 +239,4 @@ public class TransitionPaneController implements Initializable {
         }
 
     }
-
 }

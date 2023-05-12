@@ -15,7 +15,7 @@
             <Insets topRightBottomLeft="10"/>
         </padding>
         <JFXRippler fx:id="expandTrace">
-            <StackPane styleClass="responsive-icon-stack-pane-sizing" onMouseClicked="#expandTrace">
+            <StackPane styleClass="responsive-icon-stack-pane-sizing" onMouseClicked="#toggleTraceExpand">
                 <FontIcon fx:id="expandTraceIcon" iconLiteral="gmi-add" styleClass="icon-size-medium"
                           fill="white"/>
             </StackPane>
@@ -32,7 +32,7 @@
         <!-- Trace goes here -->
     </VBox>
 
-    <AnchorPane fx:id="traceSummary" minHeight="56" maxHeight="56" onMouseClicked="#expandTrace">
+    <AnchorPane fx:id="traceSummary" minHeight="56" maxHeight="56" onMouseClicked="#toggleTraceExpand">
         <VBox AnchorPane.leftAnchor="8"
               AnchorPane.topAnchor="0"
               AnchorPane.bottomAnchor="0"

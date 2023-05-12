@@ -5,7 +5,7 @@ import com.google.gson.JsonParser;
 import ecdar.Ecdar;
 import ecdar.backend.*;
 import ecdar.controllers.EcdarController;
-import ecdar.controllers.SimulatorController;
+import ecdar.controllers.SimulationController;
 import ecdar.utility.UndoRedoStack;
 import ecdar.utility.helpers.StringValidator;
 import EcdarProtoBuf.ObjectProtos;
@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-public class Query implements Serializable {
+public class Query implements RequestSource<QueryProtos.QueryResponse>, Serializable {
     private static final String QUERY = "query";
     private static final String COMMENT = "comment";
     private static final String IS_PERIODIC = "isPeriodic";
@@ -74,38 +74,38 @@ public class Query implements Serializable {
     };
 
     private final BiConsumer<ObjectProtos.State, List<String>> stateActionConsumer = (state, actions) -> {
-
+        // ToDo: Color all IO strings red
         for (Component c : Ecdar.getProject().getComponents()) {
             c.removeFailingLocations();
             c.removeFailingEdges();
         }
 
-        for (ObjectProtos.Location location : state.getLocationTuple().getLocationsList()) {
-            Component c = Ecdar.getProject().findComponent(location.getSpecificComponent().getComponentName());
-
-            if (c == null) {
-                throw new NullPointerException("Could not find the specific component: " + location.getSpecificComponent().getComponentName());
-            }
-
-            if (location.getId().isEmpty()) {
-                if(c.getName().equals(location.getSpecificComponent().getComponentName())){
-                    c.setFailingIOStrings(actions);
-                    c.setIsFailing(true);
-                }
-            } else {
-                Location l = c.findLocation(location.getId());
-                if (l == null) {
-                    throw new NullPointerException("Could not find location: " + location.getId());
-                }
-                
-                c.addFailingLocation(l.getId());
-                for (Edge edge : c.getEdges()) {
-                    if (actions.get(0).equals(edge.getSync()) && edge.getSourceLocation() == l) {
-                        c.addFailingEdge(edge);
-                    }
-                }
-            }
-        }
+//        for (ObjectProtos.LeafLocation location : ) {
+//            Component c = Ecdar.getProject().findComponent(location.getSpecificComponent().getComponentName());
+//
+//            if (c == null) {
+//                throw new NullPointerException("Could not find the specific component: " + location.getSpecificComponent().getComponentName());
+//            }
+//
+//            if (location.getId().isEmpty()) {
+//                if (c.getName().equals(location.getSpecificComponent().getComponentName())) {
+//                    c.setFailingIOStrings(actions);
+//                    c.setIsFailing(true);
+//                }
+//            } else {
+//                Location l = c.findLocation(location.getId());
+//                if (l == null) {
+//                    throw new NullPointerException("Could not find location: " + location.getId());
+//                }
+//
+//                c.addFailingLocation(l.getId());
+//                for (Edge edge : c.getEdges()) {
+//                    if (actions.get(0).equals(edge.getSync()) && edge.getSourceLocation() == l) {
+//                        c.addFailingEdge(edge);
+//                    }
+//                }
+//            }
+//        }
     };
 
     public Query(final String query, final String comment, final QueryState queryState, final Engine engine) {
@@ -219,114 +219,65 @@ public class Query implements Serializable {
         setQueryState(QueryState.RUNNING);
         errors().set("");
 
-        getEngine().enqueueQuery(this, this::handleQueryResponse, this::handleQueryBackendError);
+        getEngine().enqueueRequest(this, this::handleQueryResponse, this::handleQueryBackendError);
     }
 
     private void handleQueryResponse(QueryProtos.QueryResponse value) {
         if (getQueryState() == QueryState.UNKNOWN) return;
-        switch (value.getResultCase()) {
-            case REFINEMENT:
-                if (value.getRefinement().getSuccess()) {
-                    setQueryState(QueryState.SUCCESSFUL);
-                    getSuccessConsumer().accept(true);
-                } else {
-                    setQueryState(QueryState.ERROR);
-                    getFailureConsumer().accept(new BackendException.QueryErrorException(value.getRefinement().getReason()));
-                    getSuccessConsumer().accept(false);
-                    getStateActionConsumer().accept(value.getRefinement().getState(),
-                            value.getRefinement().getActionList());
-                }
-                break;
 
-            case CONSISTENCY:
-                if (value.getConsistency().getSuccess()) {
-                    setQueryState(QueryState.SUCCESSFUL);
-                    getSuccessConsumer().accept(true);
-                } else {
-                    setQueryState(QueryState.ERROR);
-                    getFailureConsumer().accept(new BackendException.QueryErrorException(value.getConsistency().getReason()));
-                    getSuccessConsumer().accept(false);
-                    getStateActionConsumer().accept(value.getConsistency().getState(),
-                            value.getConsistency().getActionList());
-                }
-                break;
+        if (value.hasSuccess()) {
+            setQueryState(QueryState.SUCCESSFUL);
+            getSuccessConsumer().accept(true);
 
-            case DETERMINISM:
-                if (value.getDeterminism().getSuccess()) {
-                    setQueryState(QueryState.SUCCESSFUL);
-                    getSuccessConsumer().accept(true);
-                } else {
-                    setQueryState(QueryState.ERROR);
-                    getFailureConsumer().accept(new BackendException.QueryErrorException(value.getDeterminism().getReason()));
-                    getSuccessConsumer().accept(false);
-                    getStateActionConsumer().accept(value.getDeterminism().getState(),
-                            value.getDeterminism().getActionList());
-
-                }
-                break;
-
-            case IMPLEMENTATION:
-                if (value.getImplementation().getSuccess()) {
-                    setQueryState(QueryState.SUCCESSFUL);
-                    getSuccessConsumer().accept(true);
-                } else {
-                    setQueryState(QueryState.ERROR);
-                    getFailureConsumer().accept(new BackendException.QueryErrorException(value.getImplementation().getReason()));
-                    getSuccessConsumer().accept(false);
-                    //ToDo: These errors are not implemented in the Reveaal backend.
-                    getStateActionConsumer().accept(value.getImplementation().getState(),
-                            new ArrayList<>());
-                }
-                break;
-
-            case REACHABILITY:
-                if (value.getReachability().getSuccess()) {
-                    setQueryState(QueryState.SUCCESSFUL);
-                    Ecdar.showToast("Reachability check was successful and the location can be reached.");
-
-                    //create list of edge id's
+            switch (value.getResultCase()) {
+                case COMPONENT:
+                    JsonObject returnedComponent = (JsonObject) JsonParser.parseString(value.getComponent().getJson());
+                    addGeneratedComponent(new Component(returnedComponent));
+                    break;
+                case REACHABILITY:
+                    // Highlight edges in path
                     ArrayList<String> edgeIds = new ArrayList<>();
-                    for(var pathsList : value.getReachability().getComponentPathsList()){
-                        for(var id : pathsList.getEdgeIdsList().toArray()) {
-                            edgeIds.add(id.toString());
+                    for (var decision : value.getReachabilityPath().getPath().getDecisionsList()) {
+                        for (var edge : decision.getEdgesList()) {
+                            edgeIds.add(edge.getId());
                         }
                     }
-                    //highlight the edges
-                    SimulatorController.getSimulationHandler().highlightReachabilityEdges(edgeIds);
-                    getSuccessConsumer().accept(true);
-                }
-                else if(!value.getReachability().getSuccess()){
-                    Ecdar.showToast("Reachability check was successful but the location cannot be reached.");
-                    getSuccessConsumer().accept(true);
-                } else {
-                    setQueryState(QueryState.ERROR);
-                    Ecdar.showToast("Error from backend: Reachability check was unsuccessful!");
-                    getFailureConsumer().accept(new BackendException.QueryErrorException(value.getReachability().getReason()));
-                    getSuccessConsumer().accept(false);
-                    //ToDo: These errors are not implemented in the Reveaal backend.
-                    getStateActionConsumer().accept(value.getReachability().getState(),
+
+//                    highlightReachabilityEdges(edgeIds); // ToDo NIELS: Refactor
+                    break;
+            }
+        } else {
+            setQueryState(QueryState.ERROR);
+            getFailureConsumer().accept(new BackendException.QueryErrorException(value.getError().getError()));
+            getSuccessConsumer().accept(false);
+
+            switch (value.getResultCase()) {
+                case REFINEMENT:
+                    getStateActionConsumer().accept(value.getRefinement().getRefinementState().getState().getState(),
                             new ArrayList<>());
-                }
-                break;
+                    break;
 
-            case COMPONENT:
-                setQueryState(QueryState.SUCCESSFUL);
-                getSuccessConsumer().accept(true);
-                JsonObject returnedComponent = (JsonObject) JsonParser.parseString(value.getComponent().getComponent().getJson());
-                addGeneratedComponent(new Component(returnedComponent));
-                break;
+                case CONSISTENCY:
+                    getStateActionConsumer().accept(value.getConsistency().getFailureState(),
+                            new ArrayList<>());
+                    break;
 
-            case ERROR:
-                setQueryState(QueryState.ERROR);
-                Ecdar.showToast(value.getError());
-                getFailureConsumer().accept(new BackendException.QueryErrorException(value.getError()));
-                getSuccessConsumer().accept(false);
-                break;
+                case DETERMINISM:
+                    getStateActionConsumer().accept(value.getDeterminism().getFailureState().getState(),
+                            new ArrayList<>());
+                    break;
 
-            case RESULT_NOT_SET:
-                setQueryState(QueryState.ERROR);
-                getSuccessConsumer().accept(false);
-                break;
+                case IMPLEMENTATION:
+                    getStateActionConsumer().accept(value.getImplementation().getFailureState().getState(),
+                            new ArrayList<>());
+                    break;
+
+                case REACHABILITY:
+                    // ToDo: Reachability failure state not implemented
+                    getStateActionConsumer().accept(value.getConsistency().getFailureState(),
+                            new ArrayList<>());
+                    break;
+            }
         }
     }
 
@@ -335,7 +286,7 @@ public class Query implements Serializable {
         if (getQueryState() == QueryState.UNKNOWN) return;
 
         // Due to limit information provided by the engines, we can only show the following for unreachable locations
-        if(getType() == QueryType.REACHABILITY){
+        if (getType() == QueryType.REACHABILITY) {
             Ecdar.showToast("Timeout (no response from backend): The reachability query failed. This might be due to the fact that the location is not reachable.");
         }
 
@@ -404,6 +355,26 @@ public class Query implements Serializable {
         return stateActionConsumer;
     }
 
+    public void cancel() {
+        if (getQueryState().equals(QueryState.RUNNING)) {
+            forcedCancel = true;
+            setQueryState(QueryState.UNKNOWN);
+        }
+    }
+
+    public void addError(String e) {
+        errors.set(errors.getValue() + e + "\n");
+    }
+
+    public String getCurrentErrors() {
+        return errors.getValue();
+    }
+
+    @Override
+    public GrpcRequest accept(GrpcRequestFactory requestFactory, Consumer<QueryProtos.QueryResponse> successConsumer, Consumer<Throwable> errorConsumer) {
+        return requestFactory.create(this, this::handleQueryResponse, this::handleQueryBackendError);
+    }
+
     @Override
     public JsonObject serialize() {
         final JsonObject result = new JsonObject();
@@ -434,25 +405,10 @@ public class Query implements Serializable {
             setIsPeriodic(json.getAsJsonPrimitive(IS_PERIODIC).getAsBoolean());
         }
 
-        if(json.has(ENGINE)) {
+        if (json.has(ENGINE)) {
             setEngine(BackendHelper.getEngineByName(json.getAsJsonPrimitive(ENGINE).getAsString()));
         } else {
             setEngine(BackendHelper.getDefaultEngine());
         }
-    }
-
-    public void cancel() {
-        if (getQueryState().equals(QueryState.RUNNING)) {
-            forcedCancel = true;
-            setQueryState(QueryState.UNKNOWN);
-        }
-    }
-
-    public void addError(String e) {
-        errors.set(errors.getValue() + e + "\n");
-    }
-
-    public String getCurrentErrors() {
-        return errors.getValue();
     }
 }

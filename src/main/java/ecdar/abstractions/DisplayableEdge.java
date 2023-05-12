@@ -1,7 +1,6 @@
 package ecdar.abstractions;
 
 import ecdar.code_analysis.Nearable;
-import ecdar.utility.colors.Color;
 import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.Circular;
 import ecdar.utility.helpers.MouseCircular;
@@ -9,7 +8,6 @@ import ecdar.utility.helpers.StringHelper;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.fxml.FXMLLoader;
 
 import java.util.List;
 import java.util.UUID;
@@ -123,7 +121,7 @@ public abstract class DisplayableEdge implements Nearable {
 
     public void setIsHighlighted(final boolean highlight){ this.isHighlighted.set(highlight);}
 
-    public boolean getIsHighlighted(){ return this.isHighlighted.get(); }
+    public boolean isHighlighted(){ return this.isHighlighted.get(); }
     public boolean getIsHighlightedForReachability(){ return this.isHighlightedForReachability.get(); }
 
     public BooleanProperty isHighlightedProperty() { return this.isHighlighted; }

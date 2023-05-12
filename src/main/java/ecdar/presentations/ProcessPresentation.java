@@ -1,13 +1,7 @@
 package ecdar.presentations;
 
-import ecdar.Ecdar;
 import ecdar.abstractions.Component;
-import ecdar.abstractions.Edge;
-import ecdar.abstractions.Location;
-import ecdar.abstractions.Nail;
-import ecdar.controllers.ModelController;
 import ecdar.controllers.ProcessController;
-import ecdar.utility.colors.Color;
 import ecdar.utility.colors.EnabledColor;
 import javafx.beans.InvalidationListener;
 import javafx.geometry.Insets;
@@ -24,11 +18,10 @@ import javafx.scene.text.Font;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
- * The presenter of a Process which is shown in {@link SimulatorOverviewPresentation}. <br />
+ * The presentation of a Process which is shown in {@link SimulationPresentation}. <br />
  * This class have some of the same functionality as {@link ComponentPresentation} and could be refactored
  * into a base class.
  */

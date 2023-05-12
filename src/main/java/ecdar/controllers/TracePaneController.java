@@ -1,15 +1,15 @@
 package ecdar.controllers;
 
 import com.jfoenix.controls.JFXRippler;
-import ecdar.Ecdar;
-import ecdar.abstractions.Location;
-import ecdar.backend.SimulationHandler;
-import ecdar.simulation.SimulationState;
-import ecdar.presentations.TransitionPresentation;
+import ecdar.abstractions.State;
+import ecdar.presentations.StatePresentation;
 import ecdar.utility.colors.Color;
+import javafx.application.Platform;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -20,8 +20,6 @@ import javafx.scene.layout.*;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.net.URL;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.function.BiConsumer;
 
@@ -40,33 +38,12 @@ public class TracePaneController implements Initializable {
     public Label summarySubtitleLabel;
 
     private final SimpleBooleanProperty isTraceExpanded = new SimpleBooleanProperty(false);
-    private final SimpleIntegerProperty numberOfSteps = new SimpleIntegerProperty(0);
-    private final Map<SimulationState, TransitionPresentation> transitionPresentationMap = new LinkedHashMap<>();
-
-    private SimulationHandler simulationHandler;
+    private ObservableList<StatePresentation> traceLog;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        simulationHandler = SimulatorController.getSimulationHandler();
-
         initializeToolbar();
         initializeSummaryView();
-        initializeTraceExpand();
-
-        simulationHandler.getTraceLog().addListener((ListChangeListener<SimulationState>) c -> {
-            while (c.next()) {
-                for (final SimulationState state : c.getAddedSubList()) {
-                    if (state != null) insertTraceState(state, true);
-                }
-
-                for (final SimulationState state : c.getRemoved()) {
-                    traceList.getChildren().remove(transitionPresentationMap.get(state));
-                    transitionPresentationMap.remove(state);
-                }
-            }
-
-            numberOfSteps.set(transitionPresentationMap.size());
-        });
     }
 
     /**
@@ -92,9 +69,6 @@ public class TracePaneController implements Initializable {
      * Also changes the color and cursor when mouse enters and exits the summary view.
      */
     private void initializeSummaryView() {
-        getNumberOfStepsProperty().addListener(
-                (observable, oldValue, newValue) -> updateSummaryTitle(newValue.intValue()));
-
         final Color color = Color.GREY_BLUE;
         final Color.Intensity colorIntensity = Color.Intensity.I50;
 
@@ -129,6 +103,32 @@ public class TracePaneController implements Initializable {
         setBackground.accept(color, colorIntensity);
     }
 
+    protected void setTraceLog(ObservableList<StatePresentation> traceLog) {
+        this.traceLog = traceLog;
+
+        this.traceLog.addListener((ListChangeListener<StatePresentation>) c -> {
+            updateSummaryTitle(traceLog.size());
+
+            if (!isTraceExpanded.get()) return;
+            while (c.next()) {
+                c.getRemoved().forEach(statePresentation -> traceList.getChildren().remove(statePresentation));
+                c.getAddedSubList().forEach(statePresentation -> traceList.getChildren().add(statePresentation));
+            }
+        });
+
+        isTraceExpanded.addListener((obs, oldVal, newVal) -> {
+            if (newVal) {
+                Platform.runLater(this::showTrace);
+                expandTraceIcon.setIconLiteral("gmi-expand-less");
+                expandTraceIcon.setIconSize(24);
+            } else {
+                Platform.runLater(this::hideTrace);
+                expandTraceIcon.setIconLiteral("gmi-expand-more");
+                expandTraceIcon.setIconSize(24);
+            }
+        });
+    }
+
     /**
      * Updates the text of the summary title label with the current number of steps in the trace
      * @param steps The number of steps in the trace
@@ -136,27 +136,6 @@ public class TracePaneController implements Initializable {
     private void updateSummaryTitle(int steps) {
         summaryTitleLabel.setText(steps + " number of steps in trace");
     }
-
-    /**
-     * Initializes the expand functionality that allows the user to show or hide the trace.
-     * By default, the trace is shown.
-     */
-    private void initializeTraceExpand() {
-        isTraceExpanded.addListener((obs, oldVal, newVal) -> {
-            if (newVal) {
-                showTrace();
-                expandTraceIcon.setIconLiteral("gmi-expand-less");
-                expandTraceIcon.setIconSize(24);
-            } else {
-                hideTrace();
-                expandTraceIcon.setIconLiteral("gmi-expand-more");
-                expandTraceIcon.setIconSize(24);
-            }
-        });
-
-        isTraceExpanded.set(true);
-    }
-
 
     /**
      * Removes all the trace view elements as to hide the trace from the user
@@ -168,112 +147,81 @@ public class TracePaneController implements Initializable {
     }
 
     /**
-     * Shows the trace by inserting a {@link TransitionPresentation} for each trace state
+     * Shows the trace by inserting a {@link StatePresentation} for each trace state
      * Also hides the summary view, since it should only be visible when the trace is hidden
      */
     private void showTrace() {
-        transitionPresentationMap.forEach((state, presentation) -> {
-            insertTraceState(state, false);
-        });
         root.getChildren().remove(traceSummary);
-    }
-
-    private void previewStep(final SimulationState state) {
-        traceList.getChildren().forEach(trace -> trace.setOpacity(1));
-        int i = traceList.getChildren().size() - 1;
-        while (traceList.getChildren().get(i) != transitionPresentationMap.get(state)) {
-            traceList.getChildren().get(i).setOpacity(0.4);
-            i--;
-        }
-        simulationHandler.currentState.set(state);
+        this.traceLog.forEach(this::insertStateInTrace);
     }
 
     /**
-     * Instantiates a {@link TransitionPresentation} for a {@link SimulationState} and adds it to the view
+     * Instantiates a {@link StatePresentation} for a {@link State} and adds it to the view
      *
-     * @param state         The state the should be inserted into the trace log
-     * @param shouldAnimate A boolean that indicates whether the trace should fade in when added to the view
+     * @param statePresentation The statePresentation the should be inserted into the trace log
      */
-    private void insertTraceState(final SimulationState state, final boolean shouldAnimate) {
-        final TransitionPresentation transitionPresentation = new TransitionPresentation();
-        transitionPresentationMap.put(state, transitionPresentation);
-
-        transitionPresentation.setOnMouseReleased(event -> {
-            event.consume();
-            if (simulationHandler == null) return;
-            previewStep(state);
-        });
-
-        EventHandler mouseEntered = transitionPresentation.getOnMouseEntered();
-        transitionPresentation.setOnMouseEntered(event -> {
-            SimulatorController.setSelectedState(state);
+    private void insertStateInTrace(final StatePresentation statePresentation) {
+        EventHandler mouseEntered = statePresentation.getOnMouseEntered();
+        statePresentation.setOnMouseEntered(event -> {
+            SimulationController.setSelectedState(statePresentation.getController().getState());
             mouseEntered.handle(event);
         });
 
-        EventHandler mouseExited = transitionPresentation.getOnMouseExited();
-        transitionPresentation.setOnMouseExited(event -> {
-            SimulatorController.setSelectedState(null);
+        EventHandler mouseExited = statePresentation.getOnMouseExited();
+        statePresentation.setOnMouseExited(event -> {
+            SimulationController.setSelectedState(null);
             mouseExited.handle(event);
         });
 
-        String title = traceString(state);
-        transitionPresentation.getController().setTitle(title);
+        String title = traceString(statePresentation.getController().getState());
+        statePresentation.getController().setTitle(title);
 
-        // Only insert the presentation into the view if the trace is expanded & state is not null
-        if (isTraceExpanded.get() && state != null) {
-            traceList.getChildren().add(transitionPresentation);
-            if (shouldAnimate) {
-                transitionPresentation.playFadeAnimation();
-            }
+        // Only insert the presentation into the view if the trace is expanded & statePresentation is not null
+        if (isTraceExpanded.get()) {
+            traceList.getChildren().add(statePresentation);
         }
     }
 
     /**
      * A helper method that returns a string representing a state in the trace log
      *
-     * @param state The SimulationState to represent
+     * @param state The State to represent
      * @return A string representing the state
      */
-    private String traceString(SimulationState state) {
-        StringBuilder title = new StringBuilder("(");
-        int length = state.getLocations().size();
-        for (int i = 0; i < length; i++) {
-            Location loc = Ecdar.getProject()
-                    .findComponent(state.getLocations().get(i).getKey())
-                    .findLocation(state.getLocations().get(i).getValue());
-            String locationName = loc.getId();
-            if (i == length - 1) {
-                title.append(locationName);
-            } else  {
-                title.append(locationName).append(", ");
-            }
-        }
-        title.append(")\n");
-
-        StringBuilder clocks = new StringBuilder();
-        for (var constraint : state.getState().getFederation().getDisjunction().getConjunctions(0).getConstraintsList()) {
-            var x = constraint.getX().getClockName();
-            var y = constraint.getY().getClockName();
-            var c = constraint.getC();
-            var strict = constraint.getStrict();
-            clocks.append(x).append(" - ").append(y).append(strict ? " < " : " <= ").append(c).append("\n");
-        }
-        return title.toString() + clocks.toString();
+    private String traceString(State state) {
+        // ToDo: Generate string from state
+//        StringBuilder title = new StringBuilder("(");
+//        int length = state.getLocationTree().size();
+//        for (int i = 0; i < length; i++) {
+//            Location loc = Ecdar.getProject()
+//                    .findComponent(state.getLocationTree().get(i).getKey())
+//                    .findLocation(state.getLocationTree().get(i).getValue());
+//            String locationName = loc.getId();
+//            if (i == length - 1) {
+//                title.append(locationName);
+//            } else  {
+//                title.append(locationName).append(", ");
+//            }
+//        }
+//        title.append(")\n");
+//
+//        StringBuilder clocks = new StringBuilder();
+//        for (var constraint : state.getState().getFederation().getDisjunction().getConjunctions(0).getConstraintsList()) {
+//            var x = constraint.getX().getClockName();
+//            var y = constraint.getY().getClockName();
+//            var c = constraint.getC();
+//            var strict = constraint.getStrict();
+//            clocks.append(x).append(" - ").append(y).append(strict ? " < " : " <= ").append(c).append("\n");
+//        }
+//        return title.toString() + clocks.toString();
+        return "Not implemented: " + state.toString();
     }
 
     /**
      * Method to be called when clicking on the expand rippler in the trace toolbar
      */
     @FXML
-    private void expandTrace() {
-        if (isTraceExpanded.get()) {
-            isTraceExpanded.set(false);
-        } else {
-            isTraceExpanded.set(true);
-        }
-    }
-
-    public SimpleIntegerProperty getNumberOfStepsProperty() {
-        return numberOfSteps;
+    private void toggleTraceExpand() {
+        isTraceExpanded.set(!isTraceExpanded.get());
     }
 }

@@ -1,7 +1,8 @@
 package ecdar.presentations;
 
 import com.jfoenix.controls.JFXRippler;
-import ecdar.controllers.TransitionController;
+import ecdar.abstractions.State;
+import ecdar.controllers.StateController;
 import ecdar.utility.colors.Color;
 import javafx.animation.FadeTransition;
 import javafx.animation.Interpolator;
@@ -14,19 +15,24 @@ import java.util.function.BiConsumer;
 
 /**
  * The presentation class for a transition view element.
- * It represents a single transition and may be used by classes like {@see TransitionPaneController}
+ * It represents a single transition and may be used by classes like {@see StatePaneController}
  * to show a list of transitions
  */
-public class TransitionPresentation extends AnchorPane {
-    private TransitionController controller;
+public class StatePresentation extends AnchorPane {
+    private final StateController controller;
     private FadeTransition transition;
 
-    public TransitionPresentation() {
-        controller = new EcdarFXMLLoader().loadAndGetController("TransitionPresentation.fxml", this);
+    public StatePresentation() {
+        controller = new EcdarFXMLLoader().loadAndGetController("StatePresentation.fxml", this);
 
         initializeRippler();
         initializeColors();
         initializeFadeAnimation();
+    }
+
+    public StatePresentation(State state) {
+        this();
+        controller.setState(state);
     }
 
     /**
@@ -92,7 +98,7 @@ public class TransitionPresentation extends AnchorPane {
         this.transition.play();
     }
 
-    public TransitionController getController() {
+    public StateController getController() {
         return controller;
     }
 }

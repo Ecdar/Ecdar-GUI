@@ -23,7 +23,7 @@ import java.util.function.Consumer;
 import static javafx.util.Duration.millis;
 
 /**
- * The presentation for the nail shown on a {@link SimEdgePresentation} in the {@link SimulatorOverviewPresentation}<br />
+ * The presentation for the nail shown on a {@link SimEdgePresentation} in the {@link SimulationPresentation}<br />
  * This class should be refactored such that code which are duplicated from {@link NailPresentation}
  * have its own base class.
  */

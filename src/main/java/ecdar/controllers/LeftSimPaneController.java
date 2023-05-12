@@ -1,8 +1,10 @@
 package ecdar.controllers;
 
+import ecdar.presentations.StatePresentation;
 import ecdar.presentations.TracePanePresentation;
-import ecdar.presentations.TransitionPanePresentation;
+import ecdar.presentations.StatePanePresentation;
 import ecdar.utility.colors.Color;
+import javafx.collections.ObservableList;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.control.ScrollPane;
@@ -16,7 +18,7 @@ public class LeftSimPaneController implements Initializable {
     public ScrollPane scrollPane;
     public VBox scrollPaneVbox;
 
-    public TransitionPanePresentation transitionPanePresentation;
+    public StatePanePresentation statePanePresentation;
     public TracePanePresentation tracePanePresentation;
 
     @Override
@@ -37,11 +39,16 @@ public class LeftSimPaneController implements Initializable {
      * Initializes the thin border on the right side of the transition toolbar
      */
     private void initializeRightBorder() {
-        transitionPanePresentation.getController().toolbar.setBorder(new Border(new BorderStroke(
+        statePanePresentation.getController().toolbar.setBorder(new Border(new BorderStroke(
                 Color.GREY_BLUE.getColor(Color.Intensity.I900),
                 BorderStrokeStyle.SOLID,
                 CornerRadii.EMPTY,
                 new BorderWidths(0, 1, 0, 0)
         )));
+    }
+
+    public void setTraceLog(ObservableList<StatePresentation> traceLog) {
+        statePanePresentation.getController().setTraceLog(traceLog);
+        tracePanePresentation.getController().setTraceLog(traceLog);
     }
 }

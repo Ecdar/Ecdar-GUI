@@ -6,7 +6,6 @@ import ecdar.abstractions.Edge;
 import ecdar.abstractions.Nail;
 import ecdar.presentations.SimNailPresentation;
 import ecdar.presentations.SimTagPresentation;
-import ecdar.utility.colors.Color;
 import ecdar.utility.colors.EnabledColor;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
@@ -104,7 +103,6 @@ public class SimNailController implements Initializable {
     public EnabledColor getColor() {
         return getComponent().getColor();
     }
-
 
     public DoubleProperty xProperty() {
         return root.layoutXProperty();

@@ -1,15 +1,9 @@
 package ecdar.backend;
 
-import EcdarProtoBuf.ComponentProtos;
-import EcdarProtoBuf.ObjectProtos;
-import EcdarProtoBuf.QueryProtos;
 import com.google.gson.JsonObject;
 import ecdar.Ecdar;
-import ecdar.abstractions.Component;
-import ecdar.abstractions.Query;
-import ecdar.simulation.SimulationState;
+import ecdar.abstractions.RequestSource;
 import ecdar.utility.serialize.Serializable;
-import io.grpc.stub.StreamObserver;
 import javafx.beans.property.SimpleBooleanProperty;
 
 import java.util.*;
@@ -25,7 +19,7 @@ public class Engine implements Serializable {
     private static final String PORT_RANGE_END = "portRangeEnd";
     private static final String LOCKED = "locked";
     private static final String IS_THREAD_SAFE = "isThreadSafe";
-    private static final int responseDeadline = 20000;
+
     private static final int rerunRequestDelay = 200;
     private static final int numberOfRetriesPerQuery = 5;
 
@@ -138,127 +132,17 @@ public class Engine implements Serializable {
     }
 
     /**
-     * Enqueue query for execution with consumers for success and error
+     * Enqueue request for execution based on request source with consumers for success and error
      *
-     * @param query to enqueue for execution
-     * @param successConsumer for returned QueryResponse
-     * @param errorConsumer for any throwable that might result from the execution
+     * @param requestSource RequestSource instance to construct the request from
+     * @param successConsumer for returned gRPC response
+     * @param errorConsumer for any throwable received from the engine
      */
-    public void enqueueQuery(Query query, Consumer<QueryProtos.QueryResponse> successConsumer, Consumer<Throwable> errorConsumer) {
-        GrpcRequest request = new GrpcRequest(engineConnection -> {
-            var componentsInfoBuilder = BackendHelper.getComponentsInfoBuilder(query.getQuery());
-
-            StreamObserver<QueryProtos.QueryResponse> responseObserver = new StreamObserver<>() {
-                @Override
-                public void onNext(QueryProtos.QueryResponse value) {
-                    successConsumer.accept(value);
-                }
-
-                @Override
-                public void onError(Throwable t) {
-                    errorConsumer.accept(t);
-                    setConnectionAsAvailable(engineConnection);
-                }
-
-                @Override
-                public void onCompleted() {
-                    // Release engine connection
-                    setConnectionAsAvailable(engineConnection);
-                }
-            };
-
-            var queryBuilder = QueryProtos.QueryRequest.newBuilder()
-                    .setUserId(1)
-                    .setQueryId(UUID.randomUUID().hashCode())
-                    .setSettings(QueryProtos.QueryRequest.Settings.newBuilder().setDisableClockReduction(true))
-                    .setQuery(query.getType().getQueryName() + ": " + query.getQuery())
-                    .setComponentsInfo(componentsInfoBuilder);
-
-            engineConnection.getStub().withDeadlineAfter(responseDeadline, TimeUnit.MILLISECONDS)
-                    .sendQuery(queryBuilder.build(), responseObserver);
-        });
+    public <T> void enqueueRequest(RequestSource<T> requestSource, Consumer<T> successConsumer, Consumer<Throwable> errorConsumer) {
+        GrpcRequestFactory factory = new GrpcRequestFactory(() -> {}, this::setConnectionAsAvailable);
+        GrpcRequest request = requestSource.accept(factory, successConsumer, errorConsumer);
 
         requestQueue.add(request);
-    }
-
-    /**
-     * Enqueue request of initial simulation step with consumers for success and error
-     *
-     * @param composition of the current simulated query
-     * @param stepConsumer for the resulting step
-     * @param errorConsumer for potential errors
-     */
-    public void enqueueInitialSimulationStepRequest(String composition, Consumer<QueryProtos.SimulationStepResponse> stepConsumer, Consumer<Throwable> errorConsumer) {
-        GrpcRequest request = new GrpcRequest(engineConnection -> {
-            StreamObserver<QueryProtos.SimulationStepResponse> responseObserver = getSimulationResponseObserver(stepConsumer, errorConsumer);
-
-            var comInfo = ComponentProtos.ComponentsInfo.newBuilder();
-            for (Component c : Ecdar.getProject().getComponents()) {
-                comInfo.addComponents(ComponentProtos.Component.newBuilder().setJson(c.serialize().toString()).build());
-            }
-
-            comInfo.setComponentsHash(comInfo.getComponentsList().hashCode());
-            var simStartRequest = QueryProtos.SimulationStartRequest.newBuilder();
-            var simInfo = QueryProtos.SimulationInfo.newBuilder()
-                    .setComponentComposition(composition)
-                    .setComponentsInfo(comInfo);
-            simStartRequest.setSimulationInfo(simInfo);
-            engineConnection.getStub().withDeadlineAfter(responseDeadline, TimeUnit.MILLISECONDS)
-                    .startSimulation(simStartRequest.build(), responseObserver);
-        });
-
-        requestQueue.add(request);
-    }
-
-    /**
-     * Enqueue request of initial simulation step with consumers for success and error
-     *
-     * @param composition of the current simulated query
-     * @param stepConsumer for the resulting step
-     * @param errorConsumer for potential errors
-     */
-    public void enqueueSimulationStepRequest(String composition, SimulationState state, String edgeId, String componentName, int componentId, Consumer<QueryProtos.SimulationStepResponse> stepConsumer, Consumer<Throwable> errorConsumer) {
-        GrpcRequest request = new GrpcRequest(engineConnection -> {
-            StreamObserver<QueryProtos.SimulationStepResponse> responseObserver = getSimulationResponseObserver(stepConsumer, errorConsumer);
-
-            var comInfo = ComponentProtos.ComponentsInfo.newBuilder();
-            for (Component c : Ecdar.getProject().getComponents()) {
-                comInfo.addComponents(ComponentProtos.Component.newBuilder().setJson(c.serialize().toString()).build());
-            }
-
-            comInfo.setComponentsHash(comInfo.getComponentsList().hashCode());
-            var simStepRequest = QueryProtos.SimulationStepRequest.newBuilder();
-            var simInfo = QueryProtos.SimulationInfo.newBuilder()
-                    .setComponentComposition(composition)
-                    .setComponentsInfo(comInfo);
-            simStepRequest.setSimulationInfo(simInfo);
-            var specComp = ObjectProtos.SpecificComponent.newBuilder().setComponentName(componentName).setComponentIndex(componentId);
-            var edge = EcdarProtoBuf.ObjectProtos.Edge.newBuilder().setId(edgeId).setSpecificComponent(specComp);
-            var decision = ObjectProtos.Decision.newBuilder().setEdge(edge).setSource(state.getState());
-            simStepRequest.setChosenDecision(decision);
-
-            engineConnection.getStub().withDeadlineAfter(responseDeadline, TimeUnit.MILLISECONDS)
-                    .takeSimulationStep(simStepRequest.build(), responseObserver);
-        });
-
-        requestQueue.add(request);
-    }
-
-    private static StreamObserver<QueryProtos.SimulationStepResponse> getSimulationResponseObserver(Consumer<QueryProtos.SimulationStepResponse> stepConsumer, Consumer<Throwable> errorConsumer) {
-        return new StreamObserver<>() {
-            @Override
-            public void onNext(QueryProtos.SimulationStepResponse value) {
-                stepConsumer.accept(value);
-            }
-
-            @Override
-            public void onError(Throwable t) {
-                errorConsumer.accept(t);
-            }
-
-            @Override
-            public void onCompleted() {}
-        };
     }
 
     /**

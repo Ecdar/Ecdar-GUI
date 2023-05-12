@@ -7,7 +7,6 @@ import ecdar.model_canvas.arrow_heads.SimpleArrowHead;
 import ecdar.presentations.*;
 import ecdar.utility.Highlightable;
 import ecdar.utility.UndoRedoStack;
-import ecdar.utility.colors.Color;
 import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.*;
 import ecdar.utility.keyboard.Keybind;
@@ -66,7 +65,7 @@ public class EdgeController implements Initializable, SelectHelper.ItemSelectabl
             // When an edge updates highlight property,
             // we want to update the view to reflect current highlight property
             edge.get().isHighlightedProperty().addListener(v -> {
-                if (edge.get().getIsHighlighted()) {
+                if (edge.get().isHighlighted()) {
                     this.highlight();
                 } else {
                     this.unhighlight();

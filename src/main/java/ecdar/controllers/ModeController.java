@@ -2,7 +2,7 @@ package ecdar.controllers;
 
 import javafx.scene.layout.StackPane;
 
-interface ModeController {
+public interface ModeController {
     StackPane getLeftPane();
     StackPane getRightPane();
 }

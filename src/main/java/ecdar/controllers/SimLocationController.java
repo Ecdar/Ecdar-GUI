@@ -1,12 +1,14 @@
 package ecdar.controllers;
 
+import EcdarProtoBuf.ObjectProtos;
 import com.jfoenix.controls.JFXPopup;
+import ecdar.Ecdar;
 import ecdar.abstractions.*;
-import ecdar.backend.SimulationHandler;
 import ecdar.presentations.DropDownMenu;
 import ecdar.presentations.SimLocationPresentation;
 import ecdar.presentations.SimTagPresentation;
-import ecdar.simulation.SimulationState;
+import ecdar.abstractions.State;
+import ecdar.presentations.SimulationPresentation;
 import ecdar.utility.colors.EnabledColor;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
@@ -19,13 +21,16 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Path;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.util.Pair;
+
+import java.util.ArrayList;
 import java.util.function.Consumer;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 
 /**
- * The controller of a location shown in the {@link ecdar.presentations.SimulatorOverviewPresentation}
+ * The controller of a location shown in the {@link SimulationPresentation}
  */
 public class SimLocationController implements Initializable {
     private final ObjectProperty<Location> location = new SimpleObjectProperty<>();
@@ -43,7 +48,6 @@ public class SimLocationController implements Initializable {
     public Line nameTagLine;
     public Line invariantTagLine;
     private DropDownMenu dropDownMenu;
-    private SimulationHandler simulationHandler;
 
     public static String getSimLocationReachableQuery(final Location endLocation, final Component component, final String query) {
         return getSimLocationReachableQuery(endLocation, component, query, null);
@@ -55,7 +59,7 @@ public class SimLocationController implements Initializable {
          * @param endLocation  The location which should be checked for reachability
          * @return A reachability query string
          */
-    public static String getSimLocationReachableQuery(final Location endLocation, final Component component, final String query, final SimulationState state) {
+    public static String getSimLocationReachableQuery(final Location endLocation, final Component component, final String query, final State state) {
         var stringBuilder = new StringBuilder();
 
         // append simulation query
@@ -66,7 +70,7 @@ public class SimLocationController implements Initializable {
 
         // ToDo: append start location here
         if (state != null){
-            stringBuilder.append(getStartStateString(state));
+            stringBuilder.append(getInitialStateString(state));
             stringBuilder.append(";");
         }
 
@@ -78,23 +82,35 @@ public class SimLocationController implements Initializable {
         return stringBuilder.toString();
     }
 
-    private static String getStartStateString(SimulationState state) {
-        var stringBuilder = new StringBuilder();
+    /**
+     * ToDo NIELS: Determine if this is actually what it does
+     * Returns a string representation of an array of initial location IDs for all components in the simulation
+     *
+     * @param state
+     * @return
+     */
+    private static String getInitialStateString(State state) {
+        var initialStateStringBuilder = new StringBuilder();
+        var locations = new ArrayList<Pair<ObjectProtos.ComponentInstance, String>>();
+
+        state.consumeLeafLocations((leafLocation -> locations.add(new Pair<>(leafLocation.getComponentInstance(), leafLocation.getId()))));
 
         // append locations
-        var locations = state.getLocations();
-        stringBuilder.append("[");
+        initialStateStringBuilder.append("[");
         var appendLocationWithSeparator = false;
-        for(var componentName : SimulatorController.getSimulationHandler().getComponentsInSimulation()){
+
+        // ToDO NIELS: Determine how to process this, if it is indeed the initial locations
+        for(var component : SimulationController.getSimulatedComponents()){
             var locationFound = false;
 
-            for(var location:locations){
-                if (location.getKey().equals(componentName)){
+            for(var location : locations){
+                if (location.getKey().getComponentName().equals(component.getName())){
                     if (appendLocationWithSeparator){
-                        stringBuilder.append("," + location.getValue());
+                        initialStateStringBuilder.append(",")
+                                .append(location.getValue());
                     }
                     else{
-                        stringBuilder.append(location.getValue());
+                        initialStateStringBuilder.append(location.getValue());
                     }
                     locationFound = true;
                 }
@@ -105,13 +121,13 @@ public class SimLocationController implements Initializable {
             }
             appendLocationWithSeparator = true;
         }
-        stringBuilder.append("]");
+        initialStateStringBuilder.append("]");
 
-        // append clock values
+        // ToDo: append clock values
         var clocks = state.getSimulationClocks();
-        stringBuilder.append("()");
+        initialStateStringBuilder.append("()");
 
-        return stringBuilder.toString();
+        return initialStateStringBuilder.toString();
     }
 
     private static String getEndStateString(String componentName, String endLocationId) {
@@ -120,11 +136,12 @@ public class SimLocationController implements Initializable {
         stringBuilder.append("[");
         var appendLocationWithSeparator = false;
 
-        for (var component : SimulatorController.getSimulationHandler().getComponentsInSimulation())
+        for (var component : SimulationController.getSimulatedComponents())
         {
-            if (component.equals(componentName)){
+            if (component.getName().equals(componentName)){
                 if (appendLocationWithSeparator){
-                    stringBuilder.append("," + endLocationId);
+                    stringBuilder.append(",")
+                            .append(endLocationId);
                 }
                 else{
                     stringBuilder.append(endLocationId);
@@ -161,8 +178,6 @@ public class SimLocationController implements Initializable {
         // Scale x and y 1:1 (based on the x-scale)
         scaleContent.scaleYProperty().bind(scaleContent.scaleXProperty());
         initializeMouseControls();
-
-        simulationHandler = SimulatorController.getSimulationHandler();
     }
 
     private void initializeMouseControls() {
@@ -188,9 +203,20 @@ public class SimLocationController implements Initializable {
     public void initializeDropDownMenu(){
         dropDownMenu = new DropDownMenu(root);
 
+        String composition;
+        State currentState;
+
+        try {
+            composition = SimulationController.getComposition();
+            currentState = SimulationController.getCurrentState();
+        } catch (NullPointerException e) {
+            Ecdar.showToast("Unable to inittialize dropdown due to null simulation");
+            return;
+        }
+
         dropDownMenu.addClickableListElement("Is " + getLocation().getId() + " reachable from initial state?", event -> {
             // Generate the query from the backend
-            final String reachabilityQuery = getSimLocationReachableQuery(getLocation(), getComponent(), simulationHandler.getSimulationQuery());
+            final String reachabilityQuery = getSimLocationReachableQuery(getLocation(), getComponent(), composition);
 
             // Add proper comment
             final String reachabilityComment = "Is " + getLocation().getMostDescriptiveIdentifier() + " reachable from initial state?";
@@ -206,8 +232,8 @@ public class SimLocationController implements Initializable {
         });
 
         dropDownMenu.addClickableListElement("Is " + getLocation().getId() + " reachable from current locations?", event -> {
-            // Generate the query from the backend
-            final String reachabilityQuery = getSimLocationReachableQuery(getLocation(), getComponent(), simulationHandler.getSimulationQuery(), simulationHandler.getCurrentState());
+            // Generate the query from the backend ToDo NIELS: Remove static methods
+            final String reachabilityQuery = getSimLocationReachableQuery(getLocation(), getComponent(), composition, currentState);
 
             // Add proper comment
             final String reachabilityComment = "Is " + getLocation().getMostDescriptiveIdentifier() + " reachable from current locations?";
@@ -222,6 +248,7 @@ public class SimLocationController implements Initializable {
             dropDownMenu.hide();
         });
     }
+
     public Location getLocation() {
         return location.get();
     }

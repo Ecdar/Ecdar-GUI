@@ -8,8 +8,8 @@ import ecdar.model_canvas.arrow_heads.SimpleArrowHead;
 import ecdar.presentations.Link;
 import ecdar.presentations.NailPresentation;
 import ecdar.presentations.SimNailPresentation;
+import ecdar.presentations.SimulationPresentation;
 import ecdar.utility.Highlightable;
-import ecdar.utility.colors.Color;
 import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.BindingHelper;
 import ecdar.utility.helpers.Circular;
@@ -37,7 +37,7 @@ import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
 /**
- * The controller for the edge shown in the {@link ecdar.presentations.SimulatorOverviewPresentation}
+ * The controller for the edge shown in the {@link SimulationPresentation}
  */
 public class SimEdgeController implements Initializable, Highlightable {
     private final ObservableList<Link> links = FXCollections.observableArrayList();
@@ -69,7 +69,7 @@ public class SimEdgeController implements Initializable, Highlightable {
             // When an edge updates highlight property,
             // we want to update the view to reflect current highlight property
             edge.get().isHighlightedProperty().addListener(v -> {
-                if (edge.get().getIsHighlighted()) {
+                if (edge.get().isHighlighted()) {
                     this.highlight();
                 } else {
                     this.unhighlight();

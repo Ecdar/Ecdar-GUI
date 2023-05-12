@@ -16,9 +16,7 @@
                     AnchorPane.leftAnchor="0"
                     AnchorPane.rightAnchor="0"
                     styleClass="edge-to-edge">
-            <VBox fx:id="scrollPaneVbox" >
-                <!-- Waiting on feature to be specified -->
-            </VBox>
+            <VBox fx:id="availableDecisionsVBox"/>
         </ScrollPane>
     </AnchorPane>
 </fx:root>

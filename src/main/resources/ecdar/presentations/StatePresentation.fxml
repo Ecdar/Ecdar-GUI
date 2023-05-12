@@ -7,15 +7,15 @@
 <?import com.jfoenix.controls.JFXRippler?>
 <fx:root xmlns="http://javafx.com/javafx"
          xmlns:fx="http://javafx.com/fxml"
-         fx:controller="ecdar.controllers.TransitionController"
+         fx:controller="ecdar.controllers.StateController"
          type="AnchorPane">
     <JFXRippler fx:id="rippler" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
         <AnchorPane minHeight="48">
             <padding>
                 <Insets top="10" right="20" bottom="10" left="20"/>
             </padding>
-            <Label alignment="CENTER_LEFT" fx:id="titleLabel" styleClass="body1" wrapText="true"
-                    AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
+            <Label fx:id="titleLabel" styleClass="body1" wrapText="true"
+                   AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
         </AnchorPane>
 
     </JFXRippler>

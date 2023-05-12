@@ -11,7 +11,7 @@ import java.net.URL;
  */
 public class EcdarFXMLLoader extends FXMLLoader {
     /**
-     * Loads an object hierarchy from from an XML document.
+     * Loads an object hierarchy from an XML document.
      * @param resourceName the name of the resource used to resolve relative path attribute values
      * @param <T> type of controller to get
      * @param root the root of the object hierarchy
