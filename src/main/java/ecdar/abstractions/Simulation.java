@@ -37,8 +37,6 @@ public class Simulation {
 
         this.initialState.set(initialState);
         this.currentState.set(initialState);
-
-//        addStateToTraceLog(initialState);
     }
 
     private void setSimulatedComponents(String composition) {

@@ -5,18 +5,26 @@
 <?import javafx.geometry.Insets?>
 
 <?import com.jfoenix.controls.JFXRippler?>
+<?import javafx.scene.text.Text?>
 <fx:root xmlns="http://javafx.com/javafx"
          xmlns:fx="http://javafx.com/fxml"
          fx:controller="ecdar.controllers.StateController"
          type="AnchorPane">
-    <JFXRippler fx:id="rippler" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
-        <AnchorPane minHeight="48">
+    <JFXRippler fx:id="rippler">
+        <VBox spacing="10">
             <padding>
-                <Insets top="10" right="20" bottom="10" left="20"/>
+                <Insets topRightBottomLeft="10"/>
             </padding>
-            <Label fx:id="titleLabel" styleClass="body1" wrapText="true"
-                   AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
-        </AnchorPane>
-
+            <Text text="Locations" styleClass="subhead" style="-fx-stroke-width: 1.2em"/>
+            <HBox>
+                <Region minWidth="10" maxWidth="10"/>
+                <Label fx:id="locationsLabel" styleClass="body1" wrapText="true"/>
+            </HBox>
+            <Text text="Clocks" styleClass="subhead" style="-fx-stroke-width: 1.2em"/>
+            <HBox>
+                <Region minWidth="10" maxWidth="10"/>
+                <Label fx:id="clocksLabel" styleClass="body1" wrapText="true"/>
+            </HBox>
+        </VBox>
     </JFXRippler>
 </fx:root>

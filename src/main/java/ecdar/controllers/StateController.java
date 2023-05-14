@@ -17,22 +17,32 @@ import java.util.ResourceBundle;
  */
 public class StateController implements Initializable {
     public AnchorPane root;
-    public Label titleLabel;
+    public Label locationsLabel;
+    public Label clocksLabel;
     public JFXRippler rippler;
 
     // The transition that the view represents
     private final SimpleObjectProperty<State> state = new SimpleObjectProperty<>();
-    private final SimpleObjectProperty<String> title = new SimpleObjectProperty<>();
+    private final SimpleObjectProperty<String> locationsString = new SimpleObjectProperty<>();
+    private final SimpleObjectProperty<String> clocksString = new SimpleObjectProperty<>();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        title.addListener(((observable, oldValue, newValue) -> {
-            titleLabel.setText(newValue);
+        locationsString.addListener(((observable, oldValue, newValue) -> {
+            locationsLabel.setText(newValue);
+        }));
+
+        clocksString.addListener(((observable, oldValue, newValue) -> {
+            clocksLabel.setText(newValue);
         }));
     }
 
-    public void setTitle(String title) {
-        this.title.set(title);
+    public void setLocationsString(String locationsString) {
+        this.locationsString.set(locationsString);
+    }
+
+    public void setClocksString(String clocksString) {
+        this.clocksString.set(clocksString);
     }
 
     public void setState(State state) {

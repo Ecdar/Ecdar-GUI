@@ -19,15 +19,6 @@ public class State {
         this.protoState = state;
     }
 
-    /**
-     * All the clocks connected to the current simulation.
-     *
-     * @return a {@link Map} where the component name (String) is the key, and the location name is the value (String)
-     */
-    public ObjectProtos.LocationTree getLocationTree() {
-        return locationTree;
-    }
-
     public void consumeLeafLocations(Consumer<ObjectProtos.LeafLocation> consumer) {
         consumeLeafLocations(locationTree, consumer);
     }
