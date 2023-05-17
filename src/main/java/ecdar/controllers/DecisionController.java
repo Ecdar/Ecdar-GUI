@@ -12,15 +12,16 @@ import java.util.ResourceBundle;
 
 public class DecisionController implements Initializable {
     public JFXRippler rippler;
-    public Label decisionDescription;
+    public Label action;
+    public Label clockConstraints;
 
     private final ObjectProperty<Decision> decision = new SimpleObjectProperty<>();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         decision.addListener((observable, oldValue, newValue) -> {
-            // ToDo NIELS: Add all relevant information to the description
-            decisionDescription.setText(newValue.composition + ": " + newValue.action);
+            action.setText(newValue.action);
+            clockConstraints.setText(newValue.source.getStateClockConstraintsString());
         });
     }
 

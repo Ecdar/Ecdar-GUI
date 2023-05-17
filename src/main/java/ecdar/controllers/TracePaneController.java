@@ -1,6 +1,5 @@
 package ecdar.controllers;
 
-import EcdarProtoBuf.ObjectProtos;
 import com.jfoenix.controls.JFXRippler;
 import ecdar.abstractions.State;
 import ecdar.presentations.StatePresentation;
@@ -19,7 +18,6 @@ import javafx.scene.layout.*;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.ResourceBundle;
 import java.util.function.BiConsumer;
 
@@ -173,58 +171,10 @@ public class TracePaneController implements Initializable {
             mouseExited.handle(event);
         });
 
-        statePresentation.getController().setLocationsString(getStateLocationsString(statePresentation.getController().getState()));
-        statePresentation.getController().setClocksString(getStateClockConstraintsString(statePresentation.getController().getState()));
-
         // Only insert the presentation into the view if the trace is expanded & statePresentation is not null
         if (isTraceExpanded.get()) {
             traceList.getChildren().add(statePresentation);
         }
-    }
-
-    /**
-     * A helper method that returns a string representing the locations of a state in the trace log
-     *
-     * @param state The State to represent
-     * @return A string representing the locations
-     */
-    private String getStateLocationsString(State state) {
-        StringBuilder locationsString = new StringBuilder("(");
-
-        var leafLocations = new ArrayList<ObjectProtos.LeafLocation>();
-        state.consumeLeafLocations(leafLocations::add);
-
-        int length = leafLocations.size();
-        for (int i = 0; i < length; i++) {
-            locationsString.append(leafLocations.get(i).getComponentInstance().getComponentName());
-            locationsString.append(leafLocations.get(i).getId());
-
-            if (i != length - 1) {
-                locationsString.append(", ");
-            }
-        }
-        locationsString.append(")\n");
-
-        return locationsString.toString();
-    }
-
-    /**
-     * A helper method that returns a string representing the clock constraints of a state in the trace log
-     *
-     * @param state The State to represent
-     * @return A string representing the clock constraints
-     */
-    private String getStateClockConstraintsString(State state) {
-        StringBuilder clocksString = new StringBuilder();
-        for (var constraint : state.getProtoState().getZone().getConjunctions(0).getConstraintsList()) {
-            var x = constraint.getX().getComponentClock().getClockName();
-            var y = constraint.getY().getComponentClock().getClockName();
-            var c = constraint.getC();
-            var strict = constraint.getStrict();
-            clocksString.append(x).append(" - ").append(y).append(strict ? " < " : " <= ").append(c).append("\n");
-        }
-
-        return clocksString.toString();
     }
 
     /**

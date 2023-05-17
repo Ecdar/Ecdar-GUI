@@ -5,6 +5,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -15,7 +16,7 @@ public class State {
     public final ObservableMap<String, BigDecimal> clocks = FXCollections.observableHashMap();
 
     public State(ObjectProtos.State state) {
-        this.locationTree = state.getLocationTree(); // ToDo NIELS: Ensure that the source is indeed the same for all decisions
+        this.locationTree = state.getLocationTree();
         this.protoState = state;
     }
 
@@ -50,5 +51,48 @@ public class State {
 
     public ObjectProtos.State getProtoState() {
         return protoState;
+    }
+
+    /**
+     * A helper method that returns a string representing the clock constraints of a state in the trace log
+     *
+     * @return A string representing the clock constraints
+     */
+    public String getStateClockConstraintsString() {
+        StringBuilder clocksString = new StringBuilder();
+        for (var constraint : getProtoState().getZone().getConjunctions(0).getConstraintsList()) {
+            var x = constraint.getX().getComponentClock().getClockName();
+            var y = constraint.getY().getComponentClock().getClockName();
+            var c = constraint.getC();
+            var strict = constraint.getStrict();
+            clocksString.append(x).append(" - ").append(y).append(strict ? " < " : " <= ").append(c).append("\n");
+        }
+
+        return clocksString.toString();
+    }
+
+    /**
+     * A helper method that returns a string representing the locations of a state in the trace log
+     *
+     * @return A string representing the locations
+     */
+    public String getStateLocationsString() {
+        StringBuilder locationsString = new StringBuilder();
+
+        var leafLocations = new ArrayList<ObjectProtos.LeafLocation>();
+        consumeLeafLocations(leafLocations::add);
+
+        int length = leafLocations.size();
+        for (int i = 0; i < length; i++) {
+            locationsString.append(leafLocations.get(i).getComponentInstance().getComponentName());
+            locationsString.append('.');
+            locationsString.append(leafLocations.get(i).getId());
+
+            if (i != length - 1) {
+                locationsString.append("\n");
+            }
+        }
+
+        return locationsString.toString();
     }
 }
