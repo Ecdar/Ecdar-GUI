@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public class State {
-    // locations and edges are saved as key-value pair where key is component name and value = id
     private final ObjectProtos.LocationTree locationTree;
     private final ObjectProtos.State protoState;
     public final ObservableMap<String, BigDecimal> clocks = FXCollections.observableHashMap();

@@ -20,7 +20,7 @@
                 <Region minWidth="10" maxWidth="10"/>
                 <Label fx:id="locations" styleClass="body1" wrapText="true"/>
             </HBox>
-            <Text text="Clocks" styleClass="subhead" style="-fx-stroke-width: 1.2em"/>
+            <Text text="Clock Constraints" styleClass="subhead" style="-fx-stroke-width: 1.2em"/>
             <HBox>
                 <Region minWidth="10" maxWidth="10"/>
                 <Label fx:id="clockConstraints" styleClass="body1" wrapText="true"/>

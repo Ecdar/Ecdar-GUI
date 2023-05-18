@@ -5,6 +5,7 @@ import EcdarProtoBuf.QueryProtos;
 import ecdar.Ecdar;
 import ecdar.backend.BackendHelper;
 import ecdar.presentations.*;
+import ecdar.utility.helpers.SimulationHighlighter;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -14,17 +15,18 @@ import ecdar.abstractions.State;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableMap;
+import javafx.event.EventHandler;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.StackPane;
 
 import java.net.URL;
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public class SimulationController implements ModeController, Initializable {
     public StackPane root;
@@ -38,6 +40,8 @@ public class SimulationController implements ModeController, Initializable {
 
     private static final ObjectProperty<Simulation> activeSimulation = new SimpleObjectProperty<>(null);
     private static final ObjectProperty<State> selectedState = new SimpleObjectProperty<>();
+
+    private SimulationHighlighter highlighter;
 
     /**
      * The amount that is going be zoomed in/out for each press on + or -
@@ -66,16 +70,16 @@ public class SimulationController implements ModeController, Initializable {
     private boolean isMaxZoomInReached = false;
     private boolean isMaxZoomOutReached = false;
 
+    private EventHandler<MouseEvent> decisionOnMouseEnter = event -> {
+        // ToDo: Change highlighted state
+        highlighter.highlightProcessState(((DecisionPresentation)event.getTarget()).getController().getDecision().target);
+    };
+    private EventHandler<MouseEvent> decisionOnMouseExit = event -> {
+        // ToDo: Change highlighted state
+        highlighter.highlightProcessState(getActiveSimulation().currentState.get());
+    };
+
     private final ObservableMap<String, ProcessPresentation> componentNameProcessPresentationMap = FXCollections.observableHashMap();
-
-    // ToDo NIELS: Remove static
-    public static State getCurrentState() throws NullPointerException {
-        return activeSimulation.get().currentState.get();
-    }
-
-    public static List<Component> getSimulatedComponents() {
-        return activeSimulation.get().simulatedComponents;
-    }
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
@@ -83,6 +87,7 @@ public class SimulationController implements ModeController, Initializable {
         initializeProcessContainer();
         initializeWindowResizing();
         initializeZoom();
+        highlighter = new SimulationHighlighter(componentNameProcessPresentationMap, activeSimulation);
     }
 
     /**
@@ -137,84 +142,6 @@ public class SimulationController implements ModeController, Initializable {
         });
     }
 
-    /**
-     * Clears the {@link #processContainer} and the {@link #componentNameProcessPresentationMap}.
-     */
-    private void clearOverview() {
-        processContainer.getChildren().clear();
-        componentNameProcessPresentationMap.clear();
-    }
-
-    /**
-     * Handles the scaling of the width of the {@link #processContainer}
-     *
-     * @param oldValue the width of {@link #scrollPane} before the change
-     * @param newValue the width of {@link #scrollPane} after the change
-     */
-    private void handleWidthOnScale(final Number oldValue, final Number newValue) {
-        if (resetZoom) { //Zoom reset
-            resetZoom = false;
-            processContainer.setMinWidth(scrollPane.getWidth() - SCROLLPANE_OFFSET);
-            processContainer.setMaxWidth(scrollPane.getWidth() - SCROLLPANE_OFFSET);
-        } else if (oldValue.doubleValue() > newValue.doubleValue()) { //Zoom in
-            resetZoom = false;
-            processContainer.setMinWidth(Math.round(processContainer.getWidth() * SCALE_DELTA));
-            processContainer.setMaxWidth(Math.round(processContainer.getWidth() * SCALE_DELTA));
-        } else { // Zoom out
-            resetZoom = false;
-            processContainer.setMinWidth(Math.round(processContainer.getWidth() * (1 / SCALE_DELTA)));
-            processContainer.setMaxWidth(Math.round(processContainer.getWidth() * (1 / SCALE_DELTA)));
-        }
-    }
-
-    /**
-     * Unhighlights all processes
-     */
-    public void unhighlightProcesses() {
-        for (final ProcessPresentation presentation : getProcessPresentations()) {
-            presentation.getController().unhighlightProcess();
-            presentation.showActive();
-        }
-    }
-
-    private List<ProcessPresentation> getProcessPresentations() {
-        return new ArrayList<>(componentNameProcessPresentationMap.values());
-    }
-
-    /**
-     * Finds the processes for the input locations in the input {@link State} and highlights the locations.
-     *
-     * @param state The state with the locations to highlight
-     */
-    public void highlightProcessState(final State state) {
-        Consumer<ObjectProtos.LeafLocation> leafLocationConsumer =
-                (leaf) -> componentNameProcessPresentationMap.get(leaf.getComponentInstance().getComponentName())
-                        .getController().highlightLocation(leaf.getId());
-
-        Platform.runLater(() -> state.consumeLeafLocations(leafLocationConsumer));
-    }
-
-    public void highlightAvailableEdgesFromDecisions(List<DecisionPresentation> availableDecisions) {
-        List<String> edges = availableDecisions.stream()
-                .map(decisionPresentation -> decisionPresentation.getController().getDecision().edgeIds)
-                .flatMap(List::stream)
-                .collect(Collectors.toList());
-
-        // Remove previous highlighting of edges
-        componentNameProcessPresentationMap.values().forEach(p -> p.getController()
-                .getComponent().getEdges()
-                .forEach(e -> e.setIsHighlighted(edges.contains(e.getId()))));
-    }
-
-    /**
-     * Reloads the whole simulation sets the initial transitions, states, etc
-     */
-    public void initialStep(String composition) {
-        BackendHelper.getDefaultEngine().enqueueRequest(new Decision(composition),
-                (response) -> Platform.runLater(() -> initializeActiveSimulation(response, composition)),
-                (error) -> Ecdar.showToast("Could not start simulation:\n" + error.getMessage()));
-    }
-
     private void initializeActiveSimulation(QueryProtos.SimulationStepResponse response, String composition) {
         State newState = createStateFromResponse(response);
 
@@ -230,23 +157,85 @@ public class SimulationController implements ModeController, Initializable {
         leftSimPane.getController().setTraceLog(newSimulation.traceLog);
         rightSimPane.getController().setDecisionsList(newSimulation.availableDecisions);
 
+        updateSimulationState(response.getNewDecisionPointsList());
+
         // Update highlighting when state changes
         newSimulation.currentState.addListener(observable -> {
             updateSimulationVariablesAndClocks();
-            updateHighlighting();
-            highlightTraceStates();
+            highlighter.updateHighlighting();
+            highlighter.highlightTraceStates(leftSimPane.getController().tracePanePresentation.getController().traceList.getChildren());
         });
 
-        updateSimulationState(response.getNewDecisionPointsList());
+        rightSimPane.getController().availableDecisionsVBox.getChildren().addListener((ListChangeListener<? super Node>) c -> {
+            while (c.next()) {
+                c.getAddedSubList().forEach(decisionPresentation -> {
+                    decisionPresentation.setOnMouseEntered(decisionOnMouseEnter);
+                    decisionPresentation.setOnMouseExited(decisionOnMouseExit);
+                });
+            }
+        });
+    }
+
+    // ToDo NIELS: Remove static
+    public static State getCurrentState() throws NullPointerException {
+        return activeSimulation.get().currentState.get();
+    }
+
+    public static List<Component> getSimulatedComponents() {
+        return activeSimulation.get().simulatedComponents;
+    }
+
+    private Simulation getActiveSimulation() {
+        return activeSimulation.get();
+    }
+
+    private List<ProcessPresentation> getProcessPresentations() {
+        return new ArrayList<>(componentNameProcessPresentationMap.values());
+    }
+
+    /**
+     * Reloads the whole simulation sets the initial transitions, states, etc
+     */
+    public void initialStep(String composition) {
+        BackendHelper.getDefaultEngine().enqueueRequest(new Decision(composition),
+                (response) -> Platform.runLater(() -> initializeActiveSimulation(response, composition)),
+                (error) -> Ecdar.showToast("Could not start simulation:\n" + error.getMessage()));
+    }
+
+    /**
+     * Take a step in the simulation.
+     */
+    public void nextStep(Decision decision) {
+        // removes invalid states from the log when stepping forward after previewing a previous state
+        removeStatesFromLog(getActiveSimulation().traceLog.filtered(statePresentation -> statePresentation.getController().getState() == getActiveSimulation().currentState.get()).stream().findFirst().orElse(null));
+
+        BackendHelper.getDefaultEngine().enqueueRequest(decision,
+                (response) -> {
+                    // ToDo: This is temp solution to compile but should be fixed to handle ambiguity
+                    State newState = createStateFromResponse(response);
+                    getActiveSimulation().currentState.set(newState);
+                    updateSimulationState(response.getNewDecisionPointsList());
+                },
+
+                (error) -> Ecdar.showToast("Could not take next step in simulation\nError: " + error.getMessage()));
+    }
+
+    /**
+     * Resets the current simulation, and prepares for a new simulation by clearing the
+     * {@link SimulationController#processContainer} and adding the processes of the new simulation.
+     */
+    public void resetSimulation(String queryToSimulate) {
+        clearOverview();
+        initialStep(queryToSimulate);
+    }
+
+    private void previewState(final StatePresentation statePresentation) throws NullPointerException {
+        getActiveSimulation().currentState.set(statePresentation.getController().getState());
     }
 
     private void updateSimulationState(List<ObjectProtos.Decision> availableDecisions) {
         Platform.runLater(() -> {
-            getActiveSimulation().addStateToTraceLog(getActiveSimulation().currentState.get(), this::previewStep);
-
-            updateSimulationVariablesAndClocks();
-            updateHighlighting();
-            highlightTraceStates();
+            getActiveSimulation().addStateToTraceLog(getActiveSimulation().currentState.get(), this::previewState);
 
             getActiveSimulation().availableDecisions.clear();
             if (availableDecisions.isEmpty()) {
@@ -255,6 +244,10 @@ public class SimulationController implements ModeController, Initializable {
             } else {
                 getActiveSimulation().addDecisionsFromProto(availableDecisions);
             }
+
+            updateSimulationVariablesAndClocks();
+            highlighter.updateHighlighting();
+            highlighter.highlightTraceStates(leftSimPane.getController().tracePanePresentation.getController().traceList.getChildren());
         });
     }
 
@@ -291,60 +284,33 @@ public class SimulationController implements ModeController, Initializable {
     }
 
     /**
-     * Initializer method to set up listeners that handle highlighting when selected/current state/transition changes
+     * Clears the {@link #processContainer} and the {@link #componentNameProcessPresentationMap}.
      */
-    private void updateHighlighting() {
-        highlightAvailableEdgesFromDecisions(getActiveSimulation().availableDecisions);
-
-        Platform.runLater(() -> {
-            unhighlightProcesses();
-            highlightProcessState(getActiveSimulation().currentState.get());
-        });
+    private void clearOverview() {
+        processContainer.getChildren().clear();
+        componentNameProcessPresentationMap.clear();
     }
 
     /**
-     * Initializes the fading of states in the trace list when a state is previewed
+     * Handles the scaling of the width of the {@link #processContainer}
+     *
+     * @param oldValue the width of {@link #scrollPane} before the change
+     * @param newValue the width of {@link #scrollPane} after the change
      */
-    private void highlightTraceStates() {
-        var traceListStates = leftSimPane.getController().tracePanePresentation.getController().traceList.getChildren();
-
-        var activeStatePresentation = traceListStates.stream()
-                .filter(n -> ((StatePresentation) n)
-                        .getController().getState()
-                        .equals(getActiveSimulation().currentState.get()))
-                .findFirst().orElse(null);
-
-        if (activeStatePresentation == null || traceListStates.get(traceListStates.size() - 1).equals(activeStatePresentation))
-            return;
-
-        traceListStates.forEach(trace -> trace.setOpacity(1));
-        int i = traceListStates.size() - 1;
-        while (traceListStates.get(i) != activeStatePresentation) {
-            traceListStates.get(i).setOpacity(0.4);
-            i--;
+    private void handleWidthOnScale(final Number oldValue, final Number newValue) {
+        if (resetZoom) { //Zoom reset
+            resetZoom = false;
+            processContainer.setMinWidth(scrollPane.getWidth() - SCROLLPANE_OFFSET);
+            processContainer.setMaxWidth(scrollPane.getWidth() - SCROLLPANE_OFFSET);
+        } else if (oldValue.doubleValue() > newValue.doubleValue()) { //Zoom in
+            resetZoom = false;
+            processContainer.setMinWidth(Math.round(processContainer.getWidth() * SCALE_DELTA));
+            processContainer.setMaxWidth(Math.round(processContainer.getWidth() * SCALE_DELTA));
+        } else { // Zoom out
+            resetZoom = false;
+            processContainer.setMinWidth(Math.round(processContainer.getWidth() * (1 / SCALE_DELTA)));
+            processContainer.setMaxWidth(Math.round(processContainer.getWidth() * (1 / SCALE_DELTA)));
         }
-    }
-
-    private Simulation getActiveSimulation() {
-        return activeSimulation.get();
-    }
-
-    /**
-     * Take a step in the simulation.
-     */
-    public void nextStep(Decision decision) {
-        // removes invalid states from the log when stepping forward after previewing a previous state
-        removeStatesFromLog(getActiveSimulation().traceLog.filtered(statePresentation -> statePresentation.getController().getState() == getActiveSimulation().currentState.get()).stream().findFirst().orElse(null));
-
-        BackendHelper.getDefaultEngine().enqueueRequest(decision,
-                (response) -> {
-                    // ToDo: This is temp solution to compile but should be fixed to handle ambiguity
-                    State newState = createStateFromResponse(response);
-                    getActiveSimulation().currentState.set(newState);
-                    updateSimulationState(response.getNewDecisionPointsList());
-                },
-
-                (error) -> Ecdar.showToast("Could not take next step in simulation\nError: " + error.getMessage()));
     }
 
     /**
@@ -357,43 +323,8 @@ public class SimulationController implements ModeController, Initializable {
         getActiveSimulation().traceLog.remove(newLastStateIndex + 1, getActiveSimulation().traceLog.size());
     }
 
-    private void previewStep(final StatePresentation statePresentation) throws NullPointerException {
-        getActiveSimulation().currentState.set(statePresentation.getController().getState());
-    }
-
-    /**
-     * Resets the current simulation, and prepares for a new simulation by clearing the
-     * {@link SimulationController#processContainer} and adding the processes of the new simulation.
-     */
-    public void resetSimulation(String queryToSimulate) {
-        clearOverview();
-        initialStep(queryToSimulate);
-    }
-
     private State createStateFromResponse(QueryProtos.SimulationStepResponse response) {
         return new State(response.getNewDecisionPoints(0).getSource()); // ToDo NIELS: Each source is only a subset, we should combine them to the full state
-    }
-
-    /**
-     * Highlights the edges from the reachability response
-     */
-    public void highlightReachabilityEdges(ArrayList<String> ids) throws NullPointerException {
-        //unhighlight all edges
-        for (var comp : getActiveSimulation().simulatedComponents) {
-            for (var edge : comp.getEdges()) {
-                edge.setIsHighlightedForReachability(false);
-            }
-        }
-        //highlight the edges from the reachability response
-        for (var comp : getActiveSimulation().simulatedComponents) {
-            for (var edge : comp.getEdges()) {
-                for (var id : ids) {
-                    if (edge.getId().equals(id)) {
-                        edge.setIsHighlightedForReachability(true);
-                    }
-                }
-            }
-        }
     }
 
     public static void setSelectedState(State selectedState) {
