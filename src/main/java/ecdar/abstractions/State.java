@@ -1,6 +1,7 @@
 package ecdar.abstractions;
 
 import EcdarProtoBuf.ObjectProtos;
+import ecdar.utility.helpers.ConstraintsHandler;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 
@@ -58,16 +59,7 @@ public class State {
      * @return A string representing the clock constraints
      */
     public String getStateClockConstraintsString() {
-        StringBuilder clocksString = new StringBuilder();
-        for (var constraint : getProtoState().getZone().getConjunctions(0).getConstraintsList()) {
-            var x = constraint.getX().getComponentClock().getClockName();
-            var y = constraint.getY().getComponentClock().getClockName();
-            var c = constraint.getC();
-            var strict = constraint.getStrict();
-            clocksString.append(x).append(" - ").append(y).append(strict ? " < " : " <= ").append(c).append("\n");
-        }
-
-        return clocksString.toString();
+        return ConstraintsHandler.getStateClockConstraintsString(getProtoState());
     }
 
     /**

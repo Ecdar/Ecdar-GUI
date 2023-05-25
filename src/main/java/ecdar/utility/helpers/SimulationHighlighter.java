@@ -77,7 +77,7 @@ public class SimulationHighlighter {
     }
 
     /**
-     * Highlights the edges from the reachability response
+     * Highlights the edges from the reachability response ToDO NIELS: Trigger reachability highlighting
      */
     public void highlightReachabilityEdges(ArrayList<String> ids) throws NullPointerException {
         //unhighlight all edges
