@@ -70,20 +70,14 @@ public class SimulationController implements ModeController, Initializable {
     private boolean isMaxZoomInReached = false;
     private boolean isMaxZoomOutReached = false;
 
-    private EventHandler<MouseEvent> decisionOnMouseEnter = event -> {
-        // ToDo: Change highlighted state
-        highlighter.highlightProcessState(((DecisionPresentation)event.getTarget()).getController().getDecision().target);
-    };
-    private EventHandler<MouseEvent> decisionOnMouseExit = event -> {
-        // ToDo: Change highlighted state
-        highlighter.highlightProcessState(getActiveSimulation().currentState.get());
-    };
+    private final EventHandler<MouseEvent> decisionOnMouseEnter = event -> highlighter.highlightDecisionEdges(((DecisionPresentation)event.getTarget()));
+    private final EventHandler<MouseEvent> decisionOnMouseExit = event -> highlighter.unhighlightEdges();
 
     private final ObservableMap<String, ProcessPresentation> componentNameProcessPresentationMap = FXCollections.observableHashMap();
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
-        //In case that the processContainer gets moved around we have to keep in into place.
+        //In case that the processContainer gets moved around we have to keep it in place.
         initializeProcessContainer();
         initializeWindowResizing();
         initializeZoom();
@@ -142,6 +136,12 @@ public class SimulationController implements ModeController, Initializable {
         });
     }
 
+    /**
+     * Initializes the simulation based on the received proto response and current composition
+     *
+     * @param response ProtoBuf response received from a step request
+     * @param composition current composition being simulated
+     */
     private void initializeActiveSimulation(QueryProtos.SimulationStepResponse response, String composition) {
         State newState = createStateFromResponse(response);
 
@@ -163,7 +163,7 @@ public class SimulationController implements ModeController, Initializable {
         newSimulation.currentState.addListener(observable -> {
             updateSimulationVariablesAndClocks();
             highlighter.updateHighlighting();
-            highlighter.highlightTraceStates(leftSimPane.getController().tracePanePresentation.getController().traceList.getChildren());
+            highlighter.fadeSucceedingTraceStates(leftSimPane.getController().tracePanePresentation.getController().traceList.getChildren());
         });
 
         rightSimPane.getController().availableDecisionsVBox.getChildren().addListener((ListChangeListener<? super Node>) c -> {
@@ -195,6 +195,8 @@ public class SimulationController implements ModeController, Initializable {
 
     /**
      * Reloads the whole simulation sets the initial transitions, states, etc
+     *
+     * @param composition current composition being simulated
      */
     public void initialStep(String composition) {
         BackendHelper.getDefaultEngine().enqueueRequest(new Decision(composition),
@@ -204,6 +206,8 @@ public class SimulationController implements ModeController, Initializable {
 
     /**
      * Take a step in the simulation.
+     *
+     * @param decision basis of the step to take
      */
     public void nextStep(Decision decision) {
         // removes invalid states from the log when stepping forward after previewing a previous state
@@ -216,7 +220,6 @@ public class SimulationController implements ModeController, Initializable {
                     getActiveSimulation().currentState.set(newState);
                     updateSimulationState(response.getNewDecisionPointsList());
                 },
-
                 (error) -> Ecdar.showToast("Could not take next step in simulation\nError: " + error.getMessage()));
     }
 
@@ -231,6 +234,7 @@ public class SimulationController implements ModeController, Initializable {
 
     private void previewState(final StatePresentation statePresentation) throws NullPointerException {
         getActiveSimulation().currentState.set(statePresentation.getController().getState());
+        highlighter.fadeSucceedingTraceStates(leftSimPane.getController().tracePanePresentation.getController().traceList.getChildren());
     }
 
     private void updateSimulationState(List<ObjectProtos.Decision> availableDecisions) {
@@ -247,7 +251,7 @@ public class SimulationController implements ModeController, Initializable {
 
             updateSimulationVariablesAndClocks();
             highlighter.updateHighlighting();
-            highlighter.highlightTraceStates(leftSimPane.getController().tracePanePresentation.getController().traceList.getChildren());
+            highlighter.fadeSucceedingTraceStates(leftSimPane.getController().tracePanePresentation.getController().traceList.getChildren());
         });
     }
 
@@ -314,7 +318,7 @@ public class SimulationController implements ModeController, Initializable {
     }
 
     /**
-     * Removes all states from the trace log after the given state
+     * Removes all states from the trace log, succeeding the given state
      */
     private void removeStatesFromLog(StatePresentation statePresentation) {
         if (statePresentation == null) return;
@@ -328,7 +332,7 @@ public class SimulationController implements ModeController, Initializable {
     }
 
     public static void setSelectedState(State selectedState) {
-        SimulationController.selectedState.set(selectedState);
+        SimulationController.selectedState.set(selectedState); // ToDo NIELS: Handle selection
     }
 
     public static String getComposition() {

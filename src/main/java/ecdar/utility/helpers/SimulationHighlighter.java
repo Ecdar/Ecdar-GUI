@@ -40,8 +40,6 @@ public class SimulationHighlighter {
      * Initializer method to set up listeners that handle highlighting when selected/current state/transition changes
      */
     public void updateHighlighting() {
-        highlightAvailableEdgesFromDecisions(getActiveSimulation().availableDecisions);
-
         Platform.runLater(() -> {
             unhighlightProcesses();
             highlightProcessState(getActiveSimulation().currentState.get());
@@ -61,15 +59,14 @@ public class SimulationHighlighter {
     /**
      * Initializes the fading of states in the trace list when a state is previewed
      */
-    public void highlightTraceStates(List<Node> traceListStates) {
+    public void fadeSucceedingTraceStates(List<Node> traceListStates) {
         var activeStatePresentation = traceListStates.stream()
                 .filter(n -> ((StatePresentation) n)
                         .getController().getState()
                         .equals(getActiveSimulation().currentState.get()))
                 .findFirst().orElse(null);
 
-        if (activeStatePresentation == null || traceListStates.get(traceListStates.size() - 1).equals(activeStatePresentation))
-            return;
+        if (activeStatePresentation == null) return;
 
         traceListStates.forEach(trace -> trace.setOpacity(1));
         int i = traceListStates.size() - 1;
@@ -115,20 +112,29 @@ public class SimulationHighlighter {
     }
 
     /**
-     * Highlights the edges that are part of at least one of the possible decisions
+     * Highlights the edges involved in the action of a decision
      *
-     * @param availableDecisions list of decision presentations to extract the edges from
+     * @param decision decision presentations to extract the action from
      */
-    public void highlightAvailableEdgesFromDecisions(List<DecisionPresentation> availableDecisions) {
-        List<String> edges = availableDecisions.stream()
-                .map(decisionPresentation -> decisionPresentation.getController().getDecision().edgeIds)
-                .flatMap(List::stream)
+    public void highlightDecisionEdges(DecisionPresentation decision) {
+        List<String> involvedEdgeIds = decision.getController()
+                .getDecision()
+                .protoDecision.getEdgesList()
+                .stream().map(ObjectProtos.Edge::getId)
                 .collect(Collectors.toList());
 
-        // Remove previous highlighting of edges
         componentNameProcessPresentationMap.values().forEach(p -> p.getController()
                 .getComponent().getEdges()
-                .forEach(e -> e.setIsHighlighted(edges.contains(e.getId()))));
+                .forEach(e -> e.setIsHighlighted(involvedEdgeIds.contains(e.getId()))));
+    }
+
+    /**
+     * Removes highlighting from all edges
+     */
+    public void unhighlightEdges() {
+        componentNameProcessPresentationMap.values().forEach(p -> p.getController()
+                .getComponent().getEdges()
+                .forEach(e -> e.setIsHighlighted(false)));
     }
 
     public void highlightPreview(final State state) {

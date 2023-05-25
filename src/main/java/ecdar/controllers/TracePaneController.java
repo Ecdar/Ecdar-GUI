@@ -14,6 +14,7 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.control.Label;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import org.kordamp.ikonli.javafx.FontIcon;
 
@@ -156,16 +157,16 @@ public class TracePaneController implements Initializable {
     /**
      * Instantiates a {@link StatePresentation} for a {@link State} and adds it to the view
      *
-     * @param statePresentation The statePresentation the should be inserted into the trace log
+     * @param statePresentation The statePresentation to insert into the trace log
      */
     private void insertStateInTrace(final StatePresentation statePresentation) {
-        EventHandler mouseEntered = statePresentation.getOnMouseEntered();
+        EventHandler<? super MouseEvent> mouseEntered = statePresentation.getOnMouseEntered();
         statePresentation.setOnMouseEntered(event -> {
             SimulationController.setSelectedState(statePresentation.getController().getState());
             mouseEntered.handle(event);
         });
 
-        EventHandler mouseExited = statePresentation.getOnMouseExited();
+        EventHandler<? super MouseEvent> mouseExited = statePresentation.getOnMouseExited();
         statePresentation.setOnMouseExited(event -> {
             SimulationController.setSelectedState(null);
             mouseExited.handle(event);
