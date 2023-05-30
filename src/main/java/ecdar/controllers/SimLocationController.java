@@ -1,6 +1,5 @@
 package ecdar.controllers;
 
-import EcdarProtoBuf.ObjectProtos;
 import com.jfoenix.controls.JFXPopup;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
@@ -21,9 +20,7 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Path;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.util.Pair;
 
-import java.util.ArrayList;
 import java.util.function.Consumer;
 
 import java.net.URL;
@@ -54,11 +51,11 @@ public class SimLocationController implements Initializable {
     }
 
     /**
-         * Generates a reachability query based on the given location and component
-         *
-         * @param endLocation  The location which should be checked for reachability
-         * @return A reachability query string
-         */
+     * Generates a reachability query based on the given location and component
+     *
+     * @param endLocation The location which should be checked for reachability
+     * @return A reachability query string
+     */
     public static String getSimLocationReachableQuery(final Location endLocation, final Component component, final String query, final State state) {
         var stringBuilder = new StringBuilder();
 
@@ -69,7 +66,7 @@ public class SimLocationController implements Initializable {
         stringBuilder.append(" -> ");
 
         // ToDo: append start location here
-        if (state != null){
+        if (state != null) {
             stringBuilder.append(getInitialStateString(state));
             stringBuilder.append(";");
         }
@@ -83,7 +80,6 @@ public class SimLocationController implements Initializable {
     }
 
     /**
-     * ToDo NIELS: Determine if this is actually what it does
      * Returns a string representation of an array of initial location IDs for all components in the simulation
      *
      * @param state
@@ -91,40 +87,35 @@ public class SimLocationController implements Initializable {
      */
     private static String getInitialStateString(State state) {
         var initialStateStringBuilder = new StringBuilder();
-        var locations = new ArrayList<Pair<ObjectProtos.ComponentInstance, String>>();
-
-        state.consumeLeafLocations((leafLocation -> locations.add(new Pair<>(leafLocation.getComponentInstance(), leafLocation.getId()))));
 
         // append locations
         initialStateStringBuilder.append("[");
         var appendLocationWithSeparator = false;
 
         // ToDO NIELS: Determine how to process this, if it is indeed the initial locations
-        for(var component : SimulationController.getSimulatedComponents()){
-            var locationFound = false;
+        for (var component : SimulationController.getSimulatedComponents()) {
+            boolean appendSeparator = appendLocationWithSeparator;
+            state.getComponentLocationMap().entrySet().stream()
+                    // Should only match one component
+                    .filter((componentLocationPair) -> componentLocationPair.getKey().equals(component.getName()))
+                    .forEach((entry) -> {
+                        String compName = entry.getKey(), locId = entry.getValue();
 
-            for(var location : locations){
-                if (location.getKey().getComponentName().equals(component.getName())){
-                    if (appendLocationWithSeparator){
-                        initialStateStringBuilder.append(",")
-                                .append(location.getValue());
-                    }
-                    else{
-                        initialStateStringBuilder.append(location.getValue());
-                    }
-                    locationFound = true;
-                }
-                if (locationFound){
-                    // don't go through more locations, when a location is found for the specific component that we're looking at
-                    break;
-                }
-            }
+                        if (compName.equals(component.getName())) {
+                            if (appendSeparator) {
+                                initialStateStringBuilder.append(",")
+                                        .append(locId);
+                            } else {
+                                initialStateStringBuilder.append(locId);
+                            }
+                        }
+                    });
+
             appendLocationWithSeparator = true;
         }
         initialStateStringBuilder.append("]");
 
-        // ToDo: append clock values
-        var clocks = state.getSimulationClocks();
+        // ToDo: Add clocks
         initialStateStringBuilder.append("()");
 
         return initialStateStringBuilder.toString();
@@ -136,22 +127,18 @@ public class SimLocationController implements Initializable {
         stringBuilder.append("[");
         var appendLocationWithSeparator = false;
 
-        for (var component : SimulationController.getSimulatedComponents())
-        {
-            if (component.getName().equals(componentName)){
-                if (appendLocationWithSeparator){
+        for (var component : SimulationController.getSimulatedComponents()) {
+            if (component.getName().equals(componentName)) {
+                if (appendLocationWithSeparator) {
                     stringBuilder.append(",")
                             .append(endLocationId);
-                }
-                else{
+                } else {
                     stringBuilder.append(endLocationId);
                 }
-            }
-            else{ // add underscore to indicate, that we don't care about the end locations in the other components
-                if (appendLocationWithSeparator){
+            } else { // add underscore to indicate, that we don't care about the end locations in the other components
+                if (appendLocationWithSeparator) {
                     stringBuilder.append(",_");
-                }
-                else{
+                } else {
                     stringBuilder.append("_");
                 }
             }
@@ -191,7 +178,7 @@ public class SimLocationController implements Initializable {
 
         };
         locationProperty().addListener((obs, oldLocation, newLocation) -> {
-            if(newLocation == null) return;
+            if (newLocation == null) return;
             root.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseClicked::accept);
         });
     }
@@ -200,7 +187,7 @@ public class SimLocationController implements Initializable {
      * Creates the dropdown when right clicking a location.
      * When reachability is chosen a request will be send to the backend to see if the location can be reached
      */
-    public void initializeDropDownMenu(){
+    public void initializeDropDownMenu() {
         dropDownMenu = new DropDownMenu(root);
 
         String composition;
@@ -257,6 +244,7 @@ public class SimLocationController implements Initializable {
      * Set/places the given location on the view.
      * This have to be done before adding the {@link SimLocationPresentation} to the view as nothing
      * would then be displayed.
+     *
      * @param location the location
      */
     public void setLocation(final Location location) {
@@ -285,6 +273,7 @@ public class SimLocationController implements Initializable {
 
     /**
      * Colors the location model
+     *
      * @param color the new color of the location
      */
     public void color(final EnabledColor color) {

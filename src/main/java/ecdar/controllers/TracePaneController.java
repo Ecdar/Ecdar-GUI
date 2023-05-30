@@ -174,7 +174,7 @@ public class TracePaneController implements Initializable {
 
         // Only insert the presentation into the view if the trace is expanded & statePresentation is not null
         if (isTraceExpanded.get()) {
-            traceList.getChildren().add(statePresentation);
+            traceList.getChildren().add(0, statePresentation);
         }
     }
 

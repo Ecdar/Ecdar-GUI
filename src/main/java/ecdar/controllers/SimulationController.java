@@ -4,6 +4,7 @@ import EcdarProtoBuf.ObjectProtos;
 import EcdarProtoBuf.QueryProtos;
 import ecdar.Ecdar;
 import ecdar.backend.BackendHelper;
+import ecdar.backend.StateFactory;
 import ecdar.presentations.*;
 import ecdar.utility.helpers.SimulationHighlighter;
 import javafx.application.Platform;
@@ -27,6 +28,7 @@ import javafx.scene.layout.StackPane;
 
 import java.net.URL;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class SimulationController implements ModeController, Initializable {
     public StackPane root;
@@ -74,6 +76,7 @@ public class SimulationController implements ModeController, Initializable {
     private final EventHandler<MouseEvent> decisionOnMouseExit = event -> highlighter.unhighlightEdges();
 
     private final ObservableMap<String, ProcessPresentation> componentNameProcessPresentationMap = FXCollections.observableHashMap();
+    private final StateFactory stateFactory = new StateFactory();
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
@@ -143,9 +146,9 @@ public class SimulationController implements ModeController, Initializable {
      * @param composition current composition being simulated
      */
     private void initializeActiveSimulation(QueryProtos.SimulationStepResponse response, String composition) {
-        State newState = createStateFromResponse(response);
+        State initialState = this.stateFactory.createInitialState(composition, response);
 
-        Simulation newSimulation = new Simulation(composition, newState);
+        Simulation newSimulation = new Simulation(composition, initialState);
         activeSimulation.set(newSimulation);
 
         newSimulation.simulatedComponents.forEach(component -> {
@@ -155,15 +158,25 @@ public class SimulationController implements ModeController, Initializable {
         });
 
         leftSimPane.getController().setTraceLog(newSimulation.traceLog);
-        rightSimPane.getController().setDecisionsList(newSimulation.availableDecisions);
+        rightSimPane.getController().setDecisionsList(
+                initialState.getDecisions().stream()
+                        .map(DecisionPresentation::new)
+                        .collect(Collectors.toList())
+        );
 
-        updateSimulationState(response.getNewDecisionPointsList());
+        updateSimulationState();
 
-        // Update highlighting when state changes
-        newSimulation.currentState.addListener(observable -> {
+        // Update highlighting and decisions when state changes
+        newSimulation.currentState.addListener((observable, oldState, newState) -> {
             updateSimulationVariablesAndClocks();
             highlighter.updateHighlighting();
             highlighter.fadeSucceedingTraceStates(leftSimPane.getController().tracePanePresentation.getController().traceList.getChildren());
+
+            rightSimPane.getController().setDecisionsList(
+                    newState.getDecisions().stream()
+                            .map(DecisionPresentation::new)
+                            .collect(Collectors.toList())
+            );
         });
 
         rightSimPane.getController().availableDecisionsVBox.getChildren().addListener((ListChangeListener<? super Node>) c -> {
@@ -176,7 +189,6 @@ public class SimulationController implements ModeController, Initializable {
         });
     }
 
-    // ToDo NIELS: Remove static
     public static State getCurrentState() throws NullPointerException {
         return activeSimulation.get().currentState.get();
     }
@@ -215,10 +227,8 @@ public class SimulationController implements ModeController, Initializable {
 
         BackendHelper.getDefaultEngine().enqueueRequest(decision,
                 (response) -> {
-                    // ToDo: This is temp solution to compile but should be fixed to handle ambiguity
-                    State newState = createStateFromResponse(response);
-                    getActiveSimulation().currentState.set(newState);
-                    updateSimulationState(response.getNewDecisionPointsList());
+                    getActiveSimulation().currentState.set(stateFactory.createState(getComposition(), response));
+                    updateSimulationState();
                 },
                 (error) -> Ecdar.showToast("Could not take next step in simulation\nError: " + error.getMessage()));
     }
@@ -232,22 +242,14 @@ public class SimulationController implements ModeController, Initializable {
         initialStep(queryToSimulate);
     }
 
-    private void previewState(final StatePresentation statePresentation) throws NullPointerException {
-        getActiveSimulation().currentState.set(statePresentation.getController().getState());
+    private void previewState(final State state) throws NullPointerException {
+        getActiveSimulation().currentState.set(state);
         highlighter.fadeSucceedingTraceStates(leftSimPane.getController().tracePanePresentation.getController().traceList.getChildren());
     }
 
-    private void updateSimulationState(List<ObjectProtos.Decision> availableDecisions) {
+    private void updateSimulationState() {
         Platform.runLater(() -> {
-            getActiveSimulation().addStateToTraceLog(getActiveSimulation().currentState.get(), this::previewState);
-
-            getActiveSimulation().availableDecisions.clear();
-            if (availableDecisions.isEmpty()) {
-                // If no edges are available in any of the returned decisions
-                Ecdar.showToast("No available decisions.");
-            } else {
-                getActiveSimulation().addDecisionsFromProto(availableDecisions);
-            }
+            getActiveSimulation().addStateToTraceLog(getActiveSimulation().currentState.get(), (statePresentation) -> this.previewState(statePresentation.getController().getState()));
 
             updateSimulationVariablesAndClocks();
             highlighter.updateHighlighting();
@@ -325,10 +327,6 @@ public class SimulationController implements ModeController, Initializable {
 
         var newLastStateIndex = getActiveSimulation().traceLog.indexOf(statePresentation);
         getActiveSimulation().traceLog.remove(newLastStateIndex + 1, getActiveSimulation().traceLog.size());
-    }
-
-    private State createStateFromResponse(QueryProtos.SimulationStepResponse response) {
-        return new State(response.getNewDecisionPoints(0).getSource()); // ToDo NIELS: Each source is only a subset, we should combine them to the full state
     }
 
     public static void setSelectedState(State selectedState) {

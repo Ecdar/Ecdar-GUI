@@ -1,89 +1,28 @@
 package ecdar.abstractions;
 
-import EcdarProtoBuf.ObjectProtos;
-import ecdar.utility.helpers.ConstraintsHandler;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableMap;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.function.Consumer;
+import java.util.HashMap;
+import java.util.List;
 
 public class State {
-    private final ObjectProtos.LocationTree locationTree;
-    private final ObjectProtos.State protoState;
-    public final ObservableMap<String, BigDecimal> clocks = FXCollections.observableHashMap();
+    private final HashMap<String, String> componentLocationMap;
+    private final List<ClockConstraint> clockConstraints;
+    private final List<Decision> decisions;
 
-    public State(ObjectProtos.State state) {
-        this.locationTree = state.getLocationTree();
-        this.protoState = state;
+    public State(HashMap<String, String> componentLocationMap, List<ClockConstraint> clockConstraints, List<Decision> decisions) {
+        this.componentLocationMap = componentLocationMap;
+        this.clockConstraints = clockConstraints;
+        this.decisions = decisions;
     }
 
-    public void consumeLeafLocations(Consumer<ObjectProtos.LeafLocation> consumer) {
-        consumeLeafLocations(locationTree, consumer);
+    public HashMap<String, String> getComponentLocationMap() {
+        return componentLocationMap;
     }
 
-    private void consumeLeafLocations(ObjectProtos.LocationTree tree, Consumer<ObjectProtos.LeafLocation> consumer) {
-        switch (tree.getNodeTypeCase()) {
-            case LEAF_LOCATION:
-                consumer.accept(tree.getLeafLocation());
-
-            case BINARY_LOCATION_OP: {
-                consumeLeafLocations(tree.getBinaryLocationOp().getLeft(), consumer);
-                consumeLeafLocations(tree.getBinaryLocationOp().getRight(), consumer);
-            }
-
-            case SPECIAL_LOCATION: // ToDo: Implement visualization of inconsistent and universal locations
-
-            case NODETYPE_NOT_SET: // Will never happen
-        }
+    public List<ClockConstraint> getClockConstraints() {
+        return clockConstraints;
     }
 
-    /**
-     * All the clocks connected to the current simulation.
-     *
-     * @return a {@link Map} where the name (String) is the key, and a {@link BigDecimal} is the clock value
-     */
-    public ObservableMap<String, BigDecimal> getSimulationClocks() {
-        return this.clocks;
-    }
-
-    public ObjectProtos.State getProtoState() {
-        return protoState;
-    }
-
-    /**
-     * A helper method that returns a string representing the clock constraints of a state in the trace log
-     *
-     * @return A string representing the clock constraints
-     */
-    public String getStateClockConstraintsString() {
-        return ConstraintsHandler.getStateClockConstraintsString(getProtoState());
-    }
-
-    /**
-     * A helper method that returns a string representing the locations of a state in the trace log
-     *
-     * @return A string representing the locations
-     */
-    public String getStateLocationsString() {
-        StringBuilder locationsString = new StringBuilder();
-
-        var leafLocations = new ArrayList<ObjectProtos.LeafLocation>();
-        consumeLeafLocations(leafLocations::add);
-
-        int length = leafLocations.size();
-        for (int i = 0; i < length; i++) {
-            locationsString.append(leafLocations.get(i).getComponentInstance().getComponentName());
-            locationsString.append('.');
-            locationsString.append(leafLocations.get(i).getId());
-
-            if (i != length - 1) {
-                locationsString.append("\n");
-            }
-        }
-
-        return locationsString.toString();
+    public List<Decision> getDecisions() {
+        return decisions;
     }
 }

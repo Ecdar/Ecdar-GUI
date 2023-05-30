@@ -14,11 +14,9 @@ import javafx.scene.Node;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class SimulationHighlighter {
-    // ToDo NIELS: Clean up by removing extraneous methods
     private final ObservableMap<String, ProcessPresentation> componentNameProcessPresentationMap;
     private final ObjectProperty<Simulation> simulation = new SimpleObjectProperty<>();
     private ArrayList<String> temporarilyHighlightedLocations = new ArrayList<>();
@@ -69,10 +67,11 @@ public class SimulationHighlighter {
         if (activeStatePresentation == null) return;
 
         traceListStates.forEach(trace -> trace.setOpacity(1));
-        int i = traceListStates.size() - 1;
-        while (traceListStates.get(i) != activeStatePresentation) {
+
+        int i = 0;
+        while (i < traceListStates.size() && traceListStates.get(i) != activeStatePresentation) {
             traceListStates.get(i).setOpacity(0.4);
-            i--;
+            i++;
         }
     }
 
@@ -104,11 +103,10 @@ public class SimulationHighlighter {
      * @param state The state with the locations to highlight
      */
     public void highlightProcessState(final State state) {
-        Consumer<ObjectProtos.LeafLocation> leafLocationConsumer =
-                (leaf) -> componentNameProcessPresentationMap.get(leaf.getComponentInstance().getComponentName())
-                        .getController().highlightLocation(leaf.getId());
-
-        Platform.runLater(() -> state.consumeLeafLocations(leafLocationConsumer));
+        Platform.runLater(() -> state.getComponentLocationMap().forEach((comp, loc) -> {
+            componentNameProcessPresentationMap.get(comp)
+                    .getController().highlightLocation(loc);
+        }));
     }
 
     /**
@@ -137,13 +135,11 @@ public class SimulationHighlighter {
                 .forEach(e -> e.setIsHighlighted(false)));
     }
 
-    public void highlightPreview(final State state) {
-        Consumer<ObjectProtos.LeafLocation> leafLocationConsumer =
-                (leaf) -> {
-                    componentNameProcessPresentationMap.get(leaf.getComponentInstance().getComponentName()).getController().highlightLocation(leaf.getId());
-                    temporarilyHighlightedLocations.add(leaf.getId());
-                };
 
-        Platform.runLater(() -> state.consumeLeafLocations(leafLocationConsumer));
+    public void highlightPreview(final State state) {
+        Platform.runLater(() -> state.getComponentLocationMap().forEach((comp, loc) -> {
+            componentNameProcessPresentationMap.get(comp).getController().highlightLocation(loc);
+            temporarilyHighlightedLocations.add(loc);
+        }));
     }
 }

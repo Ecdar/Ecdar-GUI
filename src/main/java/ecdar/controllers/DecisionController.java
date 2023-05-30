@@ -2,6 +2,7 @@ package ecdar.controllers;
 
 import com.jfoenix.controls.JFXRippler;
 import ecdar.abstractions.Decision;
+import ecdar.utility.helpers.ClockConstraintsHandler;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.Initializable;
@@ -16,12 +17,15 @@ public class DecisionController implements Initializable {
     public Label clockConstraints;
 
     private final ObjectProperty<Decision> decision = new SimpleObjectProperty<>();
+    private final ClockConstraintsHandler clockConstraintsHandler = new ClockConstraintsHandler();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         decision.addListener((observable, oldValue, newValue) -> {
             action.setText(newValue.action);
-            clockConstraints.setText(newValue.source.getStateClockConstraintsString());
+            clockConstraints.setText(
+                    clockConstraintsHandler.getStateClockConstraintsString(newValue.clockConstraints)
+            );
         });
     }
 

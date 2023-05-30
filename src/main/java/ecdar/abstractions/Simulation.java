@@ -1,10 +1,7 @@
 package ecdar.abstractions;
 
-import EcdarProtoBuf.ObjectProtos;
 import ecdar.Ecdar;
-import ecdar.presentations.DecisionPresentation;
 import ecdar.presentations.StatePresentation;
-import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -28,7 +25,6 @@ public class Simulation {
 
     public final ObjectProperty<State> currentState = new SimpleObjectProperty<>();
 
-    public final ObservableList<DecisionPresentation> availableDecisions = FXCollections.observableArrayList();
     public final ObservableList<StatePresentation> traceLog = FXCollections.observableArrayList();
 
     public Simulation(String composition, State initialState) {
@@ -52,14 +48,6 @@ public class Simulation {
 
 
         simulatedComponents.addAll(componentsToSimulate);
-    }
-
-    public void addDecisionsFromProto(List<ObjectProtos.Decision> protoDecisions) {
-        Platform.runLater(() -> {
-            protoDecisions.forEach(protoDecision -> {
-                availableDecisions.add(new DecisionPresentation(new Decision(composition, protoDecision)));
-            });
-        });
     }
 
     public void addStateToTraceLog(State state, Consumer<StatePresentation> onTraceLogStatePressed) {

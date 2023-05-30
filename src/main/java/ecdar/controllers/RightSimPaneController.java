@@ -26,12 +26,13 @@ public class RightSimPaneController implements Initializable {
     public VBox availableDecisionsVBox;
 
     private Consumer<Decision> onDecisionSelected;
-    private ObservableList<DecisionPresentation> availableDecisions = FXCollections.observableArrayList();
+    private final ObservableList<DecisionPresentation> availableDecisions = FXCollections.observableArrayList();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         initializeBackground();
         initializeLeftBorder();
+        initializeDecisionHandling();
     }
 
     /**
@@ -60,30 +61,14 @@ public class RightSimPaneController implements Initializable {
     private void initializeDecisionHandling() {
         availableDecisions.addListener((ListChangeListener<DecisionPresentation>) c -> {
             while (c.next()) {
+                c.getRemoved().forEach(decisionPresentation -> Platform.runLater(() -> availableDecisionsVBox.getChildren().remove(decisionPresentation)));
+
                 c.getAddedSubList().forEach(decisionPresentation -> {
                     // Request next step when decision is clicked
-                    decisionPresentation.setOnMouseClicked(event -> {
-                        onDecisionSelected.accept(decisionPresentation.getController().getDecision());
-                    });
-
-                    Platform.runLater(() -> {
-                        availableDecisionsVBox.getChildren().add(decisionPresentation);
-                    });
+                    decisionPresentation.setOnMouseClicked(event -> onDecisionSelected.accept(decisionPresentation.getController().getDecision()));
+                    Platform.runLater(() -> availableDecisionsVBox.getChildren().add(decisionPresentation));
                 });
-
-                c.getRemoved().forEach(decisionPresentation -> Platform.runLater(() -> availableDecisionsVBox.getChildren().remove(decisionPresentation)));
             }
-        });
-
-        availableDecisions.forEach(d -> {
-            // Request next step when decision is clicked
-            d.setOnMouseClicked(event -> {
-                onDecisionSelected.accept(d.getController().getDecision());
-            });
-
-            Platform.runLater(() -> {
-                availableDecisionsVBox.getChildren().add(d);
-            });
         });
     }
 
@@ -91,9 +76,8 @@ public class RightSimPaneController implements Initializable {
         onDecisionSelected = decisionSelected;
     }
 
-    public void setDecisionsList(ObservableList<DecisionPresentation> decisions) {
-        availableDecisions = decisions;
-        initializeDecisionHandling();
+    public void setDecisionsList(List<DecisionPresentation> decisions) {
+        availableDecisions.setAll(decisions);
     }
 
     protected List<Decision> getDecisions() {
@@ -101,16 +85,4 @@ public class RightSimPaneController implements Initializable {
                 .map(decisionPresentation -> decisionPresentation.getController().getDecision())
                 .collect(Collectors.toList());
     }
-
-//    /**
-//     * Get all enable edges in this state
-//     *
-//     * @return list of pairs of the component instance connected to each edge
-//     */
-//    public List<Edge> getEnabledEdges() {
-//        return getDecisions().stream()
-//                .map(decision -> decision.edgeIds)
-//                .flatMap(List::stream)
-//                .collect(Collectors.toList());
-//    }
 }

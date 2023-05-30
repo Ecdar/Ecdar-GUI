@@ -1,36 +1,32 @@
 package ecdar.utility.helpers;
 
-import EcdarProtoBuf.ObjectProtos;
 import ecdar.abstractions.ClockConstraint;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class ConstraintsHandler {
+public class ClockConstraintsHandler {
     /**
      * Generates a string representation of the clock constraints of the provided state
      *
-     * @param protoState state containing the clock constraints to represent in the string
-     * @return a prettified string representation of the state's clock constraints
+     * @param clockConstraints list of the clock constraints represent in the string
+     * @return a prettified string representation of the clock constraints
      */
-    public static String getStateClockConstraintsString(ObjectProtos.State protoState) {
-        List<ClockConstraint> refinedConstraints = new ArrayList<>();
-        for (var constraint : protoState.getZone().getConjunctions(0).getConstraintsList()) {
-            refinedConstraints.add(generateClockConstraint(constraint));
-        }
+    public String getStateClockConstraintsString(List<ClockConstraint> clockConstraints) {
+        if (clockConstraints.isEmpty()) return "";
 
         StringBuilder clockConstraintsString = new StringBuilder();
         List<Integer> mergedConstraints = new ArrayList<>();
 
-        for (int i = 0; i < refinedConstraints.size(); i++) {
+        for (int i = 0; i < clockConstraints.size(); i++) {
             if (mergedConstraints.contains(i)) continue; // 'i' has already been merged
 
-            for (int j = 1; j < refinedConstraints.size(); j++) {
+            for (int j = 1; j < clockConstraints.size(); j++) {
                 if (i == j || mergedConstraints.contains(j)) continue; // 'j' has already been merged
 
-                ClockConstraint c1 = refinedConstraints.get(i);
-                ClockConstraint c2 = refinedConstraints.get(j);
+                ClockConstraint c1 = clockConstraints.get(i);
+                ClockConstraint c2 = clockConstraints.get(j);
 
                 if (constraintClocksMatch(c1, c2)) {
                     clockConstraintsString.append(getMergedConstraintString(c1, c2)).append("\n");
@@ -40,9 +36,9 @@ public class ConstraintsHandler {
             }
         }
 
-        for (int i = 0; i < refinedConstraints.size(); i++) {
+        for (int i = 0; i < clockConstraints.size(); i++) {
             if (!mergedConstraints.contains(i)) {
-                clockConstraintsString.append(refinedConstraints.get(i).toString()).append("\n");
+                clockConstraintsString.append(clockConstraints.get(i).toString()).append("\n");
             }
         }
 
@@ -60,7 +56,7 @@ public class ConstraintsHandler {
      * @param c2 second clock constraint
      * @return string representation of the merged clock constraint if compatible, or the two separate representations otherwise
      */
-    private static String getMergedConstraintString(ClockConstraint c1, ClockConstraint c2) {
+    private String getMergedConstraintString(ClockConstraint c1, ClockConstraint c2) {
         StringBuilder mergedConstraint = new StringBuilder();
 
         if ((c1.comparator == '<' && c2.comparator == '>') ||
@@ -105,35 +101,7 @@ public class ConstraintsHandler {
      * @param c2 second clock constraint
      * @return true if the two clock constraints are compatible, false otherwise
      */
-    private static boolean constraintClocksMatch(ClockConstraint c1, ClockConstraint c2) {
+    private boolean constraintClocksMatch(ClockConstraint c1, ClockConstraint c2) {
         return (Objects.equals(c1.clocks.getValue(), c2.clocks.getValue()) && Objects.equals(c1.clocks.getKey(), c2.clocks.getKey())) || (Objects.equals(c1.clocks.getValue(), c2.clocks.getKey()) && Objects.equals(c1.clocks.getKey(), c2.clocks.getValue()));
-    }
-
-    /**
-     * Generates a ClockConstraint object from a ProtoBuf constraint
-     *
-     * @param constraint the ProtoBuf constraint to generate from
-     * @return the generated ClockConstraint
-     */
-    private static ClockConstraint generateClockConstraint(ObjectProtos.Constraint constraint) {
-        var clock1 = constraint.getX().getComponentClock().getClockName();
-        var clock2 = constraint.getY().getComponentClock().getClockName();
-        var constant = constraint.getC();
-        var strict = constraint.getStrict();
-
-        if (clock1.equals("")) {
-            // The first clock is the zero-clock
-            return new ClockConstraint(clock2, null, Math.abs(constant), '>', strict);
-        } else if (clock2.equals("")) {
-            // The second clock is the zero-clock
-            return new ClockConstraint(clock1, null, Math.abs(constant), '<', strict);
-        } else {
-            // None of the clocks are the zero-clock
-            if (constant >= 0) {
-                return new ClockConstraint(clock1, clock2, Math.abs(constant), '<', strict);
-            } else {
-                return new ClockConstraint(clock2, clock1, Math.abs(constant), '>', strict);
-            }
-        }
     }
 }

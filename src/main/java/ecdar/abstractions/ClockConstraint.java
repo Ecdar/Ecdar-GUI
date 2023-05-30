@@ -8,8 +8,8 @@ public class ClockConstraint {
     public final int constant;
     public final boolean isStrict;
 
-    public ClockConstraint(String left_clock, String right_clock, int constant, char comparator, boolean isStrict) {
-        this.clocks = new Pair<>(left_clock, right_clock);
+    public ClockConstraint(String leftClock, String rightClock, int constant, char comparator, boolean isStrict) {
+        this.clocks = new Pair<>(leftClock, rightClock);
         this.constant = constant;
         this.comparator = comparator;
         this.isStrict = isStrict;
