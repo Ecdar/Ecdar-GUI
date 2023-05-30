@@ -6,76 +6,116 @@ import ecdar.abstractions.ClockConstraint;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class ConstraintsHandler {
+    /**
+     * Generates a string representation of the clock constraints of the provided state
+     *
+     * @param protoState state containing the clock constraints to represent in the string
+     * @return a prettified string representation of the state's clock constraints
+     */
     public static String getStateClockConstraintsString(ObjectProtos.State protoState) {
         List<ClockConstraint> refinedConstraints = new ArrayList<>();
         for (var constraint : protoState.getZone().getConjunctions(0).getConstraintsList()) {
-            refinedConstraints.add(getClockConstraintLine(constraint));
+            refinedConstraints.add(generateClockConstraint(constraint));
         }
 
-//        ToDo NIELS: Check for combinable constraints
-//        StringBuilder clockConstraintsString = new StringBuilder();
-//        List<Integer> mergedConstraints = new ArrayList<>();
-//
-//        for (int i = 0; i < refinedConstraints.size(); i++) {
-//            if (mergedConstraints.contains(i)) continue; // 'i' has already been merged
-//
-//            for (int j = 1; j < refinedConstraints.size(); j++) {
-//                if (i == j || mergedConstraints.contains(j)) continue; // 'j' has already been merged
-//
-//                ClockConstraint c1 = refinedConstraints.get(i);
-//                ClockConstraint c2 = refinedConstraints.get(j);
-//
-//                if (constraintClocksMatch(c1, c2)) {
-//                    clockConstraintsString.append(getMergedConstraintString(c1, c2)).append("\n");
-//                    mergedConstraints.add(i);
-//                    mergedConstraints.add(j);
-//                }
-//            }
-//        }
-//
-//        for (int i = 0; i < refinedConstraints.size(); i++) {
-//            if (!mergedConstraints.contains(i)) {
-//                clockConstraintsString.append(refinedConstraints.get(i).toString()).append("\n");
-//            }
-//        }
-//
-//        // Remove trailing newline
-//        clockConstraintsString.setLength(clockConstraintsString.length() - 1);
+        StringBuilder clockConstraintsString = new StringBuilder();
+        List<Integer> mergedConstraints = new ArrayList<>();
 
-        return refinedConstraints.stream().map(ClockConstraint::toString).collect(Collectors.joining("\n"));
+        for (int i = 0; i < refinedConstraints.size(); i++) {
+            if (mergedConstraints.contains(i)) continue; // 'i' has already been merged
+
+            for (int j = 1; j < refinedConstraints.size(); j++) {
+                if (i == j || mergedConstraints.contains(j)) continue; // 'j' has already been merged
+
+                ClockConstraint c1 = refinedConstraints.get(i);
+                ClockConstraint c2 = refinedConstraints.get(j);
+
+                if (constraintClocksMatch(c1, c2)) {
+                    clockConstraintsString.append(getMergedConstraintString(c1, c2)).append("\n");
+                    mergedConstraints.add(i);
+                    mergedConstraints.add(j);
+                }
+            }
+        }
+
+        for (int i = 0; i < refinedConstraints.size(); i++) {
+            if (!mergedConstraints.contains(i)) {
+                clockConstraintsString.append(refinedConstraints.get(i).toString()).append("\n");
+            }
+        }
+
+        // Remove trailing newline
+        clockConstraintsString.setLength(clockConstraintsString.length() - 1);
+
+        return clockConstraintsString.toString();
     }
 
+    /**
+     * Merges two clock constraints into a combined string.
+     * If the two constraints are incompatible, this returns the two individual string representations split by `\n`
+     *
+     * @param c1 first clock constraint
+     * @param c2 second clock constraint
+     * @return string representation of the merged clock constraint if compatible, or the two separate representations otherwise
+     */
     private static String getMergedConstraintString(ClockConstraint c1, ClockConstraint c2) {
         StringBuilder mergedConstraint = new StringBuilder();
 
-        var smallestConstraint = c1.constant < c2.constant ? c1 : c2;
-        var largestConstraint = c1.equals(smallestConstraint) ? c2 : c1;
+        if ((c1.comparator == '<' && c2.comparator == '>') ||
+                (c1.comparator == '>' && c2.comparator == '<')) {
+            var smallestConstraint = c1.comparator == '>' ? c1 : c2;
+            var largestConstraint = c1.equals(smallestConstraint) ? c2 : c1;
 
-        // Left constant
-        mergedConstraint.append(smallestConstraint.constant).append(" ").append(smallestConstraint.comparator).append(smallestConstraint.isStrict ? "= " : " ");
+            // Lower bound
+            mergedConstraint.append(smallestConstraint.constant)
+                    .append(" <")
+                    .append(smallestConstraint.isStrict ? "= " : " ");
 
-        // Clocks
-        mergedConstraint.append(smallestConstraint.clocks.getKey());
-        if (smallestConstraint.clocks.getValue() == null) {
-            mergedConstraint.append(" - ").append(smallestConstraint.clocks.getValue());
+            // Clock relation
+            mergedConstraint.append(smallestConstraint.clocks.getKey());
+            if (smallestConstraint.clocks.getValue() != null) {
+                mergedConstraint.append(" - ").append(smallestConstraint.clocks.getValue());
+            }
+            mergedConstraint.append(" ");
+
+            // Upper bound
+            mergedConstraint.append("<")
+                    .append(largestConstraint.isStrict ? "= " : " ")
+                    .append(largestConstraint.constant);
+
+            return mergedConstraint.toString();
+        } else if (Objects.equals(c1.clocks.getValue(), c2.clocks.getKey()) &&
+                Objects.equals(c1.clocks.getKey(), c2.clocks.getValue())) {
+            if (c1.constant == 0 && c2.constant == 0) {
+                return mergedConstraint.append(c1.clocks.getKey())
+                        .append(" = ")
+                        .append(c1.clocks.getValue()).toString();
+            }
         }
-        mergedConstraint.append(" ");
 
-        // Right constant
-        mergedConstraint.append(largestConstraint.comparator).append(largestConstraint.isStrict ? "= " : " ").append(largestConstraint.constant);
-
-        return mergedConstraint.toString();
+        return mergedConstraint.append(c1).append("\n").append(c2).toString();
     }
 
+    /**
+     * Checks if the tro constraints can be merged
+     *
+     * @param c1 first clock constraint
+     * @param c2 second clock constraint
+     * @return true if the two clock constraints are compatible, false otherwise
+     */
     private static boolean constraintClocksMatch(ClockConstraint c1, ClockConstraint c2) {
-        return (Objects.equals(c1.clocks.getValue(), c2.clocks.getValue()) && Objects.equals(c1.clocks.getKey(), c2.clocks.getKey())) ||
-                (Objects.equals(c1.clocks.getValue(), c2.clocks.getKey()) && Objects.equals(c1.clocks.getKey(), c2.clocks.getValue()));
+        return (Objects.equals(c1.clocks.getValue(), c2.clocks.getValue()) && Objects.equals(c1.clocks.getKey(), c2.clocks.getKey())) || (Objects.equals(c1.clocks.getValue(), c2.clocks.getKey()) && Objects.equals(c1.clocks.getKey(), c2.clocks.getValue()));
     }
 
-    private static ClockConstraint getClockConstraintLine(ObjectProtos.Constraint constraint) {
+    /**
+     * Generates a ClockConstraint object from a ProtoBuf constraint
+     *
+     * @param constraint the ProtoBuf constraint to generate from
+     * @return the generated ClockConstraint
+     */
+    private static ClockConstraint generateClockConstraint(ObjectProtos.Constraint constraint) {
         var clock1 = constraint.getX().getComponentClock().getClockName();
         var clock2 = constraint.getY().getComponentClock().getClockName();
         var constant = constraint.getC();
