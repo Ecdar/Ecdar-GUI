@@ -1,6 +1,5 @@
 package ecdar.controllers;
 
-import EcdarProtoBuf.ObjectProtos;
 import EcdarProtoBuf.QueryProtos;
 import ecdar.Ecdar;
 import ecdar.backend.BackendHelper;
