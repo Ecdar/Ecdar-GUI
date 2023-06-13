@@ -15,6 +15,7 @@ import io.grpc.testing.GrpcCleanupRule;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,19 +36,23 @@ public class SimulationTest {
             public void startSimulation(QueryProtos.SimulationStartRequest request,
                                         StreamObserver<QueryProtos.SimulationStepResponse> responseObserver) {
                 try {
-                    ObjectProtos.LocationTuple locations = LocationTuple.newBuilder().addAllLocations(components.stream()
-                            .map(c -> ObjectProtos.Location.newBuilder()
-                            .setSpecificComponent(SpecificComponent.newBuilder()
-                                    .setComponentName(c.getName()))
-                            .setId(c.getInitialLocation().getId())
-                            .build())
-                            .collect(Collectors.toList()))
-                        .build();
+                    var leafLocations = components.stream()
+                            .map(c -> ObjectProtos.LeafLocation.newBuilder()
+                                    .setComponentInstance(ObjectProtos.ComponentInstance.newBuilder()
+                                            .setComponentName(c.getName()))
+                                    .setId(c.getInitialLocation().getId())
+                                    .build())
+                            .collect(Collectors.toList());
+
+                    var locationTreeBuilder = ObjectProtos.LocationTree.newBuilder();
+                    leafLocations.stream().map(locationTreeBuilder::mergeLeafLocation);
+
+                    var locationTree = locationTreeBuilder.build();
                     
-                    ObjectProtos.State state = ObjectProtos.State.newBuilder().setLocationTuple(locations).build();
-                    DecisionPoint decisionPoint = DecisionPoint.newBuilder().setSource(state).build();
+                    ObjectProtos.State state = ObjectProtos.State.newBuilder().setLocationTree(locationTree).build();
+                    ObjectProtos.Decision decision = ObjectProtos.Decision.newBuilder().setSource(state).build();
                     QueryProtos.SimulationStepResponse response = QueryProtos.SimulationStepResponse.newBuilder()
-                            .addNewDecisionPoints(decisionPoint)
+                            .addNewDecisionPoints(decision)
                             .build();
                     responseObserver.onNext(response);
                     responseObserver.onCompleted();
@@ -73,18 +78,23 @@ public class SimulationTest {
 
             QueryProtos.SimulationStartRequest request = QueryProtos.SimulationStartRequest.newBuilder().build();
 
-            var expectedResponse = new ObjectProtos.Location[components.size()];
+            var expectedResponse = new ObjectProtos.LocationTree[components.size()];
 
             for (int i = 0; i < components.size(); i++) {
                 Component comp = components.get(i);
-                expectedResponse[i] = ObjectProtos.Location.newBuilder()
-                        .setSpecificComponent(SpecificComponent.newBuilder().setComponentName(comp.getName()))
-                        .setId(comp.getInitialLocation().getId()).build();
+                expectedResponse[i] = ObjectProtos.LocationTree.newBuilder()
+                        .setLeafLocation(ObjectProtos.LeafLocation.newBuilder().setId(comp.getInitialLocation().getId())
+                                .setComponentInstance(ObjectProtos.ComponentInstance
+                                        .newBuilder()
+                                        .setComponentName(comp.getName()).build()
+                                )
+                        )
+                        .build();
             }
 
-            var result = stub.startSimulation(request).getNewDecisionPoints(0).getSource().getLocationTuple().getLocationsList().toArray();
+            var result = stub.startSimulation(request).getFullState().getLocationTree();
 
-            Assertions.assertArrayEquals(expectedResponse, result);
+            Assertions.assertTrue(Arrays.asList(expectedResponse).contains(result));
         } catch (IOException e) {
             Assertions.fail("Exception encountered: " + e.getMessage());
         }

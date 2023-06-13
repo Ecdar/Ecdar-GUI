@@ -18,7 +18,7 @@ public class StateFactory {
      * @return the generated state
      */
     public State createState(String composition, QueryProtos.SimulationStepResponse response) {
-        ObjectProtos.State sourceState = response.getNewDecisionPoints(0).getSource();
+        ObjectProtos.State sourceState = response.getFullState();
 
         HashMap<String, String> componentLocationsMap = loadLocations(sourceState.getLocationTree());
 
@@ -37,7 +37,7 @@ public class StateFactory {
      * @return the generated initial state
      */
     public State createInitialState(String composition, QueryProtos.SimulationStepResponse response) {
-        ObjectProtos.State sourceState = response.getNewDecisionPoints(0).getSource();
+        ObjectProtos.State sourceState = response.getFullState();
 
         HashMap<String, String> componentLocationsMap = loadLocations(sourceState.getLocationTree());
         List<Decision> decisions = loadDecisions(composition, response.getNewDecisionPointsList());
