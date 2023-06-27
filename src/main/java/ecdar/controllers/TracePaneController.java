@@ -1,11 +1,13 @@
 package ecdar.controllers;
 
 import com.jfoenix.controls.JFXRippler;
+import com.jfoenix.controls.JFXTooltip;
 import ecdar.abstractions.State;
 import ecdar.presentations.StatePresentation;
 import ecdar.utility.colors.Color;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
@@ -30,6 +32,8 @@ public class TracePaneController implements Initializable {
     public HBox toolbar;
     public Label traceTitle;
     public JFXRippler expandTrace;
+    public JFXRippler restartSimulation;
+    public VBox traceSection;
     public VBox traceList;
     public FontIcon expandTraceIcon;
     public AnchorPane traceSummary;
@@ -39,10 +43,38 @@ public class TracePaneController implements Initializable {
     private final SimpleBooleanProperty isTraceExpanded = new SimpleBooleanProperty(false);
     private ObservableList<StatePresentation> traceLog;
 
+    /**
+     * Keep reference to the traceLogListener, such that it can be removed and added to future logs
+     */
+    private final ListChangeListener<StatePresentation> traceLogListener = c -> {
+        updateSummaryTitle(traceLog.size());
+
+        if (!isTraceExpanded.get()) return;
+        while (c.next()) {
+            c.getRemoved().forEach(statePresentation -> traceList.getChildren().remove(statePresentation));
+            c.getAddedSubList().forEach(this::insertStateInTrace);
+        }
+    };
+
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         initializeToolbar();
         initializeSummaryView();
+
+        isTraceExpanded.addListener((obs, oldVal, newVal) -> {
+            if (newVal) {
+                Platform.runLater(this::showTrace);
+                expandTraceIcon.setIconLiteral("gmi-expand-less");
+            } else {
+                Platform.runLater(this::hideTrace);
+                expandTraceIcon.setIconLiteral("gmi-expand-more");
+            }
+
+            traceSection.setManaged(newVal);
+        });
+
+        Platform.runLater(this::toggleTraceExpand);
     }
 
     /**
@@ -61,6 +93,8 @@ public class TracePaneController implements Initializable {
 
         expandTrace.setMaskType(JFXRippler.RipplerMask.CIRCLE);
         expandTrace.setRipplerFill(color.getTextColor(colorIntensity));
+
+        JFXTooltip.install(restartSimulation, new JFXTooltip("Restart Simulation"));
     }
 
     /**
@@ -103,33 +137,22 @@ public class TracePaneController implements Initializable {
     }
 
     protected void setTraceLog(ObservableList<StatePresentation> traceLog) {
+        if (this.traceLog != null) {
+            // Remove all information from previous simulation run
+            this.traceLog.removeListener(traceLogListener);
+            this.traceLog.clear();
+        };
+
+        this.traceList.getChildren().clear();
         this.traceLog = traceLog;
 
-        this.traceLog.addListener((ListChangeListener<StatePresentation>) c -> {
-            updateSummaryTitle(traceLog.size());
-
-            if (!isTraceExpanded.get()) return;
-            while (c.next()) {
-                c.getRemoved().forEach(statePresentation -> traceList.getChildren().remove(statePresentation));
-                c.getAddedSubList().forEach(this::insertStateInTrace);
-            }
-        });
-
-        isTraceExpanded.addListener((obs, oldVal, newVal) -> {
-            if (newVal) {
-                Platform.runLater(this::showTrace);
-                expandTraceIcon.setIconLiteral("gmi-expand-less");
-                expandTraceIcon.setIconSize(24);
-            } else {
-                Platform.runLater(this::hideTrace);
-                expandTraceIcon.setIconLiteral("gmi-expand-more");
-                expandTraceIcon.setIconSize(24);
-            }
-        });
+        // Add listener to new log
+        this.traceLog.addListener(traceLogListener);
     }
 
     /**
      * Updates the text of the summary title label with the current number of steps in the trace
+     *
      * @param steps The number of steps in the trace
      */
     private void updateSummaryTitle(int steps) {
@@ -151,7 +174,8 @@ public class TracePaneController implements Initializable {
      */
     private void showTrace() {
         root.getChildren().remove(traceSummary);
-        this.traceLog.forEach(this::insertStateInTrace);
+        // After initialization, the log will be null
+        if (this.traceLog != null) this.traceLog.forEach(this::insertStateInTrace);
     }
 
     /**
@@ -160,6 +184,7 @@ public class TracePaneController implements Initializable {
      * @param statePresentation The statePresentation to insert into the trace log
      */
     private void insertStateInTrace(final StatePresentation statePresentation) {
+        // Install mouse event listeners on the state
         EventHandler<? super MouseEvent> mouseEntered = statePresentation.getOnMouseEntered();
         statePresentation.setOnMouseEntered(event -> {
             SimulationController.setSelectedState(statePresentation.getController().getState());
@@ -172,7 +197,7 @@ public class TracePaneController implements Initializable {
             mouseExited.handle(event);
         });
 
-        // Only insert the presentation into the view if the trace is expanded & statePresentation is not null
+        // Only insert the presentation into the view if the trace is expanded
         if (isTraceExpanded.get()) {
             traceList.getChildren().add(0, statePresentation);
         }

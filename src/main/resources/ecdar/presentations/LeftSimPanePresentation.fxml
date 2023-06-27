@@ -3,7 +3,6 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import ecdar.presentations.TracePanePresentation?>
-<?import ecdar.presentations.StatePanePresentation?>
 
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
          xmlns="http://javafx.com/javafx/8.0.76-ea"
@@ -11,15 +10,13 @@
          fx:id="root"
          fx:controller="ecdar.controllers.LeftSimPaneController">
     <AnchorPane>
-        <ScrollPane fx:id="scrollPane"
-                    fitToHeight="true" fitToWidth="true"
+        <ScrollPane fitToHeight="true" fitToWidth="true"
                     AnchorPane.topAnchor="0"
                     AnchorPane.bottomAnchor="0"
                     AnchorPane.leftAnchor="0"
                     AnchorPane.rightAnchor="0"
                     styleClass="edge-to-edge">
-            <VBox fx:id="scrollPaneVbox">
-                <StatePanePresentation fx:id="statePanePresentation"/>
+            <VBox fx:id="content">
                 <TracePanePresentation fx:id="tracePanePresentation"/>
             </VBox>
         </ScrollPane>

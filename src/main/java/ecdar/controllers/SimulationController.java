@@ -1,6 +1,9 @@
 package ecdar.controllers;
 
 import EcdarProtoBuf.QueryProtos;
+import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXDialog;
+import com.jfoenix.controls.JFXDialogLayout;
 import ecdar.Ecdar;
 import ecdar.backend.BackendHelper;
 import ecdar.backend.StateFactory;
@@ -20,6 +23,7 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
@@ -71,11 +75,13 @@ public class SimulationController implements ModeController, Initializable {
     private boolean isMaxZoomInReached = false;
     private boolean isMaxZoomOutReached = false;
 
-    private final EventHandler<MouseEvent> decisionOnMouseEnter = event -> highlighter.highlightDecisionEdges(((DecisionPresentation)event.getTarget()));
+    private final EventHandler<MouseEvent> decisionOnMouseEnter = event -> highlighter.highlightDecisionEdges(((DecisionPresentation) event.getTarget()));
     private final EventHandler<MouseEvent> decisionOnMouseExit = event -> highlighter.unhighlightEdges();
 
     private final ObservableMap<String, ProcessPresentation> componentNameProcessPresentationMap = FXCollections.observableHashMap();
     private final StateFactory stateFactory = new StateFactory();
+
+    private JFXDialog restartSimConfirmDialog;
 
     @Override
     public void initialize(final URL location, final ResourceBundle resources) {
@@ -83,7 +89,32 @@ public class SimulationController implements ModeController, Initializable {
         initializeProcessContainer();
         initializeWindowResizing();
         initializeZoom();
+        initializeRestartSimulationConfirmationDialog();
+
         highlighter = new SimulationHighlighter(componentNameProcessPresentationMap, activeSimulation);
+    }
+
+    private void initializeRestartSimulationConfirmationDialog() {
+        JFXDialogLayout layout = new JFXDialogLayout();
+        layout.setHeading(new Label("Restart Simulation"));
+
+        Label body = new Label("Restarting the simulation will remove all steps in the current trace.\n\nAre you sure you want to restart the simulation?");
+        body.getStyleClass().add("body1");
+        layout.setBody(body);
+
+        restartSimConfirmDialog = new JFXDialog(new StackPane(), layout, JFXDialog.DialogTransition.CENTER);
+        JFXButton confirm = new JFXButton("Yes");
+        confirm.setOnAction((event) -> {
+                restartSimConfirmDialog.close();
+                resetSimulation(getActiveSimulation().composition);
+        });
+
+        JFXButton cancel = new JFXButton("No");
+        cancel.setOnAction((event) -> {
+            restartSimConfirmDialog.close();
+        });
+
+        layout.setActions(cancel, confirm);
     }
 
     /**
@@ -141,7 +172,7 @@ public class SimulationController implements ModeController, Initializable {
     /**
      * Initializes the simulation based on the received proto response and current composition
      *
-     * @param response ProtoBuf response received from a step request
+     * @param response    ProtoBuf response received from a step request
      * @param composition current composition being simulated
      */
     private void initializeActiveSimulation(QueryProtos.SimulationStepResponse response, String composition) {
@@ -157,6 +188,13 @@ public class SimulationController implements ModeController, Initializable {
         });
 
         leftSimPane.getController().setTraceLog(newSimulation.traceLog);
+        Platform.runLater(() -> leftSimPane.getController()
+                .tracePanePresentation.getController()
+                .restartSimulation.setOnMouseClicked((event) -> {
+                    event.consume();
+                    restartSimConfirmDialog.show(Ecdar.getPresentation());
+                }));
+
         rightSimPane.getController().setDecisionsList(
                 initialState.getDecisions().stream()
                         .map(DecisionPresentation::new)
@@ -329,7 +367,7 @@ public class SimulationController implements ModeController, Initializable {
     }
 
     public static void setSelectedState(State selectedState) {
-        SimulationController.selectedState.set(selectedState); // ToDo NIELS: Handle selection
+        SimulationController.selectedState.set(selectedState);
     }
 
     public static String getComposition() {

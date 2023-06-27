@@ -199,14 +199,6 @@ public class StatePaneController implements Initializable {
     }
 
     /**
-     * Restart simulation to the initial step.
-     */
-    @FXML
-    private void restartSimulation() {
-        return;
-    } // ToDo NIELS: Use simulation controller
-
-    /**
      * Sanitizes the input that the user inserts into the delay textfield.
      * Checks if the text can be converted into a BigDecimal otherwise show the previous value.
      * For example avoids users entering letters.

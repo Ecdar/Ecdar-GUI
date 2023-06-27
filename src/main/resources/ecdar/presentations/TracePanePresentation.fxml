@@ -16,8 +16,7 @@
         </padding>
         <JFXRippler fx:id="expandTrace">
             <StackPane styleClass="responsive-icon-stack-pane-sizing" onMouseClicked="#toggleTraceExpand">
-                <FontIcon fx:id="expandTraceIcon" iconLiteral="gmi-add" styleClass="icon-size-medium"
-                          fill="white"/>
+                <FontIcon fx:id="expandTraceIcon" iconLiteral="gmi-expand-more" styleClass="icon-size-medium" fill="white"/>
             </StackPane>
         </JFXRippler>
 
@@ -26,11 +25,13 @@
         <Label fx:id="traceTitle" styleClass="title" text="Trace"/>
 
         <Region HBox.hgrow="ALWAYS"/>
-    </HBox>
 
-    <VBox fx:id="traceList">
-        <!-- Trace goes here -->
-    </VBox>
+        <JFXRippler fx:id="restartSimulation">
+            <StackPane styleClass="responsive-icon-stack-pane-sizing">
+                <FontIcon iconLiteral="gmi-refresh" styleClass="icon-size-medium" fill="white"/>
+            </StackPane>
+        </JFXRippler>
+    </HBox>
 
     <AnchorPane fx:id="traceSummary" minHeight="56" maxHeight="56" onMouseClicked="#toggleTraceExpand">
         <VBox AnchorPane.leftAnchor="8"
@@ -46,6 +47,20 @@
                    styleClass="caption"/>
         </VBox>
     </AnchorPane>
+
+    <VBox fx:id="traceSection" managed="false">
+        <ScrollPane fitToHeight="true" fitToWidth="true"
+                    AnchorPane.topAnchor="0"
+                    AnchorPane.bottomAnchor="0"
+                    AnchorPane.leftAnchor="0"
+                    AnchorPane.rightAnchor="0"
+                    styleClass="edge-to-edge">
+            <VBox fx:id="traceList">
+                <!-- Trace goes here -->
+            </VBox>
+        </ScrollPane>
+    </VBox>
+
     <padding>
         <Insets bottom="25"/>
     </padding>
