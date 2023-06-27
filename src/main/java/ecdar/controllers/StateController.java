@@ -14,9 +14,8 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 /**
- * The controller class for the transition view element.
- * It represents a single transition and may be used by classes like {@see StatePaneController}
- * to show a list of transitions
+ * The controller class for the state view element.
+ * It represents a single state within the trace of the simulation
  */
 public class StateController implements Initializable {
     public AnchorPane root;

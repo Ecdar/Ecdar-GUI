@@ -14,9 +14,8 @@ import javafx.util.Duration;
 import java.util.function.BiConsumer;
 
 /**
- * The presentation class for a transition view element.
- * It represents a single transition and may be used by classes like {@see StatePaneController}
- * to show a list of transitions
+ * The presentation class for a state view element.
+ * It represents a single state within the trace of the simulation
  */
 public class StatePresentation extends AnchorPane {
     private final StateController controller;
