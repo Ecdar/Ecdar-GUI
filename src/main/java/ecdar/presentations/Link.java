@@ -1,9 +1,8 @@
 package ecdar.presentations;
 
 import ecdar.Debug;
-import ecdar.abstractions.EdgeStatus;
-import ecdar.utility.colors.Color;
 import ecdar.utility.Highlightable;
+import ecdar.utility.colors.Color;
 import ecdar.utility.helpers.SelectHelper;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -156,5 +155,10 @@ public class Link extends Group implements SelectHelper.Selectable, Highlightabl
     @Override
     public void unhighlight() {
         shownLine.setStroke(Color.GREY.getColor(Color.Intensity.I900));
+    }
+
+    @Override
+    public void highlightPurple() {
+        shownLine.setStroke(Color.DEEP_PURPLE.getColor(Color.Intensity.I900));
     }
 }

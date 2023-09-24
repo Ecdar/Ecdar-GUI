@@ -7,6 +7,7 @@ import ecdar.backend.*;
 import ecdar.controllers.QueryController;
 import ecdar.controllers.EcdarController;
 import ecdar.utility.colors.Color;
+import ecdar.utility.helpers.StringHelper;
 import ecdar.utility.helpers.StringValidator;
 import javafx.application.Platform;
 import javafx.beans.binding.When;
@@ -17,6 +18,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
+import javafx.geometry.Point2D;
 import org.kordamp.ikonli.javafx.FontIcon;
 import org.kordamp.ikonli.material.Material;
 
@@ -67,9 +69,9 @@ public class QueryPresentation extends HBox {
             controller.getQuery().commentProperty().bind(commentTextField.textProperty());
 
 
-            queryTextField.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler(keyEvent -> {
+            queryTextField.setOnKeyPressed(Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler(keyEvent -> {
                 Platform.runLater(() -> {
-                    if (keyEvent.getCode().equals(KeyCode.ENTER)) {
+                    if (keyEvent.getCode().equals(KeyCode.ENTER) && controller.getQuery().getType() != null) {
                         runQuery();
                     }
                 });
@@ -83,7 +85,7 @@ public class QueryPresentation extends HBox {
                 }
             });
 
-            commentTextField.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
+            commentTextField.setOnKeyPressed(Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
         });
     }
 
@@ -192,7 +194,11 @@ public class QueryPresentation extends HBox {
                     } else {
                         this.tooltip.setText("The component has been created (can be accessed in the project pane)");
                     }
-                } else if (queryState.getStatusCode() == 3) {
+                }
+                else if (queryState.getStatusCode() == 2){
+                    this.tooltip.setText("This query was not a success: " + controller.getQuery().getCurrentErrors());
+                }
+                else if (queryState.getStatusCode() == 3) {
                     this.tooltip.setText("The query has not been executed yet");
                 } else {
                     this.tooltip.setText(controller.getQuery().getCurrentErrors());
@@ -248,9 +254,10 @@ public class QueryPresentation extends HBox {
 
             statusIcon.setOnMouseClicked(event -> {
                 if (controller.getQuery().getQuery().isEmpty()) return;
-                
+
                 Label label = new Label(tooltip.getText());
-                JFXDialog dialog = new InformationDialogPresentation("Result from query: " + controller.getQuery().getQuery(), label);
+
+                JFXDialog dialog = new InformationDialogPresentation("Result from query: " + StringHelper.ConvertSymbolsToUnicode(controller.getQuery().getQuery()), label);
                 dialog.show(Ecdar.getPresentation());
             });
         });
@@ -274,7 +281,6 @@ public class QueryPresentation extends HBox {
             controller.queryTypeExpand.setRipplerFill(Color.GREY_BLUE.getColor(Color.Intensity.I500));
 
             final DropDownMenu queryTypeDropDown = new DropDownMenu(controller.queryTypeExpand);
-
             queryTypeDropDown.addListElement("Query Type");
             QueryType[] queryTypes = QueryType.values();
             for (QueryType type : queryTypes) {
@@ -283,7 +289,20 @@ public class QueryPresentation extends HBox {
 
             controller.queryTypeExpand.setOnMousePressed((e) -> {
                 e.consume();
-                queryTypeDropDown.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT, 16, 16);
+                //height of app window
+                double windowHeight = this.getScene().getHeight();
+                //Location of dropdown relative to the app window
+                Point2D Origin = this.localToScene(this.getWidth(), this.getHeight());
+                //Generate the popups properties before displaying
+                queryTypeDropDown.show(this);
+                //Check if the dropdown can fit the app window.
+                if(Origin.getY()+queryTypeDropDown.getHeight() >= windowHeight){
+                    queryTypeDropDown.show(JFXPopup.PopupVPosition.BOTTOM, JFXPopup.PopupHPosition.RIGHT, -55,-(Origin.getY()-windowHeight)-50);
+                }
+                else{
+                    queryTypeDropDown.show(JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.RIGHT, 16, 16);
+                }
+
             });
 
             controller.queryTypeSymbol.setText(controller.getQuery() != null && controller.getQuery().getType() != null ? controller.getQuery().getType().getSymbol() : "---");

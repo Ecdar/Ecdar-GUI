@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<?import com.jfoenix.controls.JFXRippler?>
+<?import javafx.scene.text.Text?>
+<fx:root xmlns="http://javafx.com/javafx"
+         xmlns:fx="http://javafx.com/fxml"
+         fx:controller="ecdar.controllers.DecisionController"
+         type="AnchorPane">
+    <JFXRippler fx:id="rippler" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+        <VBox spacing="10">
+            <padding>
+                <Insets topRightBottomLeft="10"/>
+            </padding>
+            <HBox alignment="BASELINE_LEFT">
+                <Text text="Action: " styleClass="subhead" style="-fx-stroke-width: 1.2em"/>
+                <Label fx:id="action" styleClass="body1" wrapText="true"/>
+            </HBox>
+            <Text text="Clock Constraints" styleClass="subhead" style="-fx-stroke-width: 1.2em"/>
+            <HBox>
+                <Region minWidth="10" maxWidth="10"/>
+                <Label fx:id="clockConstraints" styleClass="body1" wrapText="true"/>
+            </HBox>
+        </VBox>
+    </JFXRippler>
+    <StackPane prefHeight="1" style="-fx-background-color:-grey-300;" AnchorPane.rightAnchor="0"
+               AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" minHeight="1" maxHeight="1"/>
+</fx:root>

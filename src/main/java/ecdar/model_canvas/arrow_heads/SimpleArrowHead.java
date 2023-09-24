@@ -91,6 +91,12 @@ public class SimpleArrowHead extends ArrowHead implements SelectHelper.Selectabl
         rightArrow.setStroke(SelectHelper.getNormalColor());
     }
 
+    @Override
+    public void highlightPurple() {
+        leftArrow.setStroke(Color.DEEP_PURPLE.getColor(Color.Intensity.I900));
+        rightArrow.setStroke(Color.DEEP_PURPLE.getColor(Color.Intensity.I900));
+    }
+
     /***
      * Removes the highlight by setting the stroke to grey
      */

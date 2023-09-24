@@ -94,7 +94,10 @@
                     <Region prefHeight="5"/>
                 </VBox>
             </StackPane>
-            <JFXRadioButton fx:id="defaultEngineRadioButton" styleClass="subhead">Default</JFXRadioButton>
+            <HBox spacing="20">
+                <JFXRadioButton fx:id="defaultEngineRadioButton" styleClass="subhead">Default</JFXRadioButton>
+                <JFXCheckBox fx:id="threadSafeEngineCheckBox" styleClass="subhead">Thread Safe</JFXCheckBox>
+            </HBox>
         </VBox>
     </HBox>
 </fx:root>

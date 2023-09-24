@@ -40,12 +40,10 @@ public class Edge extends DisplayableEdge implements Serializable {
             setId();
         }
 
-        bindReachabilityAnalysis();
     }
 
     public Edge(final JsonObject jsonObject, final Component component) {
         deserialize(jsonObject, component);
-        bindReachabilityAnalysis();
     }
 
     public String getSync() {
@@ -68,12 +66,27 @@ public class Edge extends DisplayableEdge implements Serializable {
         return sync.get() + (ioStatus.get().equals(EdgeStatus.INPUT) ? "?" : "!");
     }
 
-    public String getGroup(){
+    public String getGroup() {
         return group.get();
     }
 
     public void setGroup(final String string){
         group.set(string);
+    }
+
+    @Override
+    public boolean getFailing() {
+        return this.failing.get();
+    }
+
+    @Override
+    public void setFailing(boolean bool) {
+        this.failing.set(bool);
+    }
+
+    @Override
+    public BooleanProperty failingProperty() {
+        return this.failing;
     }
 
     /**
@@ -192,10 +205,17 @@ public class Edge extends DisplayableEdge implements Serializable {
         }
 
         ioStatus = new SimpleObjectProperty<>(EdgeStatus.valueOf(json.getAsJsonPrimitive(STATUS).getAsString()));
-
         final JsonPrimitive IDJson = json.getAsJsonPrimitive(ID);
-        if (IDJson != null) setId(IDJson.getAsString());
-        else setId();
+        /* The new type of edge ids is a UUID, which has a length of 36 characters.
+         * The if statement checks if the id is a UUID and if not, it creates a new UUID.
+         * This is necessary because the old type of edge ids were not unique and has to be replaced in old projects.
+         * It should be possible to simplify this in the future when all projects are updated.
+        */
+        int UUIDLength = 36;
+        if (IDJson != null && IDJson.getAsString().length() == UUIDLength)
+            setId(IDJson.getAsString());
+        else
+            setId();
 
         final JsonPrimitive groupJson = json.getAsJsonPrimitive(GROUP);
 
@@ -221,15 +241,6 @@ public class Edge extends DisplayableEdge implements Serializable {
                 addNail(newNail);
             });
         }
-    }
-
-    private void bindReachabilityAnalysis() {
-        // If there is no EcdarPresentation, we are running tests and EcdarController calls will fail
-        if (Ecdar.getPresentation() == null) return;
-        selectProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
-        guardProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
-        syncProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
-        updateProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
     }
 
     /**

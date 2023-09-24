@@ -4,6 +4,7 @@ import ecdar.abstractions.EcdarSystem;
 import ecdar.abstractions.SystemRoot;
 import ecdar.controllers.SystemRootController;
 import ecdar.utility.Highlightable;
+import ecdar.utility.colors.Color;
 import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.ItemDragHelper;
 import ecdar.utility.helpers.SelectHelper;
@@ -139,5 +140,10 @@ public class SystemRootPresentation extends StackPane implements Highlightable {
     @Override
     public void unhighlight() {
         dyeFromSystemColor();
+    }
+
+    @Override
+    public void highlightPurple() {
+        dye(new EnabledColor(Color.DEEP_PURPLE, SelectHelper.SELECT_COLOR_INTENSITY_NORMAL));
     }
 }

@@ -4,8 +4,6 @@ import ecdar.Ecdar;
 import ecdar.abstractions.HighLevelModel;
 import ecdar.controllers.FileController;
 import javafx.application.Platform;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
 import javafx.scene.layout.*;
 
 public class FilePresentation extends AnchorPane {

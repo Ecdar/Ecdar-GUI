@@ -2,6 +2,7 @@ package ecdar.presentations;
 
 import com.jfoenix.controls.JFXRippler;
 import com.jfoenix.skins.ValidationPane;
+import ecdar.Ecdar;
 import ecdar.controllers.CanvasController;
 import ecdar.controllers.EcdarController;
 import ecdar.utility.colors.Color;
@@ -36,7 +37,7 @@ public class CanvasPresentation extends StackPane implements LocationAware {
         mouseTracker = new MouseTracker(this);
         mouseTracker.registerOnMousePressedEventHandler(this::startDragSelect);
 
-        getController().root.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> EcdarController.setActiveCanvasPresentation(this));
+        getController().root.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> Ecdar.getPresentation().getController().getEditorPresentation().getController().setActiveCanvasPresentation(this));
 
         initializeModelDrag();
         initializeToolbar();

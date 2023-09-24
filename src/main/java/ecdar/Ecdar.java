@@ -4,7 +4,6 @@ import ecdar.abstractions.*;
 import ecdar.backend.BackendException;
 import ecdar.backend.BackendHelper;
 import ecdar.code_analysis.CodeAnalysis;
-import ecdar.controllers.EcdarController;
 import ecdar.issues.ExitStatusCodes;
 import ecdar.presentations.*;
 import ecdar.utility.keyboard.Keybind;
@@ -135,8 +134,8 @@ public class Ecdar extends Application {
         presentation.showHelp();
     }
 
-    public static BooleanProperty toggleFilePane() {
-        return presentation.toggleFilePane();
+    public static BooleanProperty toggleLeftPane() {
+        return presentation.toggleLeftPane();
     }
 
     /**
@@ -163,7 +162,7 @@ public class Ecdar extends Application {
     }
 
     public static BooleanProperty toggleQueryPane() {
-        return presentation.toggleQueryPane();
+        return presentation.toggleRightPane();
     }
 
     public static BooleanProperty isSplitProperty() {
@@ -256,8 +255,6 @@ public class Ecdar extends Application {
         // We're now ready! Let the curtains fall!
         stage.show();
 
-        EcdarController.reachabilityServiceEnabled = true;
-
         // Register a key-bind for showing debug-information
         KeyboardTracker.registerKeybind("DEBUG", new Keybind(new KeyCodeCombination(KeyCode.F12), () -> {
             // Toggle the debug mode for the debug class (will update misc. debug variables which presentations bind to)
@@ -311,7 +308,7 @@ public class Ecdar extends Application {
             }
         });
 
-        project = presentation.getController().projectPane.getController().project;
+        project = presentation.getController().getEditorPresentation().getController().projectPane.getController().project;
     }
 
     private void loadFonts() {
@@ -378,22 +375,10 @@ public class Ecdar extends Application {
 
         // If we found a component set that as active
         serializationDone = true;
-
-        // Update reachability check timer when components change
-        getProject().getComponents().addListener((ListChangeListener<Component>) c -> {
-            while (c.next()) {
-                c.getAddedSubList().forEach(component -> {
-                    component.getLocations().addListener((ListChangeListener<? super Location>) loc -> EcdarController.runReachabilityAnalysis());
-                    component.getDisplayableEdges().addListener((ListChangeListener<? super DisplayableEdge>) de -> EcdarController.runReachabilityAnalysis());
-                    component.declarationsTextProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
-                    component.includeInPeriodicCheckProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
-                });
-            }
-        });
     }
 
     public static ComponentPresentation getComponentPresentationOfComponent(Component component) {
-        return getPresentation().getController().projectPane.getController().getComponentPresentations().stream().filter(componentPresentation -> componentPresentation.getController().getComponent().equals(component)).findFirst().orElse(null);
+        return getPresentation().getController().getEditorPresentation().getController().projectPane.getController().getComponentPresentations().stream().filter(componentPresentation -> componentPresentation.getController().getComponent().equals(component)).findFirst().orElse(null);
     }
 
     private static String getVersion() {

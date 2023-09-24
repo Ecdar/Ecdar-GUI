@@ -1,6 +1,5 @@
 package ecdar.abstractions;
 
-import ecdar.Ecdar;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -8,6 +7,7 @@ import javafx.collections.ObservableList;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class GroupedEdge extends DisplayableEdge {
     private final ObservableList<Edge> edges = FXCollections.observableList(new ArrayList<>());
@@ -54,7 +54,7 @@ public class GroupedEdge extends DisplayableEdge {
         setGuard(edge.getGuard());
         setUpdate(edge.getUpdate());
         setColor(edge.getColor());
-        setIsHighlighted(edge.getIsHighlighted());
+        setIsHighlighted(edge.isHighlighted());
         setIsLocked(edge.getIsLockedProperty().getValue());
         setStatus(edge.getStatus());
     }
@@ -89,12 +89,7 @@ public class GroupedEdge extends DisplayableEdge {
      * Generate and sets a unique id for this location
      */
     protected void setId() {
-        for(int counter = 0; ; counter++) {
-            if(!Ecdar.getProject().getEdgeIds().contains(String.valueOf(counter))){
-                id.set(Edge.EDGE_GROUP + counter);
-                return;
-            }
-        }
+        id.set(UUID.randomUUID().toString());
     }
 
     /**
@@ -120,7 +115,7 @@ public class GroupedEdge extends DisplayableEdge {
         edge.guardProperty().bind(this.guardProperty());
         edge.updateProperty().bind(this.updateProperty());
         edge.colorProperty().bind(this.colorProperty());
-        edge.setIsHighlighted(this.getIsHighlighted());
+        edge.setIsHighlighted(this.isHighlighted());
         edge.getIsLockedProperty().bind(this.getIsLockedProperty());
         edge.setGroup(this.getId());
         edge.makeSyncNailBetweenLocations();
@@ -164,6 +159,21 @@ public class GroupedEdge extends DisplayableEdge {
             updateProperty().unbind();
             setUpdate(newProperty.get(0));
         }
+    }
+
+    @Override
+    public void setFailing(boolean bool) {
+        this.failing.set(bool);
+    }
+
+    @Override
+    public boolean getFailing() {
+        return this.failing.get();
+    }
+
+    @Override
+    public BooleanProperty failingProperty() {
+        return this.failing;
     }
 
     public List<StringProperty> getSyncProperties() {

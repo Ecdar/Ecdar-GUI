@@ -7,4 +7,7 @@ package ecdar.utility;
 public interface Highlightable {
     public void highlight();
     public void unhighlight();
+    default void highlightPurple(){
+        highlight();
+    }
 }

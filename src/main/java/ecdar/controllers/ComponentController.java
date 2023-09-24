@@ -224,11 +224,45 @@ public class ComponentController extends ModelController implements Initializabl
         getComponent().getInputStrings().forEach((channel) -> insertSignatureArrow(channel, EdgeStatus.INPUT));
     }
 
-    /***
+
+    /**
      * Initialize the listeners, that listen for changes in the input and output edges of the presented component.
      * The view is updated whenever an insert (deletions are also a type of insert) is reported
      */
     private void initializeSignatureListeners() {
+        getComponent().getIsFailingProperty().addListener((observable, oldValue, newValue) -> {
+            if (getComponent().getIsFailing()) {
+                for (Node n : inputSignatureContainer.getChildren()) {
+                    if (n instanceof SignatureArrow) {
+                        for (String label : component.get().getFailingIOStrings()) {
+                            if (Objects.equals(((SignatureArrow) n).getSignatureArrowLabel(), label)) {
+                                ((SignatureArrow) n).recolorToRed();
+                            }
+                        }
+                    }
+                }
+                for (Node n : outputSignatureContainer.getChildren()) {
+                    if (n instanceof SignatureArrow) {
+                        for (String label : component.get().getFailingIOStrings()) {
+                            if (Objects.equals(((SignatureArrow) n).getSignatureArrowLabel(), label)) {
+                                ((SignatureArrow) n).recolorToRed();
+                            }
+                        }
+                    }
+                }
+            } else {
+                for (Node n : inputSignatureContainer.getChildren()) {
+                    if (n instanceof SignatureArrow) {
+                        ((SignatureArrow) n).recolorToGray();
+                    }
+                }
+                for (Node n : outputSignatureContainer.getChildren()) {
+                    if (n instanceof SignatureArrow) {
+                        ((SignatureArrow) n).recolorToGray();
+                    }
+                }
+            }
+        });
         getComponent().getOutputStrings().addListener((ListChangeListener<String>) c -> {
             // By clearing the container we don't have to fiddle with which elements are removed and added
             outputSignatureContainer.getChildren().clear();
@@ -243,6 +277,20 @@ public class ComponentController extends ModelController implements Initializabl
                 c.getAddedSubList().forEach((channel) -> insertSignatureArrow(channel, EdgeStatus.INPUT));
             }
         });
+    }
+
+    /***
+     * Finds the max height of the input/output signature container and the component
+     * @return a double of the largest height
+     */
+    private double findMaxHeight() {
+        double inputHeight = inputSignatureContainer.getHeight();
+        double outputHeight = outputSignatureContainer.getHeight();
+        double componentHeight = component.get().getBox().getHeight();
+
+        double maxSignatureHeight = Math.max(outputHeight, inputHeight);
+
+        return Math.max(maxSignatureHeight, componentHeight);
     }
 
     private void initializeNoIncomingEdgesWarning() {
@@ -505,7 +553,7 @@ public class ComponentController extends ModelController implements Initializabl
 
     private void initializeLocationHandling() {
         final ListChangeListener<Location> locationListChangeListener = c -> {
-            if (c.next()) {
+            while (c.next()) {
                 // Locations are added to the component
                 c.getAddedSubList().forEach((loc) -> {
                     // Check related to undo/redo stack
@@ -548,7 +596,7 @@ public class ComponentController extends ModelController implements Initializabl
 
         // React on addition of edges to the component
         getComponent().getDisplayableEdges().addListener((ListChangeListener<DisplayableEdge>) c -> {
-            if (c.next()) {
+            while (c.next()) {
                 // Edges are added to the component
                 c.getAddedSubList().forEach(handleAddedEdge);
 
@@ -746,7 +794,7 @@ public class ComponentController extends ModelController implements Initializabl
      */
     @FXML
     private void modelContainerPressed(final MouseEvent event) {
-        EcdarController.getActiveCanvasPresentation().getController().leaveTextAreas();
+        Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasPresentation().getController().leaveTextAreas();
         final DisplayableEdge unfinishedEdge = getComponent().getUnfinishedEdge();
 
         dropdownCoordinatesInComponent = new Point2D(event.getX(), event.getY());

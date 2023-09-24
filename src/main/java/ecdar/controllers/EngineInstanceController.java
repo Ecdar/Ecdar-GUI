@@ -52,6 +52,7 @@ public class EngineInstanceController implements Initializable {
     public JFXTextField portRangeStart;
     public JFXTextField portRangeEnd;
     public RadioButton defaultEngineRadioButton;
+    public JFXCheckBox threadSafeEngineCheckBox;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -93,6 +94,7 @@ public class EngineInstanceController implements Initializable {
         this.engineName.setText(instance.getName());
         this.isLocal.setSelected(instance.isLocal());
         this.defaultEngineRadioButton.setSelected(instance.isDefault());
+        this.threadSafeEngineCheckBox.setSelected(instance.isThreadSafe());
 
         // Check if the path or the address should be used
         if (isLocal.isSelected()) {
@@ -113,6 +115,7 @@ public class EngineInstanceController implements Initializable {
         engine.setName(engineName.getText());
         engine.setLocal(isLocal.isSelected());
         engine.setDefault(defaultEngineRadioButton.isSelected());
+        engine.setIsThreadSafe(threadSafeEngineCheckBox.isSelected());
         engine.setEngineLocation(isLocal.isSelected() ? pathToEngine.getText() : address.getText());
         engine.setPortStart(Integer.parseInt(portRangeStart.getText()));
         engine.setPortEnd(Integer.parseInt(portRangeEnd.getText()));

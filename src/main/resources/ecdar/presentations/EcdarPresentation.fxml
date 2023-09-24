@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import ecdar.Ecdar?>
+<?import ecdar.presentations.*?>
+<?import ecdar.simulation.presentations.*?>
 <?import com.jfoenix.controls.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.ImageView?>
@@ -7,8 +10,6 @@
 <?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Text?>
 <?import org.kordamp.ikonli.javafx.*?>
-<?import ecdar.presentations.*?>
-<?import ecdar.Ecdar?>
 <?import javafx.scene.text.TextFlow?>
 <?import javafx.geometry.Insets?>
 <fx:root xmlns:fx="http://javafx.com/fxml/1"
@@ -18,90 +19,17 @@
          fx:controller="ecdar.controllers.EcdarController">
     <BorderPane fx:id="borderPane">
         <center>
-            <VBox alignment="TOP_CENTER">
-                <!-- Max height is set to -Infinity to avoid toolbar from intercepting all mouse events on the canvas -->
-                <VBox maxHeight="-Infinity">
-                    <HBox fx:id="toolbar" HBox.hgrow="ALWAYS">
-                        <padding>
-                            <Insets topRightBottomLeft="10"/>
-                        </padding>
-                        <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
-                            <!-- UNDO -->
-                            <JFXRippler fx:id="undo">
-                                <StackPane styleClass="responsive-icon-stack-pane-sizing"
-                                           onMouseClicked="#undoClicked">
-                                    <FontIcon iconLiteral="gmi-undo" fill="white" styleClass="icon-size-medium"/>
-                                </StackPane>
-                            </JFXRippler>
-
-                            <Region minWidth="8"/>
-
-                            <!-- REDO -->
-                            <JFXRippler fx:id="redo">
-                                <StackPane styleClass="responsive-icon-stack-pane-sizing"
-                                           onMouseClicked="#redoClicked">
-                                    <FontIcon iconLiteral="gmi-redo" fill="white" styleClass="icon-size-medium"/>
-                                </StackPane>
-                            </JFXRippler>
-
-                            <Region minWidth="16"/>
-
-                            <!-- Switch between input and output edges -->
-                            <HBox alignment="CENTER" spacing="-5" style="-fx-padding: -1em 0em -1em 0em;">
-                                <JFXButton fx:id="switchToInputButton" text="Input" textFill="white"
-                                           onMouseClicked="#switchToInputClicked"
-                                           styleClass="button" style="-fx-padding: 0.5em 1em 0.5em 1em"/>
-                                <JFXToggleButton fx:id="switchEdgeStatusButton"
-                                                 onMouseClicked="#switchEdgeStatusClicked"
-                                                 styleClass="toggle-button"/>
-                                <JFXButton fx:id="switchToOutputButton" text="Output" textFill="grey"
-                                           onMouseClicked="#switchToOutputClicked"
-                                           styleClass="button" style="-fx-padding: 0.5em 1em 0.5em 1em"/>
-                            </HBox>
-                        </HBox>
-                        <HBox alignment="CENTER_RIGHT">
-                            <!-- DELETE SELECTED -->
-                            <JFXRippler fx:id="deleteSelected">
-                                <StackPane styleClass="responsive-icon-stack-pane-sizing"
-                                           onMouseClicked="#deleteSelectedClicked">
-                                    <FontIcon iconLiteral="gmi-delete" fill="white" styleClass="icon-size-medium"/>
-                                </StackPane>
-                            </JFXRippler>
-
-                            <Region minWidth="8"/>
-
-                            <!-- COLOR SELECTED -->
-                            <JFXRippler fx:id="colorSelected">
-                                <StackPane styleClass="responsive-icon-stack-pane-sizing">
-                                    <FontIcon iconLiteral="gmi-color-lens" fill="white"
-                                              styleClass="icon-size-medium"/>
-                                </StackPane>
-                            </JFXRippler>
-                        </HBox>
-                    </HBox>
-                </VBox>
-                <StackPane fx:id="canvasPane" HBox.hgrow="NEVER" VBox.vgrow="NEVER">
-                    <!-- Canvases go here -->
-                </StackPane>
-            </VBox>
+            <!-- Editor or Simulator presentations go here -->
         </center>
 
         <!-- File pane -->
         <left>
-            <StackPane fx:id="leftPane" alignment="TOP_LEFT">
-                <ProjectPanePresentation
-                        fx:id="projectPane"
-                        StackPane.alignment="TOP_LEFT"/>
-            </StackPane>
+            <StackPane fx:id="leftPane" alignment="TOP_LEFT"/>
         </left>
 
         <!-- Query pane -->
         <right>
-            <StackPane fx:id="rightPane" alignment="TOP_RIGHT">
-                <QueryPanePresentation
-                        fx:id="queryPane"
-                        StackPane.alignment="TOP_RIGHT"/>
-            </StackPane>
+            <StackPane fx:id="rightPane" alignment="TOP_RIGHT"/>
         </right>
 
         <!-- Message container -->
@@ -194,7 +122,7 @@
                     </Menu>
 
                     <Menu text="View">
-                        <MenuItem fx:id="menuBarViewFilePanel" text="Project Panel">
+                        <MenuItem fx:id="menuBarViewProjectPanel" text="Project Panel">
                             <graphic>
                                 <FontIcon iconLiteral="gmi-check" fill="black" styleClass="icon-size-medium"/>
                             </graphic>
@@ -204,7 +132,8 @@
                                 <FontIcon iconLiteral="gmi-check" fill="black" styleClass="icon-size-medium"/>
                             </graphic>
                         </MenuItem>
-                        <MenuItem fx:id="menuBarAutoscaling" text="Autoscaling">
+
+                        <MenuItem fx:id="menuBarViewAutoscaling" text="Autoscaling">
                             <graphic>
                                 <FontIcon iconLiteral="gmi-check" fill="black" styleClass="icon-size-medium"/>
                             </graphic>
@@ -242,6 +171,19 @@
                         <MenuItem fx:id="menuBarViewCanvasSplit" text="Split canvas">
                             <graphic>
                                 <FontIcon iconLiteral="gmi-border-all" fill="black" styleClass="icon-size-medium"/>
+                            </graphic>
+                        </MenuItem>
+
+                        <MenuItem fx:id="menuBarViewEditor" text="Editor">
+                            <graphic>
+                                <FontIcon iconLiteral="gmi-edit" fill="black" styleClass="icon-size-medium"/>
+                            </graphic>
+                        </MenuItem>
+
+                        <MenuItem fx:id="menuBarViewSimulator" text="Simulator">
+                            <graphic>
+                                <FontIcon iconLiteral="gmi-play-circle-filled" fill="black"
+                                          styleClass="icon-size-medium"/>
                             </graphic>
                         </MenuItem>
                     </Menu>
@@ -291,8 +233,21 @@
         </top>
     </BorderPane>
 
-    <!-- Message container -->
-    <MessageTabPanePresentation fx:id="messageTabPane" StackPane.alignment="BOTTOM_CENTER"/>
+    <StackPane StackPane.alignment="TOP_CENTER" styleClass="editor-simulator-toggle">
+        <padding>
+            <Insets top="-32" bottom="-32"/>
+        </padding>
+        <JFXToggleButton fx:id="switchGuiView" styleClass="large-toggle-button"/>
+        <HBox HBox.hgrow="NEVER" alignment="CENTER" disable="true">
+            <StackPane styleClass="responsive-icon-stack-pane-sizing">
+                <FontIcon iconLiteral="gmi-edit" fill="white" styleClass="icon-size-medium"/>
+            </StackPane>
+            <StackPane styleClass="responsive-icon-stack-pane-sizing">
+                <FontIcon iconLiteral="gmi-play-circle-filled" fill="white" styleClass="icon-size-medium"/>
+            </StackPane>
+        </HBox>
+    </StackPane>
+
 
     <!-- Status container -->
     <HBox minHeight="20" maxHeight="20" StackPane.alignment="BOTTOM_CENTER"
@@ -351,8 +306,8 @@
     </StackPane>
 
     <!-- Modelling help dialog -->
-    <StackPane fx:id="dialogContainer" style="-fx-background-color: #0000007F;" visible="false">
-        <JFXDialog fx:id="dialog">
+    <StackPane fx:id="modellingHelpDialogContainer" style="-fx-background-color: #0000007F;" visible="false">
+        <JFXDialog fx:id="modellingHelpDialog">
             <VBox>
                 <!-- Scale dialog -->
                 <Region minWidth="400"/>
@@ -533,5 +488,10 @@
     <!-- Engines Dialog -->
     <StackPane fx:id="engineOptionsDialogContainer" style="-fx-background-color: #0000007F;" mouseTransparent="true">
         <EngineOptionsDialogPresentation fx:id="engineOptionsDialog"/>
+    </StackPane>
+
+    <!-- Simulation initialization Dialog -->
+    <StackPane fx:id="simulationInitializationDialogContainer" style="-fx-background-color: #0000007F;" mouseTransparent="true">
+        <SimulationInitializationDialogPresentation fx:id="simulationInitializationDialog"/>
     </StackPane>
 </fx:root>

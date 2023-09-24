@@ -22,7 +22,6 @@ public class SignatureArrowController {
     private final ObjectProperty<Component> component = new SimpleObjectProperty<>();
     private final ObjectProperty<EdgeStatus> edgeStatus = new SimpleObjectProperty<>();
     private final StringProperty syncText = new SimpleStringProperty();
-
     public Label signatureArrowLabel;
     public Path signatureArrowPath;
     public Path signatureArrowHeadPath;
@@ -32,7 +31,6 @@ public class SignatureArrowController {
     public void initialize(final URL location, final ResourceBundle resources) {
 
     }
-
     /***
      * Finds matching edges and highlights them
      */

@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class MessageCollectionController implements Initializable {
@@ -93,8 +92,8 @@ public class MessageCollectionController implements Initializable {
             headline.setStyle("-fx-underline: false;");
         };
 
-        final EventHandler<MouseEvent> onMousePressed = event -> Ecdar.getPresentation().getController().setActiveModelPresentationForActiveCanvas(
-                Ecdar.getPresentation().getController().
+        final EventHandler<MouseEvent> onMousePressed = event -> Ecdar.getPresentation().getController().getEditorPresentation().getController().setActiveModelPresentationForActiveCanvas(
+                Ecdar.getPresentation().getController().getEditorPresentation().getController().
                         projectPane.getController().getComponentPresentations().
                         stream().filter(componentPresentation -> componentPresentation.getController().getComponent().equals(component))
                         .findFirst().orElse(null));

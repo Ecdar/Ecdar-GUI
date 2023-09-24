@@ -1,5 +1,6 @@
 package ecdar.presentations;
 
+import ecdar.Ecdar;
 import ecdar.abstractions.Component;
 import ecdar.controllers.EcdarController;
 import ecdar.utility.UndoRedoStack;
@@ -9,6 +10,7 @@ import ecdar.utility.helpers.ItemDragHelper;
 import ecdar.utility.helpers.LocationAware;
 import com.jfoenix.controls.JFXTextField;
 import ecdar.utility.helpers.SelectHelper;
+import ecdar.utility.helpers.StringHelper;
 import javafx.application.Platform;
 import javafx.beans.binding.When;
 import javafx.beans.property.*;
@@ -39,7 +41,7 @@ public class TagPresentation extends StackPane {
     LineTo l3;
     boolean hadInitialFocus = false;
 
-    static double TAG_HEIGHT = 16;
+    public static double TAG_HEIGHT = 16;
 
     public TagPresentation() {
         new EcdarFXMLLoader().loadAndGetController("TagPresentation.fxml", this);
@@ -70,7 +72,7 @@ public class TagPresentation extends StackPane {
             textFieldFocusProperty().addListener((observable, oldValue, newValue) -> {
                 if (!hadInitialFocus && newValue) {
                     hadInitialFocus = true;
-                    EcdarController.getActiveCanvasPresentation().getController().leaveTextAreas();
+                    Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasPresentation().getController().leaveTextAreas();
                 }
             });
         });
@@ -120,7 +122,9 @@ public class TagPresentation extends StackPane {
         });
 
         // When enter or escape is pressed release focus
-        textField.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
+        Platform.runLater(() -> {
+            textField.setOnKeyPressed(Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
+        });
     }
 
     private void initializeDragging(JFXTextField textField, Path shape) {
@@ -146,8 +150,8 @@ public class TagPresentation extends StackPane {
         shape.addEventHandler(MouseEvent.MOUSE_DRAGGED, event -> {
             event.consume();
 
-            final double dragDistanceX = (event.getSceneX() - dragOffsetX.get()) / EcdarController.getActiveCanvasZoomFactor().get();
-            final double dragDistanceY = (event.getSceneY() - dragOffsetY.get()) / EcdarController.getActiveCanvasZoomFactor().get();
+            final double dragDistanceX = (event.getSceneX() - dragOffsetX.get()) / Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasZoomFactor().get();
+            final double dragDistanceY = (event.getSceneY() - dragOffsetY.get()) / Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasZoomFactor().get();
             double draggableNewX = getDragBounds().trimX(draggablePreviousX.get() + dragDistanceX);
             double draggableNewY = getDragBounds().trimY(draggablePreviousY.get() + dragDistanceY);
 
@@ -278,6 +282,13 @@ public class TagPresentation extends StackPane {
 
     public void replaceSpace() {
         initializeTextAid((JFXTextField) lookup("#textField"));
+    }
+
+    public void replaceSigns() {
+        var textField = (JFXTextField) lookup("#textField");
+        textField.textProperty().addListener((obs, oldText, newText) -> {
+            textField.setText(StringHelper.ConvertSymbolsToUnicode(newText));
+        });
     }
 
     public void requestTextFieldFocus() {

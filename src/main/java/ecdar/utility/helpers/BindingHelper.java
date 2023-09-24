@@ -1,10 +1,11 @@
 package ecdar.utility.helpers;
 
-import ecdar.controllers.EcdarController;
+import ecdar.Ecdar;
 import ecdar.model_canvas.arrow_heads.ArrowHead;
 import ecdar.model_canvas.arrow_heads.ChannelReceiverArrowHead;
 import ecdar.model_canvas.arrow_heads.ChannelSenderArrowHead;
 import ecdar.presentations.Link;
+import ecdar.presentations.SimTagPresentation;
 import ecdar.presentations.TagPresentation;
 import ecdar.utility.mouse.MouseTracker;
 import javafx.beans.binding.DoubleBinding;
@@ -24,9 +25,18 @@ public class BindingHelper {
         subject.visibleProperty().bind(target.visibleProperty());
     }
 
+    public static void bind(final Line subject, final SimTagPresentation target) {
+        subject.startXProperty().set(0);
+        subject.startYProperty().set(0);
+        subject.endXProperty().bind(target.translateXProperty().add(target.minWidthProperty().divide(2)));
+        subject.endYProperty().bind(target.translateYProperty().add(target.heightProperty().divide(2)));
+        subject.opacityProperty().bind(target.opacityProperty());
+        subject.visibleProperty().bind(target.visibleProperty());
+    }
+
     public static void bind(final Circular subject, final ObservableDoubleValue x, final ObservableDoubleValue y) {
-        subject.xProperty().bind(EcdarController.getActiveCanvasPresentation().mouseTracker.xProperty().subtract(x));
-        subject.yProperty().bind(EcdarController.getActiveCanvasPresentation().mouseTracker.yProperty().subtract(y));
+        subject.xProperty().bind(Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasPresentation().mouseTracker.xProperty().subtract(x));
+        subject.yProperty().bind(Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasPresentation().mouseTracker.yProperty().subtract(y));
     }
 
     public static void bind(final Link lineSubject, final ArrowHead arrowHeadSubject, final Circular source, final Circular target) {
@@ -65,7 +75,7 @@ public class BindingHelper {
 
     public static void bind(final Link subject, final Circular source, final ObservableDoubleValue x, final ObservableDoubleValue y) {
         // Calculate the bindings (so that the line will be based on the circle circumference instead of in its center)
-        final LineBinding lineBinding = LineBinding.getCircularBindings(source, EcdarController.getActiveCanvasPresentation().mouseTracker, x, y);
+        final LineBinding lineBinding = LineBinding.getCircularBindings(source, Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasPresentation().mouseTracker, x, y);
 
         // Bind the subjects properties accordingly to our calculations
         subject.startXProperty().bind(lineBinding.startX);
@@ -131,7 +141,7 @@ public class BindingHelper {
 
     public static void bind(final ArrowHead subject, final Circular source, final ObservableDoubleValue x, final ObservableDoubleValue y) {
         // Calculate the bindings (so that the line will be based on the circle circumference instead of in its center)
-        final LineBinding lineBinding = LineBinding.getCircularBindings(source, EcdarController.getActiveCanvasPresentation().mouseTracker, x, y);
+        final LineBinding lineBinding = LineBinding.getCircularBindings(source, Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasPresentation().mouseTracker, x, y);
 
         ObservableDoubleValue startX = lineBinding.startX;
         ObservableDoubleValue startY = lineBinding.startY;

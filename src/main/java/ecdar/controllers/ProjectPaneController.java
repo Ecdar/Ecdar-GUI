@@ -70,7 +70,7 @@ public class ProjectPaneController implements Initializable {
             final FilePresentation globalDclPresentation = new FilePresentation(project.getGlobalDeclarations());
             modelPresentationMap.put(globalDeclarationsPresentation, globalDclPresentation);
             globalDclPresentation.setOnMousePressed(event -> {
-                Ecdar.getPresentation().getController().setActiveModelPresentationForActiveCanvas(globalDeclarationsPresentation);
+                Ecdar.getPresentation().getController().getEditorPresentation().getController().setActiveModelPresentationForActiveCanvas(globalDeclarationsPresentation);
             });
 
             filesList.getChildren().add(globalDclPresentation);
@@ -84,7 +84,7 @@ public class ProjectPaneController implements Initializable {
 
         Platform.runLater(() -> {
             final var initializedModelPresentation = modelPresentationMap.keySet().stream().filter(mp -> mp instanceof ComponentPresentation).findFirst().orElse(null);
-            Ecdar.getPresentation().getController().setActiveModelPresentationForActiveCanvas(initializedModelPresentation);
+            Ecdar.getPresentation().getController().getEditorPresentation().getController().setActiveModelPresentationForActiveCanvas(initializedModelPresentation);
         });
     }
 
@@ -317,7 +317,7 @@ public class ProjectPaneController implements Initializable {
                 project.getComponents().remove(newComponent);
             }, "Created new component: " + newComponent.getName(), "add-circle");
 
-            EcdarController.getActiveCanvasPresentation().getController().setActiveModelPresentation(getComponentPresentations().stream().filter(componentPresentation -> componentPresentation.getController().getComponent().equals(newComponent)).findFirst().orElse(null));
+            Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasPresentation().getController().setActiveModelPresentation(getComponentPresentations().stream().filter(componentPresentation -> componentPresentation.getController().getComponent().equals(newComponent)).findFirst().orElse(null));
         });
         KeyboardTracker.registerKeybind(KeyboardTracker.CREATE_COMPONENT, binding);
     }
@@ -333,19 +333,19 @@ public class ProjectPaneController implements Initializable {
             filesList.getChildren().add(filePresentation);
         }
 
-        modelPresentationMap.put(modelPresentation, filePresentation);// ToDo NIELS: Bind these two
+        modelPresentationMap.put(modelPresentation, filePresentation);
         if (modelPresentation instanceof ComponentPresentation) {
             componentPresentations.add((ComponentPresentation) modelPresentation);
         }
 
         // Open the component if the file is pressed
         filePresentation.setOnMousePressed(event -> {
-            final var previouslyActiveFile = modelPresentationMap.get(EcdarController.getActiveCanvasPresentation()
+            final var previouslyActiveFile = modelPresentationMap.get(Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasPresentation()
                     .getController()
                     .getActiveModelPresentation());
             if (previouslyActiveFile != null) previouslyActiveFile.getController().setIsActive(false);
 
-            Ecdar.getPresentation().getController().setActiveModelPresentationForActiveCanvas(modelPresentation);
+            Ecdar.getPresentation().getController().getEditorPresentation().getController().setActiveModelPresentationForActiveCanvas(modelPresentation);
             Platform.runLater(() -> {
                 filePresentation.getController().setIsActive(true);
             });
@@ -353,20 +353,20 @@ public class ProjectPaneController implements Initializable {
 
         modelPresentation.getController().getModel().nameProperty().addListener(obs -> sortPresentations());
         filePresentation.getController().setIsActive(true);
-        Platform.runLater(() -> Ecdar.getPresentation().getController().setActiveModelPresentationForActiveCanvas(modelPresentation));
+        Platform.runLater(() -> Ecdar.getPresentation().getController().getEditorPresentation().getController().setActiveModelPresentationForActiveCanvas(modelPresentation));
     }
 
     private void handleRemovedModelPresentation(final HighLevelModelPresentation modelPresentation) {
         // If we remove the modelPresentation active on the canvas
-        if (EcdarController.getActiveCanvasPresentation().getController().getActiveModelPresentation() == modelPresentation) {
+        if (Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasPresentation().getController().getActiveModelPresentation() == modelPresentation) {
             if (project.getComponents().size() > 0) {
                 // Find the first available component and show it instead of the removed one
                 final HighLevelModelPresentation newActiveModelPresentation = modelPresentationMap.keySet().iterator().next();
-                Ecdar.getPresentation().getController().setActiveModelPresentationForActiveCanvas(newActiveModelPresentation);
+                Ecdar.getPresentation().getController().getEditorPresentation().getController().setActiveModelPresentationForActiveCanvas(newActiveModelPresentation);
                 modelPresentationMap.get(newActiveModelPresentation).getController().setIsActive(true);
             } else {
                 // Show no components (since there are none in the project)
-                Ecdar.getPresentation().getController().setActiveModelPresentationForActiveCanvas(null);
+                Ecdar.getPresentation().getController().getEditorPresentation().getController().setActiveModelPresentationForActiveCanvas(null);
             }
         }
 
@@ -504,12 +504,12 @@ public class ProjectPaneController implements Initializable {
      */
     @FXML
     private void setGeneratedComponentsVisibilityButtonClicked() {
-        if (generatedComponentsVisibilityButtonIcon.getIconCode() == Material.EXPAND_MORE) {
-            generatedComponentsVisibilityButtonIcon.setIconCode(Material.EXPAND_LESS);
+        if (generatedComponentsVisibilityButtonIcon.getIconCode() == Material.ARROW_LEFT) {
+            generatedComponentsVisibilityButtonIcon.setIconCode(Material.ARROW_DROP_DOWN);
             this.tempFilesList.setVisible(true);
             this.tempFilesList.setManaged(true);
         } else {
-            generatedComponentsVisibilityButtonIcon.setIconCode(Material.EXPAND_MORE);
+            generatedComponentsVisibilityButtonIcon.setIconCode(Material.ARROW_LEFT);
             this.tempFilesList.setVisible(false);
             this.tempFilesList.setManaged(false);
         }

@@ -13,6 +13,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.Group;
 import javafx.scene.control.Label;
 import javafx.scene.shape.Line;
@@ -52,6 +53,7 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
             }
 
             controller.propertyTag.setTranslateX(10);
+            controller.propertyTag.replaceSigns();
             controller.propertyTag.setTranslateY(-controller.propertyTag.getHeight());
             this.getChildren().add(controller.propertyTag);
 
@@ -75,7 +77,6 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
 
         radiusUpdater.accept(controller.getNail().getPropertyType());
     }
-
     private void initializePropertyTag() {
         final TagPresentation propertyTag = controller.propertyTag;
         final Line propertyTagLine = controller.propertyTagLine;
@@ -97,9 +98,14 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
                     propertyTag.setTranslateX(controller.getNail().getPropertyX());
                     propertyTag.setTranslateY(controller.getNail().getPropertyY());
                 }
-                controller.getNail().propertyXProperty().bindBidirectional(propertyTag.translateXProperty());
-                controller.getNail().propertyYProperty().bindBidirectional(propertyTag.translateYProperty());
 
+                // Check is needed because the property cannot be bound twice
+                // which happens when switching from the simulator to the editor
+                if (!controller.getNail().propertyXProperty().isBound() && !controller.getNail().propertyYProperty().isBound()) {
+                    controller.getNail().propertyXProperty().bindBidirectional(propertyTag.translateXProperty());
+                    controller.getNail().propertyYProperty().bindBidirectional(propertyTag.translateYProperty());
+                }
+                    
                 Label propertyLabel = controller.propertyLabel;
 
                 if(propertyType.equals(Edge.PropertyType.SELECTION)) {
@@ -182,10 +188,38 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
     }
 
     private void initializeNailCircleColor() {
+        // When the color of the component updates, update the nail indicator as well
+        controller.getComponent().colorProperty().addListener((observable) -> updateNailColor());
+
+        // Initialize the color of the nail
+        updateNailColor();
+    }
+
+    /**
+     * Update color when the edge of this nails failing property is updated.
+     */
+    public void onFailingUpdate(boolean isFailing) {
+        final Runnable updateNailColorOnFailingUpdate = () -> {
+            controller.nailCircle.setFill(Color.RED.getColor(Color.Intensity.I700));
+            controller.nailCircle.setStroke(Color.RED.getColor(Color.Intensity.I700.next(2)));
+        };
+        if (isFailing) {
+            updateNailColorOnFailingUpdate.run();
+        } else {
+            updateNailColor();
+        }
+    }
+
+    private void updateNailColor() {
         final Runnable updateNailColor = () -> {
             final EnabledColor color = controller.getComponent().getColor();
 
-            if(!controller.getNail().getPropertyType().equals(Edge.PropertyType.NONE)) {
+            if (controller.getEdge().getFailing() && controller.getNail().getPropertyType().equals(Edge.PropertyType.SYNCHRONIZATION)) {
+                controller.nailCircle.setFill(Color.RED.getColor(Color.Intensity.I700));
+                controller.nailCircle.setStroke(Color.RED.getColor(Color.Intensity.I700.next(2)));
+            }
+            //If edge is not NONE
+            else if(!controller.getNail().getPropertyType().equals(Edge.PropertyType.NONE)) {
                 controller.nailCircle.setFill(color.getPaintColor());
                 controller.nailCircle.setStroke(color.getStrokeColor());
             } else {
@@ -234,15 +268,7 @@ public class NailPresentation extends Group implements SelectHelper.Selectable, 
 
     @Override
     public void deselect() {
-        EnabledColor color = EnabledColor.getDefault();
-
-        // Set the color
-        if(!controller.getNail().getPropertyType().equals(Edge.PropertyType.NONE)) {
-            color = controller.getComponent().getColor();
-        }
-
-        controller.nailCircle.setFill(color.getPaintColor());
-        controller.nailCircle.setStroke(color.getStrokeColor());
+        updateNailColor();
     }
 
     public NailController getController() {

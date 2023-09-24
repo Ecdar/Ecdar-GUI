@@ -1,16 +1,16 @@
 package ecdar.abstractions;
 
-import ecdar.Ecdar;
 import ecdar.code_analysis.Nearable;
-import ecdar.utility.colors.Color;
 import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.Circular;
 import ecdar.utility.helpers.MouseCircular;
+import ecdar.utility.helpers.StringHelper;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.util.List;
+import java.util.UUID;
 
 public abstract class DisplayableEdge implements Nearable {
     private final StringProperty id = new SimpleStringProperty("");
@@ -37,6 +37,9 @@ public abstract class DisplayableEdge implements Nearable {
     private final BooleanProperty isLocked = new SimpleBooleanProperty(false);
 
     private final BooleanProperty isHighlighted = new SimpleBooleanProperty(false);
+
+    protected final BooleanProperty failing = new SimpleBooleanProperty(false);
+    private final BooleanProperty isHighlightedForReachability = new SimpleBooleanProperty(false);
 
     public Location getSourceLocation() {
         return sourceLocation.get();
@@ -81,7 +84,7 @@ public abstract class DisplayableEdge implements Nearable {
     }
 
     public String getGuard() {
-        return guard.get();
+        return StringHelper.ConvertUnicodeToSymbols(guard.get());
     }
 
     public void setGuard(final String guard) {
@@ -118,9 +121,12 @@ public abstract class DisplayableEdge implements Nearable {
 
     public void setIsHighlighted(final boolean highlight){ this.isHighlighted.set(highlight);}
 
-    public boolean getIsHighlighted(){ return this.isHighlighted.get(); }
+    public boolean isHighlighted(){ return this.isHighlighted.get(); }
+    public boolean getIsHighlightedForReachability(){ return this.isHighlightedForReachability.get(); }
 
     public BooleanProperty isHighlightedProperty() { return this.isHighlighted; }
+    public BooleanProperty isHighlightedForReachabilityProperty() { return this.isHighlightedForReachability; }
+
 
     public ObservableList<Nail> getNails() {
         return nails;
@@ -232,6 +238,8 @@ public abstract class DisplayableEdge implements Nearable {
         }
     }
 
+    public void setIsHighlightedForReachability(final boolean highlightedForReachability){ this.isHighlightedForReachability.set(highlightedForReachability);}
+
     public enum PropertyType {
         NONE(-1),
         SELECTION(0),
@@ -266,12 +274,7 @@ public abstract class DisplayableEdge implements Nearable {
      * Generate and sets a unique id for this location
      */
     protected void setId() {
-        for(int counter = 0; ; counter++) {
-            if(!Ecdar.getProject().getEdgeIds().contains(String.valueOf(counter))){
-                id.set(Edge.EDGE + counter);
-                return;
-            }
-        }
+        id.set(UUID.randomUUID().toString());
     }
 
     /**
@@ -289,4 +292,22 @@ public abstract class DisplayableEdge implements Nearable {
     public abstract List<String> getProperty(final PropertyType propertyType);
 
     public abstract void setProperty(final PropertyType propertyType, final List<String> newProperty);
+
+    /**
+     * Sets the 'failing' property
+     * @param bool true if the edge is failing.
+     */
+    public abstract void setFailing(final boolean bool);
+
+    /**
+     * Getter for the 'failing' boolean
+     * @return Whether edge is failing in last query response.
+     */
+    public abstract boolean getFailing();
+
+    /**
+     * The observable boolean property for 'failing' of this.
+     * @return The observable boolean property for 'failing' of this.
+     */
+    public abstract BooleanProperty failingProperty();
 }

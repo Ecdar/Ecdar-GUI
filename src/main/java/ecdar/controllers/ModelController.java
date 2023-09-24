@@ -5,9 +5,9 @@ import ecdar.abstractions.Box;
 import ecdar.abstractions.HighLevelModel;
 import com.jfoenix.controls.JFXTextField;
 import ecdar.utility.UndoRedoStack;
-import ecdar.utility.colors.Color;
 import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.StringValidator;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -107,9 +107,11 @@ public abstract class ModelController extends HighLevelModelController {
         model.colorProperty().addListener(observable -> updateColor.run());
         updateColor.run();
 
-        // Center the text vertically and aff a left padding of CORNER_SIZE
-        name.setPadding(new Insets(2, 0, 0, CORNER_SIZE));
-        name.setOnKeyPressed(EcdarController.getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
+        Platform.runLater(() -> {
+            // Center the text vertically and add a left padding of CORNER_SIZE
+            name.setPadding(new Insets(2, 0, 0, CORNER_SIZE));
+            name.setOnKeyPressed(Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasPresentation().getController().getLeaveTextAreaKeyHandler());
+        });
     }
 
     /**
@@ -272,11 +274,11 @@ public abstract class ModelController extends HighLevelModelController {
         });
 
         cornerAnchor.setOnMouseDragged(event -> {
-            double xDiff = (event.getScreenX() - prevX.get()) / EcdarController.getActiveCanvasZoomFactor().get(); // ToDo NIELS: Fix dependency
+            double xDiff = (event.getScreenX() - prevX.get());
             final double newWidth = Math.max(prevWidth.get() + xDiff, getDragAnchorMinWidth());
             box.setWidth(newWidth);
 
-            double yDiff = (event.getScreenY() - prevY.get()) / EcdarController.getActiveCanvasZoomFactor().get();
+            double yDiff = (event.getScreenY() - prevY.get());
             final double newHeight = Math.max(prevHeight.get() + yDiff, getDragAnchorMinHeight());
             box.setHeight(newHeight);
 

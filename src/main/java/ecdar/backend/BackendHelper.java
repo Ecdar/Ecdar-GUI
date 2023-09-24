@@ -1,5 +1,6 @@
 package ecdar.backend;
 
+import EcdarProtoBuf.ComponentProtos;
 import ecdar.Ecdar;
 import ecdar.abstractions.*;
 import javafx.beans.property.SimpleListProperty;
@@ -84,35 +85,6 @@ public final class BackendHelper {
     }
 
     /**
-     * Generates a reachability query based on the given location and component
-     *
-     * @param location  The location which should be checked for reachability
-     * @param component The component where the location belong to / are placed
-     * @return A reachability query string
-     */
-    public static String getLocationReachableQuery(final Location location, final Component component) {
-        return component.getName() + "." + location.getId();
-    }
-
-    /**
-     * Generates a string for a deadlock query based on the component
-     *
-     * @param component The component which should be checked for deadlocks
-     * @return A deadlock query string
-     */
-    public static String getExistDeadlockQuery(final Component component) {
-        // Get the names of the locations of this component. Used to produce the deadlock query
-        final String templateName = component.getName();
-        final List<String> locationNames = new ArrayList<>();
-
-        for (final Location location : component.getLocations()) {
-            locationNames.add(templateName + "." + location.getId());
-        }
-
-        return "(" + String.join(" || ", locationNames) + ") && deadlock";
-    }
-
-    /**
      * Returns the Engine with the specified name, or null, if no such Engine exists
      *
      * @param engineName Name of the Engine to return
@@ -165,5 +137,16 @@ public final class BackendHelper {
 
     public static void addEngineInstanceListener(Runnable runnable) {
         BackendHelper.enginesUpdatedListeners.add(runnable);
+    }
+
+    public static ComponentProtos.ComponentsInfo.Builder getComponentsInfoBuilder(String query) {
+        ComponentProtos.ComponentsInfo.Builder componentsInfoBuilder = ComponentProtos.ComponentsInfo.newBuilder();
+        for (Component c : Ecdar.getProject().getComponents()) {
+            if (query.contains(c.getName())) {
+                componentsInfoBuilder.addComponents(ComponentProtos.Component.newBuilder().setJson(c.serialize().toString()).build());
+            }
+        }
+        componentsInfoBuilder.setComponentsHash(componentsInfoBuilder.getComponentsList().hashCode());
+        return componentsInfoBuilder;
     }
 }

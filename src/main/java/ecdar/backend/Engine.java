@@ -1,14 +1,9 @@
 package ecdar.backend;
 
-import EcdarProtoBuf.ComponentProtos;
-import EcdarProtoBuf.QueryProtos;
 import com.google.gson.JsonObject;
-import com.google.protobuf.Empty;
 import ecdar.Ecdar;
-import ecdar.abstractions.Component;
-import ecdar.abstractions.Query;
+import ecdar.abstractions.RequestSource;
 import ecdar.utility.serialize.Serializable;
-import io.grpc.stub.StreamObserver;
 import javafx.beans.property.SimpleBooleanProperty;
 
 import java.util.*;
@@ -23,16 +18,18 @@ public class Engine implements Serializable {
     private static final String PORT_RANGE_START = "portRangeStart";
     private static final String PORT_RANGE_END = "portRangeEnd";
     private static final String LOCKED = "locked";
-    private final int responseDeadline = 20000;
-    private final int rerunRequestDelay = 200;
-    private final int numberOfRetriesPerQuery = 5;
+    private static final String IS_THREAD_SAFE = "isThreadSafe";
+
+    private static final int rerunRequestDelay = 200;
+    private static final int numberOfRetriesPerQuery = 5;
 
     private String name;
     private boolean isLocal;
     private boolean isDefault;
+    private boolean isThreadSafe;
     private int portStart;
     private int portEnd;
-    private SimpleBooleanProperty locked = new SimpleBooleanProperty(false);
+    private final SimpleBooleanProperty locked = new SimpleBooleanProperty(false);
     /**
      * This is either a path to the engines executable or an IP address at which the engine is running
      */
@@ -40,7 +37,6 @@ public class Engine implements Serializable {
 
     private final ArrayList<EngineConnection> startedConnections = new ArrayList<>();
     private final BlockingQueue<GrpcRequest> requestQueue = new ArrayBlockingQueue<>(200); // Magic number
-    // ToDo NIELS: Refactor to resize queue on port range change
     private final BlockingQueue<EngineConnection> availableConnections = new ArrayBlockingQueue<>(200); // Magic number
     private final EngineConnectionStarter connectionStarter = new EngineConnectionStarter(this);
 
@@ -77,6 +73,14 @@ public class Engine implements Serializable {
 
     public void setDefault(boolean aDefault) {
         isDefault = aDefault;
+    }
+
+    public boolean isThreadSafe() {
+        return isThreadSafe;
+    }
+
+    public void setIsThreadSafe(boolean threadSafe) {
+        isThreadSafe = threadSafe;
     }
 
     public String getEngineLocation() {
@@ -123,45 +127,20 @@ public class Engine implements Serializable {
         return locked;
     }
 
-    public ArrayList<EngineConnection> getStartedConnections() {
+    protected ArrayList<EngineConnection> getStartedConnections() {
         return startedConnections;
     }
 
     /**
-     * Enqueue query for execution with consumers for success and error
+     * Enqueue request for execution based on request source with consumers for success and error
      *
-     * @param query the query to enqueue for execution
-     * @param successConsumer consumer for returned QueryResponse
-     * @param errorConsumer consumer for any throwable that might result from the execution
+     * @param requestSource RequestSource instance to construct the request from
+     * @param successConsumer for returned gRPC response
+     * @param errorConsumer for any throwable received from the engine
      */
-    public void enqueueQuery(Query query, Consumer<QueryProtos.QueryResponse> successConsumer, Consumer<Throwable> errorConsumer) {
-        GrpcRequest request = new GrpcRequest(engineConnection -> {
-            StreamObserver<QueryProtos.QueryResponse> responseObserver = new StreamObserver<>() {
-                @Override
-                public void onNext(QueryProtos.QueryResponse value) {
-                    successConsumer.accept(value);
-                }
-
-                @Override
-                public void onError(Throwable t) {
-                    errorConsumer.accept(t);
-                    setConnectionAsAvailable(engineConnection);
-                }
-
-                @Override
-                public void onCompleted() {
-                    // Release engine connection
-                    setConnectionAsAvailable(engineConnection);
-                }
-            };
-
-            var queryBuilder = QueryProtos.Query.newBuilder()
-                    .setId(0)
-                    .setQuery(query.getType().getQueryName() + ": " + query.getQuery());
-
-            engineConnection.getStub().withDeadlineAfter(responseDeadline, TimeUnit.MILLISECONDS)
-                    .sendQuery(queryBuilder.build(), responseObserver);
-        });
+    public <T> void enqueueRequest(RequestSource<T> requestSource, Consumer<T> successConsumer, Consumer<Throwable> errorConsumer) {
+        GrpcRequestFactory factory = new GrpcRequestFactory(() -> {}, this::setConnectionAsAvailable);
+        GrpcRequest request = requestSource.accept(factory, successConsumer, errorConsumer);
 
         requestQueue.add(request);
     }
@@ -171,17 +150,8 @@ public class Engine implements Serializable {
      *
      * @param connection to make available
      */
-    public void setConnectionAsAvailable(EngineConnection connection) {
+    private void setConnectionAsAvailable(EngineConnection connection) {
         if (!availableConnections.contains(connection)) availableConnections.add(connection);
-    }
-
-    /**
-     * Clears all queued queries, stops all active engines, and closes all open engine connections
-     */
-    public void clear() throws BackendException {
-        BackendHelper.stopQueries();
-        requestQueue.clear();
-        closeConnections();
     }
 
     /**
@@ -202,12 +172,17 @@ public class Engine implements Serializable {
 
                 if (newConnection != null) {
                     startedConnections.add(newConnection);
-                    initializeConnection(newConnection);
+                    setConnectionAsAvailable(newConnection);
                 }
             }
 
-            // Blocks until a connection becomes available
-            connection = availableConnections.take();
+            if (isThreadSafe){
+                connection = availableConnections.peek();
+            }
+            else{
+                // Block until a connection becomes available
+                connection = availableConnections.take();
+            }
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -215,49 +190,13 @@ public class Engine implements Serializable {
         return connection;
     }
 
-    /**
-     * Executes the gRPC requests required to initialize the connection for query execution
-     * NOTE: This will be unnecessary with the SW5 changes for the ProtoBuf
-     */
-    private void initializeConnection(EngineConnection connection) {
-        QueryProtos.ComponentsUpdateRequest.Builder componentsBuilder = QueryProtos.ComponentsUpdateRequest.newBuilder();
-        for (Component c : Ecdar.getProject().getComponents()) {
-            componentsBuilder.addComponents(ComponentProtos.Component.newBuilder().setJson(c.serialize().toString()).build());
-        }
-
-        StreamObserver<Empty> observer = new StreamObserver<>() {
-            @Override
-            public void onNext(Empty value) {
-            }
-
-            @Override
-            public void onError(Throwable t) {
-                try {
-                    connection.close();
-                } catch (BackendException.gRpcChannelShutdownException |
-                         BackendException.EngineProcessDestructionException e) {
-                    Ecdar.showToast("An error occurred while trying to start new connection to: \"" + getName() + "\" and an exception was thrown while trying to remove gRPC channel and potential process");
-                }
-                startedConnections.remove(connection);
-            }
-
-            @Override
-            public void onCompleted() {
-                if (startedConnections.contains(connection)) setConnectionAsAvailable(connection);
-            }
-        };
-
-        connection.getStub().withDeadlineAfter(responseDeadline, TimeUnit.MILLISECONDS)
-                .updateComponents(componentsBuilder.build(), observer);
-    }
-
-    /**
+     /**
      * Close all open engine connections and kill all locally running processes
      *
      * @throws BackendException if one or more connections throw an exception on {@link EngineConnection#close()}
      *                          (use getSuppressed() to see all thrown exceptions)
      */
-    public void closeConnections() throws BackendException {
+    protected void closeConnections() throws BackendException {
         // Create a list for storing all terminated connection
         List<CompletableFuture<EngineConnection>> closeFutures = new ArrayList<>();
         BackendException exceptions = new BackendException("Exceptions were thrown while attempting to close engine connections on " + getName());
@@ -329,6 +268,7 @@ public class Engine implements Serializable {
         result.addProperty(NAME, getName());
         result.addProperty(IS_LOCAL, isLocal());
         result.addProperty(IS_DEFAULT, isDefault());
+        result.addProperty(IS_THREAD_SAFE, isThreadSafe());
         result.addProperty(LOCATION, getEngineLocation());
         result.addProperty(PORT_RANGE_START, getPortStart());
         result.addProperty(PORT_RANGE_END, getPortEnd());
@@ -342,6 +282,7 @@ public class Engine implements Serializable {
         setName(json.getAsJsonPrimitive(NAME).getAsString());
         setLocal(json.getAsJsonPrimitive(IS_LOCAL).getAsBoolean());
         setDefault(json.getAsJsonPrimitive(IS_DEFAULT).getAsBoolean());
+        setIsThreadSafe(json.has(IS_THREAD_SAFE) && json.getAsJsonPrimitive(IS_THREAD_SAFE).getAsBoolean());
         setEngineLocation(json.getAsJsonPrimitive(LOCATION).getAsString());
         setPortStart(json.getAsJsonPrimitive(PORT_RANGE_START).getAsInt());
         setPortEnd(json.getAsJsonPrimitive(PORT_RANGE_END).getAsInt());

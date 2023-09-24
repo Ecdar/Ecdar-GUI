@@ -1,5 +1,6 @@
 package ecdar.utility.helpers;
 
+import ecdar.Ecdar;
 import ecdar.controllers.EcdarController;
 import ecdar.controllers.EdgeController;
 import ecdar.presentations.ComponentOperatorPresentation;
@@ -123,8 +124,8 @@ public class ItemDragHelper {
 
             final DragBounds dragBounds = getDragBounds.get();
 
-            final double dragDistanceX = (event.getSceneX() - dragOffsetX.get()) / EcdarController.getActiveCanvasZoomFactor().get();
-            final double dragDistanceY = (event.getSceneY() - dragOffsetY.get()) / EcdarController.getActiveCanvasZoomFactor().get();
+            final double dragDistanceX = (event.getSceneX() - dragOffsetX.get()) / Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasZoomFactor().get();
+            final double dragDistanceY = (event.getSceneY() - dragOffsetY.get()) / Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasZoomFactor().get();
             double draggableNewX = dragBounds.trimX(draggablePreviousX.get() + dragDistanceX);
             double draggableNewY = dragBounds.trimY(draggablePreviousY.get() + dragDistanceY);
 

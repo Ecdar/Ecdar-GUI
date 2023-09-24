@@ -1,7 +1,6 @@
 package ecdar.abstractions;
 
 import ecdar.utility.UndoRedoStack;
-import ecdar.utility.colors.Color;
 import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.Boxed;
 import ecdar.utility.helpers.MouseCircular;
@@ -12,7 +11,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.util.Pair;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -31,11 +29,15 @@ public class Component extends HighLevelModel implements Boxed {
 
     // Verification properties
     private final ObservableList<Location> locations = FXCollections.observableArrayList();
-    private final ObservableList<DisplayableEdge> displayableEdges = FXCollections.observableArrayList();
+    private final ObservableList<Location> failingLocations = FXCollections.observableArrayList();
+    private final ObservableList<DisplayableEdge> edges = FXCollections.observableArrayList();
+    private final ObservableList<DisplayableEdge> failingEdges = FXCollections.observableArrayList();
     private final ObservableList<String> inputStrings = FXCollections.observableArrayList();
     private final ObservableList<String> outputStrings = FXCollections.observableArrayList();
+    private List<String> failingIOStrings = new ArrayList<String>();
     private final StringProperty description = new SimpleStringProperty("");
-    private final StringProperty declarationsText = new SimpleStringProperty("");
+    private final StringProperty declarationsText = new SimpleStringProperty("");;
+    private BooleanProperty isFailing = new SimpleBooleanProperty(false);
 
     // Background check
     private final BooleanProperty includeInPeriodicCheck = new SimpleBooleanProperty(true);
@@ -45,12 +47,17 @@ public class Component extends HighLevelModel implements Boxed {
     private final BooleanProperty declarationOpen = new SimpleBooleanProperty(false);
 
     public Location previousLocationForDraggedEdge;
-
+    public boolean getIsFailing(){return isFailing.get();}
+    public BooleanProperty getIsFailingProperty(){return isFailing;}
+    public void setIsFailing(boolean isFailingInput){this.isFailing.set(isFailingInput);}
+    public List<String> getFailingIOStrings(){return failingIOStrings;}
+    public void setFailingIOStrings(List<String> failingIOStrings){
+        this.failingIOStrings.clear();
+        this.failingIOStrings.addAll(failingIOStrings);}
     /**
      * Constructs an empty component
      */
     public Component() {
-
     }
 
     /**
@@ -88,7 +95,7 @@ public class Component extends HighLevelModel implements Boxed {
     private void initializeIOListeners() {
         final ChangeListener<Object> listener = (observable, oldValue, newValue) -> updateIOList();
 
-        displayableEdges.addListener((ListChangeListener<DisplayableEdge>) c -> {
+        edges.addListener((ListChangeListener<DisplayableEdge>) c -> {
             // Update the list so empty I/O status is also added to I/OLists
             updateIOList();
 
@@ -192,11 +199,72 @@ public class Component extends HighLevelModel implements Boxed {
     }
 
     /**
+     * Add a failing Edge to the list of failing edges
+     * and set the edge's failing property to true.
+     * @param edge the Edge that is failing.
+     * @return whether adding the Edge to the list was a success
+     */
+    public boolean addFailingEdge(final Edge edge) {
+        edge.setFailing(true);
+        return failingEdges.add(edge);
+    }
+
+    /**
+     * Sets all previous failing edges to not failing
+     * and removes all previous failing edges from list.
+     */
+    public void removeFailingEdges() {
+        for (DisplayableEdge edge : failingEdges) {
+            edge.setFailing(false);
+        }
+        failingEdges.removeAll();
+    }
+
+    /**
+     * Observable list of all failing locations.
+     * @return Observable list of all failing locations.
+     */
+    public ObservableList<Location> getFailingLocations() {
+        return failingLocations;
+    }
+
+    /**
+     * Adds a failing location to the list of failing locations.
+     * @param locationId the id of the location that is failing.
+     * @return whether adding the location to the list was a success
+     */
+    public boolean addFailingLocation(final String locationId) {
+        Location failingLocation = findLocation(locationId);
+        failingLocation.setFailing(true);
+        return failingLocations.add(failingLocation);
+    }
+
+    /**
+     * Sets all previous failing locations to not failing
+     * and removes all previous failing locations from list.
+     */
+    public void removeFailingLocations() {
+        for (Location location : failingLocations) {
+            location.setFailing(false);
+        }
+        failingLocations.removeAll();
+    }
+
+    /**
+     * Observable list of all failing edges.
+     * @return Observable list of all failing edges.
+     */
+    public ObservableList<DisplayableEdge> getFailingEdges() {
+        return failingEdges;
+    }
+
+
+    /**
      * Returns all DisplayableEdges of the component (returning a list potentially containing GroupEdges and Edges)
      * @return All visual edges of the component
      */
     public ObservableList<DisplayableEdge> getDisplayableEdges() {
-        return displayableEdges;
+        return edges;
     }
 
     /**
@@ -204,16 +272,16 @@ public class Component extends HighLevelModel implements Boxed {
      * @return All functional edges of the component
      */
     public List<Edge> getEdges() {
-        return getListOfEdgesFromDisplayableEdges(displayableEdges);
+        return getListOfEdgesFromDisplayableEdges(edges);
     }
 
     public boolean addEdge(final DisplayableEdge edge) {
-        if (displayableEdges.contains(edge)) return false;
-        return displayableEdges.add(edge);
+        if (edges.contains(edge)) return false;
+        return edges.add(edge);
     }
 
     public boolean removeEdge(final DisplayableEdge edge) {
-        return displayableEdges.remove(edge);
+        return edges.remove(edge);
     }
 
     /**
@@ -224,7 +292,7 @@ public class Component extends HighLevelModel implements Boxed {
     public List<DisplayableEdge> getRelatedEdges(final Location location) {
         final ArrayList<DisplayableEdge> relatedEdges = new ArrayList<>();
 
-        displayableEdges.forEach(edge -> {
+        edges.forEach(edge -> {
             if(location.equals(edge.getSourceLocation()) || location.equals(edge.getTargetLocation())) {
                 relatedEdges.add(edge);
             }
@@ -305,7 +373,7 @@ public class Component extends HighLevelModel implements Boxed {
     }
 
     public DisplayableEdge getUnfinishedEdge() {
-        for (final DisplayableEdge edge : displayableEdges) {
+        for (final DisplayableEdge edge : edges) {
             if (edge.getTargetLocation() == null
                     || edge.getSourceCircular() instanceof MouseCircular
                     || edge.getTargetCircular() instanceof MouseCircular)
@@ -469,7 +537,7 @@ public class Component extends HighLevelModel implements Boxed {
         final List<String> localInputStrings = new ArrayList<>();
         final List<String> localOutputStrings = new ArrayList<>();
 
-        List<Edge> edgeList = getListOfEdgesFromDisplayableEdges(displayableEdges);
+        List<Edge> edgeList = getListOfEdgesFromDisplayableEdges(edges);
 
         for (final Edge edge : edgeList) {
             // Extract channel id based on UPPAAL id definition
@@ -509,7 +577,7 @@ public class Component extends HighLevelModel implements Boxed {
         result.add(LOCATIONS, locations);
 
         final JsonArray edges = new JsonArray();
-        getListOfEdgesFromDisplayableEdges(this.displayableEdges).forEach(edge -> edges.add(edge.serialize()));
+        getListOfEdgesFromDisplayableEdges(this.edges).forEach(edge -> edges.add(edge.serialize()));
 
         result.add(EDGES, edges);
         result.addProperty(DESCRIPTION, getDescription());
@@ -542,7 +610,7 @@ public class Component extends HighLevelModel implements Boxed {
 
             if (!edgeGroup.isEmpty()) {
                 GroupedEdge groupedEdge = null;
-                for (DisplayableEdge edge : displayableEdges) {
+                for (DisplayableEdge edge : edges) {
                     if (edge instanceof GroupedEdge && edge.getId().equals(edgeGroup)) {
                         groupedEdge = ((GroupedEdge) edge);
                         break;
@@ -553,18 +621,18 @@ public class Component extends HighLevelModel implements Boxed {
                     GroupedEdge newGroupedEdge = new GroupedEdge(newEdge);
                     newGroupedEdge.setId(edgeGroup);
 
-                    displayableEdges.add(newGroupedEdge);
+                    edges.add(newGroupedEdge);
                 } else {
                     boolean hasSameGuardAndUpdate = groupedEdge.addEdgeToGroup(newEdge);
 
                     if (!hasSameGuardAndUpdate) {
                         // The edge has the same group id as another edge, but has different guard and/or update
                         newEdge.setGroup("");
-                        displayableEdges.add(newEdge);
+                        edges.add(newEdge);
                     }
                 }
             } else {
-                displayableEdges.add(newEdge);
+                edges.add(newEdge);
             }
         });
 

@@ -7,6 +7,7 @@ import ecdar.presentations.DropDownMenu;
 import ecdar.utility.colors.Color;
 import ecdar.utility.colors.EnabledColor;
 import ecdar.utility.helpers.Circular;
+import ecdar.utility.helpers.StringHelper;
 import ecdar.utility.serialize.Serializable;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
@@ -54,13 +55,13 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     private final ObjectProperty<Reachability> reachability = new SimpleObjectProperty<>();
 
     private final SimpleBooleanProperty isLocked = new SimpleBooleanProperty(false);
+    private final BooleanProperty failing = new SimpleBooleanProperty(false);
 
     public Location() {
     }
 
     public Location(final String id) {
         setId(id);
-        bindReachabilityAnalysis();
     }
 
     public Location(final Component component, final Type type, final String id, final double x, final double y){
@@ -83,7 +84,6 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
 
     public Location(final JsonObject jsonObject) {
         deserialize(jsonObject);
-        bindReachabilityAnalysis();
     }
 
     /**
@@ -91,7 +91,6 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
      */
     public void initialize(String id) {
         setId(id);
-        bindReachabilityAnalysis();
     }
 
     /**
@@ -148,7 +147,7 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
     }
 
     public String getInvariant() {
-        return invariant.get();
+        return StringHelper.ConvertUnicodeToSymbols(invariant.get());
     }
 
     public void setInvariant(final String invariant) {
@@ -177,7 +176,6 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
 
     public void setUrgency(final Urgency urgency) {
         // If there is no EcdarPresentation, we are running tests and EcdarController calls will fail
-        if (Ecdar.getPresentation() != null) EcdarController.runReachabilityAnalysis();
         this.urgency.set(urgency);
     }
 
@@ -269,7 +267,6 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
 
     public void setInvariantY(final double invariantY) {
         // If there is no EcdarPresentation, we are running tests and EcdarController calls will fail
-        if (Ecdar.getPresentation() != null) EcdarController.runReachabilityAnalysis();
         this.invariantY.set(invariantY);
     }
 
@@ -425,6 +422,30 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
         return "Location " + (!Strings.isNullOrEmpty(getNickname()) ? (getNickname() + " (" + getId() + ")") : getId());
     }
 
+    /**
+     * Sets whether this location failed for the last query
+     * @param bool if a query responded failure with the location, bool should be true.
+     */
+    public void setFailing(boolean bool) {
+        this.failing.set(bool);
+    }
+
+    /**
+     * Whether this location is currently failing.
+     * @return Whether this location is currently failing.
+     */
+    public boolean getFailing() {
+        return this.failing.get();
+    }
+
+    /**
+     * The observable boolean property for 'failing' of this.
+     * @return The observable boolean property for 'failing' of this.
+     */
+    public BooleanProperty failingProperty() {
+        return this.failing;
+    }
+
     public enum Type {
         NORMAL, INITIAL, UNIVERSAL, INCONSISTENT
     }
@@ -435,11 +456,6 @@ public class Location implements Circular, Serializable, Nearable, DropDownMenu.
 
     public enum Reachability {
         REACHABLE, UNREACHABLE, UNKNOWN, EXCLUDED
-    }
-
-    private void bindReachabilityAnalysis() {
-        invariantProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
-        urgencyProperty().addListener((observable, oldValue, newValue) -> EcdarController.runReachabilityAnalysis());
     }
 
     public boolean isUniversalOrInconsistent() {

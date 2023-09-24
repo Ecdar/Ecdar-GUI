@@ -2,12 +2,10 @@ package ecdar.mutation;
 
 import ecdar.Ecdar;
 import ecdar.abstractions.Component;
-import ecdar.abstractions.Project;
 import ecdar.backend.BackendException;
 import ecdar.backend.BackendHelper;
 import ecdar.mutation.models.MutationTestCase;
 import ecdar.mutation.models.MutationTestPlan;
-import ecdar.mutation.models.NonRefinementStrategy;
 import javafx.application.Platform;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
@@ -224,7 +222,6 @@ class TestCaseGenerationHandler implements ConcurrentJobsHandler {
      * @throws BackendException if the backend encounters an error
      */
     private Process startProcessToFetchStrategy(final String modelPath) throws BackendException {
-        // ToDo NIELS: not implemented after switch to thread pool
         // Run backend to check refinement and to fetch strategy if non-refinement
         // return ((jECDARDriver) BackendDriverManager.getInstance(BackendHelper.BackendNames.jEcdar)).getJEcdarProcessForRefinementCheckAndStrategyIfNonRefinement(modelPath, queryFilePath);
         return null;

@@ -90,9 +90,6 @@ public class EngineOptionsDialogController implements Initializable {
             Engine defaultEngine = engines.stream().filter(Engine::isDefault).findFirst().orElse(engines.get(0));
             BackendHelper.setDefaultEngine(defaultEngine);
 
-            String defaultEngineName = (defaultEngine.getName());
-            Ecdar.preferences.put("default_engine", defaultEngineName);
-
             return true;
         } else {
             return false;
@@ -100,7 +97,7 @@ public class EngineOptionsDialogController implements Initializable {
     }
 
     /**
-     * Resets the engines to the default engines present in the 'default_engines.json' file.
+     * Resets the engines to those packaged with the system.
      */
     public void resetEnginesToDefault() {
         updateEnginesInGUI(getPackagedEngines());
@@ -182,9 +179,10 @@ public class EngineOptionsDialogController implements Initializable {
         reveaal.setName("Reveaal");
         reveaal.setLocal(true);
         reveaal.setDefault(true);
-        reveaal.setPortStart(5032);
-        reveaal.setPortEnd(5040);
+        reveaal.setPortStart(5040);
+        reveaal.setPortEnd(5042);
         reveaal.lockInstance();
+        reveaal.setIsThreadSafe(true);
 
         // Load correct Reveaal executable based on OS
         List<String> potentialFilesForReveaal = new ArrayList<>();
@@ -203,6 +201,7 @@ public class EngineOptionsDialogController implements Initializable {
         jEcdar.setPortStart(5042);
         jEcdar.setPortEnd(5050);
         jEcdar.lockInstance();
+        jEcdar.setIsThreadSafe(false);
 
         // Load correct j-Ecdar executable based on OS
         List<String> potentialFiledForJEcdar = new ArrayList<>();
@@ -255,7 +254,6 @@ public class EngineOptionsDialogController implements Initializable {
      * @param newEnginePresentation The presentation of the new engine instance
      */
     private void addEnginePresentationToList(EnginePresentation newEnginePresentation) {
-        newEnginePresentation.getController().defaultEngineRadioButton.setSelected(engineInstanceList.getChildren().isEmpty());
         engineInstanceList.getChildren().add(newEnginePresentation);
         newEnginePresentation.getController().moveEngineInstanceUpRippler.setOnMouseClicked((mouseEvent) -> moveEngineInstance(newEnginePresentation, -1));
         newEnginePresentation.getController().moveEngineInstanceDownRippler.setOnMouseClicked((mouseEvent) -> moveEngineInstance(newEnginePresentation, +1));

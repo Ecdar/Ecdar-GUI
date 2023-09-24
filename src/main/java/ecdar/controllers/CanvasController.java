@@ -61,7 +61,7 @@ public class CanvasController implements Initializable {
      */
     public void setActiveModelPresentation(final HighLevelModelPresentation model) {
         activeModelPresentation.set(model);
-        Platform.runLater(EcdarController.getActiveCanvasPresentation().getController()::leaveTextAreas);
+        Platform.runLater(Ecdar.getPresentation().getController().getEditorPresentation().getController().getActiveCanvasPresentation().getController()::leaveTextAreas);
         Platform.runLater(zoomHelper::zoomToFit);
     }
 
